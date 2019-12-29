@@ -41,16 +41,18 @@ void ParticleParameters::serialize(std::ostream &os, u16 protocol_ver) const
 
 void ParticleParameters::deSerialize(std::istream &is, u16 protocol_ver)
 {
-	pos                = readV3F32(is);
-	vel                = readV3F32(is);
-	acc                = readV3F32(is);
-	expirationtime     = readF32(is);
-	size               = readF32(is);
+	pos                = readV3F(is, protocol_ver);
+	vel                = readV3F(is, protocol_ver);
+	acc                = readV3F(is, protocol_ver);
+	expirationtime     = readF(is, protocol_ver);
+	size               = readF(is, protocol_ver);
 	collisiondetection = readU8(is);
 	texture            = deSerializeLongString(is);
 	vertical           = readU8(is);
 	collision_removal  = readU8(is);
-	animation.deSerialize(is, 6); /* NOT the protocol ver */
+	animation.deSerializeWithProtoVer(is, protocol_ver);
+
+	// TODO: Ensure this doesn't error
 	glow               = readU8(is);
 	object_collision   = readU8(is);
 	// This is kinda awful

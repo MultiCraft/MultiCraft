@@ -23,6 +23,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/serialize.h"
 #include "networkprotocol.h"
 
+NetworkPacket::NetworkPacket(u16 command, u32 datasize, session_t peer_id,
+		u16 protocol_version):
+m_datasize(datasize), m_command(command), m_peer_id(peer_id),
+	m_protocol_version(protocol_version)
+{
+	if (m_protocol_version == 0)
+		m_protocol_version = 37;
+	m_data.resize(m_datasize);
+}
+
 NetworkPacket::NetworkPacket(u16 command, u32 datasize, session_t peer_id):
 m_datasize(datasize), m_command(command), m_peer_id(peer_id)
 {
@@ -294,7 +304,7 @@ NetworkPacket& NetworkPacket::operator<<(float src)
 {
 	checkDataSize(4);
 
-	writeF32(&m_data[m_read_offset], src);
+	writeF(&m_data[m_read_offset], src, m_protocol_version);
 
 	m_read_offset += 4;
 	return *this;
@@ -379,7 +389,7 @@ NetworkPacket& NetworkPacket::operator>>(float& dst)
 {
 	checkReadOffset(m_read_offset, 4);
 
-	dst = readF32(&m_data[m_read_offset]);
+	dst = readF(&m_data[m_read_offset], m_protocol_version);
 
 	m_read_offset += 4;
 	return *this;
@@ -389,7 +399,7 @@ NetworkPacket& NetworkPacket::operator>>(v2f& dst)
 {
 	checkReadOffset(m_read_offset, 8);
 
-	dst = readV2F32(&m_data[m_read_offset]);
+	dst = readV2F(&m_data[m_read_offset], m_protocol_version);
 
 	m_read_offset += 8;
 	return *this;
@@ -399,7 +409,7 @@ NetworkPacket& NetworkPacket::operator>>(v3f& dst)
 {
 	checkReadOffset(m_read_offset, 12);
 
-	dst = readV3F32(&m_data[m_read_offset]);
+	dst = readV3F(&m_data[m_read_offset], m_protocol_version);
 
 	m_read_offset += 12;
 	return *this;

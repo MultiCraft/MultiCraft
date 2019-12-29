@@ -50,9 +50,16 @@ struct SimpleSoundSpec
 	void deSerialize(std::istream &is, u8 cf_version)
 	{
 		name = deSerializeString(is);
-		gain = readF32(is);
-		pitch = readF32(is);
-		fade = readF32(is);
+		if (cf_version > 12) {
+			gain = readF32(is);
+			pitch = readF32(is);
+			fade = readF32(is);
+		} else {
+			// Minetest 0.4 compatibility
+			gain = readF1000(is);
+			pitch = 1.0f;
+			fade = 0.0f;
+		}
 	}
 
 	std::string name;

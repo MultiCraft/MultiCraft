@@ -413,6 +413,7 @@ struct ContentFeatures
 	void reset();
 	void serialize(std::ostream &os, u16 protocol_version) const;
 	void deSerialize(std::istream &is);
+	void deSerializeOld(std::istream &is, int version);
 	/*!
 	 * Since vertex alpha is no longer supported, this method
 	 * adds opacity directly to the texture pixels.

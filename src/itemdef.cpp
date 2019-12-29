@@ -132,7 +132,7 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 	os << serializeString(description);
 	os << serializeString(inventory_image);
 	os << serializeString(wield_image);
-	writeV3F32(os, wield_scale);
+	writeV3F(os, wield_scale, protocol_version);
 	writeS16(os, stack_max);
 	writeU8(os, usable);
 	writeU8(os, liquids_pointable);
@@ -157,7 +157,7 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 	sound_place.serialize(os, CONTENTFEATURES_VERSION);
 	sound_place_failed.serialize(os, CONTENTFEATURES_VERSION);
 
-	writeF32(os, range);
+	writeF(os, range, protocol_version);
 	os << serializeString(palette_image);
 	writeARGB8(os, color);
 	os << serializeString(inventory_overlay);
@@ -171,7 +171,7 @@ void ItemDefinition::deSerialize(std::istream &is)
 
 	// Deserialize
 	int version = readU8(is);
-	if (version < 6)
+	if (version < 1 || (version > 3 && version < 6))
 		throw SerializationError("unsupported ItemDefinition version");
 
 	type = (enum ItemType)readU8(is);
@@ -179,7 +179,10 @@ void ItemDefinition::deSerialize(std::istream &is)
 	description = deSerializeString(is);
 	inventory_image = deSerializeString(is);
 	wield_image = deSerializeString(is);
-	wield_scale = readV3F32(is);
+	if (version >= 6)
+		wield_scale = readV3F32(is);
+	else
+		wield_scale = readV3F1000(is);
 	stack_max = readS16(is);
 	usable = readU8(is);
 	liquids_pointable = readU8(is);
@@ -199,22 +202,38 @@ void ItemDefinition::deSerialize(std::istream &is)
 		groups[name] = value;
 	}
 
+	if (version < 2) {
+		// We can't be sure that node_placement_prediction is sent in version 1.
+		try {
+			node_placement_prediction = deSerializeString(is);
+		} catch (SerializationError &e) {};
+		sound_place.name = "default_place_node";
+		sound_place.gain = 0.5;
+		return;
+	}
+
 	node_placement_prediction = deSerializeString(is);
 
 	// Version from ContentFeatures::serialize to keep in sync
-	sound_place.deSerialize(is, CONTENTFEATURES_VERSION);
-	sound_place_failed.deSerialize(is, CONTENTFEATURES_VERSION);
-
-	range = readF32(is);
-	palette_image = deSerializeString(is);
-	color = readARGB8(is);
-	inventory_overlay = deSerializeString(is);
-	wield_overlay = deSerializeString(is);
+	const u8 cf_version = version >= 6 ? CONTENTFEATURES_VERSION : 9;
+	sound_place.deSerialize(is, cf_version);
 
 	// If you add anything here, insert it primarily inside the try-catch
 	// block to not need to increase the version.
-	//try {
-	//} catch(SerializationError &e) {};
+	try {
+		if (version >= 6) {
+			sound_place_failed.deSerialize(is, cf_version);
+			range = readF32(is);
+		} else {
+			if (version >= 3)
+				range = readF1000(is);
+			sound_place_failed.deSerialize(is, cf_version);
+		}
+		palette_image = deSerializeString(is);
+		color = readARGB8(is);
+		inventory_overlay = deSerializeString(is);
+		wield_overlay = deSerializeString(is);
+	} catch(SerializationError &e) {};
 }
 
 

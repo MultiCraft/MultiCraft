@@ -37,15 +37,39 @@ void TileAnimationParams::deSerialize(std::istream &is, u8 tiledef_version)
 {
 	type = (TileAnimationType) readU8(is);
 
-	if (type == TAT_VERTICAL_FRAMES) {
+	FATAL_ERROR_IF(tiledef_version >= 25, "TileAnimationParams::deSerialize "
+		"called with what is probably a protocol version.");
+
+	// Approximate protocol version
+	u16 protocol_version = tiledef_version >= 6 ? 37 : 32;
+
+	if (type == TAT_VERTICAL_FRAMES || tiledef_version <= 2) {
 		vertical_frames.aspect_w = readU16(is);
 		vertical_frames.aspect_h = readU16(is);
-		vertical_frames.length = readF32(is);
+		vertical_frames.length = readF(is, protocol_version);
 	} else if (type == TAT_SHEET_2D) {
 		sheet_2d.frames_w = readU8(is);
 		sheet_2d.frames_h = readU8(is);
-		sheet_2d.frame_length = readF32(is);
+		sheet_2d.frame_length = readF(is, protocol_version);
 	}
+}
+
+void TileAnimationParams::deSerializeWithProtoVer(std::istream &is,
+		u16 protocol_version)
+{
+	u8 tiledef_version;
+	if (protocol_version >= 37)
+		tiledef_version = 6;
+	else if (protocol_version >= 30)
+		tiledef_version = 4;
+	else if (protocol_version >= 29)
+		tiledef_version = 3;
+	else if (protocol_version >= 26)
+		tiledef_version = 2;
+	else
+		tiledef_version = 1;
+
+	deSerialize(is, tiledef_version);
 }
 
 void TileAnimationParams::determineParams(v2u32 texture_size, int *frame_count,
