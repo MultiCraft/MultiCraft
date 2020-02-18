@@ -112,20 +112,37 @@ std::string PlayerSAO::getClientInitializationData(u16 protocol_version)
 	os << serializeString(m_player->getName()); // name
 	writeU8(os, 1); // is_player
 	writeS16(os, getId()); // id
-	writeV3F32(os, m_base_position);
-	writeV3F32(os, m_rotation);
-	writeU16(os, getHP());
+	if (protocol_version >= 37) {
+		writeV3F32(os, m_base_position);
+		writeV3F32(os, m_rotation);
+		writeU16(os, getHP());
+	} else {
+		writeV3F1000(os, m_base_position + v3f(0, BS, 0));
+		writeF1000(os, m_rotation.Y);
+
+		// HP is sent as a signed integer
+		const u16 hp = getHP();
+		if (hp > S16_MAX)
+			writeS16(os, S16_MAX);
+		else
+			writeS16(os, static_cast<s16>(hp));
+	}
 
 	std::ostringstream msg_os(std::ios::binary);
-	msg_os << serializeLongString(getPropertyPacket()); // message 1
+	msg_os << serializeLongString(getPropertyPacket(
+		protocol_version)); // message 1
 	msg_os << serializeLongString(generateUpdateArmorGroupsCommand()); // 2
-	msg_os << serializeLongString(generateUpdateAnimationCommand()); // 3
+	msg_os << serializeLongString(generateUpdateAnimationCommand(
+		protocol_version)); // 3
 	for (const auto &bone_pos : m_bone_position) {
 		msg_os << serializeLongString(generateUpdateBonePositionCommand(
-			bone_pos.first, bone_pos.second.X, bone_pos.second.Y)); // m_bone_position.size
+			bone_pos.first, bone_pos.second.X, bone_pos.second.Y,
+			protocol_version)); // m_bone_position.size
 	}
-	msg_os << serializeLongString(generateUpdateAttachmentCommand()); // 4
-	msg_os << serializeLongString(generateUpdatePhysicsOverrideCommand()); // 5
+	msg_os << serializeLongString(generateUpdateAttachmentCommand(
+		protocol_version)); // 4
+	msg_os << serializeLongString(generateUpdatePhysicsOverrideCommand(
+		protocol_version)); // 5
 
 	int message_count = 5 + m_bone_position.size();
 
@@ -221,9 +238,10 @@ void PlayerSAO::step(float dtime, bool send_recommended)
 
 	if (!m_properties_sent) {
 		m_properties_sent = true;
-		std::string str = getPropertyPacket();
+		std::string str = getPropertyPacket(37);
+		std::string legacy_str = getPropertyPacket(32);
 		// create message and add to list
-		m_messages_out.emplace(getId(), true, str);
+		m_messages_out.emplace(getId(), true, str, legacy_str);
 		m_env->getScriptIface()->player_event(this, "properties_changed");
 	}
 
@@ -286,30 +304,45 @@ void PlayerSAO::step(float dtime, bool send_recommended)
 			m_rotation,
 			true,
 			false,
-			update_interval
+			update_interval,
+			37
 		);
+
+		std::string legacy_str = generateUpdatePositionCommand(
+			pos + v3f(0.0f, BS, 0.0f),
+			v3f(0.0f, 0.0f, 0.0f),
+			v3f(0.0f, 0.0f, 0.0f),
+			m_rotation,
+			true,
+			false,
+			update_interval,
+			32
+		);
+
 		// create message and add to list
-		m_messages_out.emplace(getId(), false, str);
+		m_messages_out.emplace(getId(), false, str, legacy_str);
 	}
 
 	if (!m_physics_override_sent) {
 		m_physics_override_sent = true;
 		// create message and add to list
-		m_messages_out.emplace(getId(), true, generateUpdatePhysicsOverrideCommand());
+		m_messages_out.emplace(getId(), true,
+			generateUpdatePhysicsOverrideCommand(37),
+			generateUpdatePhysicsOverrideCommand(32));
 	}
 
 	sendOutdatedData();
 }
 
-std::string PlayerSAO::generateUpdatePhysicsOverrideCommand() const
+std::string PlayerSAO::generateUpdatePhysicsOverrideCommand(const u16 protocol_version) const
 {
 	std::ostringstream os(std::ios::binary);
 	// command
 	writeU8(os, AO_CMD_SET_PHYSICS_OVERRIDE);
 	// parameters
-	writeF32(os, m_physics_override_speed);
-	writeF32(os, m_physics_override_jump);
-	writeF32(os, m_physics_override_gravity);
+	writeF(os, m_physics_override_speed, protocol_version);
+	writeF(os, m_physics_override_jump, protocol_version);
+	writeF(os, m_physics_override_gravity, protocol_version);
 	// these are sent inverted so we get true when the server sends nothing
 	writeU8(os, !m_physics_override_sneak);
 	writeU8(os, !m_physics_override_sneak_glitch);
@@ -537,10 +570,26 @@ void PlayerSAO::unlinkPlayerSessionAndSave()
 	m_env->removePlayer(m_player);
 }
 
-std::string PlayerSAO::getPropertyPacket()
+std::string PlayerSAO::getPropertyPacket(const u16 protocol_version)
 {
 	m_prop.is_visible = (true);
-	return generateSetPropertiesCommand(m_prop);
+
+	ObjectProperties prop = m_prop;
+	if (protocol_version < 37 && (m_prop.mesh == "3d_armor_character.b3d" ||
+			m_prop.mesh == "character.b3d" ||
+			m_prop.mesh == "skinsdb_3d_armor_character_5.b3d")) {
+		prop.mesh = "mc_compat_character.b3d";
+		for (u16 i = prop.textures.size(); i < 5; i++) {
+			prop.textures.emplace_back("blank.png");
+		}
+	}
+
+	// Remove a one-node offset from a copy of the object properties for MT 0.4
+	if (protocol_version < 37) {
+		prop.selectionbox.MinEdge.Y -= 1.0f;
+		prop.selectionbox.MaxEdge.Y -= 1.0f;
+	}
+	return generateSetPropertiesCommand(prop, protocol_version);
 }
 
 void PlayerSAO::setMaxSpeedOverride(const v3f &vel)

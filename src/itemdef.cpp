@@ -126,6 +126,11 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 {
 	// protocol_version >= 37
 	u8 version = 6;
+
+	// protocol_version < 37
+	if (protocol_version < 37)
+		version = 3;
+
 	writeU8(os, version);
 	writeU8(os, type);
 	os << serializeString(name);
@@ -153,13 +158,25 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 
 	os << serializeString(node_placement_prediction);
 
-	// Version from ContentFeatures::serialize to keep in sync
-	sound_place.serialize(os, CONTENTFEATURES_VERSION);
-	sound_place_failed.serialize(os, CONTENTFEATURES_VERSION);
+	if (version == 3) {
+		os << serializeString(sound_place.name);
+		writeF1000(os, sound_place.gain);
+		writeF1000(os, range);
+		os << serializeString(sound_place_failed.name);
+		writeF1000(os, sound_place_failed.gain);
+	} else {
+		// Version from ContentFeatures::serialize to keep in sync
+		sound_place.serialize(os, CONTENTFEATURES_VERSION);
+		sound_place_failed.serialize(os, CONTENTFEATURES_VERSION);
+		writeF32(os, range);
+	}
 
-	writeF(os, range, protocol_version);
 	os << serializeString(palette_image);
 	writeARGB8(os, color);
+
+	if (version == 3)
+		return;
+
 	os << serializeString(inventory_overlay);
 	os << serializeString(wield_overlay);
 }

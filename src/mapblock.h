@@ -482,7 +482,8 @@ public:
 	// These don't write or read version by itself
 	// Set disk to true for on-disk format, false for over-the-network format
 	// Precondition: version >= SER_FMT_VER_LOWEST_WRITE
-	void serialize(std::ostream &os, u8 version, bool disk);
+	void serialize(std::ostream &os, u8 version, bool disk,
+		std::string formspec_prepend="");
 	// If disk == true: In addition to doing other things, will add
 	// unknown blocks from id-name mapping to wndef
 	void deSerialize(std::istream &is, u8 version, bool disk);

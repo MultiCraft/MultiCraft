@@ -180,9 +180,10 @@ public:
 	inline Metadata &getMeta() { return m_meta; }
 
 private:
-	std::string getPropertyPacket();
+	std::string getPropertyPacket(const u16 protocol_version);
 	void unlinkPlayerSessionAndSave();
-	std::string generateUpdatePhysicsOverrideCommand() const;
+	std::string generateUpdatePhysicsOverrideCommand(
+			const u16 protocol_version) const;
 
 	RemotePlayer *m_player = nullptr;
 	session_t m_peer_id = 0;
