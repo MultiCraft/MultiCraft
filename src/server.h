@@ -374,7 +374,7 @@ private:
 
 	void init();
 
-	void SendMovement(session_t peer_id);
+	void SendMovement(session_t peer_id, u16 protocol_version);
 	void SendHP(session_t peer_id, u16 hp);
 	void SendBreath(session_t peer_id, u16 breath);
 	void SendAccessDenied(session_t peer_id, AccessDeniedCode reason,

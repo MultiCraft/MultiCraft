@@ -771,7 +771,11 @@ void Server::AsyncRunStep(bool initial_step)
 					// u16 id
 					// std::string data
 					buffer.append(idbuf, sizeof(idbuf));
-					buffer.append(serializeString(aom.datastring));
+					if (client->net_proto_version >= 37 ||
+							aom.legacystring.empty())
+						buffer.append(serializeString(aom.datastring));
+					else
+						buffer.append(serializeString(aom.legacystring));
 				}
 			}
 			/*
@@ -1147,6 +1151,9 @@ void Server::ProcessData(NetworkPacket *pkt)
 			return;
 		}
 
+		RemoteClient *client = getClient(peer_id);
+		if (client)
+			pkt->setProtocolVersion(client->net_proto_version);
 		handleCommand(pkt);
 	} catch (SendFailedException &e) {
 		errorstream << "Server::ProcessData(): SendFailedException: "
@@ -1154,7 +1161,7 @@ void Server::ProcessData(NetworkPacket *pkt)
 				<< std::endl;
 	} catch (PacketError &e) {
 		actionstream << "Server::ProcessData(): PacketError: "
-				<< "what=" << e.what()
+				<< "what=" << e.what() << ", command=" << pkt->getCommand() // TODO: REMOVE COMMAND=
 				<< std::endl;
 	}
 }
@@ -1296,11 +1303,11 @@ void Server::Send(session_t peer_id, NetworkPacket *pkt)
 		clientCommandFactoryTable[pkt->getCommand()].reliable);
 }
 
-void Server::SendMovement(session_t peer_id)
+void Server::SendMovement(session_t peer_id, u16 protocol_version)
 {
 	std::ostringstream os(std::ios_base::binary);
 
-	NetworkPacket pkt(TOCLIENT_MOVEMENT, 12 * sizeof(float), peer_id);
+	NetworkPacket pkt(TOCLIENT_MOVEMENT, 12 * sizeof(float), peer_id, protocol_version);
 
 	pkt << g_settings->getFloat("movement_acceleration_default");
 	pkt << g_settings->getFloat("movement_acceleration_air");
@@ -1335,7 +1342,13 @@ void Server::SendPlayerHPOrDie(PlayerSAO *playersao, const PlayerHPChangeReason 
 void Server::SendHP(session_t peer_id, u16 hp)
 {
 	NetworkPacket pkt(TOCLIENT_HP, 1, peer_id);
-	pkt << hp;
+	// Minetest 0.4 uses 8-bit integers for HPP.
+	if (m_clients.getProtocolVersion(peer_id) >= 37) {
+		pkt << hp;
+	} else {
+		u8 raw_hp = hp & 0xFF;
+		pkt << raw_hp;
+	}
 	Send(&pkt);
 }
 
@@ -1454,6 +1467,9 @@ void Server::SendInventory(PlayerSAO *sao, bool incremental)
 
 void Server::SendChatMessage(session_t peer_id, const ChatMessage &message)
 {
+	NetworkPacket legacypkt(TOCLIENT_CHAT_MESSAGE_OLD, 0, peer_id);
+	legacypkt << message.message;
+
 	NetworkPacket pkt(TOCLIENT_CHAT_MESSAGE, 0, peer_id);
 	u8 version = 1;
 	u8 type = message.type;
@@ -1464,9 +1480,12 @@ void Server::SendChatMessage(session_t peer_id, const ChatMessage &message)
 		if (!player)
 			return;
 
-		Send(&pkt);
+		if (player->protocol_version < 35)
+			Send(&legacypkt);
+		else
+			Send(&pkt);
 	} else {
-		m_clients.sendToAll(&pkt);
+		m_clients.sendToAllCompat(&pkt, &legacypkt, 35);
 	}
 }
 
@@ -1484,7 +1503,12 @@ void Server::SendShowFormspecMessage(session_t peer_id, const std::string &forms
 		pkt.putLongString("");
 	} else {
 		m_formspec_state_data[peer_id] = formname;
-		pkt.putLongString(formspec);
+		RemotePlayer *player = m_env->getPlayer(peer_id);
+		if (player && player->protocol_version < 37 &&
+				formspec.find("no_prepend[]") == std::string::npos)
+			pkt.putLongString(formspec + player->formspec_prepend);
+		else
+			pkt.putLongString(formspec);
 	}
 	pkt << formname;
 
@@ -1522,7 +1546,7 @@ void Server::SendSpawnParticle(session_t peer_id, u16 protocol_version,
 	}
 	assert(protocol_version != 0);
 
-	NetworkPacket pkt(TOCLIENT_SPAWN_PARTICLE, 0, peer_id);
+	NetworkPacket pkt(TOCLIENT_SPAWN_PARTICLE, 0, peer_id, protocol_version);
 
 	{
 		// NetworkPacket and iostreams are incompatible...
@@ -1569,7 +1593,7 @@ void Server::SendAddParticleSpawner(session_t peer_id, u16 protocol_version,
 	}
 	assert(protocol_version != 0);
 
-	NetworkPacket pkt(TOCLIENT_ADD_PARTICLESPAWNER, 100, peer_id);
+	NetworkPacket pkt(TOCLIENT_ADD_PARTICLESPAWNER, 100, peer_id, protocol_version);
 
 	pkt << p.amount << p.time << p.minpos << p.maxpos << p.minvel
 		<< p.maxvel << p.minacc << p.maxacc << p.minexptime << p.maxexptime
@@ -1604,7 +1628,7 @@ void Server::SendDeleteParticleSpawner(session_t peer_id, u32 id)
 
 void Server::SendHUDAdd(session_t peer_id, u32 id, HudElement *form)
 {
-	NetworkPacket pkt(TOCLIENT_HUDADD, 0 , peer_id);
+	NetworkPacket pkt(TOCLIENT_HUDADD, 0 , peer_id, m_clients.getProtocolVersion(peer_id));
 
 	pkt << id << (u8) form->type << form->pos << form->name << form->scale
 			<< form->text << form->number << form->item << form->dir
@@ -1623,7 +1647,7 @@ void Server::SendHUDRemove(session_t peer_id, u32 id)
 
 void Server::SendHUDChange(session_t peer_id, u32 id, HudElementStat stat, void *value)
 {
-	NetworkPacket pkt(TOCLIENT_HUDCHANGE, 0, peer_id);
+	NetworkPacket pkt(TOCLIENT_HUDCHANGE, 0, peer_id, m_clients.getProtocolVersion(peer_id));
 	pkt << id << (u8) stat;
 
 	switch (stat) {
@@ -1735,7 +1759,8 @@ void Server::SendSetStars(session_t peer_id, const StarParams &params)
 
 void Server::SendCloudParams(session_t peer_id, const CloudParams &params)
 {
-	NetworkPacket pkt(TOCLIENT_CLOUD_PARAMS, 0, peer_id);
+	NetworkPacket pkt(TOCLIENT_CLOUD_PARAMS, 0, peer_id,
+		m_clients.getProtocolVersion(peer_id));
 	pkt << params.density << params.color_bright << params.color_ambient
 			<< params.height << params.thickness << params.speed;
 	Send(&pkt);
@@ -1754,15 +1779,20 @@ void Server::SendOverrideDayNightRatio(session_t peer_id, bool do_override,
 
 void Server::SendTimeOfDay(session_t peer_id, u16 time, f32 time_speed)
 {
-	NetworkPacket pkt(TOCLIENT_TIME_OF_DAY, 0, peer_id);
-	pkt << time << time_speed;
+	if (peer_id != PEER_ID_INEXISTENT) {
+		NetworkPacket pkt(TOCLIENT_TIME_OF_DAY, 0, peer_id,
+			m_clients.getProtocolVersion(peer_id));
+		pkt << time << time_speed;
 
-	if (peer_id == PEER_ID_INEXISTENT) {
-		m_clients.sendToAll(&pkt);
-	}
-	else {
 		Send(&pkt);
+		return;
 	}
+
+	NetworkPacket pkt(TOCLIENT_TIME_OF_DAY, 0, peer_id, 37);
+	NetworkPacket legacypkt(TOCLIENT_TIME_OF_DAY, 0, peer_id, 32);
+	pkt << time << time_speed;
+	legacypkt << time << time_speed;
+	m_clients.sendToAllCompat(&pkt, &legacypkt, 37);
 }
 
 void Server::SendPlayerHP(session_t peer_id)
@@ -1792,7 +1822,7 @@ void Server::SendMovePlayer(session_t peer_id)
 	PlayerSAO *sao = player->getPlayerSAO();
 	assert(sao);
 
-	NetworkPacket pkt(TOCLIENT_MOVE_PLAYER, sizeof(v3f) + sizeof(f32) * 2, peer_id);
+	NetworkPacket pkt(TOCLIENT_MOVE_PLAYER, sizeof(v3f) + sizeof(f32) * 2, peer_id, player->protocol_version);
 	pkt << sao->getBasePosition() << sao->getLookPitch() << sao->getRotation().Y;
 
 	{
@@ -1821,7 +1851,7 @@ void Server::SendLocalPlayerAnimations(session_t peer_id, v2s32 animation_frames
 		f32 animation_speed)
 {
 	NetworkPacket pkt(TOCLIENT_LOCAL_PLAYER_ANIMATIONS, 0,
-		peer_id);
+		peer_id, m_clients.getProtocolVersion(peer_id));
 
 	pkt << animation_frames[0] << animation_frames[1] << animation_frames[2]
 			<< animation_frames[3] << animation_speed;
@@ -1831,7 +1861,7 @@ void Server::SendLocalPlayerAnimations(session_t peer_id, v2s32 animation_frames
 
 void Server::SendEyeOffset(session_t peer_id, v3f first, v3f third)
 {
-	NetworkPacket pkt(TOCLIENT_EYE_OFFSET, 0, peer_id);
+	NetworkPacket pkt(TOCLIENT_EYE_OFFSET, 0, peer_id, m_clients.getProtocolVersion(peer_id));
 	pkt << first << third;
 	Send(&pkt);
 }
@@ -1864,7 +1894,12 @@ void Server::SendPlayerInventoryFormspec(session_t peer_id)
 		return;
 
 	NetworkPacket pkt(TOCLIENT_INVENTORY_FORMSPEC, 0, peer_id);
-	pkt.putLongString(player->inventory_formspec);
+	if (player->protocol_version < 37 && player->inventory_formspec.find(
+			"no_prepend[]") == std::string::npos)
+		pkt.putLongString(player->inventory_formspec +
+			player->formspec_prepend);
+	else
+		pkt.putLongString(player->inventory_formspec);
 
 	Send(&pkt);
 }
@@ -1875,6 +1910,10 @@ void Server::SendPlayerFormspecPrepend(session_t peer_id)
 	assert(player);
 	if (player->getPeerId() == PEER_ID_INEXISTENT)
 		return;
+	if (player->protocol_version < 37) {
+		SendPlayerInventoryFormspec(peer_id);
+		return;
+	}
 
 	NetworkPacket pkt(TOCLIENT_FORMSPEC_PREPEND, 0, peer_id);
 	pkt << player->formspec_prepend;
@@ -1995,6 +2034,10 @@ void Server::SendActiveObjectMessages(session_t peer_id, const std::string &data
 
 void Server::SendCSMRestrictionFlags(session_t peer_id)
 {
+	const u16 protocol_version = m_clients.getProtocolVersion(peer_id);
+	if (protocol_version < 35 && protocol_version != 0)
+		return;
+
 	NetworkPacket pkt(TOCLIENT_CSM_RESTRICTION_FLAGS,
 		sizeof(m_csm_restriction_flags) + sizeof(m_csm_restriction_noderange), peer_id);
 	pkt << m_csm_restriction_flags << m_csm_restriction_noderange;
@@ -2086,17 +2129,29 @@ s32 Server::playSound(const SimpleSoundSpec &spec,
 
 	float gain = params.gain * spec.gain;
 	NetworkPacket pkt(TOCLIENT_PLAY_SOUND, 0);
+	NetworkPacket legacypkt(TOCLIENT_PLAY_SOUND, 0, PEER_ID_INEXISTENT, 32);
 	pkt << id << spec.name << gain
 			<< (u8) params.type << pos << params.object
 			<< params.loop << params.fade << params.pitch
 			<< ephemeral;
+	legacypkt << id << spec.name << gain
+			<< (u8) params.type << pos << params.object
+			<< params.loop << params.fade;
 
 	bool as_reliable = !ephemeral;
+	bool play_sound = gain > 0;
 
 	for (const u16 dst_client : dst_clients) {
+		const u16 protocol_version = m_clients.getProtocolVersion(dst_client);
+		if (!play_sound && protocol_version < 32)
+			continue;
 		if (psound)
 			psound->clients.insert(dst_client);
-		m_clients.send(dst_client, 0, &pkt, as_reliable);
+
+		if (protocol_version >= 37)
+			m_clients.send(dst_client, 0, &pkt, as_reliable);
+		else
+			m_clients.send(dst_client, 0, &legacypkt, as_reliable);
 	}
 	return id;
 }
@@ -2257,6 +2312,13 @@ void Server::sendMetadataChanged(const std::list<v3s16> &meta_updates, float far
 		if (!client)
 			continue;
 
+		if (client->net_proto_version < 37) {
+			for (const v3s16 &pos : meta_updates) {
+				client->SetBlockNotSent(getNodeBlockPos(pos));
+			}
+			continue;
+		}
+
 		ServerActiveObject *player = m_env->getActiveObject(i);
 		v3f player_pos = player ? player->getBasePosition() : v3f();
 
@@ -2303,7 +2365,12 @@ void Server::SendBlockNoLock(session_t peer_id, MapBlock *block, u8 ver,
 	*/
 
 	std::ostringstream os(std::ios_base::binary);
-	block->serialize(os, ver, false);
+
+	RemotePlayer *player = m_env->getPlayer(peer_id);
+	if (player && player->protocol_version < 37)
+		block->serialize(os, ver, false, player->formspec_prepend);
+	else
+		block->serialize(os, ver, false);
 	block->serializeNetworkSpecific(os);
 	std::string s = os.str();
 
@@ -2483,7 +2550,10 @@ void Server::fillMediaCache()
 	std::vector<std::string> paths;
 	m_modmgr->getModsMediaPaths(paths);
 	fs::GetRecursiveDirs(paths, m_gamespec.path + DIR_DELIM + "textures");
-	fs::GetRecursiveDirs(paths, porting::path_user + DIR_DELIM + "textures" + DIR_DELIM + "server");
+	fs::GetRecursiveDirs(paths, porting::path_user + DIR_DELIM + "textures" +
+			DIR_DELIM + "server");
+	fs::GetRecursiveDirs(paths, porting::path_share + DIR_DELIM + "builtin" +
+			DIR_DELIM + "game" + DIR_DELIM + "models");
 
 	// Collect media file information from paths into cache
 	for (const std::string &mediapath : paths) {
@@ -2645,7 +2715,9 @@ void Server::sendRequestedMedia(session_t peer_id,
 void Server::sendDetachedInventory(Inventory *inventory, const std::string &name, session_t peer_id)
 {
 	NetworkPacket pkt(TOCLIENT_DETACHED_INVENTORY, 0, peer_id);
+	NetworkPacket legacy_pkt(TOCLIENT_DETACHED_INVENTORY, 0, peer_id);
 	pkt << name;
+	legacy_pkt << name;
 
 	if (!inventory) {
 		pkt << false; // Remove inventory
@@ -2660,12 +2732,25 @@ void Server::sendDetachedInventory(Inventory *inventory, const std::string &name
 		const std::string &os_str = os.str();
 		pkt << static_cast<u16>(os_str.size()); // HACK: to keep compatibility with 5.0.0 clients
 		pkt.putRawString(os_str);
+		legacy_pkt.putRawString(os_str);
 	}
 
-	if (peer_id == PEER_ID_INEXISTENT)
-		m_clients.sendToAll(&pkt);
-	else
-		Send(&pkt);
+	if (peer_id == PEER_ID_INEXISTENT) {
+		m_clients.newSendToAll(&pkt);
+		if (inventory)
+			m_clients.oldSendToAll(&legacy_pkt);
+	} else {
+		RemoteClient *client = getClientNoEx(peer_id, CS_Created);
+		if (!client) {
+			warningstream << "Could not get client in sendDetachedInventory!"
+				<< std::endl;
+		}
+
+		if (!client || client->net_proto_version >= 37)
+			Send(&pkt);
+		else if (inventory)
+			Send(&legacy_pkt);
+	}
 }
 
 void Server::sendDetachedInventories(session_t peer_id, bool incremental)
@@ -2774,7 +2859,7 @@ void Server::acceptAuth(session_t peer_id, bool forSudoMode)
 	if (!forSudoMode) {
 		RemoteClient* client = getClient(peer_id, CS_Invalid);
 
-		NetworkPacket resp_pkt(TOCLIENT_AUTH_ACCEPT, 1 + 6 + 8 + 4, peer_id);
+		NetworkPacket resp_pkt(TOCLIENT_AUTH_ACCEPT, 1 + 6 + 8 + 4, peer_id, client->net_proto_version);
 
 		// Right now, the auth mechs don't change between login and sudo mode.
 		u32 sudo_auth_mechs = client->allowed_auth_mechs;

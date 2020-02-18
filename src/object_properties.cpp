@@ -73,19 +73,36 @@ std::string ObjectProperties::dump()
 	return os.str();
 }
 
-void ObjectProperties::serialize(std::ostream &os) const
+void ObjectProperties::serialize(std::ostream &os, u16 protocol_version) const
 {
-	writeU8(os, 4); // PROTOCOL_VERSION >= 37
+	if (protocol_version > 36)
+		writeU8(os, 4); // PROTOCOL_VERSION >= 37
+	else
+		writeU8(os, 1);
 	writeU16(os, hp_max);
 	writeU8(os, physical);
-	writeF32(os, 0.f); // Removed property (weight)
-	writeV3F32(os, collisionbox.MinEdge);
-	writeV3F32(os, collisionbox.MaxEdge);
-	writeV3F32(os, selectionbox.MinEdge);
-	writeV3F32(os, selectionbox.MaxEdge);
-	writeU8(os, pointable);
+	writeF(os, 0.f, protocol_version); // Removed property (weight)
+	if (protocol_version > 36) {
+		writeV3F32(os, collisionbox.MinEdge);
+		writeV3F32(os, collisionbox.MaxEdge);
+		writeV3F32(os, selectionbox.MinEdge);
+		writeV3F32(os, selectionbox.MaxEdge);
+		writeU8(os, pointable);
+	} else if (pointable) {
+		writeV3F1000(os, selectionbox.MinEdge);
+		writeV3F1000(os, selectionbox.MaxEdge);
+	} else {
+		// A hack to emulate unpointable objects
+		for (u8 i = 0; i < 6; i++)
+			writeF1000(os, 0);
+	}
 	os << serializeString(visual);
-	writeV3F32(os, visual_size);
+	if (protocol_version > 36) {
+		writeV3F32(os, visual_size);
+	} else {
+		writeF1000(os, visual_size.X);
+		writeF1000(os, visual_size.Y);
+	}
 	writeU16(os, textures.size());
 	for (const std::string &texture : textures) {
 		os << serializeString(texture);
@@ -94,7 +111,7 @@ void ObjectProperties::serialize(std::ostream &os) const
 	writeV2S16(os, initial_sprite_basepos);
 	writeU8(os, is_visible);
 	writeU8(os, makes_footstep_sound);
-	writeF32(os, automatic_rotate);
+	writeF(os, automatic_rotate, protocol_version);
 	// Added in protocol version 14
 	os << serializeString(mesh);
 	writeU16(os, colors.size());
@@ -102,16 +119,21 @@ void ObjectProperties::serialize(std::ostream &os) const
 		writeARGB8(os, color);
 	}
 	writeU8(os, collideWithObjects);
-	writeF32(os, stepheight);
+	writeF(os, stepheight, protocol_version);
 	writeU8(os, automatic_face_movement_dir);
-	writeF32(os, automatic_face_movement_dir_offset);
+	writeF(os, automatic_face_movement_dir_offset, protocol_version);
 	writeU8(os, backface_culling);
 	os << serializeString(nametag);
 	writeARGB8(os, nametag_color);
-	writeF32(os, automatic_face_movement_max_rotation_per_sec);
+	writeF(os, automatic_face_movement_max_rotation_per_sec, protocol_version);
 	os << serializeString(infotext);
 	os << serializeString(wield_item);
 	writeS8(os, glow);
+
+	// Everything after this can use writeF32().
+	if (protocol_version < 37)
+		return;
+
 	writeU16(os, breath_max);
 	writeF32(os, eye_height);
 	writeF32(os, zoom_fov);

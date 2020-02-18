@@ -65,6 +65,6 @@ struct ObjectProperties
 
 	ObjectProperties();
 	std::string dump();
-	void serialize(std::ostream &os) const;
+	void serialize(std::ostream &os, u16 protocol_version) const;
 	void deSerialize(std::istream &is);
 };
