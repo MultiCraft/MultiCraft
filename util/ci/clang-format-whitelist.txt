@@ -247,6 +247,8 @@ src/mapgen/mapgen_v6.cpp
 src/mapgen/mapgen_v6.h
 src/mapgen/mapgen_v7.cpp
 src/mapgen/mapgen_v7.h
+src/mapgen/mapgen_v7p.cpp
+src/mapgen/mapgen_v7p.h
 src/mapgen/mapgen_valleys.cpp
 src/mapgen/mapgen_valleys.h
 src/mapgen/mg_biome.cpp

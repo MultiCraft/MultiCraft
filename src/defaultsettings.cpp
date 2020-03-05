@@ -433,7 +433,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("liquid_update", "1.0");
 
 	// Mapgen
-	settings->setDefault("mg_name", "v7");
+	settings->setDefault("mg_name", "v7p");
 	settings->setDefault("water_level", "1");
 	settings->setDefault("mapgen_limit", "31000");
 	settings->setDefault("chunksize", "5");

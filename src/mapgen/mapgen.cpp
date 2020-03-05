@@ -47,6 +47,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mapgen_v5.h"
 #include "mapgen_v6.h"
 #include "mapgen_v7.h"
+#include "mapgen_v7p.h"
 #include "mapgen_valleys.h"
 #include "mapgen_singlenode.h"
 #include "cavegen.h"
@@ -88,6 +89,7 @@ struct MapgenDesc {
 // Of the remaining, v5 last due to age, v7 first due to being the default.
 // The order of 'enum MapgenType' in mapgen.h must match this order.
 static MapgenDesc g_reg_mapgens[] = {
+	{"v7p",        true},
 	{"v7",         true},
 	{"valleys",    true},
 	{"carpathian", true},
@@ -173,6 +175,8 @@ Mapgen *Mapgen::createMapgen(MapgenType mgtype, MapgenParams *params,
 		return new MapgenV6((MapgenV6Params *)params, emerge);
 	case MAPGEN_V7:
 		return new MapgenV7((MapgenV7Params *)params, emerge);
+	case MAPGEN_V7P:
+		return new MapgenV7P((MapgenV7PParams *)params, emerge);
 	case MAPGEN_VALLEYS:
 		return new MapgenValleys((MapgenValleysParams *)params, emerge);
 	default:
@@ -198,6 +202,8 @@ MapgenParams *Mapgen::createMapgenParams(MapgenType mgtype)
 		return new MapgenV6Params;
 	case MAPGEN_V7:
 		return new MapgenV7Params;
+	case MAPGEN_V7P:
+		return new MapgenV7PParams;
 	case MAPGEN_VALLEYS:
 		return new MapgenValleysParams;
 	default:

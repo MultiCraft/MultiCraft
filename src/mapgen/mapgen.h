@@ -26,8 +26,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/string.h"
 #include "util/container.h"
 
-#define MAPGEN_DEFAULT MAPGEN_V7
-#define MAPGEN_DEFAULT_NAME "v7"
+#define MAPGEN_DEFAULT MAPGEN_V7P
+#define MAPGEN_DEFAULT_NAME "v7p"
 
 /////////////////// Mapgen flags
 #define MG_TREES       0x01  // Obsolete. Moved into mgv6 flags
@@ -105,6 +105,7 @@ private:
 
 // Order must match the order of 'static MapgenDesc g_reg_mapgens[]' in mapgen.cpp
 enum MapgenType {
+	MAPGEN_V7P,
 	MAPGEN_V7,
 	MAPGEN_VALLEYS,
 	MAPGEN_CARPATHIAN,
