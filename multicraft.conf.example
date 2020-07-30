@@ -1351,7 +1351,7 @@
 
 #    Enable mod channels support.
 #    type: bool
-# enable_mod_channels = false
+# enable_mod_channels = true
 
 #    If this is set, players will always (re)spawn at the given position.
 #    type: string
@@ -1389,7 +1389,7 @@
 # ask_reconnect_on_crash = false
 
 #    From how far clients know about objects, stated in mapblocks (16 nodes).
-#    
+#
 #    Setting this larger than active_block_range will also cause the server
 #    to maintain active objects up to this distance in the direction the
 #    player is looking. (This can avoid mobs suddenly disappearing from view)
@@ -1589,7 +1589,7 @@
 #    csm_restriction_noderange)
 #    READ_PLAYERINFO: 32 (disable get_player_names call client-side)
 #    type: int
-# csm_restriction_flags = 62
+# csm_restriction_flags = 60
 
 #    If the CSM restriction for node range is enabled, get_node calls are limited
 #    to this distance from the player to the node.
@@ -1942,7 +1942,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    Second of two 3D noises that together define tunnels.
@@ -1955,7 +1955,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise defining giant caverns.
@@ -1968,7 +1968,7 @@
 #    octaves     = 5,
 #    persistence = 0.63,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise defining terrain.
@@ -1994,7 +1994,7 @@
 #    octaves     = 2,
 #    persistence = 0.8,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 ## Mapgen V6
@@ -2381,7 +2381,7 @@
 #    octaves     = 5,
 #    persistence = 0.63,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise defining structure of river canyon walls.
@@ -2394,7 +2394,7 @@
 #    octaves     = 4,
 #    persistence = 0.75,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise defining structure of floatlands.
@@ -2410,7 +2410,7 @@
 #    octaves     = 4,
 #    persistence = 0.75,
 #    lacunarity  = 1.618,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise defining giant caverns.
@@ -2423,7 +2423,7 @@
 #    octaves     = 5,
 #    persistence = 0.63,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    First of two 3D noises that together define tunnels.
@@ -2436,7 +2436,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    Second of two 3D noises that together define tunnels.
@@ -2449,7 +2449,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise that determines number of dungeons per mapchunk.
@@ -2462,7 +2462,7 @@
 #    octaves     = 2,
 #    persistence = 0.8,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 ## Mapgen Carpathian
@@ -2705,7 +2705,7 @@
 #    octaves     = 5,
 #    persistence = 0.55,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    First of two 3D noises that together define tunnels.
@@ -2718,7 +2718,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    Second of two 3D noises that together define tunnels.
@@ -2731,7 +2731,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise defining giant caverns.
@@ -2744,7 +2744,7 @@
 #    octaves     = 5,
 #    persistence = 0.63,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise that determines number of dungeons per mapchunk.
@@ -2757,7 +2757,7 @@
 #    octaves     = 2,
 #    persistence = 0.8,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 ## Mapgen Flat
@@ -2867,7 +2867,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    Second of two 3D noises that together define tunnels.
@@ -2880,7 +2880,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise that determines number of dungeons per mapchunk.
@@ -2893,7 +2893,7 @@
 #    octaves     = 2,
 #    persistence = 0.8,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 ## Mapgen Fractal
@@ -3067,7 +3067,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    Second of two 3D noises that together define tunnels.
@@ -3080,7 +3080,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    3D noise that determines number of dungeons per mapchunk.
@@ -3093,7 +3093,7 @@
 #    octaves     = 2,
 #    persistence = 0.8,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 ## Mapgen Valleys
@@ -3183,7 +3183,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    Second of two 3D noises that together define tunnels.
@@ -3196,7 +3196,7 @@
 #    octaves     = 3,
 #    persistence = 0.5,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    The depth of dirt or other biome filler node.
@@ -3222,7 +3222,7 @@
 #    octaves     = 6,
 #    persistence = 0.63,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    Defines large-scale river channel structure.
@@ -3274,7 +3274,7 @@
 #    octaves     = 6,
 #    persistence = 0.8,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 #    Amplifies the valleys.
@@ -3313,7 +3313,7 @@
 #    octaves     = 2,
 #    persistence = 0.8,
 #    lacunarity  = 2.0,
-#    flags       = 
+#    flags       =
 # }
 
 ## Advanced
@@ -3374,4 +3374,3 @@
 #    so see a full list at https://content.minetest.net/help/content_flags/
 #    type: string
 # contentdb_flag_blacklist = nonfree, desktop_default
-
