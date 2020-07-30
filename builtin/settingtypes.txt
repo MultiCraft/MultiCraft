@@ -975,7 +975,7 @@ enable_remote_media_server (Connect to external media server) bool true
 
 #    Enable Lua modding support on client.
 #    This support is experimental and API can change.
-enable_client_modding (Client modding) bool false
+enable_client_modding (Client modding) bool true
 
 #    URL to the server list displayed in the Multiplayer Tab.
 serverlist_url (Serverlist URL) string servers.minetest.net
