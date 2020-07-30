@@ -360,7 +360,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("default_password", "");
 	settings->setDefault("default_privs", "interact, shout");
 	settings->setDefault("enable_pvp", "true");
-	settings->setDefault("enable_mod_channels", "false");
+	settings->setDefault("enable_mod_channels", "true");
 	settings->setDefault("disallow_empty_password", "false");
 	settings->setDefault("disable_anticheat", "false");
 	settings->setDefault("enable_rollback_recording", "false");
@@ -383,7 +383,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("max_block_send_distance", "10");
 	settings->setDefault("block_send_optimize_distance", "4");
 	settings->setDefault("server_side_occlusion_culling", "true");
-	settings->setDefault("csm_restriction_flags", "62");
+	settings->setDefault("csm_restriction_flags", "60");
 	settings->setDefault("csm_restriction_noderange", "0");
 	settings->setDefault("max_clearobjects_extra_loaded_blocks", "4096");
 	settings->setDefault("time_speed", "72");
