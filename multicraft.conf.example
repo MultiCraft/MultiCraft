@@ -1162,7 +1162,7 @@
 #    Enable Lua modding support on client.
 #    This support is experimental and API can change.
 #    type: bool
-# enable_client_modding = false
+# enable_client_modding = true
 
 #    URL to the server list displayed in the Multiplayer Tab.
 #    type: string
