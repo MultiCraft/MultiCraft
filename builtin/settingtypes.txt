@@ -1124,7 +1124,7 @@ player_transfer_distance (Player transfer distance) int 0
 enable_pvp (Player versus player) bool true
 
 #    Enable mod channels support.
-enable_mod_channels (Mod channels) bool false
+enable_mod_channels (Mod channels) bool true
 
 #    If this is set, players will always (re)spawn at the given position.
 static_spawnpoint (Static spawnpoint) string
@@ -1315,7 +1315,7 @@ server_side_occlusion_culling (Server side occlusion culling) bool true
 #    LOOKUP_NODES_LIMIT: 16 (limits get_node call client-side to
 #    csm_restriction_noderange)
 #    READ_PLAYERINFO: 32 (disable get_player_names call client-side)
-csm_restriction_flags (Client side modding restrictions) int 62
+csm_restriction_flags (Client side modding restrictions) int 60
 
 #   If the CSM restriction for node range is enabled, get_node calls are limited
 #   to this distance from the player to the node.
