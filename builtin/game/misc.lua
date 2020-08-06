@@ -42,13 +42,13 @@ end
 
 function core.send_join_message(player_name)
 	if not core.is_singleplayer() then
-		core.chat_send_all("*** " .. player_name .. " joined the game.")
+		core.chat_send_all("=> " .. player_name .. " has joined the server")
 	end
 end
 
 
 function core.send_leave_message(player_name, timed_out)
-	local announcement = "*** " ..  player_name .. " left the game."
+	local announcement = "<= " ..  player_name .. " left the server"
 	if timed_out then
 		announcement = announcement .. " (timed out)"
 	end
@@ -109,6 +109,22 @@ function core.get_player_radius_area(player_name, radius)
 end
 
 
+local mapgen_limit = tonumber(core.settings:get("mapgen_limit"))
+function core.is_valid_pos(pos)
+	if not pos or type(pos) ~= "table" then
+		return false
+	end
+	for _, v in pairs({"x", "y", "z"}) do
+		if not pos[v] or pos[v] ~= pos[v] or
+				pos[v] < -mapgen_limit or pos[v] > mapgen_limit then
+			return false
+		end
+	end
+
+	return true
+end
+
+
 function core.hash_node_position(pos)
 	return (pos.z + 32768) * 65536 * 65536
 		 + (pos.y + 32768) * 65536
@@ -157,6 +173,9 @@ function core.is_protected(pos, name)
 	return false
 end
 
+function core.is_protected_action()
+	return false
+end
 
 function core.record_protection_violation(pos, name)
 	for _, func in pairs(core.registered_on_protection_violation) do

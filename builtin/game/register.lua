@@ -107,6 +107,9 @@ function core.register_entity(name, prototype)
 	prototype.mod_origin = core.get_current_modname() or "??"
 end
 
+-- Intllib
+Sl = intllib.make_gettext_pair("locales")
+
 function core.register_item(name, itemdef)
 	-- Check name
 	if name == nil then
@@ -134,6 +137,9 @@ function core.register_item(name, itemdef)
 			core.log("warning", "Node 'light_source' value exceeds maximum," ..
 				" limiting to maximum: " ..name)
 		end
+		if itemdef.light_source == nil then
+			itemdef.light_source = 0
+		end
 		setmetatable(itemdef, {__index = core.nodedef_default})
 		core.registered_nodes[itemdef.name] = itemdef
 	elseif itemdef.type == "craft" then
@@ -151,6 +157,12 @@ function core.register_item(name, itemdef)
 	-- Flowing liquid uses param2
 	if itemdef.type == "node" and itemdef.liquidtype == "flowing" then
 		itemdef.paramtype2 = "flowingliquid"
+	end
+
+	-- Intllib
+	if itemdef.description and itemdef.description ~= "" then
+		itemdef.description = Sl(itemdef.description:gsub("@", "\001"))
+			:gsub("\001", "@")
 	end
 
 	-- BEGIN Legacy stuff
@@ -344,8 +356,8 @@ core.register_item(":unknown", {
 
 core.register_node(":air", {
 	description = "Air",
-	inventory_image = "air.png",
-	wield_image = "air.png",
+	inventory_image = "blank.png",
+	wield_image = "blank.png",
 	drawtype = "airlike",
 	paramtype = "light",
 	sunlight_propagates = true,
@@ -356,6 +368,7 @@ core.register_node(":air", {
 	floodable = true,
 	air_equivalent = true,
 	drop = "",
+	drowning = 0,
 	groups = {not_in_creative_inventory=1},
 })
 
@@ -372,6 +385,7 @@ core.register_node(":ignore", {
 	buildable_to = true, -- A way to remove accidentally placed ignores
 	air_equivalent = true,
 	drop = "",
+	drowning = 0,
 	groups = {not_in_creative_inventory=1},
 	on_place = function(itemstack, placer, pointed_thing)
 		core.chat_send_player(
@@ -385,7 +399,11 @@ core.register_node(":ignore", {
 -- The hand (bare definition)
 core.register_item(":", {
 	type = "none",
-	wield_image = "wieldhand.png",
+	wield_image = "blank.png",
+	tool_capabilities = {
+		full_punch_interval = 0.5,
+		damage_groups = {fleshy = core.settings:get_bool("creative_mode") and 5 or 1}
+	},
 	groups = {not_in_creative_inventory=1},
 })
 
@@ -405,6 +423,15 @@ function core.override_item(name, redefinition)
 		rawset(item, k, v)
 	end
 	register_item_raw(item)
+end
+
+
+function core.add_group(name, adding)
+	local addgroup = table.copy(core.registered_items[name].groups) or {}
+	for k, v in pairs(adding) do
+		addgroup[k] = v
+	end
+	core.override_item(name, {groups = addgroup})
 end
 
 
@@ -612,6 +639,102 @@ core.registered_can_bypass_userlimit, core.register_can_bypass_userlimit = make_
 core.registered_on_modchannel_message, core.register_on_modchannel_message = make_registration()
 core.registered_on_player_inventory_actions, core.register_on_player_inventory_action = make_registration()
 core.registered_allow_player_inventory_actions, core.register_allow_player_inventory_action = make_registration()
+
+
+--
+-- Player step iteration
+--
+
+players_per_step = tonumber(core.settings:get("players_per_globalstep")) or 20
+
+local player_iter
+local player_iter_forced
+local playerstep_iter
+local playerstep_funcs = {}
+local playerstep_funcs_forced = {}
+local playernames = {}
+local playernames_forced = {}
+
+core.register_playerstep = function(func, force)
+	local funcs = force and playerstep_funcs_forced or playerstep_funcs
+	funcs[#funcs + 1] = func
+end
+
+local function table_iter(t)
+	local i = 0
+	local n = table.getn(t)
+	return function ()
+		i = i + 1
+		if i <= n then
+			return t[i]
+		end
+	end
+end
+
+function core.get_player_iter()
+	local names = {}
+	for player in table_iter(core.get_connected_players()) do
+		local name = player:get_player_name()
+		if name then
+			names[#names + 1] = name
+		end
+	end
+	return table_iter(names)
+end
+
+local function get_playerstep_func()
+	if playerstep_iter == nil then
+		playerstep_iter = table_iter(playerstep_funcs)
+		playernames = {}
+		for _ = 1, players_per_step do
+			if player_iter == nil then
+				player_iter = core.get_player_iter()
+			end
+			local name = player_iter()
+			if not name then
+				player_iter = nil
+				break
+			end
+			playernames[#playernames + 1] = name
+		end
+	end
+	local func = playerstep_iter()
+	playerstep_iter = func and playerstep_iter
+	return func or get_playerstep_func()
+end
+
+-- Run playerstep callbacks
+
+core.register_globalstep(function(dtime)
+	-- Run forced callbacks
+	if #playerstep_funcs_forced ~= 0 then
+		playernames_forced = {}
+		for _ = 1, players_per_step do
+			if player_iter_forced == nil then
+				player_iter_forced = core.get_player_iter()
+			end
+			local name = player_iter_forced()
+			if not name then
+				player_iter_forced = nil
+				break
+			end
+			playernames_forced[#playernames_forced + 1] = name
+		end
+		for func in table_iter(playerstep_funcs_forced) do
+			if type(func) == "function" then
+				func(dtime, playernames_forced)
+			end
+		end
+	end
+	if #playerstep_funcs ~= 0 then
+		-- Run single step callbacks
+		local func = get_playerstep_func()
+		if type(func) == "function" then
+			func(dtime, playernames)
+		end
+	end
+end)
+
 
 --
 -- Compatibility for on_mapgen_init()
