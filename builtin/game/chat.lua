@@ -105,6 +105,15 @@ local function parse_range_str(player_name, str)
 	return p1, p2
 end
 
+-- Chatcommand aliases (by @luk3yx)
+local function register_chatcommand_alias(new, old)
+	local def = assert(core.registered_chatcommands[old])
+	assert(not core.registered_chatcommands[new])
+
+	core.registered_chatcommands[new] = def
+end
+core.register_chatcommand_alias = register_chatcommand_alias
+
 --
 -- Chat commands
 --
@@ -436,7 +445,6 @@ core.register_chatcommand("teleport", {
 		p.y = tonumber(p.y)
 		p.z = tonumber(p.z)
 		if p.x and p.y and p.z then
-
 			local lm = 31000
 			if p.x < -lm or p.x > lm or p.y < -lm or p.y > lm or p.z < -lm or p.z > lm then
 				return false, "Cannot teleport out of map bounds!"
@@ -447,7 +455,7 @@ core.register_chatcommand("teleport", {
 					return false, "Can't teleport, you're attached to an object!"
 				end
 				teleportee:set_pos(p)
-				return true, "Teleporting to "..core.pos_to_string(p)
+				return true, "Teleporting to " .. core.pos_to_string(p, 1)
 			end
 		end
 
@@ -469,7 +477,7 @@ core.register_chatcommand("teleport", {
 			p = find_free_position_near(p)
 			teleportee:set_pos(p)
 			return true, "Teleporting to " .. target_name
-					.. " at "..core.pos_to_string(p)
+					.. " at " .. core.pos_to_string(p, 1)
 		end
 
 		if not core.check_player_privs(name, {bring=true}) then
@@ -491,7 +499,7 @@ core.register_chatcommand("teleport", {
 			end
 			teleportee:set_pos(p)
 			return true, "Teleporting " .. teleportee_name
-					.. " to " .. core.pos_to_string(p)
+					.. " to " .. core.pos_to_string(p, 1)
 		end
 
 		teleportee = nil
@@ -514,13 +522,14 @@ core.register_chatcommand("teleport", {
 			teleportee:set_pos(p)
 			return true, "Teleporting " .. teleportee_name
 					.. " to " .. target_name
-					.. " at " .. core.pos_to_string(p)
+					.. " at " .. core.pos_to_string(p, 1)
 		end
 
 		return false, 'Invalid parameters ("' .. param
 				.. '") or player not found (see /help teleport)'
 	end,
 })
+register_chatcommand_alias("tp", "teleport")
 
 core.register_chatcommand("set", {
 	params = "([-n] <name> <value>) | <name>",
@@ -649,7 +658,7 @@ core.register_chatcommand("fixlight", {
 core.register_chatcommand("mods", {
 	params = "",
 	description = "List mods installed on the server",
-	privs = {},
+	privs = {server = true},
 	func = function(name, param)
 		return true, table.concat(core.get_modnames(), ", ")
 	end,
@@ -658,6 +667,18 @@ core.register_chatcommand("mods", {
 local function handle_give_command(cmd, giver, receiver, stackstring)
 	core.log("action", giver .. " invoked " .. cmd
 			.. ', stackstring="' .. stackstring .. '"')
+	local ritems = core.registered_items
+	if not stackstring:match(":") and not ritems[stackstring] then
+		local modslist = core.get_modnames()
+		table.insert(modslist, 1, "default")
+		for _, modname in pairs(modslist) do
+			local namecheck = modname .. ":" .. stackstring:match("%S*")
+			if ritems[namecheck] then
+				stackstring = modname .. ":" .. stackstring
+				break
+			end
+		end
+	end
 	local itemstack = ItemStack(stackstring)
 	if itemstack:is_empty() then
 		return false, "Cannot give an empty item"
@@ -926,6 +947,7 @@ core.register_chatcommand("time", {
 		return true, "Time of day changed."
 	end,
 })
+register_chatcommand_alias("settime", "time")
 
 core.register_chatcommand("days", {
 	description = "Show day count since world creation",
@@ -1030,8 +1052,7 @@ core.register_chatcommand("clearobjects", {
 		core.log("action", name .. " clears all objects ("
 				.. options.mode .. " mode).")
 		core.chat_send_all("Clearing all objects. This may take a long time."
-				.. " You may experience a timeout. (by "
-				.. name .. ")")
+				.. " You may experience a timeout.")
 		core.clear_objects(options)
 		core.log("action", "Object clearing done.")
 		core.chat_send_all("*** Cleared all objects.")
@@ -1041,7 +1062,7 @@ core.register_chatcommand("clearobjects", {
 
 core.register_chatcommand("msg", {
 	params = "<name> <message>",
-	description = "Send a direct message to a player",
+	description = "Send a private message to a player",
 	privs = {shout=true},
 	func = function(name, param)
 		local sendto, message = param:match("^(%S+)%s(.+)$")
@@ -1052,13 +1073,15 @@ core.register_chatcommand("msg", {
 			return false, "The player " .. sendto
 					.. " is not online."
 		end
-		core.log("action", "DM from " .. name .. " to " .. sendto
+		core.log("action", "PM from " .. name .. " to " .. sendto
 				.. ": " .. message)
-		core.chat_send_player(sendto, "DM from " .. name .. ": "
-				.. message)
+		core.chat_send_player(sendto, minetest.colorize("green",
+				"PM from " .. name .. ": " .. message))
 		return true, "Message sent."
 	end,
 })
+register_chatcommand_alias("m", "msg")
+register_chatcommand_alias("pm", "msg")
 
 core.register_chatcommand("last-login", {
 	params = "[<name>]",
@@ -1134,4 +1157,35 @@ core.register_chatcommand("kill", {
 	func = function(name, param)
 		return handle_kill_command(name, param == "" and name or param)
 	end,
+})
+
+core.register_chatcommand("spawn", {
+	description = "Teleport to the spawn point",
+	func = function(name)
+		local player = core.get_player_by_name(name)
+		if not player then
+			return false
+		end
+		local spawnpoint = core.setting_get_pos("static_spawnpoint")
+		if spawnpoint then
+			player:set_pos(spawnpoint)
+			return true, "Teleporting to spawn..."
+		else
+			return false, "The spawn point is not set!"
+		end
+	end
+})
+
+core.register_chatcommand("setspawn", {
+	description = "Sets the spawn point to your current position",
+	privs = {server = true},
+	func = function(name)
+		local player = core.get_player_by_name(name)
+		if not player then
+			return false
+		end
+		local pos = core.pos_to_string(player:get_pos(), 1)
+		core.settings:set("static_spawnpoint", pos)
+		return true, "The spawn point are set to " .. pos
+	end
 })

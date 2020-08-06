@@ -1,33 +1,36 @@
 -- Minetest: builtin/item.lua
 
+local random, pi = math.random, math.pi
+local vnew, vround, vadd, vapply = vector.new, vector.round, vector.add, vector.apply
+
 local builtin_shared = ...
 local SCALE = 0.667
 
 local facedir_to_euler = {
 	{y = 0, x = 0, z = 0},
-	{y = -math.pi/2, x = 0, z = 0},
-	{y = math.pi, x = 0, z = 0},
-	{y = math.pi/2, x = 0, z = 0},
-	{y = math.pi/2, x = -math.pi/2, z = math.pi/2},
-	{y = math.pi/2, x = math.pi, z = math.pi/2},
-	{y = math.pi/2, x = math.pi/2, z = math.pi/2},
-	{y = math.pi/2, x = 0, z = math.pi/2},
-	{y = -math.pi/2, x = math.pi/2, z = math.pi/2},
-	{y = -math.pi/2, x = 0, z = math.pi/2},
-	{y = -math.pi/2, x = -math.pi/2, z = math.pi/2},
-	{y = -math.pi/2, x = math.pi, z = math.pi/2},
-	{y = 0, x = 0, z = math.pi/2},
-	{y = 0, x = -math.pi/2, z = math.pi/2},
-	{y = 0, x = math.pi, z = math.pi/2},
-	{y = 0, x = math.pi/2, z = math.pi/2},
-	{y = math.pi, x = math.pi, z = math.pi/2},
-	{y = math.pi, x = math.pi/2, z = math.pi/2},
-	{y = math.pi, x = 0, z = math.pi/2},
-	{y = math.pi, x = -math.pi/2, z = math.pi/2},
-	{y = math.pi, x = math.pi, z = 0},
-	{y = -math.pi/2, x = math.pi, z = 0},
-	{y = 0, x = math.pi, z = 0},
-	{y = math.pi/2, x = math.pi, z = 0}
+	{y = -pi/2, x = 0, z = 0},
+	{y = pi, x = 0, z = 0},
+	{y = pi/2, x = 0, z = 0},
+	{y = pi/2, x = -pi/2, z = pi/2},
+	{y = pi/2, x = pi, z = pi/2},
+	{y = pi/2, x = pi/2, z = pi/2},
+	{y = pi/2, x = 0, z = pi/2},
+	{y = -pi/2, x = pi/2, z = pi/2},
+	{y = -pi/2, x = 0, z = pi/2},
+	{y = -pi/2, x = -pi/2, z = pi/2},
+	{y = -pi/2, x = pi, z = pi/2},
+	{y = 0, x = 0, z = pi/2},
+	{y = 0, x = -pi/2, z = pi/2},
+	{y = 0, x = pi, z = pi/2},
+	{y = 0, x = pi/2, z = pi/2},
+	{y = pi, x = pi, z = pi/2},
+	{y = pi, x = pi/2, z = pi/2},
+	{y = pi, x = 0, z = pi/2},
+	{y = pi, x = -pi/2, z = pi/2},
+	{y = pi, x = pi, z = 0},
+	{y = -pi/2, x = pi, z = 0},
+	{y = 0, x = pi, z = 0},
+	{y = pi/2, x = pi, z = 0}
 }
 
 local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
@@ -35,6 +38,8 @@ local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
 --
 -- Falling stuff
 --
+
+local drop_attached_node
 
 core.register_entity(":__builtin:falling_node", {
 	initial_properties = {
@@ -50,8 +55,10 @@ core.register_entity(":__builtin:falling_node", {
 	node = {},
 	meta = {},
 	floats = false,
+	timer = 0,
 
 	set_node = function(self, node, meta)
+		node.param2 = node.param2 or 0
 		self.node = node
 		meta = meta or {}
 		if type(meta.to_table) == "function" then
@@ -143,7 +150,7 @@ core.register_entity(":__builtin:falling_node", {
 
 		-- Rotate entity
 		if def.drawtype == "torchlike" then
-			self.object:set_yaw(math.pi*0.25)
+			self.object:set_yaw(pi*0.25)
 		elseif (node.param2 ~= 0 and (def.wield_image == ""
 				or def.wield_image == nil))
 				or def.drawtype == "signlike"
@@ -161,28 +168,28 @@ core.register_entity(":__builtin:falling_node", {
 				local rot = node.param2 % 8
 				local pitch, yaw, roll = 0, 0, 0
 				if rot == 1 then
-					pitch, yaw = math.pi, math.pi
+					pitch, yaw = pi, pi
 				elseif rot == 2 then
-					pitch, yaw = math.pi/2, math.pi/2
+					pitch, yaw = pi/2, pi/2
 				elseif rot == 3 then
-					pitch, yaw = math.pi/2, -math.pi/2
+					pitch, yaw = pi/2, -pi/2
 				elseif rot == 4 then
-					pitch, yaw = math.pi/2, math.pi
+					pitch, yaw = pi/2, pi
 				elseif rot == 5 then
-					pitch, yaw = math.pi/2, 0
+					pitch, yaw = pi/2, 0
 				end
 				if def.drawtype == "signlike" then
-					pitch = pitch - math.pi/2
+					pitch = pitch - pi/2
 					if rot == 0 then
-						yaw = yaw + math.pi/2
+						yaw = yaw + pi/2
 					elseif rot == 1 then
-						yaw = yaw - math.pi/2
+						yaw = yaw - pi/2
 					end
 				elseif def.drawtype == "mesh" or def.drawtype == "normal" then
 					if rot >= 0 and rot <= 1 then
-						roll = roll + math.pi
+						roll = roll + pi
 					else
-						yaw = yaw + math.pi
+						yaw = yaw + pi
 					end
 				end
 				self.object:set_rotation({x=pitch, y=yaw, z=roll})
@@ -217,9 +224,9 @@ core.register_entity(":__builtin:falling_node", {
 		-- Add levels if dropped on same leveled node
 		if bcd and bcd.paramtype2 == "leveled" and
 				bcn.name == self.node.name then
-			local addlevel = self.node.level
-			if (addlevel or 0) <= 0 then
-				addlevel = bcd.leveled
+			local addlevel = self.node.level or 0
+			if addlevel <= 0 then
+				addlevel = bcd.leveled or 0
 			end
 			if core.add_node_level(bcp, addlevel) < addlevel then
 				return true
@@ -230,7 +237,7 @@ core.register_entity(":__builtin:falling_node", {
 		end
 
 		-- Decide if we're replacing the node or placing on top
-		local np = vector.new(bcp)
+		local np = vnew(bcp)
 		if bcd and bcd.buildable_to and
 				(not self.floats or bcd.liquidtype == "none") then
 			core.remove_node(bcp)
@@ -262,6 +269,12 @@ core.register_entity(":__builtin:falling_node", {
 			if self.meta then
 				core.get_meta(np):from_table(self.meta)
 			end
+			-- Drop node if falls into a protected area
+			if core.is_protected(np, "") then
+				self.object:remove()
+				drop_attached_node(np)
+				return true
+			end
 			if def.sounds and def.sounds.place then
 				core.sound_play(def.sounds.place, {pos = np}, true)
 			end
@@ -276,7 +289,7 @@ core.register_entity(":__builtin:falling_node", {
 		if self.floats then
 			local pos = self.object:get_pos()
 
-			local bcp = vector.round({x = pos.x, y = pos.y - 0.7, z = pos.z})
+			local bcp = vround({x = pos.x, y = pos.y - 0.7, z = pos.z})
 			local bcn = core.get_node(bcp)
 
 			local bcd = core.registered_nodes[bcn.name]
@@ -322,7 +335,7 @@ core.register_entity(":__builtin:falling_node", {
 					y = player_collision.old_velocity.y,
 					z = vel.z
 				})
-				self.object:set_pos(vector.add(self.object:get_pos(),
+				self.object:set_pos(vadd(self.object:get_pos(),
 					{x = 0, y = -0.5, z = 0}))
 			end
 			return
@@ -335,7 +348,7 @@ core.register_entity(":__builtin:falling_node", {
 		local failure = false
 
 		local pos = self.object:get_pos()
-		local distance = vector.apply(vector.subtract(pos, bcp), math.abs)
+		local distance = vapply(vector.subtract(pos, bcp), math.abs)
 		if distance.x >= 1 or distance.z >= 1 then
 			-- We're colliding with some part of a node that's sticking out
 			-- Since we don't want to visually teleport, drop as item
@@ -351,6 +364,14 @@ core.register_entity(":__builtin:falling_node", {
 			if not (def and def.walkable) then
 				failure = true -- This is unexpected, fail
 			end
+		end
+
+		-- Drop node if does not fall within 5 seconds
+		self.timer = self.timer + dtime
+		if self.timer > 5 then
+			core.add_item(pos, self.node)
+			self.object:remove()
+			return
 		end
 
 		-- Try to actually place ourselves
@@ -396,7 +417,7 @@ function core.spawn_falling_node(pos)
 	return convert_to_falling_node(pos, node)
 end
 
-local function drop_attached_node(p)
+function drop_attached_node(p)
 	local n = core.get_node(p)
 	local drops = core.get_node_drops(n, "")
 	local def = core.registered_items[n.name]
@@ -418,9 +439,9 @@ local function drop_attached_node(p)
 	core.remove_node(p)
 	for _, item in pairs(drops) do
 		local pos = {
-			x = p.x + math.random()/2 - 0.25,
-			y = p.y + math.random()/2 - 0.25,
-			z = p.z + math.random()/2 - 0.25,
+			x = p.x + random()/2 - 0.25,
+			y = p.y + random()/2 - 0.25,
+			z = p.z + random()/2 - 0.25,
 		}
 		core.add_item(pos, item)
 	end
@@ -439,7 +460,7 @@ function builtin_shared.check_attached_node(p, n)
 	else
 		d.y = -1
 	end
-	local p2 = vector.add(p, d)
+	local p2 = vadd(p, d)
 	local nn = core.get_node(p2).name
 	local def2 = core.registered_nodes[nn]
 	if def2 and not def2.walkable then
@@ -486,6 +507,33 @@ function core.check_single_for_falling(p)
 		end
 	end
 
+	--	Attached, but not wallmounted. Yes, no one thought about it.
+	--	This is an alternative to function 'check_attached_node', so it seems too complicated.
+	local check_connected = {
+		{x = -1, y = 0, z = 0},
+		{x = 1, y = 0, z = 0},
+		{x = 0, y = 0, z = 1},
+		{x = 0, y = 0, z = -1}
+	}
+
+	for i = 1, 4 do
+		local pa = vadd(p, check_connected[i])
+		local nc = core.get_node(pa)
+		if core.get_item_group(nc.name, "attached_node2") ~= 0 then
+			for j = 1, 4 do
+				local ptwo = vadd(pa, check_connected[j])
+				local ntwo = core.get_node(ptwo)
+				local def = core.registered_nodes[ntwo.name]
+				if def and def.walkable then
+					return false
+				end
+			end
+
+			drop_attached_node(pa)
+			return true
+		end
+	end
+
 	return false
 end
 
@@ -509,7 +557,7 @@ local check_for_falling_neighbors = {
 
 function core.check_for_falling(p)
 	-- Round p to prevent falling entities to get stuck.
-	p = vector.round(p)
+	p = vround(p)
 
 	-- We make a stack, and manually maintain size for performance.
 	-- Stored in the stack, we will maintain tables with pos, and
@@ -526,7 +574,7 @@ function core.check_for_falling(p)
 		n = n + 1
 		s[n] = {p = p, v = v}
 		-- Select next node from neighbor list.
-		p = vector.add(p, check_for_falling_neighbors[v])
+		p = vadd(p, check_for_falling_neighbors[v])
 		-- Now we check out the node. If it is in need of an update,
 		-- it will let us know in the return value (true = updated).
 		if not core.check_single_for_falling(p) then
