@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --this program is distributed in the hope that it will be useful,
@@ -69,14 +69,15 @@ function dialog_create(name,get_formspec,buttonhandler,eventhandler)
 end
 
 function messagebox(name, message)
+	local bg = core.formspec_escape(defaulttexturedir .. "bg_common.png")
 	return dialog_create(name,
 			function()
 				return ([[
-					formspec_version[3]
-					size[8,3]
-					textarea[0.375,0.375;7.25,1.2;;;%s]
-					button[3,1.825;2,0.8;ok;%s]
-				]]):format(message, fgettext("OK"))
+					size[12,6,false]
+					background[0,0;0,0;%s;true;32]
+					textarea[1,1;10,4;;;%s]
+					button[5,4.5;2,0.8;ok;%s]
+				]]):format(bg, message, fgettext("OK"))
 			end,
 			function(this, fields)
 				if fields.ok then

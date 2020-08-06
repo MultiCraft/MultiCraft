@@ -126,4 +126,3 @@ file = assert(io.open("src/settings_translation_file.cpp", "w"))
 --file = assert(io.open("settings_translation_file.cpp", "w"))
 file:write(create_translation_file())
 file:close()
-

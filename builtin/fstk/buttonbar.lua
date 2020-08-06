@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -34,7 +34,7 @@ local function buttonbar_formspec(self)
 			(i - self.startbutton) * self.btn_size +       --button offset
 			self.btn_initial_offset
 		else
-			btn_pos.x = self.pos.x + (self.btn_size * 0.05)
+			btn_pos.x = self.pos.x + (self.btn_size * 0.1)
 		end
 
 		if self.orientation == "vertical" then
@@ -187,7 +187,7 @@ function buttonbar_create(name, cbf_buttonhandler, pos, orientation, size)
 	local self = {}
 	self.name = name
 	self.type = "addon"
-	self.bgcolor = "#000000"
+	self.bgcolor = "#8fb9de"
 	self.pos = pos
 	self.size = size
 	self.orientation = orientation

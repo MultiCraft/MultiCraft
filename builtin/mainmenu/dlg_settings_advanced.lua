@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -783,7 +783,9 @@ local function create_change_setting_formspec(dialogdata)
 	end
 
 	return (
-		"size[" .. width .. "," .. height + 0.25 .. ",true]" ..
+		"size[" .. width .. "," .. height + 0.25 .. ",false]" ..
+		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;32]" ..
 		create_textfield(description_box, setting_name, comment_text) ..
 		formspec ..
 		"button[" .. width / 2 - 2.5 .. "," .. height - 0.4 .. ";2.5,1;btn_done;" ..
@@ -945,7 +947,9 @@ local function handle_change_setting_buttons(this, fields)
 end
 
 local function create_settings_formspec(tabview, _, tabdata)
-	local formspec = "size[12,5.4;true]" ..
+	local formspec = "size[12,5.4;false]" ..
+			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;32]" ..
 			"tablecolumns[color;tree;text,width=28;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..
 			"field[0.3,0.1;10.2,1;search_string;;" .. core.formspec_escape(search_string) .. "]" ..

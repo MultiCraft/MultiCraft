@@ -17,112 +17,20 @@
 
 local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
-local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
-
-local function current_game()
-	local last_game_id = core.settings:get("menu_last_game")
-	local game = pkgmgr.find_by_gameid(last_game_id)
-
-	return game
-end
-
-local function singleplayer_refresh_gamebar()
-	local old_bar = ui.find_by_name("game_button_bar")
-
-	if old_bar ~= nil then
-		old_bar:delete()
-	end
-
-	local function game_buttonbar_button_handler(fields)
-		if fields.game_open_cdb then
-			local maintab = ui.find_by_name("maintab")
-			local dlg = create_store_dlg("game")
-			dlg:set_parent(maintab)
-			maintab:hide()
-			dlg:show()
-			return true
-		end
-
-		for key, value in pairs(fields) do
-			for j=1, #pkgmgr.games do
-				if ("game_btnbar_" .. pkgmgr.games[j].id == key) then
-					mm_texture.update("singleplayer", pkgmgr.games[j])
-				--	core.set_topleft_text(pkgmgr.games[j].name)
-					core.settings:set("menu_last_game",pkgmgr.games[j].id)
-					menudata.worldlist:set_filtercriteria(pkgmgr.games[j].id)
-					--[[local index = filterlist.get_current_index(menudata.worldlist,
-						tonumber(core.settings:get("mainmenu_last_selected_world")))
-					if not index or index < 1 then
-						local selected = core.get_table_index("sp_worlds")
-						if selected ~= nil and selected < #menudata.worldlist:get_list() then
-							index = selected
-						else
-							index = #menudata.worldlist:get_list()
-						end
-					end]]
-
-					return true
-				end
-			end
-		end
-	end
-
-	local btnbar = buttonbar_create("game_button_bar",
-		game_buttonbar_button_handler,
-		{x=-1.35, y=-0.32}, "vertical", {x=1, y=6.14})
-
-	for i=1, #pkgmgr.games do
-		if pkgmgr.games[i].id ~= "default" then
-			local btn_name = "game_btnbar_" .. pkgmgr.games[i].id
-
-			local image = nil
-			local text = nil
-			local tooltip = core.formspec_escape(pkgmgr.games[i].name)
-
-			if pkgmgr.games[i].menuicon_path ~= nil and
-				pkgmgr.games[i].menuicon_path ~= "" then
-				image = core.formspec_escape(pkgmgr.games[i].menuicon_path)
-			else
-				local part1 = pkgmgr.games[i].id:sub(1,5)
-				local part2 = pkgmgr.games[i].id:sub(6,10)
-				local part3 = pkgmgr.games[i].id:sub(11)
-
-				text = part1 .. "\n" .. part2
-				if part3 ~= nil and
-					part3 ~= "" then
-					text = text .. "\n" .. part3
-				end
-			end
-
-			btnbar:add_button(btn_name, text, image, tooltip)
-		end
-	end
-
-	if not mobile then
-		local plus_image = core.formspec_escape(defaulttexturedir .. "plus.png")
-		btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
-	end
-end
-
-local function filter_default()
-	local gameid = core.settings:get("menu_last_game")
-	if not gameid or gameid == "" or gameid == "default" then
-		for j=1, #pkgmgr.games do
-			local name = pkgmgr.games[j].id
-			if name and name ~= "default" then
-				menudata.worldlist:set_filtercriteria(name)
-				core.settings:set("menu_last_game", name)
-				mm_texture.update("singleplayer", current_game())
-				return
-			end
-		end
-	end
-end
 
 local function get_formspec()
-	filter_default()
+	menudata.worldlist:set_filtercriteria("default")
+
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
+	if not index or index < 1 then
+		local selected = core.get_table_index("sp_worlds")
+		if selected ~= nil and selected < #menudata.worldlist:get_list() then
+			index = selected
+		else
+			index = #menudata.worldlist:get_list()
+		end
+	end
 
 	local creative_checkbox = core.settings:get_bool("creative_mode") and
 			"creative_checkbox" or "blank"
@@ -141,7 +49,6 @@ local function get_formspec()
 				core.formspec_escape(defaulttexturedir ..
 					"blank.png") .. ";world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
-			"button[9.5,4.8;2.5,1;world_configure;".. fgettext("Configure") .. "]" ..
 
 			"image_button[6.72,1.43;4.96,1.41;" ..
 				core.formspec_escape(defaulttexturedir ..
@@ -184,7 +91,7 @@ local function get_formspec()
 end
 
 local function main_button_handler(this, fields, name)
-	assert(name == "local")
+	assert(name == "local_default")
 
 	local world_doubleclick = false
 
@@ -232,52 +139,55 @@ local function main_button_handler(this, fields, name)
 	if fields["play"] ~= nil or world_doubleclick or fields["key_enter"] then
 		local selected = core.get_table_index("sp_worlds")
 		gamedata.selected_world = menudata.worldlist:get_raw_index(selected)
-		core.settings:set("maintab_LAST", "local")
+		core.settings:set("maintab_LAST", "local_default")
 		core.settings:set("mainmenu_last_selected_world", gamedata.selected_world)
 
-		if selected == nil or gamedata.selected_world == 0 then
-			gamedata.errormessage =
-					fgettext("No world created or selected!")
-			return true
-		end
-
-		-- Update last game
-		local world = menudata.worldlist:get_raw_element(gamedata.selected_world)
-		if world then
-			local game = pkgmgr.find_by_gameid(world.gameid)
-			core.settings:set("menu_last_game", game.id)
-		end
-
 		if core.settings:get_bool("enable_server") then
-			gamedata.playername = fields["te_playername"]
-			gamedata.password   = fields["te_passwd"]
-			gamedata.port       = fields["te_serverport"]
-			gamedata.address    = ""
+			if selected ~= nil and gamedata.selected_world ~= 0 then
+				gamedata.playername = fields["te_playername"]
+				gamedata.password   = fields["te_passwd"]
+				gamedata.port       = fields["te_serverport"]
+				gamedata.address    = ""
 
-			core.settings:set_bool("auto_connect", false)
-			if fields["port"] ~= nil then
-				core.settings:set("port",fields["port"])
-			end
-			if fields["te_serveraddr"] ~= nil then
-				core.settings:set("bind_address",fields["te_serveraddr"])
+				core.settings:set_bool("auto_connect", false)
+				if fields["port"] ~= nil then
+					core.settings:set("port",fields["port"])
+				end
+				if fields["te_serveraddr"] ~= nil then
+					core.settings:set("bind_address",fields["te_serveraddr"])
+				end
+
+				--update last game
+				local world = menudata.worldlist:get_raw_element(gamedata.selected_world)
+				if world then
+					core.settings:set("menu_last_game", "default")
+				end
+
+				core.start()
+			else
+				gamedata.errormessage =
+					fgettext("No world created or selected!")
 			end
 		else
-			gamedata.singleplayer = true
-			core.settings:set_bool("auto_connect", true)
-			core.settings:set("connect_time", os.time())
-			core.start()
+			if selected ~= nil and gamedata.selected_world ~= 0 then
+				gamedata.singleplayer = true
+				core.settings:set_bool("auto_connect", true)
+				core.settings:set("connect_time", os.time())
+				core.start()
+			else
+				gamedata.errormessage =
+					fgettext("No world created or selected!")
+			end
+			return true
 		end
-
-		core.start()
-		return true
 	end
 
 	if fields["world_create"] ~= nil then
-		local create_world_dlg = create_create_world_dlg(true)
+		core.settings:set("menu_last_game", "default")
+		local create_world_dlg = create_create_world_default_dlg(true)
 		create_world_dlg:set_parent(this)
 		this:hide()
 		create_world_dlg:show()
-		mm_texture.update("singleplayer", current_game())
 		return true
 	end
 
@@ -290,18 +200,17 @@ local function main_button_handler(this, fields, name)
 				world.name ~= nil and
 				world.name ~= "" then
 				local index = menudata.worldlist:get_raw_index(selected)
-				local delete_world_dlg = create_delete_world_dlg(world.name, index, world.gameid)
+				local delete_world_dlg = create_delete_world_dlg(world.name,index)
 				delete_world_dlg:set_parent(this)
 				this:hide()
 				delete_world_dlg:show()
-				mm_texture.update("singleplayer",current_game())
 			end
 		end
 
 		return true
 	end
 
-	if fields["world_configure"] ~= nil then
+--[[if fields["world_configure"] ~= nil then
 		local selected = core.get_table_index("sp_worlds")
 		if selected ~= nil then
 			local configdialog =
@@ -312,42 +221,17 @@ local function main_button_handler(this, fields, name)
 				configdialog:set_parent(this)
 				this:hide()
 				configdialog:show()
-				mm_texture.update("singleplayer",current_game())
 			end
 		end
 
 		return true
-	end
-end
-
-local function on_change(type, old_tab, new_tab)
-	if (type == "ENTER") then
-		local game = current_game()
-
-		if game then
-			menudata.worldlist:set_filtercriteria(game.id)
-			core.set_topleft_text("Powered by Minetest Engine")
-			mm_texture.update("singleplayer",game)
-		end
-
-		singleplayer_refresh_gamebar()
-		ui.find_by_name("game_button_bar"):show()
-	else
-		menudata.worldlist:set_filtercriteria(nil)
-		local gamebar = ui.find_by_name("game_button_bar")
-		if gamebar then
-			gamebar:hide()
-		end
-		core.set_topleft_text("")
-		mm_texture.update(new_tab,nil)
-	end
+	end]]
 end
 
 --------------------------------------------------------------------------------
 return {
-	name = "local",
-	caption = fgettext("Other games"),
+	name = "local_default",
+	caption = fgettext("Singleplayer"),
 	cbf_formspec = get_formspec,
-	cbf_button_handler = main_button_handler,
-	on_change = on_change
+	cbf_button_handler = main_button_handler
 }
