@@ -2,11 +2,19 @@
 
 local builtin_shared = ...
 
+local abs, atan2, cos, floor, max, sin, random =
+	math.abs, math.atan2, math.cos, math.floor, math.max, math.sin, math.random
+local vadd, vnew, vmultiply, vnormalize, vsubtract =
+	vector.add, vector.new, vector.multiply, vector.normalize, vector.subtract
+
+local creative_mode = core.settings:get_bool("creative_mode")
+local node_drop = core.settings:get_bool("node_drop", true)
+
 local function copy_pointed_thing(pointed_thing)
 	return {
 		type  = pointed_thing.type,
-		above = vector.new(pointed_thing.above),
-		under = vector.new(pointed_thing.under),
+		above = vnew(pointed_thing.above),
+		under = vnew(pointed_thing.under),
 		ref   = pointed_thing.ref,
 	}
 end
@@ -39,11 +47,11 @@ end
 
 function core.dir_to_facedir(dir, is6d)
 	--account for y if requested
-	if is6d and math.abs(dir.y) > math.abs(dir.x) and math.abs(dir.y) > math.abs(dir.z) then
+	if is6d and abs(dir.y) > abs(dir.x) and abs(dir.y) > abs(dir.z) then
 
 		--from above
 		if dir.y < 0 then
-			if math.abs(dir.x) > math.abs(dir.z) then
+			if abs(dir.x) > abs(dir.z) then
 				if dir.x < 0 then
 					return 19
 				else
@@ -59,7 +67,7 @@ function core.dir_to_facedir(dir, is6d)
 
 		--from below
 		else
-			if math.abs(dir.x) > math.abs(dir.z) then
+			if abs(dir.x) > abs(dir.z) then
 				if dir.x < 0 then
 					return 15
 				else
@@ -75,7 +83,7 @@ function core.dir_to_facedir(dir, is6d)
 		end
 
 	--otherwise, place horizontally
-	elseif math.abs(dir.x) > math.abs(dir.z) then
+	elseif abs(dir.x) > abs(dir.z) then
 		if dir.x < 0 then
 			return 3
 		else
@@ -113,13 +121,13 @@ function core.facedir_to_dir(facedir)
 end
 
 function core.dir_to_wallmounted(dir)
-	if math.abs(dir.y) > math.max(math.abs(dir.x), math.abs(dir.z)) then
+	if abs(dir.y) > max(abs(dir.x), abs(dir.z)) then
 		if dir.y < 0 then
 			return 1
 		else
 			return 0
 		end
-	elseif math.abs(dir.x) > math.abs(dir.z) then
+	elseif abs(dir.x) > abs(dir.z) then
 		if dir.x < 0 then
 			return 3
 		else
@@ -148,11 +156,11 @@ function core.wallmounted_to_dir(wallmounted)
 end
 
 function core.dir_to_yaw(dir)
-	return -math.atan2(dir.x, dir.z)
+	return -atan2(dir.x, dir.z)
 end
 
 function core.yaw_to_dir(yaw)
-	return {x = -math.sin(yaw), y = 0, z = math.cos(yaw)}
+	return {x = -sin(yaw), y = 0, z = cos(yaw)}
 end
 
 function core.is_colored_paramtype(ptype)
@@ -165,9 +173,9 @@ function core.strip_param2_color(param2, paramtype2)
 		return nil
 	end
 	if paramtype2 == "colorfacedir" then
-		param2 = math.floor(param2 / 32) * 32
+		param2 = floor(param2 / 32) * 32
 	elseif paramtype2 == "colorwallmounted" then
-		param2 = math.floor(param2 / 8) * 8
+		param2 = floor(param2 / 8) * 8
 	end
 	-- paramtype2 == "color" requires no modification.
 	return param2
@@ -210,7 +218,7 @@ function core.get_node_drops(node, toolname)
 		local good_rarity = true
 		local good_tool = true
 		if item.rarity ~= nil then
-			good_rarity = item.rarity < 1 or math.random(item.rarity) == 1
+			good_rarity = item.rarity < 1 or random(item.rarity) == 1
 		end
 		if item.tools ~= nil then
 			good_tool = false
@@ -347,7 +355,7 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 			color_divisor = 32
 		end
 		if color_divisor then
-			local color = math.floor(metatable.palette_index / color_divisor)
+			local color = floor(metatable.palette_index / color_divisor)
 			local other = newnode.param2 % color_divisor
 			newnode.param2 = color * color_divisor + other
 		end
@@ -406,16 +414,6 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 	return itemstack, place_to
 end
 
--- deprecated, item_place does not call this
-function core.item_place_object(itemstack, placer, pointed_thing)
-	local pos = core.get_pointed_thing_position(pointed_thing, true)
-	if pos ~= nil then
-		local item = itemstack:take_item()
-		core.add_item(pos, item)
-	end
-	return itemstack
-end
-
 function core.item_place(itemstack, placer, pointed_thing, param2)
 	-- Call on_rightclick if the pointed node defines it
 	if pointed_thing.type == "node" and placer and
@@ -439,10 +437,103 @@ function core.item_secondary_use(itemstack, placer)
 	return itemstack
 end
 
+local function item_throw_step(entity, dtime)
+	entity.throw_timer = entity.throw_timer + dtime
+	if entity.throw_timer > 20 then
+		entity.object:remove()
+		return
+	end
+	if not entity.thrower then
+		return
+	end
+	local pos = entity.object:get_pos()
+	if not core.is_valid_pos(pos) then
+		entity.object:remove()
+		return
+	end
+	local hit_object
+	local dir = vnormalize(entity.object:get_velocity())
+	local pos2 = vadd(pos, vmultiply(dir, 3))
+	local _, node_pos = core.line_of_sight(pos, pos2)
+	if node_pos then
+		local def = core.get_node(node_pos)
+		if def then
+			pos = vsubtract(node_pos, vmultiply(dir, 1.5))
+			entity.object:move_to(pos)
+		else
+			node_pos = nil
+		end
+	end
+	local objs = core.get_objects_inside_radius(pos, 1.5)
+	for _, obj in pairs(objs) do
+		if obj:is_player() then
+			local name = obj:get_player_name()
+			if name ~= entity.thrower then
+				hit_object = obj
+				break
+			end
+		elseif obj:get_luaentity() ~= nil and
+				obj:get_luaentity().name ~= "__builtin:throwing_item" and
+				obj:get_luaentity().name ~= "__builtin:item" then
+			hit_object = obj
+			break
+		end
+	end
+	if hit_object or node_pos then
+		local player = core.get_player_by_name(entity.thrower)
+		entity.on_impact(player, pos, entity.throw_direction, hit_object)
+		entity.object:remove()
+	end
+end
+
+function core.item_throw(name, thrower, speed, accel, on_impact)
+	if not thrower or not thrower:is_player() then
+		return
+	end
+	local pos = thrower:get_pos()
+	if not core.is_valid_pos(pos) then
+		return
+	end
+	pos.y = pos.y + 1.5
+	local obj
+	local properties = {is_visible=true}
+	if core.registered_entities[name] then
+		obj = core.add_entity(pos, name)
+	elseif core.registered_items[name] then
+		obj = core.add_entity(pos, "__builtin:throwing_item")
+		properties.textures = {name}
+	else
+		return
+	end
+	if obj then
+		local ent = obj:get_luaentity()
+		if ent then
+			local s = speed or 19 -- default speed
+			local a = accel or -3 -- default acceleration
+			local dir = thrower:get_look_dir()
+			local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
+			ent.thrower = thrower:get_player_name()
+			ent.throw_timer = 0
+			ent.throw_direction = dir
+			ent.on_step = item_throw_step
+			ent.on_impact = on_impact and on_impact or function() end
+			obj:set_properties(properties)
+			obj:set_velocity({x=dir.x * s, y=dir.y * s, z=dir.z * s})
+			obj:set_acceleration({x=dir.x * a, y=-gravity, z=dir.z * a})
+			return obj
+		else
+			obj:remove()
+		end
+	end
+end
+
 function core.item_drop(itemstack, dropper, pos)
 	local dropper_is_player = dropper and dropper:is_player()
 	local p = table.copy(pos)
 	local cnt = itemstack:get_count()
+	if not core.is_valid_pos(p) then
+		return
+	end
 	if dropper_is_player then
 		p.y = p.y + 1.2
 	end
@@ -450,12 +541,19 @@ function core.item_drop(itemstack, dropper, pos)
 	local obj = core.add_item(p, item)
 	if obj then
 		if dropper_is_player then
+			local vel = dropper:get_player_velocity()
 			local dir = dropper:get_look_dir()
-			dir.x = dir.x * 2.9
-			dir.y = dir.y * 2.9 + 2
-			dir.z = dir.z * 2.9
+			dir.x = vel.x + dir.x * 4
+			dir.y = vel.y + dir.y * 4 + 2
+			dir.z = vel.z + dir.z * 4
 			obj:set_velocity(dir)
 			obj:get_luaentity().dropped_by = dropper:get_player_name()
+		else
+			obj:set_velocity({
+				x = random(-2, 2),
+				y = random(2, 4),
+				z = random(-2, 2)
+			})
 		end
 		return itemstack
 	end
@@ -463,7 +561,8 @@ function core.item_drop(itemstack, dropper, pos)
 	-- environment failed
 end
 
-function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
+local enable_hunger = core.settings:get_bool("enable_damage") and core.settings:get_bool("enable_hunger")
+function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
 	for _, callback in pairs(core.registered_on_item_eats) do
 		local result = callback(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		if result then
@@ -472,14 +571,46 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 	end
 	local def = itemstack:get_definition()
 	if itemstack:take_item() ~= nil then
-		user:set_hp(user:get_hp() + hp_change)
+		if enable_hunger then
+			hunger.item_eat(hp_change, user, poison)
+		else
+			user:set_hp(user:get_hp() + hp_change)
+		end
+
+		local pos = user:get_pos()
+		if not core.is_valid_pos(pos) then
+			return itemstack
+		end
 
 		if def and def.sound and def.sound.eat then
 			core.sound_play(def.sound.eat, {
-				pos = user:get_pos(),
-				max_hear_distance = 16
-			}, true)
+				pos = pos,
+				max_hear_distance = 16})
+		else
+			core.sound_play("player_eat", {
+				pos = pos,
+				max_hear_distance = 10,
+				gain = 0.3})
 		end
+
+		local dir = user:get_look_dir()
+		local ppos = {x = pos.x, y = pos.y + 1.3, z = pos.z}
+		core.add_particlespawner({
+			amount = 20,
+			time = 0.1,
+			minpos = ppos,
+			maxpos = ppos,
+			minvel = {x = dir.x - 1, y = 2, z = dir.z - 1},
+			maxvel = {x = dir.x + 1, y = 2, z = dir.z + 1},
+			minacc = {x = 0, y = -5, z = 0},
+			maxacc = {x = 0, y = -9, z = 0},
+			minexptime = 1,
+			maxexptime = 1,
+			minsize = 1,
+			maxsize = 1,
+			vertical = false,
+			texture = def.inventory_image
+		})
 
 		if replace_with_item then
 			if itemstack:is_empty() then
@@ -490,8 +621,7 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 				if inv and inv:room_for_item("main", {name=replace_with_item}) then
 					inv:add_item("main", replace_with_item)
 				else
-					local pos = user:get_pos()
-					pos.y = math.floor(pos.y + 0.5)
+					pos.y = pos.y + 0.5
 					core.add_item(pos, replace_with_item)
 				end
 			end
@@ -500,10 +630,10 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 	return itemstack
 end
 
-function core.item_eat(hp_change, replace_with_item)
+function core.item_eat(hp_change, replace_with_item, poison)
 	return function(itemstack, user, pointed_thing)  -- closure
 		if user then
-			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
+			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
 		end
 	end
 end
@@ -512,7 +642,7 @@ function core.node_punch(pos, node, puncher, pointed_thing)
 	-- Run script hook
 	for _, callback in ipairs(core.registered_on_punchnodes) do
 		-- Copy pos and node because callback can modify them
-		local pos_copy = vector.new(pos)
+		local pos_copy = vnew(pos)
 		local node_copy = {name=node.name, param1=node.param1, param2=node.param2}
 		local pointed_thing_copy = pointed_thing and copy_pointed_thing(pointed_thing) or nil
 		callback(pos_copy, node_copy, puncher, pointed_thing_copy)
@@ -523,7 +653,7 @@ function core.handle_node_drops(pos, drops, digger)
 	-- Add dropped items to object's inventory
 	local inv = digger and digger:get_inventory()
 	local give_item
-	if inv then
+	if (not node_drop or creative_mode) and inv then
 		give_item = function(item)
 			return inv:add_item("main", item)
 		end
@@ -537,12 +667,7 @@ function core.handle_node_drops(pos, drops, digger)
 	for _, dropped_item in pairs(drops) do
 		local left = give_item(dropped_item)
 		if not left:is_empty() then
-			local p = {
-				x = pos.x + math.random()/2-0.25,
-				y = pos.y + math.random()/2-0.25,
-				z = pos.z + math.random()/2-0.25,
-			}
-			core.add_item(p, left)
+			core.item_drop(left, nil, pos)
 		end
 	end
 end
@@ -675,7 +800,7 @@ end
 -- Item definition defaults
 --
 
-local default_stack_max = tonumber(minetest.settings:get("default_stack_max")) or 99
+local default_stack_max = tonumber(minetest.settings:get("default_stack_max")) or 64
 
 core.nodedef_default = {
 	-- Item properties
