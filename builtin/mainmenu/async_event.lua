@@ -1,4 +1,3 @@
-
 core.async_jobs = {}
 
 local function handle_job(jobid, serialized_retval)
@@ -29,4 +28,3 @@ function core.handle_async(func, parameter, callback)
 
 	return true
 end
-

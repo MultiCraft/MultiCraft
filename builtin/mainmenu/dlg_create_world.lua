@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -96,7 +96,10 @@ local function create_world_formspec(dialogdata)
 
 	-- Error out when no games found
 	if #pkgmgr.games == 0 then
-		return "size[12.25,3,true]" ..
+		return "size[12.25,3,false]" ..
+			"bgcolor[#8FB9DE]" ..
+			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;48]" ..
 			"box[0,0;12,2;#ff8800]" ..
 			"textarea[0.3,0;11.7,2;;;"..
 			fgettext("You have no games installed.") .. "\n" ..
@@ -316,7 +319,10 @@ local function create_world_formspec(dialogdata)
 	end
 
 	local retval =
-		"size[12.25,7,true]" ..
+		"size[12.25,7,false]" ..
+		"bgcolor[#8FB9DE]" ..
+		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;48]" ..
 
 		-- Left side
 		"container[0,0]"..
@@ -363,9 +369,7 @@ local function create_world_buttonhandler(this, fields)
 
 		if gameindex ~= nil then
 			if worldname == "" then
-				local random_number = math.random(10000, 99999)
-				local random_world_name = "Unnamed" .. random_number
-				worldname = random_world_name
+				worldname = "World " .. math.random(1000, 9999)
 			end
 
 			core.settings:set("fixed_map_seed", fields["te_seed"])
