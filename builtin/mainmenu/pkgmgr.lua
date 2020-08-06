@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -897,18 +897,43 @@ function pkgmgr.get_game(index)
 end
 
 --------------------------------------------------------------------------------
+local default_game_idx
+function pkgmgr.get_game_no_default(index)
+	if default_game_idx and index >= default_game_idx then
+		index = index + 1
+	end
+	return pkgmgr.get_game(index)
+end
+
+function pkgmgr.create_world_no_default(worldname, gameindex)
+	if default_game_idx and gameindex >= default_game_idx then
+		gameindex = gameindex + 1
+	end
+	return core.create_world(worldname, gameindex)
+end
+
+--------------------------------------------------------------------------------
 function pkgmgr.update_gamelist()
 	pkgmgr.games = core.get_games()
+
+	-- Update default_game_idx
+	for i, game in ipairs(pkgmgr.games) do
+		if game.id == "default" then
+			default_game_idx = i
+			break
+		end
+	end
 end
 
 --------------------------------------------------------------------------------
 function pkgmgr.gamelist()
 	local retval = ""
 	if #pkgmgr.games > 0 then
-		retval = retval .. core.formspec_escape(pkgmgr.games[1].name)
-
-		for i=2,#pkgmgr.games,1 do
-			retval = retval .. "," .. core.formspec_escape(pkgmgr.games[i].name)
+		for i = 1, #pkgmgr.games do
+			if retval ~= "" then retval = retval .. "," end
+			if pkgmgr.games[i].id ~= "default" then
+				retval = retval .. core.formspec_escape(pkgmgr.games[i].name)
+			end
 		end
 	end
 	return retval

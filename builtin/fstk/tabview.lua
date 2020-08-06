@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -56,24 +56,42 @@ local function add_tab(self,tab)
 	end
 end
 
+local function get_bg(tsize, tabname)
+	local bg =
+		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;32]"
+
+	if tabname then
+		bg = bg ..
+			"background[0,0;" .. tsize.width .. "," .. tsize.height .. ";" ..
+			core.formspec_escape(defaulttexturedir ..
+				"bg_" .. tabname .. ".png") .. ";true]"
+	end
+
+	return bg
+end
+
 --------------------------------------------------------------------------------
 local function get_formspec(self)
 	local formspec = ""
 
 	if not self.hidden and (self.parent == nil or not self.parent.hidden) then
+		local name = self.tablist[self.last_tab_index].name
+		local tabname = (name == "local" or name == "online") and name
+				or (name == "local_default" and "local")
 
 		if self.parent == nil then
 			local tsize = self.tablist[self.last_tab_index].tabsize or
 					{width=self.width, height=self.height}
 			formspec = formspec ..
 					string.format("size[%f,%f,%s]",tsize.width,tsize.height,
-						dump(self.fixed_size))
+						dump(self.fixed_size)) .. get_bg(tsize, tabname)
 		end
 		formspec = formspec .. self:tab_header()
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
 					self,
-					self.tablist[self.last_tab_index].name,
+					name,
 					self.tablist[self.last_tab_index].tabdata,
 					self.tablist[self.last_tab_index].tabsize
 					)

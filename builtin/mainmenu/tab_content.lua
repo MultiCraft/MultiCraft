@@ -4,7 +4,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -30,7 +30,13 @@ local function get_formspec(tabview, name, tabdata)
 
 	if packages == nil then
 		packages_raw = {}
-		table.insert_all(packages_raw, pkgmgr.games)
+		local i = 0
+		for _, game in ipairs(pkgmgr.games) do
+			if game.id ~= "default" then
+				i = i + 1
+				packages_raw[i] = game
+			end
+		end
 		table.insert_all(packages_raw, pkgmgr.get_texture_packs())
 		table.insert_all(packages_raw, pkgmgr.global_mods:get_list())
 
@@ -136,7 +142,8 @@ local function get_formspec(tabview, name, tabdata)
 		retval = retval .. "textarea[5.85,2.2;6.35,2.9;;" ..
 			fgettext("Information:") .. ";" .. desc .. "]"
 
-		if core.may_modify_path(selected_pkg.path) then
+		if core.may_modify_path(selected_pkg.path) and not
+			(selected_pkg.type == "game" and selected_pkg.name == "default") then
 			retval = retval ..
 				"button[5.5,4.65;3.25,1;btn_mod_mgr_delete_mod;" ..
 				fgettext("Uninstall Package") .. "]"

@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -95,6 +95,9 @@ local function start_install(calling_dialog, package)
 				elseif package.type == "game" then
 					conf_path = path .. DIR_DELIM .. "game.conf"
 					name_is_title = true
+
+					ui.childlist = {}
+					menudata.init_tabs()
 				elseif package.type == "txp" then
 					conf_path = path .. DIR_DELIM .. "texture_pack.conf"
 				end
@@ -319,7 +322,9 @@ function store.get_formspec(dlgdata)
 	if #store.packages_full > 0 then
 		formspec = {
 			"formspec_version[3]",
-			"size[15.75,9.5]",
+			"size[15.75,9.5;false]",
+			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;32]",
 			"position[0.5,0.55]",
 			"container[0.375,0.375]",
 			"field[0,0;10.225,0.8;search_string;;", core.formspec_escape(search_string), "]",
@@ -351,7 +356,9 @@ function store.get_formspec(dlgdata)
 		end
 	else
 		formspec = {
-			"size[12,7]",
+			"size[12,7;false]",
+			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;32]",
 			"position[0.5,0.55]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
 			"container[0,", H - 0.8 - 0.375, "]",

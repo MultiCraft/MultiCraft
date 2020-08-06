@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -54,38 +54,70 @@ end
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
+local maintab = core.settings:get("maintab_LAST")
+local connect_time = tonumber(core.settings:get("connect_time"))
+
 function ui.update()
 	local formspec = {}
+
+	-- attempt auto restart
+--[[if gamedata ~= nil and gamedata.errormessage ~= nil and
+			core.settings:get_bool("auto_connect") == true and
+			connect_time and connect_time < os.time() - 30 and
+			not gamedata.errormessage:find("Kicked") then
+		if maintab == "local" or maintab == "local_default" then
+			gamedata.singleplayer = true
+			gamedata.selected_world =
+				tonumber(core.settings:get("mainmenu_last_selected_world"))
+		end
+		core.settings:set("connect_time", os.time())
+		gamedata.reconnect_requested = false
+		gamedata.errormessage = nil
+		gamedata.do_reconnect = true
+		core.start()
+		return
+	end]]
 
 	-- handle errors
 	if gamedata ~= nil and gamedata.reconnect_requested then
 		local error_message = core.formspec_escape(
 				gamedata.errormessage or "<none available>")
 		formspec = {
-			"size[14,8]",
-			"real_coordinates[true]",
+			"formspec_version[3]",
+			"size[14,8.25]",
+			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;32]",
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
 				fgettext("The server has requested a reconnect:"), error_message),
 			"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
-			"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]"
+			"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Close") .. "]"
 		}
 	elseif gamedata ~= nil and gamedata.errormessage ~= nil then
 		local error_message = core.formspec_escape(gamedata.errormessage)
 
 		local error_title
-		if string.find(gamedata.errormessage, "ModError") then
+		if gamedata.errormessage:find("ModError") then
 			error_title = fgettext("An error occurred in a Lua script:")
 		else
 			error_title = fgettext("An error occurred:")
 		end
+		local restart_btn = "button[5,6.6;4,1;btn_reconnect_no;" .. fgettext("Close") .. "]"
+		if maintab == "local" or maintab == "local_default" and
+				connect_time and connect_time < os.time() - 30 then
+			restart_btn =
+				"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..
+				"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Close") .. "]"
+		end
 		formspec = {
-			"size[14,8]",
-			"real_coordinates[true]",
+			"formspec_version[3]",
+			"size[14,8.25]",
+			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;32]",
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
 				error_title, error_message),
-			"button[5,6.6;4,1;btn_error_confirm;" .. fgettext("OK") .. "]"
+			restart_btn
 		}
 	else
 		local active_toplevel_ui_elements = 0
@@ -164,12 +196,18 @@ end
 --------------------------------------------------------------------------------
 core.button_handler = function(fields)
 	if fields["btn_reconnect_yes"] then
+		if maintab == "local" or maintab == "local_default" then
+			gamedata.singleplayer = true
+			gamedata.selected_world =
+				tonumber(core.settings:get("mainmenu_last_selected_world"))
+		end
+		core.settings:set("connect_time", os.time())
 		gamedata.reconnect_requested = false
 		gamedata.errormessage = nil
 		gamedata.do_reconnect = true
 		core.start()
 		return
-	elseif fields["btn_reconnect_no"] or fields["btn_error_confirm"] then
+	elseif fields["btn_reconnect_no"] then
 		gamedata.errormessage = nil
 		gamedata.reconnect_requested = false
 		ui.update()

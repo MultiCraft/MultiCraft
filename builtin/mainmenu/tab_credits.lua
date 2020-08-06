@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -16,6 +16,19 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 --------------------------------------------------------------------------------
+
+local multicraft_developers = {
+	"Maksim Gamarnik (MoNTE48) <MoNTE48@mail.ua>",
+	"Bektur Mambetov (ubulem) <berkut87@gmail.com>",
+	"Alexander Zavrin (Ransom.00)",
+	"luk3yx",
+	"An0n3m0us",
+	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
+	"Vitaliy Lobachevskiy (numberZero) <numzer0@yandex.ru>",
+	"sfan5 <sfan5@live.de>",
+	"Stuart Jones (stujones11) <stujones111@gmail.com>",
+	"And other people who helped make the world better!"
+}
 
 local core_developers = {
 	"Perttu Ahola (celeron55) <celeron55@gmail.com>",
@@ -98,15 +111,19 @@ return {
 	name = "credits",
 	caption = fgettext("Credits"),
 	cbf_formspec = function(tabview, name, tabdata)
-		local logofile = defaulttexturedir .. "logo.png"
 		local version = core.get_version()
-		return "image[0.5,1;" .. core.formspec_escape(logofile) .. "]" ..
-			"label[0.5,2.8;" .. version.project .. " " .. version.string .. "]" ..
-			"button[0.5,3;2,2;homepage;minetest.net]" ..
+		return "label[0.1,-0.1;" ..
+			"MultiCraft Open Source Project, ver. " .. version.string .. "\n" ..
+			"Copyright (C) 2014-2021 MultiCraft Development Team\n" ..
+			"Licence: LGPLv3.0+ and CC-BY-SA 4.0, Home page: http://multicraft.world\n" ..
+			"Created and Powered by Minetest Engine, ver. 5.3.0]" ..
+--			"button[10,-0.5;2,2;homepage;multicraft.world]" ..
 			"tablecolumns[color;text]" ..
-			"tableoptions[background=#00000000;highlight=#00000000;border=false]" ..
-			"table[3.5,-0.25;8.5,6.05;list_credits;" ..
-			"#FFFF00," .. fgettext("Core Developers") .. ",," ..
+			"tableoptions[background=#999999;highlight=#00000000;border=true]" ..
+			"table[0,1.6;11.8,3.8;list_credits;" ..
+			"#FFFF00," .. fgettext("MultiCraft Developers") .. ",," ..
+			buildCreditList(multicraft_developers) .. ",,," ..
+			"#FFFF00," .. fgettext("Minetest Developers") .. ",," ..
 			buildCreditList(core_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Active Contributors") .. ",," ..
 			buildCreditList(active_contributors) .. ",,," ..
@@ -118,7 +135,7 @@ return {
 	end,
 	cbf_button_handler = function(this, fields, name, tabdata)
 		if fields.homepage then
-			core.open_url("https://www.minetest.net")
+			core.open_url("http://multicraft.world")
 		end
 	end,
 }

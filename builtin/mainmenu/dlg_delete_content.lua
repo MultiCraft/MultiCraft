@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -19,7 +19,9 @@
 
 local function delete_content_formspec(dialogdata)
 	local retval =
-		"size[11.5,4.5,true]" ..
+		"size[11.5,4.5,false]" ..
+		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;32]" ..
 		"label[2,2;" ..
 		fgettext("Are you sure you want to delete \"$1\"?", dialogdata.content.name) .. "]"..
 		"style[dlg_delete_content_confirm;bgcolor=red]" ..
@@ -44,6 +46,9 @@ local function delete_content_buttonhandler(this, fields)
 
 			if this.data.content.type == "game" then
 				pkgmgr.update_gamelist()
+
+				ui.childlist = {}
+				menudata.init_tabs()
 			else
 				pkgmgr.refresh_globals()
 			end

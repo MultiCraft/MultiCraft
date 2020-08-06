@@ -3,7 +3,7 @@
 --
 --This program is free software; you can redistribute it and/or modify
 --it under the terms of the GNU Lesser General Public License as published by
---the Free Software Foundation; either version 2.1 of the License, or
+--the Free Software Foundation; either version 3.0 of the License, or
 --(at your option) any later version.
 --
 --This program is distributed in the hope that it will be useful,
@@ -69,7 +69,9 @@ local function get_formspec(data)
 	local mod = data.list:get_list()[data.selected_mod] or {name = ""}
 
 	local retval =
-		"size[11.5,7.5,true]" ..
+		"size[11.5,7.5,false]" ..
+		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;32]" ..
 		"label[0.5,0;" .. fgettext("World:") .. "]" ..
 		"label[1.75,0;" .. data.worldspec.name .. "]"
 
