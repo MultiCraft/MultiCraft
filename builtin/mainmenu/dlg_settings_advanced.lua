@@ -1098,7 +1098,7 @@ function create_adv_settings_dlg()
 				return dlg
 end
 
--- Uncomment to generate 'minetest.conf.example' and 'settings_translation_file.cpp'.
+-- Uncomment to generate 'multicraft.conf.example' and 'settings_translation_file.cpp'.
 -- For RUN_IN_PLACE the generated files may appear in the 'bin' folder.
 -- See comment and alternative line at the end of 'generate_from_settingtypes.lua'.
 

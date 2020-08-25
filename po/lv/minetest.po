@@ -1825,10 +1825,10 @@ msgid "Key already in use"
 msgstr "Šis taustiņš jau tiek izmantots"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Taustiņu iestatījumi. (Ja šī izvēlne salūzt, izdzēsiet iestatījumus no "
-"minetest.conf)"
+"multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

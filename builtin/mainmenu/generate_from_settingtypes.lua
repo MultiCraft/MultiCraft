@@ -6,16 +6,16 @@ local sprintf = string.format
 local rep = string.rep
 
 local minetest_example_header = [[
-#    This file contains a list of all available settings and their default value for minetest.conf
+#    This file contains a list of all available settings and their default value for multicraft.conf
 
 #    By default, all the settings are commented and not functional.
 #    Uncomment settings by removing the preceding #.
 
-#    minetest.conf is read by default from:
-#    ../minetest.conf
-#    ../../minetest.conf
+#    multicraft.conf is read by default from:
+#    ../multicraft.conf
+#    ../../multicraft.conf
 #    Any other path can be chosen by passing the path as a parameter
-#    to the program, eg. "minetest.exe --config ../minetest.conf.example".
+#    to the program, eg. "multicraft.exe --config ../multicraft.conf.example".
 
 #    Further documentation:
 #    http://wiki.minetest.net/
@@ -116,12 +116,12 @@ local function create_translation_file()
 	return concat(result, "\n")
 end
 
-local file = assert(io.open("minetest.conf.example", "w"))
+local file = assert(io.open("multicraft.conf.example", "w"))
 file:write(create_minetest_conf_example())
 file:close()
 
 file = assert(io.open("src/settings_translation_file.cpp", "w"))
--- If 'minetest.conf.example' appears in the 'bin' folder, the line below may have to be
+-- If 'multicraft.conf.example' appears in the 'bin' folder, the line below may have to be
 -- used instead. The file will also appear in the 'bin' folder.
 --file = assert(io.open("settings_translation_file.cpp", "w"))
 file:write(create_translation_file())

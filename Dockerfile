@@ -2,21 +2,21 @@ FROM alpine:3.11
 
 ENV MINETEST_GAME_VERSION master
 
-COPY .git /usr/src/minetest/.git
-COPY CMakeLists.txt /usr/src/minetest/CMakeLists.txt
-COPY README.md /usr/src/minetest/README.md
-COPY minetest.conf.example /usr/src/minetest/minetest.conf.example
-COPY builtin /usr/src/minetest/builtin
-COPY cmake /usr/src/minetest/cmake
-COPY doc /usr/src/minetest/doc
-COPY fonts /usr/src/minetest/fonts
-COPY lib /usr/src/minetest/lib
-COPY misc /usr/src/minetest/misc
-COPY po /usr/src/minetest/po
-COPY src /usr/src/minetest/src
-COPY textures /usr/src/minetest/textures
+COPY .git /usr/src/multicraft/.git
+COPY CMakeLists.txt /usr/src/multicraft/CMakeLists.txt
+COPY README.md /usr/src/multicraft/README.md
+COPY multicraft.conf.example /usr/src/multicraft/multicraft.conf.example
+COPY builtin /usr/src/multicraft/builtin
+COPY cmake /usr/src/multicraft/cmake
+COPY doc /usr/src/multicraft/doc
+COPY fonts /usr/src/multicraft/fonts
+COPY lib /usr/src/multicraft/lib
+COPY misc /usr/src/multicraft/misc
+COPY po /usr/src/multicraft/po
+COPY src /usr/src/multicraft/src
+COPY textures /usr/src/multicraft/textures
 
-WORKDIR /usr/src/minetest
+WORKDIR /usr/src/multicraft
 
 RUN apk add --no-cache git build-base irrlicht-dev cmake bzip2-dev libpng-dev \
 		jpeg-dev libxxf86vm-dev mesa-dev sqlite-dev libogg-dev \
@@ -36,7 +36,7 @@ RUN git clone --recursive https://github.com/jupp0r/prometheus-cpp/ && \
 	make -j2 && \
 	make install
 
-WORKDIR /usr/src/minetest
+WORKDIR /usr/src/multicraft
 RUN mkdir build && \
 	cd build && \
 	cmake .. \
@@ -52,17 +52,17 @@ RUN mkdir build && \
 FROM alpine:3.11
 
 RUN apk add --no-cache sqlite-libs curl gmp libstdc++ libgcc libpq && \
-	adduser -D minetest --uid 30000 -h /var/lib/minetest && \
-	chown -R minetest:minetest /var/lib/minetest
+	adduser -D multicraft --uid 30000 -h /var/lib/multicraft && \
+	chown -R multicraft:multicraft /var/lib/multicraft
 
-WORKDIR /var/lib/minetest
+WORKDIR /var/lib/multicraft
 
-COPY --from=0 /usr/local/share/minetest /usr/local/share/minetest
-COPY --from=0 /usr/local/bin/minetestserver /usr/local/bin/minetestserver
-COPY --from=0 /usr/local/share/doc/minetest/minetest.conf.example /etc/minetest/minetest.conf
+COPY --from=0 /usr/local/share/multicraft /usr/local/share/multicraft
+COPY --from=0 /usr/local/bin/multicraftserver /usr/local/bin/multicraftserver
+COPY --from=0 /usr/local/share/doc/multicraft/multicraft.conf.example /etc/multicraft/multicraft.conf
 
-USER minetest:minetest
+USER multicraft:multicraft
 
 EXPOSE 30000/udp 30000/tcp
 
-CMD ["/usr/local/bin/minetestserver", "--config", "/etc/minetest/minetest.conf"]
+CMD ["/usr/local/bin/multicraftserver", "--config", "/etc/multicraft/multicraft.conf"]

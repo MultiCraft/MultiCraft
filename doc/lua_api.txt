@@ -79,7 +79,7 @@ The game directory can contain the following files:
       e.g. `disallowed_mapgen_settings = mgv5_spflags`
       These settings are hidden for this game in the world creation
       dialog and game start menu.
-* `minetest.conf`:
+* `multicraft.conf`:
   Used to set default settings when running this game.
 * `settingtypes.txt`:
   In the same format as the one in builtin.
@@ -4042,7 +4042,7 @@ Callbacks:
 * `on_step(self, dtime)`
     * Called on every server tick, after movement and collision processing.
       `dtime` is usually 0.1 seconds, as per the `dedicated_server_step` setting
-      in `minetest.conf`.
+      in `multicraft.conf`.
 * `on_punch(self, puncher, time_from_last_punch, tool_capabilities, dir, damage)`
     * Called when somebody punches the object.
     * Note that you probably want to handle most punches using the automatic
@@ -4363,7 +4363,7 @@ Call these functions only at load time!
     * If it is a description, the priv will be granted to singleplayer and admin
       by default.
     * To allow players with `basic_privs` to grant, see the `basic_privs`
-      minetest.conf setting.
+      multicraft.conf setting.
 * `minetest.register_authentication_handler(authentication handler definition)`
     * Registers an auth handler that overrides the builtin one.
     * This function can be called by a single mod once only.
@@ -4565,7 +4565,7 @@ Setting-related
 ---------------
 
 * `minetest.settings`: Settings object containing all of the settings from the
-  main config file (`minetest.conf`).
+  main config file (`multicraft.conf`).
 * `minetest.setting_get_pos(name)`: Loads a setting from the main settings and
   parses it as a position (in the format `(1,2,3)`). Returns a position or nil.
 
@@ -4794,14 +4794,14 @@ Environment access
     * `flags` contains a comma-delimited string of flags to set, or if the
       prefix `"no"` is attached, clears instead.
     * `flags` is in the same format and has the same options as `mg_flags` in
-      `minetest.conf`.
+      `multicraft.conf`.
 * `minetest.get_mapgen_setting(name)`
     * Gets the *active* mapgen setting (or nil if none exists) in string
       format with the following order of precedence:
         1) Settings loaded from map_meta.txt or overrides set during mod
            execution.
         2) Settings set by mods without a metafile override
-        3) Settings explicitly set in the user config file, minetest.conf
+        3) Settings explicitly set in the user config file, multicraft.conf
         4) Settings set as the user config default
 * `minetest.get_mapgen_setting_noiseparams(name)`
     * Same as above, but returns the value as a NoiseParams table if the
@@ -6442,7 +6442,7 @@ secure random device cannot be found on the system.
 `Settings`
 ----------
 
-An interface to read config files in the format of `minetest.conf`.
+An interface to read config files in the format of `multicraft.conf`.
 
 It can be created via `Settings(filename)`.
 

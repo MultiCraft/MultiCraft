@@ -1819,7 +1819,7 @@ msgid "Key already in use"
 msgstr "La tecla ya se está utilizando"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Combinaciones de teclas. (Si este menú da error, elimina líneas en minetest."
 "conf)"

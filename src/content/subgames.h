@@ -53,8 +53,9 @@ struct SubgameSpec
 	bool isValid() const { return (!id.empty() && !path.empty()); }
 };
 
-// minetest.conf
-bool getGameMinetestConfig(const std::string &game_path, Settings &conf);
+// minetest.conf and multicraft.conf
+bool getGameMinetestConfig(
+		const std::string &game_path, Settings &conf, const std::string &file);
 
 SubgameSpec findSubgame(const std::string &id);
 SubgameSpec findWorldSubgame(const std::string &world_path);

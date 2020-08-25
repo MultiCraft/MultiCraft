@@ -1890,10 +1890,10 @@ msgid "Key already in use"
 msgstr "Дугме се већ користи"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Подешавање контрола.(Ако овај мени нешто поквари, обришите ствари из "
-"minetest.conf)"
+"multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

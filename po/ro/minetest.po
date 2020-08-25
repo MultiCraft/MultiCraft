@@ -1825,9 +1825,9 @@ msgid "Key already in use"
 msgstr "Tastă deja folosită"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Keybindings. (Dacă acest meniu apare, șterge lucrurile din minetest.conf)"
+"Keybindings. (Dacă acest meniu apare, șterge lucrurile din multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

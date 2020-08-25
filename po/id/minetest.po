@@ -1813,10 +1813,10 @@ msgid "Key already in use"
 msgstr "Tombol telah terpakai"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Pengaturan tombol. (Jika menu ini kacau, hapus pengaturan kontrol dari "
-"minetest.conf)"
+"multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

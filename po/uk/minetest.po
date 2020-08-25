@@ -1816,7 +1816,7 @@ msgid "Key already in use"
 msgstr "Клавіша вже використовується"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Комбінації клавіш. (Якщо це меню зламалося, видаліть налаштування з minetest."
 "conf)"

@@ -31,9 +31,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/tile.h" // getImagePath
 #endif
 
-bool getGameMinetestConfig(const std::string &game_path, Settings &conf)
+bool getGameMinetestConfig(
+		const std::string &game_path, Settings &conf, const std::string &file)
 {
-	std::string conf_path = game_path + DIR_DELIM + "minetest.conf";
+	std::string conf_path = game_path + DIR_DELIM + file;
 	return conf.readConfigFile(conf_path.c_str());
 }
 
@@ -297,7 +298,9 @@ bool loadGameConfAndInitWorld(const std::string &path, const SubgameSpec &gamesp
 	g_settings->clearDefaults();
 	set_default_settings(g_settings);
 	Settings game_defaults;
-	getGameMinetestConfig(gamespec.path, game_defaults);
+	getGameMinetestConfig(gamespec.path, game_defaults, "minetest.conf");
+	g_settings->overrideDefaults(&game_defaults);
+	getGameMinetestConfig(gamespec.path, game_defaults, "multicraft.conf");
 	g_settings->overrideDefaults(&game_defaults);
 
 	infostream << "Initializing world at " << path << std::endl;

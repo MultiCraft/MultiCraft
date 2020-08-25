@@ -1814,9 +1814,9 @@ msgid "Key already in use"
 msgstr "Tasto già usato"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from minetest.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Associamenti tasti. (Se questo menu si incasina, togli roba da minetest.conf)"
+"Associamenti tasti. (Se questo menu si incasina, togli roba da multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"
