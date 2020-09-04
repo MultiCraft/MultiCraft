@@ -1,16 +1,18 @@
 apply plugin: 'com.android.library'
-import org.ajoberstar.grgit.Grgit
+apply plugin: 'de.undercouch.download'
 
 android {
 	compileSdkVersion 29
-	buildToolsVersion '29.0.3'
-	ndkVersion '21.1.6352462'
+	buildToolsVersion '30.0.3'
+	ndkVersion '22.0.7026061'
 	defaultConfig {
 		minSdkVersion 16
+		//noinspection OldTargetApi
 		targetSdkVersion 29
 		externalNativeBuild {
 			ndkBuild {
-				arguments '-j8',
+				arguments '-j' + Runtime.getRuntime().availableProcessors(),
+						"--output-sync=none",
 						"versionMajor=${versionMajor}",
 						"versionMinor=${versionMinor}",
 						"versionPatch=${versionPatch}",
@@ -45,15 +47,49 @@ android {
 	}
 }
 
-task cloneGitRepo() {
-	def destination = file('deps')
-	if(!destination.exists()) {
-		def grgit = Grgit.clone(
-				dir: destination,
-				uri: 'https://github.com/minetest/minetest_android_deps_binaries'
-		)
-		grgit.close()
+// get precompiled deps
+task downloadDeps(type: Download) {
+	src 'https://github.com/MultiCraft/deps/archive/master.zip'
+	dest new File(buildDir, 'deps.zip')
+	overwrite false
+}
+
+task getDeps(dependsOn: downloadDeps, type: Copy) {
+	def deps = file('deps')
+	def f = file("$buildDir/deps-master")
+
+	if (!f.exists()) {
+		from zipTree(downloadDeps.dest)
+		into buildDir
+	}
+
+	doLast {
+		file(f).renameTo(file(deps))
 	}
 }
 
-preBuild.dependsOn cloneGitRepo
+// get libiconv
+task downloadIconv(dependsOn: getDeps, type: Download) {
+	src 'https://github.com/MoNTE48/ndk_iconv/archive/mc.zip'
+	dest new File(buildDir, 'iconv.zip')
+	overwrite false
+}
+
+task getIconv(dependsOn: downloadIconv, type: Copy) {
+	def iconv = file('deps/Android/ndk_iconv')
+	def f = file("$buildDir/ndk_iconv-mc")
+
+	if (!iconv.exists() && !f.exists()) {
+		from zipTree(downloadIconv.dest)
+		into buildDir
+	}
+
+	doLast {
+		if (!iconv.exists()) {
+			file(f).renameTo(file(iconv))
+		}
+	}
+}
+
+preBuild.dependsOn getDeps
+preBuild.dependsOn getIconv

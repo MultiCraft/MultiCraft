@@ -1,18 +1,23 @@
 apply plugin: 'com.android.application'
 android {
 	compileSdkVersion 29
-	buildToolsVersion '29.0.3'
-	ndkVersion '21.1.6352462'
+	buildToolsVersion '30.0.3'
+	ndkVersion '22.0.7026061'
 	defaultConfig {
-		applicationId 'net.minetest.minetest'
+		applicationId 'com.multicraft.game'
 		minSdkVersion 16
+		//noinspection OldTargetApi
 		targetSdkVersion 29
 		versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 		versionCode project.versionCode
+		multiDexEnabled true
 	}
 
+	// load properties
 	Properties props = new Properties()
-	props.load(new FileInputStream(file('../local.properties')))
+	def propfile = file('../local.properties')
+	if (propfile.exists())
+		props.load(new FileInputStream(propfile))
 
 	if (props.getProperty('keystore') != null) {
 		signingConfigs {
@@ -26,8 +31,13 @@ android {
 
 		buildTypes {
 			release {
+				shrinkResources true
 				minifyEnabled true
 				signingConfig signingConfigs.release
+			}
+			debug {
+				debuggable true
+				minifyEnabled false
 			}
 		}
 	}
@@ -47,55 +57,75 @@ android {
 	}
 }
 
-task prepareAssets() {
-	def assetsFolder = "build/assets"
+import com.android.build.OutputFile
+import org.apache.tools.ant.taskdefs.condition.Os
+
+task prepareAssetsFiles() {
+	def assetsFolder = "build/assets/Files"
 	def projRoot = "../../.."
-	def gameToCopy = "minetest_game"
 
 	copy {
-		from "${projRoot}/minetest.conf.example", "${projRoot}/README.md" into assetsFolder
+		from "${projRoot}/builtin" into "${assetsFolder}/builtin" exclude '*.txt'
 	}
 	copy {
-		from "${projRoot}/doc/lgpl-2.1.txt" into "${assetsFolder}"
-	}
-	copy {
-		from "${projRoot}/builtin" into "${assetsFolder}/builtin"
-	}
-	/*copy {
-		// ToDo: fix Minetest shaders that currently don't work with OpenGL ES
 		from "${projRoot}/client/shaders" into "${assetsFolder}/client/shaders"
-	}*/
+	}
 	copy {
 		from "../native/deps/Android/Irrlicht/shaders" into "${assetsFolder}/client/shaders/Irrlicht"
 	}
 	copy {
-		from "${projRoot}/fonts" include "*.ttf" into "${assetsFolder}/fonts"
+		from "${projRoot}/fonts/Retron2000.ttf" into "${assetsFolder}/fonts"
+	}
+	fileTree("${projRoot}/po").include("**/*.po").forEach { poFile ->
+		def moPath = "${assetsFolder}/locale/${poFile.parentFile.name}/LC_MESSAGES/"
+		file(moPath).mkdirs()
+		if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
+			exec {
+				commandLine 'msgfmt', '-o', "${moPath}/minetest.mo", poFile
+			}
+		}
 	}
 	copy {
-		from "${projRoot}/games/${gameToCopy}" into "${assetsFolder}/games/${gameToCopy}"
-	}
-	/*copy {
-		// ToDo: fix broken locales
-		from "${projRoot}/po" into "${assetsFolder}/po"
-	}*/
-	copy {
-		from "${projRoot}/textures" into "${assetsFolder}/textures"
+		from "${projRoot}/textures" into "${assetsFolder}/textures" exclude '*.txt'
 	}
 
-	file("${assetsFolder}/.nomedia").text = "";
+	task zipAssetsFiles(type: Zip) {
+		archiveFileName = "Files.zip"
+		destinationDirectory = file("src/main/assets/data")
 
-	task zipAssets(type: Zip) {
-		archiveName "Minetest.zip"
 		from "${assetsFolder}"
-		destinationDir file("src/main/assets")
 	}
 }
 
-preBuild.dependsOn zipAssets
+task prepareAssetsGames() {
+	def assetsFolder = "build/assets/games"
+	def projRoot = "../../.."
+	def gameToCopy = "default"
+
+	copy {
+		from "${projRoot}/games/${gameToCopy}" into "${assetsFolder}/games/${gameToCopy}"
+	}
+
+	task zipAssetsGames(type: Zip) {
+		archiveFileName = "games.zip"
+		destinationDirectory = file("src/main/assets/data")
+		from "${assetsFolder}"
+	}
+}
+
+task zipAssetsWorlds(type: Zip) {
+	archiveFileName = "worlds.zip"
+	destinationDirectory = file("src/main/assets/data")
+	from("../../worlds") {
+		into "worlds"
+	}
+}
+
+preBuild.dependsOn zipAssetsFiles
+preBuild.dependsOn zipAssetsGames
+preBuild.dependsOn zipAssetsWorlds
 
 // Map for the version code that gives each ABI a value.
-import com.android.build.OutputFile
-
 def abiCodes = ['armeabi-v7a': 0, 'arm64-v8a': 1]
 android.applicationVariants.all { variant ->
 	variant.outputs.each {
@@ -106,6 +136,23 @@ android.applicationVariants.all { variant ->
 }
 
 dependencies {
+	/* MultiCraft Native */
 	implementation project(':native')
-	implementation 'androidx.appcompat:appcompat:1.1.0'
+
+	/* Third-party libraries */
+	implementation 'androidx.multidex:multidex:2.0.1'
+	implementation 'androidx.preference:preference:1.1.1'
+	implementation 'com.google.android.play:core:1.9.1'
+	implementation 'io.reactivex.rxjava2:rxjava:2.2.20'
+	implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+	//noinspection GradleDependency
+	implementation 'com.squareup.okhttp3:okhttp:3.12.12'
+	//noinspection GradleDependency
+	implementation 'commons-io:commons-io:2.5'
+	implementation 'gun0912.ted:tedpermission-rx2:2.2.3'
+	implementation 'com.google.code.gson:gson:2.8.6'
+
+	/* Analytics libraries */
+	//noinspection GradleDynamicVersion
+	/*implementation 'com.bugsnag:bugsnag-android-core:5.+'*/
 }
