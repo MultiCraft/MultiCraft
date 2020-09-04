@@ -335,6 +335,20 @@ int ModApiMainMenu::l_get_favorites(lua_State *L)
 			lua_settable(L, top_lvl2);
 		}
 
+		if (!server["server_id"].asString().empty()) {
+			lua_pushstring(L,"server_id");
+			std::string topush = server["server_id"].asString();
+			lua_pushstring(L, topush.c_str());
+			lua_settable(L, top_lvl2);
+		}
+
+		if (!server["mobile_friendly"].asString().empty()) {
+			lua_pushstring(L,"mobile_friendly");
+			std::string topush = server["mobile_friendly"].asString();
+			lua_pushstring(L, topush.c_str());
+			lua_settable(L, top_lvl2);
+		}
+
 		if (!server["proto_min"].asString().empty()) {
 			lua_pushstring(L, "proto_min");
 			lua_pushinteger(L, server["proto_min"].asInt());
@@ -399,10 +413,10 @@ int ModApiMainMenu::l_get_favorites(lua_State *L)
 			lua_settable(L, top_lvl2);
 		}
 
-		if (server.isMember("ping")) {
-			float ping = server["ping"].asFloat();
-			lua_pushstring(L, "ping");
-			lua_pushnumber(L, ping);
+		if (server.isMember("lag")) {
+			float lag = server["lag"].asFloat();
+			lua_pushstring(L, "lag");
+			lua_pushnumber(L, lag);
 			lua_settable(L, top_lvl2);
 		}
 
@@ -710,6 +724,16 @@ int ModApiMainMenu::l_get_gamepath(lua_State *L)
 	std::string gamepath = fs::RemoveRelativePathComponents(
 		porting::path_user + DIR_DELIM + "games" + DIR_DELIM);
 	lua_pushstring(L, gamepath.c_str());
+	return 1;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_get_serverlistpath(lua_State *L)
+{
+	std::string modpath = fs::RemoveRelativePathComponents(
+		porting::path_user + DIR_DELIM + "client" + DIR_DELIM +
+		"serverlist" + DIR_DELIM);
+	lua_pushstring(L, modpath.c_str());
 	return 1;
 }
 
@@ -1116,6 +1140,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(get_modpath);
 	API_FCT(get_clientmodpath);
 	API_FCT(get_gamepath);
+	API_FCT(get_serverlistpath);
 	API_FCT(get_texturepath);
 	API_FCT(get_texturepath_share);
 	API_FCT(get_cache_path);
@@ -1147,6 +1172,7 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(get_modpath);
 	API_FCT(get_clientmodpath);
 	API_FCT(get_gamepath);
+	API_FCT(get_serverlistpath);
 	API_FCT(get_texturepath);
 	API_FCT(get_texturepath_share);
 	API_FCT(get_cache_path);

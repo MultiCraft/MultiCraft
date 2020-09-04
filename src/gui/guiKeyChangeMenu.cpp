@@ -33,6 +33,7 @@
 #include <algorithm>
 
 #include "mainmenumanager.h"  // for g_gamecallback
+#include "client/renderingengine.h"
 
 #define KMaxButtonPerColumns 12
 
@@ -119,7 +120,11 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 {
 	removeChildren();
 
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+#else
 	const float s = m_gui_scale;
+#endif
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 835 * s / 2,
 		screensize.Y / 2 - 430 * s / 2,

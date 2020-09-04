@@ -103,7 +103,7 @@ Hud::Hud(gui::IGUIEnvironment *guienv, Client *client, LocalPlayer *player,
 
 	if (m_mode == HIGHLIGHT_BOX) {
 		m_selection_material.Thickness =
-			rangelim(g_settings->getS16("selectionbox_width"), 1, 5);
+			rangelim(g_settings->getS16("selectionbox_width"), 1, 6);
 	} else if (m_mode == HIGHLIGHT_HALO) {
 		m_selection_material.setTexture(0, tsrc->getTextureForMesh("halo.png"));
 		m_selection_material.setFlag(video::EMF_BACK_FACE_CULLING, true);
@@ -332,7 +332,7 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 										 (e->number >> 0)  & 0xFF);
 				std::wstring text = unescape_translate(utf8_to_wide(e->text));
 				core::dimension2d<u32> textsize = textfont->getDimension(text.c_str());
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 				// The text size on Android is not proportional with the actual scaling
 				irr::gui::IGUIFont *font_scaled = font_size <= 3 ?
 					textfont : g_fontengine->getFont(font_size - 3);
@@ -345,7 +345,7 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				                     text_height * e->scale.Y * m_scale_factor);
 				v2s32 offs(e->offset.X * m_scale_factor,
 				           e->offset.Y * m_scale_factor);
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 				if (e->offset.X < -20)
 					font_scaled->draw(text.c_str(), size + pos + offset + offs, color);
 				else
@@ -464,6 +464,8 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 
 	p += offset;
 
+	p.Y -= g_settings->getU16("hud_move_upwards");
+
 	v2s32 steppos;
 	switch (drawdir) {
 		case HUD_DIR_RIGHT_LEFT:
@@ -575,7 +577,8 @@ void Hud::drawHotbar(u16 playeritem) {
 
 	s32 hotbar_itemcount = player->hud_hotbar_itemcount;
 	s32 width = hotbar_itemcount * (m_hotbar_imagesize + m_padding * 2);
-	v2s32 pos = centerlowerpos - v2s32(width / 2, m_hotbar_imagesize + m_padding * 3);
+	v2s32 pos = centerlowerpos - v2s32(width / 2, m_hotbar_imagesize + m_padding * 2.4);
+	pos.Y -= g_settings->getU16("hud_move_upwards");
 
 	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
 	if ((float) width / (float) window_size.X <=

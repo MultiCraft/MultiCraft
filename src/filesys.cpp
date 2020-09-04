@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "log.h"
 #include "config.h"
 #include "porting.h"
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 #include "settings.h" // For g_settings
 #endif
 
@@ -365,7 +365,7 @@ std::string TempPath()
 		compatible with lua's os.tmpname which under the default
 		configuration hardcodes mkstemp("/tmp/lua_XXXXXX").
 	*/
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	return g_settings->get("TMPFolder");
 #else
 	return DIR_DELIM "tmp";

@@ -198,6 +198,8 @@ if(ENABLE_LEVELDB)
 	endif()
 endif(ENABLE_LEVELDB)
 
+option(ENABLE_SQLITE "Enable SQLite backend" TRUE)
+set(USE_SQLITE TRUE)
 
 OPTION(ENABLE_REDIS "Enable Redis backend" TRUE)
 set(USE_REDIS FALSE)

@@ -27,6 +27,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "porting.h"
 #include "gettext.h"
+#include "client/renderingengine.h"
 
 const int ID_oldPassword = 256;
 const int ID_newPassword1 = 257;
@@ -79,7 +80,13 @@ void GUIPasswordChange::regenerateGui(v2u32 screensize)
 	/*
 		Calculate new sizes and positions
 	*/
+#if defined(__ANDROID__) || defined(__IOS__)
+	const float s = m_gui_scale * porting::getDisplayDensity() / 2;
+#elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+#else
 	const float s = m_gui_scale;
+#endif
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 580 * s / 2,
 		screensize.Y / 2 - 300 * s / 2,
@@ -183,7 +190,7 @@ void GUIPasswordChange::drawMenu()
 	driver->draw2DRectangle(bgcolor, AbsoluteRect, &AbsoluteClippingRect);
 
 	gui::IGUIElement::draw();
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	getAndroidUIInput();
 #endif
 }
@@ -283,11 +290,15 @@ std::string GUIPasswordChange::getNameByID(s32 id)
 	return "";
 }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 bool GUIPasswordChange::getAndroidUIInput()
 {
 	if (!hasAndroidUIInput())
 		return false;
+
+	// still waiting
+	if (porting::getInputDialogState() == -1)
+		return true;
 
 	gui::IGUIElement *e = nullptr;
 	if (m_jni_field_name == "old_password")
@@ -296,12 +307,13 @@ bool GUIPasswordChange::getAndroidUIInput()
 		e = getElementFromId(ID_newPassword1);
 	else if (m_jni_field_name == "new_password_2")
 		e = getElementFromId(ID_newPassword2);
-
-	if (e) {
-		std::string text = porting::getInputDialogValue();
-		e->setText(utf8_to_wide(text).c_str());
-	}
 	m_jni_field_name.clear();
+
+	if (!e || e->getType() != irr::gui::EGUIET_EDIT_BOX)
+		return false;
+
+	std::string text = porting::getInputDialogValue();
+	e->setText(utf8_to_wide(text).c_str());
 	return false;
 }
 #endif

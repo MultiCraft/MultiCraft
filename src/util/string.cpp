@@ -79,7 +79,7 @@ bool convert(const char *to, const char *from, char *outbuf,
 	return true;
 }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 // Android need manual caring to support the full character set possible with wchar_t
 const char *DEFAULT_ENCODING = "UTF-32LE";
 #else
@@ -97,7 +97,7 @@ std::wstring utf8_to_wide(const std::string &input)
 	char *outbuf = new char[outbuf_size];
 	memset(outbuf, 0, outbuf_size);
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 	// Android need manual caring to support the full character set possible with wchar_t
 	SANITY_CHECK(sizeof(wchar_t) == 4);
 #endif
@@ -209,7 +209,7 @@ wchar_t *narrow_to_wide_c(const char *str)
 }
 
 std::wstring narrow_to_wide(const std::string &mbs) {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 	return utf8_to_wide(mbs);
 #else
 	size_t wcl = mbs.size();
@@ -225,7 +225,7 @@ std::wstring narrow_to_wide(const std::string &mbs) {
 
 std::string wide_to_narrow(const std::wstring &wcs)
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 	return wide_to_utf8(wcs);
 #else
 	size_t mbl = wcs.size() * 4;

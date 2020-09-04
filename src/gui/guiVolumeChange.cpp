@@ -30,6 +30,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "settings.h"
 
 #include "gettext.h"
+#include "client/renderingengine.h"
 
 const int ID_soundText = 263;
 const int ID_soundExitButton = 264;
@@ -74,7 +75,11 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 	/*
 		Calculate new sizes and positions
 	*/
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+#else
 	const float s = m_gui_scale;
+#endif
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 380 * s / 2,
 		screensize.Y / 2 - 200 * s / 2,

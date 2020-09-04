@@ -38,7 +38,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if USE_SOUND
 	#include "sound_openal.h"
 #endif
-#ifdef __ANDROID__
+#ifdef __IOS__
+namespace irr {
+	class CIrrDeviceiOS : public IrrlichtDevice {
+	public:
+		void *getViewController();
+	};
+}
+#endif
+#if defined(__ANDROID__) || defined(__IOS__)
 	#include "porting.h"
 #endif
 
@@ -106,6 +114,8 @@ bool ClientLauncher::run(GameParams &game_params, const Settings &cmd_args)
 
 	RenderingEngine::get_instance()->setupTopLevelWindow(PROJECT_NAME_C);
 
+	RenderingEngine::get_raw_device()->getLogger()->setLogLevel(irr::ELL_INFORMATION);
+
 	/*
 		This changes the minimum allowed number of vertices in a VBO.
 		Default is 500.
@@ -130,7 +140,7 @@ bool ClientLauncher::run(GameParams &game_params, const Settings &cmd_args)
 	skin->setColor(gui::EGDC_3D_SHADOW, video::SColor(255, 0, 0, 0));
 	skin->setColor(gui::EGDC_HIGH_LIGHT, video::SColor(255, 70, 120, 50));
 	skin->setColor(gui::EGDC_HIGH_LIGHT_TEXT, video::SColor(255, 255, 255, 255));
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	float density = porting::getDisplayDensity();
 	skin->setSize(gui::EGDS_CHECK_BOX_WIDTH, (s32)(17.0f * density));
 	skin->setSize(gui::EGDS_SCROLLBAR_SIZE, (s32)(14.0f * density));
@@ -277,6 +287,10 @@ bool ClientLauncher::run(GameParams &game_params, const Settings &cmd_args)
 			delete g_touchscreengui;
 			g_touchscreengui = NULL;
 			receiver->m_touchscreengui = NULL;
+#endif
+
+#if defined(__ANDROID__) || defined(__IOS__)
+			porting::notifyExitGame();
 #endif
 
 		} //try
@@ -469,11 +483,11 @@ bool ClientLauncher::launch_game(std::string &error_message,
 	// If using simple singleplayer mode, override
 	if (simple_singleplayer_mode) {
 		assert(!skip_main_menu);
-		current_playername = "singleplayer";
+		current_playername = "Player";
 		current_password = "";
 		current_address = "";
 		current_port = myrand_range(49152, 65535);
-	} else {
+	} else if (menudata.servername != "\x01TEMP\x01") {
 		g_settings->set("name", playername);
 		if (!address.empty()) {
 			ServerListSpec server;
@@ -552,7 +566,7 @@ void ClientLauncher::main_menu(MainMenuData *menudata)
 	infostream << "Waited for other menus" << std::endl;
 
 	// Cursor can be non-visible when coming from the game
-#ifndef ANDROID
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	RenderingEngine::get_raw_device()->getCursorControl()->setVisible(true);
 #endif
 

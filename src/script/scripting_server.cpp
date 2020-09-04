@@ -118,7 +118,9 @@ void ServerScripting::InitializeModApi(lua_State *L, int top)
 	ModApiItemMod::Initialize(L, top);
 	ModApiMapgen::Initialize(L, top);
 	ModApiParticles::Initialize(L, top);
+#if USE_SQLITE
 	ModApiRollback::Initialize(L, top);
+#endif
 	ModApiServer::Initialize(L, top);
 	ModApiUtil::Initialize(L, top);
 	ModApiHttp::Initialize(L, top);

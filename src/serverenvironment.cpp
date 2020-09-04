@@ -40,7 +40,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gameparams.h"
 #include "database/database-dummy.h"
 #include "database/database-files.h"
+#if USE_SQLITE
 #include "database/database-sqlite3.h"
+#endif
 #if USE_POSTGRESQL
 #include "database/database-postgresql.h"
 #endif
@@ -405,8 +407,13 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 	std::string conf_path = path_world + DIR_DELIM + "world.mt";
 	Settings conf;
 
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	std::string player_backend_name = "sqlite3";
 	std::string auth_backend_name = "sqlite3";
+#else
+	std::string player_backend_name = "leveldb";
+	std::string auth_backend_name = "leveldb";
+#endif
 
 	bool succeeded = conf.readConfigFile(conf_path.c_str());
 
@@ -444,7 +451,7 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 		}
 	}
 
-	if (player_backend_name == "files") {
+	/*if (player_backend_name == "files") {
 		warningstream << "/!\\ You are using old player file backend. "
 				<< "This backend is deprecated and will be removed in a future release /!\\"
 				<< std::endl << "Switching to SQLite3 or PostgreSQL is advised, "
@@ -454,9 +461,9 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 	if (auth_backend_name == "files") {
 		warningstream << "/!\\ You are using old auth file backend. "
 				<< "This backend is deprecated and will be removed in a future release /!\\"
-				<< std::endl << "Switching to SQLite3 is advised, "
+				<< std::endl << "Switching to LevelDB or SQLite3 is advised, "
 				<< "please read http://wiki.minetest.net/Database_backends." << std::endl;
-	}
+	}*/
 
 	m_player_database = openPlayerDatabase(player_backend_name, path_world, conf);
 	m_auth_database = openAuthDatabase(auth_backend_name, path_world, conf);
@@ -692,7 +699,7 @@ void ServerEnvironment::loadMeta()
 
 	setTimeOfDay(args.exists("time_of_day") ?
 		// set day to early morning by default
-		args.getU64("time_of_day") : 5250);
+		args.getU64("time_of_day") : 6000);
 
 	m_last_clear_objects_time = args.exists("last_clear_objects_time") ?
 		// If missing, do as if clearObjects was never called
@@ -1818,7 +1825,7 @@ void ServerEnvironment::activateObjects(MapBlock *block, u32 dtime_s)
 		<<" objects)"<<std::endl;
 	bool large_amount = (block->m_static_objects.m_stored.size() > g_settings->getU16("max_objects_per_block"));
 	if (large_amount) {
-		errorstream<<"suspiciously large amount of objects detected: "
+		warningstream<<"suspiciously large amount of objects detected: "
 			<<block->m_static_objects.m_stored.size()<<" in "
 			<<PP(block->getPos())
 			<<"; removing all of them."<<std::endl;
@@ -2078,9 +2085,10 @@ bool ServerEnvironment::saveStaticToBlock(
 PlayerDatabase *ServerEnvironment::openPlayerDatabase(const std::string &name,
 		const std::string &savedir, const Settings &conf)
 {
-
+#if USE_SQLITE
 	if (name == "sqlite3")
 		return new PlayerDatabaseSQLite3(savedir);
+#endif
 
 	if (name == "dummy")
 		return new Database_Dummy();
@@ -2101,7 +2109,7 @@ PlayerDatabase *ServerEnvironment::openPlayerDatabase(const std::string &name,
 	if (name == "files")
 		return new PlayerDatabaseFiles(savedir + DIR_DELIM + "players");
 
-	throw BaseException(std::string("Database backend ") + name + " not supported.");
+	throw ModError(std::string("Database backend ") + name + " not supported.");
 }
 
 bool ServerEnvironment::migratePlayersDatabase(const GameParams &game_params,
@@ -2194,8 +2202,10 @@ bool ServerEnvironment::migratePlayersDatabase(const GameParams &game_params,
 AuthDatabase *ServerEnvironment::openAuthDatabase(
 		const std::string &name, const std::string &savedir, const Settings &conf)
 {
+#if USE_SQLITE
 	if (name == "sqlite3")
 		return new AuthDatabaseSQLite3(savedir);
+#endif
 
 #if USE_POSTGRESQL
 	if (name == "postgresql") {
@@ -2213,7 +2223,7 @@ AuthDatabase *ServerEnvironment::openAuthDatabase(
 		return new AuthDatabaseLevelDB(savedir);
 #endif
 
-	throw BaseException(std::string("Database backend ") + name + " not supported.");
+	throw ModError(std::string("Database backend ") + name + " not supported.");
 }
 
 bool ServerEnvironment::migrateAuthDatabase(

@@ -313,9 +313,15 @@ bool loadGameConfAndInitWorld(const std::string &path, const SubgameSpec &gamesp
 		Settings conf;
 
 		conf.set("gameid", gamespec.id);
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 		conf.set("backend", "sqlite3");
 		conf.set("player_backend", "sqlite3");
 		conf.set("auth_backend", "sqlite3");
+#else
+		conf.set("backend", "leveldb");
+		conf.set("player_backend", "leveldb");
+		conf.set("auth_backend", "leveldb");
+#endif
 		conf.setBool("creative_mode", g_settings->getBool("creative_mode"));
 		conf.setBool("enable_damage", g_settings->getBool("enable_damage"));
 

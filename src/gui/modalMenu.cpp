@@ -32,13 +32,13 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment *env, gui::IGUIElement *parent, 
 		IMenuManager *menumgr) :
 		IGUIElement(gui::EGUIET_ELEMENT, env, parent, id,
 				core::rect<s32>(0, 0, 100, 100)),
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 		m_jni_field_name(""),
 #endif
 		m_menumgr(menumgr)
 {
 	m_gui_scale = g_settings->getFloat("gui_scaling");
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	float d = porting::getDisplayDensity();
 	m_gui_scale *= 1.1 - 0.3 * d + 0.2 * d * d;
 #endif
@@ -114,7 +114,7 @@ void GUIModalMenu::removeChildren()
 
 bool GUIModalMenu::preprocessEvent(const SEvent &event)
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	// clang-format off
 	// display software keyboard when clicking edit boxes
 	if (event.EventType == EET_MOUSE_INPUT_EVENT &&
@@ -129,7 +129,7 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 
 			std::string field_name = getNameByID(hovered->getID());
 			// read-only field
-			if (field_name.empty())
+			if (field_name.empty() || porting::hasRealKeyboard())
 				return retval;
 
 			m_jni_field_name = field_name;
@@ -139,7 +139,8 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 			std::string label = wide_to_utf8(getLabelByID(hovered->getID()));
 			if (label.empty())
 				label = "text";
-			message += gettext(label) + ":";
+			message += gettext(label.c_str());
+			message += ":";
 
 			// single line text input
 			int type = 2;
@@ -248,7 +249,7 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 	return false;
 }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 bool GUIModalMenu::hasAndroidUIInput()
 {
 	// no dialog shown

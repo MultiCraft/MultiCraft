@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "wieldmesh.h"
 #include "noise.h"         // easeCurve
 #include "sound.h"
-#include "event.h"
+#include "mtevent.h"
 #include "nodedef.h"
 #include "util/numeric.h"
 #include "constants.h"
@@ -695,6 +695,8 @@ void Camera::drawNametags()
 			i = m_nametags.begin();
 			i != m_nametags.end(); ++i) {
 		Nametag *nametag = *i;
+		if (!nametag->parent_node->isVisible())
+			continue;
 		if (nametag->nametag_color.getAlpha() == 0) {
 			// Enforce hiding nametag,
 			// because if freetype is enabled, a grey

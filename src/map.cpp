@@ -43,7 +43,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server.h"
 #include "database/database.h"
 #include "database/database-dummy.h"
+#if USE_SQLITE
 #include "database/database-sqlite3.h"
+#endif
 #include "script/scripting_server.h"
 #include <deque>
 #include <queue>
@@ -195,8 +197,10 @@ void Map::addNodeAndUpdate(v3s16 p, MapNode n,
 		std::map<v3s16, MapBlock*> &modified_blocks,
 		bool remove_metadata)
 {
+#if USE_SQLITE
 	// Collect old node for rollback
 	RollbackNode rollback_oldnode(this, p, m_gamedef);
+#endif
 
 	// This is needed for updating the lighting
 	MapNode oldnode = getNode(p);
@@ -221,6 +225,7 @@ void Map::addNodeAndUpdate(v3s16 p, MapNode n,
 		modified_block.second->expireDayNightDiff();
 	}
 
+#if USE_SQLITE
 	// Report for rollback
 	if(m_gamedef->rollback())
 	{
@@ -229,6 +234,7 @@ void Map::addNodeAndUpdate(v3s16 p, MapNode n,
 		action.setSetNode(p, rollback_oldnode, rollback_newnode);
 		m_gamedef->rollback()->reportAction(action);
 	}
+#endif
 
 	/*
 		Add neighboring liquid nodes and this node to transform queue.
@@ -791,6 +797,7 @@ void Map::transformLiquids(std::map<v3s16, MapBlock*> &modified_blocks,
 		n0.setLight(LIGHTBANK_DAY, 0, m_nodedef);
 		n0.setLight(LIGHTBANK_NIGHT, 0, m_nodedef);
 
+#if USE_SQLITE
 		// Find out whether there is a suspect for this action
 		std::string suspect;
 		if (m_gamedef->rollback())
@@ -808,7 +815,9 @@ void Map::transformLiquids(std::map<v3s16, MapBlock*> &modified_blocks,
 			RollbackAction action;
 			action.setSetNode(p0, rollback_oldnode, rollback_newnode);
 			m_gamedef->rollback()->reportAction(action);
-		} else {
+		} else
+#endif
+		{
 			// Set node
 			setNode(p0, n0);
 		}
@@ -1219,8 +1228,13 @@ ServerMap::ServerMap(const std::string &savedir, IGameDef *gamedef,
 	Settings conf;
 	bool succeeded = conf.readConfigFile(conf_path.c_str());
 	if (!succeeded || !conf.exists("backend")) {
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 		// fall back to sqlite3
 		conf.set("backend", "sqlite3");
+#else
+		// fall back to leveldb
+		conf.set("backend", "leveldb");
+#endif
 	}
 	std::string backend = conf.get("backend");
 	dbase = createDatabase(backend, savedir, conf);
@@ -1884,8 +1898,10 @@ MapDatabase *ServerMap::createDatabase(
 	const std::string &savedir,
 	Settings &conf)
 {
+#if USE_SQLITE
 	if (name == "sqlite3")
 		return new MapDatabaseSQLite3(savedir);
+#endif
 	if (name == "dummy")
 		return new Database_Dummy();
 	#if USE_LEVELDB
@@ -1904,7 +1920,7 @@ MapDatabase *ServerMap::createDatabase(
 	}
 	#endif
 
-	throw BaseException(std::string("Database backend ") + name + " not supported.");
+	throw ModError(std::string("Database backend ") + name + " not supported.");
 }
 
 void ServerMap::beginSave()

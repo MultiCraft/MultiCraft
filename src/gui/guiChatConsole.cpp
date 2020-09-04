@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "log.h"
 #include "gettext.h"
 #include <string>
+#include "touchscreengui.h"
 
 #if USE_FREETYPE
 	#include "irrlicht_changes/CGUITTFont.h"
@@ -134,6 +135,10 @@ void GUIChatConsole::closeConsoleAtOnce()
 	closeConsole();
 	m_height = 0;
 	recalculateConsolePosition();
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui)
+		g_touchscreengui->show();
+#endif
 }
 
 f32 GUIChatConsole::getDesiredHeight() const
@@ -422,7 +427,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			return true;
 		}
 
-		if (event.KeyInput.Key == KEY_ESCAPE) {
+		if (event.KeyInput.Key == KEY_ESCAPE || event.KeyInput.Key == KEY_CANCEL) {
 			closeConsoleAtOnce();
 			m_close_on_enter = false;
 			// inhibit open so the_game doesn't reopen immediately

@@ -33,6 +33,7 @@ class IShaderSource;
 #define MINIMAP_MAX_SX 512
 #define MINIMAP_MAX_SY 512
 
+#if !defined(__ANDROID__) && !defined(__IOS__)
 enum MinimapMode {
 	MINIMAP_MODE_OFF,
 	MINIMAP_MODE_SURFACEx1,
@@ -43,6 +44,14 @@ enum MinimapMode {
 	MINIMAP_MODE_RADARx4,
 	MINIMAP_MODE_COUNT,
 };
+#else
+enum MinimapMode {
+	MINIMAP_MODE_OFF,
+	MINIMAP_MODE_SURFACEx1,
+	MINIMAP_MODE_RADARx1,
+	MINIMAP_MODE_COUNT,
+};	
+#endif
 
 enum MinimapShape {
 	MINIMAP_SHAPE_SQUARE,

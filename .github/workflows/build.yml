@@ -27,26 +27,26 @@ on:
 
 jobs:
   # This is our minor gcc compiler
-  gcc_6:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install deps
-        run: |
-          sudo apt-get install g++-6 gcc-6 -qyy
-          source ./util/ci/common.sh
-          install_linux_deps
-
-      - name: Build
-        run: |
-          ./util/ci/build.sh
-        env:
-          CC: gcc-6
-          CXX: g++-6
-
-      - name: Test
-        run: |
-          ./bin/multicraft --run-unittests
+#  gcc_6:
+#    runs-on: ubuntu-18.04
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Install deps
+#        run: |
+#          sudo apt-get install g++-6 gcc-6 -qyy
+#          source ./util/ci/common.sh
+#          install_linux_deps
+#
+#      - name: Build
+#        run: |
+#          ./util/ci/build.sh
+#        env:
+#          CC: gcc-6
+#          CXX: g++-6
+#
+#      - name: Test
+#        run: |
+#          ./bin/multicraft --run-unittests
 
   # This is the current gcc compiler (available in bionic)
   gcc_8:
@@ -71,26 +71,26 @@ jobs:
           ./bin/multicraft --run-unittests
 
   # This is our minor clang compiler
-  clang_3_9:
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install deps
-        run: |
-          sudo apt-get install clang-3.9 -qyy
-          source ./util/ci/common.sh
-          install_linux_deps
-
-      - name: Build
-        run: |
-          ./util/ci/build.sh
-        env:
-          CC: clang-3.9
-          CXX: clang++-3.9
-
-      - name: Test
-        run: |
-          ./bin/multicraft --run-unittests
+#  clang_3_9:
+#    runs-on: ubuntu-18.04
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Install deps
+#        run: |
+#          sudo apt-get install clang-3.9 -qyy
+#          source ./util/ci/common.sh
+#          install_linux_deps
+#
+#      - name: Build
+#        run: |
+#          ./util/ci/build.sh
+#        env:
+#          CC: clang-3.9
+#          CXX: clang++-3.9
+#
+#      - name: Test
+#        run: |
+#          ./bin/multicraft --run-unittests
 
   # This is the current clang version
   clang_9:
@@ -121,56 +121,56 @@ jobs:
           valgrind --leak-check=full --leak-check-heuristics=all --undef-value-errors=no --error-exitcode=9 ./bin/multicraft --run-unittests
 
   # Build with prometheus-cpp (server-only)
-  clang_9_prometheus:
-    name: "clang_9 (PROMETHEUS=1)"
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install deps
-        run: |
-          sudo apt-get install clang-9 -qyy
-          source ./util/ci/common.sh
-          install_linux_deps
-
-      - name: Build prometheus-cpp
-        run: |
-          ./util/ci/build_prometheus_cpp.sh
-
-      - name: Build
-        run: |
-          ./util/ci/build.sh
-        env:
-          CC: clang-9
-          CXX: clang++-9
-          CMAKE_FLAGS: "-DENABLE_PROMETHEUS=1 -DBUILD_CLIENT=0"
-
-      - name: Test
-        run: |
-          ./bin/multicraftserver --run-unittests
+#  clang_9_prometheus:
+#    name: "clang_9 (PROMETHEUS=1)"
+#    runs-on: ubuntu-18.04
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Install deps
+#        run: |
+#          sudo apt-get install clang-9 -qyy
+#          source ./util/ci/common.sh
+#          install_linux_deps
+#
+#      - name: Build prometheus-cpp
+#        run: |
+#          ./util/ci/build_prometheus_cpp.sh
+#
+#      - name: Build
+#        run: |
+#          ./util/ci/build.sh
+#        env:
+#          CC: clang-9
+#          CXX: clang++-9
+#          CMAKE_FLAGS: "-DENABLE_PROMETHEUS=1 -DBUILD_CLIENT=0"
+#
+#      - name: Test
+#        run: |
+#          ./bin/multicraftserver --run-unittests
 
   # Build without freetype (client-only)
-  clang_9_no_freetype:
-    name: "clang_9 (FREETYPE=0)"
-    runs-on: ubuntu-18.04
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install deps
-        run: |
-          sudo apt-get install clang-9 -qyy
-          source ./util/ci/common.sh
-          install_linux_deps
-
-      - name: Build
-        run: |
-          ./util/ci/build.sh
-        env:
-          CC: clang-9
-          CXX: clang++-9
-          CMAKE_FLAGS: "-DENABLE_FREETYPE=0 -DBUILD_SERVER=0"
-
-      - name: Test
-        run: |
-          ./bin/multicraft --run-unittests
+#  clang_9_no_freetype:
+#    name: "clang_9 (FREETYPE=0)"
+#    runs-on: ubuntu-18.04
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Install deps
+#        run: |
+#          sudo apt-get install clang-9 -qyy
+#          source ./util/ci/common.sh
+#          install_linux_deps
+#
+#      - name: Build
+#        run: |
+#          ./util/ci/build.sh
+#        env:
+#          CC: clang-9
+#          CXX: clang++-9
+#          CMAKE_FLAGS: "-DENABLE_FREETYPE=0 -DBUILD_SERVER=0"
+#
+#      - name: Test
+#        run: |
+#          ./bin/multicraft --run-unittests
 
   docker:
     name: "Docker image"
@@ -219,10 +219,10 @@ jobs:
 
   msvc:
     name: VS 2019 ${{ matrix.config.arch }}-${{ matrix.type }}
-    runs-on: windows-2019 
+    runs-on: windows-2019
     env:
-      VCPKG_VERSION: c7ab9d3110813979a873b2dbac630a9ab79850dc
-#                    2020.04
+      VCPKG_VERSION: 0bf3923f9fab4001c00f0f429682a0853b5749e0
+#                    2020.11
       vcpkg_packages: irrlicht zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit
     strategy:
       fail-fast: false
@@ -248,7 +248,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Restore from cache and run vcpkg
-        uses: lukka/run-vcpkg@v2
+        uses: lukka/run-vcpkg@v5
         with:
           vcpkgArguments: ${{env.vcpkg_packages}}
           vcpkgDirectory: '${{ github.workspace }}\vcpkg'

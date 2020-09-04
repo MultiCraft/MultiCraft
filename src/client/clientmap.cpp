@@ -129,7 +129,7 @@ void ClientMap::updateDrawList()
 	// Use a higher fov to accomodate faster camera movements.
 	// Blocks are cropped better when they are drawn.
 	// Or maybe they aren't? Well whatever.
-	camera_fov *= 1.2;
+	camera_fov *= 1.1;
 
 	v3s16 cam_pos_nodes = floatToInt(camera_position, BS);
 	v3s16 p_blocks_min;
@@ -184,7 +184,11 @@ void ClientMap::updateDrawList()
 			if (block->mesh)
 				block->mesh->updateCameraOffset(m_camera_offset);
 
+#if !defined(__ANDROID__) && !defined(__IOS__)
 			float range = 100000 * BS;
+#else
+			float range = m_control.wanted_range * BS * 4;	
+#endif
 			if (!m_control.range_all)
 				range = m_control.wanted_range * BS;
 

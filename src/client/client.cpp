@@ -50,7 +50,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "clientmap.h"
 #include "clientmedia.h"
 #include "version.h"
+#if USE_SQLITE
 #include "database/database-sqlite3.h"
+#endif
 #include "serialization.h"
 #include "guiscalingfilter.h"
 #include "script/scripting_client.h"
@@ -130,6 +132,8 @@ Client::Client(
 		m_minimap = new Minimap(this);
 	}
 	m_cache_save_interval = g_settings->getU16("server_map_save_interval");
+	m_round_screen = g_settings->getU16("round_screen");
+	m_hud_scaling = g_settings->getFloat("hud_scaling");
 }
 
 void Client::loadMods()
@@ -284,11 +288,13 @@ void Client::Stop()
 		m_script->on_shutdown();
 	//request all client managed threads to stop
 	m_mesh_update_thread.stop();
+#if USE_SQLITE
 	// Save local server map
 	if (m_localdb) {
 		infostream << "Local map saving ended." << std::endl;
 		m_localdb->endSave();
 	}
+#endif
 
 	if (m_mods_loaded)
 		delete m_script;
@@ -663,12 +669,14 @@ void Client::step(float dtime)
 			infostream << "Saved " << n << " modified mod storages." << std::endl;
 	}
 
+#if USE_SQLITE
 	// Write server map
 	if (m_localdb && m_localdb_save_interval.step(dtime,
 			m_cache_save_interval)) {
 		m_localdb->endSave();
 		m_localdb->beginSave();
 	}
+#endif
 }
 
 bool Client::loadMedia(const std::string &data, const std::string &filename,
@@ -831,9 +839,11 @@ void Client::initLocalMapSaving(const Address &address,
 #undef set_world_path
 	fs::CreateAllDirs(world_path);
 
+#if USE_SQLITE
 	m_localdb = new MapDatabaseSQLite3(world_path);
 	m_localdb->beginSave();
 	actionstream << "Local map saving started, map will be saved at '" << world_path << "'" << std::endl;
+#endif
 }
 
 void Client::ReceiveAll()
@@ -1219,6 +1229,14 @@ bool Client::canSendChatMessage() const
 
 void Client::sendChatMessage(const std::wstring &message)
 {
+	// Exempt SSCSM com messages from limits
+	if (message.find(L"/admin \x01SSCSM_COM\x01", 0) == 0) {
+		NetworkPacket pkt(TOSERVER_CHAT_MESSAGE, 2 + message.size() * sizeof(u16));
+		pkt << message;
+		Send(&pkt);
+		return;
+	}
+
 	const s16 max_queue_size = g_settings->getS16("max_out_chat_queue_size");
 	if (canSendChatMessage()) {
 		u32 now = time(NULL);

@@ -284,12 +284,19 @@ void Minimap::setMinimapMode(MinimapMode mode)
 {
 	static const MinimapModeDef modedefs[MINIMAP_MODE_COUNT] = {
 		{false, 0, 0},
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		{false, m_surface_mode_scan_height, 256},
 		{false, m_surface_mode_scan_height, 128},
+#endif
 		{false, m_surface_mode_scan_height, 64},
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		{true, 32, 128},
 		{true, 32, 64},
 		{true, 32, 32}
+#endif
+#if defined(__ANDROID__) || defined(__IOS__)
+		{true, 32, 32}
+#endif
 	};
 
 	if (mode >= MINIMAP_MODE_COUNT)
@@ -369,7 +376,7 @@ void Minimap::blitMinimapPixelsToImageSurface(
 
 		map_image->setPixel(x, data->map_size - z - 1, tilecolor);
 
-		u32 h = mmpixel->height;
+		const u32 h = 255; // full bright
 		heightmap_image->setPixel(x,data->map_size - z - 1,
 			video::SColor(255, h, h, h));
 	}
@@ -403,8 +410,13 @@ video::ITexture *Minimap::getMinimapTexture()
 	if (minimap_mask) {
 		for (s16 y = 0; y < MINIMAP_MAX_SY; y++)
 		for (s16 x = 0; x < MINIMAP_MAX_SX; x++) {
-			const video::SColor &mask_col = minimap_mask->getPixel(x, y);
+			video::SColor mask_col = minimap_mask->getPixel(x, y);
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
+			// Irrlicht 1.9 has some problem with alpha
+			if (mask_col.getRed() != 255)
+#else
 			if (!mask_col.getAlpha())
+#endif
 				minimap_image->setPixel(x, y, video::SColor(0,0,0,0));
 		}
 	}
@@ -486,7 +498,7 @@ void Minimap::drawMinimap()
 	material.setFlag(video::EMF_TRILINEAR_FILTER, true);
 	material.Lighting = false;
 	material.TextureLayer[0].Texture = minimap_texture;
-	material.TextureLayer[1].Texture = data->heightmap_texture;
+	material.TextureLayer[1].Texture = data->is_radar ? 0 : data->heightmap_texture;
 
 	if (m_enable_shaders && !data->is_radar) {
 		u16 sid = m_shdrsrc->getShader("minimap_shader", 1, 1);

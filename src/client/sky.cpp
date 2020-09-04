@@ -48,10 +48,13 @@ Sky::Sky(s32 id, ITextureSource *tsrc) :
 	mat.Lighting = false;
 #if ENABLE_GLES
 	mat.ZBuffer = video::ECFN_DISABLED;
+#elif defined(__MACH__) && defined(__APPLE__) && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR > 8
+	// ugly but for making cpp_lint happy...
+	mat.ZBuffer = video::ECFN_DISABLED;
 #else
 	mat.ZBuffer = video::ECFN_NEVER;
 #endif
-	mat.ZWriteEnable = false;
+	mat.setFlag(video::EMF_ZWRITE_ENABLE, false); // ZWriteEnable is bool on early 1.9 but E_ZWRITE on later 1.9
 	mat.AntiAliasing = 0;
 	mat.TextureLayer[0].TextureWrapU = video::ETC_CLAMP_TO_EDGE;
 	mat.TextureLayer[0].TextureWrapV = video::ETC_CLAMP_TO_EDGE;
@@ -249,7 +252,7 @@ void Sky::render()
 		}
 
 		// Draw far cloudy fog thing blended with skycolor
-		if (m_visible) {
+		/*if (m_visible) {
 			driver->setMaterial(m_materials[1]);
 			for (u32 j = 0; j < 4; j++) {
 				vertices[0] = video::S3DVertex(-1, -0.02, -1, 0, 0, 1, m_bgcolor, t, t);
@@ -272,7 +275,7 @@ void Sky::render()
 				}
 				driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
 			}
-		}
+		}*/
 
 		// Draw stars before sun and moon to be behind them
 		if (m_star_params.visible)

@@ -6,9 +6,6 @@
 
 #pragma once
 
-#include "IrrCompileConfig.h"
-#ifdef _IRR_COMPILE_WITH_GUI_
-
 #include "IGUIStaticText.h"
 #include "irrArray.h"
 
@@ -139,6 +136,8 @@ namespace gui
 		#else
 		virtual video::SColor getOverrideColor() const;
 		#endif
+
+		video::SColor getActiveColor() const; // IrrLicht 1.9; doesn't hurt in 1.8
 
 		//! Sets if the static text should use the overide color or the
 		//! color in the gui skin.
@@ -274,5 +273,3 @@ inline void setStaticText(irr::gui::IGUIStaticText *static_text, const wchar_t *
 {
 	setStaticText(static_text, EnrichedString(text, static_text->getOverrideColor()));
 }
-
-#endif // _IRR_COMPILE_WITH_GUI_

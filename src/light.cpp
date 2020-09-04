@@ -73,7 +73,7 @@ void set_light_table(float gamma)
 	params.gamma = rangelim(gamma, 0.33f, 3.0f);
 
 // Boundary values should be fixed
-	light_LUT[0] = 0;
+	light_LUT[0] = 10;
 	light_LUT[LIGHT_SUN] = 255;
 
 	for (size_t i = 1; i < LIGHT_SUN; i++) {

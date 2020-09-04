@@ -49,7 +49,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define HUD_PARAM_HOTBAR_SELECTED_IMAGE 3
 
 #define HUD_HOTBAR_ITEMCOUNT_DEFAULT 8
+#if !defined(__ANDROID__) && !defined(__IOS__)
 #define HUD_HOTBAR_ITEMCOUNT_MAX     32
+#else
+#define HUD_HOTBAR_ITEMCOUNT_MAX     9
+#endif
 
 
 #define HOTBAR_IMAGE_SIZE 48

@@ -73,8 +73,14 @@ std::vector<ServerListSpec> getOnline()
 
 	u16 proto_version_min = CLIENT_PROTOCOL_VERSION_MIN;
 
+#if !defined(__ANDROID__) && !defined(__APPLE__)
+	const std::string list = base64_decode("L2xpc3Q=");
+#else
+	const std::string list = base64_decode("OjMwMDAvc2VydmVybGlzdC5qc29u");
+#endif
+
 	geturl << g_settings->get("serverlist_url") <<
-		"/list?proto_version_min=" << proto_version_min <<
+		list << "?proto_version_min=" << proto_version_min <<
 		"&proto_version_max=" << CLIENT_PROTOCOL_VERSION_MAX;
 	Json::Value root = fetchJsonValue(geturl.str(), NULL);
 
@@ -226,6 +232,7 @@ void sendAnnounce(AnnounceAction action,
 		server["name"]         = g_settings->get("server_name");
 		server["description"]  = g_settings->get("server_description");
 		server["version"]      = g_version_string;
+		server["server_id"]    = PROJECT_NAME;
 		server["proto_min"]    = strict_checking ? LATEST_PROTOCOL_VERSION : SERVER_PROTOCOL_VERSION_MIN;
 		server["proto_max"]    = strict_checking ? LATEST_PROTOCOL_VERSION : SERVER_PROTOCOL_VERSION_MAX;
 		server["url"]          = g_settings->get("server_url");
@@ -241,8 +248,7 @@ void sendAnnounce(AnnounceAction action,
 		for (const std::string &clients_name : clients_names) {
 			server["clients_list"].append(clients_name);
 		}
-		if (!gameid.empty())
-			server["gameid"] = gameid;
+		server["gameid"]       = "MultiCraft";
 	}
 
 	if (action == AA_START) {
@@ -274,4 +280,3 @@ void sendAnnounce(AnnounceAction action,
 #endif
 
 } // namespace ServerList
-

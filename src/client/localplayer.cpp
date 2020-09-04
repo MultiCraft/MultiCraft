@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "localplayer.h"
 #include <cmath>
-#include "event.h"
+#include "mtevent.h"
 #include "collision.h"
 #include "nodedef.h"
 #include "settings.h"
@@ -289,6 +289,11 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 	// /src/script/common/c_content.cpp and /src/content_sao.cpp
 	float player_stepheight = (m_cao == nullptr) ? 0.0f :
 		(touching_ground ? m_cao->getStepHeight() : (0.2f * BS));
+
+#ifdef HAVE_TOUCHSCREENGUI
+	if (touching_ground)
+		player_stepheight += (0.6f * BS);
+#endif
 
 	v3f accel_f;
 	const v3f initial_position = position;
@@ -634,10 +639,21 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 	if (superspeed || (is_climbing && fast_climb) ||
 			((in_liquid || in_liquid_stable) && fast_climb))
 		speedH = speedH.normalize() * movement_speed_fast;
-	else if (control.sneak && !free_move && !in_liquid && !in_liquid_stable)
+	else if (control.sneak && !free_move && !in_liquid && !in_liquid_stable) {
 		speedH = speedH.normalize() * movement_speed_crouch;
-	else
+		if (!m_sneak_offset && !getParent() && (physics_override_speed != 0)) {
+			eye_offset_first += v3f(0,-3,0);
+			eye_offset_third += v3f(0,-3,0);
+			m_sneak_offset = true;
+		}
+	} else {
 		speedH = speedH.normalize() * movement_speed_walk;
+		if (m_sneak_offset && !getParent() && (physics_override_speed != 0)) {
+			eye_offset_first += v3f(0,3,0);
+			eye_offset_third += v3f(0,3,0);
+			m_sneak_offset = false;
+		}
+	}
 
 	// Acceleration increase
 	f32 incH = 0.0f; // Horizontal (X, Z)
@@ -658,11 +674,18 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 	}
 
 	float slip_factor = 1.0f;
-	if (!free_move && !in_liquid && !in_liquid_stable)
+	float speed_factor = 1.0f;
+	if (!free_move && !in_liquid && !in_liquid_stable) {
 		slip_factor = getSlipFactor(env, speedH);
+		speed_factor = getSpeedFactor(env);
+	}
 
-	// Don't sink when swimming in pitch mode
-	if (pitch_move && in_liquid) {
+	// Apply speed factor
+	speedH *= speed_factor;
+	speedV *= speed_factor;
+
+	// Don't sink when swimming
+	if (in_liquid) {
 		v3f controlSpeed = speedH + speedV;
 		if (controlSpeed.getLength() > 0.01f)
 			swimming_pitch = true;
@@ -906,6 +929,10 @@ void LocalPlayer::old_move(f32 dtime, Environment *env, f32 pos_max_d,
 	// TODO: This shouldn't be hardcoded but decided by the server
 	float player_stepheight = touching_ground ? (BS * 0.6f) : (BS * 0.2f);
 
+#ifdef HAVE_TOUCHSCREENGUI
+	player_stepheight += (0.6 * BS);
+#endif
+
 	v3f accel_f;
 	const v3f initial_position = position;
 	const v3f initial_speed = m_speed;
@@ -1100,6 +1127,34 @@ float LocalPlayer::getSlipFactor(Environment *env, const v3f &speedH)
 
 		return core::clamp(1.0f / (slippery + 1), 0.001f, 1.0f);
 	}
+	return 1.0f;
+}
+
+float LocalPlayer::getSpeedFactor(Environment *env)
+{
+	int speed_below = 0, speed_above = 0;
+	v3s16 pos = getStandingNodePos();
+	const NodeDefManager *nodemgr = env->getGameDef()->ndef();
+	Map *map = &env->getMap();
+
+	const ContentFeatures &f = nodemgr->get(map->getNode(pos));
+	if (f.walkable)
+		speed_below = itemgroup_get(f.groups, "speed");
+
+	const ContentFeatures &f2 = nodemgr->get(map->getNode(
+		pos + v3s16(0, 1, 0)));
+	speed_above = itemgroup_get(f2.groups, "speed");
+
+	if (speed_above == 0) {
+		const ContentFeatures &f3 = nodemgr->get(map->getNode(
+			pos + v3s16(0, 2, 0)));
+		speed_above = itemgroup_get(f3.groups, "speed");
+	}
+
+	int speed = speed_below + speed_above;
+	if (speed != 0)
+		return core::clamp(1.0f + f32(speed) / 100.f, 0.01f, 10.f);
+
 	return 1.0f;
 }
 

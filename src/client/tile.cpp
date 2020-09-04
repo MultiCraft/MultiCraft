@@ -1015,7 +1015,7 @@ video::IImage* TextureSource::generateImage(const std::string &name)
 
 #if ENABLE_GLES
 
-
+#if !defined(__ANDROID__) && !defined(__IOS__)
 static inline u16 get_GL_major_version()
 {
 	const GLubyte *gl_version = glGetString(GL_VERSION);
@@ -1036,6 +1036,13 @@ bool hasNPotSupport()
 		strstr((char *)glGetString(GL_EXTENSIONS), "GL_OES_texture_npot");
 	return supported;
 }
+#else
+// gles3 has NPotSupport, but this is using too many resources
+bool hasNPotSupport()
+{
+	return false;
+}
+#endif
 
 /**
  * Check and align image to npot2 if required by hardware
@@ -1057,13 +1064,15 @@ video::IImage * Align2Npot2(video::IImage * image,
 	unsigned int height = npot2(dim.Height);
 	unsigned int width  = npot2(dim.Width);
 
-	if (dim.Height == height && dim.Width == width)
+	if (dim.Width == width)
 		return image;
 
-	if (dim.Height > height)
-		height *= 2;
-	if (dim.Width > width)
-		width *= 2;
+#ifdef __IOS__
+	if (height > 64 || width > 64) {
+		height /= 2;
+		width /= 2;
+	}
+#endif
 
 	video::IImage *targetimage =
 			driver->createImage(video::ECF_A8R8G8B8,
@@ -1244,8 +1253,13 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 					It is an image with a number of cracking stages
 					horizontally tiled.
 				*/
+#ifndef HAVE_TOUCHSCREENGUI		
 				video::IImage *img_crack = m_sourcecache.getOrLoad(
 					"crack_anylength.png");
+#else
+				video::IImage *img_crack = m_sourcecache.getOrLoad(
+					"crack_anylength_touch.png");
+#endif
 
 				if (img_crack) {
 					draw_crack(img_crack, baseimg,

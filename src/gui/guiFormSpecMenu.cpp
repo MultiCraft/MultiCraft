@@ -315,7 +315,7 @@ void GUIFormSpecMenu::parseSize(parserData* data, const std::string &element)
 		data->invsize.Y = MYMAX(0, stof(parts[1]));
 
 		lockSize(false);
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		if (parts.size() == 3) {
 			if (parts[2] == "true") {
 				lockSize(true,v2u32(800,600));
@@ -1414,13 +1414,17 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 {
 	std::vector<std::string> parts = split(element,';');
 
-	if ((parts.size() == 4) ||
-		((parts.size() > 4) && (m_formspec_version > FORMSPEC_API_VERSION)))
+	if ((parts.size() >= 4) /*||
+		((parts.size() > 4) && (m_formspec_version > FORMSPEC_API_VERSION))*/)
 	{
 		std::vector<std::string> v_pos = split(parts[0],',');
 		std::vector<std::string> v_geom = split(parts[1],',');
 		std::string name = parts[2];
 		std::string label = parts[3];
+		std::string default_val;
+
+		if (parts.size() > 4)
+			default_val = parts[4];
 
 		MY_CHECKPOS("pwdfield",0);
 		MY_CHECKGEOM("pwdfield",1);
@@ -1444,12 +1448,16 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 
 		core::rect<s32> rect = core::rect<s32>(pos.X, pos.Y, pos.X+geom.X, pos.Y+geom.Y);
 
+		if (m_form_src && !default_val.empty())
+			default_val = m_form_src->resolveText(default_val);
+
 		std::wstring wlabel = translate_string(utf8_to_wide(unescape_string(label)));
+		std::wstring wpassword = utf8_to_wide(unescape_string(default_val));
 
 		FieldSpec spec(
 			name,
 			wlabel,
-			L"",
+			wpassword,
 			258 + m_fields.size(),
 			0,
 			ECI_IBEAM
@@ -1583,6 +1591,8 @@ void GUIFormSpecMenu::parseSimpleField(parserData *data,
 	std::string label = parts[1];
 	std::string default_val = parts[2];
 
+	bool is_dynamic = (name.length() > 0 && name[0] == 'D');
+
 	core::rect<s32> rect;
 
 	if (data->explicit_size)
@@ -1613,6 +1623,8 @@ void GUIFormSpecMenu::parseSimpleField(parserData *data,
 		ECI_IBEAM
 	);
 
+	spec.is_dynamic = is_dynamic;
+
 	createTextField(data, spec, rect, false);
 
 	m_fields.push_back(spec);
@@ -1628,6 +1640,8 @@ void GUIFormSpecMenu::parseTextArea(parserData* data, std::vector<std::string>& 
 	std::string name = parts[2];
 	std::string label = parts[3];
 	std::string default_val = parts[4];
+
+	bool is_dynamic = (name.length() > 0 && name[0] == 'D');
 
 	MY_CHECKPOS(type,0);
 	MY_CHECKGEOM(type,1);
@@ -1676,6 +1690,8 @@ void GUIFormSpecMenu::parseTextArea(parserData* data, std::vector<std::string>& 
 		0,
 		ECI_IBEAM
 	);
+
+	spec.is_dynamic = is_dynamic;
 
 	createTextField(data, spec, rect, type == "textarea");
 
@@ -3093,15 +3109,15 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 			// the image size can't be less than 0.3 inch
 			// multiplied by gui_scaling, even if this means
 			// the form doesn't fit the screen.
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 			// For mobile devices these magic numbers are
 			// different and forms should always use the
 			// maximum screen space available.
 			double prefer_imgsize = mydata.screensize.Y / 10 * gui_scaling;
-			double fitx_imgsize = mydata.screensize.X /
-				((12.0 / 8.0) * (0.5 + mydata.invsize.X));
-			double fity_imgsize = mydata.screensize.Y /
-				((15.0 / 11.0) * (0.85 + mydata.invsize.Y));
+			double fitx_imgsize = floor(mydata.screensize.X /
+				(1.5 * (0.5 + mydata.invsize.X)));
+			double fity_imgsize = floor(mydata.screensize.Y /
+				(1.15 * (0.85 + mydata.invsize.Y)));
 			use_imgsize = MYMIN(prefer_imgsize,
 					MYMIN(fitx_imgsize, fity_imgsize));
 #else
@@ -3305,7 +3321,7 @@ void GUIFormSpecMenu::legacySortElements(core::list<IGUIElement *>::Iterator fro
 	}
 }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 bool GUIFormSpecMenu::getAndroidUIInput()
 {
 	if (!hasAndroidUIInput())
@@ -3555,7 +3571,7 @@ void GUIFormSpecMenu::showTooltip(const std::wstring &text,
 	v2u32 screenSize = Environment->getVideoDriver()->getScreenSize();
 	int tooltip_offset_x = m_btn_height;
 	int tooltip_offset_y = m_btn_height;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	tooltip_offset_x *= 3;
 	tooltip_offset_y  = 0;
 	if (m_pointer.X > (s32)screenSize.X / 2)
@@ -4178,8 +4194,14 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 						count = MYMIN(s_count, 10);
 					else if (button == BET_WHEEL_DOWN)
 						count = 1;
-					else  // left
+					else { // left
+#ifdef HAVE_TOUCHSCREENGUI
+						if (s.listname == "craft")
+							count = 1;
+						else
+#endif
 						count = s_count;
+					}
 
 					if (!event.MouseInput.Shift) {
 						// no shift: select item
@@ -4552,14 +4574,16 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 			}
 		}
 
-		if (event.GUIEvent.EventType == gui::EGET_TABLE_CHANGED) {
+		if (event.GUIEvent.EventType == gui::EGET_TABLE_CHANGED ||
+			event.GUIEvent.EventType == gui::EGET_EDITBOX_CHANGED) {
 			int current_id = event.GUIEvent.Caller->getID();
 			if (current_id > 257) {
-				// find the element that was clicked
+				// find the element that was clicked or changed
 				for (GUIFormSpecMenu::FieldSpec &s : m_fields) {
 					// if it's a table, set the send field
 					// so lua knows which table was changed
-					if ((s.ftype == f_Table) && (s.fid == current_id)) {
+					if ((s.ftype == f_Table && s.fid == current_id) ||
+						(s.ftype == f_Unknown && s.is_dynamic && s.fid == current_id)) {
 						s.send = true;
 						acceptInput();
 						s.send=false;

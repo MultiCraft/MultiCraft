@@ -38,7 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../gui/guiSkin.h"
 
 #if !defined(_WIN32) && !defined(__APPLE__) && !defined(__ANDROID__) && \
-		!defined(SERVER) && !defined(__HAIKU__)
+		!defined(SERVER) && !defined(__HAIKU__) && !defined(__IOS__)
 #define XORG_USED
 #endif
 #ifdef XORG_USED
@@ -85,6 +85,12 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 {
 	sanity_check(!s_singleton);
 
+#ifdef __ANDROID__
+	// Set correct resolution
+	g_settings->setU16("screen_w", porting::getDisplaySize().X);
+	g_settings->setU16("screen_h", porting::getDisplaySize().Y);
+#endif
+
 	// Resolution selection
 	bool fullscreen = g_settings->getBool("fullscreen");
 	u16 screen_w = g_settings->getU16("screen_w");
@@ -129,7 +135,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	params.EventReceiver = receiver;
 	params.HighPrecisionFPU = g_settings->getBool("high_precision_fpu");
 	params.ZBufferBits = 24;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	params.PrivateData = porting::app_global;
 #endif
 #if ENABLE_GLES
@@ -148,6 +154,16 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 			gui::EGST_WINDOWS_METALLIC, driver);
 	m_device->getGUIEnvironment()->setSkin(skin);
 	skin->drop();
+
+#ifdef __IOS__
+	if (device) {
+		CIrrDeviceiOS* dev = (CIrrDeviceiOS*) device;
+		porting::setViewController(dev->getViewController());
+#ifdef ADS
+		ads_startup(dev->getViewController());
+#endif
+	}
+#endif
 }
 
 RenderingEngine::~RenderingEngine()
@@ -475,6 +491,14 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		gui::IGUIEnvironment *guienv, ITextureSource *tsrc, float dtime,
 		int percent, bool clouds)
 {
+#ifdef __IOS__
+		if (m_device->isWindowMinimized())
+			return;
+#else
+		if (!m_device->isWindowFocused())
+			return;
+#endif
+
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
 
 	v2s32 textsize(g_fontengine->getTextWidth(text), g_fontengine->getLineHeight());
@@ -485,6 +509,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 			guienv->addStaticText(text.c_str(), textrect, false, false);
 	guitext->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_UPPERLEFT);
 
+	clouds = false; // disable clouds at loading time
 	bool cloud_menu_background = clouds && g_settings->getBool("menu_clouds");
 	if (cloud_menu_background) {
 		g_menuclouds->step(dtime * 3);
@@ -492,8 +517,14 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		get_video_driver()->beginScene(
 				true, true, video::SColor(255, 140, 186, 250));
 		g_menucloudsmgr->drawAll();
-	} else
+	} else {
 		get_video_driver()->beginScene(true, true, video::SColor(255, 0, 0, 0));
+		video::ITexture *background_image = tsrc->getTexture("bg.png");
+
+		get_video_driver()->draw2DImage(background_image,
+			irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
+			irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
+	}
 
 	// draw progress bar
 	if ((percent >= 0) && (percent <= 100)) {
@@ -502,27 +533,78 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 				tsrc->getTexture("progress_bar_bg.png");
 
 		if (progress_img && progress_img_bg) {
-#ifndef __ANDROID__
 			const core::dimension2d<u32> &img_size =
 					progress_img_bg->getSize();
-			u32 imgW = rangelim(img_size.Width, 200, 600);
-			u32 imgH = rangelim(img_size.Height, 24, 72);
+#if !defined(__ANDROID__) && !defined(__IOS__)
+			float scale = RenderingEngine::getDisplayDensity();
+			scale = scale >= 1 ? scale : 1;
+			u32 imgW = rangelim(img_size.Width, 256, 1024) * scale;
+			u32 imgH = rangelim(img_size.Height, 32, 128) * scale;
+			float imgR = scale;
 #else
-			const core::dimension2d<u32> img_size(256, 48);
-			float imgRatio = (float)img_size.Height / img_size.Width;
-			u32 imgW = screensize.X / 2.2f;
-			u32 imgH = floor(imgW * imgRatio);
+			float imgRatio = (float) img_size.Height / img_size.Width;
+			u32 imgW = npot2(screensize.X / 2.0f);
+			if (imgW > (screensize.X * 0.7) && imgW >= 1024)
+				imgW /= 2;
+			u32 imgH = imgW * imgRatio;
+			float imgR = (float) (imgW) / img_size.Width;
 #endif
 			v2s32 img_pos((screensize.X - imgW) / 2,
 					(screensize.Y - imgH) / 2);
 
-			draw2DImageFilterScaled(get_video_driver(), progress_img_bg,
-					core::rect<s32>(img_pos.X, img_pos.Y,
-							img_pos.X + imgW,
-							img_pos.Y + imgH),
-					core::rect<s32>(0, 0, img_size.Width,
-							img_size.Height),
-					0, 0, true);
+			draw2DImageFilterScaled(
+				driver, progress_img_bg,
+				core::rect<s32>(img_pos.X, img_pos.Y, img_pos.X + imgW, img_pos.Y + imgH),
+				core::rect<s32>(0, 0, img_size.Width, img_size.Height),
+				0, 0, true);
+
+			// rects for drawing a color progress bar
+			const static core::rect<s32> rects[] = {
+				core::rect<s32>(  4, 24,   5, 40),
+				core::rect<s32>(  5, 21,   6, 43),
+				core::rect<s32>(  6, 19,   7, 45),
+				core::rect<s32>(  7, 17,   8, 47),
+				core::rect<s32>(  8, 15,   9, 49),
+				core::rect<s32>(  9, 14,  10, 50),
+				core::rect<s32>( 10, 13,  11, 51),
+				core::rect<s32>( 11, 12,  12, 52),
+				core::rect<s32>( 12, 11,  13, 53),
+				core::rect<s32>( 13, 10,  14, 54),
+				core::rect<s32>( 14,  9,  15, 55),
+				core::rect<s32>( 15,  8,  17, 56),
+				core::rect<s32>( 17,  7,  19, 57),
+				core::rect<s32>( 19,  6,  21, 58),
+				core::rect<s32>( 21,  5,  24, 59),
+				core::rect<s32>( 24,  4, 488, 60),
+				core::rect<s32>(488,  5, 491, 59),
+				core::rect<s32>(491,  6, 493, 58),
+				core::rect<s32>(493,  7, 495, 57),
+				core::rect<s32>(495,  8, 497, 56),
+				core::rect<s32>(497,  9, 498, 55),
+				core::rect<s32>(498, 10, 499, 54),
+				core::rect<s32>(499, 11, 500, 53),
+				core::rect<s32>(500, 12, 501, 52),
+				core::rect<s32>(501, 13, 502, 51),
+				core::rect<s32>(502, 14, 503, 50),
+				core::rect<s32>(503, 15, 504, 49),
+				core::rect<s32>(504, 17, 505, 47),
+				core::rect<s32>(505, 19, 506, 45),
+				core::rect<s32>(506, 21, 507, 43),
+				core::rect<s32>(507, 24, 508, 40)
+			};
+
+			for (const auto & i : rects) {
+				const s32 clipx = (percent * imgW) / 100;
+				core::rect<s32> r(
+					MYMIN(i.UpperLeftCorner.X * imgR, clipx), i.UpperLeftCorner.Y * imgR,
+					MYMIN(i.LowerRightCorner.X * imgR, clipx), i.LowerRightCorner.Y * imgR
+				);
+				if (r.getArea() <= 0)
+					break;
+				get_video_driver()->draw2DRectangle(
+					video::SColor(255, 255 - percent * 2, percent * 2, 25),
+					r + img_pos, nullptr);
+			}
 
 			draw2DImageFilterScaled(get_video_driver(), progress_img,
 					core::rect<s32>(img_pos.X, img_pos.Y,
@@ -641,7 +723,7 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 	return driver_names[type];
 }
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__IOS__)
 #if defined(XORG_USED)
 
 static float calcDisplayDensity()
@@ -725,7 +807,7 @@ v2u32 RenderingEngine::getDisplaySize()
 	return deskres;
 }
 
-#else // __ANDROID__
+#else // __ANDROID__/__IOS__
 float RenderingEngine::getDisplayDensity()
 {
 	return porting::getDisplayDensity();
@@ -735,4 +817,4 @@ v2u32 RenderingEngine::getDisplaySize()
 {
 	return porting::getDisplaySize();
 }
-#endif // __ANDROID__
+#endif // __ANDROID__/__IOS__

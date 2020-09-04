@@ -685,6 +685,7 @@ void Channel::UpdateTimers(float dtime)
 			current_packet_successful = 0;
 		}
 
+#if !(defined(__ANDROID__) && defined(__aarch64__))
 		/* dynamic window size */
 		float successful_to_lost_ratio = 0.0f;
 		bool done = false;
@@ -725,6 +726,7 @@ void Channel::UpdateTimers(float dtime)
 						MIN_RELIABLE_WINDOW_SIZE);
 			}
 		}
+#endif
 	}
 
 	if (bpm_counter > 10.0f) {
