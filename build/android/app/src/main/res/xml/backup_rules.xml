@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+	<exclude
+		domain="sharedpref"
+		path="MultiCraftSettings.xml" />
+	<exclude
+		domain="sharedpref"
+		path="RateMe.xml" />
+	<exclude
+		domain="sharedpref"
+		path="com.multicraft.game_preferences.xml" />
+</full-backup-content>
