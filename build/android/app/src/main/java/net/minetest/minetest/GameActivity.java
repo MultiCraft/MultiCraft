@@ -30,8 +30,7 @@ import android.view.WindowManager;
 
 public class GameActivity extends NativeActivity {
 	static {
-		System.loadLibrary("c++_shared");
-		System.loadLibrary("Minetest");
+		System.loadLibrary("MultiCraft");
 	}
 
 	private int messageReturnCode;

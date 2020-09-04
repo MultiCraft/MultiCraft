@@ -17,10 +17,10 @@ LOCAL_MODULE := Irrlicht
 LOCAL_SRC_FILES := deps/Android/Irrlicht/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libIrrlicht.a
 include $(PREBUILT_STATIC_LIBRARY)
 
-#include $(CLEAR_VARS)
-#LOCAL_MODULE := LevelDB
-#LOCAL_SRC_FILES := deps/Android/LevelDB/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libleveldb.a
-#include $(PREBUILT_STATIC_LIBRARY)
+include $(CLEAR_VARS)
+LOCAL_MODULE := LevelDB
+LOCAL_SRC_FILES := deps/Android/LevelDB/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libleveldb.a
+include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := LuaJIT
@@ -65,7 +65,7 @@ LOCAL_SRC_FILES := deps/Android/Vorbis/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libvo
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := Minetest
+LOCAL_MODULE := MultiCraft
 
 LOCAL_CFLAGS += \
 	-DJSONCPP_NO_LOCALE_SUPPORT     \
@@ -74,7 +74,8 @@ LOCAL_CFLAGS += \
 	-DUSE_CURL=1                    \
 	-DUSE_SOUND=1                   \
 	-DUSE_FREETYPE=1                \
-	-DUSE_LEVELDB=0                 \
+	-DUSE_LEVELDB=1                 \
+	-DUSE_SQLITE=0                  \
 	-DUSE_LUAJIT=1                  \
 	-DVERSION_MAJOR=${versionMajor} \
 	-DVERSION_MINOR=${versionMinor} \
@@ -105,7 +106,6 @@ LOCAL_C_INCLUDES := \
 	deps/Android/libiconv/libcharset/include        \
 	deps/Android/LuaJIT/src                         \
 	deps/Android/OpenAL-Soft/include                \
-	deps/Android/sqlite                             \
 	deps/Android/Vorbis/include
 
 LOCAL_SRC_FILES := \
@@ -115,13 +115,44 @@ LOCAL_SRC_FILES := \
 	../../../src/database/database.cpp              \
 	../../../src/database/database-dummy.cpp        \
 	../../../src/database/database-files.cpp        \
-	../../../src/database/database-sqlite3.cpp      \
+	../../../src/database/database-leveldb.cpp      \
 	$(wildcard ../../../src/gui/*.cpp)              \
 	$(wildcard ../../../src/irrlicht_changes/*.cpp) \
 	$(wildcard ../../../src/mapgen/*.cpp)           \
 	$(wildcard ../../../src/network/*.cpp)          \
 	$(wildcard ../../../src/script/*.cpp)           \
-	$(wildcard ../../../src/script/*/*.cpp)         \
+	$(wildcard ../../../src/script/common/*.cpp)    \
+	$(wildcard ../../../src/script/cpp_api/*.cpp)   \
+	../../../src/script/lua_api/l_areastore.cpp     \
+	../../../src/script/lua_api/l_auth.cpp          \
+	../../../src/script/lua_api/l_base.cpp          \
+	../../../src/script/lua_api/l_camera.cpp        \
+	../../../src/script/lua_api/l_craft.cpp         \
+	../../../src/script/lua_api/l_client.cpp        \
+	../../../src/script/lua_api/l_env.cpp           \
+	../../../src/script/lua_api/l_http.cpp          \
+	../../../src/script/lua_api/l_inventory.cpp     \
+	../../../src/script/lua_api/l_item.cpp          \
+	../../../src/script/lua_api/l_itemstackmeta.cpp \
+	../../../src/script/lua_api/l_localplayer.cpp   \
+	../../../src/script/lua_api/l_mainmenu.cpp      \
+	../../../src/script/lua_api/l_mapgen.cpp        \
+	../../../src/script/lua_api/l_metadata.cpp      \
+	../../../src/script/lua_api/l_minimap.cpp       \
+	../../../src/script/lua_api/l_modchannels.cpp   \
+	../../../src/script/lua_api/l_nodemeta.cpp      \
+	../../../src/script/lua_api/l_nodetimer.cpp     \
+	../../../src/script/lua_api/l_noise.cpp         \
+	../../../src/script/lua_api/l_object.cpp        \
+	../../../src/script/lua_api/l_particles.cpp     \
+	../../../src/script/lua_api/l_particles_local.cpp \
+	../../../src/script/lua_api/l_playermeta.cpp    \
+	../../../src/script/lua_api/l_server.cpp        \
+	../../../src/script/lua_api/l_settings.cpp      \
+	../../../src/script/lua_api/l_sound.cpp         \
+	../../../src/script/lua_api/l_storage.cpp       \
+	../../../src/script/lua_api/l_util.cpp          \
+	../../../src/script/lua_api/l_vmanip.cpp        \
 	$(wildcard ../../../src/server/*.cpp)           \
 	$(wildcard ../../../src/threading/*.cpp)        \
 	$(wildcard ../../../src/util/*.c)               \
@@ -173,8 +204,6 @@ LOCAL_SRC_FILES := \
 	../../../src/raycast.cpp                        \
 	../../../src/reflowscan.cpp                     \
 	../../../src/remoteplayer.cpp                   \
-	../../../src/rollback.cpp                       \
-	../../../src/rollback_interface.cpp             \
 	../../../src/serialization.cpp                  \
 	../../../src/server.cpp                         \
 	../../../src/serverenvironment.cpp              \
@@ -189,8 +218,6 @@ LOCAL_SRC_FILES := \
 	../../../src/voxel.cpp                          \
 	../../../src/voxelalgorithms.cpp
 
-# LevelDB backend is disabled
-#	../../../src/database/database-leveldb.cpp
 
 # GMP
 LOCAL_SRC_FILES += ../../../lib/gmp/mini-gmp.c
@@ -203,11 +230,7 @@ LOCAL_SRC_FILES += \
 	deps/Android/libiconv/lib/iconv.c               \
 	deps/Android/libiconv/libcharset/lib/localcharset.c
 
-# SQLite3
-LOCAL_SRC_FILES += deps/Android/sqlite/sqlite3.c
-
-LOCAL_STATIC_LIBRARIES += Curl Freetype Irrlicht OpenAL mbedTLS mbedx509 mbedcrypto Vorbis LuaJIT android_native_app_glue $(PROFILER_LIBS) #LevelDB
-#OpenSSL Crypto
+LOCAL_STATIC_LIBRARIES += Curl Freetype Irrlicht OpenAL mbedTLS mbedx509 mbedcrypto Vorbis LuaJIT android_native_app_glue $(PROFILER_LIBS) LevelDB
 
 LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES
 

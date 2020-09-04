@@ -1,11 +1,11 @@
 APP_PLATFORM := ${APP_PLATFORM}
 APP_ABI := ${TARGET_ABI}
-APP_STL := c++_shared
+APP_STL := c++_static
 NDK_TOOLCHAIN_VERSION := clang
 APP_SHORT_COMMANDS := true
-APP_MODULES := Minetest
+APP_MODULES := MultiCraft
 
-APP_CPPFLAGS := -Ofast -fvisibility=hidden -fexceptions -Wno-deprecated-declarations -Wno-extra-tokens
+APP_CPPFLAGS := -Ofast -fvisibility=hidden -fexceptions -Wno-deprecated-declarations -Wno-extra-tokens -Wno-inconsistent-missing-override
 
 ifeq ($(APP_ABI),armeabi-v7a)
 APP_CPPFLAGS += -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 -mthumb
@@ -16,7 +16,7 @@ endif
 #endif
 
 ifndef NDEBUG
-APP_CPPFLAGS := -g -D_DEBUG -O0 -fno-omit-frame-pointer -fexceptions
+APP_CPPFLAGS := -g -D_DEBUG -O0 -fno-omit-frame-pointer -fexceptions -Wno-inconsistent-missing-override
 endif
 
 APP_CFLAGS   := $(APP_CPPFLAGS) -Wno-parentheses-equality #-Werror=shorten-64-to-32

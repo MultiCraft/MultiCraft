@@ -100,8 +100,8 @@ public class UnzipService extends IntentService {
 
 	private void unzip(Intent intent) {
 		String zip = intent.getStringExtra(EXTRA_KEY_IN_FILE);
-		isDir("Minetest", Environment.getExternalStorageDirectory().toString());
-		String location = Environment.getExternalStorageDirectory() + File.separator + "Minetest" + File.separator;
+		isDir("MultiCraft", Environment.getExternalStorageDirectory().toString());
+		String location = Environment.getExternalStorageDirectory() + File.separator + "MultiCraft" + File.separator;
 		int per = 0;
 		int size = getSummarySize(zip);
 		File zipFile = new File(zip);
