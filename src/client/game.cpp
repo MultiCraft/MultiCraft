@@ -338,7 +338,7 @@ public:
 	static void playerDamage(MtEvent *e, void *data)
 	{
 		SoundMaker *sm = (SoundMaker *)data;
-		sm->m_sound->playSound(SimpleSoundSpec("player_damage", 0.5), false);
+		sm->m_sound->playSound(SimpleSoundSpec("player_damage", 1.0), false);
 	}
 
 	static void playerFallingDamage(MtEvent *e, void *data)
@@ -595,11 +595,7 @@ public:
 	}
 };
 
-#ifdef __ANDROID__
 #define SIZE_TAG "size[11,5.5]"
-#else
-#define SIZE_TAG "size[11,5.5,true]" // Fixed size on desktop
-#endif
 
 /****************************************************************************
 
@@ -629,11 +625,13 @@ struct GameRunData {
 	bool left_punch;
 	bool reset_jump_timer;
 	float nodig_delay_timer;
+	float noplace_delay_timer;
 	float dig_time;
 	float dig_time_complete;
 	float repeat_rightclick_timer;
 	float object_hit_delay_timer;
 	float time_from_last_punch;
+	float pause_game_timer;
 	ClientActiveObject *selected_object;
 
 	float jump_timer;
@@ -685,6 +683,12 @@ public:
 
 	void run();
 	void shutdown();
+#if defined(__ANDROID__) || defined(__IOS__)
+	void pauseGame();
+#endif
+#ifdef __IOS__
+	void customStatustext(const std::wstring &text, float time);
+#endif
 
 protected:
 
@@ -797,7 +801,7 @@ protected:
 		return input->wasKeyDown(k);
 	}
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	void handleAndroidChatInput();
 #endif
 
@@ -882,6 +886,7 @@ private:
 	scene::ISceneManager *smgr;
 	bool *kill;
 	std::string *error_message;
+	std::string wield_name;
 	bool *reconnect_requested;
 	scene::ISceneNode *skybox;
 
@@ -920,7 +925,7 @@ private:
 
 	bool m_does_lost_focus_pause_game = false;
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	bool m_cache_hold_aux1;
 	bool m_android_chat_open;
 #endif
@@ -959,7 +964,7 @@ Game::Game() :
 
 	readSettings();
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	m_cache_hold_aux1 = false;	// This is initialised properly later
 #endif
 
@@ -1088,7 +1093,7 @@ void Game::run()
 
 	set_light_table(g_settings->getFloat("display_gamma"));
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	m_cache_hold_aux1 = g_settings->getBool("fast_move")
 			&& client->checkPrivilege("fast");
 #endif
@@ -1099,6 +1104,10 @@ void Game::run()
 	while (RenderingEngine::run()
 			&& !(*kill || g_gamecallback->shutdown_requested
 			|| (server && server->isShutdownRequested()))) {
+#ifdef __IOS__
+		if (device->isWindowMinimized())
+			continue;
+#endif
 
 		const irr::core::dimension2d<u32> &current_screen_size =
 			RenderingEngine::get_video_driver()->getScreenSize();
@@ -1343,6 +1352,10 @@ bool Game::createClient(const std::string &playername,
 		return false;
 	}
 
+#if defined(__ANDROID__) || defined(__IOS__)
+	porting::notifyServerConnect(!simple_singleplayer_mode);
+#endif
+
 	if (!getServerContent(&connect_aborted)) {
 		if (error_message->empty() && !connect_aborted) {
 			// Should not happen if error messages are set properly
@@ -1580,7 +1593,7 @@ bool Game::connectToServer(const std::string &playername,
 			} else {
 				wait_time += dtime;
 				// Only time out if we aren't waiting for the server we started
-				if (!address->empty() && wait_time > 10) {
+				if (!address->empty() && wait_time > 15) {
 					*error_message = "Connection timed out.";
 					errorstream << *error_message << std::endl;
 					break;
@@ -1659,7 +1672,10 @@ bool Game::getServerContent(bool *aborted)
 			std::stringstream message;
 			std::fixed(message);
 			message.precision(0);
-			message << gettext("Media...") << " " << (client->mediaReceiveProgress()*100) << "%";
+			float receive = client->mediaReceiveProgress() * 100;
+			message << gettext("Media...");
+			if (receive > 0)
+				message << " " << receive << "%";
 			message.precision(2);
 
 			if ((USE_CURL == 0) ||
@@ -1698,6 +1714,9 @@ inline void Game::updateInteractTimers(f32 dtime)
 
 	if (runData.object_hit_delay_timer >= 0)
 		runData.object_hit_delay_timer -= dtime;
+
+	if (runData.noplace_delay_timer >= 0)
+		runData.noplace_delay_timer -= dtime;
 
 	runData.time_from_last_punch += dtime;
 }
@@ -1872,16 +1891,18 @@ void Game::processUserInput(f32 dtime)
 	// Input handler step() (used by the random input generator)
 	input->step(dtime);
 
-#ifdef __ANDROID__
-	auto formspec = m_game_ui->getFormspecGUI();
-	if (formspec)
-		formspec->getAndroidUIInput();
-	else
-		handleAndroidChatInput();
+#if defined(__ANDROID__) || defined(__IOS__)
+	if (!porting::hasRealKeyboard()) {
+		auto formspec = m_game_ui->getFormspecGUI();
+		if (formspec)
+			formspec->getAndroidUIInput();
+		else
+			handleAndroidChatInput();
+	}
 #endif
 
 	// Increase timer for double tap of "keymap_jump"
-	if (m_cache_doubletap_jump && runData.jump_timer <= 0.2f)
+	if (m_cache_doubletap_jump && runData.jump_timer <= 0.15f)
 		runData.jump_timer += dtime;
 
 	processKeyInput();
@@ -1901,7 +1922,7 @@ void Game::processKeyInput()
 	} else if (wasKeyDown(KeyType::INVENTORY)) {
 		openInventory();
 	} else if (input->cancelPressed()) {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 		m_android_chat_open = false;
 #endif
 		if (!gui_chat_console->isOpenInhibited()) {
@@ -2101,10 +2122,12 @@ void Game::openConsole(float scale, const wchar_t *line)
 {
 	assert(scale > 0.0f && scale <= 1.0f);
 
-#ifdef __ANDROID__
-	porting::showInputDialog(gettext("ok"), "", "", 2);
-	m_android_chat_open = true;
-#else
+#if defined(__ANDROID__) || defined(__IOS__)
+	if (!porting::hasRealKeyboard()) {
+		porting::showInputDialog(gettext("OK"), "", "", 2);
+		m_android_chat_open = true;
+	} else {
+#endif
 	if (gui_chat_console->isOpenInhibited())
 		return;
 	gui_chat_console->openConsole(scale);
@@ -2112,10 +2135,12 @@ void Game::openConsole(float scale, const wchar_t *line)
 		gui_chat_console->setCloseOnEnter(true);
 		gui_chat_console->replaceAndAddToHistory(line);
 	}
+#if defined(__ANDROID__) || defined(__IOS__)
+	}
 #endif
 }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 void Game::handleAndroidChatInput()
 {
 	if (m_android_chat_open && porting::getInputDialogState() == 0) {
@@ -2145,9 +2170,24 @@ void Game::toggleFreeMove()
 
 void Game::toggleFreeMoveAlt()
 {
-	if (m_cache_doubletap_jump && runData.jump_timer < 0.2f)
-		toggleFreeMove();
+	bool free_move = !g_settings->getBool("free_move");
+	bool creative = !g_settings->getBool("creative_mode");
 
+	if (simple_singleplayer_mode) {
+		if (m_cache_doubletap_jump && runData.jump_timer < 0.15f) {
+			if (!free_move || !creative)
+				toggleFreeMove();
+		}
+	} else {
+		if (client->checkPrivilege("fly") && runData.jump_timer < 0.15f) {
+#if defined(__ANDROID__) || defined(__IOS__)
+			toggleFreeMove();
+#else
+		if (m_cache_doubletap_jump)
+			toggleFreeMove();
+#endif
+		}
+	}
 	runData.reset_jump_timer = true;
 }
 
@@ -2181,7 +2221,7 @@ void Game::toggleFast()
 		m_game_ui->showTranslatedStatusText("Fast mode disabled");
 	}
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	m_cache_hold_aux1 = fast_move && has_fast_privs;
 #endif
 }
@@ -2249,6 +2289,7 @@ void Game::toggleMinimap(bool shift_pressed)
 
 	m_game_ui->m_flags.show_minimap = true;
 	switch (mode) {
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		case MINIMAP_MODE_SURFACEx1:
 			m_game_ui->showTranslatedStatusText("Minimap in surface mode, Zoom x1");
 			break;
@@ -2266,7 +2307,16 @@ void Game::toggleMinimap(bool shift_pressed)
 			break;
 		case MINIMAP_MODE_RADARx4:
 			m_game_ui->showTranslatedStatusText("Minimap in radar mode, Zoom x4");
-			break;
+		break;
+#else
+		case MINIMAP_MODE_SURFACEx1:
+			m_game_ui->showTranslatedStatusText("Minimap shown");
+		break;
+		case MINIMAP_MODE_RADARx1:
+			m_game_ui->showTranslatedStatusText("Minimap in radar mode");
+		break;
+#endif
+
 		default:
 			mode = MINIMAP_MODE_OFF;
 			m_game_ui->m_flags.show_minimap = false;
@@ -2381,10 +2431,17 @@ void Game::decreaseViewRange()
 void Game::toggleFullViewRange()
 {
 	draw_control->range_all = !draw_control->range_all;
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	if (draw_control->range_all)
 		m_game_ui->showTranslatedStatusText("Enabled unlimited viewing range");
 	else
 		m_game_ui->showTranslatedStatusText("Disabled unlimited viewing range");
+#else
+	if (draw_control->range_all)
+		m_game_ui->showTranslatedStatusText("Enabled far viewing range");
+	else
+		m_game_ui->showTranslatedStatusText("Disabled far viewing range");
+#endif
 }
 
 
@@ -2401,7 +2458,7 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 	if ((device->isWindowActive() && device->isWindowFocused()
 			&& !isMenuActive()) || random_input) {
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		if (!random_input) {
 			// Mac OSX gets upset if this is set every frame
 			if (device->getCursorControl()->isVisible())
@@ -2420,7 +2477,7 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 
 	} else {
 
-#ifndef ANDROID
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		// Mac OSX gets upset if this is set every frame
 		if (!device->getCursorControl()->isVisible())
 			device->getCursorControl()->setVisible(true);
@@ -2503,13 +2560,13 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 			( (u32)(isKeyDown(KeyType::ZOOM)                          & 0x1) << 9)
 		);
 
-#ifdef ANDROID
+#if defined(__ANDROID__) || defined(__IOS__)
 	/* For Android, simulate holding down AUX1 (fast move) if the user has
 	 * the fast_move setting toggled on. If there is an aux1 key defined for
 	 * Android then its meaning is inverted (i.e. holding aux1 means walk and
 	 * not fast)
 	 */
-	if (m_cache_hold_aux1) {
+	if (m_cache_hold_aux1 && !porting::hasRealKeyboard()) {
 		control.aux1 = control.aux1 ^ true;
 		keypress_bits ^= ((u32)(1U << 5));
 	}
@@ -2539,6 +2596,15 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 
 inline void Game::step(f32 *dtime)
 {
+#if defined(__ANDROID__) || defined(__IOS__)
+	if (g_menumgr.pausesGame()) {
+		runData.pause_game_timer += *dtime;
+		if (runData.pause_game_timer > 120.f) {
+			g_gamecallback->disconnect();
+			return;
+		}
+	}
+#endif
 	bool can_be_and_is_paused =
 			(simple_singleplayer_mode && g_menumgr.pausesGame());
 
@@ -3293,10 +3359,13 @@ void Game::handlePointingAtNode(const PointedThing &pointed,
 
 	ClientMap &map = client->getEnv().getClientMap();
 
+	bool digging = false;
 	if (runData.nodig_delay_timer <= 0.0 && input->getLeftState()
 			&& !runData.digging_blocked
 			&& client->checkPrivilege("interact")) {
 		handleDigging(pointed, nodepos, selected_item, hand_item, dtime);
+		digging = true;
+		runData.noplace_delay_timer = 1.0;
 	}
 
 	// This should be done after digging handling
@@ -3316,6 +3385,7 @@ void Game::handlePointingAtNode(const PointedThing &pointed,
 
 	if ((input->getRightClicked() ||
 			runData.repeat_rightclick_timer >= m_repeat_right_click_time) &&
+			!digging && runData.noplace_delay_timer <= 0.0 &&
 			client->checkPrivilege("interact")) {
 		runData.repeat_rightclick_timer = 0;
 		infostream << "Ground right-clicked" << std::endl;
@@ -3546,7 +3616,15 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 
 	m_game_ui->setInfoText(infotext);
 
-	if (input->getLeftState()) {
+	const ItemDefinition &playeritem_def =
+		tool_item.getDefinition(itemdef_manager);
+	bool nohit_enabled = ((ItemGroupList) playeritem_def.groups)["nohit"] != 0;
+
+#ifdef HAVE_TOUCHSCREENGUI
+	if (input->getRightClicked() && !nohit_enabled) {
+#else
+	if (input->getLeftState() && !nohit_enabled) {
+#endif
 		bool do_punch = false;
 		bool do_punch_damage = false;
 
@@ -3576,7 +3654,11 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 			if (!disable_send)
 				client->interact(INTERACT_START_DIGGING, pointed);
 		}
-	} else if (input->getRightClicked()) {
+#ifdef HAVE_TOUCHSCREENGUI
+	} else if (input->getLeftClicked() || (input->getRightClicked() && nohit_enabled)) {
+#else
+	} else if (input->getRightClicked() || (input->getLeftClicked() && nohit_enabled)) {
+#endif
 		infostream << "Right-clicked object" << std::endl;
 		client->interact(INTERACT_PLACE, pointed);  // place
 	}
@@ -3658,6 +3740,8 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 		client->setCrack(runData.dig_index, nodepos);
 	} else {
 		infostream << "Digging completed" << std::endl;
+		runData.noplace_delay_timer = 1.0;
+		client->interact(INTERACT_DIGGING_COMPLETED, pointed);
 		client->setCrack(-1, v3s16(0, 0, 0));
 
 		runData.dig_time = 0;
@@ -3732,7 +3816,11 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	*/
 
 	if (draw_control->range_all) {
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		runData.fog_range = 100000 * BS;
+#else
+		runData.fog_range = draw_control->wanted_range * BS * 4;
+#endif
 	} else {
 		runData.fog_range = draw_control->wanted_range * BS;
 	}
@@ -3862,6 +3950,12 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		ItemStack selected_item, hand_item;
 		ItemStack &tool_item = player->getWieldedItem(&selected_item, &hand_item);
 		camera->wield(tool_item);
+
+		std::string item_desc = selected_item.getDefinition(itemdef_manager).description;
+			if (wield_name != item_desc) {
+				m_game_ui->showStatusText(utf8_to_wide(item_desc));
+				wield_name = item_desc;
+			}
 	}
 
 	/*
@@ -4009,6 +4103,10 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 	u32 frametime_min = 1000 / (g_menumgr.pausesGame()
 			? g_settings->getFloat("pause_fps_max")
 			: g_settings->getFloat("fps_max"));
+#if defined(__ANDROID__) || defined(__IOS__)
+	if (g_menumgr.pausesGame() && !device->isWindowFocused())
+		frametime_min = 1000;
+#endif
 
 	if (fps_timings->busy_time < frametime_min) {
 		fps_timings->sleep_time = frametime_min - fps_timings->busy_time;
@@ -4076,6 +4174,28 @@ void Game::readSettings()
 	m_does_lost_focus_pause_game = g_settings->getBool("pause_on_lost_focus");
 }
 
+#if defined(__ANDROID__) || defined(__IOS__)
+void Game::pauseGame()
+{
+	if (g_menumgr.pausesGame() || !hud)
+		return;
+	g_touchscreengui->handleReleaseAll();
+	showPauseMenu();
+	runData.pause_game_timer = 0;
+}
+#endif
+
+#ifdef __IOS__
+void Game::customStatustext(const std::wstring &text, float time)
+{
+	m_statustext = text;
+	if (m_statustext == L"")
+		runData.statustext_time = 0;
+	else
+		runData.statustext_time = time;
+}
+#endif
+
 /****************************************************************************/
 /****************************************************************************
  Shutdown / cleanup
@@ -4128,7 +4248,7 @@ void Game::showDeathFormspec()
 #define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
 void Game::showPauseMenu()
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	static const std::string control_text = strgettext("Default Controls:\n"
 		"No menu visible:\n"
 		"- single tap: button activate\n"
@@ -4177,35 +4297,38 @@ void Game::showPauseMenu()
 	str_formspec_escape(control_text);
 #endif
 
+#ifndef __IOS__
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
+#else
+	float ypos = 1.5f;
+#endif
 	std::ostringstream os;
 
 	os << "formspec_version[1]" << SIZE_TAG
-		<< "button_exit[4," << (ypos++) << ";3,0.5;btn_continue;"
+		<< "bgcolor[#00000060;true]"
+		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_continue;"
 		<< strgettext("Continue") << "]";
 
 	if (!simple_singleplayer_mode) {
-		os << "button_exit[4," << (ypos++) << ";3,0.5;btn_change_password;"
+		os << "button_exit[3.5," << (ypos++) << ";4,0.5;btn_change_password;"
 			<< strgettext("Change Password") << "]";
-	} else {
-		os << "field[4.95,0;5,1.5;;" << strgettext("Game paused") << ";]";
 	}
 
-#ifndef __ANDROID__
+#if !defined(__ANDROID__) && !defined(__IOS__)
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound")) {
-		os << "button_exit[4," << (ypos++) << ";3,0.5;btn_sound;"
+		os << "button_exit[3.5," << (ypos++) << ";4,0.5;btn_sound;"
 			<< strgettext("Sound Volume") << "]";
 	}
 #endif
-	os		<< "button_exit[4," << (ypos++) << ";3,0.5;btn_key_config;"
+	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_key_config;"
 		<< strgettext("Change Keys")  << "]";
 #endif
-	os		<< "button_exit[4," << (ypos++) << ";3,0.5;btn_exit_menu;"
+	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << "]";
-	os		<< "button_exit[4," << (ypos++) << ";3,0.5;btn_exit_os;"
+	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_exit_os;"
 		<< strgettext("Exit to OS")   << "]"
-		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
+/*		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
 		<< "textarea[0.4,0.25;3.9,6.25;;" << PROJECT_NAME_C " " VERSION_STRING "\n"
 		<< "\n"
 		<<  strgettext("Game info:") << "\n";
@@ -4243,7 +4366,7 @@ void Game::showPauseMenu()
 
 		}
 	}
-	os << ";]";
+	os << ";]"*/;
 
 	/* Create menu */
 	/* Note: FormspecFormSource and LocalFormspecHandler  *
@@ -4256,6 +4379,8 @@ void Game::showPauseMenu()
 			fs_src, txt_dst, client->getFormspecPrepend());
 	formspec->setFocus("btn_continue");
 	formspec->doPause = true;
+
+	runData.pause_game_timer = 0;
 }
 
 /****************************************************************************/
@@ -4263,6 +4388,8 @@ void Game::showPauseMenu()
  extern function for launching the game
  ****************************************************************************/
 /****************************************************************************/
+
+static Game *g_game = NULL;
 
 void the_game(bool *kill,
 		bool random_input,
@@ -4280,6 +4407,7 @@ void the_game(bool *kill,
 		bool simple_singleplayer_mode)
 {
 	Game game;
+	g_game = &game;
 
 	/* Make a copy of the server address because if a local singleplayer server
 	 * is created then this is updated and we don't want to change the value
@@ -4309,5 +4437,25 @@ void the_game(bool *kill,
 				strgettext("\nCheck debug.txt for details.");
 		errorstream << error_message << std::endl;
 	}
+	g_game = NULL;
 	game.shutdown();
 }
+
+#if defined(__ANDROID__) || defined(__IOS__)
+void external_pause_game()
+{
+	if (!g_game)
+		return;
+	g_game->pauseGame();
+}
+#endif
+
+#ifdef __IOS__
+void external_statustext(const char *text, float duration)
+{
+	if (!g_game)
+		return;
+	std::wstring s = narrow_to_wide(std::string(text));
+	g_game->customStatustext(s, duration);
+}
+#endif

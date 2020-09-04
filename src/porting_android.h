@@ -72,6 +72,22 @@ int getInputDialogState();
  */
 std::string getInputDialogValue();
 
+/**
+ * get max device RAM as integer value
+ * returns -1 on failure
+ */
+	float getMemoryMax();
+
+/**
+ * notify java on server connection
+ */
+	void notifyServerConnect(bool is_multiplayer);
+
+/**
+ * notify java on game exit
+ */
+	void notifyExitGame();
+
 #ifndef SERVER
 float getDisplayDensity();
 v2u32 getDisplaySize();

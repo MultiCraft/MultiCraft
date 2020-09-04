@@ -150,10 +150,9 @@ bool Thread::kill()
 	TerminateThread((HANDLE) m_thread_obj->native_handle(), 0);
 	CloseHandle((HANDLE) m_thread_obj->native_handle());
 #else
-	// We need to pthread_kill instead on Android since NDKv5's pthread
-	// implementation is incomplete.
+	// We need to pthread_kill instead on Android pthread
 # ifdef __ANDROID__
-	pthread_kill(getThreadHandle(), SIGKILL);
+	pthread_kill(getThreadHandle(), SIGQUIT);
 # else
 	pthread_cancel(getThreadHandle());
 # endif
@@ -297,7 +296,7 @@ bool Thread::bindToProcessor(unsigned int proc_number)
 	return pthread_processor_bind_np(PTHREAD_BIND_ADVISORY_NP,
 			&answer, proc_number, getThreadHandle()) == 0;
 
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || defined(__IOS__)
 
 	struct thread_affinity_policy tapol;
 
@@ -341,4 +340,3 @@ bool Thread::setPriority(int prio)
 
 #endif
 }
-

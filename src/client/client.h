@@ -437,6 +437,10 @@ public:
 	{
 		return m_env.getLocalPlayer()->formspec_prepend;
 	}
+
+	const u16 getRoundScreen() { return m_round_screen; }
+	const f32 getHudScaling() { return m_hud_scaling; }
+	const bool hasSmallHud() { return m_hud_small; }
 private:
 	void loadMods();
 	bool checkBuiltinIntegrity();
@@ -602,4 +606,8 @@ private:
 	u32 m_csm_restriction_noderange = 8;
 
 	std::unique_ptr<ModChannelMgr> m_modchannel_mgr;
+
+	u16 m_round_screen;
+	f32 m_hud_scaling;
+	bool m_hud_small;
 };

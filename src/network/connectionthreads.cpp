@@ -782,9 +782,9 @@ void ConnectionSendThread::sendPackets(float dtime)
 			if (!peer)
 				continue;
 			if (peer->m_increment_packets_remaining == 0) {
-				LOG(warningstream << m_connection->getDesc()
-					<< " Packet quota used up for peer_id=" << peerId
-					<< ", was " << peer_packet_quota << " pkts" << std::endl);
+				//LOG(warningstream << m_connection->getDesc()
+				//	<< " Packet quota used up for peer_id=" << peerId
+				//	<< ", was " << peer_packet_quota << " pkts" << std::endl);
 			}
 		}
 	}

@@ -224,6 +224,9 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("gui_scaling_filter_txr2img", "true");
 	settings->setDefault("desynchronize_mapblock_texture_animation", "true");
 	settings->setDefault("hud_hotbar_max_width", "1.0");
+	settings->setDefault("hud_move_upwards", "0");
+	settings->setDefault("hud_small", "false");
+	settings->setDefault("round_screen", "0");
 	settings->setDefault("enable_local_map_saving", "false");
 	settings->setDefault("show_entity_selectionbox", "true");
 	settings->setDefault("texture_clean_transparent", "false");
@@ -275,11 +278,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("aux1_descends", "false");
 	settings->setDefault("doubletap_jump", "false");
 	settings->setDefault("always_fly_fast", "true");
-#ifdef __ANDROID__
-	settings->setDefault("autojump", "true");
-#else
 	settings->setDefault("autojump", "false");
-#endif
 	settings->setDefault("continuous_forward", "false");
 	settings->setDefault("enable_joysticks", "false");
 	settings->setDefault("joystick_id", "0");

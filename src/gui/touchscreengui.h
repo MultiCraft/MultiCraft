@@ -198,6 +198,9 @@ public:
 	void hide();
 	void show();
 
+	// handle all buttons
+	void handleReleaseAll();
+
 private:
 	IrrlichtDevice *m_device;
 	IGUIEnvironment *m_guienv;

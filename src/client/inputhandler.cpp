@@ -23,6 +23,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gui/mainmenumanager.h"
 #include "hud.h"
 
+#if defined(__ANDROID__)
+#include "porting_android.h"
+#endif
+
+#ifdef __IOS__
+#include "porting_ios.h"
+#endif
+
+#if defined(__ANDROID__) || defined(__IOS__)
+extern void external_pause_game();
+#endif
+
 void KeyCache::populate_nonchanging()
 {
 	key[KeyType::ESC] = EscapeKey;
@@ -129,6 +141,23 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 	}
 #endif
 
+#ifdef __IOS__
+	if (event.EventType == irr::EET_APPLICATION_EVENT) {
+		int AppEvent = event.ApplicationEvent.EventType;
+		if (AppEvent == irr::EAET_DID_PAUSE) {
+			external_pause_game();
+#ifdef ADS
+			ads_set_paused(true);
+#endif
+		}
+#ifdef ADS
+		if (AppEvent == irr::EAET_DID_RESUME)
+			ads_set_paused(false);
+#endif
+		return true;
+	}
+#endif
+
 	if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
 		/* TODO add a check like:
 		if (event.JoystickEvent != joystick_we_listen_for)
@@ -172,8 +201,10 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 				LL_NONE,    // ELL_NONE
 		};
 		assert(event.LogEvent.Level < ARRLEN(irr_loglev_conv));
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		g_logger.log(irr_loglev_conv[event.LogEvent.Level],
 				std::string("Irrlicht: ") + event.LogEvent.Text);
+#endif
 		return true;
 	}
 	/* always return false in order to continue processing events */

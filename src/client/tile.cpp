@@ -37,7 +37,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #if ENABLE_GLES
 #ifdef _IRR_COMPILE_WITH_OGLES1_
+#ifndef __IOS__
 #include <GLES/gl.h>
+#else
+#include <OpenGLES/ES2/gl.h>
+#endif
 #else
 #include <GLES2/gl2.h>
 #endif
@@ -1057,13 +1061,15 @@ video::IImage * Align2Npot2(video::IImage * image,
 	unsigned int height = npot2(dim.Height);
 	unsigned int width  = npot2(dim.Width);
 
-	if (dim.Height == height && dim.Width == width)
+	if (dim.Width == width)
 		return image;
 
-	if (dim.Height > height)
-		height *= 2;
-	if (dim.Width > width)
-		width *= 2;
+#ifdef __IOS__
+	if (height > 64 || width > 64) {
+		height /= 2;
+		width /= 2;
+	}
+#endif
 
 	video::IImage *targetimage =
 			driver->createImage(video::ECF_A8R8G8B8,
@@ -1244,8 +1250,13 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 					It is an image with a number of cracking stages
 					horizontally tiled.
 				*/
+#ifndef HAVE_TOUCHSCREENGUI		
 				video::IImage *img_crack = m_sourcecache.getOrLoad(
 					"crack_anylength.png");
+#else
+				video::IImage *img_crack = m_sourcecache.getOrLoad(
+					"crack_anylength_touch.png");
+#endif
 
 				if (img_crack) {
 					draw_crack(img_crack, baseimg,

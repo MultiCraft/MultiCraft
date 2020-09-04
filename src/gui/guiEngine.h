@@ -218,6 +218,9 @@ private:
 	/** scripting interface */
 	MainMenuScripting       *m_script = nullptr;
 
+	/** irrlicht device */
+	IrrlichtDevice          *m_device = nullptr;
+
 	/** script basefolder */
 	std::string              m_scriptdir = "";
 

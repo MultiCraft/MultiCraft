@@ -178,8 +178,8 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 
 	std::string legacyPlayerNameCasing = playerName;
 
-	if (!isSingleplayer() && strcasecmp(playername, "singleplayer") == 0) {
-		actionstream << "Server: Player with the name \"singleplayer\" tried "
+	if (!isSingleplayer() && strcasecmp(playername, "Player") == 0) {
+		actionstream << "Server: Player with the name \"Player\" tried "
 			"to connect from " << addr_s << std::endl;
 		DenyAccess(peer_id, SERVER_ACCESSDENIED_WRONG_NAME);
 		return;
@@ -1404,15 +1404,18 @@ void Server::handleCommand_NodeMetaFields(NetworkPacket* pkt)
 		return;
 	}
 
+#if USE_SQLITE
 	// If something goes wrong, this player is to blame
 	RollbackScopeActor rollback_scope(m_rollback,
 			std::string("player:")+player->getName());
 
 	// Check the target node for rollback data; leave others unnoticed
 	RollbackNode rn_old(&m_env->getMap(), p, this);
+#endif
 
 	m_script->node_on_receive_fields(p, formname, fields, playersao);
 
+#if USE_SQLITE
 	// Report rollback data
 	RollbackNode rn_new(&m_env->getMap(), p, this);
 	if (rollback() && rn_new != rn_old) {
@@ -1420,6 +1423,7 @@ void Server::handleCommand_NodeMetaFields(NetworkPacket* pkt)
 		action.setSetNode(p, rn_old, rn_new);
 		rollback()->reportAction(action);
 	}
+#endif
 }
 
 void Server::handleCommand_InventoryFields(NetworkPacket* pkt)

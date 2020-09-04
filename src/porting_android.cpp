@@ -38,6 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 extern int main(int argc, char *argv[]);
+extern void external_pause_game();
 
 void android_main(android_app *app)
 {
@@ -76,12 +77,25 @@ extern "C" {
 			"Java_net_minetest_minetest_GameActivity_putMessageBoxResult got: " <<
 			std::string((const char*) env->GetStringChars(text, nullptr)) << std::endl;
 	}
+	/*JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
+			JNIEnv *env, jclass clazz)
+	{
+		external_pause_game();
+	}*/
+	bool device_has_keyboard = false;
+	/*JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_keyboardEvent(
+				JNIEnv *env, jclass clazz, jboolean hasKeyboard)
+	{
+		device_has_keyboard = hasKeyboard;
+	}*/
 }
 
 namespace porting {
 android_app *app_global;
 JNIEnv      *jnienv;
 jclass       nativeActivity;
+
+static float device_memory_max = 0;
 
 jclass findClass(const std::string &classname)
 {
@@ -192,7 +206,6 @@ void initializePathsAndroid()
 	path_share   = path_storage + DIR_DELIM + PROJECT_NAME_C;
 	path_cache   = getAndroidPath(nativeActivity,
 			app_global->activity->clazz, mt_getAbsPath, "getCacheDir");
-	migrateCachePath();
 }
 
 void showInputDialog(const std::string &acceptButton, const std::string &hint,
@@ -253,6 +266,47 @@ std::string getInputDialogValue()
 
 	return text;
 }
+
+	float getMemoryMax() {
+		if (device_memory_max == 0) {
+			jmethodID getMemory = jnienv->GetMethodID(nativeActivity,
+			                                          "getMemoryMax", "()F");
+
+			if (getMemory == nullptr)
+				assert("porting::getMemoryMax unable to find java method" == nullptr);
+
+			device_memory_max = jnienv->CallFloatMethod(
+					app_global->activity->clazz, getMemory);
+		}
+
+		return device_memory_max;
+	}
+
+	bool hasRealKeyboard() {
+		return device_has_keyboard;
+	}
+
+	void notifyServerConnect(bool is_multiplayer) {
+		/*jmethodID notifyConnect = jnienv->GetMethodID(nativeActivity,
+		                                              "notifyServerConnect", "(Z)V");
+
+		if (notifyConnect == nullptr)
+			assert("porting::notifyServerConnect unable to find java method" == nullptr);
+
+		auto param = (jboolean) is_multiplayer;
+
+		jnienv->CallVoidMethod(app_global->activity->clazz, notifyConnect, param);*/
+	}
+
+	void notifyExitGame() {
+		/*jmethodID notifyExit = jnienv->GetMethodID(nativeActivity,
+		                                           "notifyExitGame", "()V");
+
+		if (notifyExit == nullptr)
+			assert("porting::notifyExitGame unable to find java method" == nullptr);
+
+		jnienv->CallVoidMethod(app_global->activity->clazz, notifyExit);*/
+	}
 
 #ifndef SERVER
 float getDisplayDensity()

@@ -1256,7 +1256,20 @@ ItemStack read_item(lua_State* L, int index, IItemDefManager *idef)
 
 		return istack;
 	} else {
-		throw LuaError("Expecting itemstack, itemstring, table or nil");
+		// throw LuaError("Expecting itemstack, itemstring, table or nil");
+
+		// Print a traceback
+		lua_getglobal(L, "debug");
+		lua_getfield(L, -1, "traceback");
+		lua_remove(L, -2); // Remove debug
+		lua_call(L, 0, 1);
+		std::string tb = lua_tostring(L, -1);
+		lua_remove(L, -2); // Remove the traceback
+
+		errorstream << "read_item(): Expecting itemstack, itemstring, "
+			<< "table or nil." << std::endl << tb << std::endl;
+
+		return ItemStack();
 	}
 }
 

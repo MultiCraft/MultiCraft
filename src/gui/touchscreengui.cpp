@@ -1198,3 +1198,12 @@ void TouchScreenGUI::show()
 
 	Toggle(true);
 }
+
+void TouchScreenGUI::handleReleaseAll()
+{
+	m_known_ids.clear();
+	if (m_move_id != -1)
+		handleReleaseEvent(m_move_id);
+	for (auto & m_button : m_buttons)
+		m_button.ids.clear();
+}

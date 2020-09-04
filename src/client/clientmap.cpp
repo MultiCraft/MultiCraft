@@ -184,7 +184,11 @@ void ClientMap::updateDrawList()
 			if (block->mesh)
 				block->mesh->updateCameraOffset(m_camera_offset);
 
+#if !defined(__ANDROID__) && !defined(__IOS__)
 			float range = 100000 * BS;
+#else
+			float range = m_control.wanted_range * BS * 4;	
+#endif
 			if (!m_control.range_all)
 				range = m_control.wanted_range * BS;
 

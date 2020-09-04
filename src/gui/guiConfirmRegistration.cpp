@@ -45,7 +45,7 @@ GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 		m_client(client), m_playername(playername), m_password(password),
 		m_aborted(aborted), m_tsrc(tsrc)
 {
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	m_touchscreen_visible = false;
 #endif
 }
@@ -162,7 +162,7 @@ void GUIConfirmRegistration::drawMenu()
 	driver->draw2DRectangle(bgcolor, AbsoluteRect, &AbsoluteClippingRect);
 
 	gui::IGUIElement::draw();
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	getAndroidUIInput();
 #endif
 }
@@ -251,7 +251,7 @@ bool GUIConfirmRegistration::OnEvent(const SEvent &event)
 	return false;
 }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 bool GUIConfirmRegistration::getAndroidUIInput()
 {
 	if (!hasAndroidUIInput() || m_jni_field_name != "password")

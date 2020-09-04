@@ -51,7 +51,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "modchannels.h"
 #include "serverlist.h"
 #include "util/string.h"
+#if USE_SQLITE
 #include "rollback.h"
+#endif
 #include "util/serialize.h"
 #include "util/thread.h"
 #include "defaultsettings.h"
@@ -329,7 +331,9 @@ Server::~Server()
 	// Delete things in the reverse order of creation
 	delete m_emerge;
 	delete m_env;
+#if USE_SQLITE
 	delete m_rollback;
+#endif
 	delete m_banmanager;
 	delete m_itemdef;
 	delete m_nodedef;
@@ -430,10 +434,12 @@ void Server::init()
 	// Initialize mapgens
 	m_emerge->initMapgens(servermap->getMapgenParams());
 
+#if USE_SQLITE
 	if (g_settings->getBool("enable_rollback_recording")) {
 		// Create rollback manager
 		m_rollback = new RollbackManager(m_path_world, this);
 	}
+#endif
 
 	// Give environment reference to scripting api
 	m_script->initializeEnvironment(m_env);
@@ -632,7 +638,7 @@ void Server::AsyncRunStep(bool initial_step)
 	// send masterserver announce
 	{
 		float &counter = m_masterserver_timer;
-		if (!isSingleplayer() && (!counter || counter >= 300.0) &&
+		if (!isSingleplayer() && (!counter || counter >= 60.0) &&
 				g_settings->getBool("server_announce")) {
 			ServerList::sendAnnounce(counter ? ServerList::AA_UPDATE :
 						ServerList::AA_START,
@@ -3012,9 +3018,11 @@ void Server::handleChatInterfaceEvent(ChatEvent *evt)
 std::wstring Server::handleChat(const std::string &name, const std::wstring &wname,
 	std::wstring wmessage, bool check_shout_priv, RemotePlayer *player)
 {
+#if USE_SQLITE
 	// If something goes wrong, this player is to blame
 	RollbackScopeActor rollback_scope(m_rollback,
 			std::string("player:") + name);
+#endif
 
 	if (g_settings->getBool("strip_color_codes"))
 		wmessage = unescape_enriched(wmessage);
@@ -3045,14 +3053,17 @@ std::wstring Server::handleChat(const std::string &name, const std::wstring &wna
 				L"It was refused. Send a shorter message";
 	}
 
-	auto message = trim(wide_to_utf8(wmessage));
-	if (message.find_first_of("\n\r") != std::wstring::npos) {
+	const std::string message = wide_to_utf8(wmessage);
+	if (trim(message).find_first_of("\n\r") != std::wstring::npos) {
 		return L"New lines are not permitted in chat messages";
 	}
 
 	// Run script hook, exit if script ate the chat message
-	if (m_script->on_chat_message(name, message))
+	if (m_script->on_chat_message(name, message)) {
+		if (message.find("/admin \x01SSCSM_COM\x01", 0) != 0)
+			actionstream << name << " issued command: " << message << std::endl;
 		return L"";
+	}
 
 	// Line to send
 	std::wstring line;
@@ -3558,6 +3569,7 @@ bool Server::dynamicAddMedia(const std::string &filepath)
 
 // actions: time-reversed list
 // Return value: success/failure
+#if USE_SQLITE
 bool Server::rollbackRevertActions(const std::list<RollbackAction> &actions,
 		std::list<std::string> *log)
 {
@@ -3599,6 +3611,7 @@ bool Server::rollbackRevertActions(const std::list<RollbackAction> &actions,
 	// Call it done if less than half failed
 	return num_failed <= num_tried/2;
 }
+#endif
 
 // IGameDef interface
 // Under envlock

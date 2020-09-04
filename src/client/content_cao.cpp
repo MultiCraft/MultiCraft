@@ -897,9 +897,6 @@ u16 GenericCAO::getLightPosition(v3s16 *pos)
 
 void GenericCAO::updateNametag()
 {
-	if (m_is_local_player) // No nametag for local player
-		return;
-
 	if (m_prop.nametag.empty()) {
 		// Delete nametag
 		if (m_nametag) {
@@ -1229,7 +1226,7 @@ void GenericCAO::updateTextures(std::string mod)
 	bool use_bilinear_filter = g_settings->getBool("bilinear_filter");
 	bool use_anisotropic_filter = g_settings->getBool("anisotropic_filter");
 
-	m_previous_texture_modifier = m_current_texture_modifier;
+//	m_previous_texture_modifier = m_current_texture_modifier; // otherwise modifiers will overlap due to function design bug
 	m_current_texture_modifier = mod;
 	m_glow = m_prop.glow;
 
@@ -1606,7 +1603,7 @@ void GenericCAO::processMessage(const std::string &data)
 			player->setZoomFOV(m_prop.zoom_fov);
 		}
 
-		if ((m_is_player && !m_is_local_player) && m_prop.nametag.empty())
+		if (m_is_player && m_prop.nametag.empty())
 			m_prop.nametag = m_name;
 
 		if (expire_visuals) {
@@ -1778,9 +1775,9 @@ void GenericCAO::processMessage(const std::string &data)
 						v2f(m_prop.visual_size.X, m_prop.visual_size.Y) * BS);
 				m_env->addSimpleObject(simple);
 			} else if (m_reset_textures_timer < 0 && !m_prop.damage_texture_modifier.empty()) {
-				m_reset_textures_timer = 0.05;
+				m_reset_textures_timer = 0.1;
 				if(damage >= 2)
-					m_reset_textures_timer += 0.05 * damage;
+					m_reset_textures_timer += 0.25 * damage;
 				updateTextures(m_current_texture_modifier + m_prop.damage_texture_modifier);
 			}
 		}
@@ -1830,11 +1827,19 @@ bool GenericCAO::directReportPunch(v3f dir, const ItemStack *punchitem,
 			punchitem,
 			time_from_last_punch);
 
-	if(result.did_punch && result.damage != 0)
+	if (!itemgroup_get(m_armor_groups, "silent")) {
+		SimpleSoundSpec spec;
+		spec.name = "player_punch";
+		spec.gain = 1.0f;
+		m_client->sound()->playSoundAt(spec, false, getPosition());
+	}
+
+	s16 damage = result.damage;
+	if(result.did_punch && damage != 0)
 	{
-		if(result.damage < m_hp)
+		if(damage < m_hp)
 		{
-			m_hp -= result.damage;
+			m_hp -= damage;
 		} else {
 			m_hp = 0;
 			// TODO: Execute defined fast response
@@ -1845,9 +1850,9 @@ bool GenericCAO::directReportPunch(v3f dir, const ItemStack *punchitem,
 			m_env->addSimpleObject(simple);
 		}
 		if (m_reset_textures_timer < 0 && !m_prop.damage_texture_modifier.empty()) {
-			m_reset_textures_timer = 0.05;
+			m_reset_textures_timer = 0.1;
 			if (result.damage >= 2)
-				m_reset_textures_timer += 0.05 * result.damage;
+				m_reset_textures_timer += 0.25 * result.damage;
 			updateTextures(m_current_texture_modifier + m_prop.damage_texture_modifier);
 		}
 	}
