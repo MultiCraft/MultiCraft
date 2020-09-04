@@ -35,6 +35,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cerrno>
 #include <cstring>
 
+#ifdef __IOS__
+#import <Foundation/Foundation.h>
+#endif
+
 const int BUFFER_LENGTH = 256;
 
 class StringBuffer : public std::streambuf {
@@ -149,6 +153,31 @@ class AndroidSystemLogOutput : public ICombinedLogOutput {
 };
 
 AndroidSystemLogOutput g_android_log_output;
+
+#endif
+
+// iOS
+#ifdef __IOS__
+
+class IosSystemLogOutput : public ICombinedLogOutput {
+public:
+	IosSystemLogOutput()
+	{
+		g_logger.addOutput(this);
+	}
+	~IosSystemLogOutput()
+	{
+		g_logger.removeOutput(this);
+	}
+	void logRaw(LogLevel lev, const std::string &line)
+	{
+#if !NDEBUG
+		NSLog(@"%s", line.c_str());
+#endif
+	}
+};
+
+IosSystemLogOutput g_ios_log_output;
 
 #endif
 

@@ -163,6 +163,7 @@ private:
 		const f32 max_increase_V, const bool use_pitch);
 	bool updateSneakNode(Map *map, const v3f &position, const v3f &sneak_max);
 	float getSlipFactor(Environment *env, const v3f &speedH);
+	float getSpeedFactor(Environment *env);
 	void handleAutojump(f32 dtime, Environment *env,
 		const collisionMoveResult &result,
 		const v3f &position_before_move, const v3f &speed_before_move,
@@ -179,6 +180,7 @@ private:
 	// Whether a "sneak ladder" structure is detected at the players pos
 	// see detectSneakLadder() in the .cpp for more info (always false if disabled)
 	bool m_sneak_ladder_detected = false;
+	bool m_sneak_offset = false;
 
 	// ***** Variables for temporary option of the old move code *****
 	// Stores the max player uplift by m_sneak_node

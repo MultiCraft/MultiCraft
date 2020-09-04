@@ -382,7 +382,7 @@ const HTTPFetchResult * HTTPFetchOngoing::complete(CURLcode res)
 	}
 
 	if (res != CURLE_OK) {
-		errorstream << request.url << " not found ("
+		warningstream << request.url << " not found ("
 			<< curl_easy_strerror(res) << ")"
 			<< " (response code " << result.response_code << ")"
 			<< std::endl;

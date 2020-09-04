@@ -408,7 +408,7 @@ void ScriptApiBase::objectrefGetOrCreate(lua_State *L,
 	} else {
 		push_objectRef(L, cobj->getId());
 		if (cobj->isGone())
-			warningstream << "ScriptApiBase::objectrefGetOrCreate(): "
+			actionstream << "ScriptApiBase::objectrefGetOrCreate(): "
 					<< "Pushing ObjectRef to removed/deactivated object"
 					<< ", this is probably a bug." << std::endl;
 	}

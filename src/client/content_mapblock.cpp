@@ -909,7 +909,7 @@ void MapblockMeshGenerator::drawSignlikeNode()
 {
 	u8 wall = n.getWallMounted(nodedef);
 	useTile(0, MATERIAL_FLAG_CRACK_OVERLAY, MATERIAL_FLAG_BACKFACE_CULLING);
-	static const float offset = BS / 16;
+	static const float offset = BS / 48;
 	float size = BS / 2 * f->visual_scale;
 	// Wall at X+ of node
 	v3f vertices[4] = {

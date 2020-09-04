@@ -65,7 +65,7 @@ void GameUI::init()
 	// Object infos are shown in this
 	m_guitext_info = gui::StaticText::add(guienv, L"",
 		core::rect<s32>(0, 0, 400, g_fontengine->getTextHeight() * 5 + 5)
-			+ v2s32(100, 200), false, true, guiroot);
+			+ v2s32(100, 200) * RenderingEngine::getDisplayDensity(), false, true, guiroot);
 
 	// Status text (displays info when showing and hiding GUI stuff, etc.)
 	m_guitext_status = gui::StaticText::add(guienv, L"<Status>",
@@ -95,13 +95,15 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 	const GUIChatConsole *chat_console, float dtime)
 {
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
+	LocalPlayer *player = client->getEnv().getLocalPlayer();
+	v3f player_position = player->getPosition();
 
+	std::ostringstream os(std::ios_base::binary);
 	if (m_flags.show_debug) {
 		static float drawtime_avg = 0;
 		drawtime_avg = drawtime_avg * 0.95 + stats.drawtime * 0.05;
 		u16 fps = 1.0 / stats.dtime_jitter.avg;
 
-		std::ostringstream os(std::ios_base::binary);
 		os << std::fixed
 			<< PROJECT_NAME_C " " << g_version_hash
 			<< " | FPS: " << fps
@@ -115,25 +117,28 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 			<< (draw_control->range_all ? "All" : itos(draw_control->wanted_range))
 			<< std::setprecision(3)
 			<< " | RTT: " << client->getRTT() << "s";
-		setStaticText(m_guitext, utf8_to_wide(os.str()).c_str());
+		} else {
+			os << std::setprecision(1) << std::fixed
+				<< "X: " << (player_position.X / BS)
+				<< ", Y: " << (player_position.Y / BS)
+				<< ", Z: " << (player_position.Z / BS);
+		}
+		m_guitext->setText(utf8_to_wide(os.str()).c_str());
 
-		m_guitext->setRelativePosition(core::rect<s32>(5, 5, screensize.X,
-			5 + g_fontengine->getTextHeight()));
-	}
+		m_guitext->setRelativePosition(core::rect<s32>(
+			5 + client->getRoundScreen(), 5,
+			screensize.X, 5 + g_fontengine->getTextHeight()));
 
 	// Finally set the guitext visible depending on the flag
-	m_guitext->setVisible(m_flags.show_debug);
+	m_guitext->setVisible(m_flags.show_hud);
 
 	if (m_flags.show_debug) {
-		LocalPlayer *player = client->getEnv().getLocalPlayer();
-		v3f player_position = player->getPosition();
-
 		std::ostringstream os(std::ios_base::binary);
 		os << std::setprecision(1) << std::fixed
-			<< "pos: (" << (player_position.X / BS)
-			<< ", " << (player_position.Y / BS)
-			<< ", " << (player_position.Z / BS)
-			<< ") | yaw: " << (wrapDegrees_0_360(cam.camera_yaw)) << "\xC2\xB0 "
+			<< "X: " << (player_position.X / BS)
+			<< ", Y: " << (player_position.Y / BS)
+			<< ", Z: " << (player_position.Z / BS)
+			<< " | yaw: " << (wrapDegrees_0_360(cam.camera_yaw)) << "° "
 			<< yawToDirectionString(cam.camera_yaw)
 			<< " | pitch: " << (-wrapDegrees_180(cam.camera_pitch)) << "\xC2\xB0"
 			<< " | seed: " << ((u64)client->getMapSeed());
@@ -157,7 +162,7 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		));
 	}
 
-	m_guitext2->setVisible(m_flags.show_debug);
+	m_guitext2->setVisible(m_flags.show_debug && m_flags.show_hud);
 
 	setStaticText(m_guitext_info, m_infotext.c_str());
 	m_guitext_info->setVisible(m_flags.show_hud && g_menumgr.menuCount() == 0);
@@ -179,7 +184,10 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 	if (!m_statustext.empty()) {
 		s32 status_width  = m_guitext_status->getTextWidth();
 		s32 status_height = m_guitext_status->getTextHeight();
-		s32 status_y = screensize.Y - 150;
+
+		s32 status_y = screensize.Y -
+			150 * RenderingEngine::getDisplayDensity() * client->getHudScaling();
+
 		s32 status_x = (screensize.X - status_width) / 2;
 
 		m_guitext_status->setRelativePosition(core::rect<s32>(status_x ,
@@ -220,10 +228,10 @@ void GameUI::setChatText(const EnrichedString &chat_text, u32 recent_chat_count)
 {
 
 	// Update gui element size and position
-	s32 chat_y = 5;
+	s32 chat_y = 5 + g_fontengine->getLineHeight();;
 
 	if (m_flags.show_debug)
-		chat_y += 2 * g_fontengine->getLineHeight();
+		chat_y += g_fontengine->getLineHeight();
 
 	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
 
@@ -257,7 +265,7 @@ void GameUI::updateProfiler()
 		core::position2di upper_left(6, 50);
 		core::position2di lower_right = upper_left;
 		lower_right.X += size.Width + 10;
-		lower_right.Y += size.Height; 
+		lower_right.Y += size.Height;
 
 		m_guitext_profiler->setRelativePosition(core::rect<s32>(upper_left, lower_right));
 	}

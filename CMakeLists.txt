@@ -49,7 +49,7 @@ set(RUN_IN_PLACE ${DEFAULT_RUN_IN_PLACE} CACHE BOOL
 
 set(BUILD_CLIENT TRUE CACHE BOOL "Build client")
 set(BUILD_SERVER FALSE CACHE BOOL "Build server")
-set(BUILD_UNITTESTS TRUE CACHE BOOL "Build unittests")
+set(BUILD_UNITTESTS FALSE CACHE BOOL "Build unittests")
 
 
 set(WARN_ALL TRUE CACHE BOOL "Enable -Wall for Release build")

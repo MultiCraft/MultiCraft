@@ -113,6 +113,7 @@ class GUIFormSpecMenu : public GUIModalMenu
 			ftype(f_Unknown),
 			is_exit(false),
 			priority(priority),
+			is_dynamic(false),
 			fcursor_icon(cursor_icon)
 		{
 		}
@@ -126,6 +127,7 @@ class GUIFormSpecMenu : public GUIModalMenu
 		bool is_exit;
 		// Draw priority for formspec version < 3
 		int priority;
+		bool is_dynamic;
 		core::rect<s32> rect;
 		gui::ECURSOR_ICON fcursor_icon;
 	};
@@ -259,7 +261,7 @@ public:
 	GUITable* getTable(const std::string &tablename);
 	std::vector<std::string>* getDropDownValues(const std::string &name);
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	bool getAndroidUIInput();
 #endif
 

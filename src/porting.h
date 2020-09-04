@@ -162,12 +162,6 @@ extern std::string path_cache;
 std::string getDataPath(const char *subpath);
 
 /*
-	Move cache folder from path_user to the
-	system cache location if possible.
-*/
-void migrateCachePath();
-
-/*
 	Initialize path_*.
 */
 void initializePaths();
@@ -282,7 +276,7 @@ inline u64 getDeltaMs(u64 old_time_ms, u64 new_time_ms)
 inline const char *getPlatformName()
 {
 	return
-#if defined(ANDROID)
+#if defined(__ANDROID__)
 	"Android"
 #elif defined(__linux__)
 	"Linux"
@@ -323,6 +317,9 @@ inline const char *getPlatformName()
 	;
 }
 
+// Touchscreen device specific function
+bool hasRealKeyboard();
+
 bool secure_rand_fill_buf(void *buf, size_t len);
 
 // This attaches to the parents process console, or creates a new one if it doesnt exist.
@@ -336,4 +333,8 @@ bool openURL(const std::string &url);
 
 #ifdef __ANDROID__
 #include "porting_android.h"
+#endif
+
+#ifdef __IOS__
+#include "porting_ios.h"
 #endif
