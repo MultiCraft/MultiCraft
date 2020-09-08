@@ -231,7 +231,7 @@ assert(base_env._raw.minetest.register_on_sending_chat_message ~=
 
 -- SSCSM functions
 -- When calling these from an SSCSM, make sure they exist first.
-local mod_channel = minetest.mod_channel_join("sscsm:exec_pipe")
+local mod_channel
 local loaded_sscsms = {}
 base_env:set("join_mod_channel", function()
 	if not mod_channel then
