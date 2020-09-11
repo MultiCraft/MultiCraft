@@ -185,7 +185,7 @@ Minimap::Minimap(Client *client)
 	// Initialize static settings
 	m_enable_shaders = g_settings->getBool("enable_shaders");
 	m_surface_mode_scan_height =
-		g_settings->getBool("minimap_double_scan_height") ? 128 : 64;
+		g_settings->getBool("minimap_double_scan_height") ? 256 : 128;
 
 	// Initialize minimap data
 	data = new MinimapData;
@@ -294,7 +294,7 @@ void Minimap::setMinimapMode(MinimapMode mode)
 		{true, 32, 64},
 		{true, 32, 32}
 #endif
-#if defined(__ANDROID__) && defined(__IOS__)
+#if defined(__ANDROID__) || defined(__IOS__)
 		{true, 32, 32}
 #endif
 	};

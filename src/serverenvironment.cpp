@@ -456,14 +456,14 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 				<< "This backend is deprecated and will be removed in a future release /!\\"
 				<< std::endl << "Switching to SQLite3 or PostgreSQL is advised, "
 				<< "please read http://wiki.minetest.net/Database_backends." << std::endl;
-	}*/
+	}
 
 	if (auth_backend_name == "files") {
 		warningstream << "/!\\ You are using old auth file backend. "
 				<< "This backend is deprecated and will be removed in a future release /!\\"
 				<< std::endl << "Switching to LevelDB or SQLite3 is advised, "
 				<< "please read http://wiki.minetest.net/Database_backends." << std::endl;
-	}
+	}*/
 
 	m_player_database = openPlayerDatabase(player_backend_name, path_world, conf);
 	m_auth_database = openAuthDatabase(auth_backend_name, path_world, conf);

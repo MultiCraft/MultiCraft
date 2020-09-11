@@ -30,10 +30,10 @@ class Client;
 class ITextureSource;
 class IShaderSource;
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
 #define MINIMAP_MAX_SX 512
 #define MINIMAP_MAX_SY 512
 
+#if !defined(__ANDROID__) && !defined(__IOS__)
 enum MinimapMode {
 	MINIMAP_MODE_OFF,
 	MINIMAP_MODE_SURFACEx1,
@@ -45,9 +45,6 @@ enum MinimapMode {
 	MINIMAP_MODE_COUNT,
 };
 #else
-#define MINIMAP_MAX_SX 256
-#define MINIMAP_MAX_SY 256
-
 enum MinimapMode {
 	MINIMAP_MODE_OFF,
 	MINIMAP_MODE_SURFACEx1,

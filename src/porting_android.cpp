@@ -70,24 +70,24 @@ void android_main(android_app *app)
  * ToDo: this doesn't work as expected, there's a workaround for it right now
  */
 extern "C" {
-	JNIEXPORT void JNICALL Java_net_minetest_minetest_GameActivity_putMessageBoxResult(
+	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_putMessageBoxResult(
 			JNIEnv *env, jclass thiz, jstring text)
 	{
 		errorstream <<
-			"Java_net_minetest_minetest_GameActivity_putMessageBoxResult got: " <<
+			"Java_com_multicraft_game_GameActivity_putMessageBoxResult got: " <<
 			std::string((const char*) env->GetStringChars(text, nullptr)) << std::endl;
 	}
-	/*JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
+	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
 			JNIEnv *env, jclass clazz)
 	{
 		external_pause_game();
-	}*/
+	}
 	bool device_has_keyboard = false;
-	/*JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_keyboardEvent(
+	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_keyboardEvent(
 				JNIEnv *env, jclass clazz, jboolean hasKeyboard)
 	{
 		device_has_keyboard = hasKeyboard;
-	}*/
+	}
 }
 
 namespace porting {
@@ -128,7 +128,7 @@ void initAndroid()
 		exit(-1);
 	}
 
-	nativeActivity = findClass("net/minetest/minetest/GameActivity");
+	nativeActivity = findClass("com/multicraft/game/GameActivity");
 	if (nativeActivity == nullptr)
 		errorstream <<
 			"porting::initAndroid unable to find java native activity class" <<
@@ -138,7 +138,7 @@ void initAndroid()
 	// in the start-up code
 	__android_log_print(ANDROID_LOG_ERROR, PROJECT_NAME_C,
 			"Initializing GPROF profiler");
-	monstartup("libMinetest.so");
+	monstartup("libMultiCraft.so");
 #endif
 }
 
@@ -201,9 +201,12 @@ void initializePathsAndroid()
 				"getAbsolutePath", "()Ljava/lang/String;");
 	std::string path_storage = getAndroidPath(cls_Env, nullptr,
 				mt_getAbsPath, "getExternalStorageDirectory");
+	std::string path_data = getAndroidPath(nativeActivity, app_global->activity->clazz, mt_getAbsPath,
+				"getFilesDir");
 
-	path_user    = path_storage + DIR_DELIM + PROJECT_NAME_C;
-	path_share   = path_storage + DIR_DELIM + PROJECT_NAME_C;
+	path_user    = path_storage + DIR_DELIM + "Android/data/com.multicraft.game/files";
+	path_share   = path_data;
+	path_locale  = path_data + DIR_DELIM + "locale";
 	path_cache   = getAndroidPath(nativeActivity,
 			app_global->activity->clazz, mt_getAbsPath, "getCacheDir");
 }
@@ -287,7 +290,7 @@ std::string getInputDialogValue()
 	}
 
 	void notifyServerConnect(bool is_multiplayer) {
-		/*jmethodID notifyConnect = jnienv->GetMethodID(nativeActivity,
+		jmethodID notifyConnect = jnienv->GetMethodID(nativeActivity,
 		                                              "notifyServerConnect", "(Z)V");
 
 		if (notifyConnect == nullptr)
@@ -295,17 +298,17 @@ std::string getInputDialogValue()
 
 		auto param = (jboolean) is_multiplayer;
 
-		jnienv->CallVoidMethod(app_global->activity->clazz, notifyConnect, param);*/
+		jnienv->CallVoidMethod(app_global->activity->clazz, notifyConnect, param);
 	}
 
 	void notifyExitGame() {
-		/*jmethodID notifyExit = jnienv->GetMethodID(nativeActivity,
+		jmethodID notifyExit = jnienv->GetMethodID(nativeActivity,
 		                                           "notifyExitGame", "()V");
 
 		if (notifyExit == nullptr)
 			assert("porting::notifyExitGame unable to find java method" == nullptr);
 
-		jnienv->CallVoidMethod(app_global->activity->clazz, notifyExit);*/
+		jnienv->CallVoidMethod(app_global->activity->clazz, notifyExit);
 	}
 
 #ifndef SERVER

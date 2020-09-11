@@ -27,6 +27,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mapgen/mapgen.h" // Mapgen::setDefaultSettings
 #include "util/string.h"
 
+#ifdef __IOS__
+#import <UIKit/UIKit.h>
+#import "SDVersion.h"
+#endif
+
 void set_default_settings(Settings *settings)
 {
 	// Client and server
@@ -38,7 +43,7 @@ void set_default_settings(Settings *settings)
 	// Client
 	settings->setDefault("address", "");
 	settings->setDefault("enable_sound", "true");
-	settings->setDefault("sound_volume", "0.8");
+	settings->setDefault("sound_volume", "1.0");
 	settings->setDefault("mute_sound", "false");
 	settings->setDefault("enable_mesh_cache", "false");
 	settings->setDefault("mesh_generation_interval", "0");
@@ -200,7 +205,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("cinematic_camera_smoothing", "0.7");
 	settings->setDefault("enable_clouds", "true");
 	settings->setDefault("view_bobbing_amount", "1.0");
-	settings->setDefault("fall_bobbing_amount", "0.03");
+	settings->setDefault("fall_bobbing_amount", "1.0");
 	settings->setDefault("enable_3d_clouds", "true");
 	settings->setDefault("cloud_radius", "12");
 	settings->setDefault("menu_clouds", "true");
@@ -213,7 +218,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("formspec_default_bg_color", "(0,0,0)");
 	settings->setDefault("formspec_default_bg_opacity", "140");
 	settings->setDefault("selectionbox_color", "(0,0,0)");
-	settings->setDefault("selectionbox_width", "2");
+	settings->setDefault("selectionbox_width", "4");
 	settings->setDefault("node_highlighting", "box");
 	settings->setDefault("crosshair_color", "(255,255,255)");
 	settings->setDefault("crosshair_alpha", "255");
@@ -228,7 +233,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("hud_small", "false");
 	settings->setDefault("round_screen", "0");
 	settings->setDefault("enable_local_map_saving", "false");
-	settings->setDefault("show_entity_selectionbox", "true");
+	settings->setDefault("show_entity_selectionbox", "false");
 	settings->setDefault("texture_clean_transparent", "false");
 	settings->setDefault("texture_min_size", "64");
 	settings->setDefault("ambient_occlusion_gamma", "2.2");
@@ -238,11 +243,11 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("enable_shaders", "true");
 #endif
 	settings->setDefault("enable_particles", "true");
-	settings->setDefault("arm_inertia", "true");
+	settings->setDefault("arm_inertia", "false");
 
 	settings->setDefault("enable_minimap", "true");
 	settings->setDefault("minimap_shape_round", "true");
-	settings->setDefault("minimap_double_scan_height", "true");
+	settings->setDefault("minimap_double_scan_height", "false");
 
 	// Effects
 	settings->setDefault("directional_colored_fog", "true");
@@ -276,7 +281,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("safe_dig_and_place", "false");
 	settings->setDefault("random_input", "false");
 	settings->setDefault("aux1_descends", "false");
-	settings->setDefault("doubletap_jump", "false");
+	settings->setDefault("doubletap_jump", "true");
 	settings->setDefault("always_fly_fast", "true");
 	settings->setDefault("autojump", "false");
 	settings->setDefault("continuous_forward", "false");
@@ -287,25 +292,48 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("joystick_frustum_sensitivity", "170");
 
 	// Main menu
-	settings->setDefault("main_menu_style", "full");
 	settings->setDefault("main_menu_path", "");
 	settings->setDefault("serverlist_file", "favoriteservers.txt");
 
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
 	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-Italic.ttf"));
 	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Arimo-Bold.ttf"));
 	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
+#else
+	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Retron2000.ttf"));
+	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Retron2000.ttf"));
+	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Retron2000.ttf"));
+	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Retron2000.ttf"));
+#endif
 	settings->setDefault("font_bold", "false");
 	settings->setDefault("font_italic", "false");
 	settings->setDefault("font_shadow", "1");
 	settings->setDefault("font_shadow_alpha", "127");
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	settings->setDefault("mono_font_path", porting::getDataPath("fonts" DIR_DELIM "Cousine-Regular.ttf"));
 	settings->setDefault("mono_font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Cousine-Italic.ttf"));
 	settings->setDefault("mono_font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Cousine-Bold.ttf"));
 	settings->setDefault("mono_font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Cousine-BoldItalic.ttf"));
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallbackFull.ttf"));
+#else
+#ifdef __ANDROID__
+	settings->setDefault("mono_font_path", "/system/fonts/DroidSansMono.ttf");
+	settings->setDefault("mono_font_path_italic", porting::getDataPath("fonts" DIR_DELIM "DroidSansMono.ttf"));
+	settings->setDefault("mono_font_path_bold", porting::getDataPath("fonts" DIR_DELIM "DroidSansMono.ttf"));
+	settings->setDefault("mono_font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "DroidSansMono.ttf"));
+	settings->setDefault("fallback_font_path", "/system/fonts/DroidSans.ttf");
+#endif
+#ifdef __IOS__
+	settings->setDefault("mono_font_path", g_settings->get("font_path"));
+	settings->setDefault("mono_font_path_italic", g_settings->get("font_path"));
+	settings->setDefault("mono_font_path_bold", g_settings->get("font_path"));
+	settings->setDefault("mono_font_path_bold_italic", g_settings->get("font_path"));
+	settings->setDefault("fallback_font_path", g_settings->get("font_path"));
+#endif
+#endif
 
 	settings->setDefault("fallback_font_shadow", "1");
 	settings->setDefault("fallback_font_shadow_alpha", "128");
@@ -345,7 +373,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("enable_ipv6", "true");
 	settings->setDefault("ipv6_server", "false");
 	settings->setDefault("max_packets_per_iteration","1024");
-	settings->setDefault("port", "30000");
+	settings->setDefault("port", "40000");
 	settings->setDefault("strict_protocol_version_checking", "false");
 	settings->setDefault("player_transfer_distance", "0");
 	settings->setDefault("max_simultaneous_block_sends_per_client", "40");
@@ -401,7 +429,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("nodetimer_interval", "0.2");
 	settings->setDefault("ignore_world_load_errors", "false");
 	settings->setDefault("remote_media", "");
-	settings->setDefault("debug_log_level", "action");
+	settings->setDefault("debug_log_level", "warning");
 	settings->setDefault("debug_log_size_max", "50");
 	settings->setDefault("chat_log_level", "error");
 	settings->setDefault("emergequeue_limit_total", "512");
@@ -415,7 +443,7 @@ void set_default_settings(Settings *settings)
 	// Physics
 	settings->setDefault("movement_acceleration_default", "3");
 	settings->setDefault("movement_acceleration_air", "2");
-	settings->setDefault("movement_acceleration_fast", "10");
+	settings->setDefault("movement_acceleration_fast", "20");
 	settings->setDefault("movement_speed_walk", "4");
 	settings->setDefault("movement_speed_crouch", "1.35");
 	settings->setDefault("movement_speed_fast", "20");
@@ -423,7 +451,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("movement_speed_jump", "6.5");
 	settings->setDefault("movement_liquid_fluidity", "1");
 	settings->setDefault("movement_liquid_fluidity_smooth", "0.5");
-	settings->setDefault("movement_liquid_sink", "10");
+	settings->setDefault("movement_liquid_sink", "20");
 	settings->setDefault("movement_gravity", "9.81");
 
 	// Liquids
@@ -458,50 +486,176 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("fps_max", "0");
 #endif
 
-	// Altered settings for Android
-#ifdef __ANDROID__
+	// Mobile Platform
+#if defined(__ANDROID__) || defined(__IOS__)
 	settings->setDefault("screen_w", "0");
 	settings->setDefault("screen_h", "0");
 	settings->setDefault("fullscreen", "true");
 	settings->setDefault("touchtarget", "true");
 	settings->setDefault("TMPFolder", porting::path_cache);
 	settings->setDefault("touchscreen_threshold","20");
-	settings->setDefault("fixed_virtual_joystick", "false");
+	settings->setDefault("fixed_virtual_joystick", "true");
 	settings->setDefault("virtual_joystick_triggers_aux", "false");
-	settings->setDefault("smooth_lighting", "false");
-	settings->setDefault("max_simultaneous_block_sends_per_client", "10");
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
-	settings->setDefault("max_block_generate_distance", "5");
-	settings->setDefault("enable_3d_clouds", "false");
-	settings->setDefault("fps_max", "30");
-	settings->setDefault("pause_fps_max", "10");
-	settings->setDefault("max_objects_per_block", "20");
-	settings->setDefault("sqlite_synchronous", "1");
-	settings->setDefault("server_map_save_interval", "15");
-	settings->setDefault("client_mapblock_limit", "1000");
-	settings->setDefault("active_block_range", "2");
-	settings->setDefault("viewing_range", "50");
-	settings->setDefault("leaves_style", "simple");
 	settings->setDefault("curl_verify_cert","false");
+	settings->setDefault("pause_on_lost_focus", "true");
+	settings->setDefault("doubletap_jump", "true");
 
-	// Apply settings according to screen size
+	// Set the optimal settings depending on the memory size [Android] | model [iOS]
+#ifdef __ANDROID__
+	// minimal settings for less than 2GB RAM
+	if (porting::getMemoryMax() < 2) {
+#elif __IOS__
+	// minimal settings for 32-bit devices
+	bool arm = false;
+#if defined(__arm__)
+	arm = true;
+#endif
+	if (arm) {
+#endif
+		settings->setDefault("client_unload_unused_data_timeout", "60");
+		settings->setDefault("client_mapblock_limit", "50");
+		settings->setDefault("fps_max", "30");
+		settings->setDefault("pause_fps_max", "5");
+		settings->setDefault("viewing_range", "25");
+		settings->setDefault("smooth_lighting", "false");
+		settings->setDefault("enable_clouds", "false");
+		settings->setDefault("active_block_range", "1");
+		settings->setDefault("dedicated_server_step", "0.2");
+		settings->setDefault("abm_interval", "3.0");
+		settings->setDefault("chunksize", "3");
+		settings->setDefault("max_block_generate_distance", "1");
+#ifdef __ANDROID__
+	// low settings for 2-4GB RAM
+	} else if (porting::getMemoryMax() >= 2 && porting::getMemoryMax() < 4) {
+#elif __IOS__
+	// low settings
+	} else if (([SDVersion deviceVersion] == iPhone5S) || ([SDVersion deviceVersion] == iPhone6) || ([SDVersion deviceVersion] == iPhone6Plus) || ([SDVersion deviceVersion] == iPodTouch6Gen) ||
+			   ([SDVersion deviceVersion] == iPadMini2) || ([SDVersion deviceVersion] == iPadMini3)) {
+#endif
+		settings->setDefault("client_unload_unused_data_timeout", "120");
+		settings->setDefault("client_mapblock_limit", "200");
+		settings->setDefault("fps_max", "35");
+		settings->setDefault("pause_fps_max", "5");
+		settings->setDefault("viewing_range", "30");
+		settings->setDefault("smooth_lighting", "false");
+		settings->setDefault("enable_3d_clouds", "false");
+		settings->setDefault("cloud_radius", "6");
+		settings->setDefault("active_block_range", "1");
+		settings->setDefault("dedicated_server_step", "0.2");
+		settings->setDefault("abm_interval", "2.0");
+		settings->setDefault("chunksize", "3");
+		settings->setDefault("max_block_generate_distance", "2");
+#ifdef __ANDROID__
+	// medium settings for 4.1-6GB RAM
+	} else if (porting::getMemoryMax() >= 4 && porting::getMemoryMax() < 6) {
+#elif __IOS__
+	// medium settings
+	} else if (([SDVersion deviceVersion] == iPhone6S) || ([SDVersion deviceVersion] == iPhone6SPlus) || ([SDVersion deviceVersion] == iPhoneSE) || ([SDVersion deviceVersion] == iPhone7) || ([SDVersion deviceVersion] == iPhone7Plus) ||
+			   ([SDVersion deviceVersion] == iPadMini4) || ([SDVersion deviceVersion] == iPadAir)) {
+#endif
+		settings->setDefault("client_unload_unused_data_timeout", "300");
+		settings->setDefault("client_mapblock_limit", "300");
+		settings->setDefault("fps_max", "35");
+		settings->setDefault("pause_fps_max", "10");
+		settings->setDefault("viewing_range", "60");
+		settings->setDefault("cloud_radius", "6");
+		settings->setDefault("active_block_range", "2");
+		settings->setDefault("max_block_generate_distance", "3");
+	} else {
+	// high settings
+		settings->setDefault("client_mapblock_limit", "500");
+		settings->setDefault("viewing_range", "80");
+		settings->setDefault("max_block_generate_distance", "5");
+	}
+
+	// Android Settings
+#ifdef __ANDROID__
+	settings->setDefault("debug_log_level", "error");
+
+#ifdef __aarch64__
+	settings->setDefault("enable_client_modding", "false");
+#endif
+
+	// Check screen size
 	float x_inches = (float) porting::getDisplaySize().X /
 			(160.f * porting::getDisplayDensity());
 
-	if (x_inches < 3.7f) {
+	std::string font_size_str_small = std::to_string(TTF_DEFAULT_FONT_SIZE - 1);
+
+	if (x_inches <= 3.7) {
+		// small 4" phones
+		settings->setDefault("hud_scaling", "0.55");
+		settings->setDefault("font_size", font_size_str_small);
+		settings->setDefault("mouse_sensitivity", "0.3");
+		settings->setDefault("hud_small", "true");
+	} else if (x_inches > 3.7 && x_inches <= 4.5) {
+		// medium phones
 		settings->setDefault("hud_scaling", "0.6");
-		settings->setDefault("font_size", "14");
-		settings->setDefault("mono_font_size", "14");
-	} else if (x_inches < 4.5f) {
+		settings->setDefault("font_size", font_size_str_small);
+		settings->setDefault("hud_small", "true");
+		settings->setDefault("selectionbox_width", "6");
+	} else if (x_inches > 4.5 && x_inches <= 5) {
+		// large 6" phones
 		settings->setDefault("hud_scaling", "0.7");
-		settings->setDefault("font_size", "14");
-		settings->setDefault("mono_font_size", "14");
-	} else if (x_inches < 6.0f) {
-		settings->setDefault("hud_scaling", "0.85");
-		settings->setDefault("font_size", "14");
-		settings->setDefault("mono_font_size", "14");
+		settings->setDefault("mouse_sensitivity", "0.15");
+		settings->setDefault("hud_small", "true");
+		settings->setDefault("selectionbox_width", "6");
+	} else if (x_inches > 5 && x_inches <= 6) {
+		// 7" tablets
+		settings->setDefault("hud_scaling", "0.9");
+		settings->setDefault("hud_small", "true");
+		settings->setDefault("selectionbox_width", "6");
 	}
-	// Tablets >= 6.0 use non-Android defaults for these settings
+#endif // Android
+
+	// iOS Settings
+#ifdef __IOS__
+	settings->setDefault("enable_minimap", "false");
+	settings->setDefault("debug_log_level", "none");
+	settings->setDefault("password_save", "true");
+
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+		settings->setDefault("hud_small", "true");
+
+	// Set the size of the elements depending on the screen size
+	if ([SDVersion deviceVersion] == iPhone4S) {
+		// 3.5" iPhone
+		settings->setDefault("hud_scaling", "0.5");
+	} else if SDVersion4Inch {
+		// 4" iPhone and iPod Touch
+		settings->setDefault("hud_scaling", "0.55");
+		settings->setDefault("mouse_sensitivity", "0.33");
+	} else if SDVersion4and7Inch {
+		// 4.7" iPhone
+		settings->setDefault("hud_scaling", "0.65");
+		settings->setDefault("mouse_sensitivity", "0.27");
+	} else if SDVersion5and5Inch {
+		// 5.5" iPhone Plus
+		settings->setDefault("hud_scaling", "0.7");
+		settings->setDefault("mouse_sensitivity", "0.3");
+	} else if (SDVersion5and8Inch || SDVersion6and1Inch || SDVersion6and5Inch) {
+		// 5.8+" iPhones
+		settings->setDefault("hud_scaling", "0.85");
+		settings->setDefault("mouse_sensitivity", "0.35");
+		settings->setDefault("selectionbox_width", "6");
+	} else if SDVersion7and9Inch {
+		// iPad mini
+		settings->setDefault("hud_scaling", "0.9");
+		settings->setDefault("mouse_sensitivity", "0.25");
+		settings->setDefault("selectionbox_width", "6");
+	} else {
+		// iPad
+		settings->setDefault("mouse_sensitivity", "0.3");
+		settings->setDefault("selectionbox_width", "6");
+	}
+
+	// Settings for the Rounded Screen and Home Bar
+	if SDVersionHomeBar {
+		settings->setDefault("hud_move_upwards", "20");
+		settings->setDefault("round_screen", "35");
+	}
+#endif // iOS
 #endif
 }

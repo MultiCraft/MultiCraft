@@ -78,18 +78,18 @@ GUITable::GUITable(gui::IGUIEnvironment *env,
 	setTabOrder(-1);
 	updateAbsolutePosition();
 	float density = RenderingEngine::getDisplayDensity();
+	float gui_scaling = g_settings->getFloat("gui_scaling");
+	scale = density * gui_scaling;
 #if defined(__ANDROID__) || defined(__IOS__)
 	density = 1; // dp scaling is applied by the skin
 #endif
 	core::rect<s32> relative_rect = m_scrollbar->getRelativePosition();
-	float gui_scaling = g_settings->getFloat("gui_scaling");
 	s32 width = (relative_rect.getWidth() / (2.0 / 3.0)) * density *
 			gui_scaling;
 	m_scrollbar->setRelativePosition(core::rect<s32>(
 			relative_rect.LowerRightCorner.X-width,relative_rect.UpperLeftCorner.Y,
 			relative_rect.LowerRightCorner.X,relative_rect.LowerRightCorner.Y
 			));
-	scale = density * gui_scaling;
 }
 
 GUITable::~GUITable()
@@ -738,7 +738,7 @@ void GUITable::drawCell(const Cell *cell, video::SColor color,
 			dest_pos.X += cell->xpos;
 			core::rect<s32> source_rect(
 					core::position2d<s32>(0, 0),
-					image->getOriginalSize());	
+					image->getOriginalSize());
 #if defined(__ANDROID__) || defined(__IOS__)
 			s32 imgh = source_rect.LowerRightCorner.Y * scale;
 #else
