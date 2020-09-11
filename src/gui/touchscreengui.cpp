@@ -2,6 +2,7 @@
 Copyright (C) 2014 sapier
 Copyright (C) 2018 srifqi, Muhammad Rifqi Priyo Susanto
 		<muhammadrifqipriyosusanto@gmail.com>
+Copyright (C) 2014-2020 Maksim Gamarnik [MoNTE48] MoNTE48@mail.ua
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -38,9 +39,16 @@ using namespace irr::core;
 
 const char **button_imagenames = (const char *[]) {
 	"jump_btn.png",
-	"down.png",
-	"zoom.png",
-	"aux_btn.png"
+	"drop_btn.png",
+	"down_btn.png",
+	//"zoom.png",
+	//"aux_btn.png",
+	"inventory_btn.png",
+	"escape_btn.png",
+	"minimap_btn.png",
+	"rangeview_btn.png",
+	"camera_btn.png",
+	"chat_btn.png"
 };
 
 const char **joystick_imagenames = (const char *[]) {
@@ -77,12 +85,12 @@ static irr::EKEY_CODE id2keycode(touch_gui_button_id id)
 		case crunch_id:
 			key = "sneak";
 			break;
-		case zoom_id:
+		/*case zoom_id:
 			key = "zoom";
 			break;
 		case special1_id:
 			key = "special1";
-			break;
+			break;*/
 		case fly_id:
 			key = "freemove";
 			break;
@@ -110,6 +118,8 @@ static irr::EKEY_CODE id2keycode(touch_gui_button_id id)
 		case range_id:
 			key = "rangeselect";
 			break;
+		case escape_id:
+			return irr::KEY_ESCAPE;
 		default:
 			break;
 	}
@@ -499,22 +509,38 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 
 	// init jump button
 	initButton(jump_id,
-			rect<s32>(m_screensize.X - (1.75 * button_size),
-					m_screensize.Y - button_size,
-					m_screensize.X - (0.25 * button_size),
-					m_screensize.Y),
-			L"x", false);
+	           rect<s32>(m_screensize.X - button_size * 3,
+	                     m_screensize.Y - button_size * 3,
+	                     m_screensize.X - button_size * 1.5,
+	                     m_screensize.Y - button_size * 1.5),
+	           L"x", false);
+
+	// init drop button
+	initButton(drop_id,
+	           rect<s32>(m_screensize.X - button_size,
+	                     m_screensize.Y / 2 - button_size,
+	                     m_screensize.X,
+	                     m_screensize.Y / 2),
+	           L"drop", false);
 
 	// init crunch button
 	initButton(crunch_id,
-			rect<s32>(m_screensize.X - (3.25 * button_size),
-					m_screensize.Y - button_size,
-					m_screensize.X - (1.75 * button_size),
-					m_screensize.Y),
+			rect<s32>(m_screensize.X - button_size * 3,
+					  m_screensize.Y - button_size / 1.5,
+					  m_screensize.X - button_size * 1.5,
+					  m_screensize.Y),
 			L"H", false);
 
+	// init inventory button
+	initButton(inventory_id,
+	           rect<s32>(m_screensize.X - button_size * 1.5,
+	                     m_screensize.Y - button_size * 1.5,
+	                     m_screensize.X,
+	                     m_screensize.Y),
+	           L"inv", false);
+
 	// init zoom button
-	initButton(zoom_id,
+/*	initButton(zoom_id,
 			rect<s32>(m_screensize.X - (1.25 * button_size),
 					m_screensize.Y - (4 * button_size),
 					m_screensize.X - (0.25 * button_size),
@@ -543,9 +569,6 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 	m_settingsbar.addButton(noclip_id,  L"noclip",    "noclip_btn.png");
 	m_settingsbar.addButton(fast_id,    L"fast",      "fast_btn.png");
 	m_settingsbar.addButton(debug_id,   L"debug",     "debug_btn.png");
-	m_settingsbar.addButton(camera_id,  L"camera",    "camera_btn.png");
-	m_settingsbar.addButton(range_id,   L"rangeview", "rangeview_btn.png");
-	m_settingsbar.addButton(minimap_id, L"minimap",   "minimap_btn.png");
 
 	// Chat is shown by default, so chat_hide_btn.png is shown first.
 	m_settingsbar.addToggleButton(toggle_chat_id, L"togglechat",
@@ -563,7 +586,61 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 
 	m_rarecontrolsbar.addButton(chat_id,      L"Chat", "chat_btn.png");
 	m_rarecontrolsbar.addButton(inventory_id, L"inv",  "inventory_btn.png");
-	m_rarecontrolsbar.addButton(drop_id,      L"drop", "drop_btn.png");
+	m_rarecontrolsbar.addButton(drop_id,      L"drop", "drop_btn.png");*/
+
+	// dirty implementation of positions for iOS
+#ifndef __IOS__
+	s32 button_075 = 1;
+	s32 button_05 = 1;
+	s32 button_05b = 0;
+#else
+	double button_075 = 0.75;
+	s32 button_05 = 2;
+	double button_05b = button_size * 0.5;
+#endif
+
+	// init pause button [1]
+	initButton(escape_id,
+	           rect<s32>(m_screensize.X / 2 - button_size * 2 * button_075,
+	                     0,
+	                     m_screensize.X / 2 - button_size / button_05,
+	                     button_size),
+	           L"Exit", false);
+
+	// init minimap button [2]
+#ifndef __IOS__
+	// iOS have memory leak with enabled minimap
+	initButton(minimap_id,
+	           rect<s32>(m_screensize.X / 2 - button_size,
+	                     0,
+	                     m_screensize.X / 2,
+	                     button_size),
+	           L"minimap", false);
+#endif
+
+	// init rangeselect button [3]
+	initButton(range_id,
+	           rect<s32>(m_screensize.X / 2 - button_05b,
+	                     0,
+	                     m_screensize.X / 2 + button_size / button_05,
+	                     button_size),
+	           L"rangeview", false);
+
+	// init camera button [4]
+	initButton(camera_id,
+	           rect<s32>(m_screensize.X / 2 + button_size / button_05,
+	                     0,
+	                     m_screensize.X / 2 + button_size * 2 * button_075,
+	                     button_size),
+	           L"camera", false);
+
+	// init chat button
+	initButton(chat_id,
+	           rect<s32>(m_screensize.X - button_size * 1.25,
+	                     0,
+	                     m_screensize.X,
+	                     button_size),
+	           L"Chat", false);
 }
 
 touch_gui_button_id TouchScreenGUI::getButtonID(s32 x, s32 y)
@@ -687,9 +764,24 @@ void TouchScreenGUI::handleReleaseEvent(size_t evt_id)
 			translated->MouseInput.Event        = EMIE_LMOUSE_LEFT_UP;
 			m_receiver->OnEvent(*translated);
 			delete translated;
-		} else {
-			// do double tap detection
-			doubleTapDetection();
+		} else if (!m_move_has_really_moved) {
+			auto *translated = new SEvent;
+			memset(translated, 0, sizeof(SEvent));
+			translated->EventType               = EET_MOUSE_INPUT_EVENT;
+			translated->MouseInput.X            = m_move_downlocation.X;
+			translated->MouseInput.Y            = m_move_downlocation.Y;
+			translated->MouseInput.Shift        = false;
+			translated->MouseInput.Control      = false;
+			translated->MouseInput.ButtonStates = 0;
+			translated->MouseInput.Event        = EMIE_LMOUSE_LEFT_UP;
+			m_receiver->OnEvent(*translated);
+			delete translated;
+			quickTapDetection();
+			m_shootline = m_device
+						->getSceneManager()
+						->getSceneCollisionManager()
+						->getRayFromScreenCoordinates(
+							v2s32(m_move_downlocation.X, m_move_downlocation.Y));
 		}
 	}
 
@@ -752,22 +844,22 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 		// handle button events
 		if (button != after_last_element_id) {
 			handleButtonEvent(button, eventID, true);
-			m_settingsbar.deactivate();
-			m_rarecontrolsbar.deactivate();
+			//m_settingsbar.deactivate();
+			//m_rarecontrolsbar.deactivate();
 		} else if (isHUDButton(event)) {
-			m_settingsbar.deactivate();
-			m_rarecontrolsbar.deactivate();
+			//m_settingsbar.deactivate();
+			//m_rarecontrolsbar.deactivate();
 			// already handled in isHUDButton()
 		} else if (m_settingsbar.isButton(event)) {
-			m_rarecontrolsbar.deactivate();
+			//m_rarecontrolsbar.deactivate();
 			// already handled in isSettingsBarButton()
 		} else if (m_rarecontrolsbar.isButton(event)) {
-			m_settingsbar.deactivate();
+			//m_settingsbar.deactivate();
 			// already handled in isSettingsBarButton()
 		} else {
 			// handle non button events
-			m_settingsbar.deactivate();
-			m_rarecontrolsbar.deactivate();
+			//m_settingsbar.deactivate();
+			//m_rarecontrolsbar.deactivate();
 
 			s32 dxj = event.TouchInput.X - button_size * 5.0f / 2.0f;
 			s32 dyj = event.TouchInput.Y - m_screensize.Y + button_size * 5.0f / 2.0f;
@@ -842,7 +934,7 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 					s32 dy = Y - m_pointerpos[event.TouchInput.ID].Y;
 
 					// adapt to similar behaviour as pc screen
-					double d = g_settings->getFloat("mouse_sensitivity") * 3.0f;
+					double d = g_settings->getFloat("mouse_sensitivity");
 
 					m_camera_yaw_change -= dx * d;
 					m_camera_pitch = MYMIN(MYMAX(m_camera_pitch + (dy * d), -180), 180);
@@ -988,26 +1080,16 @@ void TouchScreenGUI::handleChangedButton(const SEvent &event)
 				event.TouchInput.ID, true);
 }
 
-bool TouchScreenGUI::doubleTapDetection()
+// Punch or left click
+bool TouchScreenGUI::quickTapDetection()
 {
 	m_key_events[0].down_time = m_key_events[1].down_time;
 	m_key_events[0].x         = m_key_events[1].x;
 	m_key_events[0].y         = m_key_events[1].y;
-	m_key_events[1].down_time = m_move_downtime;
-	m_key_events[1].x         = m_move_downlocation.X;
-	m_key_events[1].y         = m_move_downlocation.Y;
 
-	u64 delta = porting::getDeltaMs(m_key_events[0].down_time, porting::getTimeMs());
-	if (delta > 400)
-		return false;
-
-	double distance = sqrt(
-			(m_key_events[0].x - m_key_events[1].x) *
-			(m_key_events[0].x - m_key_events[1].x) +
-			(m_key_events[0].y - m_key_events[1].y) *
-			(m_key_events[0].y - m_key_events[1].y));
-
-	if (distance > (20 + m_touchscreen_threshold))
+	// ignore the occasional touch
+	u64 delta = porting::getDeltaMs(m_move_downtime, porting::getTimeMs());
+	if (delta < 50)
 		return false;
 
 	auto *translated = new SEvent();
@@ -1145,8 +1227,8 @@ void TouchScreenGUI::step(float dtime)
 		}
 	}
 
-	m_settingsbar.step(dtime);
-	m_rarecontrolsbar.step(dtime);
+	//m_settingsbar.step(dtime);
+	//m_rarecontrolsbar.step(dtime);
 }
 
 void TouchScreenGUI::resetHud()
@@ -1175,11 +1257,11 @@ void TouchScreenGUI::Toggle(bool visible)
 		while (!m_known_ids.empty())
 			handleReleaseEvent(m_known_ids.begin()->id);
 
-		m_settingsbar.hide();
-		m_rarecontrolsbar.hide();
+		//m_settingsbar.hide();
+		//m_rarecontrolsbar.hide();
 	} else {
-		m_settingsbar.show();
-		m_rarecontrolsbar.show();
+		//m_settingsbar.show();
+		//m_rarecontrolsbar.show();
 	}
 }
 
