@@ -1,5 +1,6 @@
 /*
 Copyright (C) 2014 sapier
+Copyright (C) 2014-2020 Maksim Gamarnik [MoNTE48] MoNTE48@mail.ua
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -36,23 +37,24 @@ using namespace irr::gui;
 typedef enum
 {
 	jump_id = 0,
+	drop_id,
 	crunch_id,
-	zoom_id,
-	special1_id,
+	inventory_id,
+	// zoom_id,
+	// special1_id,
+	escape_id,
+	minimap_id,
+	range_id,
+	camera_id,
+	chat_id,
 	after_last_element_id,
-	settings_starter_id,
-	rare_controls_starter_id,
+	// settings_starter_id,
+	// rare_controls_starter_id,
 	fly_id,
 	noclip_id,
 	fast_id,
 	debug_id,
-	camera_id,
-	range_id,
-	minimap_id,
 	toggle_chat_id,
-	chat_id,
-	inventory_id,
-	drop_id,
 	forward_id,
 	backward_id,
 	left_id,
@@ -219,7 +221,7 @@ private:
 
 	// forward, backward, left, right
 	touch_gui_button_id m_joystick_names[5] = {
-			forward_id, backward_id, left_id, right_id, special1_id};
+			forward_id, backward_id, left_id, right_id, /*special1_id*/};
 	bool m_joystick_status[5] = {false, false, false, false, false};
 
 	/*
@@ -230,13 +232,13 @@ private:
 	 */
 	line3d<f32> m_shootline;
 
-	int m_move_id = -1;
+	size_t m_move_id = -1;
 	bool m_move_has_really_moved = false;
 	u64 m_move_downtime = 0;
 	bool m_move_sent_as_mouse_event = false;
 	v2s32 m_move_downlocation = v2s32(-10000, -10000);
 
-	int m_joystick_id = -1;
+	size_t m_joystick_id = -1;
 	bool m_joystick_has_really_moved = false;
 	bool m_fixed_joystick = false;
 	bool m_joystick_triggers_special1 = false;
@@ -258,12 +260,14 @@ private:
 	// initialize a button
 	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 			const std::wstring &caption, bool immediate_release,
-			float repeat_delay = BUTTON_REPEAT_DELAY);
+			float repeat_delay = SLOW_BUTTON_REPEAT);
 
 	// initialize a joystick button
 	button_info *initJoystickButton(touch_gui_button_id id,
 			const rect<s32> &button_rect, int texture_id,
 			bool visible = true);
+
+	void moveJoystick(const SEvent &event, float dx, float dy);
 
 	struct id_status
 	{
@@ -281,8 +285,8 @@ private:
 	// handle pressed hud buttons
 	bool isHUDButton(const SEvent &event);
 
-	// handle double taps
-	bool doubleTapDetection();
+	// handle quick taps
+	bool quickTapDetection();
 
 	// handle release event
 	void handleReleaseEvent(size_t evt_id);
@@ -290,7 +294,7 @@ private:
 	// apply joystick status
 	void applyJoystickStatus();
 
-	// double-click detection variables
+	// long-click detection variables
 	struct key_event
 	{
 		u64 down_time;
@@ -301,7 +305,7 @@ private:
 	// array for saving last known position of a pointer
 	std::map<size_t, v2s32> m_pointerpos;
 
-	// array for double tap detection
+	// array for long-click detection
 	key_event m_key_events[2];
 
 	// settings bar
