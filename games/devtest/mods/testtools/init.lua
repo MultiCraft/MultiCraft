@@ -1,6 +1,8 @@
 local S = minetest.get_translator("testtools")
 local F = minetest.formspec_escape
 
+dofile(minetest.get_modpath("testtools") .. "/light.lua")
+
 -- TODO: Add a Node Metadata tool
 
 -- Param 2 Tool: Set param2 value of tools
