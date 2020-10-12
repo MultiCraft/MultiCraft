@@ -780,7 +780,7 @@ Example (colored grass block):
         -- Overlay tiles: define them in the same style
         -- The top and bottom tile does not have overlay
         overlay_tiles = {"", "",
-            {name = "default_grass_side.png", tileable_vertical = false}},
+            {name = "default_grass_side.png"}},
         -- Global color, used in inventory
         color = "green",
         -- Palette in the world
@@ -1150,7 +1150,7 @@ Look for examples in `games/devtest` or `games/minetest_game`.
       base cube without affecting them.
     * The base cube texture tiles are defined as normal, the `plantlike`
       extension uses the defined special tile, for example:
-      `special_tiles = {{name = "default_papyrus.png", tileable_vertical = true}},`
+      `special_tiles = {{name = "default_papyrus.png"}},`
 
 `*_optional` drawtypes need less rendering time if deactivated
 (always client-side).
@@ -6891,13 +6891,8 @@ Tile definition
 
 * `"image.png"`
 * `{name="image.png", animation={Tile Animation definition}}`
-* `{name="image.png", backface_culling=bool, tileable_vertical=bool,
-  tileable_horizontal=bool, align_style="node"/"world"/"user", scale=int}`
+* `{name="image.png", backface_culling=bool, align_style="node"/"world"/"user", scale=int}`
     * backface culling enabled by default for most nodes
-    * tileable flags are info for shaders, how they should treat texture
-      when displacement mapping is used.
-      Directions are from the point of view of the tile texture,
-      not the node it's on.
     * align style determines whether the texture will be rotated with the node
       or kept aligned with its surroundings. "user" means that client
       setting will be used, similar to `glasslike_framed_optional`.
