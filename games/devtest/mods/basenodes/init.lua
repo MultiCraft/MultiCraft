@@ -126,6 +126,7 @@ minetest.register_node("basenodes:pine_needles", {
 minetest.register_node("basenodes:water_source", {
 	description = "Water Source",
 	drawtype = "liquid",
+	waving = 3,
 	tiles = {"default_water.png"},
 	special_tiles = {
 		{name = "default_water.png", backface_culling = false},
@@ -150,6 +151,7 @@ minetest.register_node("basenodes:water_source", {
 minetest.register_node("basenodes:water_flowing", {
 	description = "Flowing Water",
 	drawtype = "flowingliquid",
+	waving = 3,
 	tiles = {"default_water_flowing.png"},
 	special_tiles = {
 		{name = "default_water_flowing.png", backface_culling = false},
@@ -175,6 +177,7 @@ minetest.register_node("basenodes:water_flowing", {
 minetest.register_node("basenodes:river_water_source", {
 	description = "River Water Source",
 	drawtype = "liquid",
+	waving = 3,
 	tiles = { "default_river_water.png" },
 	special_tiles = {
 		{name = "default_river_water.png", backface_culling = false},
@@ -201,6 +204,7 @@ minetest.register_node("basenodes:river_water_source", {
 minetest.register_node("basenodes:river_water_flowing", {
 	description = "Flowing River Water",
 	drawtype = "flowingliquid",
+	waving = 3,
 	tiles = {"default_river_water_flowing.png"},
 	special_tiles = {
 		{name = "default_river_water_flowing.png", backface_culling = false},
