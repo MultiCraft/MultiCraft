@@ -78,12 +78,12 @@ local function get_formspec(self)
 					{width=self.width, height=self.height}
 			local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 			formspec = formspec ..
-					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height,
+					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height + 1,
 						dump(self.fixed_size)) ..
 					"bgcolor[#0000]" ..
-					"container[1,0]" ..
+					"container[1,1]" ..
 					"background9[-0.2,-0.26;" .. tsize.width + 0.4 .. "," ..
-						tsize.height + 0.75 .. ";" .. defaulttexturedir ..
+						tsize.height + 1.75 .. ";" .. defaulttexturedir ..
 						"bg_common.png;false;40]" ..
 					"style[settings_tab;content_offset=0]" ..
 					"image_button[12.02,1.3;1,1.55;" ..
@@ -189,6 +189,20 @@ local function tab_header(self)
 			math.max(self.last_tab_index, 1))
 end
 
+
+--------------------------------------------------------------------------------
+local function button_header(self)
+
+	local toadd = ""
+
+	local x = (self.width - (#self.tablist * 1.75)) / 2
+	for i=1,#self.tablist,1 do
+		toadd = toadd .. "button[" .. x + (i - 1) * 1.75 .. ",0;2,0.8;" ..
+			self.name .. ":" .. i .. ";" .. self.tablist[i].caption .. "]"
+	end
+	return toadd
+end
+
 --------------------------------------------------------------------------------
 local function switch_to_tab(self, index)
 	--first call on_change for tab to leave
@@ -220,6 +234,16 @@ local function handle_tab_buttons(self,fields)
 		local index = tonumber(fields[self.name])
 		switch_to_tab(self, index)
 		return true
+	end
+
+	local s = self.name .. ':'
+	local n = #s
+	for field in pairs(fields) do
+		if field:sub(1, n) == s then
+			local index = tonumber(field:sub(n + 1))
+			switch_to_tab(self, index)
+			return true
+		end
 	end
 
 	return false
@@ -281,6 +305,7 @@ local tabview_metatable = {
 	set_fixed_size =
 			function(self,state) self.fixed_size = state end,
 	tab_header = tab_header,
+	button_header = button_header,
 	handle_tab_buttons = handle_tab_buttons
 }
 
