@@ -1,7 +1,6 @@
 uniform sampler2D baseTexture;
 
 uniform vec4 skyBgColor;
-uniform float fogDistance;
 uniform vec3 eyePosition;
 
 // The cameraOffset is the current center of the visible world.
@@ -17,7 +16,7 @@ varying vec3 vPosition;
 varying vec3 worldPosition;
 varying lowp vec4 varColor;
 varying mediump vec2 varTexCoord;
-varying vec3 eyeVec;
+varying mediump vec3 eyeVec; // divided by fogDistance
 
 const float fogStart = FOG_START;
 const float fogShadingParameter = 1.0 / ( 1.0 - fogStart);
@@ -87,7 +86,7 @@ void main(void)
 	// should be more efficient as well.
 	// Note: clarity = (1 - fogginess)
 	float clarity = clamp(fogShadingParameter
-		- fogShadingParameter * length(eyeVec) / fogDistance, 0.0, 1.0);
+		- fogShadingParameter * length(eyeVec), 0.0, 1.0);
 	col = mix(skyBgColor, col, clarity);
 	col = vec4(col.rgb, base.a);
 

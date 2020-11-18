@@ -3,6 +3,7 @@ uniform mat4 mWorld;
 // Color of the light emitted by the sun.
 uniform vec3 dayLight;
 uniform vec3 eyePosition;
+uniform float fogDistance;
 
 // The cameraOffset is the current center of the visible world.
 uniform vec3 cameraOffset;
@@ -17,7 +18,7 @@ varying vec3 vPosition;
 varying vec3 worldPosition;
 varying lowp vec4 varColor;
 varying mediump vec2 varTexCoord;
-varying vec3 eyeVec;
+varying mediump vec3 eyeVec;
 
 // Color of the light emitted by the light sources.
 const vec3 artificialLight = vec3(1.04, 1.04, 1.04);
@@ -129,10 +130,9 @@ void main(void)
 	gl_Position = mWorldViewProj * inVertexPosition;
 #endif
 
-
+	eyeVec = -(mWorldView * inVertexPosition).xyz / fogDistance;
 	vPosition = gl_Position.xyz;
 
-	eyeVec = -(mWorldView * inVertexPosition).xyz;
 
 	// Calculate color.
 	// Red, green and blue components are pre-multiplied with
