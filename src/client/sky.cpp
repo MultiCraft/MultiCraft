@@ -213,7 +213,7 @@ void Sky::render()
 
 		const f32 t = 1.0f;
 		const f32 o = 0.0f;
-		static const u16 indices[4] = {0, 1, 2, 3};
+		static const u16 indices[6] = {0, 1, 2, 0, 2, 3};
 		video::S3DVertex vertices[4];
 
 		driver->setMaterial(m_materials[1]);
@@ -255,7 +255,7 @@ void Sky::render()
 						vertex.Pos.rotateXZBy(180);
 					}
 				}
-				driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
+				driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 			}
 		}
 
@@ -281,7 +281,7 @@ void Sky::render()
 						// Switch from -Z (south) to +Z (north)
 						vertex.Pos.rotateXZBy(-180);
 				}
-				driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
+				driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 			}
 		}*/
 
@@ -312,7 +312,7 @@ void Sky::render()
 					// Switch from -Z (south) to -X (west)
 					vertex.Pos.rotateXZBy(-90);
 			}
-			driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
+			driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 		}
 
 		// Draw sun
@@ -348,7 +348,7 @@ void Sky::render()
 						// Switch from -Z (south) to +Z (north)
 						vertex.Pos.rotateXZBy(-180);
 				}
-				driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
+				driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 			}
 
 			// Draw bottom far cloudy fog thing in front of sun, moon and stars
@@ -357,7 +357,7 @@ void Sky::render()
 			vertices[1] = video::S3DVertex( 1, -1.0, -1, 0, 1, 0, c, o, t);
 			vertices[2] = video::S3DVertex( 1, -1.0, 1, 0, 1, 0, c, o, o);
 			vertices[3] = video::S3DVertex(-1, -1.0, 1, 0, 1, 0, c, t, o);
-			driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
+			driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 		}
 	}
 }
@@ -601,7 +601,7 @@ void Sky::draw_sun(video::IVideoDriver *driver, float sunsize, const video::SCol
 	 * wicked_time_of_day: current time of day, to know where should be the sun in the sky
 	 */
 {
-	static const u16 indices[4] = {0, 1, 2, 3};
+	static const u16 indices[] = {0, 1, 2, 0, 2, 3};
 	std::array<video::S3DVertex, 4> vertices;
 	if (!m_sun_texture) {
 		driver->setMaterial(m_materials[1]);
@@ -619,7 +619,7 @@ void Sky::draw_sun(video::IVideoDriver *driver, float sunsize, const video::SCol
 		for (int i = 0; i < 4; i++) {
 			draw_sky_body(vertices, -sunsizes[i], sunsizes[i], colors[i]);
 			place_sky_body(vertices, 90, wicked_time_of_day * 360 - 90);
-			driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
+			driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 		}
 	} else {
 		driver->setMaterial(m_materials[3]);
@@ -631,7 +631,7 @@ void Sky::draw_sun(video::IVideoDriver *driver, float sunsize, const video::SCol
 			c = video::SColor(255, 255, 255, 255);
 		draw_sky_body(vertices, -d, d, c);
 		place_sky_body(vertices, 90, wicked_time_of_day * 360 - 90);
-		driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
+		driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 	}
 }
 
@@ -648,7 +648,7 @@ void Sky::draw_moon(video::IVideoDriver *driver, float moonsize, const video::SC
 	* the sky
 	*/
 {
-	static const u16 indices[4] = {0, 1, 2, 3};
+	static const u16 indices[] = {0, 1, 2, 0, 2, 3};
 	std::array<video::S3DVertex, 4> vertices;
 	if (!m_moon_texture) {
 		driver->setMaterial(m_materials[1]);
@@ -672,7 +672,7 @@ void Sky::draw_moon(video::IVideoDriver *driver, float moonsize, const video::SC
 		for (int i = 0; i < 4; i++) {
 			draw_sky_body(vertices, moonsizes_1[i], moonsizes_2[i], colors[i]);
 			place_sky_body(vertices, -90, wicked_time_of_day * 360 - 90);
-			driver->drawIndexedTriangleFan(&vertices[0], 4, indices, 2);
+			driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 		}
 	} else {
 		driver->setMaterial(m_materials[4]);
