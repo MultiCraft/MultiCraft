@@ -487,7 +487,7 @@ bool ClientLauncher::launch_game(std::string &error_message,
 		current_password = "";
 		current_address = "";
 		current_port = myrand_range(49152, 65535);
-	} else if (server_name != "\x01TEMP\x01") {
+	} else if (menudata.servername != "\x01TEMP\x01") {
 		g_settings->set("name", playername);
 		if (!address.empty()) {
 			ServerListSpec server;
