@@ -89,6 +89,7 @@ void ScriptApiSecurity::initializeSecurity()
 		"string",
 		"table",
 		"math",
+		"utf8",
 	};
 	static const char *io_whitelist[] = {
 		"close",
