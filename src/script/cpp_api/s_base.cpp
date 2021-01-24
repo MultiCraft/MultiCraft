@@ -38,6 +38,7 @@ extern "C" {
 #if USE_LUAJIT
 	#include "luajit.h"
 #endif
+LUALIB_API int luaopen_utf8(lua_State *L);
 }
 
 #include <cstdio>
@@ -87,6 +88,9 @@ ScriptApiBase::ScriptApiBase(ScriptingType type):
 		clientOpenLibs(m_luastack);
 	else
 		luaL_openlibs(m_luastack);
+
+	lua_pushcfunction(m_luastack, luaopen_utf8);
+	lua_call(m_luastack, 0, 0);
 
 	// Make the ScriptApiBase* accessible to ModApiBase
 #if INDIRECT_SCRIPTAPI_RIDX

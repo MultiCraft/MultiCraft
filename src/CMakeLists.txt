@@ -568,6 +568,7 @@ if(BUILD_CLIENT)
 		${JSON_LIBRARY}
 		${PLATFORM_LIBS}
 		${CLIENT_PLATFORM_LIBS}
+		luautf8
 	)
 	target_link_libraries(
 		${client_LIBS}
@@ -640,6 +641,7 @@ if(BUILD_SERVER)
 		${LUA_LIBRARY}
 		${GMP_LIBRARY}
 		${PLATFORM_LIBS}
+		luautf8
 	)
 	set_target_properties(${PROJECT_NAME}server PROPERTIES
 			COMPILE_DEFINITIONS "SERVER")
