@@ -259,6 +259,7 @@ void ScriptApiSecurity::initializeSecurityClient()
 		"string",
 		"table",
 		"math",
+		"utf8",
 	};
 	static const char *os_whitelist[] = {
 		"clock",
@@ -809,4 +810,3 @@ int ScriptApiSecurity::sl_os_remove(lua_State *L)
 	lua_call(L, 1, 2);
 	return 2;
 }
-
