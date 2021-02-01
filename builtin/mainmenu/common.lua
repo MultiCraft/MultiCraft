@@ -57,10 +57,10 @@ function get_tab_header()
 	return string.format([[
 		container[0.65,0]
 
-		style[local_default;fgimg=%s;fgimg_hovered=%s]
-		style[online;fgimg=%s;fgimg_hovered=%s]
-		style[create_server;fgimg=%s;fgimg_hovered=%s]
-		style[credits;fgimg=%s;fgimg_hovered=%s]
+		style[local_default;fgimg=%s;fgimg_hovered=%s;content_offset=0]
+		style[online;fgimg=%s;fgimg_hovered=%s;content_offset=0]
+		style[create_server;fgimg=%s;fgimg_hovered=%s;content_offset=0]
+		style[credits;fgimg=%s;fgimg_hovered=%s;content_offset=0]
 
 		image_button[0,-0.1;3.2,0.9;;local_default;Singleplayer]
 		image_button[3,-0.1;2.7,0.9;;online;Multiplayer]
