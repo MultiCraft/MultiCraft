@@ -58,12 +58,11 @@ end
 
 local function get_bg(tsize, tabname)
 	local bg =
-		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]"
+		"bgcolor[#0000]background9[0,0;14,8;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;39]"
 
-	if tabname then
-		bg = bg ..
-			"background[0,0;" .. tsize.width .. "," .. tsize.height .. ";" ..
+	if false then
+		bg =  "background[0,0;" .. tsize.width .. "," .. tsize.height .. ";" ..
 			core.formspec_escape(defaulttexturedir ..
 				"bg_" .. tabname .. ".png") .. ";true]"
 	end
@@ -87,7 +86,7 @@ local function get_formspec(self)
 					string.format("size[%f,%f,%s]",tsize.width,tsize.height,
 						dump(self.fixed_size)) .. get_bg(tsize, tabname)
 		end
-		formspec = formspec .. self:tab_header()
+		--formspec = formspec .. self:tab_header()
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
 					self,
@@ -167,6 +166,7 @@ local function tab_header(self)
 
 		toadd = toadd .. self.tablist[i].caption
 	end
+
 	return string.format("tabheader[%f,%f;%s;%s;%i;true;false]",
 			self.header_x, self.header_y, self.name, toadd, self.last_tab_index);
 end
@@ -196,12 +196,22 @@ local function switch_to_tab(self, index)
 end
 
 --------------------------------------------------------------------------------
+
+local tab_idx = {
+	local_default = 1,
+	online = 3,
+	credits = 6,
+}
+
 local function handle_tab_buttons(self,fields)
 	--save tab selection to config file
-	if fields[self.name] then
-		local index = tonumber(fields[self.name])
-		switch_to_tab(self, index)
-		return true
+
+	for k in pairs(fields) do
+		local idx = tab_idx[k]
+		if idx then
+			switch_to_tab(self, idx)
+			return true
+		end
 	end
 
 	return false
@@ -259,7 +269,7 @@ local tabview_metatable = {
 			function(self,handler) self.glb_evt_handler = handler end,
 	set_fixed_size =
 			function(self,state) self.fixed_size = state end,
-	tab_header = tab_header,
+	--tab_header = tab_header,
 	handle_tab_buttons = handle_tab_buttons
 }
 

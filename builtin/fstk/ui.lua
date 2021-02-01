@@ -84,9 +84,9 @@ function ui.update()
 				gamedata.errormessage or "<none available>")
 		formspec = {
 			"size[14,8]",
-			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]",
 			"real_coordinates[true]",
+			"background9[0,0;14,8;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;39]",
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
 				fgettext("The server has requested a reconnect:"), error_message),
@@ -111,9 +111,9 @@ function ui.update()
 		end
 		formspec = {
 			"size[14,8]",
-			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]",
 			"real_coordinates[true]",
+			"background9[0,0;14,8;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;39]",
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
 				error_title, error_message),

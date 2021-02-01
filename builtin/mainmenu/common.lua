@@ -41,6 +41,41 @@ local function render_client_count(n)
 end
 
 --------------------------------------------------------------------------------
+function get_tab_header()
+	local tab = core.settings:get("maintab_LAST")
+
+	local tab1_img = core.formspec_escape(defaulttexturedir .. "tab1.png")
+	local tab2_img = core.formspec_escape(defaulttexturedir .. "tab2.png")
+	local tab3_img = core.formspec_escape(defaulttexturedir .. "tab3.png")
+	local tab4_img = core.formspec_escape(defaulttexturedir .. "tab4.png")
+
+	local tab1_img_hover = core.formspec_escape(defaulttexturedir .. "tab1_hover.png")
+	local tab2_img_hover = core.formspec_escape(defaulttexturedir .. "tab2_hover.png")
+	local tab3_img_hover = core.formspec_escape(defaulttexturedir .. "tab3_hover.png")
+	local tab4_img_hover = core.formspec_escape(defaulttexturedir .. "tab4_hover.png")
+
+	return string.format([[
+		container[0.65,0]
+
+		style[local_default;fgimg=%s;fgimg_hovered=%s]
+		style[online;fgimg=%s;fgimg_hovered=%s]
+		style[create_server;fgimg=%s;fgimg_hovered=%s]
+		style[credits;fgimg=%s;fgimg_hovered=%s]
+
+		image_button[0,-0.1;3.2,0.9;;local_default;Singleplayer]
+		image_button[3,-0.1;2.7,0.9;;online;Multiplayer]
+		image_button[5.5,-0.1;3.3,0.9;;create_server;Create Server]
+		image_button[8.59,-0.1;2.2,0.9;;credits;Credits]
+
+		container_end[]
+	]],
+	tab == "local_default" and tab1_img_hover or tab1_img, tab1_img_hover,
+	tab == "online" and tab2_img_hover or tab2_img, tab2_img_hover,
+	tab == "create_server" and tab3_img_hover or tab3_img, tab3_img_hover,
+	tab == "credits" and tab4_img_hover or tab4_img, tab4_img_hover)
+end
+
+--------------------------------------------------------------------------------
 function image_column(tooltip)
 	return "image,tooltip=" .. core.formspec_escape(tooltip) .. "," ..
 		"0=" .. core.formspec_escape(defaulttexturedir .. "blank.png") .. "," ..

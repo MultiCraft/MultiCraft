@@ -40,51 +40,62 @@ local function get_formspec()
 		creative_bg = "creative_bg_" .. lang .. ".png"
 	end
 
-	local retval =
-			"image_button[0,4.84;3.31,0.92;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";world_delete;;true;false]" ..
+	local world_delete_img = core.formspec_escape(defaulttexturedir .. "world_delete.png")
+	local world_delete_img_hover = core.formspec_escape(defaulttexturedir .. "world_delete_hover.png")
+
+	local world_new_img = core.formspec_escape(defaulttexturedir .. "world_new.png")	
+	local world_new_img_hover = core.formspec_escape(defaulttexturedir .. "world_new_hover.png")
+
+	local world_play_img = core.formspec_escape(defaulttexturedir .. "world_play.png")
+	local world_play_img_hover = core.formspec_escape(defaulttexturedir .. "world_play_hover.png")
+
+	local retval =  get_tab_header() ..
+			string.format("style[world_delete;fgimg=%s;fgimg_hovered=%s]",
+				world_delete_img, world_delete_img_hover) ..
+			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
 			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
-			"image_button[3.14,4.84;3.3,0.92;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";world_create;;true;false]" ..
+
+			string.format("style[world_create;fgimg=%s;fgimg_hovered=%s]",
+				world_new_img, world_new_img_hover) ..
+			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"image_button[6.72,1.43;4.96,1.41;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";play;;true;false]" ..
+			string.format("style[play;fgimg=%s;fgimg_hovered=%s]",
+				world_play_img, world_play_img_hover) ..
+			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
-			"image_button[7.2,3.09;4,0.83;" ..
-				core.formspec_escape(defaulttexturedir) .. creative_bg ..
-				";;;true;false]" ..
-			"image_button[7.2,3.09;4,0.83;" ..
+			"background9[7.2,4.09;4,0.8;" ..
+				core.formspec_escape(defaulttexturedir) .. creative_bg .. ";false;14]" ..
+			"image_button[7.41,4.22;0.5,0.5;" ..
 				core.formspec_escape(defaulttexturedir) .. creative_checkbox ..
 					".png;cb_creative_mode;;true;false]" ..
 
-			"tableoptions[background=#27233F;border=false]" ..
-			"table[-0.01,0;6.28,4.64;sp_worlds;" ..
-			menu_render_worldlist() ..
-			";" .. index .. "]"
+			"background9[0,0.9;6.5,3.8;" ..
+				core.formspec_escape(defaulttexturedir) .. "worldlist_bg.png" .. ";false;33]" ..
+			"tableoptions[background=#0000;border=false]" ..
+			"table[0,0.9;6.28,3.64;sp_worlds;" ..
+				menu_render_worldlist() ..
+				";" .. index .. "]"
 
-
+--[[
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
 				"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
 					dump(core.settings:get_bool("enable_server")) .. "]"
 	end
-
+]]
 	if core.settings:get_bool("enable_server") then
 		retval = retval ..
-				"checkbox[6.6,0.65;cb_server_announce;" .. fgettext("Announce Server") .. ";" ..
-					dump(core.settings:get_bool("server_announce")) .. "]" ..
+			"checkbox[6.6,0.65;cb_server_announce;" .. fgettext("Announce Server") .. ";" ..
+				dump(core.settings:get_bool("server_announce")) .. "]" ..
 
-				-- Name / Password
-				"label[6.6,-0.3;" .. fgettext("Name") .. ":" .. "]" ..
-				"label[9.3,-0.3;" .. fgettext("Password") .. ":" .. "]" ..
-				"field[6.9,0.6;2.8,0.5;te_playername;;" ..
-					core.formspec_escape(core.settings:get("name")) .. "]" ..
-				"pwdfield[9.6,0.6;2.8,0.5;te_passwd;]"
+			-- Name / Password
+			"label[6.6,-0.3;" .. fgettext("Name") .. ":" .. "]" ..
+			"label[9.3,-0.3;" .. fgettext("Password") .. ":" .. "]" ..
+			"field[6.9,0.6;2.8,0.5;te_playername;;" ..
+				core.formspec_escape(core.settings:get("name")) .. "]" ..
+			"pwdfield[9.6,0.6;2.8,0.5;te_passwd;]"
 	end
 
 	return retval

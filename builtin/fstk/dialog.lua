@@ -71,19 +71,20 @@ end
 function messagebox(name, message)
 	local bg = core.formspec_escape(defaulttexturedir .. "bg_common.png")
 	return dialog_create(name,
-			function()
-				return ([[
-					size[12,6,false]
-					background[0,0;0,0;%s;true;32]
-					textarea[1,1;10,4;;;%s]
-					button[5,4.5;2,0.8;ok;%s]
-				]]):format(bg, message, fgettext("OK"))
-			end,
-			function(this, fields)
-				if fields.ok then
-					this:delete()
-					return true
-				end
-			end,
-			nil)
+		function()
+
+			return ([[
+				size[12,6,false]
+				background9[0,0;14,8;%s;true;39]
+				textarea[1,1;10,4;;;%s]
+				button[5,4.5;2,0.8;ok;%s]
+			]]):format(bg, message, fgettext("OK"))
+		end,
+		function(this, fields)
+			if fields.ok then
+				this:delete()
+				return true
+			end
+		end,
+		nil)
 end

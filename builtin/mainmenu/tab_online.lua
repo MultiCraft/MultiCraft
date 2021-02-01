@@ -57,9 +57,15 @@ local function get_formspec(tabview, name, tabdata)
 				.. ";btn_mp_refresh;;true;false]"
 	end
 
+	local connect_img = core.formspec_escape(defaulttexturedir .. "world_play.png")
+	local connect_img_hover = core.formspec_escape(defaulttexturedir .. "world_play_hover.png")
+
 	local retval =
+		get_tab_header() ..
+		"container[0,1]" ..
+
 		-- Search
-	search_panel..
+		search_panel ..
 
 		-- Address / Port
 		"label[7.1,-0.3;" .. fgettext("Address") .. ":" .. "]" ..
@@ -76,12 +82,12 @@ local function get_formspec(tabview, name, tabdata)
 			esc(core.settings:get("name")) .. "]" ..
 
 		-- Description Background
-		"box[7.1,2.1;4.8,2.65;#999999]" ..
+		"box[7.1,2.1;4.8,1.65;#999999]" ..
 
 		-- Connect
-		"image_button[8.8,4.88;3.3,0.9;" ..
-			esc(defaulttexturedir .. "blank.png")
-			.. ";btn_mp_connect;;true;false]" ..
+		string.format("style[btn_mp_connect;fgimg=%s;fgimg_hovered=%s]",
+				connect_img, connect_img_hover) ..
+		"image_button[8.8,3.88;3.3,0.9;;btn_mp_connect;;true;false]" ..
 		"tooltip[btn_mp_connect;".. fgettext("Connect") .. "]"
 
 		local pwd = password_save and esc(core.settings:get("password")) or password_tmp
@@ -101,7 +107,9 @@ local function get_formspec(tabview, name, tabdata)
 
 	--favourites
 	retval = retval ..
-		"tableoptions[background=#27233F;border=false]" ..
+		"background9[-0.09,0.7;7.19,4.03;" ..
+			core.formspec_escape(defaulttexturedir) .. "worldlist_bg.png" .. ";false;33]" ..
+		"tableoptions[background=#0000;border=false]" ..
 		"tablecolumns[" ..
 		image_column(fgettext("Favorite")) .. ",align=center;" ..
 		image_column(fgettext("Lag")) .. ",padding=0.25;" ..
@@ -112,7 +120,7 @@ local function get_formspec(tabview, name, tabdata)
 		image_column(fgettext("Server mode")) .. ",padding=0.5;" ..
 		"color,span=1;" ..
 		"text,padding=0.5]" ..
-		"table[-0.09,0.7;6.99,4.93;favourites;"
+		"table[-0.09,0.7;6.99,3.83;favourites;"
 
 	if menudata.search_result then
 		for i = 1, #menudata.search_result do
@@ -161,6 +169,8 @@ local function get_formspec(tabview, name, tabdata)
 	else
 		retval = retval .. ";0]"
 	end
+
+	retval = retval .. "container_end[]"
 
 	return retval
 end
