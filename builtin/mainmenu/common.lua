@@ -64,7 +64,7 @@ function get_tab_header()
 
 		image_button[0,-0.1;3.2,0.9;;local_default;Singleplayer]
 		image_button[3,-0.1;2.7,0.9;;online;Multiplayer]
-		image_button[5.5,-0.1;3.3,0.9;;create_server;Create Server]
+		image_button[5.49,-0.1;3.3,0.9;;create_server;Create Server]
 		image_button[8.59,-0.1;2.2,0.9;;credits;Credits]
 
 		container_end[]
