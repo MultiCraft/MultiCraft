@@ -50,6 +50,8 @@ end
 
 local tabs = {}
 
+tabs.home = dofile(menupath .. DIR_DELIM .. "tab_home.lua")
+
 if not mobile then
 	tabs.settings = dofile(menupath .. DIR_DELIM .. "tab_settings.lua")
 	tabs.content  = dofile(menupath .. DIR_DELIM .. "tab_content.lua")
@@ -79,6 +81,8 @@ end
 --------------------------------------------------------------------------------
 function menudata.init_tabs()
 	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0, y = 0})
+
+	tv_main:add(tabs.home)
 
 	for i = 1, #pkgmgr.games do
 		if pkgmgr.games[i].id == "default" then

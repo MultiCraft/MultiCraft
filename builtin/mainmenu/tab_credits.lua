@@ -110,10 +110,12 @@ end
 return {
 	name = "credits",
 	caption = fgettext("Credits"),
+	tabsize = {width = 12, height = 5},
 	cbf_formspec = function(tabview, name, tabdata)
 		local version = core.get_version()
-		return  get_tab_header() ..
-			"container[0,1]" ..
+		return  --get_tab_header() ..
+			get_back_fs() ..
+			"container[0,0.5]" ..
 			"label[0.1,-0.1;" ..
 			"MultiCraft Open Source Project, ver. " .. version.string .. "\n" ..
 --			"button[0.5,3;2,2;homepage;multicraft.world]" ..
@@ -122,7 +124,7 @@ return {
 			"Created and Powered by Minetest Engine, ver. 5.3.0]" ..
 			"tablecolumns[color;text]" ..
 			"tableoptions[background=#999999;highlight=#00000000;border=true]" ..
-			"table[0,1.6;11.8,2.8;list_credits;" ..
+			"table[0,1.6;11.8,3;list_credits;" ..
 			"#FFFF00," .. fgettext("MultiCraft Developers") .. ",," ..
 			buildCreditList(multicraft_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Minetest Developers") .. ",," ..
@@ -136,6 +138,7 @@ return {
 			";1]" ..
 			"container_end[]"
 	end,
+
 	cbf_button_handler = function(this, fields, name, tabdata)
 --		if fields.homepage then
 --			core.open_url("http://multicraft.world")

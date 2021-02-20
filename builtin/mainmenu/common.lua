@@ -76,6 +76,13 @@ function get_tab_header()
 end
 
 --------------------------------------------------------------------------------
+function get_back_fs()
+	return "hypertext[0.2,-0.1;2,1;back;" ..
+			"<tag name=action color=#ffffed hovercolor=#ff0 font=bold size=22>" ..
+			"<action name=back>◄ Back</action>]"
+end
+
+--------------------------------------------------------------------------------
 function image_column(tooltip)
 	return "image,tooltip=" .. core.formspec_escape(tooltip) .. "," ..
 		"0=" .. core.formspec_escape(defaulttexturedir .. "blank.png") .. "," ..

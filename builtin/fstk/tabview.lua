@@ -43,6 +43,7 @@ local function add_tab(self,tab)
 		get_formspec = tab.cbf_formspec,
 		tabsize = tab.tabsize,
 		on_change = tab.on_change,
+		no_bg = tab.no_bg,
 		tabdata = {},
 	}
 
@@ -57,9 +58,8 @@ local function add_tab(self,tab)
 end
 
 local function get_bg(tsize, tabname)
-	local bg =
-		"bgcolor[#0000]background9[0,0;14,8;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;39]"
+	local bg = "bgcolor[#0000]background9[0,0;14,8;" ..
+		core.formspec_escape(defaulttexturedir .. "bg_common.png") .. ";true;39]"
 
 	if false then
 		bg =  "background[0,0;" .. tsize.width .. "," .. tsize.height .. ";" ..
@@ -76,31 +76,36 @@ local function get_formspec(self)
 
 	if not self.hidden and (self.parent == nil or not self.parent.hidden) then
 		local name = self.tablist[self.last_tab_index].name
-		local tabname = (name == "local" or name == "online") and name
-				or (name == "local_default" and "local")
+		local tabname = (name == "local" or name == "online") and name or
+				(name == "local_default" and "local")
 
 		if self.parent == nil then
 			local tsize = self.tablist[self.last_tab_index].tabsize or
-					{width=self.width, height=self.height}
-			formspec = formspec ..
-					string.format("size[%f,%f,%s]",tsize.width,tsize.height,
-						dump(self.fixed_size)) .. get_bg(tsize, tabname)
+					{width = self.width, height = self.height}
+
+			formspec = formspec .. string.format("size[%f,%f,%s]",
+				tsize.width, tsize.height, dump(self.fixed_size))
+
+			if not self.tablist[self.last_tab_index].no_bg then
+				formspec = formspec .. get_bg(tsize, tabname)
+			end
 		end
+
 		--formspec = formspec .. self:tab_header()
+
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
 					self,
 					name,
 					self.tablist[self.last_tab_index].tabdata,
-					self.tablist[self.last_tab_index].tabsize
-					)
+					self.tablist[self.last_tab_index].tabsize)
 	end
+
 	return formspec
 end
 
 --------------------------------------------------------------------------------
-local function handle_buttons(self,fields)
-
+local function handle_buttons(self, fields)	
 	if self.hidden then
 		return false
 	end
@@ -112,6 +117,10 @@ local function handle_buttons(self,fields)
 	if self.glb_btn_handler ~= nil and
 		self.glb_btn_handler(self,fields) then
 		return true
+	end
+
+	if fields.back then
+		return true, switch_to_tab(self, 1)
 	end
 
 	if self.tablist[self.last_tab_index].button_handler ~= nil then
@@ -155,10 +164,9 @@ end
 
 --------------------------------------------------------------------------------
 local function tab_header(self)
-
 	local toadd = ""
 
-	for i=1,#self.tablist,1 do
+	for i = 1, #self.tablist, 1 do
 
 		if toadd ~= "" then
 			toadd = toadd .. ","
@@ -172,7 +180,7 @@ local function tab_header(self)
 end
 
 --------------------------------------------------------------------------------
-local function switch_to_tab(self, index)
+function switch_to_tab(self, index)
 	--first call on_change for tab to leave
 	if self.tablist[self.last_tab_index].on_change ~= nil then
 		self.tablist[self.last_tab_index].on_change("LEAVE",
@@ -185,7 +193,7 @@ local function switch_to_tab(self, index)
 	self.current_tab = self.tablist[index].name
 
 	if (self.autosave_tab) then
-		core.settings:set(self.name .. "_LAST",self.current_tab)
+		--core.settings:set(self.name .. "_LAST", self.current_tab)
 	end
 
 	-- call for tab to enter

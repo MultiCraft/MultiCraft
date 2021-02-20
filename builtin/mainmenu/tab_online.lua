@@ -61,8 +61,9 @@ local function get_formspec(tabview, name, tabdata)
 	local connect_img_hover = core.formspec_escape(defaulttexturedir .. "world_play_hover.png")
 
 	local retval =
-		get_tab_header() ..
-		"container[0,1]" ..
+		--get_tab_header() ..
+		get_back_fs() ..
+		"container[0,0.5]" ..
 
 		-- Search
 		search_panel ..
@@ -422,5 +423,6 @@ return {
 	caption = fgettext("Multiplayer"),
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
-	on_change = on_change
+	on_change = on_change,
+	tabsize = {width = 12, height = 5},
 }

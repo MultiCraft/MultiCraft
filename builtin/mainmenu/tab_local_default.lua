@@ -49,7 +49,9 @@ local function get_formspec()
 	local world_play_img = core.formspec_escape(defaulttexturedir .. "world_play.png")
 	local world_play_img_hover = core.formspec_escape(defaulttexturedir .. "world_play_hover.png")
 
-	local retval =  get_tab_header() ..
+	local retval =  --get_tab_header() ..
+			get_back_fs() ..
+			"container[0,-0.4]" ..
 			string.format("style[world_delete;fgimg=%s;fgimg_hovered=%s]",
 				world_delete_img, world_delete_img_hover) ..
 			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
@@ -97,6 +99,8 @@ local function get_formspec()
 				core.formspec_escape(core.settings:get("name")) .. "]" ..
 			"pwdfield[9.6,0.6;2.8,0.5;te_passwd;]"
 	end
+
+	retval = retval .. "container_end[]"
 
 	return retval
 end
@@ -244,5 +248,6 @@ return {
 	name = "local_default",
 	caption = fgettext("Singleplayer"),
 	cbf_formspec = get_formspec,
-	cbf_button_handler = main_button_handler
+	cbf_button_handler = main_button_handler,
+	tabsize = {width = 12, height = 5},
 }
