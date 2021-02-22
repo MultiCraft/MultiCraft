@@ -1,6 +1,7 @@
 local function get_formspec(tabview, name, tabdata)
 	local retval =
 		"real_coordinates[true]" ..
+		"style_type[button;border=false;content_offset=0]" ..
 		"style_type[image_button;border=false;bgimg_hovered=" ..
 			core.formspec_escape(defaulttexturedir .. "select.png") .. "]" ..
 
@@ -8,13 +9,13 @@ local function get_formspec(tabview, name, tabdata)
 		"container[3,4.5]" ..
 
 		"image_button[0,0;3,3;" .. core.formspec_escape(defaulttexturedir .. "hosting_create.png") .. ";solo;]" ..
-		"tooltip[0,0;3,3;Solo]" ..
+		"button[0,3.1;3,0.5;__;Singleplayer]" ..
 
 		"image_button[3.5,0;3,3;" .. core.formspec_escape(defaulttexturedir .. "hosting_create.png") .. ";multi;]" ..
-		"tooltip[3.5,0;3,3;Multiplayer]" ..
+		"button[3.5,3.1;3,0.5;__;Multiplayer]" ..
 
 		"image_button[7,0;3,3;" .. core.formspec_escape(defaulttexturedir .. "hosting_create.png") .. ";host;]" ..
-		"tooltip[7,0;3,3;Host a server]" ..
+		"button[7,3.1;3,0.5;__;Server Hosting]" ..
 
 		"container_end[]" ..
 
@@ -35,7 +36,7 @@ local function main_button_handler(this, fields, name, tabdata)
 		return true, switch_to_tab(this, 4)
 	elseif fields.host then
 		return true, switch_to_tab(this, 4)
-	else
+	elseif not fields["__"] then
 		return true, switch_to_tab(this, 7)
 	end
 end
