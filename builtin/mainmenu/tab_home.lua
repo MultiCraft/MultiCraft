@@ -1,15 +1,24 @@
 local function get_formspec(tabview, name, tabdata)
 	local retval =
 		"real_coordinates[true]" ..
-		"bgcolor[#0000]" ..
+		"style_type[image_button;border=false;bgimg_hovered=" ..
+			core.formspec_escape(defaulttexturedir .. "select.png") .. "]" ..
 
-		"container[0,0]" ..
-		"button[0,0;6,1.5;solo;Singleplayer]" ..
-		"button[0,1.7;6,1.5;multi;Play Online]" ..
-		"button[0,3.4;6,1.5;host;Host a server]" ..
+		"bgcolor[#0000]" ..
+		"container[3,4.5]" ..
+
+		"image_button[0,0;3,3;" .. core.formspec_escape(defaulttexturedir .. "hosting_create.png") .. ";solo;]" ..
+		"tooltip[0,0;3,3;Solo]" ..
+
+		"image_button[3.5,0;3,3;" .. core.formspec_escape(defaulttexturedir .. "hosting_create.png") .. ";multi;]" ..
+		"tooltip[3.5,0;3,3;Multiplayer]" ..
+
+		"image_button[7,0;3,3;" .. core.formspec_escape(defaulttexturedir .. "hosting_create.png") .. ";host;]" ..
+		"tooltip[7,0;3,3;Host a server]" ..
+
 		"container_end[]" ..
 
-		"hypertext[2.5,6;2,1;;" ..
+		"hypertext[14.8,11.5;2,1;;" ..
 			"<tag name=action color=#ffffed hovercolor=#ff0 font=bold size=22>" ..
 			"<action name=credits>Credits</action>]"
 
@@ -43,5 +52,5 @@ return {
 	cbf_button_handler = main_button_handler,
 	on_change = on_change,
 	no_bg = true,
-	tabsize = {width = 6, height = 6.3},
+	tabsize = {width = 16, height = 12},
 }
