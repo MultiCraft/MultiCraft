@@ -39,7 +39,7 @@ const button_data buttons_data[] = {
 	{ "jump_btn.png", "", "", N_("Jump"), "jump", false, -1, KeyType::JUMP },
 	{ "drop_btn.png", "", "drop_btn_float.png", N_("Drop"), "drop", false, -1, KeyType::DROP },
 	{ "sneak_btn.png", "", "sneak_btn_float.png", N_("Sneak"), "sneak", false, -1, KeyType::SNEAK },
-	{ "special1_btn.png", "", "", N_("Special"), "special1", false, -1, KeyType::SPECIAL1 },
+	{ "special1_btn.png", "", "", N_("Special"), "special1", false, -1, KeyType::AUX1 },
 	{ "inventory_btn.png", "", "inventory_btn_float.png", N_("Inventory"), "inventory", true, -1, KeyType::INVENTORY },
 	{ "escape_btn.png", "", "escape_btn_float.png", N_("Exit"), "escape", true, 1, KeyType::ESC },
 	{ "minimap_btn.png", "", "minimap_btn_float.png", N_("Toggle minimap"), "minimap", true, 1, KeyType::MINIMAP },
