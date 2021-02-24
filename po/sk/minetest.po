@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: minetest\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-02-23 19:03+0100\n"
-"PO-Revision-Date: 2021-03-14 11:02+0000\n"
+"PO-Revision-Date: 2021-04-21 20:29+0000\n"
 "Last-Translator: Marian <daretmavi@gmail.com>\n"
 "Language-Team: Slovak <https://hosted.weblate.org/projects/minetest/minetest/"
 "sk/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Weblate 4.5.2-dev\n"
+"X-Generator: Weblate 4.7-dev\n"
 
 #: builtin/client/death_formspec.lua src/client/game.cpp
 msgid "Respawn"
@@ -773,7 +773,7 @@ msgstr "Poďakovanie"
 
 #: builtin/mainmenu/tab_credits.lua
 msgid "Open User Data Directory"
-msgstr "Otvor adresár s užívateľskými dátami"
+msgstr "Otvor adresár užívateľa"
 
 #: builtin/mainmenu/tab_credits.lua
 msgid ""
