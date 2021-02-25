@@ -2478,7 +2478,7 @@ Elements
 * **Note**: If the new coordinate system is enabled, checkboxes are
   positioned from the center of the checkbox, not the top.
 
-### `scrollbar[<X>,<Y>;<W>,<H>;<orientation>;<name>;<value>]`
+### `scrollbar[<X>,<Y>;<W>,<H>;<orientation>;<name>;<value>;<bg.png,slider.png,arrow_up.png,arrow_down.png>]`
 
 * Show a scrollbar using options defined by the previous `scrollbaroptions[]`
 * There are two ways to use it:

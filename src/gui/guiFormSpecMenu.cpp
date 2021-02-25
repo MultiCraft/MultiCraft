@@ -648,6 +648,10 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 		std::vector<std::string> v_geom = split(parts[1],',');
 		std::string name = parts[3];
 		std::string value = parts[4];
+		std::vector<std::string> textures;
+
+		if (parts.size() == 6)
+			textures = split(parts[5], ',');
 
 		MY_CHECKPOS("scrollbar",0);
 		MY_CHECKGEOM("scrollbar",1);
@@ -702,6 +706,15 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 		s32 scrollbar_size = is_horizontal ? dim.X : dim.Y;
 
 		e->setPageSize(scrollbar_size * (max - min + 1) / data->scrollbar_options.thumb_size);
+
+		std::vector<video::ITexture *> itextures;
+
+		if (!textures.empty()) {
+			for (u32 i = 0; i < textures.size(); ++i)
+				itextures.push_back(m_tsrc->getTexture(textures[i]));
+
+			e->setTextures(itextures);
+		}
 
 		m_scrollbars.emplace_back(spec,e);
 		m_fields.push_back(spec);
