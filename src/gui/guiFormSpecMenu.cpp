@@ -3465,9 +3465,13 @@ void GUIFormSpecMenu::drawMenu()
 
 	/*
 		Call base class
-		(This is where all the drawing happens.)
 	*/
-	gui::IGUIElement::draw();
+	core::list<IGUIElement*>::Iterator it = Children.begin();
+	for (; it != Children.end(); ++it)
+		if ((*it)->isNotClipped() ||
+				AbsoluteClippingRect.isRectCollided(
+						(*it)->getAbsolutePosition()))
+			(*it)->draw();
 
 	for (gui::IGUIElement *e : m_clickthrough_elements)
 		e->setVisible(false);
