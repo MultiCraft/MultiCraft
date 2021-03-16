@@ -28,7 +28,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server.h"
 #include "filesys.h"
 #include "version.h"
-#include "client/game.h"
 #include "defaultsettings.h"
 #include "gettext.h"
 #include "log.h"
@@ -45,6 +44,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#include "terminal_chat_console.h"
 #endif
 #ifndef SERVER
+#include "client/game.h"
 #include "gui/guiMainMenu.h"
 #include "client/clientlauncher.h"
 #include "gui/guiEngine.h"
