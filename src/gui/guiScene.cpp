@@ -76,7 +76,7 @@ void GUIScene::setTexture(u32 idx, video::ITexture *texture)
 
 void GUIScene::draw()
 {
-	m_driver->clearZBuffer();
+	m_driver->clearBuffers(video::ECBF_DEPTH);
 
 	// Control rotation speed based on time
 	u64 new_time = porting::getTimeMs();

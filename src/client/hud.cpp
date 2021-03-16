@@ -1037,7 +1037,7 @@ void drawItemStack(
 		video::ITexture *tiles_texture = tiles.empty() ? nullptr :
 			client->getTextureSource()->getTextureForMeshTransient(tiles);
 
-		driver->clearZBuffer();
+		driver->clearBuffers(video::ECBF_DEPTH);
 		s32 delta = 0;
 		if (rotation_kind < IT_ROT_NONE) {
 			MeshTimeInfo &ti = rotation_time_infos[rotation_kind];

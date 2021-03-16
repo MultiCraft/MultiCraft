@@ -2343,7 +2343,7 @@ Does not support formspecs other than the inventory.
     * Requires formspec version >= 4.
     * See `background9[]` documentation for more information.
 
-### `model[<X>,<Y>;<W>,<H>;<name>;<mesh>;<textures>;<rotation X,Y>;<continuous>;<mouse control>;<frame loop range>]`
+### `model[<X>,<Y>;<W>,<H>;<name>;<mesh>;<textures>;<rotation X,Y>;<continuous>;<mouse control>;<frame loop range>;<animation speed>]`
 
 * Show a mesh model.
 * `name`: Element name that can be used for styling
@@ -2357,6 +2357,7 @@ Does not support formspecs other than the inventory.
 * `frame loop range` (Optional): Range of the animation frames.
     * Defaults to the full range of all available frames.
     * Syntax: `<begin>,<end>`
+* `animation speed` (Optional): Sets the animation speed. Default 0 FPS.
 
 ### `item_image[<X>,<Y>;<W>,<H>;<item name>]`
 
