@@ -3213,16 +3213,17 @@ std::string Server::getStatusString()
 
 	os << "# Server: ";
 	// Version
-	os << "version=" << g_version_string;
+	os << "version: " << g_version_string;
 	// Uptime
-	os << ", uptime=" << m_uptime_counter->get();
+	os << " | uptime: " << duration_to_string((int) m_uptime_counter->get());
 	// Max lag estimate
-	os << ", max_lag=" << (m_env ? m_env->getMaxLagEstimate() : 0);
+	os << " | max lag: " << std::setprecision(3);
+	os << (m_env ? m_env->getMaxLagEstimate() : 0) << "s";
 
 	// Disabled due to misuse.
 	// Information about clients
 	/*bool first = true;
-	os << ", clients={";
+	os << " | clients: ";
 	if (m_env) {
 		std::vector<session_t> clients = m_clients.getClientIDs();
 		for (session_t client_id : clients) {
@@ -3238,8 +3239,7 @@ std::string Server::getStatusString()
 				first = false;
 			os << name;
 		}
-	}
-	os << "}";*/
+	}*/
 
 	if (m_env && !((ServerMap*)(&m_env->getMap()))->isSavingEnabled())
 		os << std::endl << "# Server: " << " WARNING: Map saving is disabled.";
