@@ -1,6 +1,7 @@
 -- Minetest: builtin/misc.lua
 
 local ceil, floor = math.ceil, math.floor
+local S = core.get_translator("__builtin")
 
 --
 -- Misc. API functions
@@ -44,15 +45,15 @@ end
 
 function core.send_join_message(player_name)
 	if not core.is_singleplayer() then
-		core.chat_send_all("=> " .. player_name .. " has joined the server")
+		core.chat_send_all("*** " .. S("@1 joined the game.", player_name))
 	end
 end
 
 
 function core.send_leave_message(player_name, timed_out)
-	local announcement = "<= " ..  player_name .. " left the server"
+	local announcement = "*** " .. S("@1 left the game.", player_name)
 	if timed_out then
-		announcement = announcement .. " (timed out)"
+		announcement = "*** " .. S("@1 left the game (timed out).", player_name)
 	end
 	core.chat_send_all(announcement)
 end
