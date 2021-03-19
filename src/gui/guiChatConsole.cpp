@@ -1259,13 +1259,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				deletePromptSelection();
 			}
 
-			#if defined(__linux__) && (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9)
-				wchar_t wc = L'_';
-				mbtowc( &wc, (char *) &event.KeyInput.Char, sizeof(event.KeyInput.Char) );
-				prompt.input(wc);
-			#else
-				prompt.input(event.KeyInput.Char);
-			#endif
+			prompt.input(event.KeyInput.Char);
 			calculatePromptScrollPos();
 			return true;
 		}
