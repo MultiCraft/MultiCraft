@@ -842,6 +842,8 @@ private:
 		const NodeMetadata *meta);
 	static const ClientEventHandler clientEventHandler[CLIENTEVENT_MAX];
 
+	f32 getSensitivityScaleFactor() const;
+
 	InputHandler *input = nullptr;
 
 	Client *client = nullptr;
@@ -2612,7 +2614,6 @@ void Game::toggleFullViewRange()
 		m_game_ui->showTranslatedStatusText("Zoom currently disabled by game or mod");
 }*/
 
-
 void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 {
 	if ((device->isWindowActive() && device->isWindowFocused()
@@ -2639,6 +2640,18 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 	}
 }
 
+// Get the factor to multiply with sensitivity to get the same mouse/joystick
+// responsiveness independently of FOV.
+f32 Game::getSensitivityScaleFactor() const
+{
+	f32 fov_y = client->getCamera()->getFovY();
+
+	// Multiply by a constant such that it becomes 1.0 at 72 degree FOV and
+	// 16:9 aspect ratio to minimize disruption of existing sensitivity
+	// settings.
+	return tan(fov_y / 2.0f) * 1.3763818698f;
+}
+
 void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 {
 #ifdef HAVE_TOUCHSCREENGUI
@@ -2655,15 +2668,17 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 			dist.Y = -dist.Y;
 		}
 
-		cam->camera_yaw   -= dist.X * m_cache_mouse_sensitivity;
-		cam->camera_pitch += dist.Y * m_cache_mouse_sensitivity;
+		f32 sens_scale = getSensitivityScaleFactor();
+		cam->camera_yaw   -= dist.X * m_cache_mouse_sensitivity * sens_scale;
+		cam->camera_pitch += dist.Y * m_cache_mouse_sensitivity * sens_scale;
 
 		if (dist.X != 0 || dist.Y != 0)
 			input->setMousePos(center.X, center.Y);
 	}
 
 	if (m_cache_enable_joysticks) {
-		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime;
+		f32 sens_scale = getSensitivityScaleFactor();
+		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime * sens_scale;
 		f32 yaw = 0;
 		f32 pitch = 0;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
