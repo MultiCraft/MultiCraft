@@ -10,6 +10,9 @@ http://creativecommons.org/licenses/by-sa/3.0/
 Textures by Zughy & MultiCraft Development Team are under CC BY-SA 4.0
 https://creativecommons.org/licenses/by-sa/4.0/
 
+textures/base/pack/server_public.png is under CC-BY 4.0, taken from Twitter's Twemoji set
+https://creativecommons.org/licenses/by/4.0/
+
 Authors of media files
 -----------------------
 Everything not listed in here:
@@ -47,6 +50,7 @@ MultiCraft Development Team:
   textures/base/pack/progress_bar_*.png
   textures/base/pack/rangeview_btn.png
   textures/base/pack/refresh.png
+  textures/base/pack/server_favorite.png
   textures/base/pack/server_flags_*.png
   textures/base/pack/server_ping_*.png
   textures/base/pack/start_icon.png
@@ -62,7 +66,7 @@ erlehmann:
   misc/minetest-icon.ico
   misc/minetest.svg
 
-srifqi
+srifqi:
   textures/base/pack/chat_hide_btn.png
   textures/base/pack/chat_show_btn.png
 
@@ -77,6 +81,9 @@ Zughy:
 KevDoy, An0n3m0us:
   textures/base/pack/heart.png
   textures/base/pack/heart_gone.png
+
+appgurueu:
+  textures/base/pack/server_incompatible.png
 
 License of Minetest source code
 -------------------------------
