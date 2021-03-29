@@ -879,7 +879,7 @@ font_path (Regular font path) filepath fonts/MultiCraftFont.ttf
 
 font_path_bold (Bold font path) filepath ""
 font_path_italic (Italic font path) filepath ""
-font_path_bolditalic (Bold and italic font path) filepath ""
+font_path_bold_italic (Bold and italic font path) filepath ""
 
 #    Font size of the monospace font in point (pt).
 mono_font_size (Monospace font size) int 15 1
@@ -892,7 +892,7 @@ mono_font_path (Monospace font path) filepath ""
 
 mono_font_path_bold (Bold monospace font path) filepath ""
 mono_font_path_italic (Italic monospace font path) filepath ""
-mono_font_path_bolditalic (Bold and italic monospace font path) filepath ""
+mono_font_path_bold_italic (Bold and italic monospace font path) filepath ""
 
 #    Shadow offset (in pixels) of the fallback font. If 0, then shadow will not be drawn.
 fallback_font_shadow (Fallback font shadow) int 1
