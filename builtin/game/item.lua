@@ -162,7 +162,7 @@ end
 
 function core.is_colored_paramtype(ptype)
 	return (ptype == "color") or (ptype == "colorfacedir") or
-		(ptype == "colorwallmounted")
+		(ptype == "colorwallmounted") or (ptype == "colordegrotate")
 end
 
 function core.strip_param2_color(param2, paramtype2)
@@ -173,6 +173,8 @@ function core.strip_param2_color(param2, paramtype2)
 		param2 = floor(param2 / 32) * 32
 	elseif paramtype2 == "colorwallmounted" then
 		param2 = floor(param2 / 8) * 8
+	elseif paramtype2 == "colordegrotate" then
+		param2 = floor(param2 / 32) * 32
 	end
 	-- paramtype2 == "color" requires no modification.
 	return param2
@@ -349,6 +351,8 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 		elseif def.paramtype2 == "colorwallmounted" then
 			color_divisor = 8
 		elseif def.paramtype2 == "colorfacedir" then
+			color_divisor = 32
+		elseif def.paramtype2 == "colordegrotate" then
 			color_divisor = 32
 		end
 		if color_divisor then
