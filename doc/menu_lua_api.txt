@@ -249,7 +249,8 @@ core.get_screen_info()
     window_width    = <current window width>,
     window_height   = <current window height>,
     max_refresh_rate = <refresh rate of the display in Hz: the fastest on Android and iOS, the current one on desktops with SDL, 0 without>,
-    is_tablet       = <true on a tablet>
+    is_tablet       = <true on a tablet>,
+    render_info     = <active render information>
     }
 
 

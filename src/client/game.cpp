@@ -1527,6 +1527,17 @@ bool Game::createClient(const GameStartData &start_data)
 #ifndef NDEBUG
 	str += L" ";
 	str += utf8_to_wide(g_version_hash);
+	{
+		const wchar_t *text = nullptr;
+		if (simple_singleplayer_mode)
+			text = wgettext("Singleplayer");
+		else
+			text = wgettext("Multiplayer");
+		str += L" [";
+		str += text;
+		str += L"]";
+		delete text;
+	}
 	str += L" [";
 	str += driver->getName();
 	str += L"]";

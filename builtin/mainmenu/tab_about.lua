@@ -113,8 +113,8 @@ local function buildCreditList(source)
 end
 
 return {
-	name = "credits",
-	caption = fgettext("Credits"),
+	name = "about",
+	caption = fgettext("About"),
 	cbf_formspec = function(tabview, name, tabdata)
 		local logofile = defaulttexturedir .. "logo.png"
 		local version = core.get_version()

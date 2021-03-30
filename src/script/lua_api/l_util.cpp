@@ -624,6 +624,10 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	lua_pushboolean(L, false);
 #endif
 	lua_settable(L, top);
+
+	lua_pushstring(L, "render_info");
+	lua_pushstring(L, wide_to_utf8(RenderingEngine::get_video_driver()->getName()).c_str());
+	lua_settable(L, top);
 	return 1;
 }
 
