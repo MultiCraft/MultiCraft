@@ -43,12 +43,7 @@ struct CameraOrientation {
 	f32 camera_pitch;  // "up/down"
 };
 
-// before 1.8 there isn't a "integer interface", only float
-#if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
-typedef f32 SamplerLayer_t;
-#else
 typedef s32 SamplerLayer_t;
-#endif
 
 class GameGlobalShaderConstantSetter : public IShaderConstantSetter
 {

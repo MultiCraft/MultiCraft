@@ -251,11 +251,7 @@ void StaticText::setCenterEachLine(const bool centerEachLine)
 }
 
 
-#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR <= 7
-const video::SColor& StaticText::getOverrideColor() const
-#else
 video::SColor StaticText::getOverrideColor() const
-#endif
 {
 	return ColoredText.getDefaultColor();
 }
