@@ -83,7 +83,8 @@ end
 --------------------------------------------------------------------------------
 function render_serverlist_row(spec, is_favorite, is_approved)
 	-- Get information from non_mobile_servers.
-	if is_favorite and not spec.proto_min and menudata.non_mobile_servers then
+	if is_favorite and not spec.proto_min and menudata.non_mobile_servers and
+			spec.address and spec.port then
 		local id = ("%s:%s"):format(spec.address, spec.port)
 		spec = menudata.non_mobile_servers[id] or spec
 	end
