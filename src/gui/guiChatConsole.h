@@ -155,6 +155,8 @@ public:
 
 	virtual void setVisible(bool visible);
 
+	virtual bool acceptsIME() { return true; }
+
 	bool hasFocus();
 
 	bool convertToMouseEvent(

@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "guiEditBox.h"
 
+#include "IrrCompileConfig.h"
 #include "IGUISkin.h"
 #include "IGUIEnvironment.h"
 #include "IGUIFont.h"
@@ -228,8 +229,7 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 					core::stringw text = utf8_to_stringw(
 							event.SDLTextEvent.Text);
 
-					for (size_t i = 0; i < text.size(); i++)
-						inputChar(text[i]);
+					inputString(text);
 				}
 
 				return true;
@@ -244,6 +244,11 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 			if (processMouse(event))
 				return true;
 			break;
+#if (IRRLICHT_VERSION_MT_REVISION >= 2)
+		case EET_STRING_INPUT_EVENT:
+			inputString(*event.StringInput.Str);
+			return true;
+#endif
 #if defined(__ANDROID__) || defined(__IOS__)
 		case EET_TOUCH_INPUT_EVENT:
 			if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
@@ -723,36 +728,41 @@ bool GUIEditBox::onKeyDelete(const SEvent &event, s32 &mark_begin, s32 &mark_end
 
 void GUIEditBox::inputChar(wchar_t c)
 {
+	if (c == 0)
+		return;
+	core::stringw s(&c, 1);
+	inputString(s);
+}
+
+void GUIEditBox::inputString(const core::stringw &str)
+{
 	if (!isEnabled() || !m_writable)
 		return;
 
-	if (c != 0) {
-		if (Text.size() < m_max || m_max == 0) {
-			core::stringw s;
-
-			if (m_mark_begin != m_mark_end) {
-				// clang-format off
-				// replace marked text
-				s = Text.subString(0, m_real_mark_begin);
-				s.append(c);
-				s.append(Text.subString(m_real_mark_end, Text.size() - m_real_mark_end));
-				Text = s;
-				m_cursor_pos = m_real_mark_begin + 1;
-				// clang-format on
-			} else {
-				// add new character
-				s = Text.subString(0, m_cursor_pos);
-				s.append(c);
-				s.append(Text.subString(m_cursor_pos,
-						Text.size() - m_cursor_pos));
-				Text = s;
-				++m_cursor_pos;
-			}
-
-			m_blink_start_time = porting::getTimeMs();
-			setTextMarkers(0, 0);
+	u32 len = str.size();
+	if (Text.size()+len <= m_max || m_max == 0) {
+		core::stringw s;
+		if (m_mark_begin != m_mark_end) {
+			// replace marked text
+			s = Text.subString(0, m_real_mark_begin);
+			s.append(str);
+			s.append(Text.subString(m_real_mark_end, Text.size() - m_real_mark_end));
+			Text = s;
+			m_cursor_pos = m_real_mark_begin + len;
+		} else {
+			// append string
+			s = Text.subString(0, m_cursor_pos);
+			s.append(str);
+			s.append(Text.subString(m_cursor_pos,
+					Text.size() - m_cursor_pos));
+			Text = s;
+			m_cursor_pos += len;
 		}
+
+		m_blink_start_time = porting::getTimeMs();
+		setTextMarkers(0, 0);
 	}
+
 	breakText();
 	sendGuiEvent(EGET_EDITBOX_CHANGED);
 	calculateScrollPos();
