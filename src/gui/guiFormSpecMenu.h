@@ -440,6 +440,7 @@ private:
 	bool parseAnchorDirect(parserData *data, const std::string &element);
 	void parseAnchor(parserData *data, const std::string &element);
 	bool parseStyle(parserData *data, const std::string &element, bool style_type);
+	void parseModel(parserData *data, const std::string &element);
 
 	void tryClose();
 

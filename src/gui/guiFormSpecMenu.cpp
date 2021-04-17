@@ -69,6 +69,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "guiTable.h"
 #include "intlGUIEditBox.h"
 #include "guiHyperText.h"
+#include "guiScene.h"
 
 #define MY_CHECKPOS(a,b)													\
 	if (v_pos.size() != 2) {												\
@@ -2693,6 +2694,99 @@ bool GUIFormSpecMenu::parseStyle(parserData *data, const std::string &element, b
 	return true;
 }
 
+void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
+{
+	std::vector<std::string> parts = split(element, ';');
+
+	if (parts.size() < 5 || (parts.size() > 10 &&
+			m_formspec_version <= FORMSPEC_API_VERSION)) {
+		errorstream << "Invalid model element (" << parts.size() << "): '" << element
+			<< "'" << std::endl;
+		return;
+	}
+
+	// Avoid length checks by resizing
+	if (parts.size() < 10)
+		parts.resize(10);
+
+	std::vector<std::string> v_pos = split(parts[0], ',');
+	std::vector<std::string> v_geom = split(parts[1], ',');
+	std::string name = unescape_string(parts[2]);
+	std::string meshstr = unescape_string(parts[3]);
+	std::vector<std::string> textures = split(parts[4], ',');
+	std::vector<std::string> vec_rot = split(parts[5], ',');
+	bool inf_rotation = is_yes(parts[6]);
+	bool mousectrl = is_yes(parts[7]) || parts[7].empty(); // default true
+	std::vector<std::string> frame_loop = split(parts[8], ',');
+	std::string speed = unescape_string(parts[9]);
+
+	MY_CHECKPOS("model", 0);
+	MY_CHECKGEOM("model", 1);
+
+	v2s32 pos;
+	v2s32 geom;
+
+	if (data->real_coordinates) {
+		pos = getRealCoordinateBasePos(v_pos);
+		geom = getRealCoordinateGeometry(v_geom);
+	} else {
+		pos = getElementBasePos(&v_pos);
+		geom.X = stof(v_geom[0]) * (float)imgsize.X;
+		geom.Y = stof(v_geom[1]) * (float)imgsize.Y;
+	}
+
+	if (!data->explicit_size)
+		warningstream << "invalid use of model without a size[] element" << std::endl;
+
+	scene::IAnimatedMesh *mesh = m_client->getMesh(meshstr);
+
+	if (!mesh) {
+		errorstream << "Invalid model element: Unable to load mesh:"
+				<< std::endl << "\t" << meshstr << std::endl;
+		return;
+	}
+
+	FieldSpec spec(
+		name,
+		L"",
+		L"",
+		258 + m_fields.size()
+	);
+
+	core::rect<s32> rect(pos, pos + geom);
+
+	GUIScene *e = new GUIScene(Environment, RenderingEngine::get_scene_manager(),
+			data->current_parent, rect, spec.fid);
+
+	auto meshnode = e->setMesh(mesh);
+
+	for (u32 i = 0; i < textures.size() && i < meshnode->getMaterialCount(); ++i)
+		e->setTexture(i, m_tsrc->getTexture(unescape_string(textures[i])));
+
+	if (vec_rot.size() >= 2)
+		e->setRotation(v2f(stof(vec_rot[0]), stof(vec_rot[1])));
+
+	e->enableContinuousRotation(inf_rotation);
+	e->enableMouseControl(mousectrl);
+
+	s32 frame_loop_begin = 0;
+	s32 frame_loop_end = 0x7FFFFFFF;
+
+	if (frame_loop.size() == 2) {
+	    frame_loop_begin = stoi(frame_loop[0]);
+	    frame_loop_end = stoi(frame_loop[1]);
+	}
+
+	e->setFrameLoop(frame_loop_begin, frame_loop_end);
+	e->setAnimationSpeed(stof(speed));
+
+	auto style = getStyleForElement("model", spec.fname);
+	e->setStyles(style);
+	e->drop();
+
+	m_fields.push_back(spec);
+}
+
 void GUIFormSpecMenu::parseElement(parserData* data, const std::string &element)
 {
 	//some prechecks
@@ -2881,6 +2975,11 @@ void GUIFormSpecMenu::parseElement(parserData* data, const std::string &element)
 
 	if (type == "scroll_container_end") {
 		parseScrollContainerEnd(data);
+		return;
+	}
+
+	if (type == "model") {
+		parseModel(data, description);
 		return;
 	}
 
