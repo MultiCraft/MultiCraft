@@ -594,6 +594,7 @@ private:
 	std::unordered_map<std::string, Palette> m_palettes;
 
 	// Cached settings needed for making textures from meshes
+	bool m_setting_mipmap;
 	bool m_setting_trilinear_filter;
 	bool m_setting_bilinear_filter;
 	bool m_setting_convert_to_16bit;
@@ -615,6 +616,7 @@ TextureSource::TextureSource(bool main_menu) : m_sourcecache(SourceImageCache(ma
 	// Cache some settings
 	// Note: Since this is only done once, the game must be restarted
 	// for these settings to take effect
+	m_setting_mipmap = g_settings->getBool("mip_map");
 	m_setting_trilinear_filter = g_settings->getBool("trilinear_filter");
 	m_setting_bilinear_filter = g_settings->getBool("bilinear_filter");
 	m_setting_convert_to_16bit = g_settings->getBool("convert_to_16bit");
@@ -882,7 +884,7 @@ video::ITexture* TextureSource::getTextureForMeshInternal(const std::string &nam
 		bool transient)
 {
 	static thread_local bool filter_needed =
-		g_settings->getBool("texture_clean_transparent") ||
+		g_settings->getBool("texture_clean_transparent") || m_setting_mipmap ||
 		((m_setting_trilinear_filter || m_setting_bilinear_filter) &&
 		g_settings->getS32("texture_min_size") > 1);
 	// Avoid duplicating texture if it won't actually change
@@ -1868,8 +1870,8 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 				return false;
 			}
 
-			// Apply the "clean transparent" filter, if configured.
-			if (g_settings->getBool("texture_clean_transparent"))
+			// Apply the "clean transparent" filter, if needed
+			if (m_setting_mipmap || g_settings->getBool("texture_clean_transparent"))
 				imageCleanTransparent(baseimg, 127);
 
 			/* Upscale textures to user's requested minimum size.  This is a trick to make
