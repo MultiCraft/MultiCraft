@@ -59,6 +59,9 @@ public:
 			Inventory *inventory);
 	~Hud();
 
+	void toggleBlockBounds();
+	void drawBlockBounds();
+
 	void resizeHotbar();
 	void drawCrosshair();
 	void drawSelectionMesh();
@@ -126,6 +129,14 @@ private:
 	video::SMaterial m_selection_material;
 
 	scene::SMeshBuffer m_rotation_mesh_buffer;
+
+	enum BlockBoundsMode
+	{
+		BLOCK_BOUNDS_OFF,
+		BLOCK_BOUNDS_CURRENT,
+		BLOCK_BOUNDS_ALL,
+		BLOCK_BOUNDS_MAX
+	} m_block_bounds_mode = BLOCK_BOUNDS_OFF;
 
 	enum
 	{

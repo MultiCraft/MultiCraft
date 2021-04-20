@@ -76,6 +76,7 @@ void KeyCache::populate()
 	key[KeyType::DEC_VOLUME] = getKeySetting("keymap_decrease_volume");
 	key[KeyType::CINEMATIC] = getKeySetting("keymap_cinematic");
 	key[KeyType::SCREENSHOT] = getKeySetting("keymap_screenshot");
+	key[KeyType::TOGGLE_BLOCK_BOUNDS] = getKeySetting("keymap_toggle_block_bounds");
 	key[KeyType::TOGGLE_HUD] = getKeySetting("keymap_toggle_hud");
 	key[KeyType::TOGGLE_NAMETAGS] = getKeySetting("keymap_toggle_nametags");
 	key[KeyType::TOGGLE_CHAT] = getKeySetting("keymap_toggle_chat");
