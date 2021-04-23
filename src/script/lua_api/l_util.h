@@ -101,6 +101,9 @@ private:
 	// sha1(string, raw)
 	static int l_sha1(lua_State *L);
 
+	// colorspec_to_colorstring(colorspec)
+	static int l_colorspec_to_colorstring(lua_State *L);
+
 #ifndef SERVER
 	// upgrade(string, string)
 	static int l_upgrade(lua_State *L);

@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include "irrlichttypes_extrabloated.h"
 #include "lua_api/l_util.h"
 #include "lua_api/l_internal.h"
 #include "lua_api/l_settings.h"
@@ -52,6 +53,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef SERVER
 #include "client/renderingengine.h"
 #endif
+#include <cstdio>
 
 
 // log([level,] text)
@@ -549,6 +551,23 @@ int ModApiUtil::l_sha1(lua_State *L)
 	return 1;
 }
 
+// colorspec_to_colorstring(colorspec)
+int ModApiUtil::l_colorspec_to_colorstring(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+
+	video::SColor color(0);
+	if (read_color(L, 1, &color)) {
+		char colorstring[10];
+		snprintf(colorstring, 10, "#%02X%02X%02X%02X",
+			color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+		lua_pushstring(L, colorstring);
+		return 1;
+	}
+
+	return 0;
+}
+
 #ifndef SERVER
 int ModApiUtil::l_upgrade(lua_State *L)
 {
@@ -746,6 +765,7 @@ void ModApiUtil::Initialize(lua_State *L, int top)
 
 	API_FCT(get_version);
 	API_FCT(sha1);
+	API_FCT(colorspec_to_colorstring);
 
 #ifndef SERVER
 	API_FCT(upgrade);
@@ -777,6 +797,7 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 
 	API_FCT(get_version);
 	API_FCT(sha1);
+	API_FCT(colorspec_to_colorstring);
 
 	API_FCT(get_screen_info);
 	API_FCT(get_system_ram);
@@ -817,6 +838,7 @@ void ModApiUtil::InitializeAsync(lua_State *L, int top)
 
 	API_FCT(get_version);
 	API_FCT(sha1);
+	API_FCT(colorspec_to_colorstring);
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
