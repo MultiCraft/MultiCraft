@@ -184,7 +184,7 @@ void PlayerSAO::step(float dtime, bool send_recommended)
 			// No more breath, damage player
 			if (m_breath == 0) {
 				PlayerHPChangeReason reason(PlayerHPChangeReason::DROWNING);
-				setHP(m_hp - c.drowning, reason);
+				setHP(m_hp - drowning, reason);
 				m_env->getGameDef()->SendPlayerHPOrDie(this, reason);
 			}
 		}
