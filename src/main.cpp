@@ -247,8 +247,12 @@ int main(int argc, char *argv[])
 		return run_dedicated_server(game_params, cmd_args) ? 0 : 1;
 
 #ifndef SERVER
-	ClientLauncher launcher;
-	retval = launcher.run(game_params, cmd_args) ? 0 : 1;
+	{
+		ClientLauncher launcher;
+		retval = launcher.run(game_params, cmd_args) ? 0 : 1;
+		// The fetch thread is an SDL thread: it ends before the device quits SDL
+		httpfetch_cleanup();
+	}
 #else
 	retval = 0;
 #endif
@@ -258,9 +262,6 @@ int main(int argc, char *argv[])
 		g_settings->updateConfigFile(g_settings_path.c_str());
 
 	print_modified_quicktune_values();
-
-	// Stop httpfetch thread (if started)
-	httpfetch_cleanup();
 
 	END_DEBUG_EXCEPTION_HANDLER
 

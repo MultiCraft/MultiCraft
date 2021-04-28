@@ -254,7 +254,7 @@ RenderingEngine::~RenderingEngine()
 	s_singleton = nullptr;
 }
 
-v2u32 RenderingEngine::getWindowSize() const
+v2u32 RenderingEngine::_getWindowSize() const
 {
 	if (core)
 		return core->getVirtualSize();

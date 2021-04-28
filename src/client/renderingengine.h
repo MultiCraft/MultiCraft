@@ -45,7 +45,6 @@ public:
 	RenderingEngine(IEventReceiver *eventReceiver);
 	~RenderingEngine();
 
-	v2u32 getWindowSize() const;
 	void setResizable(bool resize);
 
 	video::IVideoDriver *getVideoDriver() { return driver; }
@@ -74,6 +73,12 @@ public:
 	void removeMesh(const irr::scene::IMesh* mesh);
 
 	static RenderingEngine *get_instance() { return s_singleton; }
+
+	static v2u32 getWindowSize()
+	{
+		sanity_check(s_singleton);
+		return s_singleton->_getWindowSize();
+	}
 
 	// The last error Irrlicht logged, for the message of a device that did not start
 	static void noteEngineError(const std::string &text) { s_engine_error = text; }
@@ -186,6 +191,8 @@ public:
 	}
 
 private:
+	v2u32 _getWindowSize() const;
+
 	void _draw_load_screen(const std::wstring &text, gui::IGUIEnvironment *guienv,
 			ITextureSource *tsrc, float dtime = 0, int percent = 0);
 

@@ -670,6 +670,7 @@ public:
 
 	bool startup(bool *kill,
 			InputHandler *input,
+			RenderingEngine *rendering_engine,
 			const GameStartData &game_params,
 			std::string &error_message,
 			bool *reconnect,
@@ -886,6 +887,7 @@ private:
 	   these items (e.g. device)
 	*/
 	IrrlichtDevice *device;
+	RenderingEngine *m_rendering_engine;
 	video::IVideoDriver *driver;
 	scene::ISceneManager *smgr;
 	bool *kill;
@@ -1031,6 +1033,7 @@ Game::~Game()
 
 bool Game::startup(bool *kill,
 		InputHandler *input,
+		RenderingEngine *rendering_engine,
 		const GameStartData &start_data,
 		std::string &error_message,
 		bool *reconnect,
@@ -1038,6 +1041,7 @@ bool Game::startup(bool *kill,
 {
 
 	// "cache"
+	m_rendering_engine        = rendering_engine;
 	this->device              = RenderingEngine::get_raw_device();
 	video::IVideoDriver *run_driver = device->getVideoDriver();
 	actionstream << "Video driver " << RenderingEngine::getVideoDriverName(run_driver->getDriverType())
@@ -1045,18 +1049,17 @@ bool Game::startup(bool *kill,
 			<< ", GLSL " << (run_driver->queryFeature(video::EVDF_ARB_GLSL) ? "yes" : "no") << std::endl;
 	this->kill                = kill;
 	this->error_message       = &error_message;
-	this->reconnect_requested = reconnect;
+	reconnect_requested       = reconnect;
 	this->input               = input;
 	this->chat_backend        = chat_backend;
-	this->simple_singleplayer_mode = start_data.isSinglePlayer();
+	simple_singleplayer_mode  = start_data.isSinglePlayer();
 
 	input->keycache.populate();
 
 	driver = device->getVideoDriver();
-	smgr = RenderingEngine::get_scene_manager();
+	smgr = m_rendering_engine->get_scene_manager();
 
-	RenderingEngine::get_scene_manager()->getParameters()->
-		setAttribute(scene::OBJ_LOADER_IGNORE_MATERIAL_FILES, true);
+	smgr->getParameters()->setAttribute(scene::OBJ_LOADER_IGNORE_MATERIAL_FILES, true);
 
 	// Reinit runData
 	runData = GameRunData();
@@ -1077,7 +1080,7 @@ bool Game::startup(bool *kill,
 	if (!createClient(start_data))
 		return false;
 
-	RenderingEngine::initialize(client, hud);
+	m_rendering_engine->initialize(client, hud);
 
 	return true;
 }
@@ -1096,7 +1099,7 @@ void Game::run()
 	Profiler::GraphValues dummyvalues;
 	g_profiler->graphGet(dummyvalues);
 
-	draw_times.last_time = RenderingEngine::get_timer_time();
+	draw_times.last_time = m_rendering_engine->get_timer_time();
 
 	set_light_table(g_settings->getFloat("display_gamma"));
 
@@ -1116,7 +1119,7 @@ void Game::run()
 			|| (server && server->isShutdownRequested()))) {
 
 		const irr::core::dimension2d<u32> &current_screen_size =
-			RenderingEngine::get_video_driver()->getScreenSize();
+			m_rendering_engine->get_video_driver()->getScreenSize();
 		// Verify if window size has changed and save it if it's the case
 		// Ensure evaluating settings->getBool after verifying screensize
 		// First condition is cheaper
@@ -1227,7 +1230,7 @@ void Game::run()
 
 void Game::shutdown()
 {
-	RenderingEngine::finalize();
+	m_rendering_engine->finalize();
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR <= 8
 	if (g_settings->get("3d_mode") == "pageflip") {
 		driver->setRenderTarget(irr::video::ERT_STEREO_BOTH_BUFFERS);
@@ -1628,7 +1631,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 			start_data.password, start_data.address,
 			*draw_control, texture_src, shader_src,
 			itemdef_manager, nodedef_manager, sound, eventmgr,
-			RenderingEngine::get_instance(), connect_address.isIPv6(), m_game_ui.get());
+			m_rendering_engine, connect_address.isIPv6(), m_game_ui.get());
 
 	client->m_simple_singleplayer_mode = simple_singleplayer_mode;
 	client->m_connect_aborted = &m_connect_aborted;
@@ -1651,7 +1654,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 		f32 dtime;
 		f32 wait_time = 0; // in seconds
 
-		fps_control.last_time = RenderingEngine::get_timer_time();
+		fps_control.last_time = m_rendering_engine->get_timer_time();
 
 		while ((result = RenderingEngine::run())) {
 
@@ -1727,7 +1730,7 @@ bool Game::getServerContent()
 	FpsControl fps_control = {};
 	f32 dtime; // in seconds
 
-	fps_control.last_time = RenderingEngine::get_timer_time();
+	fps_control.last_time = m_rendering_engine->get_timer_time();
 
 	bool result = true;
 	while ((result = RenderingEngine::run())) {
@@ -1773,13 +1776,13 @@ bool Game::getServerContent()
 		if (!client->itemdefReceived()) {
 			const wchar_t *text = wgettext("Item definitions...");
 			progress = 25;
-			RenderingEngine::draw_load_screen(text, guienv, texture_src,
+			m_rendering_engine->draw_load_screen(text, guienv, texture_src,
 				dtime, progress);
 			delete[] text;
 		} else if (!client->nodedefReceived()) {
 			const wchar_t *text = wgettext("Node definitions...");
 			progress = 30;
-			RenderingEngine::draw_load_screen(text, guienv, texture_src,
+			m_rendering_engine->draw_load_screen(text, guienv, texture_src,
 				dtime, progress);
 			delete[] text;
 		} else {
@@ -1806,7 +1809,7 @@ bool Game::getServerContent()
 			}
 
 			progress = 30 + client->mediaReceiveProgress() * 35 + 0.5;
-			RenderingEngine::draw_load_screen(utf8_to_wide(message.str()), guienv,
+			m_rendering_engine->draw_load_screen(utf8_to_wide(message.str()), guienv,
 				texture_src, dtime, progress);
 		}
 	}
@@ -4718,6 +4721,7 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 
 void the_game(bool *kill,
 		InputHandler *input,
+		RenderingEngine *rendering_engine,
 		const GameStartData &start_data,
 		std::string &error_message,
 		ChatBackend &chat_backend,
@@ -4736,8 +4740,8 @@ void the_game(bool *kill,
 
 	try {
 
-		if (game.startup(kill, input, start_data, error_message,
-				reconnect_requested, &chat_backend)) {
+		if (game.startup(kill, input, rendering_engine, start_data,
+				error_message, reconnect_requested, &chat_backend)) {
 			game.run();
 		}
 

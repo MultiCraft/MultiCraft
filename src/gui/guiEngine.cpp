@@ -90,9 +90,11 @@ void MenuMusicFetcher::fetchSounds(const std::string &name,
 /******************************************************************************/
 GUIEngine::GUIEngine(JoystickController *joystick,
 		gui::IGUIElement *parent,
+		RenderingEngine *rendering_engine,
 		IMenuManager *menumgr,
 		MainMenuData *data,
 		bool &kill) :
+	m_rendering_engine(rendering_engine),
 	m_parent(parent),
 	m_menumanager(menumgr),
 	m_smgr(g_menucloudsmgr),
@@ -125,7 +127,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 		g_fontengine->getTextHeight());
 	rect += v2s32(4, 0);
 
-	m_irr_toplefttext = gui::StaticText::add(RenderingEngine::get_gui_env(),
+	m_irr_toplefttext = gui::StaticText::add(rendering_engine->get_gui_env(),
 			m_toplefttext, rect, false, true, 0, -1);
 
 	//create formspecsource
@@ -228,7 +230,7 @@ void GUIEngine::run()
 {
 	// Always create clouds because they may or may not be
 	// needed based on the game selected
-	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
+	video::IVideoDriver *driver = m_rendering_engine->get_video_driver();
 
 	cloudInit();
 
@@ -276,7 +278,7 @@ void GUIEngine::run()
 		}
 
 		const irr::core::dimension2d<u32> &current_screen_size =
-			RenderingEngine::get_video_driver()->getScreenSize();
+			m_rendering_engine->get_video_driver()->getScreenSize();
 		// Verify if window size has changed and save it if it's the case
 		// Ensure evaluating settings->getBool after verifying screensize
 		// First condition is cheaper
@@ -317,7 +319,7 @@ void GUIEngine::run()
 		drawHeader(driver);
 		drawFooter(driver);
 
-		RenderingEngine::get_gui_env()->drawAll();
+		m_rendering_engine->get_gui_env()->drawAll();
 
 		driver->endScene();
 		drawn = true;
@@ -372,7 +374,7 @@ GUIEngine::~GUIEngine()
 	//clean up texture pointers
 	for (image_definition &texture : m_textures) {
 		if (texture.texture)
-			RenderingEngine::get_video_driver()->removeTexture(texture.texture);
+			m_rendering_engine->get_video_driver()->removeTexture(texture.texture);
 	}
 
 	delete m_texture_source;
@@ -391,13 +393,13 @@ void GUIEngine::cloudInit()
 
 	m_cloud.camera = m_smgr->getActiveCamera();
 
-	m_cloud.lasttime = RenderingEngine::get_timer_time();
+	m_cloud.lasttime = m_rendering_engine->get_timer_time();
 }
 
 /******************************************************************************/
 void GUIEngine::cloudPreProcess()
 {
-	u32 time = RenderingEngine::get_timer_time();
+	u32 time = m_rendering_engine->get_timer_time();
 
 	if(time > m_cloud.lasttime)
 		m_cloud.dtime = (time - m_cloud.lasttime) / 1000.0;
@@ -418,7 +420,7 @@ void GUIEngine::cloudPostProcess(u32 frametime_min, IrrlichtDevice *device)
 	u32 busytime_u32;
 
 	// not using getRealTime is necessary for wine
-	u32 time = RenderingEngine::get_timer_time();
+	u32 time = m_rendering_engine->get_timer_time();
 	if(time > m_cloud.lasttime)
 		busytime_u32 = time - m_cloud.lasttime;
 	else
@@ -590,7 +592,7 @@ void GUIEngine::drawFooter(video::IVideoDriver *driver)
 bool GUIEngine::setTexture(texture_layer layer, const std::string &texturepath,
 		bool tile_image, unsigned int minsize)
 {
-	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
+	video::IVideoDriver *driver = m_rendering_engine->get_video_driver();
 
 	if (m_textures[layer].texture) {
 		driver->removeTexture(m_textures[layer].texture);
@@ -664,7 +666,7 @@ void GUIEngine::updateTopLeftTextSize()
 	rect += v2s32(5 + g_settings->getU16("round_screen") * 1.1, 0);
 
 	m_irr_toplefttext->remove();
-	m_irr_toplefttext = gui::StaticText::add(RenderingEngine::get_gui_env(),
+	m_irr_toplefttext = gui::StaticText::add(m_rendering_engine->get_gui_env(),
 			m_toplefttext, rect, false, true, 0, -1);
 }
 

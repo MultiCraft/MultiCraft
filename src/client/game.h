@@ -24,7 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string>
 
 class InputHandler;
-class ChatBackend;  /* to avoid having to include chat.h */
+class ChatBackend;
+class RenderingEngine;
 struct SubgameSpec;
 struct GameStartData;
 
@@ -113,6 +114,7 @@ public:
 
 void the_game(bool *kill,
 		InputHandler *input,
+		RenderingEngine *rendering_engine,
 		const GameStartData &start_data,
 		std::string &error_message,
 		ChatBackend &chat_backend,
