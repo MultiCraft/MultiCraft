@@ -26,6 +26,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include "debug.h"
 
+namespace irr { namespace scene {
+class IMesh;
+}}
 class ITextureSource;
 class Camera;
 class Client;
@@ -68,6 +71,8 @@ public:
 	static bool print_video_modes();
 	void cleanupMeshCache();
 
+	void removeMesh(const irr::scene::IMesh* mesh);
+
 	static RenderingEngine *get_instance() { return s_singleton; }
 
 	// The last error Irrlicht logged, for the message of a device that did not start
@@ -83,12 +88,6 @@ public:
 	{
 		sanity_check(s_singleton && s_singleton->m_device);
 		return s_singleton->m_device->getVideoDriver();
-	}
-
-	static scene::IMeshCache *get_mesh_cache()
-	{
-		sanity_check(s_singleton && s_singleton->m_device);
-		return s_singleton->m_device->getSceneManager()->getMeshCache();
 	}
 
 	static scene::ISceneManager *get_scene_manager()

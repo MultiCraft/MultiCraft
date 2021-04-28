@@ -2114,7 +2114,7 @@ scene::IAnimatedMesh* Client::getMesh(const std::string &filename, bool cache)
 	}
 	mesh->grab();
 	if (!cache)
-		m_rendering_engine->get_mesh_cache()->removeMesh(mesh);
+		m_rendering_engine->removeMesh(mesh);
 	return mesh;
 }
 
