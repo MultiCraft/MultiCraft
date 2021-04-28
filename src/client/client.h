@@ -45,6 +45,7 @@ struct ClientEvent;
 struct MeshMakeData;
 struct ChatMessage;
 class MapBlockMesh;
+class RenderingEngine;
 class IWritableTextureSource;
 class IWritableShaderSource;
 class IWritableItemDefManager;
@@ -123,6 +124,7 @@ public:
 			NodeDefManager *nodedef,
 			ISoundManager *sound,
 			MtEventManager *event,
+			RenderingEngine *rendering_engine,
 			bool ipv6,
 			GameUI *game_ui
 	);
@@ -482,6 +484,7 @@ private:
 	NodeDefManager *m_nodedef;
 	ISoundManager *m_sound;
 	MtEventManager *m_event;
+	RenderingEngine *m_rendering_engine;
 
 
 	MeshUpdateThread m_mesh_update_thread;

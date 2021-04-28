@@ -134,6 +134,7 @@ Client::Client(
 		NodeDefManager *nodedef,
 		ISoundManager *sound,
 		MtEventManager *event,
+		RenderingEngine *rendering_engine,
 		bool ipv6,
 		GameUI *game_ui
 ):
@@ -143,6 +144,7 @@ Client::Client(
 	m_nodedef(nodedef),
 	m_sound(sound),
 	m_event(event),
+	m_rendering_engine(rendering_engine),
 	m_mesh_update_thread(this),
 	m_env(
 		new ClientMap(this, control, 666),
@@ -2104,17 +2106,11 @@ scene::IAnimatedMesh* Client::getMesh(const std::string &filename, bool cache)
 
 	// Create the mesh, remove it from cache and return it
 	// This allows unique vertex colors and other properties for each instance
-#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR > 8
-	io::IReadFile *rfile = RenderingEngine::get_filesystem()->createMemoryReadFile(
+	io::IReadFile *rfile = m_rendering_engine->get_filesystem()->createMemoryReadFile(
 			data.c_str(), data.size(), filename.c_str());
-#else
-	Buffer<char> data_rw(data.c_str(), data.size()); // Const-incorrect Irrlicht
-	io::IReadFile *rfile = RenderingEngine::get_filesystem()->createMemoryReadFile(
-			*data_rw, data_rw.getSize(), filename.c_str());
-#endif
 	FATAL_ERROR_IF(!rfile, "Could not create/open RAM file");
 
-	scene::IAnimatedMesh *mesh = RenderingEngine::get_scene_manager()->getMesh(rfile);
+	scene::IAnimatedMesh *mesh = m_rendering_engine->get_scene_manager()->getMesh(rfile);
 	rfile->drop();
 	if (!mesh) {
 		errorstream << "Client::getMesh(): Could not load mesh: \"" << filename
@@ -2123,7 +2119,7 @@ scene::IAnimatedMesh* Client::getMesh(const std::string &filename, bool cache)
 	}
 	mesh->grab();
 	if (!cache)
-		RenderingEngine::get_mesh_cache()->removeMesh(mesh);
+		m_rendering_engine->get_mesh_cache()->removeMesh(mesh);
 	return mesh;
 }
 
