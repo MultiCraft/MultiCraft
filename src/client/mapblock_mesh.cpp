@@ -1075,8 +1075,8 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 	*/
 
 	{
-		MapblockMeshGenerator generator(data, &collector);
-		generator.generate();
+		MapblockMeshGenerator(data, &collector,
+			data->m_client->getSceneManager()->getMeshManipulator()).generate();
 	}
 
 	/*

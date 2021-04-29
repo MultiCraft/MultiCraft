@@ -1438,8 +1438,8 @@ bool NodeDefManager::updateTextures(IGameDef *gamedef,
 	Client *client = (Client *)gamedef;
 	ITextureSource *tsrc = client->tsrc();
 	IShaderSource *shdsrc = client->getShaderSource();
-	scene::IMeshManipulator *meshmanip =
-		RenderingEngine::get_scene_manager()->getMeshManipulator();
+	auto smgr = client->getSceneManager();
+	scene::IMeshManipulator *meshmanip = smgr->getMeshManipulator();
 	TextureSettings tsettings;
 	tsettings.readSettings();
 

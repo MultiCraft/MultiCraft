@@ -326,7 +326,7 @@ bool Hud::calculateScreenPos(const v3s16 &camera_offset, HudElement *e, v2s32 *p
 {
 	v3f w_pos = e->world_pos * BS;
 	scene::ICameraSceneNode* camera =
-		RenderingEngine::get_scene_manager()->getActiveCamera();
+		client->getSceneManager()->getActiveCamera();
 	w_pos -= intToFloat(camera_offset, BS);
 	core::matrix4 trans = camera->getProjectionMatrix();
 	trans *= camera->getViewMatrix();
@@ -534,7 +534,7 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 
 				// Angle according to camera view
 				v3f fore(0.f, 0.f, 1.f);
-				scene::ICameraSceneNode *cam = RenderingEngine::get_scene_manager()->getActiveCamera();
+				scene::ICameraSceneNode *cam = client->getSceneManager()->getActiveCamera();
 				cam->getAbsoluteTransformation().rotateVect(fore);
 				int angle = - fore.getHorizontalAngle().Y;
 
