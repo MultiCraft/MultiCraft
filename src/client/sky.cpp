@@ -60,8 +60,8 @@ static video::SMaterial baseMaterial()
 	return mat;
 };
 
-Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc) :
-		Sky(id, tsrc, ssrc, RenderingEngine::get_scene_manager())
+Sky::Sky(s32 id, RenderingEngine *rendering_engine, ITextureSource *tsrc, IShaderSource *ssrc) :
+		Sky(id, tsrc, ssrc, rendering_engine->get_scene_manager())
 {}
 
 Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager *smgr, bool is_mainmenu) :

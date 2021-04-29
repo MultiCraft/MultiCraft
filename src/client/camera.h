@@ -31,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 class LocalPlayer;
 struct MapDrawControl;
 class Client;
+class RenderingEngine;
 class WieldMeshSceneNode;
 
 struct Nametag
@@ -84,7 +85,7 @@ enum CameraMode {CAMERA_MODE_FIRST, CAMERA_MODE_THIRD, CAMERA_MODE_THIRD_FRONT};
 class Camera
 {
 public:
-	Camera(MapDrawControl &draw_control, Client *client);
+	Camera(MapDrawControl &draw_control, Client *client, RenderingEngine *rendering_engine);
 	~Camera();
 
 	static void settingChangedCallback(const std::string &name, void *data);
