@@ -35,13 +35,6 @@ struct ItemStack;
 class Hud
 {
 public:
-	video::IVideoDriver *driver;
-	gui::IGUIEnvironment *guienv;
-	Client *client;
-	LocalPlayer *player;
-	Inventory *inventory;
-	ITextureSource *tsrc;
-
 	video::SColor crosshair_argb;
 	video::SColor selectionbox_argb;
 
@@ -54,7 +47,7 @@ public:
 
 	bool pointing_at_object = false;
 
-	Hud(gui::IGUIEnvironment *guienv, Client *client, LocalPlayer *player,
+	Hud(Client *client, LocalPlayer *player,
 			Inventory *inventory);
 	~Hud();
 
@@ -105,6 +98,12 @@ private:
 			const core::rect<s32> &rect, int way);
 
 	void drawHotbar();
+
+	Client *client = nullptr;
+	video::IVideoDriver *driver = nullptr;
+	LocalPlayer *player = nullptr;
+	Inventory *inventory = nullptr;
+	ITextureSource *tsrc = nullptr;
 
 	float m_hud_scaling; // cached minetest setting
 	float m_scale_factor;

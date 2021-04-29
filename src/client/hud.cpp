@@ -45,11 +45,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define OBJECT_CROSSHAIR_LINE_SIZE 16
 #define CROSSHAIR_LINE_SIZE 16
 
-Hud::Hud(gui::IGUIEnvironment *guienv, Client *client, LocalPlayer *player,
+Hud::Hud(Client *client, LocalPlayer *player,
 		Inventory *inventory)
 {
 	driver            = RenderingEngine::get_video_driver();
-	this->guienv      = guienv;
 	this->client      = client;
 	this->player      = player;
 	this->inventory   = inventory;
