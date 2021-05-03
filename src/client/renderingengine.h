@@ -26,9 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include "debug.h"
 
-namespace irr { namespace scene {
-class IMesh;
-}}
 class ITextureSource;
 class Camera;
 class Client;
@@ -70,7 +67,7 @@ public:
 	static bool print_video_modes();
 	void cleanupMeshCache();
 
-	void removeMesh(const irr::scene::IMesh* mesh);
+	void removeMesh(const scene::IMesh* mesh);
 
 	static RenderingEngine *get_instance() { return s_singleton; }
 

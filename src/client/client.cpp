@@ -1559,7 +1559,7 @@ bool Client::updateWieldedItem()
 	return true;
 }
 
-irr::scene::ISceneManager* Client::getSceneManager()
+scene::ISceneManager* Client::getSceneManager()
 {
 	return m_rendering_engine->get_scene_manager();
 }
