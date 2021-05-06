@@ -660,81 +660,13 @@ int ModApiMainMenu::l_extract_zip(lua_State *L)
 	if (ModApiMainMenu::mayModifyPath(absolute_destination)) {
 		fs::CreateAllDirs(absolute_destination);
 
-		io::IFileSystem *fs = RenderingEngine::get_filesystem();
-
-		if (!fs->addFileArchive(zipfile, false, false, io::EFAT_ZIP, password)) {
-			lua_pushboolean(L,false);
-			return 1;
+		std::string errorMessage;
+		lua_pushboolean(L, fs::extractZipFile(RenderingEngine::get_filesystem(),
+				zipfile, destination, password, &errorMessage));
+		if (!errorMessage.empty()) {
+			lua_pushstring(L, errorMessage.c_str());
+			return 2;
 		}
-
-		sanity_check(fs->getFileArchiveCount() > 0);
-
-		/**********************************************************************/
-		/* WARNING this is not threadsafe!!                                   */
-		/**********************************************************************/
-		io::IFileArchive* opened_zip =
-			fs->getFileArchive(fs->getFileArchiveCount()-1);
-
-		const io::IFileList* files_in_zip = opened_zip->getFileList();
-
-		unsigned int number_of_files = files_in_zip->getFileCount();
-
-		for (unsigned int i=0; i < number_of_files; i++) {
-			std::string fullpath = destination;
-			fullpath += DIR_DELIM;
-			fullpath += files_in_zip->getFullFileName(i).c_str();
-			std::string fullpath_dir = fs::RemoveLastPathComponent(fullpath);
-
-			if (!files_in_zip->isDirectory(i)) {
-				if (!fs::PathExists(fullpath_dir) && !fs::CreateAllDirs(fullpath_dir)) {
-					fs->removeFileArchive(fs->getFileArchiveCount()-1);
-					lua_pushboolean(L,false);
-					return 1;
-				}
-
-				io::IReadFile* toread = opened_zip->createAndOpenFile(i);
-
-				if (toread == nullptr) {
-					// Wrong password
-					fs->removeFileArchive(fs->getFileArchiveCount()-1);
-					lua_pushboolean(L, false);
-					lua_pushstring(L, "invalid password");
-					return 2;
-				}
-
-				FILE *targetfile = fopen(fullpath.c_str(),"wb");
-
-				if (targetfile == NULL) {
-					fs->removeFileArchive(fs->getFileArchiveCount()-1);
-					lua_pushboolean(L,false);
-					return 1;
-				}
-
-				char read_buffer[1024];
-				long total_read = 0;
-
-				while (total_read < toread->getSize()) {
-
-					unsigned int bytes_read =
-							toread->read(read_buffer,sizeof(read_buffer));
-					if ((bytes_read == 0 ) ||
-						(fwrite(read_buffer, 1, bytes_read, targetfile) != bytes_read))
-					{
-						fclose(targetfile);
-						fs->removeFileArchive(fs->getFileArchiveCount()-1);
-						lua_pushboolean(L,false);
-						return 1;
-					}
-					total_read += bytes_read;
-				}
-
-				fclose(targetfile);
-			}
-
-		}
-
-		fs->removeFileArchive(fs->getFileArchiveCount()-1);
-		lua_pushboolean(L,true);
 		return 1;
 	}
 
