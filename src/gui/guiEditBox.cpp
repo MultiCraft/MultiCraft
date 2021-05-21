@@ -591,6 +591,9 @@ bool GUIEditBox::onKeyControlX(const SEvent &event, s32 &mark_begin, s32 &mark_e
 	// First copy to clipboard
 	onKeyControlC(event);
 
+	if (!m_writable)
+		return false;
+
 	if (m_passwordbox || !m_operator || m_mark_begin == m_mark_end)
 		return false;
 
@@ -613,7 +616,7 @@ bool GUIEditBox::onKeyControlX(const SEvent &event, s32 &mark_begin, s32 &mark_e
 
 bool GUIEditBox::onKeyControlV(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 {
-	if (!isEnabled())
+	if (!isEnabled() || !m_writable)
 		return false;
 
 	// paste from the clipboard
@@ -656,7 +659,7 @@ bool GUIEditBox::onKeyControlV(const SEvent &event, s32 &mark_begin, s32 &mark_e
 
 bool GUIEditBox::onKeyBack(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 {
-	if (!isEnabled() || Text.empty())
+	if (!isEnabled() || Text.empty() || !m_writable)
 		return false;
 
 	core::stringw s;
@@ -693,7 +696,7 @@ bool GUIEditBox::onKeyBack(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 
 bool GUIEditBox::onKeyDelete(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 {
-	if (!isEnabled() || Text.empty())
+	if (!isEnabled() || Text.empty() || !m_writable)
 		return false;
 
 	core::stringw s;
