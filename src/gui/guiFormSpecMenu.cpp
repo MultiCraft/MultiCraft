@@ -1645,11 +1645,10 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 		}
 
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
-		e->setDrawBorder(style.getBool(StyleSpec::BORDER, true));
 		e->setOverrideColor(style.getColor(StyleSpec::TEXTCOLOR, video::SColor(0xFFFFFFFF)));
-		if (style.get(StyleSpec::BGCOLOR, "") == "transparent") {
-			e->setDrawBackground(false);
-		}
+		bool border = style.getBool(StyleSpec::BORDER, true);
+		e->setDrawBorder(border);
+		e->setDrawBackground(border);
 		e->setOverrideFont(style.getFont());
 		e->setScrollbarStyle(style, m_tsrc);
 
