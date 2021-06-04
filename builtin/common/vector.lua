@@ -1,26 +1,55 @@
+--[[
+Vector helpers
+Note: The vector.*-functions must be able to accept old vectors that had no metatables
+]]
+
+-- localize functions
+local setmetatable = setmetatable
+-- math.hypot and math.round come from misc_helpers.lua, loaded after this file
+local floor = math.floor
+local min, max, pi = math.min, math.max, math.pi
+
 vector = {}
 
-local floor, hypot, round = math.floor, math.hypot, math.round
-local min, max, pi = math.min, math.max, math.pi
+local metatable = {}
+vector.metatable = metatable
+
+local xyz = {"x", "y", "z"}
+
+-- only called when rawget(v, key) returns nil
+function metatable.__index(v, key)
+	return rawget(v, xyz[key]) or vector[key]
+end
+
+-- only called when rawget(v, key) returns nil
+function metatable.__newindex(v, key, value)
+	rawset(v, xyz[key] or key, value)
+end
+
+-- constructors
+
+local function fast_new(x, y, z)
+	return setmetatable({x = x, y = y, z = z}, metatable)
+end
 
 function vector.new(a, b, c)
 	if type(a) == "table" then
 		assert(a.x and a.y and a.z, "Invalid vector passed to vector.new()")
-		return {x=a.x, y=a.y, z=a.z}
+		return fast_new(a.x, a.y, a.z)
 	elseif a then
 		assert(b and c, "Invalid arguments for vector.new()")
-		return {x=a, y=b, z=c}
+		return fast_new(a, b, c)
 	end
-	return {x=0, y=0, z=0}
+	return fast_new(0, 0, 0)
 end
 
 function vector.zero()
-	return {x=0, y=0, z=0}
+	return fast_new(0, 0, 0)
 end
 
 function vector.copy(v)
 	assert(v.x and v.y and v.z, "Invalid vector passed to vector.copy()")
-	return vector.new(v)
+	return fast_new(v.x, v.y, v.z)
 end
 
 function vector.from_string(s, init)
@@ -38,63 +67,56 @@ end
 function vector.to_string(v)
 	return string.format("(%g, %g, %g)", v.x, v.y, v.z)
 end
+metatable.__tostring = vector.to_string
 
 function vector.equals(a, b)
 	return a.x == b.x and
 	       a.y == b.y and
 	       a.z == b.z
 end
+metatable.__eq = vector.equals
+
+-- unary operations
 
 function vector.length(v)
-	return hypot(v.x, hypot(v.y, v.z))
+	return math.hypot(v.x, math.hypot(v.y, v.z))
 end
+-- Note: we can not use __len because it is already used for primitive table length
 
 function vector.normalize(v)
 	local len = vector.length(v)
 	if len == 0 then
-		return {x=0, y=0, z=0}
+		return fast_new(0, 0, 0)
 	else
 		return vector.divide(v, len)
 	end
 end
 
 function vector.floor(v)
-	return {
-		x = floor(v.x),
-		y = floor(v.y),
-		z = floor(v.z)
-	}
+	return fast_new(floor(v.x), floor(v.y), floor(v.z))
 end
 
 function vector.round(v)
-	return {
-		x = round(v.x),
-		y = round(v.y),
-		z = round(v.z)
-	}
+	return fast_new(math.round(v.x), math.round(v.y), math.round(v.z))
 end
 
 function vector.apply(v, func)
-	return {
-		x = func(v.x),
-		y = func(v.y),
-		z = func(v.z)
-	}
+	return fast_new(
+		func(v.x),
+		func(v.y),
+		func(v.z)
+	)
 end
 
 function vector.distance(a, b)
 	local x = a.x - b.x
 	local y = a.y - b.y
 	local z = a.z - b.z
-	return hypot(x, hypot(y, z))
+	return math.hypot(x, math.hypot(y, z))
 end
 
 function vector.direction(pos1, pos2)
-	return vector.normalize({
-		x = pos2.x - pos1.x,
-		y = pos2.y - pos1.y,
-		z = pos2.z - pos1.z
-	})
+	return vector.subtract(pos2, pos1):normalize()
 end
 
 function vector.angle(a, b)
@@ -109,70 +131,137 @@ function vector.dot(a, b)
 end
 
 function vector.cross(a, b)
-	return {
-		x = a.y * b.z - a.z * b.y,
-		y = a.z * b.x - a.x * b.z,
-		z = a.x * b.y - a.y * b.x
-	}
+	return fast_new(
+		a.y * b.z - a.z * b.y,
+		a.z * b.x - a.x * b.z,
+		a.x * b.y - a.y * b.x
+	)
 end
+
+function metatable.__unm(v)
+	return fast_new(-v.x, -v.y, -v.z)
+end
+
+-- add, sub, mul, div operations
 
 function vector.add(a, b)
 	if type(b) == "table" then
-		return {x = a.x + b.x,
-			y = a.y + b.y,
-			z = a.z + b.z}
+		return fast_new(
+			a.x + b.x,
+			a.y + b.y,
+			a.z + b.z
+		)
 	else
-		return {x = a.x + b,
-			y = a.y + b,
-			z = a.z + b}
+		return fast_new(
+			a.x + b,
+			a.y + b,
+			a.z + b
+		)
 	end
+end
+function metatable.__add(a, b)
+	return fast_new(
+		a.x + b.x,
+		a.y + b.y,
+		a.z + b.z
+	)
 end
 
 function vector.subtract(a, b)
 	if type(b) == "table" then
-		return {x = a.x - b.x,
-			y = a.y - b.y,
-			z = a.z - b.z}
+		return fast_new(
+			a.x - b.x,
+			a.y - b.y,
+			a.z - b.z
+		)
 	else
-		return {x = a.x - b,
-			y = a.y - b,
-			z = a.z - b}
+		return fast_new(
+			a.x - b,
+			a.y - b,
+			a.z - b
+		)
 	end
+end
+function metatable.__sub(a, b)
+	return fast_new(
+		a.x - b.x,
+		a.y - b.y,
+		a.z - b.z
+	)
 end
 
 function vector.multiply(a, b)
 	if type(b) == "table" then
-		return {x = a.x * b.x,
-			y = a.y * b.y,
-			z = a.z * b.z}
+		return fast_new(
+			a.x * b.x,
+			a.y * b.y,
+			a.z * b.z
+		)
 	else
-		return {x = a.x * b,
-			y = a.y * b,
-			z = a.z * b}
+		return fast_new(
+			a.x * b,
+			a.y * b,
+			a.z * b
+		)
+	end
+end
+function metatable.__mul(a, b)
+	if type(a) == "table" then
+		return fast_new(
+			a.x * b,
+			a.y * b,
+			a.z * b
+		)
+	else
+		return fast_new(
+			a * b.x,
+			a * b.y,
+			a * b.z
+		)
 	end
 end
 
 function vector.divide(a, b)
 	if type(b) == "table" then
-		return {x = a.x / b.x,
-			y = a.y / b.y,
-			z = a.z / b.z}
+		return fast_new(
+			a.x / b.x,
+			a.y / b.y,
+			a.z / b.z
+		)
 	else
-		return {x = a.x / b,
-			y = a.y / b,
-			z = a.z / b}
+		return fast_new(
+			a.x / b,
+			a.y / b,
+			a.z / b
+		)
 	end
 end
+function metatable.__div(a, b)
+	-- scalar/vector makes no sense
+	return fast_new(
+		a.x / b,
+		a.y / b,
+		a.z / b
+	)
+end
+
+-- misc stuff
 
 function vector.offset(v, x, y, z)
-	return {x = v.x + x,
-		y = v.y + y,
-		z = v.z + z}
+	return fast_new(
+		v.x + x,
+		v.y + y,
+		v.z + z
+	)
 end
 
 function vector.sort(a, b)
-	return {x = min(a.x, b.x), y = min(a.y, b.y), z = min(a.z, b.z)},
-		{x = max(a.x, b.x), y = max(a.y, b.y), z = max(a.z, b.z)}
+	return fast_new(min(a.x, b.x), min(a.y, b.y), min(a.z, b.z)),
+		fast_new(max(a.x, b.x), max(a.y, b.y), max(a.z, b.z))
+end
+
+function vector.check(v)
+	return getmetatable(v) == metatable
 end
 
 local function sin(x)
@@ -240,7 +329,7 @@ end
 
 function vector.dir_to_rotation(forward, up)
 	forward = vector.normalize(forward)
-	local rot = {x = math.asin(forward.y), y = -math.atan2(forward.x, forward.z), z = 0}
+	local rot = vector.new(math.asin(forward.y), -math.atan2(forward.x, forward.z), 0)
 	if not up then
 		return rot
 	end
@@ -248,7 +337,7 @@ function vector.dir_to_rotation(forward, up)
 			"Invalid vectors passed to vector.dir_to_rotation().")
 	up = vector.normalize(up)
 	-- Calculate vector pointing up with roll = 0, just based on forward vector.
-	local forwup = vector.rotate({x = 0, y = 1, z = 0}, rot)
+	local forwup = vector.rotate(vector.new(0, 1, 0), rot)
 	-- 'forwup' and 'up' are now in a plane with 'forward' as normal.
 	-- The angle between them is the absolute of the roll value we're looking for.
 	rot.z = vector.angle(forwup, up)
