@@ -133,12 +133,16 @@ public:
 	}
 
 	void getBlocksInViewRange(v3s16 cam_pos_nodes,
-		v3s16 *p_blocks_min, v3s16 *p_blocks_max);
+		v3s16 *p_blocks_min, v3s16 *p_blocks_max, float range=-1.0f);
 	void updateDrawList();
 	// Collects the visible mesh buffers into m_drawbufs_solid/transparent.
 	// Called once per frame from the solid render pass.
 	void updateDrawBufs(video::IVideoDriver *driver);
+	void updateDrawListShadow(const v3f &shadow_light_pos, const v3f &shadow_light_dir, float shadow_range);
 	void renderMap(video::IVideoDriver* driver, s32 pass);
+
+	void renderMapShadows(video::IVideoDriver *driver,
+			const video::SMaterial &material, s32 pass);
 
 	int getBackgroundBrightness(float max_d, u32 daylight_factor,
 			int oldvalue, bool *sunlight_seen_result);
@@ -149,9 +153,12 @@ public:
 	virtual void PrintInfo(std::ostream &out);
 
 	const MapDrawControl & getControl() const { return m_control; }
+	f32 getWantedRange() const { return m_control.wanted_range; }
 	f32 getCameraFov() const { return m_camera_fov; }
+
 private:
 	Client *m_client;
+	RenderingEngine *m_rendering_engine;
 
 	aabb3f m_box = aabb3f(-BS * 1000000, -BS * 1000000, -BS * 1000000,
 		BS * 1000000, BS * 1000000, BS * 1000000);
@@ -170,6 +177,7 @@ private:
 	// walked and every buffer classified only once instead of twice.
 	MeshBufListList m_drawbufs_solid;
 	MeshBufListList m_drawbufs_transparent;
+	std::map<v3s16, MapBlock*> m_drawlist_shadow;
 
 	std::set<v2s16> m_last_drawn_sectors;
 
@@ -177,4 +185,5 @@ private:
 	bool m_cache_bilinear_filter;
 	bool m_cache_anistropic_filter;
 	bool m_cache_transparency_sorting;
+	bool m_added_to_shadow_renderer{false};
 };

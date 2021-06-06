@@ -19,9 +19,35 @@ centroid varying vec2 varTexCoord;
 #endif
 varying vec3 eyeVec;
 
+#ifdef ENABLE_DYNAMIC_SHADOWS
+	// shadow uniforms
+	uniform vec3 v_LightDirection;
+	uniform float f_textureresolution;
+	uniform mat4 m_ShadowViewProj;
+	uniform float f_shadowfar;
+	uniform float f_shadow_strength;
+	uniform float f_timeofday;
+	varying float cosLight;
+	varying float normalOffsetScale;
+	varying float adj_shadow_strength;
+	varying float f_normal_length;
+	varying vec3 vNormal;
+	varying vec3 worldPosition;
+	varying float nightRatio;
+#endif
+
 // Color of the light emitted by the light sources.
 const vec3 artificialLight = vec3(1.04, 1.04, 1.04);
 
+#ifdef ENABLE_DYNAMIC_SHADOWS
+// custom smoothstep implementation because it's not defined in glsl1.2
+// https://docs.gl/sl4/smoothstep
+float mtsmoothstep(in float edge0, in float edge1, in float x)
+{
+	float t = clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
+	return t * t * (3.0 - 2.0 * t);
+}
+#endif
 
 float smoothCurve(float x)
 {
@@ -133,6 +159,10 @@ void main(void)
 #endif
 
 	eyeVec = -(mWorldView * inVertexPosition).xyz / fogDistance;
+#ifdef ENABLE_DYNAMIC_SHADOWS
+	worldPosition = (mWorld * inVertexPosition).xyz;
+	vNormal = inVertexNormal;
+#endif
 
 
 	// Calculate color.
@@ -146,6 +176,9 @@ void main(void)
 #endif
 	// The alpha gives the ratio of sunlight in the incoming light.
 	color.rgb *= 2.0 * mix(artificialLight.rgb, dayLight.rgb, color.a);
+#ifdef ENABLE_DYNAMIC_SHADOWS
+	nightRatio = 1.0 - color.a;
+#endif
 	color.a = 1.0;
 
 	// Emphase blue a bit in darker places
@@ -160,5 +193,26 @@ void main(void)
 	vec3 sq = inVertexNormal * inVertexNormal;
 	varColor.a = sq.x + sq.y + sq.z < 0.5 ? 1.0 : sqrt(0.45) * sq.x +
 		(inVertexNormal.y < 0.0 ? sqrt(0.2) : 1.0) * sq.y + sqrt(0.7) * sq.z;
+#endif
+
+#ifdef ENABLE_DYNAMIC_SHADOWS
+	vec3 nNormal = normalize(vNormal);
+	cosLight = dot(nNormal, -v_LightDirection);
+	float texelSize = 767.0 / f_textureresolution;
+	float slopeScale = clamp(1.0 - abs(cosLight), 0.0, 1.0);
+	normalOffsetScale = texelSize * slopeScale;
+	
+	if (f_timeofday < 0.2) {
+		adj_shadow_strength = f_shadow_strength * 0.5 *
+			(1.0 - mtsmoothstep(0.18, 0.2, f_timeofday));
+	} else if (f_timeofday >= 0.8) {
+		adj_shadow_strength = f_shadow_strength * 0.5 *
+			mtsmoothstep(0.8, 0.83, f_timeofday);
+	} else {
+		adj_shadow_strength = f_shadow_strength *
+			mtsmoothstep(0.20, 0.25, f_timeofday) *
+			(1.0 - mtsmoothstep(0.7, 0.8, f_timeofday));
+	}
+	f_normal_length = length(vNormal);
 #endif
 }

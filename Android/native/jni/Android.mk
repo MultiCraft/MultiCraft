@@ -159,6 +159,10 @@ LOCAL_SRC_FILES := \
 	../../src/client/meshgen/collector.cpp         \
 	../../src/client/render/core.cpp               \
 	../../src/client/render/plain.cpp              \
+	../../src/client/shadows/dynamicshadows.cpp    \
+	../../src/client/shadows/dynamicshadowsrender.cpp \
+	../../src/client/shadows/shadowsScreenQuad.cpp \
+	../../src/client/shadows/shadowsshadercallbacks.cpp \
 	$(wildcard ../../src/content/*.cpp)            \
 	../../src/database/database.cpp                \
 	../../src/database/database-dummy.cpp          \

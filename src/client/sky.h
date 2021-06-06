@@ -117,6 +117,8 @@ public:
 			float moon_angle, float sun_horizon_pos, float sun_day_pos,
 			float sun_angle);
 
+	float getSkyBodyOrbitTilt() const { return m_sky_body_orbit_tilt; }
+
 private:
 	aabb3f m_box;
 	video::SMaterial m_materials[SKY_MATERIAL_COUNT];
@@ -171,6 +173,7 @@ private:
 	bool m_directional_colored_fog;
 	bool m_in_clouds = true; // Prevent duplicating bools to remember old values
 	bool m_enable_shaders = false;
+	float m_sky_body_orbit_tilt = 0.0f;
 
 	video::SColorf m_bgcolor_bright_f = video::SColorf(1.0f, 1.0f, 1.0f, 1.0f);
 	video::SColorf m_skycolor_bright_f = video::SColorf(1.0f, 1.0f, 1.0f, 1.0f);
@@ -227,3 +230,7 @@ private:
 		float horizon_position,	float day_position, float angle = 0);
 	void setSkyDefaults();
 };
+
+// calculates value for sky body positions for the given observed time of day
+// this is used to draw both Sun/Moon and shadows
+float getWickedTimeOfDay(float time_of_day);

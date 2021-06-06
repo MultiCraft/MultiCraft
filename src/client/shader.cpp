@@ -218,6 +218,16 @@ class MainShaderConstantSetter : public IShaderConstantSetter
 {
 	CachedVertexShaderSetting<float, 16> m_world_view_proj;
 	CachedVertexShaderSetting<float, 16> m_world;
+
+	// Shadow-related
+	CachedPixelShaderSetting<float, 16> m_shadow_view_proj;
+	CachedPixelShaderSetting<float, 3> m_light_direction;
+	CachedPixelShaderSetting<float> m_texture_res;
+	CachedPixelShaderSetting<float> m_shadow_strength;
+	CachedPixelShaderSetting<float> m_time_of_day;
+	CachedPixelShaderSetting<float> m_shadowfar;
+	CachedPixelShaderSetting<s32> m_shadow_texture;
+
 #if ENABLE_GLES
 	// Modelview matrix
 	CachedVertexShaderSetting<float, 16> m_world_view;
@@ -239,6 +249,13 @@ public:
 		, m_texture("mTexture")
 #endif
 		, m_node_color("nodeColor")
+		, m_shadow_view_proj("m_ShadowViewProj")
+		, m_light_direction("v_LightDirection")
+		, m_texture_res("f_textureresolution")
+		, m_shadow_strength("f_shadow_strength")
+		, m_time_of_day("f_timeofday")
+		, m_shadowfar("f_shadowfar")
+		, m_shadow_texture("ShadowMapSampler")
 	{}
 	~MainShaderConstantSetter() = default;
 
@@ -284,6 +301,36 @@ public:
 		m_world_view.set(*reinterpret_cast<float(*)[16]>(m_mat_world_view.pointer()), services);
 		m_texture.set(texture, services);
 #endif
+
+		// Set uniforms for Shadow shader
+		if (ShadowRenderer *shadow = RenderingEngine::get_shadow_renderer()) {
+			const auto &light = shadow->getDirectionalLight();
+
+			core::matrix4 shadowViewProj = light.getProjectionMatrix();
+			shadowViewProj *= light.getViewMatrix();
+			m_shadow_view_proj.set(shadowViewProj.pointer(), services);
+
+			float v_LightDirection[3];
+			light.getDirection().getAs3Values(v_LightDirection);
+			m_light_direction.set(v_LightDirection, services);
+
+			float TextureResolution = light.getMapResolution();
+			m_texture_res.set(&TextureResolution, services);
+
+			float ShadowStrength = shadow->getShadowStrength();
+			m_shadow_strength.set(&ShadowStrength, services);
+
+			float timeOfDay = shadow->getTimeOfDay();
+			m_time_of_day.set(&timeOfDay, services);
+
+			float shadowFar = shadow->getMaxShadowFar();
+			m_shadowfar.set(&shadowFar, services);
+
+			// I dont like using this hardcoded value. maybe something like
+			// MAX_TEXTURE - 1 or somthing like that??
+			s32 TextureLayerID = 3;
+			m_shadow_texture.set(&TextureLayerID, services);
+		}
 	}
 };
 
@@ -522,11 +569,15 @@ u32 ShaderSource::getShaderIdDirect(const std::string &name,
 		return 0;
 	}
 
+	// Only the dynamic shadows read DRAW_TYPE, without them one program serves every drawtype
+	if (!g_settings->getBool("enable_dynamic_shadows"))
+		drawtype = NDT_NORMAL;
+
 	// Check if already have such instance
 	for(u32 i=0; i<m_shaderinfo_cache.size(); i++){
 		ShaderInfo *info = &m_shaderinfo_cache[i];
-		if(info->name == name && info->material_type == material_type /*&&
-			info->drawtype == drawtype*/)
+		if(info->name == name && info->material_type == material_type &&
+			info->drawtype == drawtype)
 			return i;
 	}
 
@@ -836,7 +887,7 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 #undef PROVIDE
 
 	shaders_header << "#define MATERIAL_TYPE " << (int)material_type << "\n";
-	//shaders_header << "#define DRAW_TYPE " << (int)drawtype << "\n";
+	shaders_header << "#define DRAW_TYPE " << (int)drawtype << "\n";
 
 	bool enable_waving_water = g_settings->getBool("enable_waving_water");
 	shaders_header << "#define ENABLE_WAVING_WATER " << enable_waving_water << "\n";
@@ -874,6 +925,23 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 	shaders_header << "#define LIGHT_BOOST vec3(" << light_boost[0] << "," << light_boost[1]
 		<< "," << light_boost[2] << ")\n";
 	shaders_header << "#define LIGHT_SCALE " << light_boost[3] << "\n";
+
+	if (g_settings->getBool("enable_dynamic_shadows")) {
+		shaders_header << "#define ENABLE_DYNAMIC_SHADOWS 1\n";
+		if (g_settings->getBool("shadow_map_color"))
+			shaders_header << "#define COLORED_SHADOWS 1\n";
+
+		if (g_settings->getBool("shadow_poisson_filter"))
+			shaders_header << "#define POISSON_FILTER 1\n";
+
+		s32 shadow_filter = g_settings->getS32("shadow_filters");
+		shaders_header << "#define SHADOW_FILTER " << shadow_filter << "\n";
+
+		float shadow_soft_radius = g_settings->getS32("shadow_soft_radius");
+		if (shadow_soft_radius < 1.0f)
+			shadow_soft_radius = 1.0f;
+		shaders_header << "#define SOFTSHADOWRADIUS " << shadow_soft_radius << "\n";
+	}
 
 	std::string common_header = shaders_header.str();
 

@@ -236,6 +236,10 @@
 		84F20E8F25D52868009562A9 /* directiontables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E7D25D52868009562A9 /* directiontables.cpp */; };
 		84F20EA125D528C5009562A9 /* core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9425D528C5009562A9 /* core.cpp */; };
 		84F20EA325D528C5009562A9 /* plain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9725D528C5009562A9 /* plain.cpp */; };
+		3DD05A88D0E97147F634B00D /* dynamicshadows.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 811AEECC8E0492902C39417B /* dynamicshadows.cpp */; };
+		A740002EAA2F4CD61B694F2E /* dynamicshadowsrender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA4A16A68402F1D6DCBE3026 /* dynamicshadowsrender.cpp */; };
+		1C7B8EB1DFF21A7DE90A4217 /* shadowsScreenQuad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81484AC46803EF454D002E62 /* shadowsScreenQuad.cpp */; };
+		46B2A7C1B46A329E52DE3C11 /* shadowsshadercallbacks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4A1E1163C525745119547B73 /* shadowsshadercallbacks.cpp */; };
 		84F20EB025D528D7009562A9 /* subgames.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EA825D528D6009562A9 /* subgames.cpp */; };
 		84F20EB225D528D7009562A9 /* mods.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAE25D528D7009562A9 /* mods.cpp */; };
 		84F20EB325D528D7009562A9 /* content.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAF25D528D7009562A9 /* content.cpp */; };
@@ -297,6 +301,7 @@
 		84FA1AB6306BCDC700A04E82 /* MultiCraftFont.ttf in Copy Fonts */ = {isa = PBXBuildFile; fileRef = 84FA1AA8306BCDC700A04E82 /* MultiCraftFont.ttf */; };
 		84FD8E3126A0B01D00EF2BFA /* guiEditBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */; };
 		84FD8E3426A0B04900EF2BFA /* guiScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3326A0B04900EF2BFA /* guiScene.cpp */; };
+		B3972FC52F7F49C1941DFC5B /* shadow_shaders in Copy Shaders */ = {isa = PBXBuildFile; fileRef = D3C4126B9A624CA794964E5C /* shadow_shaders */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -318,6 +323,7 @@
 				84FA1AAF306BCDC700A04E82 /* nodes_shader in Copy Shaders */,
 				84FA1AB0306BCDC700A04E82 /* object_shader in Copy Shaders */,
 				84FA1AB1306BCDC700A04E82 /* selection_shader in Copy Shaders */,
+				B3972FC52F7F49C1941DFC5B /* shadow_shaders in Copy Shaders */,
 				84FA1AB2306BCDC700A04E82 /* stars_shader in Copy Shaders */,
 				84FA1AB3306BCDC700A04E82 /* Irrlicht in Copy Shaders */,
 				84FA1AB4306BCDC700A04E82 /* Metal in Copy Shaders */,
@@ -796,6 +802,14 @@
 		84F20E9325D528C5009562A9 /* plain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = plain.h; path = ../../../src/client/render/plain.h; sourceTree = "<group>"; };
 		84F20E9425D528C5009562A9 /* core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = core.cpp; path = ../../../src/client/render/core.cpp; sourceTree = "<group>"; };
 		84F20E9725D528C5009562A9 /* plain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = plain.cpp; path = ../../../src/client/render/plain.cpp; sourceTree = "<group>"; };
+		811AEECC8E0492902C39417B /* dynamicshadows.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dynamicshadows.cpp; path = ../../../src/client/shadows/dynamicshadows.cpp; sourceTree = "<group>"; };
+		B20D882E943F1ED6566E6335 /* dynamicshadows.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dynamicshadows.h; path = ../../../src/client/shadows/dynamicshadows.h; sourceTree = "<group>"; };
+		FA4A16A68402F1D6DCBE3026 /* dynamicshadowsrender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dynamicshadowsrender.cpp; path = ../../../src/client/shadows/dynamicshadowsrender.cpp; sourceTree = "<group>"; };
+		4FD29FC6B5D38AD86916F732 /* dynamicshadowsrender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dynamicshadowsrender.h; path = ../../../src/client/shadows/dynamicshadowsrender.h; sourceTree = "<group>"; };
+		81484AC46803EF454D002E62 /* shadowsScreenQuad.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shadowsScreenQuad.cpp; path = ../../../src/client/shadows/shadowsScreenQuad.cpp; sourceTree = "<group>"; };
+		1D72D74129B5100CDB981E3D /* shadowsScreenQuad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shadowsScreenQuad.h; path = ../../../src/client/shadows/shadowsScreenQuad.h; sourceTree = "<group>"; };
+		4A1E1163C525745119547B73 /* shadowsshadercallbacks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = shadowsshadercallbacks.cpp; path = ../../../src/client/shadows/shadowsshadercallbacks.cpp; sourceTree = "<group>"; };
+		D4D41EF6324E23B2E6210E31 /* shadowsshadercallbacks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shadowsshadercallbacks.h; path = ../../../src/client/shadows/shadowsshadercallbacks.h; sourceTree = "<group>"; };
 		84F20E9825D528C5009562A9 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core.h; path = ../../../src/client/render/core.h; sourceTree = "<group>"; };
 		84F20EA825D528D6009562A9 /* subgames.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = subgames.cpp; path = ../../../src/content/subgames.cpp; sourceTree = "<group>"; };
 		84F20EA925D528D6009562A9 /* subgames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = subgames.h; path = ../../../src/content/subgames.h; sourceTree = "<group>"; };
@@ -903,6 +917,7 @@
 		84FA1AA2306BCDC700A04E82 /* nodes_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = nodes_shader; path = ../../../client/shaders/nodes_shader; sourceTree = "<group>"; };
 		84FA1AA3306BCDC700A04E82 /* object_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = object_shader; path = ../../../client/shaders/object_shader; sourceTree = "<group>"; };
 		84FA1AA4306BCDC700A04E82 /* selection_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = selection_shader; path = ../../../client/shaders/selection_shader; sourceTree = "<group>"; };
+		D3C4126B9A624CA794964E5C /* shadow_shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; name = shadow_shaders; path = ../../../client/shaders/shadow_shaders; sourceTree = "<group>"; };
 		84FA1AA5306BCDC700A04E82 /* stars_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = stars_shader; path = ../../../client/shaders/stars_shader; sourceTree = "<group>"; };
 		84FA1AA6306BCDC700A04E82 /* Irrlicht */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Irrlicht; path = ../../deps/irrlicht/Irrlicht; sourceTree = "<group>"; };
 		84FA1AA7306BCDC700A04E82 /* Metal */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Metal; path = ../../assets/client/shaders/Metal; sourceTree = "<group>"; };
@@ -996,6 +1011,21 @@
 				84F20E9325D528C5009562A9 /* plain.h */,
 			);
 			name = render;
+			sourceTree = "<group>";
+		};
+		D4A3EF2D0854B327C1A288A3 /* shadows */ = {
+			isa = PBXGroup;
+			children = (
+				811AEECC8E0492902C39417B /* dynamicshadows.cpp */,
+				B20D882E943F1ED6566E6335 /* dynamicshadows.h */,
+				FA4A16A68402F1D6DCBE3026 /* dynamicshadowsrender.cpp */,
+				4FD29FC6B5D38AD86916F732 /* dynamicshadowsrender.h */,
+				81484AC46803EF454D002E62 /* shadowsScreenQuad.cpp */,
+				1D72D74129B5100CDB981E3D /* shadowsScreenQuad.h */,
+				4A1E1163C525745119547B73 /* shadowsshadercallbacks.cpp */,
+				D4D41EF6324E23B2E6210E31 /* shadowsshadercallbacks.h */,
+			);
+			name = shadows;
 			sourceTree = "<group>";
 		};
 		84135C2F25D526E500CA4DCF /* content */ = {
@@ -1329,6 +1359,7 @@
 			children = (
 				84135BA325D5268E00CA4DCF /* meshgen */,
 				84135BA425D5269800CA4DCF /* render */,
+				D4A3EF2D0854B327C1A288A3 /* shadows */,
 				84135C0125D526D600CA4DCF /* activeobjectmgr.cpp */,
 				84135BC025D526D300CA4DCF /* activeobjectmgr.h */,
 				84135BE325D526D500CA4DCF /* camera.cpp */,
@@ -1765,6 +1796,7 @@
 				84FA1AA2306BCDC700A04E82 /* nodes_shader */,
 				84FA1AA3306BCDC700A04E82 /* object_shader */,
 				84FA1AA4306BCDC700A04E82 /* selection_shader */,
+				D3C4126B9A624CA794964E5C /* shadow_shaders */,
 				84FA1AA5306BCDC700A04E82 /* stars_shader */,
 				84FA1AA6306BCDC700A04E82 /* Irrlicht */,
 				84FA1AA7306BCDC700A04E82 /* Metal */,
@@ -2088,6 +2120,10 @@
 				84F20F0B25D52958009562A9 /* guiHyperText.cpp in Sources */,
 				84135B6725D5264B00CA4DCF /* filesys.cpp in Sources */,
 				84F20EA325D528C5009562A9 /* plain.cpp in Sources */,
+				3DD05A88D0E97147F634B00D /* dynamicshadows.cpp in Sources */,
+				A740002EAA2F4CD61B694F2E /* dynamicshadowsrender.cpp in Sources */,
+				1C7B8EB1DFF21A7DE90A4217 /* shadowsScreenQuad.cpp in Sources */,
+				46B2A7C1B46A329E52DE3C11 /* shadowsshadercallbacks.cpp in Sources */,
 				84F20DD825D52812009562A9 /* s_nodemeta.cpp in Sources */,
 				84135B8225D5264C00CA4DCF /* server.cpp in Sources */,
 				84F20DDB25D52812009562A9 /* s_security.cpp in Sources */,

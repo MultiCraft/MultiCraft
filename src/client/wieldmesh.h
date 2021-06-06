@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 class Client;
 class ITextureSource;
 struct ContentFeatures;
+class ShadowRenderer;
 
 /*!
  * Holds color information of an item mesh's buffer.
@@ -131,6 +132,8 @@ private:
 	// so this variable is just required so we can implement
 	// getBoundingBox() and is set to an empty box.
 	aabb3f m_bounding_box;
+
+	ShadowRenderer *m_shadow;
 };
 
 void getItemMesh(Client *client, const ItemStack &item, ItemMesh *result);

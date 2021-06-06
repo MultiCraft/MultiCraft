@@ -138,7 +138,14 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 		m_materials[i].Lighting = true;
 		m_materials[i].MaterialType = video::EMT_SOLID;
 	}
+
 	m_directional_colored_fog = g_settings->getBool("directional_colored_fog");
+
+	if (!m_is_mainmenu && g_settings->getBool("enable_dynamic_shadows")) {
+		float val = g_settings->getFloat("shadow_sky_body_orbit_tilt");
+		m_sky_body_orbit_tilt = rangelim(val, 0.0f, 60.0f);
+	}
+
 	setStarCount(1000, true);
 }
 
@@ -203,17 +210,7 @@ void Sky::render()
 		video::SColorf mooncolor_f(0.50, 0.57, 0.65, 1);
 		video::SColorf mooncolor2_f(0.85, 0.875, 0.9, 1);
 
-		float nightlength = 0.415;
-		float wn = nightlength / 2;
-		float wicked_time_of_day = 0;
-		if (m_time_of_day > wn && m_time_of_day < 1.0 - wn)
-			wicked_time_of_day = (m_time_of_day - wn) / (1.0 - wn * 2) * 0.5 + 0.25;
-		else if (m_time_of_day < 0.5)
-			wicked_time_of_day = m_time_of_day / wn * 0.25;
-		else
-			wicked_time_of_day = 1.0 - ((1.0 - m_time_of_day) / wn * 0.25);
-		/*std::cerr<<"time_of_day="<<m_time_of_day<<" -> "
-				<<"wicked_time_of_day="<<wicked_time_of_day<<std::endl;*/
+		float wicked_time_of_day = getWickedTimeOfDay(m_time_of_day);
 
 		video::SColor suncolor = suncolor_f.toSColor();
 		video::SColor suncolor2 = suncolor2_f.toSColor();
@@ -785,11 +782,18 @@ void Sky::place_sky_body(std::array<video::S3DVertex, 4> &vertices,
 	* day_position: turn the body around the Z axis, to place it depending of the time of the day
 	*/
 {
+	v3f centrum(0, 0, -1);
+	centrum.rotateXZBy(horizon_position);
+	centrum.rotateXYBy(day_position);
+	// Only the tilt moves the body: a horizon position other than 90 has turned it already
+	const float untilted_z = centrum.Z;
+	centrum.rotateYZBy(m_sky_body_orbit_tilt);
 	for (video::S3DVertex &vertex : vertices) {
 		// Body is directed to -Z (south) by default
 		vertex.Pos.rotateXYBy(angle);
 		vertex.Pos.rotateXZBy(horizon_position);
 		vertex.Pos.rotateXYBy(day_position);
+		vertex.Pos.Z += centrum.Z - untilted_z;
 	}
 }
 
@@ -1018,4 +1022,18 @@ void Sky::setCustomSkyBodyPos(float moon_horizon_pos, float moon_day_pos,
 	m_custom_sun_horizon_pos = sun_horizon_pos;
 	m_custom_sun_day_pos = sun_day_pos;
 	m_custom_sun_angle = sun_angle;
+}
+
+float getWickedTimeOfDay(float time_of_day)
+{
+	float nightlength = 0.415f;
+	float wn = nightlength / 2;
+	float wicked_time_of_day = 0;
+	if (time_of_day > wn && time_of_day < 1.0f - wn)
+		wicked_time_of_day = (time_of_day - wn) / (1.0f - wn * 2) * 0.5f + 0.25f;
+	else if (time_of_day < 0.5f)
+		wicked_time_of_day = time_of_day / wn * 0.25f;
+	else
+		wicked_time_of_day = 1.0f - ((1.0f - time_of_day) / wn * 0.25f);
+	return wicked_time_of_day;
 }
