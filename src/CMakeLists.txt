@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.6)
-
 project(multicraft)
 
 INCLUDE(CheckIncludeFiles)
@@ -124,27 +122,6 @@ option(ENABLE_FREETYPE "Enable FreeType2 (TrueType fonts and basic unicode suppo
 set(USE_FREETYPE FALSE)
 
 if(ENABLE_FREETYPE)
-##
-## Note: FindFreetype.cmake seems to have been fixed in recent versions of
-## CMake. If issues persist, re-enable this workaround specificially for the
-## failing platforms.
-##
-#	if(UNIX)
-#		include(FindPkgConfig)
-#		if(PKG_CONFIG_FOUND)
-#			pkg_check_modules(FREETYPE QUIET freetype2)
-#			if(FREETYPE_FOUND)
-#				SET(FREETYPE_PKGCONFIG_FOUND TRUE)
-#				SET(FREETYPE_LIBRARY ${FREETYPE_LIBRARIES})
-#				# Because CMake is idiotic
-#				string(REPLACE ";" " " FREETYPE_CFLAGS_STR ${FREETYPE_CFLAGS})
-#				string(REPLACE ";" " " FREETYPE_LDFLAGS_STR ${FREETYPE_LDFLAGS})
-#			endif(FREETYPE_FOUND)
-#		endif(PKG_CONFIG_FOUND)
-#	endif(UNIX)
-#	if(NOT FREETYPE_FOUND)
-#		find_package(Freetype)
-#	endif()
 	find_package(Freetype)
 	if(FREETYPE_FOUND)
 		message(STATUS "Freetype enabled.")
@@ -353,6 +330,10 @@ else()
 	if (ICONV_LIBRARY)
 		set(PLATFORM_LIBS ${PLATFORM_LIBS} ${ICONV_LIBRARY})
 	endif()
+	if (HAIKU)
+		set(PLATFORM_LIBS ${PLATFORM_LIBS} intl network)
+	endif()
+
 endif()
 
 check_include_files(endian.h HAVE_ENDIAN_H)
@@ -553,7 +534,7 @@ set(EXECUTABLE_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/bin")
 if(BUILD_CLIENT)
 	add_executable(${PROJECT_NAME} ${client_SRCS} ${extra_windows_SRCS})
 	add_dependencies(${PROJECT_NAME} GenerateVersion)
-	set(client_LIBS
+	target_link_libraries(
 		${PROJECT_NAME}
 		${ZLIB_LIBRARIES}
 		${IRRLICHT_LIBRARY}
@@ -570,9 +551,14 @@ if(BUILD_CLIENT)
 		${CLIENT_PLATFORM_LIBS}
 		luautf8
 	)
-	target_link_libraries(
-		${client_LIBS}
-	)
+	if(NOT USE_LUAJIT)
+		set_target_properties(${PROJECT_NAME} PROPERTIES
+			# This is necessary for dynamic Lua modules
+			# to work when Lua is statically linked (issue #10806)
+			ENABLE_EXPORTS 1
+		)
+	endif()
+
 	if(ENABLE_GLES)
 		target_link_libraries(
 			${PROJECT_NAME}
@@ -644,7 +630,15 @@ if(BUILD_SERVER)
 		luautf8
 	)
 	set_target_properties(${PROJECT_NAME}server PROPERTIES
-			COMPILE_DEFINITIONS "SERVER")
+		COMPILE_DEFINITIONS "SERVER")
+	if(NOT USE_LUAJIT)
+		set_target_properties(${PROJECT_NAME}server PROPERTIES
+			# This is necessary for dynamic Lua modules
+			# to work when Lua is statically linked (issue #10806)
+			ENABLE_EXPORTS 1
+		)
+	endif()
+
 	if (USE_GETTEXT)
 		target_link_libraries(${PROJECT_NAME}server ${GETTEXT_LIBRARY})
 	endif()
@@ -677,10 +671,11 @@ endif(BUILD_SERVER)
 # Blacklisted locales that don't work.
 # see issue #4638
 set(GETTEXT_BLACKLISTED_LOCALES
-	be
+	ar
 	he
-	ko
 	ky
+	ms_Arab
+	th
 )
 
 option(APPLY_LOCALE_BLACKLIST "Use a blacklist to avoid broken locales" TRUE)
@@ -688,7 +683,7 @@ option(APPLY_LOCALE_BLACKLIST "Use a blacklist to avoid broken locales" TRUE)
 if (GETTEXTLIB_FOUND AND APPLY_LOCALE_BLACKLIST)
 	set(GETTEXT_USED_LOCALES "")
 	foreach(LOCALE ${GETTEXT_AVAILABLE_LOCALES})
-		if (NOT ";${GETTEXT_BLACKLISTED_LOCALES};" MATCHES ";${LOCALE};")
+		if (NOT "${LOCALE}" IN_LIST GETTEXT_BLACKLISTED_LOCALES)
 			list(APPEND GETTEXT_USED_LOCALES ${LOCALE})
 		endif()
 	endforeach()
@@ -701,21 +696,14 @@ include(CheckCSourceCompiles)
 
 if(MSVC)
 	# Visual Studio
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D WIN32_LEAN_AND_MEAN /MP")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D WIN32_LEAN_AND_MEAN")
 	# EHa enables SEH exceptions (used for catching segfaults)
-	set(CMAKE_CXX_FLAGS_RELEASE "/EHa /Ox /GL /FD /MD /GS- /Zi /fp:fast /D NDEBUG /D _HAS_ITERATOR_DEBUGGING=0 /TP")
+	set(CMAKE_CXX_FLAGS_RELEASE "/EHa /Ox /MD /GS- /Zi /fp:fast /D NDEBUG /D _HAS_ITERATOR_DEBUGGING=0")
 	if(CMAKE_SIZEOF_VOID_P EQUAL 4)
 		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /arch:SSE")
 	endif()
-	
-	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF")
-	else()
-		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/LTCG /INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF")
-	endif()
 
-	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-
+	set(CMAKE_EXE_LINKER_FLAGS_RELEASE "/INCREMENTAL:NO /DEBUG /OPT:REF /OPT:ICF /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 
 	set(CMAKE_CXX_FLAGS_SEMIDEBUG "/MDd /Zi /Ob0 /O1 /RTC1")
 
@@ -726,6 +714,19 @@ if(MSVC)
 	# Flags for C files (sqlite)
 	# /MD = dynamically link to MSVCRxxx.dll
 	set(CMAKE_C_FLAGS_RELEASE "/O2 /Ob2 /MD")
+
+	# Flags that cannot be shared between cl and clang-cl
+	# https://clang.llvm.org/docs/UsersManual.html#clang-cl
+	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fuse-ld=lld")
+
+		# Disable pragma-pack warning
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-pragma-pack")
+	else()
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /TP /FD /GL")
+		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+	endif()
 else()
 	# GCC or compatible compilers such as Clang
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")

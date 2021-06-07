@@ -75,8 +75,6 @@ video::ITexture *MenuTextureSource::getTexture(const std::string &name, u32 *id)
 	if (name.empty())
 		return NULL;
 
-	m_to_delete.insert(name);
-
 #if ENABLE_GLES
 	video::ITexture *retval = m_driver->findTexture(name.c_str());
 	if (retval)
@@ -90,6 +88,7 @@ video::ITexture *MenuTextureSource::getTexture(const std::string &name, u32 *id)
 	video::IImage *newimage = Align2Npot2(image, m_driver);
 	retval = m_driver->addTexture(name.c_str(), newimage);
 	image = NULL;
+	m_to_delete.insert(name);
 	newimage->drop();
 	return retval;
 #else
@@ -172,6 +171,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 			m_menumanager,
 			NULL /* &client */,
 			m_texture_source,
+			m_sound_manager,
 			m_formspecgui,
 			m_buttonhandler,
 			"",
@@ -313,7 +313,7 @@ void GUIEngine::run()
 		u32 frametime_min = 1000 / g_settings->getFloat("pause_fps_max") / 2;
 
 		if (m_clouds_enabled)
-			cloudPostProcess();
+			cloudPostProcess(frametime_min, device);
 		else
 			sleep_ms(frametime_min);
 
@@ -383,9 +383,8 @@ void GUIEngine::cloudPreProcess()
 }
 
 /******************************************************************************/
-void GUIEngine::cloudPostProcess()
+void GUIEngine::cloudPostProcess(u32 frametime_min, IrrlichtDevice *device)
 {
-	float fps_max = g_settings->getFloat("pause_fps_max");
 	// Time of frame without fps limit
 	u32 busytime_u32;
 
@@ -396,12 +395,10 @@ void GUIEngine::cloudPostProcess()
 	else
 		busytime_u32 = 0;
 
-	// FPS limiter
-	u32 frametime_min = 1000./fps_max;
-
+	// FPS limit
 	if (busytime_u32 < frametime_min) {
 		u32 sleeptime = frametime_min - busytime_u32;
-		m_device->sleep(sleeptime);
+		device->sleep(sleeptime);
 	}
 }
 
@@ -499,8 +496,6 @@ void GUIEngine::drawHeader(video::IVideoDriver *driver)
 		core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
 		splashrect += v2s32((screensize.Width/2)-(splashsize.X/2),
 				((free_space/2)-splashsize.Y/2)+10);
-
-	video::SColor bgcolor(255,50,50,50);
 
 	draw2DImageFilterScaled(driver, texture, splashrect,
 		core::rect<s32>(core::position2d<s32>(0,0),

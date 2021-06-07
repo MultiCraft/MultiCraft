@@ -1,5 +1,6 @@
 minetest.register_node("chest:chest", {
-	description = "Chest",
+	description = "Chest" .. "\n" ..
+		"32 inventory slots",
 	tiles ={"chest_chest.png^[sheet:2x2:0,0", "chest_chest.png^[sheet:2x2:0,0",
 		"chest_chest.png^[sheet:2x2:1,0", "chest_chest.png^[sheet:2x2:1,0",
 		"chest_chest.png^[sheet:2x2:1,0", "chest_chest.png^[sheet:2x2:0,1"},
@@ -22,6 +23,18 @@ minetest.register_node("chest:chest", {
 		local inv = meta:get_inventory()
 		return inv:is_empty("main")
 	end,
+	allow_metadata_inventory_put = function(pos, listname, index, stack, player)
+		minetest.chat_send_player(player:get_player_name(), "Allow put: " .. stack:to_string())
+		return stack:get_count()
+	end,
+	allow_metadata_inventory_take = function(pos, listname, index, stack, player)
+		minetest.chat_send_player(player:get_player_name(), "Allow take: " .. stack:to_string())
+		return stack:get_count()
+	end,
+	on_metadata_inventory_put = function(pos, listname, index, stack, player)
+		minetest.chat_send_player(player:get_player_name(), "On put: " .. stack:to_string())
+	end,
+	on_metadata_inventory_take = function(pos, listname, index, stack, player)
+		minetest.chat_send_player(player:get_player_name(), "On take: " .. stack:to_string())
+	end,
 })
-
-

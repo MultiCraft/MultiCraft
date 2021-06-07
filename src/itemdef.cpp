@@ -62,6 +62,7 @@ ItemDefinition& ItemDefinition::operator=(const ItemDefinition &def)
 	type = def.type;
 	name = def.name;
 	description = def.description;
+	short_description = def.short_description;
 	inventory_image = def.inventory_image;
 	inventory_overlay = def.inventory_overlay;
 	wield_image = def.wield_image;
@@ -102,6 +103,7 @@ void ItemDefinition::reset()
 	type = ITEM_NONE;
 	name = "";
 	description = "";
+	short_description = "";
 	inventory_image = "";
 	inventory_overlay = "";
 	wield_image = "";
@@ -133,10 +135,10 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 
 	writeU8(os, version);
 	writeU8(os, type);
-	os << serializeString(name);
-	os << serializeString(description);
-	os << serializeString(inventory_image);
-	os << serializeString(wield_image);
+	os << serializeString16(name);
+	os << serializeString16(description);
+	os << serializeString16(inventory_image);
+	os << serializeString16(wield_image);
 	writeV3F(os, wield_scale, protocol_version);
 	writeS16(os, stack_max);
 	writeU8(os, usable);
@@ -148,15 +150,15 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 		tool_capabilities->serialize(tmp_os, protocol_version);
 		tool_capabilities_s = tmp_os.str();
 	}
-	os << serializeString(tool_capabilities_s);
+	os << serializeString16(tool_capabilities_s);
 
 	writeU16(os, groups.size());
 	for (const auto &group : groups) {
-		os << serializeString(group.first);
+		os << serializeString16(group.first);
 		writeS16(os, group.second);
 	}
 
-	os << serializeString(node_placement_prediction);
+	os << serializeString16(node_placement_prediction);
 
 	if (version == 3) {
 		os << serializeString(sound_place.name);
@@ -171,14 +173,16 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 		writeF32(os, range);
 	}
 
-	os << serializeString(palette_image);
+	os << serializeString16(palette_image);
 	writeARGB8(os, color);
 
 	if (version == 3)
 		return;
 
-	os << serializeString(inventory_overlay);
-	os << serializeString(wield_overlay);
+	os << serializeString16(inventory_overlay);
+	os << serializeString16(wield_overlay);
+
+	os << serializeString16(short_description);
 }
 
 void ItemDefinition::deSerialize(std::istream &is)
@@ -192,10 +196,10 @@ void ItemDefinition::deSerialize(std::istream &is)
 		throw SerializationError("unsupported ItemDefinition version");
 
 	type = (enum ItemType)readU8(is);
-	name = deSerializeString(is);
-	description = deSerializeString(is);
-	inventory_image = deSerializeString(is);
-	wield_image = deSerializeString(is);
+	name = deSerializeString16(is);
+	description = deSerializeString16(is);
+	inventory_image = deSerializeString16(is);
+	wield_image = deSerializeString16(is);
 	if (version >= 6)
 		wield_scale = readV3F32(is);
 	else
@@ -204,7 +208,7 @@ void ItemDefinition::deSerialize(std::istream &is)
 	usable = readU8(is);
 	liquids_pointable = readU8(is);
 
-	std::string tool_capabilities_s = deSerializeString(is);
+	std::string tool_capabilities_s = deSerializeString16(is);
 	if (!tool_capabilities_s.empty()) {
 		std::istringstream tmp_is(tool_capabilities_s, std::ios::binary);
 		tool_capabilities = new ToolCapabilities;
@@ -214,7 +218,7 @@ void ItemDefinition::deSerialize(std::istream &is)
 	groups.clear();
 	u32 groups_size = readU16(is);
 	for(u32 i=0; i<groups_size; i++){
-		std::string name = deSerializeString(is);
+		std::string name = deSerializeString16(is);
 		int value = readS16(is);
 		groups[name] = value;
 	}
@@ -222,14 +226,14 @@ void ItemDefinition::deSerialize(std::istream &is)
 	if (version < 2) {
 		// We can't be sure that node_placement_prediction is sent in version 1.
 		try {
-			node_placement_prediction = deSerializeString(is);
+			node_placement_prediction = deSerializeString16(is);
 		} catch (SerializationError &e) {};
 		sound_place.name = "default_place_node";
 		sound_place.gain = 0.5;
 		return;
 	}
 
-	node_placement_prediction = deSerializeString(is);
+	node_placement_prediction = deSerializeString16(is);
 
 	// Version from ContentFeatures::serialize to keep in sync
 	const u8 cf_version = version >= 6 ? CONTENTFEATURES_VERSION : 9;
@@ -250,6 +254,7 @@ void ItemDefinition::deSerialize(std::istream &is)
 		color = readARGB8(is);
 		inventory_overlay = deSerializeString(is);
 		wield_overlay = deSerializeString(is);
+		short_description = deSerializeString16(is);
 	} catch(SerializationError &e) {};
 }
 
@@ -557,14 +562,14 @@ public:
 			// Serialize ItemDefinition and write wrapped in a string
 			std::ostringstream tmp_os(std::ios::binary);
 			def->serialize(tmp_os, protocol_version);
-			os << serializeString(tmp_os.str());
+			os << serializeString16(tmp_os.str());
 		}
 
 		writeU16(os, m_aliases.size());
 
 		for (const auto &it : m_aliases) {
-			os << serializeString(it.first);
-			os << serializeString(it.second);
+			os << serializeString16(it.first);
+			os << serializeString16(it.second);
 		}
 	}
 	void deSerialize(std::istream &is)
@@ -579,7 +584,7 @@ public:
 		for(u16 i=0; i<count; i++)
 		{
 			// Deserialize a string and grab an ItemDefinition from it
-			std::istringstream tmp_is(deSerializeString(is), std::ios::binary);
+			std::istringstream tmp_is(deSerializeString16(is), std::ios::binary);
 			ItemDefinition def;
 			def.deSerialize(tmp_is);
 			// Register
@@ -588,8 +593,8 @@ public:
 		u16 num_aliases = readU16(is);
 		for(u16 i=0; i<num_aliases; i++)
 		{
-			std::string name = deSerializeString(is);
-			std::string convert_to = deSerializeString(is);
+			std::string name = deSerializeString16(is);
+			std::string convert_to = deSerializeString16(is);
 			registerAlias(name, convert_to);
 		}
 	}

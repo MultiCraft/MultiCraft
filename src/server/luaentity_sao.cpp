@@ -42,8 +42,8 @@ LuaEntitySAO::LuaEntitySAO(ServerEnvironment *env, v3f pos, const std::string &d
 		u8 version2 = 0;
 		u8 version = readU8(is);
 
-		name = deSerializeString(is);
-		state = deSerializeLongString(is);
+		name = deSerializeString16(is);
+		state = deSerializeString32(is);
 
 		if (version < 1)
 			break;
@@ -112,6 +112,15 @@ void LuaEntitySAO::addedToEnvironment(u32 dtime_s)
 	}
 }
 
+void LuaEntitySAO::dispatchScriptDeactivate()
+{
+	// Ensure that this is in fact a registered entity,
+	// and that it isn't already gone.
+	// The latter also prevents this from ever being called twice.
+	if (m_registered && !isGone())
+		m_env->getScriptIface()->luaentity_Deactivate(m_id);
+}
+
 void LuaEntitySAO::step(float dtime, bool send_recommended)
 {
 	if(!m_properties_sent)
@@ -138,15 +147,11 @@ void LuaEntitySAO::step(float dtime, bool send_recommended)
 
 	// Each frame, parent position is copied if the object is attached, otherwise it's calculated normally
 	// If the object gets detached this comes into effect automatically from the last known origin
-	if(isAttached())
-	{
-		v3f pos = m_env->getActiveObject(m_attachment_parent_id)->getBasePosition();
-		m_base_position = pos;
+	if (auto *parent = getParent()) {
+		m_base_position = parent->getBasePosition();
 		m_velocity = v3f(0,0,0);
 		m_acceleration = v3f(0,0,0);
-	}
-	else
-	{
+	} else {
 		if(m_prop.physical){
 			aabb3f box = m_prop.collisionbox;
 			box.MinEdge *= BS;
@@ -226,7 +231,7 @@ std::string LuaEntitySAO::getClientInitializationData(u16 protocol_version)
 
 	// PROTOCOL_VERSION >= 37
 	writeU8(os, 1); // version
-	os << serializeString(""); // name
+	os << serializeString16(""); // name
 	writeU8(os, 0); // is_player
 	writeU16(os, getId()); //id
 	writeV3F(os, m_base_position, protocol_version);
@@ -237,30 +242,30 @@ std::string LuaEntitySAO::getClientInitializationData(u16 protocol_version)
 	writeU16(os, m_hp);
 
 	std::ostringstream msg_os(std::ios::binary);
-	msg_os << serializeLongString(getPropertyPacket(
+	msg_os << serializeString32(getPropertyPacket(
 		protocol_version)); // message 1
-	msg_os << serializeLongString(generateUpdateArmorGroupsCommand()); // 2
-	msg_os << serializeLongString(generateUpdateAnimationCommand(
+	msg_os << serializeString32(generateUpdateArmorGroupsCommand()); // 2
+	msg_os << serializeString32(generateUpdateAnimationCommand(
 		protocol_version)); // 3
 	for (const auto &bone_pos : m_bone_position) {
-		msg_os << serializeLongString(generateUpdateBonePositionCommand(
+		msg_os << serializeString32(generateUpdateBonePositionCommand(
 			bone_pos.first, bone_pos.second.X, bone_pos.second.Y,
-			protocol_version)); // m_bone_position.size
+			protocol_version)); // 3 + N
 	}
-	msg_os << serializeLongString(generateUpdateAttachmentCommand(
-		protocol_version)); // 4
+	msg_os << serializeString32(generateUpdateAttachmentCommand(
+		protocol_version)); // 4 + m_bone_position.size
 
 	int message_count = 4 + m_bone_position.size();
 
 	for (const auto &id : getAttachmentChildIds()) {
 		if (ServerActiveObject *obj = m_env->getActiveObject(id)) {
 			message_count++;
-			msg_os << serializeLongString(obj->generateUpdateInfantCommand(
+			msg_os << serializeString32(obj->generateUpdateInfantCommand(
 				id, protocol_version));
 		}
 	}
 
-	msg_os << serializeLongString(generateSetTextureModCommand());
+	msg_os << serializeString32(generateSetTextureModCommand());
 	message_count++;
 
 	writeU8(os, message_count);
@@ -278,14 +283,14 @@ void LuaEntitySAO::getStaticData(std::string *result) const
 	// version must be 1 to keep backwards-compatibility. See version2
 	writeU8(os, 1);
 	// name
-	os<<serializeString(m_init_name);
+	os<<serializeString16(m_init_name);
 	// state
 	if(m_registered){
 		std::string state = m_env->getScriptIface()->
 			luaentity_GetStaticdata(m_id);
-		os<<serializeLongString(state);
+		os<<serializeString32(state);
 	} else {
-		os<<serializeLongString(m_init_state);
+		os<<serializeString32(m_init_state);
 	}
 	writeU16(os, m_hp);
 	writeV3F1000(os, m_velocity);
@@ -310,7 +315,7 @@ u16 LuaEntitySAO::punch(v3f dir,
 {
 	if (!m_registered) {
 		// Delete unknown LuaEntities when punched
-		m_pending_removal = true;
+		markForRemoval();
 		return 0;
 	}
 
@@ -343,7 +348,7 @@ u16 LuaEntitySAO::punch(v3f dir,
 		clearParentAttachment();
 		clearChildAttachments();
 		m_env->getScriptIface()->luaentity_on_death(m_id, puncher);
-		m_pending_removal = true;
+		markForRemoval();
 	}
 
 	actionstream << puncher->getDescription() << " (id=" << puncher->getId() <<
@@ -444,7 +449,7 @@ std::string LuaEntitySAO::generateSetTextureModCommand() const
 	// command
 	writeU8(os, AO_CMD_SET_TEXTURE_MOD);
 	// parameters
-	os << serializeString(m_current_texture_modifier);
+	os << serializeString16(m_current_texture_modifier);
 	return os.str();
 }
 
@@ -490,6 +495,9 @@ void LuaEntitySAO::sendPosition(bool do_interpolate, bool is_movement_end)
 	// If the object is attached client-side, don't waste bandwidth sending its position to clients
 	if(isAttached())
 		return;
+
+	// Send attachment updates instantly to the client prior updating position
+	sendOutdatedData();
 
 	m_last_sent_move_precision = m_base_position.getDistanceFrom(
 			m_last_sent_position);

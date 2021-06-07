@@ -24,6 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/basic_macros.h"
 #include <sstream>
 
+static const video::SColor NULL_BGCOLOR{0, 1, 1, 1};
+
 ObjectProperties::ObjectProperties()
 {
 	textures.emplace_back("unknown_object.png");
@@ -62,6 +64,13 @@ std::string ObjectProperties::dump()
 	os << ", nametag=" << nametag;
 	os << ", nametag_color=" << "\"" << nametag_color.getAlpha() << "," << nametag_color.getRed()
 			<< "," << nametag_color.getGreen() << "," << nametag_color.getBlue() << "\" ";
+
+	if (nametag_bgcolor)
+		os << ", nametag_bgcolor=" << "\"" << nametag_color.getAlpha() << "," << nametag_color.getRed()
+		   << "," << nametag_color.getGreen() << "," << nametag_color.getBlue() << "\" ";
+	else
+		os << ", nametag_bgcolor=null ";
+
 	os << ", selectionbox=" << PP(selectionbox.MinEdge) << "," << PP(selectionbox.MaxEdge);
 	os << ", pointable=" << pointable;
 	os << ", static_save=" << static_save;
@@ -70,6 +79,7 @@ std::string ObjectProperties::dump()
 	os << ", use_texture_alpha=" << use_texture_alpha;
 	os << ", damage_texture_modifier=" << damage_texture_modifier;
 	os << ", shaded=" << shaded;
+	os << ", show_on_minimap=" << show_on_minimap;
 	return os.str();
 }
 
@@ -100,9 +110,9 @@ void ObjectProperties::serialize(std::ostream &os, u16 protocol_version) const
 	// The "wielditem" type isn't exactly the same as "item", however this
 	// is the most similar compatible option
 	if (visual == "item" && protocol_version < 37)
-		os << serializeString("wielditem");
+		os << serializeString16("wielditem");
 	else
-		os << serializeString(visual);
+		os << serializeString16(visual);
 
 	if (protocol_version > 36) {
 		writeV3F32(os, visual_size);
@@ -116,11 +126,11 @@ void ObjectProperties::serialize(std::ostream &os, u16 protocol_version) const
 	if (protocol_version < 37 && (visual == "item" || visual == "wielditem") &&
 			!wield_item.empty()) {
 		writeU16(os, 1);
-		os << serializeString(wield_item);
+		os << serializeString16(wield_item);
 	} else {
 		writeU16(os, textures.size());
 		for (const std::string &texture : textures) {
-			os << serializeString(texture);
+			os << serializeString16(texture);
 		}
 	}
 
@@ -130,7 +140,7 @@ void ObjectProperties::serialize(std::ostream &os, u16 protocol_version) const
 	writeU8(os, makes_footstep_sound);
 	writeF(os, automatic_rotate, protocol_version);
 	// Added in protocol version 14
-	os << serializeString(mesh);
+	os << serializeString16(mesh);
 	writeU16(os, colors.size());
 	for (video::SColor color : colors) {
 		writeARGB8(os, color);
@@ -140,11 +150,11 @@ void ObjectProperties::serialize(std::ostream &os, u16 protocol_version) const
 	writeU8(os, automatic_face_movement_dir);
 	writeF(os, automatic_face_movement_dir_offset, protocol_version);
 	writeU8(os, backface_culling);
-	os << serializeString(nametag);
+	os << serializeString16(nametag);
 	writeARGB8(os, nametag_color);
 	writeF(os, automatic_face_movement_max_rotation_per_sec, protocol_version);
-	os << serializeString(infotext);
-	os << serializeString(wield_item);
+	os << serializeString16(infotext);
+	os << serializeString16(wield_item);
 	writeS8(os, glow);
 
 	// Everything after this can use writeF32().
@@ -155,8 +165,16 @@ void ObjectProperties::serialize(std::ostream &os, u16 protocol_version) const
 	writeF32(os, eye_height);
 	writeF32(os, zoom_fov);
 	writeU8(os, use_texture_alpha);
-	os << serializeString(damage_texture_modifier);
+	os << serializeString16(damage_texture_modifier);
 	writeU8(os, shaded);
+	writeU8(os, show_on_minimap);
+
+	if (!nametag_bgcolor)
+		writeARGB8(os, NULL_BGCOLOR);
+	else if (nametag_bgcolor.value().getAlpha() == 0)
+		writeARGB8(os, video::SColor(0, 0, 0, 0));
+	else
+		writeARGB8(os, nametag_bgcolor.value());
 
 	// Add stuff only at the bottom.
 	// Never remove anything, because we don't want new versions of this
@@ -186,7 +204,7 @@ void ObjectProperties::deSerialize(std::istream &is)
 			selectionbox.MaxEdge = collisionbox.MaxEdge;
 			pointable = true;
 		}
-		visual = deSerializeString(is);
+		visual = deSerializeString16(is);
 		if (version == 1) {
 			v2f size = readV2F1000(is);
 			visual_size = v3f(size.X, size.Y, size.X);
@@ -196,14 +214,14 @@ void ObjectProperties::deSerialize(std::istream &is)
 		textures.clear();
 		u32 texture_count = readU16(is);
 		for (u32 i = 0; i < texture_count; i++){
-			textures.push_back(deSerializeString(is));
+			textures.push_back(deSerializeString16(is));
 		}
 		spritediv = readV2S16(is);
 		initial_sprite_basepos = readV2S16(is);
 		is_visible = readU8(is);
 		makes_footstep_sound = readU8(is);
 		automatic_rotate = readF(is, protocol_version);
-		mesh = deSerializeString(is);
+		mesh = deSerializeString16(is);
 		colors.clear();
 		u32 color_count = readU16(is);
 		for (u32 i = 0; i < color_count; i++){
@@ -214,12 +232,12 @@ void ObjectProperties::deSerialize(std::istream &is)
 		automatic_face_movement_dir = readU8(is);
 		automatic_face_movement_dir_offset = readF(is, protocol_version);
 		backface_culling = readU8(is);
-		nametag = deSerializeString(is);
+		nametag = deSerializeString16(is);
 		nametag_color = readARGB8(is);
 		automatic_face_movement_max_rotation_per_sec = readF(is,
 			protocol_version);
-		infotext = deSerializeString(is);
-		wield_item = deSerializeString(is);
+		infotext = deSerializeString16(is);
+		wield_item = deSerializeString16(is);
 
 		// The "glow" property exists in MultiCraft 1.
 		glow = readS8(is);
@@ -231,10 +249,20 @@ void ObjectProperties::deSerialize(std::istream &is)
 		zoom_fov = readF32(is);
 		use_texture_alpha = readU8(is);
 
-		damage_texture_modifier = deSerializeString(is);
+		damage_texture_modifier = deSerializeString16(is);
 		u8 tmp = readU8(is);
 		if (is.eof())
-			throw SerializationError("");
+			return;
 		shaded = tmp;
+		tmp = readU8(is);
+		if (is.eof())
+			return;
+		show_on_minimap = tmp;
+
+		auto bgcolor = readARGB8(is);
+		if (bgcolor != NULL_BGCOLOR)
+			nametag_bgcolor = bgcolor;
+		else
+			nametag_bgcolor = nullopt;
 	} catch (SerializationError &e) {}
 }

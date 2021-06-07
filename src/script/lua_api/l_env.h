@@ -114,6 +114,9 @@ private:
 
 	// get_objects_inside_radius(pos, radius)
 	static int l_get_objects_inside_radius(lua_State *L);
+	
+	// get_objects_in_area(pos, minp, maxp)
+	static int l_get_objects_in_area(lua_State *L);
 
 	// set_timeofday(val)
 	// val = 0...1
@@ -194,6 +197,11 @@ private:
 
 	// Get a string translated server side
 	static int l_get_translated_string(lua_State * L);
+
+	/* Helpers */
+
+	static void collectNodeIds(lua_State *L, int idx,
+		const NodeDefManager *ndef, std::vector<content_t> &filter);
 
 public:
 	static void Initialize(lua_State *L, int top);
