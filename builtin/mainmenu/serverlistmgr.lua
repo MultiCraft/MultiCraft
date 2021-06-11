@@ -18,22 +18,30 @@
 serverlistmgr = {}
 
 --------------------------------------------------------------------------------
+serverlistmgr.mobile_only = PLATFORM == "Android" or PLATFORM == "iOS"
 local function order_server_list(list)
 	local res = {}
-	--orders the favorite list after support
+	local non_mobile_servers = {}
+	local mobile = serverlistmgr.mobile_only
+
+	-- orders the multicraft list before support
 	for i = 1, #list do
 		local fav = list[i]
-		if is_server_protocol_compat(fav.proto_min, fav.proto_max) then
+		if mobile and not fav.mobile_friendly then
+			non_mobile_servers[("%s:%s"):format(fav.address, fav.port)] = fav
+		elseif fav.server_id == "multicraft" then
 			res[#res + 1] = fav
 		end
 	end
 	for i = 1, #list do
 		local fav = list[i]
-		if not is_server_protocol_compat(fav.proto_min, fav.proto_max) then
+		if (mobile and fav.mobile_friendly or not mobile) and
+				is_server_protocol_compat(fav.proto_min, fav.proto_max) and
+				fav.server_id ~= "multicraft" then
 			res[#res + 1] = fav
 		end
 	end
-	return res
+	return res, non_mobile_servers
 end
 
 local public_downloading = false
@@ -64,8 +72,11 @@ function serverlistmgr.sync()
 	core.handle_async(
 		function(param)
 			local http = core.get_http_api()
-			local url = ("%s/list?proto_version_min=%d&proto_version_max=%d"):format(
+			local url = ("%s%s?proto_version_min=%d&proto_version_max=%d"):format(
 				core.settings:get("serverlist_url"),
+				(PLATFORM == "Android" or PLATFORM == "iOS") and
+					core.decode_base64("OjMwMDAvc2VydmVybGlzdC5qc29u") or
+					core.decode_base64("L2xpc3Q"),
 				core.get_min_supp_proto(),
 				core.get_max_supp_proto())
 
@@ -80,9 +91,10 @@ function serverlistmgr.sync()
 		nil,
 		function(result)
 			public_downloading = nil
-			local favs = order_server_list(result)
+			local favs, non_mobile_servers = order_server_list(result)
 			if favs[1] then
 				serverlistmgr.servers = favs
+				serverlistmgr.non_mobile_servers = non_mobile_servers
 			end
 			core.event_handler("Refresh")
 		end

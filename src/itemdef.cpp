@@ -161,10 +161,10 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 	os << serializeString16(node_placement_prediction);
 
 	if (version == 3) {
-		os << serializeString(sound_place.name);
+		os << serializeString16(sound_place.name);
 		writeF1000(os, sound_place.gain);
 		writeF1000(os, range);
-		os << serializeString(sound_place_failed.name);
+		os << serializeString16(sound_place_failed.name);
 		writeF1000(os, sound_place_failed.gain);
 	} else {
 		// Version from ContentFeatures::serialize to keep in sync
@@ -250,10 +250,10 @@ void ItemDefinition::deSerialize(std::istream &is)
 				range = readF1000(is);
 			sound_place_failed.deSerialize(is, cf_version);
 		}
-		palette_image = deSerializeString(is);
+		palette_image = deSerializeString16(is);
 		color = readARGB8(is);
-		inventory_overlay = deSerializeString(is);
-		wield_overlay = deSerializeString(is);
+		inventory_overlay = deSerializeString16(is);
+		wield_overlay = deSerializeString16(is);
 		short_description = deSerializeString16(is);
 	} catch(SerializationError &e) {};
 }

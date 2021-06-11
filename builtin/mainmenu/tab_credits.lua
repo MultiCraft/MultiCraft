@@ -114,8 +114,8 @@ return {
 	caption = fgettext("Credits"),
 	cbf_formspec = function(tabview, name, tabdata)
 		local version = core.get_version()
-		return "label[0.1,-0.1;" ..
-			"MultiCraft Open Source Project, ver. " .. version.string .. "\n" ..
+		local fs = "label[0.1,-0.1;" ..
+			"MultiCraft Open Source, ver. " .. version.string .. "\n" ..
 			"Copyright (C) 2014-2021 MultiCraft Development Team\n" ..
 			"Licence: LGPLv3.0+ and CC-BY-SA 4.0, Home page: http://multicraft.world\n" ..
 			"Created and Powered by Minetest Engine, ver. 5.4.1]" ..
@@ -135,12 +135,12 @@ return {
 			buildCreditList(previous_contributors) .. "," ..
 			";1]"
 
-		if PLATFORM ~= "Android" then
+	--[[if PLATFORM ~= "Android" then
 			fs = fs .. "tooltip[userdata;" ..
 					fgettext("Opens the directory that contains user-provided worlds, games, mods,\n" ..
 							"and texture packs in a file manager / explorer.") .. "]"
 			fs = fs .. "button[0,4.75;3.5,1;userdata;" .. fgettext("Open User Data Directory") .. "]"
-		end
+		end]]
 
 		return fs
 	end,

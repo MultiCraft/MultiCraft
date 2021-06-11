@@ -18,7 +18,6 @@
 --------------------------------------------------------------------------------
 local password_save = core.settings:get_bool("password_save")
 local password_tmp = ""
-local mobile_only = PLATFORM == "Android" or PLATFORM == "iOS"
 
 local function get_formspec(tabview, name, tabdata)
 	-- Update the cached supported proto info,
@@ -46,7 +45,7 @@ local function get_formspec(tabview, name, tabdata)
 			"image_button[5.59,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png")
 				.. ";btn_mp_refresh;;true;false]" ..
 			"image_button[6.29,-0.13;0.83,0.83;" .. esc(defaulttexturedir ..
-				(not mobile_only and "online_pc" or "online_mobile") .. ".png")
+				(serverlistmgr.mobile_only and "online_mobile" or "online_pc") .. ".png")
 				.. ";btn_mp_mobile;;true;false]"
 	else
 		search_panel =
@@ -59,7 +58,7 @@ local function get_formspec(tabview, name, tabdata)
 
 	local retval =
 		-- Search
-	search_panel..
+		search_panel..
 
 		-- Address / Port
 		"label[7.1,-0.3;" .. fgettext("Address") .. ":" .. "]" ..
@@ -93,7 +92,7 @@ local function get_formspec(tabview, name, tabdata)
 			retval = retval .. "image_button[7.1,4.91;0.83,0.83;" .. esc(defaulttexturedir .. "trash.png")
 				.. ";btn_delete_favorite;;true;false]"
 		end
-		if fav_selected.description then
+		if selected.description then
 			retval = retval .. "textarea[7.5,2.2;4.8,3;;" ..
 				esc((gamedata.serverdescription or ""), true) .. ";]"
 		end
@@ -112,7 +111,7 @@ local function get_formspec(tabview, name, tabdata)
 		image_column(fgettext("Server mode")) .. ",padding=0.5;" ..
 		"color,span=1;" ..
 		"text,padding=0.5]" ..
-		"table[-0.09,0.7;6.99,4.93;favourites;"
+		"table[-0.09,0.7;6.99,4.93;favorites;"
 
 	if menudata.search_result then
 		local favs = serverlistmgr.get_favorites()
@@ -129,8 +128,7 @@ local function get_formspec(tabview, name, tabdata)
 				retval = retval .. ","
 			end
 
-			retval = retval .. render_serverlist_row(server, server.is_favorite,
-					server.server_id == "multicraft")
+			retval = retval .. render_serverlist_row(server, server.is_favorite)
 		end
 	elseif #serverlistmgr.servers > 0 then
 		local favs = serverlistmgr.get_favorites()
@@ -147,11 +145,10 @@ local function get_formspec(tabview, name, tabdata)
 				end
 			end
 		end
-		retval = retval .. render_serverlist_row(menudata.favorites[1], (#favs > 0),
-				menudata.favorites[1].server_id == "multicraft")
-		for i = 2, #menudata.favorites do
-			retval = retval .. "," .. render_serverlist_row(menudata.favorites[i],
-					(i <= #favs), menudata.favorites[i].server_id == "multicraft")
+
+		retval = retval .. render_serverlist_row(serverlistmgr.servers[1], (#favs > 0))
+		for i = 2, #serverlistmgr.servers do
+			retval = retval .. "," .. render_serverlist_row(serverlistmgr.servers[i], (i <= #favs))
 		end
 	end
 
@@ -181,8 +178,8 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		end
 	end
 
-	if fields.favourites then
-		local event = core.explode_table_event(fields.favourites)
+	if fields.favorites then
+		local event = core.explode_table_event(fields.favorites)
 		local fav = serverlist[event.row]
 
 		if event.type == "DCL" then
@@ -277,6 +274,8 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		serverlistmgr.sync()
 		tabdata.selected = nil
 
+		core.settings:set("address", "")
+		core.settings:set("remote_port", "30000")
 		return true
 	end
 
@@ -353,7 +352,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 	end
 
 	if fields.btn_mp_mobile then
-		mobile_only = not mobile_only
+		serverlistmgr.mobile_only = not serverlistmgr.mobile_only
 		serverlistmgr.sync()
 		return true
 	end
@@ -402,8 +401,8 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		core.settings:set_bool("auto_connect", auto_connect)
 		core.settings:set("connect_time", os.time())
 		core.settings:set("maintab_LAST", "online")
-		core.settings:set("address",     fields.te_address)
-		core.settings:set("remote_port", fields.te_port)
+		core.settings:set("address",     gamedata.address)
+		core.settings:set("remote_port", gamedata.port)
 
 		core.start()
 		return true
@@ -419,7 +418,7 @@ end
 --------------------------------------------------------------------------------
 return {
 	name = "online",
-	caption = fgettext("Multiplayer"),
+	caption = fgettext("Join Game"),
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
 	on_change = on_change

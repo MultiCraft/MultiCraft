@@ -302,6 +302,8 @@
 		84F20F4C25D52975009562A9 /* mapgen_fractal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3A25D52975009562A9 /* mapgen_fractal.cpp */; };
 		84F20F4D25D52975009562A9 /* mapgen_v7.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3B25D52975009562A9 /* mapgen_v7.cpp */; };
 		84F20F4E25D52975009562A9 /* mapgen_v5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3C25D52975009562A9 /* mapgen_v5.cpp */; };
+		84FD8E3126A0B01D00EF2BFA /* guiEditBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */; };
+		84FD8E3426A0B04900EF2BFA /* guiScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3326A0B04900EF2BFA /* guiScene.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -933,6 +935,10 @@
 		84F20F3B25D52975009562A9 /* mapgen_v7.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mapgen_v7.cpp; path = ../../../../src/mapgen/mapgen_v7.cpp; sourceTree = "<group>"; };
 		84F20F3C25D52975009562A9 /* mapgen_v5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mapgen_v5.cpp; path = ../../../../src/mapgen/mapgen_v5.cpp; sourceTree = "<group>"; };
 		84F20F3D25D52975009562A9 /* mapgen_v6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mapgen_v6.h; path = ../../../../src/mapgen/mapgen_v6.h; sourceTree = "<group>"; };
+		84FD8E2F26A0B01D00EF2BFA /* guiEditBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiEditBox.h; path = ../../../../src/gui/guiEditBox.h; sourceTree = "<group>"; };
+		84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiEditBox.cpp; path = ../../../../src/gui/guiEditBox.cpp; sourceTree = "<group>"; };
+		84FD8E3226A0B04900EF2BFA /* guiScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiScene.h; path = ../../../../src/gui/guiScene.h; sourceTree = "<group>"; };
+		84FD8E3326A0B04900EF2BFA /* guiScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiScene.cpp; path = ../../../../src/gui/guiScene.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1058,6 +1064,8 @@
 				84F20ED725D52955009562A9 /* guiChatConsole.h */,
 				84F20EF325D52957009562A9 /* guiConfirmRegistration.cpp */,
 				84F20ED325D52955009562A9 /* guiConfirmRegistration.h */,
+				84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */,
+				84FD8E2F26A0B01D00EF2BFA /* guiEditBox.h */,
 				84F20ECB25D52954009562A9 /* guiEditBoxWithScrollbar.cpp */,
 				84F20EEE25D52957009562A9 /* guiEditBoxWithScrollbar.h */,
 				84F20EEB25D52957009562A9 /* guiEngine.cpp */,
@@ -1077,6 +1085,8 @@
 				84F20ECD25D52955009562A9 /* guiPasswordChange.h */,
 				84F20EF525D52957009562A9 /* guiPathSelectMenu.cpp */,
 				84F20EDA25D52955009562A9 /* guiPathSelectMenu.h */,
+				84FD8E3326A0B04900EF2BFA /* guiScene.cpp */,
+				84FD8E3226A0B04900EF2BFA /* guiScene.h */,
 				84F20EFD25D52958009562A9 /* guiScrollBar.cpp */,
 				84F20EDD25D52956009562A9 /* guiScrollBar.h */,
 				84F20EF625D52957009562A9 /* guiScrollContainer.cpp */,
@@ -1212,7 +1222,6 @@
 				84135B4A25D5264600CA4DCF /* emerge.h */,
 				84135B0C25D5263100CA4DCF /* environment.cpp */,
 				84135AD925D5261F00CA4DCF /* environment.h */,
-				84135B1525D5263500CA4DCF /* mtevent.h */,
 				84135AF925D5262800CA4DCF /* exceptions.h */,
 				84135AFE25D5262B00CA4DCF /* face_position_cache.cpp */,
 				84135AEA25D5262200CA4DCF /* face_position_cache.h */,
@@ -1263,6 +1272,7 @@
 				84135AC725D5261C00CA4DCF /* modchannels.cpp */,
 				84135B4E25D5264700CA4DCF /* modchannels.h */,
 				84135AE925D5262200CA4DCF /* modifiedstate.h */,
+				84135B1525D5263500CA4DCF /* mtevent.h */,
 				84135ACF25D5261D00CA4DCF /* nameidmapping.cpp */,
 				84135B4F25D5264800CA4DCF /* nameidmapping.h */,
 				84135AF325D5262600CA4DCF /* nodedef.cpp */,
@@ -2063,6 +2073,7 @@
 				84135B9025D5264C00CA4DCF /* metadata.cpp in Sources */,
 				84F20E2625D5282A009562A9 /* l_base.cpp in Sources */,
 				84135B6C25D5264B00CA4DCF /* emerge.cpp in Sources */,
+				84FD8E3126A0B01D00EF2BFA /* guiEditBox.cpp in Sources */,
 				84F20E5525D5283F009562A9 /* mods.cpp in Sources */,
 				84F20E8225D52868009562A9 /* auth.cpp in Sources */,
 				84F20F4E25D52975009562A9 /* mapgen_v5.cpp in Sources */,
@@ -2170,6 +2181,7 @@
 				84F20E3A25D5282A009562A9 /* l_particles.cpp in Sources */,
 				84135B7A25D5264C00CA4DCF /* mapnode.cpp in Sources */,
 				84135B9A25D5264C00CA4DCF /* porting.cpp in Sources */,
+				84FD8E3426A0B04900EF2BFA /* guiScene.cpp in Sources */,
 				84135C1F25D526D700CA4DCF /* mapblock_mesh.cpp in Sources */,
 				847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */,
 				84F20DD925D52812009562A9 /* s_env.cpp in Sources */,

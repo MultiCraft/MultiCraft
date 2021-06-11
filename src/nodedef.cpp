@@ -600,11 +600,11 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 {
 	if (version == 5) // In PROTOCOL_VERSION 13
 	{
-		name = deSerializeString(is);
+		name = deSerializeString16(is);
 		groups.clear();
 		u32 groups_size = readU16(is);
 		for(u32 i=0; i<groups_size; i++){
-			std::string name = deSerializeString(is);
+			std::string name = deSerializeString16(is);
 			int value = readS16(is);
 			groups[name] = value;
 		}
@@ -619,7 +619,7 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 			throw SerializationError("unsupported CF_SPECIAL_COUNT");
 		for (u32 i = 0; i < CF_SPECIAL_COUNT; i++)
 			tiledef_special[i].deSerialize(is, version, drawtype);
-		alpha = readU8(is);
+		setAlphaFromLegacy(readU8(is));
 		post_effect_color.setAlpha(readU8(is));
 		post_effect_color.setRed(readU8(is));
 		post_effect_color.setGreen(readU8(is));
@@ -634,10 +634,10 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		diggable = readU8(is);
 		climbable = readU8(is);
 		buildable_to = readU8(is);
-		deSerializeString(is); // legacy: used to be metadata_name
+		deSerializeString16(is); // legacy: used to be metadata_name
 		liquid_type = (enum LiquidType)readU8(is);
-		liquid_alternative_flowing = deSerializeString(is);
-		liquid_alternative_source = deSerializeString(is);
+		liquid_alternative_flowing = deSerializeString16(is);
+		liquid_alternative_source = deSerializeString16(is);
 		liquid_viscosity = readU8(is);
 		light_source = readU8(is);
 		light_source = MYMIN(light_source, LIGHT_MAX);
@@ -650,11 +650,11 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		sound_dig.deSerialize(is, version);
 		sound_dug.deSerialize(is, version);
 	} else if (version == 6) {
-		name = deSerializeString(is);
+		name = deSerializeString16(is);
 		groups.clear();
 		u32 groups_size = readU16(is);
 		for (u32 i = 0; i < groups_size; i++) {
-			std::string name = deSerializeString(is);
+			std::string name = deSerializeString16(is);
 			int	value = readS16(is);
 			groups[name] = value;
 		}
@@ -669,7 +669,7 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 			throw SerializationError("unsupported CF_SPECIAL_COUNT");
 		for (u32 i = 0; i < 2; i++)
 			tiledef_special[i].deSerialize(is, version, drawtype);
-		alpha = readU8(is);
+		setAlphaFromLegacy(readU8(is));
 		post_effect_color.setAlpha(readU8(is));
 		post_effect_color.setRed(readU8(is));
 		post_effect_color.setGreen(readU8(is));
@@ -684,10 +684,10 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		diggable = readU8(is);
 		climbable = readU8(is);
 		buildable_to = readU8(is);
-		deSerializeString(is); // legacy: used to be metadata_name
+		deSerializeString16(is); // legacy: used to be metadata_name
 		liquid_type = (enum LiquidType)readU8(is);
-		liquid_alternative_flowing = deSerializeString(is);
-		liquid_alternative_source = deSerializeString(is);
+		liquid_alternative_flowing = deSerializeString16(is);
+		liquid_alternative_source = deSerializeString16(is);
 		liquid_viscosity = readU8(is);
 		liquid_renewable = readU8(is);
 		light_source = readU8(is);
@@ -704,11 +704,11 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		leveled = readU8(is);
 		liquid_range = readU8(is);
 	} else if (version == 7 || version == 8){
-		name = deSerializeString(is);
+		name = deSerializeString16(is);
 		groups.clear();
 		u32 groups_size = readU16(is);
 		for (u32 i = 0; i < groups_size; i++) {
-			std::string name = deSerializeString(is);
+			std::string name = deSerializeString16(is);
 			int value = readS16(is);
 			groups[name] = value;
 		}
@@ -723,7 +723,7 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 			throw SerializationError("unsupported CF_SPECIAL_COUNT");
 		for (u32 i = 0; i < CF_SPECIAL_COUNT; i++)
 			tiledef_special[i].deSerialize(is, version, drawtype);
-		alpha = readU8(is);
+		setAlphaFromLegacy(readU8(is));
 		post_effect_color.setAlpha(readU8(is));
 		post_effect_color.setRed(readU8(is));
 		post_effect_color.setGreen(readU8(is));
@@ -738,10 +738,10 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		diggable = readU8(is);
 		climbable = readU8(is);
 		buildable_to = readU8(is);
-		deSerializeString(is); // legacy: used to be metadata_name
+		deSerializeString16(is); // legacy: used to be metadata_name
 		liquid_type = (enum LiquidType) readU8(is);
-		liquid_alternative_flowing = deSerializeString(is);
-		liquid_alternative_source = deSerializeString(is);
+		liquid_alternative_flowing = deSerializeString16(is);
+		liquid_alternative_source = deSerializeString16(is);
 		liquid_viscosity = readU8(is);
 		liquid_renewable = readU8(is);
 		light_source = readU8(is);
@@ -760,7 +760,7 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		liquid_range = readU8(is);
 		waving = readU8(is);
 		try {
-			mesh = deSerializeString(is);
+			mesh = deSerializeString16(is);
 			collision_box.deSerialize(is);
 			floodable = readU8(is);
 			u16 connects_to_size = readU16(is);
@@ -1284,11 +1284,11 @@ void ContentFeatures::serializeOld(std::ostream &os, u16 protocol_version) const
 		const u8 version = protocol_version < 27 ? 7 : 8;
 		writeU8(os, version);
 
-		os << serializeString(name);
+		os << serializeString16(name);
 		writeU16(os, groups.size());
 		for (ItemGroupList::const_iterator i = groups.begin();
 				i != groups.end(); ++i) {
-			os << serializeString(i->first);
+			os << serializeString16(i->first);
 			writeS16(os, i->second);
 		}
 		writeU8(os, drawtype);
@@ -1314,10 +1314,10 @@ void ContentFeatures::serializeOld(std::ostream &os, u16 protocol_version) const
 		writeU8(os, diggable);
 		writeU8(os, climbable);
 		writeU8(os, buildable_to);
-		os << serializeString(""); // legacy: used to be metadata_name
+		os << serializeString16(""); // legacy: used to be metadata_name
 		writeU8(os, liquid_type);
-		os << serializeString(liquid_alternative_flowing);
-		os << serializeString(liquid_alternative_source);
+		os << serializeString16(liquid_alternative_flowing);
+		os << serializeString16(liquid_alternative_source);
 		writeU8(os, liquid_viscosity);
 		writeU8(os, liquid_renewable);
 		writeU8(os, light_source);
@@ -1334,7 +1334,7 @@ void ContentFeatures::serializeOld(std::ostream &os, u16 protocol_version) const
 		writeU8(os, leveled);
 		writeU8(os, liquid_range);
 		writeU8(os, waving);
-		os << serializeString(mesh);
+		os << serializeString16(mesh);
 		collision_box.serialize(os, protocol_version);
 		writeU8(os, floodable);
 		writeU16(os, connects_to_ids.size());

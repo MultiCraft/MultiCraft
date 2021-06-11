@@ -186,8 +186,6 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 
 	m_script = new MainMenuScripting(this);
 
-	m_device = RenderingEngine::get_raw_device();
-
 	try {
 		m_script->setMainMenuData(&m_data->script_data);
 		m_data->script_data.errormessage = "";
@@ -264,10 +262,11 @@ void GUIEngine::run()
 	}
 
 	while (RenderingEngine::run() && (!m_startgame) && (!m_kill)) {
+		IrrlichtDevice *device = RenderingEngine::get_raw_device();
 #ifdef __IOS__
-		if (m_device->isWindowMinimized())
+		if (device->isWindowMinimized())
 #else
-		if (!m_device->isWindowFocused())
+		if (!device->isWindowFocused())
 #endif
 		{
 			sleep_ms(50);
@@ -310,7 +309,8 @@ void GUIEngine::run()
 
 		driver->endScene();
 
-		u32 frametime_min = 1000 / g_settings->getFloat("pause_fps_max") / 2;
+		u32 frametime_min = 1000 / g_settings->getFloat("fps_max_unfocused")
+			/ 2;
 
 		if (m_clouds_enabled)
 			cloudPostProcess(frametime_min, device);

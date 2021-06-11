@@ -1617,7 +1617,7 @@ void Client::typeChatMessage(const std::wstring &message)
 		LocalPlayer *player = m_env.getLocalPlayer();
 		if (!player)
 			return;
-		std::wstring name = narrow_to_wide(player->getName());
+		std::wstring name = utf8_to_wide(player->getName());
 		ChatMessage *chatMessage = new ChatMessage(CHATMESSAGE_TYPE_NORMAL,
 			message, name);
 		m_chat_queue.push(chatMessage);

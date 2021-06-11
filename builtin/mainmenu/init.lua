@@ -157,35 +157,10 @@ local function init_globals()
 	ui.set_default("maintab")
 	tv_main:show()
 
-	ui.update()
-end
-
---------------------------------------------------------------------------------
-local function init_globals()
-	-- Init gamedata
-	gamedata.worldindex = 0
-
-	menudata.worldlist = filterlist.create(
-		core.get_worlds,
-		compare_worlds,
-		-- Unique id comparison function
-		function(element, uid)
-			return element.name == uid
-		end,
-		-- Filter function
-		function(element, gameid)
-			return element.gameid == gameid
-		end
-	)
-
-	menudata.worldlist:add_sort_mechanism("alphabetic", sort_worlds_alphabetic)
-	menudata.worldlist:set_sortmode("alphabetic")
-
-	-- Create main tabview
 	core.set_clouds(false)
 	mm_texture.set_dirt_bg()
-	menudata.init_tabs()
---	core.sound_play("main_menu", true)
+
+	ui.update()
 end
 
 init_globals()

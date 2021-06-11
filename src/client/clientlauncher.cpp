@@ -496,7 +496,7 @@ bool ClientLauncher::launch_game(std::string &error_message,
 
 	// If using simple singleplayer mode, override
 	if (start_data.isSinglePlayer()) {
-		start_data.name = "singleplayer";
+		start_data.name = "Player";
 		start_data.password = "";
 		start_data.socket_port = myrand_range(49152, 65535);
 	} else {

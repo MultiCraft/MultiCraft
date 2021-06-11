@@ -4436,7 +4436,7 @@ void external_statustext(const char *text, float duration)
 {
 	if (!g_game)
 		return;
-	std::wstring s = narrow_to_wide(std::string(text));
+	std::wstring s = utf8_to_wide(std::string(text));
 	g_game->customStatustext(s, duration);
 }
 #endif

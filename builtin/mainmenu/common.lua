@@ -58,12 +58,12 @@ end
 
 
 --------------------------------------------------------------------------------
-function render_serverlist_row(spec, is_favorite, is_approved)
+function render_serverlist_row(spec, is_favorite)
 	-- Get information from non_mobile_servers.
-	if is_favorite and not spec.proto_min and menudata.non_mobile_servers and
-			spec.address and spec.port then
+	if is_favorite and not spec.proto_min and spec.address and spec.port and
+			serverlistmgr.non_mobile_servers then
 		local id = ("%s:%s"):format(spec.address, spec.port)
-		spec = menudata.non_mobile_servers[id] or spec
+		spec = serverlistmgr.non_mobile_servers[id] or spec
 	end
 
 	local text = ""
@@ -81,12 +81,10 @@ function render_serverlist_row(spec, is_favorite, is_approved)
 	local details
 	if is_favorite then
 		details = "1,"
+	elseif spec.server_id == "multicraft" then
+		details = "2,"
 	else
-		if is_approved then
-			details = "2,"
-		else
-			details = "3,"
-		end
+		details = "3,"
 	end
 
 	if spec.lag then

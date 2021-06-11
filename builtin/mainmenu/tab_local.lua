@@ -19,13 +19,9 @@ local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
 local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
-local enable_gamebar = PLATFORM ~= "Android"
-local current_game, singleplayer_refresh_gamebar
-
-if enable_gamebar then
-	function current_game()
-		local last_game_id = core.settings:get("menu_last_game")
-		local game = pkgmgr.find_by_gameid(last_game_id)
+local function current_game()
+	local last_game_id = core.settings:get("menu_last_game")
+	local game = pkgmgr.find_by_gameid(last_game_id)
 
 	return game
 end

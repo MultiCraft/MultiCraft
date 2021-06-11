@@ -950,12 +950,12 @@ void Client::handleCommand_DetachedInventory(NetworkPacket* pkt)
 		std::string datastring(pkt->getString(0), pkt->getSize());
 		std::istringstream is(datastring, std::ios_base::binary);
 
-		std::string name = deSerializeString(is);
+		std::string name = deSerializeString16(is);
 
 		infostream << "Client: Detached inventory update: \"" << name
 				<< "\"" << std::endl;
 
-		Inventory *inv = NULL;
+		Inventory *inv = nullptr;
 		if (m_detached_inventories.count(name) > 0)
 			inv = m_detached_inventories[name];
 		else {
