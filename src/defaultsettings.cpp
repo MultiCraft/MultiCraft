@@ -188,7 +188,6 @@ void set_default_settings()
 	settings->setDefault("screen_h", "768");
 	settings->setDefault("autosave_screensize", "true");
 	settings->setDefault("fullscreen", "false");
-	settings->setDefault("fullscreen_bpp", "24");
 	settings->setDefault("vsync", "true");
 	settings->setDefault("fov", "72");
 	settings->setDefault("leaves_style", "fancy");
@@ -499,7 +498,6 @@ void set_default_settings()
 	settings->setDefault("server_name", "");
 	settings->setDefault("server_description", "");
 
-	settings->setDefault("high_precision_fpu", "true");
 	settings->setDefault("enable_console", "false");
 	settings->setDefault("screen_dpi", "72");
 	settings->setDefault("display_density_factor", "1");

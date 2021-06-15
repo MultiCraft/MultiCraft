@@ -102,10 +102,6 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 
 	init_args(start_data, cmd_args);
 
-	// List video modes if requested
-	if (list_video_modes)
-		return m_rendering_engine->print_video_modes();
-
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound")) {
 		// Check if it's already created just in case
@@ -376,8 +372,6 @@ void ClientLauncher::init_args(GameStartData &start_data, const Settings &cmd_ar
 
 	if (cmd_args.exists("name"))
 		start_data.name = cmd_args.get("name");
-
-	list_video_modes = cmd_args.getFlag("videomodes");
 
 	random_input = g_settings->getBool("random_input")
 			|| cmd_args.getFlag("random-input");
