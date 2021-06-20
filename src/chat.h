@@ -63,6 +63,8 @@ struct ChatFormattedFragment
 	EnrichedString text;
 	// starting column
 	u32 column;
+	// web link is empty for most frags
+	std::string weblink;
 	// formatting
 	//u8 bold:1;
 };
@@ -169,6 +171,11 @@ private:
 	u32 m_del_formatted = 0;
 
 	int m_current_line_index = 0;
+
+	// Enable clickable chat weblinks
+	bool m_cache_clickable_chat_weblinks;
+	// Color of clickable chat weblinks
+	irr::video::SColor m_cache_chat_weblink_color;
 };
 
 class ChatPrompt

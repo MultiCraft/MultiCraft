@@ -106,6 +106,8 @@ GUIChatConsole::GUIChatConsole(
 
 	// set default cursor options
 	setCursor(true, true, 2.0, 0.1);
+
+	m_cache_clickable_chat_weblinks = g_settings->getBool("clickable_chat_weblinks");
 }
 
 GUIChatConsole::~GUIChatConsole()
@@ -1297,6 +1299,17 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			s32 rows = myround(-3.0 * event.MouseInput.Wheel);
 			m_chat_backend->scroll(rows);
 			m_vscrollbar->setPos(m_vscrollbar->getPos() + rows);
+		}
+		// Middle click or ctrl-click opens weblink, if enabled in config
+		else if (m_cache_clickable_chat_weblinks && (
+				event.MouseInput.Event == EMIE_MMOUSE_PRESSED_DOWN ||
+				(event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN && event.MouseInput.Control))) {
+			u32 row = m_chat_backend->getConsoleBuffer().getRows();
+			s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
+
+			// If clicked within console output region
+			if (event.MouseInput.Y < prompt_y)
+				middleClick(event.MouseInput.X, event.MouseInput.Y);
 		} else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 			if (event.MouseInput.X <= (s32)(m_screensize.X - m_round_screen_offset) &&
 					event.MouseInput.X >= m_round_screen_offset) {
@@ -1496,6 +1509,41 @@ void GUIChatConsole::setVisible(bool visible)
 	if (!visible) {
 		m_height = 0;
 		recalculateConsolePosition();
+	}
+}
+
+void GUIChatConsole::middleClick(s32 x, s32 y)
+{
+	// Prevent accidental rapid clicking
+	static u64 s_oldtime = 0;
+	u64 newtime = porting::getTimeMs();
+
+	// 0.6 seconds should suffice
+	if (newtime - s_oldtime < 600)
+		return;
+	s_oldtime = newtime;
+
+	// Identify targetted fragment, if exists
+	const ChatSelection pos = getCursorPos(x, y);
+	const std::vector<ChatFormattedFragment> &
+			frags = m_chat_backend->getConsoleBuffer().getFormattedLine(pos.row).fragments;
+	if (pos.fragment >= frags.size())
+		return;
+	const std::string &weblink = frags[pos.fragment].weblink;
+
+	// User notification
+	if (weblink.size() != 0) {
+		std::ostringstream msg;
+		msg << " * ";
+		if (porting::open_url(weblink)) {
+			msg << gettext("Opening webpage");
+		}
+		else {
+			msg << gettext("Failed to open webpage");
+		}
+		msg << " '" << weblink << "'";
+		msg.flush();
+		m_chat_backend->addUnparsedMessage(utf8_to_wide(msg.str()));
 	}
 }
 
