@@ -1,4 +1,5 @@
-FROM alpine:3.14
+ARG DOCKER_IMAGE=alpine:3.14
+FROM $DOCKER_IMAGE AS builder
 
 ENV MINETEST_GAME_VERSION master
 ENV PROMETHEUS_CPP_VERSION v1.3.0
@@ -21,7 +22,7 @@ COPY textures /usr/src/multicraft/textures
 WORKDIR /usr/src/multicraft
 
 RUN apk add --no-cache git build-base cmake sqlite-dev curl-dev zlib-dev zstd-dev \
-		gmp-dev jsoncpp-dev postgresql-dev luajit-dev ca-certificates && \
+		gmp-dev jsoncpp-dev postgresql-dev ninja luajit-dev ca-certificates && \
 	git clone --depth=1 -b ${MINETEST_GAME_VERSION} https://github.com/minetest/minetest_game.git ./games/minetest_game && \
 	rm -fr ./games/minetest_game/.git
 
@@ -32,9 +33,10 @@ RUN git clone --recursive --depth=1 -b ${PROMETHEUS_CPP_VERSION} https://github.
 	cmake .. \
 		-DCMAKE_INSTALL_PREFIX=/usr/local \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DENABLE_TESTING=0 && \
-	make -j2 && \
-	make install
+		-DENABLE_TESTING=0 \
+		-GNinja && \
+	ninja && \
+	ninja install
 
 RUN git clone --depth=1 https://github.com/minetest/irrlicht/ -b ${IRRLICHT_VERSION} && \
 	cp -r irrlicht/include /usr/include/irrlichtmt
@@ -48,11 +50,13 @@ RUN mkdir build && \
 		-DBUILD_SERVER=TRUE \
 		-DENABLE_PROMETHEUS=TRUE \
 		-DBUILD_UNITTESTS=FALSE \
-		-DBUILD_CLIENT=FALSE && \
-	make -j2 && \
-	make install
+		-DBUILD_CLIENT=FALSE \
+		-GNinja && \
+	ninja && \
+	ninja install
 
-FROM alpine:3.14
+ARG DOCKER_IMAGE=alpine:3.14
+FROM $DOCKER_IMAGE AS runtime
 
 RUN apk add --no-cache sqlite-libs curl gmp libstdc++ libgcc libpq luajit jsoncpp && \
 	adduser -D multicraft --uid 30000 -h /var/lib/multicraft && \
@@ -60,9 +64,9 @@ RUN apk add --no-cache sqlite-libs curl gmp libstdc++ libgcc libpq luajit jsoncp
 
 WORKDIR /var/lib/multicraft
 
-COPY --from=0 /usr/local/share/multicraft /usr/local/share/multicraft
-COPY --from=0 /usr/local/bin/multicraftserver /usr/local/bin/multicraftserver
-COPY --from=0 /usr/local/share/doc/multicraft/multicraft.conf.example /etc/multicraft/multicraft.conf
+COPY --from=builder /usr/local/share/multicraft /usr/local/share/multicraft
+COPY --from=builder /usr/local/bin/multicraftserver /usr/local/bin/multicraftserver
+COPY --from=builder /usr/local/share/doc/multicraft/multicraft.conf.example /etc/multicraft/multicraft.conf
 
 USER multicraft:multicraft
 
