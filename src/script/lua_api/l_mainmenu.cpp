@@ -939,6 +939,14 @@ int ModApiMainMenu::l_do_async_callback(lua_State *L)
 }
 
 /******************************************************************************/
+int ModApiMainMenu::l_sleep_ms(lua_State *L)
+{
+	int delay = luaL_checkinteger(L, 1);
+	sleep_ms(delay);
+	return 0;
+}
+
+/******************************************************************************/
 void ModApiMainMenu::Initialize(lua_State *L, int top)
 {
 	API_FCT(update_formspec);
@@ -1011,4 +1019,5 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
 	//API_FCT(gettext); (gettext lib isn't threadsafe)
+	API_FCT(sleep_ms);
 }
