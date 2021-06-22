@@ -19,7 +19,18 @@ builddir="$( cd "$builddir" && pwd )"
 packagedir=$builddir/packages
 libdir=$builddir/libs
 
-toolchain_file=$dir/toolchain_x86_64-w64-mingw32.cmake
+# Test which win64 compiler is present
+which x86_64-w64-mingw32-gcc &>/dev/null &&
+	toolchain_file=$dir/toolchain_x86_64-w64-mingw32.cmake
+which x86_64-w64-mingw32-gcc-posix &>/dev/null &&
+	toolchain_file=$dir/toolchain_x86_64-w64-mingw32-posix.cmake
+
+if [ -z "$toolchain_file" ]; then
+	echo "Unable to determine which mingw32 compiler to use"
+	exit 1
+fi
+echo "Using $toolchain_file"
+
 irrlicht_version=1.8.4
 ogg_version=1.3.5
 vorbis_version=1.3.7
