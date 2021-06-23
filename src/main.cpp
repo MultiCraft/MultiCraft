@@ -103,6 +103,7 @@ static void list_worlds(bool print_name, bool print_path);
 static bool setup_log_params(const Settings &cmd_args);
 static bool create_userdata_path();
 static bool init_common(const Settings &cmd_args, int argc, char *argv[]);
+static void uninit_common();
 static void startup_message();
 static bool read_config_file(const Settings &cmd_args);
 static void init_log_streams(const Settings &cmd_args);
@@ -224,6 +225,7 @@ int main(int argc, char *argv[])
 		errorstream << "Unittest support is not enabled in this binary. "
 			<< "If you want to enable it, compile project with BUILD_UNITTESTS=1 flag."
 			<< std::endl;
+		return 1;
 #endif
 	}
 
@@ -523,12 +525,16 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 	startup_message();
 	set_default_settings();
 
-	// Initialize sockets
 	sockets_init();
-	atexit(sockets_cleanup);
 
 	// Initialize g_settings
 	Settings::createLayer(SL_GLOBAL);
+
+	// Set cleanup callback(s) to run at process exit
+#ifndef __ANDROID__
+	// Android quits with _Exit, its exit() only follows a fatal error with other threads running
+	atexit(uninit_common);
+#endif
 
 	if (!read_config_file(cmd_args))
 		return false;
@@ -549,6 +555,17 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 #endif
 
 	return true;
+}
+
+static void uninit_common()
+{
+	httpfetch_cleanup();
+
+	sockets_cleanup();
+
+	// It'd actually be okay to leak these but we want to please valgrind...
+	for (int i = 0; i < (int)SL_TOTAL_COUNT; i++)
+		delete Settings::getLayer((SettingsLayer)i);
 }
 
 static void startup_message()

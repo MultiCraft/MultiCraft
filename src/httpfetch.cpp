@@ -814,10 +814,13 @@ void httpfetch_cleanup()
 {
 	verbosestream<<"httpfetch_cleanup: cleaning up"<<std::endl;
 
-	g_httpfetch_thread->stop();
-	g_httpfetch_thread->requestWakeUp();
-	g_httpfetch_thread->wait();
-	delete g_httpfetch_thread;
+	if (g_httpfetch_thread) {
+		g_httpfetch_thread->stop();
+		g_httpfetch_thread->requestWakeUp();
+		g_httpfetch_thread->wait();
+		delete g_httpfetch_thread;
+		g_httpfetch_thread = nullptr;
+	}
 
 	curl_global_cleanup();
 }
