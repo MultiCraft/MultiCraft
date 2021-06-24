@@ -105,7 +105,7 @@ if core.settings:get_bool("enable_rollback_recording") then
 	})
 end
 core.register_privilege("debug", {
-	description = S("Allows enabling various debug options that may affect gameplay"),
+	description = S("Can enable wireframe"),
 	give_to_singleplayer = false,
 })
 
