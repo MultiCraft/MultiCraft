@@ -729,6 +729,7 @@ protected:
 	bool handleCallbacks();
 	void processQueues();
 	void updateProfilers(const RunStats &stats, const FpsControl &draw_times, f32 dtime);
+	void updateBasicDebugState();
 	void updateStats(RunStats *stats, const FpsControl &draw_times, f32 dtime);
 	void updateProfilerGraphs(ProfilerGraph *graph);
 
@@ -746,6 +747,7 @@ protected:
 	void toggleFast();
 	void toggleNoClip();
 	void toggleCinematic();
+	void toggleBlockBounds();
 	void toggleAutoforward();
 
 	void toggleMinimap(bool shift_pressed);
@@ -1163,6 +1165,7 @@ void Game::run()
 		m_game_ui->clearInfoText();
 		hud->resizeHotbar();
 
+
 		updateProfilers(stats, draw_times, dtime);
 		processUserInput(dtime);
 		// Update camera before player movement to avoid camera lag of one frame
@@ -1174,10 +1177,11 @@ void Game::run()
 		updatePlayerControl(cam_view);
 		step(&dtime);
 		processClientEvents(&cam_view_target);
+		updateBasicDebugState();
 		updateCamera(draw_times.busy_time, dtime);
 		updateSound(dtime);
 		processPlayerInteraction(dtime, m_game_ui->m_flags.show_hud,
-			m_game_ui->m_flags.show_debug);
+			m_game_ui->m_flags.show_basic_debug);
 		updateFrame(&graph, &stats, dtime, cam_view);
 		updateProfilerGraphs(&graph);
 
@@ -1781,6 +1785,19 @@ void Game::processQueues()
 	shader_src->processQueue();
 }
 
+void Game::updateBasicDebugState()
+{
+	if (m_game_ui->m_flags.show_basic_debug) {
+		if (!client->checkPrivilege("basic_debug")) {
+			m_game_ui->m_flags.show_basic_debug = false;
+			hud->disableBlockBounds();
+		}
+	} else if (m_game_ui->m_flags.show_minimal_debug) {
+		if (client->checkPrivilege("basic_debug")) {
+			m_game_ui->m_flags.show_basic_debug = true;
+		}
+	}
+}
 
 void Game::updateProfilers(const RunStats &stats, const FpsControl &draw_times,
 		f32 dtime)
@@ -2275,6 +2292,15 @@ void Game::toggleCinematic()
 		m_game_ui->showTranslatedStatusText("Cinematic mode disabled");
 }
 
+void Game::toggleBlockBounds()
+{
+	if (client->checkPrivilege("basic_debug")) {
+		hud->toggleBlockBounds();
+	} else {
+		m_game_ui->showTranslatedStatusText("Can't show block bounds (need 'basic_debug' privilege)");
+	}
+}
+
 // Autoforward by toggling continuous forward.
 void Game::toggleAutoforward()
 {
@@ -2337,24 +2363,41 @@ void Game::toggleFog()
 
 void Game::toggleDebug()
 {
-	// Initial / 4x toggle: Chat only
-	// 1x toggle: Debug text with chat
+	// Initial: No debug info
+	// 1x toggle: Debug text
 	// 2x toggle: Debug text with profiler graph
-	// 3x toggle: Debug text and wireframe
-	if (!m_game_ui->m_flags.show_debug) {
-		m_game_ui->m_flags.show_debug = true;
+	// 3x toggle: Debug text and wireframe (needs "debug" priv)
+	// Next toggle: Back to initial
+	//
+	// The debug text can be in 2 modes: minimal and basic.
+	// * Minimal: Only technical client info that not gameplay-relevant
+	// * Basic: Info that might give gameplay advantage, e.g. pos, angle
+	// Basic mode is used when player has "basic_debug" priv,
+	// otherwise the Minimal mode is used.
+	if (!m_game_ui->m_flags.show_minimal_debug) {
+		m_game_ui->m_flags.show_minimal_debug = true;
+		if (client->checkPrivilege("basic_debug")) {
+			m_game_ui->m_flags.show_basic_debug = true;
+		}
 		m_game_ui->m_flags.show_profiler_graph = false;
 		draw_control->show_wireframe = false;
 		m_game_ui->showTranslatedStatusText("Debug info shown");
 	} else if (!m_game_ui->m_flags.show_profiler_graph && !draw_control->show_wireframe) {
+		if (client->checkPrivilege("basic_debug")) {
+			m_game_ui->m_flags.show_basic_debug = true;
+		}
 		m_game_ui->m_flags.show_profiler_graph = true;
 		m_game_ui->showTranslatedStatusText("Profiler graph shown");
 	} else if (!draw_control->show_wireframe && client->checkPrivilege("debug")) {
+		if (client->checkPrivilege("basic_debug")) {
+			m_game_ui->m_flags.show_basic_debug = true;
+		}
 		m_game_ui->m_flags.show_profiler_graph = false;
 		draw_control->show_wireframe = true;
 		m_game_ui->showTranslatedStatusText("Wireframe shown");
 	} else {
-		m_game_ui->m_flags.show_debug = false;
+		m_game_ui->m_flags.show_minimal_debug = false;
+		m_game_ui->m_flags.show_basic_debug = false;
 		m_game_ui->m_flags.show_profiler_graph = false;
 		draw_control->show_wireframe = false;
 		if (client->checkPrivilege("debug")) {

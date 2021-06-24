@@ -106,7 +106,8 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 	v3f player_position = player->getPosition();
 
 	std::ostringstream os(std::ios_base::binary);
-	if (m_flags.show_debug) {
+	// Minimal debug text must only contain info that can't give a gameplay advantage
+	if (m_flags.show_minimal_debug) {
 		static float drawtime_avg = 0;
 		drawtime_avg = drawtime_avg * 0.95 + stats.drawtime * 0.05;
 		u16 fps = 1.0 / stats.dtime_jitter.avg;
@@ -137,9 +138,10 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		screensize.X, 5 + g_fontengine->getTextHeight()));
 
 	// Finally set the guitext visible depending on the flag
-	m_guitext->setVisible(m_flags.show_hud && (m_flags.show_debug || m_flags.show_minimap));
+	m_guitext->setVisible(m_flags.show_hud && (m_flags.show_minimal_debug || m_flags.show_minimap));
 
-	if (m_flags.show_debug) {
+	// Basic debug text also shows info that might give a gameplay advantage
+	if (m_flags.show_basic_debug) {
 		std::ostringstream os(std::ios_base::binary);
 		os << std::setprecision(1) << std::fixed
 			<< "X: " << (player_position.X / BS)
@@ -169,7 +171,7 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		));
 	}
 
-	m_guitext2->setVisible(m_flags.show_debug && m_flags.show_hud);
+	m_guitext2->setVisible(m_flags.show_basic_debug && m_flags.show_hud);
 
 	setStaticText(m_guitext_info, m_infotext.c_str());
 	m_guitext_info->setVisible(m_flags.show_hud && g_menumgr.menuCount() == 0);
@@ -240,7 +242,8 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 void GameUI::initFlags()
 {
 	m_flags = GameUI::Flags();
-	m_flags.show_debug = g_settings->getBool("show_debug");
+	m_flags.show_minimal_debug = g_settings->getBool("show_debug");
+	m_flags.show_basic_debug = false;
 }
 
 void GameUI::showMinimap(bool show)
@@ -269,9 +272,9 @@ void GameUI::updateChatSize()
 	s32 chat_y = 5;
 
 	if (m_flags.show_hud) {
-		if (m_flags.show_debug)
-			chat_y += g_fontengine->getLineHeight() * 2;
-		else if (m_flags.show_minimap)
+		if (m_flags.show_minimal_debug)
+			chat_y += g_fontengine->getLineHeight();
+		if (m_flags.show_basic_debug)
 			chat_y += g_fontengine->getLineHeight();
 	}
 
