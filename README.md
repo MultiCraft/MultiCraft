@@ -185,11 +185,23 @@ Download source (this is the URL to the latest of source repository, which might
     git clone --depth 1 https://github.com/MultiCraft/MultiCraft.git
     cd MultiCraft
 
+Download IrrlichtMt to `lib/irrlichtmt`, it will be used to satisfy the IrrlichtMt dependency that way:
+
+    git clone --depth 1 https://github.com/minetest/irrlicht.git lib/irrlichtmt
+
 Download source, without using Git:
 
     wget https://github.com/MultiCraft/MultiCraft/archive/main.tar.gz
     tar xf main.tar.gz
     cd MultiCraft-main
+
+Download IrrlichtMt, without using Git:
+
+    cd lib/
+    wget https://github.com/minetest/irrlicht/archive/master.tar.gz
+    tar xf master.tar.gz
+    mv irrlicht-master irrlichtmt
+    cd ..
 
 #### Build
 
