@@ -874,40 +874,30 @@ void RenderingEngine::_draw_scene(video::SColor skycolor, bool show_hud,
 
 const char *RenderingEngine::getVideoDriverName(irr::video::E_DRIVER_TYPE type)
 {
-	static const char *driver_ids[] = {
-			"null",
-			"software",
-			"burningsvideo",
-			"direct3d8",
-			"direct3d9",
-			"opengl",
-			"ogles1",
-			"ogles2",
-			"webgl1",
-			"angle",
-			"metal",
+	static const std::unordered_map<irr::video::E_DRIVER_TYPE,const std::string> driver_ids = {
+		{irr::video::EDT_NULL, "null"},
+		{irr::video::EDT_OPENGL, "opengl"},
+		{irr::video::EDT_OGLES1, "ogles1"},
+		{irr::video::EDT_OGLES2, "ogles2"},
+		{irr::video::EDT_ANGLE, "angle"},
+		{irr::video::EDT_METAL, "metal"},
 	};
 
-	return driver_ids[type];
+	return driver_ids.at(type).c_str();
 }
 
 const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYPE type)
 {
-	static const char *driver_names[] = {
-			"NULL Driver",
-			"Software Renderer",
-			"Burning's Video",
-			"Direct3D 8",
-			"Direct3D 9",
-			"OpenGL",
-			"OpenGL ES1",
-			"OpenGL ES2",
-			"WebGL 1",
-			"ANGLE",
-			"Metal",
+	static const std::unordered_map<irr::video::E_DRIVER_TYPE,const std::string> driver_names = {
+		{irr::video::EDT_NULL, "NULL Driver"},
+		{irr::video::EDT_OPENGL, "OpenGL"},
+		{irr::video::EDT_OGLES1, "OpenGL ES1"},
+		{irr::video::EDT_OGLES2, "OpenGL ES2"},
+		{irr::video::EDT_ANGLE, "ANGLE"},
+		{irr::video::EDT_METAL, "Metal"},
 	};
 
-	return driver_names[type];
+	return driver_names.at(type).c_str();
 }
 
 float RenderingEngine::getScreenScale()
