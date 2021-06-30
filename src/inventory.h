@@ -315,7 +315,7 @@ public:
 	void serialize(std::ostream &os, bool incremental = false) const;
 	void deSerialize(std::istream &is);
 
-	// Adds a new list or clears and resizes an existing one
+	// Creates a new list if none exists or truncates existing lists
 	InventoryList * addList(const std::string &name, u32 size);
 	InventoryList * getList(const std::string &name);
 	const InventoryList * getList(const std::string &name) const;
