@@ -28,7 +28,6 @@ public class Constants {
 	public static final int SESSION_COUNT = 5;
 	public static final String NO_SPACE_LEFT = "ENOSPC";
 	public static final String FILES = "Files.zip";
-	public static final String WORLDS = "worlds.zip";
 	public static final String GAMES = "games.zip";
 	public static final int versionCode = BuildConfig.VERSION_CODE;
 	public static final String versionName = BuildConfig.VERSION_NAME;

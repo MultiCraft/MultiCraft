@@ -53,7 +53,6 @@ import static android.os.Environment.getExternalStorageDirectory;
 import static com.multicraft.game.helpers.ApiLevelHelper.isKitkat;
 import static com.multicraft.game.helpers.Constants.FILES;
 import static com.multicraft.game.helpers.Constants.GAMES;
-import static com.multicraft.game.helpers.Constants.WORLDS;
 import static com.multicraft.game.helpers.Constants.appPackage;
 import static com.multicraft.game.helpers.PreferencesHelper.TAG_SHORTCUT_EXIST;
 
@@ -157,13 +156,6 @@ public class Utilities {
 			case GAMES:
 				path = context.getFilesDir().toString();
 				break;
-			case WORLDS:
-				try {
-					path = context.getExternalFilesDir(null).toString();
-				} catch (NullPointerException e) {
-					path = getExternalStorageDirectory() + "/Android/data/com.multicraft.game/files";
-				}
-				break;
 			default:
 				throw new IllegalArgumentException("No such zip name");
 		}
@@ -174,7 +166,7 @@ public class Utilities {
 		try {
 			return new ArrayList<>(Arrays.asList(context.getAssets().list("data")));
 		} catch (IOException e) {
-			return new ArrayList<>(Arrays.asList(FILES, GAMES, WORLDS));
+			return new ArrayList<>(Arrays.asList(FILES, GAMES));
 		}
 	}
 }
