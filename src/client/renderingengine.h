@@ -29,6 +29,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // include the shadow mapper classes too
 #include "client/shadows/dynamicshadowsrender.h"
 
+struct VideoDriverInfo {
+	std::string name;
+	std::string friendly_name;
+};
 
 class ITextureSource;
 class Camera;
@@ -50,8 +54,7 @@ public:
 
 	video::IVideoDriver *getVideoDriver() { return driver; }
 
-	static const char *getVideoDriverName(irr::video::E_DRIVER_TYPE type);
-	static const char *getVideoDriverFriendlyName(irr::video::E_DRIVER_TYPE type);
+	static const VideoDriverInfo &getVideoDriverInfo(irr::video::E_DRIVER_TYPE type);
 	static float getDisplayDensity();
 	static float getScreenScale();
 	static float getHudScaling();

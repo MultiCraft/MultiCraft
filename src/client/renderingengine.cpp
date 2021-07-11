@@ -159,8 +159,8 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 			RenderingEngine::getSupportedVideoDrivers();
 	auto indexOf = [&drivers](const std::string &name) {
 		u32 i = 0;
-		while (i < drivers.size() &&
-				strcasecmp(name.c_str(), RenderingEngine::getVideoDriverName(drivers[i])))
+		while (i < drivers.size() && strcasecmp(name.c_str(),
+				RenderingEngine::getVideoDriverInfo(drivers[i]).name.c_str()))
 			i++;
 		return i;
 	};
@@ -168,8 +168,8 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	// A name the build does not have, as a typo in /set, leaves the platform's driver
 	if (i == drivers.size()) {
 		errorstream << "Invalid video_driver specified; defaulting to "
-				<< RenderingEngine::getVideoDriverName(driverType) << std::endl;
-		i = indexOf(RenderingEngine::getVideoDriverName(driverType));
+				<< RenderingEngine::getVideoDriverInfo(driverType).name << std::endl;
+		i = indexOf(RenderingEngine::getVideoDriverInfo(driverType).name);
 	}
 	if (i < drivers.size())
 		driverType = drivers[i];
@@ -197,9 +197,9 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	m_device = createDeviceEx(params);
 	// A driver that does not start hands over to the next one the build has
 	while (!m_device && ++i < drivers.size()) {
-		warningstream << RenderingEngine::getVideoDriverName(driverType) <<
+		warningstream << RenderingEngine::getVideoDriverInfo(driverType).name <<
 				" did not start, the game goes on with "
-				<< RenderingEngine::getVideoDriverName(drivers[i]) << std::endl;
+				<< RenderingEngine::getVideoDriverInfo(drivers[i]).name << std::endl;
 		driverType = drivers[i];
 		params.DriverType = driverType;
 		m_device = createDeviceEx(params);
@@ -208,7 +208,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	// SDL names a window that did not open, Irrlicht a driver that did not start
 	const char *sdl_error = SDL_GetError();
 	FATAL_ERROR_IF(!m_device, ("Device create failed. Driver Type: \"" +
-			std::string(RenderingEngine::getVideoDriverName(driverType)) + "\". " +
+			RenderingEngine::getVideoDriverInfo(driverType).name + "\". " +
 			(sdl_error &&
 			*sdl_error ?
 			"SDL: " + std::string(sdl_error) : "Irrlicht: " + s_engine_error)).c_str());
@@ -872,32 +872,17 @@ void RenderingEngine::_draw_scene(video::SColor skycolor, bool show_hud,
 	core->draw(skycolor, show_hud, show_minimap, draw_wield_tool, draw_crosshair, draw_nametags);
 }
 
-const char *RenderingEngine::getVideoDriverName(irr::video::E_DRIVER_TYPE type)
+const VideoDriverInfo &RenderingEngine::getVideoDriverInfo(irr::video::E_DRIVER_TYPE type)
 {
-	static const std::unordered_map<irr::video::E_DRIVER_TYPE,const std::string> driver_ids = {
-		{irr::video::EDT_NULL, "null"},
-		{irr::video::EDT_OPENGL, "opengl"},
-		{irr::video::EDT_OGLES1, "ogles1"},
-		{irr::video::EDT_OGLES2, "ogles2"},
-		{irr::video::EDT_ANGLE, "angle"},
-		{irr::video::EDT_METAL, "metal"},
+	static const std::unordered_map<irr::video::E_DRIVER_TYPE,VideoDriverInfo> driver_info_map = {
+		{irr::video::EDT_NULL, {"null", "NULL Driver"}},
+		{irr::video::EDT_OPENGL, {"opengl", "OpenGL"}},
+		{irr::video::EDT_OGLES1, {"ogles1", "OpenGL ES1"}},
+		{irr::video::EDT_OGLES2, {"ogles2", "OpenGL ES2"}},
+		{irr::video::EDT_ANGLE, {"angle", "ANGLE"}},
+		{irr::video::EDT_METAL, {"metal", "Metal"}},
 	};
-
-	return driver_ids.at(type).c_str();
-}
-
-const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYPE type)
-{
-	static const std::unordered_map<irr::video::E_DRIVER_TYPE,const std::string> driver_names = {
-		{irr::video::EDT_NULL, "NULL Driver"},
-		{irr::video::EDT_OPENGL, "OpenGL"},
-		{irr::video::EDT_OGLES1, "OpenGL ES1"},
-		{irr::video::EDT_OGLES2, "OpenGL ES2"},
-		{irr::video::EDT_ANGLE, "ANGLE"},
-		{irr::video::EDT_METAL, "Metal"},
-	};
-
-	return driver_names.at(type).c_str();
+	return driver_info_map.at(type);
 }
 
 float RenderingEngine::getScreenScale()

@@ -1028,13 +1028,12 @@ int ModApiMainMenu::l_get_video_drivers(lua_State *L)
 
 	lua_newtable(L);
 	for (u32 i = 0; i != drivers.size(); i++) {
-		const char *name  = RenderingEngine::getVideoDriverName(drivers[i]);
-		const char *fname = RenderingEngine::getVideoDriverFriendlyName(drivers[i]);
+		auto &info = RenderingEngine::getVideoDriverInfo(drivers[i]);
 
 		lua_newtable(L);
-		lua_pushstring(L, name);
+		lua_pushstring(L, info.name.c_str());
 		lua_setfield(L, -2, "name");
-		lua_pushstring(L, fname);
+		lua_pushstring(L, info.friendly_name.c_str());
 		lua_setfield(L, -2, "friendly_name");
 
 		lua_rawseti(L, -2, i + 1);
@@ -1047,7 +1046,7 @@ int ModApiMainMenu::l_get_video_drivers(lua_State *L)
 int ModApiMainMenu::l_get_active_driver(lua_State *L)
 {
 	video::E_DRIVER_TYPE type = RenderingEngine::get_video_driver()->getDriverType();
-	lua_pushstring(L, RenderingEngine::getVideoDriverName(type));
+	lua_pushstring(L, RenderingEngine::getVideoDriverInfo(type).name.c_str());
 	return 1;
 }
 
