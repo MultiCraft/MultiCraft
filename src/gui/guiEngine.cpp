@@ -38,6 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/fontengine.h"
 #include "client/guiscalingfilter.h"
 #include "irrlicht_changes/static_text.h"
+#include "translation.h"
 
 #if ENABLE_GLES
 #include "client/tile.h"
@@ -184,6 +185,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 
 	infostream << "GUIEngine: Initializing Lua" << std::endl;
 
+	g_client_translations->clear();
 	m_script = new MainMenuScripting(this);
 
 	try {

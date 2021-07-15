@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "serverlist.h"
 #include "mapgen/mapgen.h"
 #include "settings.h"
+#include "translation.h"
 
 #include <IFileArchive.h>
 #include <IFileSystem.h>
@@ -947,6 +948,14 @@ int ModApiMainMenu::l_sleep_ms(lua_State *L)
 }
 
 /******************************************************************************/
+int ModApiMainMenu::l_load_translation(lua_State *L)
+{
+	const std::string tr_data = luaL_checkstring(L, 1);
+	g_client_translations->loadTranslation(tr_data);
+	return 0;
+}
+
+/******************************************************************************/
 void ModApiMainMenu::Initialize(lua_State *L, int top)
 {
 	API_FCT(update_formspec);
@@ -992,6 +1001,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(open_url);
 	API_FCT(open_dir);
 	API_FCT(do_async_callback);
+	API_FCT(load_translation);
 }
 
 /******************************************************************************/
