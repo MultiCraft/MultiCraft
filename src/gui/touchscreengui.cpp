@@ -1249,7 +1249,7 @@ void TouchScreenGUI::Toggle(bool visible)
 			button.guibutton->setVisible(visible);
 	}
 
-	if (m_joystick_btn_off->guibutton)
+	if (m_joystick_btn_off != nullptr && m_joystick_btn_off->guibutton)
 		m_joystick_btn_off->guibutton->setVisible(visible);
 
 	// clear all active buttons

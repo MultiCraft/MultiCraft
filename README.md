@@ -1,14 +1,14 @@
 MultiCraft Open Source
 ======================
 
-![Build Status](https://github.com/MultiCraft/MultiCraft5.3/workflows/build/badge.svg)
+![Build Status](https://github.com/MultiCraft/MultiCraft2/workflows/build/badge.svg)
 [![License](https://img.shields.io/badge/license-LGPLv3.0%2B-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 
 MultiCraft Open Source is a free open-source voxel game engine with easy modding and game creation.
 
 MultiCraft is based on the Minetest project, which is developed by a [number of contributors](https://github.com/minetest/minetest/graphs/contributors).
 
-Copyright © 2014-2020 Maksim Gamarnik [MoNTE48] <MoNTE48@mail.ua> & MultiCraft Development Team.
+Copyright © 2014-2021 Maksim Gamarnik [MoNTE48] <MoNTE48@mail.ua> & MultiCraft Development Team.
 
 Table of Contents
 ------------------

@@ -81,10 +81,10 @@ void sendAnnounce(AnnounceAction action,
 		server["mapgen"]            = mg_name;
 		server["privs"]             = g_settings->get("default_privs");
 		server["can_see_far_names"] = g_settings->getS16("player_transfer_distance") <= 0;
-		server["mods"]              = Json::Value(Json::arrayValue);
+		/*server["mods"]              = Json::Value(Json::arrayValue);
 		for (const ModSpec &mod : mods) {
 			server["mods"].append(mod.name);
-		}
+		}*/
 	} else if (action == AA_UPDATE) {
 		if (lag)
 			server["lag"] = lag;

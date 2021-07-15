@@ -23,9 +23,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "filesys.h"
 #include "config.h"
 #include "constants.h"
-#include "porting.h"
 #include "mapgen/mapgen.h" // Mapgen::setDefaultSettings
 #include "util/string.h"
+
+#ifdef __ANDROID__
+#include "client/renderingengine.h"
+#endif
 
 #ifdef __APPLE__
 #ifdef __IOS__
@@ -37,7 +40,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void set_default_settings()
 {
-	Settings *settings = Settings::createLayer(SL_DEFAULTS);
+	Settings *settings = Settings::getLayer(SL_DEFAULTS);
+	if (settings == nullptr)
+		settings = Settings::createLayer(SL_DEFAULTS);
 
 	// Client and server
 	settings->setDefault("language", "");
@@ -242,7 +247,7 @@ void set_default_settings()
 	settings->setDefault("show_entity_selectionbox", "false");
 	settings->setDefault("texture_clean_transparent", "false");
 	settings->setDefault("texture_min_size", "0");
-	settings->setDefault("ambient_occlusion_gamma", "1.8");
+	settings->setDefault("ambient_occlusion_gamma", "2.2");
 #if ENABLE_GLES
 	settings->setDefault("enable_shaders", "false");
 #else
@@ -250,7 +255,7 @@ void set_default_settings()
 #endif
 	settings->setDefault("enable_particles", "true");
 	settings->setDefault("arm_inertia", "false");
-	settings->setDefault("show_nametag_backgrounds", "true");
+	settings->setDefault("show_nametag_backgrounds", "false");
 
 	settings->setDefault("enable_minimap", "true");
 	settings->setDefault("minimap_shape_round", "true");
@@ -398,7 +403,7 @@ void set_default_settings()
 	settings->setDefault("kick_msg_crash", "This server has experienced an internal error. You will now be disconnected.");
 	settings->setDefault("ask_reconnect_on_crash", "false");
 
-	settings->setDefault("chat_message_format", "<@name> @message");
+	settings->setDefault("chat_message_format", "@name: @message");
 	settings->setDefault("profiler_print_interval", "0");
 	settings->setDefault("active_object_send_range_blocks", "8");
 	settings->setDefault("active_block_range", "4");
@@ -485,7 +490,6 @@ void set_default_settings()
 	// Altered settings for macOS
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	settings->setDefault("keymap_sneak", "KEY_SHIFT");
-	settings->setDefault("keymap_toggle_debug", "KEY_KEY_V");
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 	settings->setDefault("vsync", "true");
 
@@ -502,8 +506,6 @@ void set_default_settings()
 
 	// Mobile Platform
 #if defined(__ANDROID__) || defined(__IOS__)
-	settings->setDefault("screen_w", "0");
-	settings->setDefault("screen_h", "0");
 	settings->setDefault("fullscreen", "true");
 	settings->setDefault("touchtarget", "true");
 	settings->setDefault("TMPFolder", porting::path_cache);
@@ -531,10 +533,8 @@ void set_default_settings()
 	if (memoryMax < 2) {
 		// minimal settings for less than 2GB RAM
 #elif __IOS__
-	if (iOS_ver < 11.0) {
-		// minimal settings for legacy 32-bit devices
-		settings->setDefault("enable_minimap", "false");
-		settings->setDefault("enable_clouds", "false");
+	if (false) {
+		// obsolete
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "60");
 		settings->setDefault("client_mapblock_limit", "50");
@@ -593,10 +593,7 @@ void set_default_settings()
 		settings->setDefault("viewing_range", "80");
 		settings->setDefault("max_block_generate_distance", "5");
 
-#ifdef __ANDROID__
-		settings->setDefault("video_driver", "ogles2");
-		settings->setDefault("enable_shaders", "true");
-#elif __IOS__
+#ifdef __IOS__
 		if (@available(iOS 13, *)) {
 #endif
 		// enable visual shader effects
@@ -608,44 +605,50 @@ void set_default_settings()
 #endif
 	}
 
+	std::string font_small = std::to_string(TTF_DEFAULT_FONT_SIZE - 1);
+
 	// Android Settings
 #ifdef __ANDROID__
-	settings->setDefault("video_driver", "ogles1");
-	settings->setDefault("enable_shaders", "false");
+	// Switch to olges2 with shaders on powerful Android devices
+	if (memoryMax >= 6) {
+		settings->setDefault("video_driver", "ogles2");
+		settings->setDefault("enable_shaders", "true");
+	} else {
+		settings->setDefault("video_driver", "ogles1");
+		settings->setDefault("enable_shaders", "false");
+	}
 
 	settings->setDefault("debug_log_level", "error");
 
-	// Apply settings according to screen size
-	float x_inches = (float) porting::getDisplaySize().X /
-			(160.f * porting::getDisplayDensity());
-
-	std::string font_size_str_small = std::to_string(TTF_DEFAULT_FONT_SIZE - 1);
-
-	if (x_inches <= 3.7) {
-		// small 4" phones
-		settings->setDefault("hud_scaling", "0.55");
-		settings->setDefault("font_size", font_size_str_small);
-		settings->setDefault("mouse_sensitivity", "0.3");
-	} else if (x_inches > 3.7 && x_inches <= 4.5) {
-		// medium phones
-		settings->setDefault("hud_scaling", "0.6");
-		settings->setDefault("font_size", font_size_str_small);
-		settings->setDefault("selectionbox_width", "6");
-	} else if (x_inches > 4.5 && x_inches <= 5.5) {
-		// large 6" phones
-		settings->setDefault("hud_scaling", "0.7");
-		settings->setDefault("mouse_sensitivity", "0.15");
-		settings->setDefault("selectionbox_width", "6");
-	} else if (x_inches > 5.5 && x_inches <= 6.5) {
-		// 7" tablets
-		settings->setDefault("hud_scaling", "0.9");
-		settings->setDefault("selectionbox_width", "6");
+	v2u32 window_size = RenderingEngine::getDisplaySize();
+	if (window_size.X > 0) {
+		float x_inches = window_size.X / (160.f * porting::getDisplayDensity());
+		if (x_inches <= 3.7) {
+			// small 4" phones
+			g_settings->setDefault("hud_scaling", "0.55");
+			g_settings->setDefault("font_size", font_small);
+			g_settings->setDefault("mouse_sensitivity", "0.3");
+		} else if (x_inches > 3.7 && x_inches <= 4.5) {
+			// medium phones
+			g_settings->setDefault("hud_scaling", "0.6");
+			g_settings->setDefault("font_size", font_small);
+			g_settings->setDefault("selectionbox_width", "6");
+		} else if (x_inches > 4.5 && x_inches <= 5.5) {
+			// large 6" phones
+			g_settings->setDefault("hud_scaling", "0.7");
+			g_settings->setDefault("mouse_sensitivity", "0.15");
+			g_settings->setDefault("selectionbox_width", "6");
+		} else if (x_inches > 5.5 && x_inches <= 6.5) {
+			// 7" tablets
+			g_settings->setDefault("hud_scaling", "0.9");
+			g_settings->setDefault("selectionbox_width", "6");
+		}
 	}
 #endif // Android
 
 	// iOS Settings
 #ifdef __IOS__
-	// Switch to olges2 with shaders on the new iOS version
+	// Switch to olges2 with shaders in new iOS versions
 	if (@available(iOS 13, *)) {
 		settings->setDefault("video_driver", "ogles2");
 		settings->setDefault("enable_shaders", "true");
@@ -662,14 +665,17 @@ void set_default_settings()
 		// 4" iPhone and iPod Touch
 		settings->setDefault("hud_scaling", "0.55");
 		settings->setDefault("mouse_sensitivity", "0.33");
+		settings->setDefault("font_size", font_small);
 	} else if SDVersion4and7Inch {
 		// 4.7" iPhone
-		settings->setDefault("hud_scaling", "0.65");
+		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("mouse_sensitivity", "0.27");
+		settings->setDefault("font_size", font_small);
 	} else if SDVersion5and5Inch {
 		// 5.5" iPhone Plus
-		settings->setDefault("hud_scaling", "0.7");
+		settings->setDefault("hud_scaling", "0.65");
 		settings->setDefault("mouse_sensitivity", "0.3");
+		settings->setDefault("font_size", font_small);
 	} else if (SDVersion5and8Inch || SDVersion6and1Inch || SDVersion6and5Inch) {
 		// 5.8+" iPhones
 		settings->setDefault("hud_scaling", "0.85");
@@ -687,18 +693,14 @@ void set_default_settings()
 	}
 
 	// Settings for the Rounded Screen and Home Bar
-	if (@available(iOS 11, *)) {
-		UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
-		int bottomPadding = (int) window.safeAreaInsets.bottom;
+	UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
 
-		if (bottomPadding > 0) {
-			settings->setDefault("hud_move_upwards", "20");
-			if (SDVersioniPhone12Series)
-				settings->setDefault("round_screen", "75");
-			else
-				settings->setDefault("round_screen", "35");
-		}
-	}
+	if (window.safeAreaInsets.bottom > 0) {
+		settings->setDefault("hud_move_upwards", "20");
+		if (SDVersioniPhone12Series)
+			settings->setDefault("round_screen", "75");
+		else
+			settings->setDefault("round_screen", "35");
 #endif // iOS
 #endif
 }

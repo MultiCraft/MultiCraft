@@ -390,7 +390,11 @@ core.register_entity(":__builtin:falling_node", {
 		-- Drop node if does not fall within 5 seconds
 		self.timer = self.timer + dtime
 		if self.timer > 5 then
-			core.add_item(pos, self.node)
+			-- Add dropped items
+			local drops = core.get_node_drops(self.node, "")
+			for _, dropped_item in pairs(drops) do
+				core.add_item(pos, dropped_item)
+			end
 			self.object:remove()
 			return
 		end

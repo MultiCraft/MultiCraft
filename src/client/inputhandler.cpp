@@ -31,8 +31,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting_ios.h"
 #endif
 
-#if defined(__ANDROID__) || defined(__IOS__)
-extern void external_pause_game();
+#if defined(__IOS__)
+extern "C" void external_pause_game();
 #endif
 
 void KeyCache::populate_nonchanging()
@@ -118,7 +118,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 	if (isMenuActive()) {
 #ifdef HAVE_TOUCHSCREENGUI
 		if (m_touchscreengui) {
-			m_touchscreengui->Toggle(false);
+			m_touchscreengui->hide();
 		}
 #endif
 		return g_menumgr.preprocessEvent(event);
@@ -154,16 +154,9 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 #ifdef __IOS__
 	} else if (event.EventType == irr::EET_APPLICATION_EVENT) {
 		int AppEvent = event.ApplicationEvent.EventType;
-		if (AppEvent == irr::EAET_DID_PAUSE) {
+		ioswrap_events(AppEvent);
+		if (AppEvent == irr::EAET_WILL_PAUSE)
 			external_pause_game();
-#ifdef ADS
-			ads_set_paused(true);
-#endif
-		}
-#ifdef ADS
-		if (AppEvent == irr::EAET_DID_RESUME)
-			ads_set_paused(false);
-#endif
 		return true;
 #endif
 

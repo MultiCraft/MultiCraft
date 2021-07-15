@@ -22,9 +22,10 @@ local multicraft_developers = {
 	"Bektur Mambetov (ubulem) <berkut87@gmail.com>",
 	"Alexander Zavrin (Ransom.00)",
 	"luk3yx",
-	"An0n3m0us",
-	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
+	"Nathan Salapat (NathanS21) <nathan@nathansalapat.com>",
 	"Vitaliy Lobachevskiy (numberZero) <numzer0@yandex.ru>",
+	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
+	"An0n3m0us",
 	"sfan5 <sfan5@live.de>",
 	"Stuart Jones (stujones11) <stujones111@gmail.com>",
 	"And other people who helped make the world better!"

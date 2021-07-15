@@ -56,6 +56,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "filesys.h"
 #endif
 
+#ifdef __ANDROID__
+#include "defaultsettings.h"
+#endif
+
 RenderingEngine *RenderingEngine::s_singleton = nullptr;
 
 
@@ -85,16 +89,15 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 {
 	sanity_check(!s_singleton);
 
-#ifdef __ANDROID__
-	// Set correct resolution
-	g_settings->setU16("screen_w", porting::getDisplaySize().X);
-	g_settings->setU16("screen_h", porting::getDisplaySize().Y);
-#endif
-
 	// Resolution selection
 	bool fullscreen = g_settings->getBool("fullscreen");
+#if defined(__ANDROID__) || defined(__IOS__)
+	u16 screen_w = 0;
+	u16 screen_h = 0;
+ #else
 	u16 screen_w = g_settings->getU16("screen_w");
 	u16 screen_h = g_settings->getU16("screen_h");
+ #endif
 
 	// bpp, fsaa, vsync
 	bool vsync = g_settings->getBool("vsync");
@@ -155,13 +158,17 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	m_device->getGUIEnvironment()->setSkin(skin);
 	skin->drop();
 
-#ifdef __IOS__
-	if (device) {
-		CIrrDeviceiOS* dev = (CIrrDeviceiOS*) device;
-		porting::setViewController(dev->getViewController());
-#ifdef ADS
-		ads_startup(dev->getViewController());
+#ifdef __ANDROID__
+	// Apply settings according to screen size
+	// We can get real screen size only after device initialization finished
+	if (m_device)
+		set_default_settings();
 #endif
+
+#ifdef __IOS__
+	if (m_device) {
+		CIrrDeviceiOS* dev = (CIrrDeviceiOS*) m_device;
+		porting::setViewController(dev->getViewController());
 	}
 #endif
 }
@@ -815,6 +822,9 @@ float RenderingEngine::getDisplayDensity()
 
 v2u32 RenderingEngine::getDisplaySize()
 {
-	return porting::getDisplaySize();
+	const RenderingEngine *engine = RenderingEngine::get_instance();
+	if (engine == nullptr)
+		return v2u32(0, 0);
+	return engine->getWindowSize();
 }
 #endif // __ANDROID__/__IOS__
