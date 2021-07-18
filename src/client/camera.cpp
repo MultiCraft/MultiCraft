@@ -698,8 +698,6 @@ void Camera::drawNametags()
 
 	for (const Nametag *nametag : m_nametags) {
 		// Nametags are hidden in GenericCAO::updateNametag()
-		if (!nametag->parent_node->isVisible())
-			continue;
 
 		v3f pos = nametag->parent_node->getAbsolutePosition() + nametag->pos * BS;
 		f32 transformed_pos[4] = { pos.X, pos.Y, pos.Z, 1.0f };

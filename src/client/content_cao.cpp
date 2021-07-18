@@ -941,7 +941,9 @@ void GenericCAO::updateMarker()
 
 void GenericCAO::updateNametag()
 {
-	if (m_prop.nametag.empty() || m_prop.nametag_color.getAlpha() == 0) {
+	if (m_prop.nametag.empty() || m_prop.nametag_color.getAlpha() == 0 ||
+			(m_is_local_player &&
+			m_client->getCamera()->getCameraMode() == CAMERA_MODE_FIRST)) {
 		// Delete nametag
 		if (m_nametag) {
 			m_client->getCamera()->removeNametag(m_nametag);
@@ -1983,6 +1985,9 @@ void GenericCAO::updateMeshCulling()
 		node->setMaterialFlag(video::EMF_FRONT_FACE_CULLING,
 			false);
 	}
+
+	// Show/hide the nametag
+	updateNametag();
 }
 
 // Prototype
