@@ -834,11 +834,10 @@ endif(BUILD_SERVER)
 # see issue #4638
 set(GETTEXT_BLACKLISTED_LOCALES
 	he
-	ky
 	th
 )
 
-option(APPLY_LOCALE_BLACKLIST "Use a blacklist to avoid broken locales" TRUE)
+option(APPLY_LOCALE_BLACKLIST "Use a blacklist to avoid known broken locales" TRUE)
 
 if (GETTEXTLIB_FOUND AND APPLY_LOCALE_BLACKLIST)
 	set(GETTEXT_USED_LOCALES "")
@@ -848,6 +847,8 @@ if (GETTEXTLIB_FOUND AND APPLY_LOCALE_BLACKLIST)
 		endif()
 	endforeach()
 	message(STATUS "Locale blacklist applied; Locales used: ${GETTEXT_USED_LOCALES}")
+elseif (GETTEXTLIB_FOUND)
+	set(GETTEXT_USED_LOCALES ${GETTEXT_AVAILABLE_LOCALES})
 endif()
 
 # Set some optimizations and tweaks
