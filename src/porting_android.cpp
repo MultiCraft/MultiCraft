@@ -38,7 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 extern int main(int argc, char *argv[]);
-extern void external_pause_game();
+extern "C" void external_pause_game();
 
 void android_main(android_app *app)
 {
@@ -229,13 +229,13 @@ void showInputDialog(const std::string &acceptButton, const std::string &hint,
 			jacceptButton, jhint, jcurrent, jeditType);
 }
 
-void openURLAndroid(const std::string &url)
+void openURIAndroid(const std::string &url)
 {
-	jmethodID url_open = jnienv->GetMethodID(nativeActivity, "openURL",
+	jmethodID url_open = jnienv->GetMethodID(nativeActivity, "openURI",
 		"(Ljava/lang/String;)V");
 
 	FATAL_ERROR_IF(url_open == nullptr,
-		"porting::openURLAndroid unable to find java openURL method");
+		"porting::openURIAndroid unable to find java openURI method");
 
 	jstring jurl = jnienv->NewStringUTF(url.c_str());
 	jnienv->CallVoidMethod(app_global->activity->clazz, url_open, jurl);
@@ -310,7 +310,7 @@ void notifyExitGame()
 			"notifyExitGame", "()V");
 
 	FATAL_ERROR_IF(notifyExit == nullptr,
-		"porting::notifyExit unable to find java getDensity method");	
+		"porting::notifyExit unable to find java notifyExit method");
 
 	jnienv->CallVoidMethod(app_global->activity->clazz, notifyExit);
 }
@@ -332,35 +332,6 @@ float getDisplayDensity()
 		firstrun = false;
 	}
 	return value;
-}
-
-v2u32 getDisplaySize()
-{
-	static bool firstrun = true;
-	static v2u32 retval;
-
-	if (firstrun) {
-		jmethodID getDisplayWidth = jnienv->GetMethodID(nativeActivity,
-				"getDisplayWidth", "()I");
-
-		FATAL_ERROR_IF(getDisplayWidth == nullptr,
-			"porting::getDisplayWidth unable to find java getDisplayWidth method");
-
-		retval.X = jnienv->CallIntMethod(app_global->activity->clazz,
-				getDisplayWidth);
-
-		jmethodID getDisplayHeight = jnienv->GetMethodID(nativeActivity,
-				"getDisplayHeight", "()I");
-
-		FATAL_ERROR_IF(getDisplayHeight == nullptr,
-			"porting::getDisplayHeight unable to find java getDisplayHeight method");
-
-		retval.Y = jnienv->CallIntMethod(app_global->activity->clazz,
-				getDisplayHeight);
-
-		firstrun = false;
-	}
-	return retval;
 }
 #endif // ndef SERVER
 }

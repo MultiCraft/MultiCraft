@@ -18,6 +18,8 @@
 ui = {}
 ui.childlist = {}
 ui.default = nil
+-- Whether fstk is currently showing its own formspec instead of active ui elements.
+ui.overridden = false
 
 --------------------------------------------------------------------------------
 function ui.add(child)
@@ -58,6 +60,7 @@ local maintab = core.settings:get("maintab_LAST")
 local connect_time = tonumber(core.settings:get("connect_time"))
 
 function ui.update()
+	ui.overridden = false
 	local formspec = {}
 
 	-- attempt auto restart
@@ -93,6 +96,7 @@ function ui.update()
 			"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
 			"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Close") .. "]"
 		}
+		ui.overridden = true
 	elseif gamedata ~= nil and gamedata.errormessage ~= nil then
 		local error_message = core.formspec_escape(gamedata.errormessage)
 
@@ -119,6 +123,7 @@ function ui.update()
 				error_title, error_message),
 			restart_btn
 		}
+		ui.overridden = true
 	else
 		local active_toplevel_ui_elements = 0
 		for key,value in pairs(ui.childlist) do
@@ -221,6 +226,16 @@ end
 
 --------------------------------------------------------------------------------
 core.event_handler = function(event)
+	-- Handle error messages
+	if ui.overridden then
+		if event == "MenuQuit" then
+			gamedata.errormessage = nil
+			gamedata.reconnect_requested = false
+			ui.update()
+		end
+		return
+	end
+
 	if ui.handle_events(event) then
 		ui.update()
 		return

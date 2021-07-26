@@ -633,6 +633,11 @@ end
 function core.item_eat(hp_change, replace_with_item, poison)
 	return function(itemstack, user, pointed_thing)  -- closure
 		if user then
+			if user:is_player() and pointed_thing.type == "object" then
+				pointed_thing.ref:right_click(user)
+				return user:get_wielded_item()
+			end
+
 			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
 		end
 	end
@@ -676,12 +681,13 @@ function core.node_dig(pos, node, digger)
 	local diggername = user_name(digger)
 	local log = make_log(diggername)
 	local def = core.registered_nodes[node.name]
+	-- Copy pos because the callback could modify it
 	if def and (not def.diggable or
-			(def.can_dig and not def.can_dig(pos, digger))) then
+			(def.can_dig and not def.can_dig(vector.new(pos), digger))) then
 		log("info", diggername .. " tried to dig "
 			.. node.name .. " which is not diggable "
 			.. core.pos_to_string(pos))
-		return
+		return false
 	end
 
 	if core.is_protected(pos, diggername) then
@@ -690,7 +696,7 @@ function core.node_dig(pos, node, digger)
 				.. " at protected position "
 				.. core.pos_to_string(pos))
 		core.record_protection_violation(pos, diggername)
-		return
+		return false
 	end
 
 	log('action', diggername .. " digs "
@@ -773,6 +779,8 @@ function core.node_dig(pos, node, digger)
 		local node_copy = {name=node.name, param1=node.param1, param2=node.param2}
 		callback(pos_copy, node_copy, digger)
 	end
+
+	return true
 end
 
 function core.itemstring_with_palette(item, palette_index)
@@ -800,7 +808,7 @@ end
 -- Item definition defaults
 --
 
-local default_stack_max = tonumber(minetest.settings:get("default_stack_max")) or 64
+local default_stack_max = tonumber(core.settings:get("default_stack_max")) or 64
 
 core.nodedef_default = {
 	-- Item properties
@@ -829,10 +837,6 @@ core.nodedef_default = {
 
 	on_receive_fields = nil,
 
-	on_metadata_inventory_move = core.node_metadata_inventory_move_allow_all,
-	on_metadata_inventory_offer = core.node_metadata_inventory_offer_allow_all,
-	on_metadata_inventory_take = core.node_metadata_inventory_take_allow_all,
-
 	-- Node properties
 	drawtype = "normal",
 	visual_scale = 1.0,
@@ -843,7 +847,6 @@ core.nodedef_default = {
 	--	{name="", backface_culling=true},
 	--	{name="", backface_culling=true},
 	--},
-	alpha = 255,
 	post_effect_color = {a=0, r=0, g=0, b=0},
 	paramtype = "none",
 	paramtype2 = "none",

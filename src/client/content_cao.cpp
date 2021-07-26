@@ -47,6 +47,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <algorithm>
 #include <cmath>
 #include "client/shader.h"
+#include "client/minimap.h"
 
 class Settings;
 struct ToolCapabilities;
@@ -353,6 +354,8 @@ void GenericCAO::initialize(const std::string &data)
 			m_is_local_player = true;
 			m_is_visible = false;
 			player->setCAO(this);
+
+			m_prop.show_on_minimap = false;
 		}
 		if (m_client->getProtoVersion() < 33)
 			m_env->addPlayerName(m_name.c_str());
@@ -369,7 +372,7 @@ void GenericCAO::processInitData(const std::string &data)
 	const u16 protocol_version = m_client->getProtoVersion();
 
 	// PROTOCOL_VERSION >= 14
-	m_name = deSerializeString(is);
+	m_name = deSerializeString16(is);
 	m_is_player = readU8(is);
 	if (protocol_version >= 37) {
 		m_id = readU16(is);
@@ -387,7 +390,7 @@ void GenericCAO::processInitData(const std::string &data)
 	const u8 num_messages = readU8(is);
 
 	for (int i = 0; i < num_messages; i++) {
-		std::string message = deSerializeLongString(is);
+		std::string message = deSerializeString32(is);
 		processMessage(message);
 	}
 
@@ -464,18 +467,21 @@ void GenericCAO::setChildrenVisible(bool toset)
 	for (u16 cao_id : m_attachment_child_ids) {
 		GenericCAO *obj = m_env->getGenericCAO(cao_id);
 		if (obj) {
-			obj->setVisible(toset);
+			// Check if the entity is forced to appear in first person.
+			obj->setVisible(obj->m_force_visible ? true : toset);
 		}
 	}
 }
 
-void GenericCAO::setAttachment(int parent_id, const std::string &bone, v3f position, v3f rotation)
+void GenericCAO::setAttachment(int parent_id, const std::string &bone,
+		v3f position, v3f rotation, bool force_visible)
 {
 	int old_parent = m_attachment_parent_id;
 	m_attachment_parent_id = parent_id;
 	m_attachment_bone = bone;
 	m_attachment_position = position;
 	m_attachment_rotation = rotation;
+	m_force_visible = force_visible;
 
 	ClientActiveObject *parent = m_env->getActiveObject(parent_id);
 
@@ -485,18 +491,31 @@ void GenericCAO::setAttachment(int parent_id, const std::string &bone, v3f posit
 		if (parent)
 			parent->addAttachmentChild(m_id);
 	}
-
-
 	updateAttachments();
+
+	// Forcibly show attachments if required by set_attach
+	if (m_force_visible) {
+		m_is_visible = true;
+	} else if (!m_is_local_player) {
+		// Objects attached to the local player should be hidden in first person
+		m_is_visible = !m_attached_to_local ||
+			m_client->getCamera()->getCameraMode() != CAMERA_MODE_FIRST;
+		m_force_visible = false;
+	} else {
+		// Local players need to have this set,
+		// otherwise first person attachments fail.
+		m_is_visible = true;
+	}
 }
 
 void GenericCAO::getAttachment(int *parent_id, std::string *bone, v3f *position,
-	v3f *rotation) const
+	v3f *rotation, bool *force_visible) const
 {
 	*parent_id = m_attachment_parent_id;
 	*bone = m_attachment_bone;
 	*position = m_attachment_position;
 	*rotation = m_attachment_rotation;
+	*force_visible = m_force_visible;
 }
 
 void GenericCAO::clearChildAttachments()
@@ -506,7 +525,7 @@ void GenericCAO::clearChildAttachments()
 		int child_id = *m_attachment_child_ids.begin();
 
 		if (ClientActiveObject *child = m_env->getActiveObject(child_id))
-			child->setAttachment(0, "", v3f(), v3f());
+			child->setAttachment(0, "", v3f(), v3f(), false);
 
 		removeAttachmentChild(child_id);
 	}
@@ -515,9 +534,9 @@ void GenericCAO::clearChildAttachments()
 void GenericCAO::clearParentAttachment()
 {
 	if (m_attachment_parent_id)
-		setAttachment(0, "", m_attachment_position, m_attachment_rotation);
+		setAttachment(0, "", m_attachment_position, m_attachment_rotation, false);
 	else
-		setAttachment(0, "", v3f(), v3f());
+		setAttachment(0, "", v3f(), v3f(), false);
 }
 
 void GenericCAO::addAttachmentChild(int child_id)
@@ -575,6 +594,9 @@ void GenericCAO::removeFromScene(bool permanent)
 		m_client->getCamera()->removeNametag(m_nametag);
 		m_nametag = nullptr;
 	}
+
+	if (m_marker && m_client->getMinimap())
+		m_client->getMinimap()->removeMarker(&m_marker);
 }
 
 void GenericCAO::addToScene(ITextureSource *tsrc)
@@ -805,11 +827,13 @@ void GenericCAO::addToScene(ITextureSource *tsrc)
 		node->setParent(m_matrixnode);
 
 	updateNametag();
+	updateMarker();
 	updateNodePos();
 	updateAnimation();
 	updateBonePosition();
 	updateAttachments();
 	setNodeLight(m_last_light);
+	updateMeshCulling();
 }
 
 void GenericCAO::updateLight(u32 day_night_ratio)
@@ -895,9 +919,31 @@ u16 GenericCAO::getLightPosition(v3s16 *pos)
 	return 3;
 }
 
+void GenericCAO::updateMarker()
+{
+	if (!m_client->getMinimap())
+		return;
+
+	if (!m_prop.show_on_minimap) {
+		if (m_marker)
+			m_client->getMinimap()->removeMarker(&m_marker);
+		return;
+	}
+
+	if (m_marker)
+		return;
+
+	scene::ISceneNode *node = getSceneNode();
+	if (!node)
+		return;
+	m_marker = m_client->getMinimap()->addMarker(node);
+}
+
 void GenericCAO::updateNametag()
 {
-	if (m_prop.nametag.empty()) {
+	if (m_prop.nametag.empty() || m_prop.nametag_color.getAlpha() == 0 ||
+			(m_is_local_player &&
+			m_client->getCamera()->getCameraMode() == CAMERA_MODE_FIRST)) {
 		// Delete nametag
 		if (m_nametag) {
 			m_client->getCamera()->removeNametag(m_nametag);
@@ -915,12 +961,14 @@ void GenericCAO::updateNametag()
 	if (!m_nametag) {
 		// Add nametag
 		m_nametag = m_client->getCamera()->addNametag(node,
-			m_prop.nametag, m_prop.nametag_color, pos);
+			m_prop.nametag, m_prop.nametag_color,
+			m_prop.nametag_bgcolor, pos);
 	} else {
 		// Update nametag
-		m_nametag->nametag_text = m_prop.nametag;
-		m_nametag->nametag_color = m_prop.nametag_color;
-		m_nametag->nametag_pos = pos;
+		m_nametag->text = m_prop.nametag;
+		m_nametag->textcolor = m_prop.nametag_color;
+		m_nametag->bgcolor = m_prop.nametag_bgcolor;
+		m_nametag->pos = pos;
 	}
 }
 
@@ -984,13 +1032,13 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 			if (controls.sneak && walking)
 				new_speed /= 2;
 
-			if (walking && (controls.LMB || controls.RMB)) {
+			if (walking && (controls.dig || controls.place)) {
 				new_anim = player->local_animations[3];
 				player->last_animation = WD_ANIM;
-			} else if(walking) {
+			} else if (walking) {
 				new_anim = player->local_animations[1];
 				player->last_animation = WALK_ANIM;
-			} else if(controls.LMB || controls.RMB) {
+			} else if (controls.dig || controls.place) {
 				new_anim = player->local_animations[2];
 				player->last_animation = DIG_ANIM;
 			}
@@ -1013,9 +1061,9 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 
 			// Update local player animations
 			if ((player->last_animation != old_anim ||
-				m_animation_speed != old_anim_speed) &&
-				player->last_animation != NO_ANIM && allow_update)
-					updateAnimation();
+					m_animation_speed != old_anim_speed) &&
+					player->last_animation != NO_ANIM && allow_update)
+				updateAnimation();
 
 		}
 	}
@@ -1130,7 +1178,7 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 		}
 	}
 
-	if (!getParent() && std::fabs(m_prop.automatic_rotate) > 0.001) {
+	if (!getParent() && node && fabs(m_prop.automatic_rotate) > 0.001f) {
 		// This is the child node's rotation. It is only used for automatic_rotate.
 		v3f local_rot = node->getRotation();
 		local_rot.Y = modulo360f(local_rot.Y - dtime * core::RADTODEG *
@@ -1139,7 +1187,7 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 	}
 
 	if (!getParent() && m_prop.automatic_face_movement_dir &&
-			(fabs(m_velocity.Z) > 0.001 || fabs(m_velocity.X) > 0.001)) {
+			(fabs(m_velocity.Z) > 0.001f || fabs(m_velocity.X) > 0.001f)) {
 		float target_yaw = atan2(m_velocity.Z, m_velocity.X) * 180 / M_PI
 				+ m_prop.automatic_face_movement_dir_offset;
 		float max_rotation_per_sec =
@@ -1185,6 +1233,7 @@ void GenericCAO::updateTexturePos()
 		int row = m_tx_basepos.Y;
 		int col = m_tx_basepos.X;
 
+		// Yawpitch goes rightwards
 		if (m_tx_select_horiz_by_yawpitch) {
 			if (cam_to_entity.Y > 0.75)
 				col += 5;
@@ -1214,6 +1263,27 @@ void GenericCAO::updateTexturePos()
 		float txs = m_tx_size.X;
 		float tys = m_tx_size.Y;
 		setBillboardTextureMatrix(m_spritenode, txs, tys, col, row);
+	}
+
+	else if (m_meshnode) {
+		if (m_prop.visual == "upright_sprite") {
+			int row = m_tx_basepos.Y;
+			int col = m_tx_basepos.X;
+
+			// Animation goes downwards
+			row += m_anim_frame;
+
+			const auto &tx = m_tx_size;
+			v2f t[4] = { // cf. vertices in GenericCAO::addToScene()
+				tx * v2f(col+1, row+1),
+				tx * v2f(col, row+1),
+				tx * v2f(col, row),
+				tx * v2f(col+1, row),
+			};
+			auto mesh = m_meshnode->getMesh();
+			setMeshBufferTextureCoords(mesh->getMeshBuffer(0), t, 4);
+			setMeshBufferTextureCoords(mesh->getMeshBuffer(1), t, 4);
+		}
 	}
 }
 
@@ -1256,7 +1326,7 @@ void GenericCAO::updateTextures(std::string mod)
 		}
 	}
 
-	if (m_animated_meshnode) {
+	else if (m_animated_meshnode) {
 		if (m_prop.visual == "mesh") {
 			for (u32 i = 0; i < m_prop.textures.size() &&
 					i < m_animated_meshnode->getMaterialCount(); ++i) {
@@ -1305,8 +1375,8 @@ void GenericCAO::updateTextures(std::string mod)
 			}
 		}
 	}
-	if(m_meshnode)
-	{
+
+	else if (m_meshnode) {
 		if(m_prop.visual == "cube")
 		{
 			for (u32 i = 0; i < 6; ++i)
@@ -1398,6 +1468,9 @@ void GenericCAO::updateTextures(std::string mod)
 				setMeshColor(mesh, m_prop.colors[0]);
 		}
 	}
+	// Prevent showing the player after changing texture
+	if (m_is_local_player)
+		updateMeshCulling();
 }
 
 void GenericCAO::updateAnimation()
@@ -1568,6 +1641,8 @@ void GenericCAO::processMessage(const std::string &data)
 	const u16 protocol_version = m_client->getProtoVersion();
 	if (cmd == AO_CMD_SET_PROPERTIES) {
 		ObjectProperties newprops;
+		newprops.show_on_minimap = m_is_player; // default
+
 		newprops.deSerialize(is);
 
 		// Check what exactly changed
@@ -1605,6 +1680,8 @@ void GenericCAO::processMessage(const std::string &data)
 
 		if (m_is_player && m_prop.nametag.empty())
 			m_prop.nametag = m_name;
+		if (m_is_local_player)
+			m_prop.show_on_minimap = false;
 
 		if (expire_visuals) {
 			expireVisuals();
@@ -1617,6 +1694,7 @@ void GenericCAO::processMessage(const std::string &data)
 					updateTextures(m_current_texture_modifier);
 			}
 			updateNametag();
+			updateMarker();
 		}
 	} else if (cmd == AO_CMD_UPDATE_POSITION) {
 		// Not sent by the server if this object is an attachment.
@@ -1653,7 +1731,7 @@ void GenericCAO::processMessage(const std::string &data)
 		rot_translator.update(m_rotation, false, update_interval);
 		updateNodePos();
 	} else if (cmd == AO_CMD_SET_TEXTURE_MOD) {
-		std::string mod = deSerializeString(is);
+		std::string mod = deSerializeString16(is);
 
 		// immediately reset a engine issued texture modifier if a mod sends a different one
 		if (m_reset_textures_timer > 0) {
@@ -1731,7 +1809,7 @@ void GenericCAO::processMessage(const std::string &data)
 		m_animation_speed = readF(is, protocol_version);
 		updateAnimationSpeed();
 	} else if (cmd == AO_CMD_SET_BONE_POSITION) {
-		std::string bone = deSerializeString(is);
+		std::string bone = deSerializeString16(is);
 		v3f position = readV3F(is, protocol_version);
 		v3f rotation = readV3F(is, protocol_version);
 		m_bone_position[bone] = core::vector2d<v3f>(position, rotation);
@@ -1739,15 +1817,12 @@ void GenericCAO::processMessage(const std::string &data)
 		// updateBonePosition(); now called every step
 	} else if (cmd == AO_CMD_ATTACH_TO) {
 		u16 parent_id = readS16(is);
-		std::string bone = deSerializeString(is);
+		std::string bone = deSerializeString16(is);
 		v3f position = readV3F(is, protocol_version);
 		v3f rotation = readV3F(is, protocol_version);
+		bool force_visible = readU8(is); // Returns false for EOF
 
-		setAttachment(parent_id, bone, position, rotation);
-
-		// localplayer itself can't be attached to localplayer
-		if (!m_is_local_player)
-			m_is_visible = !m_attached_to_local;
+		setAttachment(parent_id, bone, position, rotation, force_visible);
 	} else if (cmd == AO_CMD_PUNCHED) {
 		u16 result_hp = readU16(is);
 		if (protocol_version < 37) {
@@ -1794,7 +1869,7 @@ void GenericCAO::processMessage(const std::string &data)
 		int armor_groups_size = readU16(is);
 		for(int i=0; i<armor_groups_size; i++)
 		{
-			std::string name = deSerializeString(is);
+			std::string name = deSerializeString16(is);
 			int rating = readS16(is);
 			m_armor_groups[name] = rating;
 		}
@@ -1872,6 +1947,47 @@ std::string GenericCAO::debugInfoText()
 	}
 	os<<"}";
 	return os.str();
+}
+
+void GenericCAO::updateMeshCulling()
+{
+	if (!m_is_local_player)
+		return;
+
+	const bool hidden = m_client->getCamera()->getCameraMode() == CAMERA_MODE_FIRST;
+
+	if (m_meshnode && m_prop.visual == "upright_sprite") {
+		u32 buffers = m_meshnode->getMesh()->getMeshBufferCount();
+		for (u32 i = 0; i < buffers; i++) {
+			video::SMaterial &mat = m_meshnode->getMesh()->getMeshBuffer(i)->getMaterial();
+			// upright sprite has no backface culling
+			mat.setFlag(video::EMF_FRONT_FACE_CULLING, hidden);
+		}
+		return;
+	}
+
+	irr::scene::ISceneNode *node = getSceneNode();
+	if (!node)
+		return;
+
+	if (hidden) {
+		// Hide the mesh by culling both front and
+		// back faces. Serious hackyness but it works for our
+		// purposes. This also preserves the skeletal armature.
+		node->setMaterialFlag(video::EMF_BACK_FACE_CULLING,
+			true);
+		node->setMaterialFlag(video::EMF_FRONT_FACE_CULLING,
+			true);
+	} else {
+		// Restore mesh visibility.
+		node->setMaterialFlag(video::EMF_BACK_FACE_CULLING,
+			m_prop.backface_culling);
+		node->setMaterialFlag(video::EMF_FRONT_FACE_CULLING,
+			false);
+	}
+
+	// Show/hide the nametag
+	updateNametag();
 }
 
 // Prototype

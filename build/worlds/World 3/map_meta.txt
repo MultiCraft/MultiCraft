@@ -1,4 +1,0 @@
-water_level = 1
-mg_name = v7p
-seed = CC
-[end_of_params]

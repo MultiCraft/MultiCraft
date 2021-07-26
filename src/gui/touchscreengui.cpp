@@ -1034,8 +1034,7 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 			s32 dyj = event.TouchInput.Y - m_screensize.Y + button_size * 5.0f / 2.0f;
 			bool inside_joystick = (dxj * dxj + dyj * dyj <= button_size * button_size * 1.5 * 1.5);
 
-			if (m_joystick_has_really_moved ||
-					(!m_joystick_has_really_moved && inside_joystick) ||
+			if (m_joystick_has_really_moved || inside_joystick ||
 					(!m_fixed_joystick &&
 					dx * dx + dy * dy > m_touchscreen_threshold * m_touchscreen_threshold)) {
 				moveJoystick(event, dx, dy);
@@ -1250,7 +1249,7 @@ void TouchScreenGUI::Toggle(bool visible)
 			button.guibutton->setVisible(visible);
 	}
 
-	if (m_joystick_btn_off->guibutton)
+	if (m_joystick_btn_off != nullptr && m_joystick_btn_off->guibutton)
 		m_joystick_btn_off->guibutton->setVisible(visible);
 
 	// clear all active buttons

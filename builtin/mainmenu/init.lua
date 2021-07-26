@@ -19,6 +19,7 @@ mt_color_grey  = "#AAAAAA"
 mt_color_blue  = "#6389FF"
 mt_color_green = "#72FF63"
 mt_color_dark_green = "#25C191"
+mt_color_orange  = "#FF8800"
 
 local menupath = core.get_mainmenu_path()
 local basepath = core.get_builtin_path()
@@ -34,6 +35,7 @@ dofile(basepath .. "fstk" .. DIR_DELIM .. "ui.lua")
 dofile(menupath .. DIR_DELIM .. "async_event.lua")
 dofile(menupath .. DIR_DELIM .. "common.lua")
 dofile(menupath .. DIR_DELIM .. "pkgmgr.lua")
+dofile(menupath .. DIR_DELIM .. "serverlistmgr.lua")
 dofile(menupath .. DIR_DELIM .. "textures.lua")
 
 dofile(menupath .. DIR_DELIM .. "dlg_create_world.lua")
@@ -77,7 +79,34 @@ local function main_event_handler(tabview, event)
 end
 
 --------------------------------------------------------------------------------
-function menudata.init_tabs()
+local function init_globals()
+	-- Init gamedata
+	gamedata.worldindex = 0
+
+	menudata.worldlist = filterlist.create(
+		core.get_worlds,
+		compare_worlds,
+		-- Unique id comparison function
+		function(element, uid)
+			return element.name == uid
+		end,
+		-- Filter function
+		function(element, gameid)
+			return element.gameid == gameid
+		end
+	)
+
+	menudata.worldlist:add_sort_mechanism("alphabetic", sort_worlds_alphabetic)
+	menudata.worldlist:set_sortmode("alphabetic")
+
+	if not core.settings:get("menu_last_game") then
+		local default_game = core.settings:get("default_game") or "minetest"
+		core.settings:set("menu_last_game", default_game)
+	end
+
+	mm_texture.init()
+
+	-- Create main tabview
 	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0, y = 0})
 
 	for i = 1, #pkgmgr.games do
@@ -116,38 +145,22 @@ function menudata.init_tabs()
 		end
 	end
 
+	-- In case the folder of the last selected game has been deleted,
+	-- display "Minetest" as a header
+	if tv_main.current_tab == "local" then
+		local game = pkgmgr.find_by_gameid(core.settings:get("menu_last_game"))
+		if game == nil then
+			mm_texture.reset()
+		end
+	end
+
 	ui.set_default("maintab")
 	tv_main:show()
 
-	ui.update()
-end
-
---------------------------------------------------------------------------------
-local function init_globals()
-	-- Init gamedata
-	gamedata.worldindex = 0
-
-	menudata.worldlist = filterlist.create(
-		core.get_worlds,
-		compare_worlds,
-		-- Unique id comparison function
-		function(element, uid)
-			return element.name == uid
-		end,
-		-- Filter function
-		function(element, gameid)
-			return element.gameid == gameid
-		end
-	)
-
-	menudata.worldlist:add_sort_mechanism("alphabetic", sort_worlds_alphabetic)
-	menudata.worldlist:set_sortmode("alphabetic")
-
-	-- Create main tabview
 	core.set_clouds(false)
 	mm_texture.set_dirt_bg()
-	menudata.init_tabs()
---	core.sound_play("main_menu", true)
+
+	ui.update()
 end
 
 init_globals()

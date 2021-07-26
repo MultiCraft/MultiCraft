@@ -79,33 +79,6 @@ void MeshMakeData::fill(MapBlock *block)
 	}
 }
 
-void MeshMakeData::fillSingleNode(MapNode *node)
-{
-	m_blockpos = v3s16(0,0,0);
-
-	v3s16 blockpos_nodes = v3s16(0,0,0);
-	VoxelArea area(blockpos_nodes-v3s16(1,1,1)*MAP_BLOCKSIZE,
-			blockpos_nodes+v3s16(1,1,1)*MAP_BLOCKSIZE*2-v3s16(1,1,1));
-	s32 volume = area.getVolume();
-	s32 our_node_index = area.index(1,1,1);
-
-	// Allocate this block + neighbors
-	m_vmanip.clear();
-	m_vmanip.addArea(area);
-
-	// Fill in data
-	MapNode *data = new MapNode[volume];
-	for(s32 i = 0; i < volume; i++)
-	{
-		if (i == our_node_index)
-			data[i] = *node;
-		else
-			data[i] = MapNode(CONTENT_AIR, LIGHT_MAX, 0);
-	}
-	m_vmanip.copyFrom(data, area, area.MinEdge, area.MinEdge, area.getExtent());
-	delete[] data;
-}
-
 void MeshMakeData::setCrack(int crack_level, v3s16 crack_pos)
 {
 	if (crack_level >= 0)
@@ -417,12 +390,21 @@ static void getNodeVertexDirs(const v3s16 &dir, v3s16 *vertex_dirs)
 	u8 idx = (dir.X + 2 * dir.Y + 3 * dir.Z) & 7;
 	idx = (idx - 1) * 4;
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#if __GNUC__ > 7
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+#endif
 	memcpy(vertex_dirs, &vertex_dirs_table[idx], 4 * sizeof(v3s16));
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 }
 
 static void getNodeTextureCoords(v3f base, const v3f &scale, const v3s16 &dir, float *u, float *v)
 {
-	if (dir.X > 0 || dir.Y > 0 || dir.Z < 0)
+	if (dir.X > 0 || dir.Y != 0 || dir.Z < 0)
 		base -= scale;
 	if (dir == v3s16(0,0,1)) {
 		*u = -base.X - 1;
@@ -440,8 +422,8 @@ static void getNodeTextureCoords(v3f base, const v3f &scale, const v3s16 &dir, f
 		*u = base.X + 1;
 		*v = -base.Z - 2;
 	} else if (dir == v3s16(0,-1,0)) {
-		*u = base.X;
-		*v = base.Z;
+		*u = base.X + 1;
+		*v = base.Z + 1;
 	}
 }
 
@@ -1034,7 +1016,7 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 	m_enable_shaders = data->m_use_shaders;
 	m_enable_vbo = g_settings->getBool("enable_vbo");
 
-	if (g_settings->getBool("enable_minimap")) {
+	if (data->m_client->getMinimap()) {
 		m_minimap_mapblock = new MinimapMapblock;
 		m_minimap_mapblock->getMinimapNodes(
 			&data->m_vmanip, data->m_blockpos * MAP_BLOCKSIZE);
@@ -1193,21 +1175,7 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 			buf->drop();
 		}
 
-		/*
-			Do some stuff to the mesh
-		*/
-		m_camera_offset = camera_offset;
-		translateMesh(m_mesh[layer],
-			intToFloat(data->m_blockpos * MAP_BLOCKSIZE - camera_offset, BS));
-
 		if (m_mesh[layer]) {
-#if 0
-			// Usually 1-700 faces and 1-7 materials
-			std::cout << "Updated MapBlock has " << fastfaces_new.size()
-					<< " faces and uses " << m_mesh[layer]->getMeshBufferCount()
-					<< " materials (meshbuffers)" << std::endl;
-#endif
-
 			// Use VBO for mesh (this just would set this for ever buffer)
 			if (m_enable_vbo)
 				m_mesh[layer]->setHardwareMappingHint(scene::EHM_STATIC);
@@ -1226,13 +1194,13 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 MapBlockMesh::~MapBlockMesh()
 {
 	for (scene::IMesh *m : m_mesh) {
-		if (m_enable_vbo && m)
+		if (m_enable_vbo) {
 			for (u32 i = 0; i < m->getMeshBufferCount(); i++) {
 				scene::IMeshBuffer *buf = m->getMeshBuffer(i);
 				RenderingEngine::get_video_driver()->removeHardwareBuffer(buf);
 			}
+		}
 		m->drop();
-		m = NULL;
 	}
 	delete m_minimap_mapblock;
 }
@@ -1324,19 +1292,6 @@ bool MapBlockMesh::animate(bool faraway, float time, int crack,
 	}
 
 	return true;
-}
-
-void MapBlockMesh::updateCameraOffset(v3s16 camera_offset)
-{
-	if (camera_offset != m_camera_offset) {
-		for (scene::IMesh *layer : m_mesh) {
-			translateMesh(layer,
-				intToFloat(m_camera_offset - camera_offset, BS));
-			if (m_enable_vbo)
-				layer->setDirty();
-		}
-		m_camera_offset = camera_offset;
-	}
 }
 
 video::SColor encode_light(u16 light, u8 emissive_light)

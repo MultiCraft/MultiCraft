@@ -55,7 +55,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define HUD_HOTBAR_ITEMCOUNT_MAX     9
 #endif
 
-
 #define HOTBAR_IMAGE_SIZE 48
 
 enum HudElementType {
@@ -64,7 +63,9 @@ enum HudElementType {
 	HUD_ELEM_STATBAR   = 2,
 	HUD_ELEM_INVENTORY = 3,
 	HUD_ELEM_WAYPOINT  = 4,
-	HUD_ELEM_IMAGE_WAYPOINT = 5
+	HUD_ELEM_IMAGE_WAYPOINT = 5,
+	HUD_ELEM_COMPASS   = 6,
+	HUD_ELEM_MINIMAP   = 7
 };
 
 enum HudElementStat {
@@ -81,6 +82,13 @@ enum HudElementStat {
 	HUD_STAT_SIZE,
 	HUD_STAT_Z_INDEX,
 	HUD_STAT_TEXT2,
+};
+
+enum HudCompassDir {
+	HUD_COMPASS_ROTATE = 0,
+	HUD_COMPASS_ROTATE_REVERSE,
+	HUD_COMPASS_TRANSLATE,
+	HUD_COMPASS_TRANSLATE_REVERSE,
 };
 
 struct HudElement {
@@ -103,4 +111,13 @@ struct HudElement {
 extern const EnumString es_HudElementType[];
 extern const EnumString es_HudElementStat[];
 extern const EnumString es_HudBuiltinElement[];
+
+// Minimap stuff
+
+enum MinimapType {
+	MINIMAP_TYPE_OFF,
+	MINIMAP_TYPE_SURFACE,
+	MINIMAP_TYPE_RADAR,
+	MINIMAP_TYPE_TEXTURE,
+};
 

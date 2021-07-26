@@ -1,15 +1,11 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.5)
 
-if(${CMAKE_VERSION} STREQUAL "2.8.2")
-	# Bug http://vtk.org/Bug/view.php?id=11020
-	message(WARNING "CMake/CPack version 2.8.2 will not create working .deb packages!")
-endif()
+cmake_policy(SET CMP0025 OLD)
 
 # This can be read from ${PROJECT_NAME} after project() is called
 project(multicraft)
 set(PROJECT_NAME_CAPITALIZED "MultiCraft")
 
-# Works only for cmake 3.1 and greater
 set(CMAKE_CXX_STANDARD 11)
 set(GCC_MINIMUM_VERSION "4.8")
 set(CLANG_MINIMUM_VERSION "3.4")
@@ -250,15 +246,15 @@ cpack_add_component(Docs
 
 cpack_add_component(SUBGAME_MINETEST_GAME
 	DISPLAY_NAME "Minetest Game"
-	DESCRIPTION "The official subgame for the Minetest engine, that can easily extended by mods."
-	GROUP "Subgames"
+	DESCRIPTION "The default game bundled in the Minetest engine. Mainly used as a modding base."
+	GROUP "Games"
 )
 
 cpack_add_component(SUBGAME_MINIMAL
 	DISPLAY_NAME "Development Test"
-	DESCRIPTION "A minimal test game helping to develop the engine."
+	DESCRIPTION "A basic testing environment used for engine development and sometimes for testing mods."
 	DISABLED #DISABLED does not mean it is disabled, and is just not selected by default.
-	GROUP "Subgames"
+	GROUP "Games"
 )
 
 cpack_add_component_group(Subgames
@@ -279,11 +275,12 @@ if(WIN32)
 		set(CPACK_GENERATOR ZIP)
 
 	else()
-		set(CPACK_GENERATOR WIX ZIP)
+		set(CPACK_GENERATOR WIX)
 		set(CPACK_PACKAGE_NAME "${PROJECT_NAME_CAPITALIZED}")
-		set(CPACK_PACKAGE_INSTALL_DIRECTORY "${PROJECT_NAME_CAPITALIZED}")
+		set(CPACK_PACKAGE_INSTALL_DIRECTORY ".")
 		set(CPACK_PACKAGE_EXECUTABLES ${PROJECT_NAME} "${PROJECT_NAME_CAPITALIZED}")
 		set(CPACK_CREATE_DESKTOP_LINKS ${PROJECT_NAME})
+		set(CPACK_PACKAGING_INSTALL_PREFIX "/${PROJECT_NAME_CAPITALIZED}")
 
 		set(CPACK_WIX_PRODUCT_ICON "${CMAKE_CURRENT_SOURCE_DIR}/misc/multicraft-icon.ico")
 		# Supported languages can be found at

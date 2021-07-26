@@ -240,7 +240,7 @@ void TileDef::serialize(std::ostream &os, u16 protocol_version) const
 
 	writeU8(os, version);
 
-	os << serializeString(name);
+	os << serializeString16(name);
 	animation.serialize(os, version);
 
 	// Compatibility with Minetest 0.4.
@@ -291,7 +291,7 @@ void TileDef::deSerialize(std::istream &is, u8 contentfeatures_version,
 	NodeDrawType drawtype)
 {
 	int version = readU8(is);
-	name = deSerializeString(is);
+	name = deSerializeString16(is);
 	animation.deSerialize(is, version);
 
 	bool has_scale = false;
@@ -384,6 +384,18 @@ ContentFeatures::ContentFeatures()
 	reset();
 }
 
+ContentFeatures::~ContentFeatures()
+{
+#ifndef SERVER
+	for (u16 j = 0; j < 6; j++) {
+		delete tiles[j].layers[0].frames;
+		delete tiles[j].layers[1].frames;
+	}
+	for (u16 j = 0; j < CF_SPECIAL_COUNT; j++)
+		delete special_tiles[j].layers[0].frames;
+#endif
+}
+
 void ContentFeatures::reset()
 {
 	/*
@@ -420,7 +432,7 @@ void ContentFeatures::reset()
 		i = TileDef();
 	for (auto &j : tiledef_special)
 		j = TileDef();
-	alpha = 255;
+	alpha = ALPHAMODE_OPAQUE;
 	post_effect_color = video::SColor(0, 0, 0, 0);
 	param_type = CPT_NONE;
 	param_type_2 = CPT2_NONE;
@@ -465,6 +477,31 @@ void ContentFeatures::reset()
 	node_dig_prediction = "air";
 }
 
+void ContentFeatures::setAlphaFromLegacy(u8 legacy_alpha)
+{
+	// No special handling for nodebox/mesh here as it doesn't make sense to
+	// throw warnings when the server is too old to support the "correct" way
+	switch (drawtype) {
+	case NDT_NORMAL:
+		alpha = legacy_alpha == 255 ? ALPHAMODE_OPAQUE : ALPHAMODE_CLIP;
+		break;
+	case NDT_LIQUID:
+	case NDT_FLOWINGLIQUID:
+		alpha = legacy_alpha == 255 ? ALPHAMODE_OPAQUE : ALPHAMODE_BLEND;
+		break;
+	default:
+		alpha = legacy_alpha == 255 ? ALPHAMODE_CLIP : ALPHAMODE_BLEND;
+		break;
+	}
+}
+
+u8 ContentFeatures::getAlphaForLegacy() const
+{
+	// This is so simple only because 255 and 0 mean wildly different things
+	// depending on drawtype...
+	return alpha == ALPHAMODE_OPAQUE ? 255 : 0;
+}
+
 void ContentFeatures::serialize(std::ostream &os, u16 protocol_version) const
 {
 	if (protocol_version < 31) {
@@ -478,10 +515,10 @@ void ContentFeatures::serialize(std::ostream &os, u16 protocol_version) const
 	writeU8(os, version);
 
 	// general
-	os << serializeString(name);
+	os << serializeString16(name);
 	writeU16(os, groups.size());
 	for (const auto &group : groups) {
-		os << serializeString(group.first);
+		os << serializeString16(group.first);
 		writeS16(os, group.second);
 	}
 	writeU8(os, param_type);
@@ -489,7 +526,7 @@ void ContentFeatures::serialize(std::ostream &os, u16 protocol_version) const
 
 	// visual
 	writeU8(os, drawtype);
-	os << serializeString(mesh);
+	os << serializeString16(mesh);
 	writeF(os, visual_scale, protocol_version);
 	writeU8(os, 6);
 	for (const TileDef &td : tiledef)
@@ -500,11 +537,11 @@ void ContentFeatures::serialize(std::ostream &os, u16 protocol_version) const
 	for (const TileDef &td : tiledef_special) {
 		td.serialize(os, protocol_version);
 	}
-	writeU8(os, alpha);
+	writeU8(os, getAlphaForLegacy());
 	writeU8(os, color.getRed());
 	writeU8(os, color.getGreen());
 	writeU8(os, color.getBlue());
-	os << serializeString(palette_name);
+	os << serializeString16(palette_name);
 	writeU8(os, waving);
 	writeU8(os, connect_sides);
 	writeU16(os, connects_to_ids.size());
@@ -532,8 +569,8 @@ void ContentFeatures::serialize(std::ostream &os, u16 protocol_version) const
 
 	// liquid
 	writeU8(os, liquid_type);
-	os << serializeString(liquid_alternative_flowing);
-	os << serializeString(liquid_alternative_source);
+	os << serializeString16(liquid_alternative_flowing);
+	os << serializeString16(liquid_alternative_source);
 	writeU8(os, liquid_viscosity);
 	writeU8(os, liquid_renewable);
 	writeU8(os, liquid_range);
@@ -554,34 +591,20 @@ void ContentFeatures::serialize(std::ostream &os, u16 protocol_version) const
 	writeU8(os, legacy_facedir_simple);
 	writeU8(os, legacy_wallmounted);
 
-	os << serializeString(node_dig_prediction);
+	os << serializeString16(node_dig_prediction);
 	writeU8(os, leveled_max);
-}
-
-void ContentFeatures::correctAlpha(TileDef *tiles, int length)
-{
-	// alpha == 0 means that the node is using texture alpha
-	if (alpha == 0 || alpha == 255)
-		return;
-
-	for (int i = 0; i < length; i++) {
-		if (tiles[i].name.empty())
-			continue;
-		std::stringstream s;
-		s << tiles[i].name << "^[noalpha^[opacity:" << ((int)alpha);
-		tiles[i].name = s.str();
-	}
+	writeU8(os, alpha);
 }
 
 void ContentFeatures::deSerializeOld(std::istream &is, int version)
 {
 	if (version == 5) // In PROTOCOL_VERSION 13
 	{
-		name = deSerializeString(is);
+		name = deSerializeString16(is);
 		groups.clear();
 		u32 groups_size = readU16(is);
 		for(u32 i=0; i<groups_size; i++){
-			std::string name = deSerializeString(is);
+			std::string name = deSerializeString16(is);
 			int value = readS16(is);
 			groups[name] = value;
 		}
@@ -596,7 +619,7 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 			throw SerializationError("unsupported CF_SPECIAL_COUNT");
 		for (u32 i = 0; i < CF_SPECIAL_COUNT; i++)
 			tiledef_special[i].deSerialize(is, version, drawtype);
-		alpha = readU8(is);
+		setAlphaFromLegacy(readU8(is));
 		post_effect_color.setAlpha(readU8(is));
 		post_effect_color.setRed(readU8(is));
 		post_effect_color.setGreen(readU8(is));
@@ -611,10 +634,10 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		diggable = readU8(is);
 		climbable = readU8(is);
 		buildable_to = readU8(is);
-		deSerializeString(is); // legacy: used to be metadata_name
+		deSerializeString16(is); // legacy: used to be metadata_name
 		liquid_type = (enum LiquidType)readU8(is);
-		liquid_alternative_flowing = deSerializeString(is);
-		liquid_alternative_source = deSerializeString(is);
+		liquid_alternative_flowing = deSerializeString16(is);
+		liquid_alternative_source = deSerializeString16(is);
 		liquid_viscosity = readU8(is);
 		light_source = readU8(is);
 		light_source = MYMIN(light_source, LIGHT_MAX);
@@ -627,11 +650,11 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		sound_dig.deSerialize(is, version);
 		sound_dug.deSerialize(is, version);
 	} else if (version == 6) {
-		name = deSerializeString(is);
+		name = deSerializeString16(is);
 		groups.clear();
 		u32 groups_size = readU16(is);
 		for (u32 i = 0; i < groups_size; i++) {
-			std::string name = deSerializeString(is);
+			std::string name = deSerializeString16(is);
 			int	value = readS16(is);
 			groups[name] = value;
 		}
@@ -646,7 +669,7 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 			throw SerializationError("unsupported CF_SPECIAL_COUNT");
 		for (u32 i = 0; i < 2; i++)
 			tiledef_special[i].deSerialize(is, version, drawtype);
-		alpha = readU8(is);
+		setAlphaFromLegacy(readU8(is));
 		post_effect_color.setAlpha(readU8(is));
 		post_effect_color.setRed(readU8(is));
 		post_effect_color.setGreen(readU8(is));
@@ -661,10 +684,10 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		diggable = readU8(is);
 		climbable = readU8(is);
 		buildable_to = readU8(is);
-		deSerializeString(is); // legacy: used to be metadata_name
+		deSerializeString16(is); // legacy: used to be metadata_name
 		liquid_type = (enum LiquidType)readU8(is);
-		liquid_alternative_flowing = deSerializeString(is);
-		liquid_alternative_source = deSerializeString(is);
+		liquid_alternative_flowing = deSerializeString16(is);
+		liquid_alternative_source = deSerializeString16(is);
 		liquid_viscosity = readU8(is);
 		liquid_renewable = readU8(is);
 		light_source = readU8(is);
@@ -681,11 +704,11 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		leveled = readU8(is);
 		liquid_range = readU8(is);
 	} else if (version == 7 || version == 8){
-		name = deSerializeString(is);
+		name = deSerializeString16(is);
 		groups.clear();
 		u32 groups_size = readU16(is);
 		for (u32 i = 0; i < groups_size; i++) {
-			std::string name = deSerializeString(is);
+			std::string name = deSerializeString16(is);
 			int value = readS16(is);
 			groups[name] = value;
 		}
@@ -700,7 +723,7 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 			throw SerializationError("unsupported CF_SPECIAL_COUNT");
 		for (u32 i = 0; i < CF_SPECIAL_COUNT; i++)
 			tiledef_special[i].deSerialize(is, version, drawtype);
-		alpha = readU8(is);
+		setAlphaFromLegacy(readU8(is));
 		post_effect_color.setAlpha(readU8(is));
 		post_effect_color.setRed(readU8(is));
 		post_effect_color.setGreen(readU8(is));
@@ -715,10 +738,10 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		diggable = readU8(is);
 		climbable = readU8(is);
 		buildable_to = readU8(is);
-		deSerializeString(is); // legacy: used to be metadata_name
+		deSerializeString16(is); // legacy: used to be metadata_name
 		liquid_type = (enum LiquidType) readU8(is);
-		liquid_alternative_flowing = deSerializeString(is);
-		liquid_alternative_source = deSerializeString(is);
+		liquid_alternative_flowing = deSerializeString16(is);
+		liquid_alternative_source = deSerializeString16(is);
 		liquid_viscosity = readU8(is);
 		liquid_renewable = readU8(is);
 		light_source = readU8(is);
@@ -737,7 +760,7 @@ void ContentFeatures::deSerializeOld(std::istream &is, int version)
 		liquid_range = readU8(is);
 		waving = readU8(is);
 		try {
-			mesh = deSerializeString(is);
+			mesh = deSerializeString16(is);
 			collision_box.deSerialize(is);
 			floodable = readU8(is);
 			u16 connects_to_size = readU16(is);
@@ -761,11 +784,11 @@ void ContentFeatures::deSerialize(std::istream &is)
 	}
 
 	// general
-	name = deSerializeString(is);
+	name = deSerializeString16(is);
 	groups.clear();
 	u32 groups_size = readU16(is);
 	for (u32 i = 0; i < groups_size; i++) {
-		std::string name = deSerializeString(is);
+		std::string name = deSerializeString16(is);
 		int value = readS16(is);
 		groups[name] = value;
 	}
@@ -774,7 +797,7 @@ void ContentFeatures::deSerialize(std::istream &is)
 
 	// visual
 	drawtype = (enum NodeDrawType) readU8(is);
-	mesh = deSerializeString(is);
+	mesh = deSerializeString16(is);
 	if (version > 12)
 		visual_scale = readF32(is);
 	else
@@ -789,11 +812,11 @@ void ContentFeatures::deSerialize(std::istream &is)
 		throw SerializationError("unsupported CF_SPECIAL_COUNT");
 	for (TileDef &td : tiledef_special)
 		td.deSerialize(is, version, drawtype);
-	alpha = readU8(is);
+	setAlphaFromLegacy(readU8(is));
 	color.setRed(readU8(is));
 	color.setGreen(readU8(is));
 	color.setBlue(readU8(is));
-	palette_name = deSerializeString(is);
+	palette_name = deSerializeString16(is);
 	waving = readU8(is);
 	connect_sides = readU8(is);
 	u16 connects_to_size = readU16(is);
@@ -823,8 +846,8 @@ void ContentFeatures::deSerialize(std::istream &is)
 
 	// liquid
 	liquid_type = (enum LiquidType) readU8(is);
-	liquid_alternative_flowing = deSerializeString(is);
-	liquid_alternative_source = deSerializeString(is);
+	liquid_alternative_flowing = deSerializeString16(is);
+	liquid_alternative_source = deSerializeString16(is);
 	liquid_viscosity = readU8(is);
 	liquid_renewable = readU8(is);
 	liquid_range = readU8(is);
@@ -846,11 +869,17 @@ void ContentFeatures::deSerialize(std::istream &is)
 	legacy_wallmounted = readU8(is);
 
 	try {
-		node_dig_prediction = deSerializeString(is);
-		u8 tmp_leveled_max = readU8(is);
+		node_dig_prediction = deSerializeString16(is);
+
+		u8 tmp = readU8(is);
 		if (is.eof()) /* readU8 doesn't throw exceptions so we have to do this */
 			throw SerializationError("");
-		leveled_max = tmp_leveled_max;
+		leveled_max = tmp;
+
+		tmp = readU8(is);
+		if (is.eof())
+			throw SerializationError("");
+		alpha = static_cast<enum AlphaMode>(tmp);
 	} catch(SerializationError &e) {};
 }
 
@@ -867,7 +896,7 @@ static void fillTileAttribs(ITextureSource *tsrc, TileLayer *layer,
 	bool has_scale = tiledef.scale > 0;
 	bool use_autoscale = tsettings.autoscale_mode == AUTOSCALE_FORCE ||
 		(tsettings.autoscale_mode == AUTOSCALE_ENABLE && !has_scale);
-	if (use_autoscale && layer->texture) {
+	if (use_autoscale) {
 		auto texture_size = layer->texture->getOriginalSize();
 		float base_size = tsettings.node_texture_size;
 		float size = std::fmin(texture_size.Width, texture_size.Height);
@@ -915,7 +944,7 @@ static void fillTileAttribs(ITextureSource *tsrc, TileLayer *layer,
 	} else {
 		std::ostringstream os(std::ios::binary);
 		if (!layer->frames) {
-			layer->frames = std::make_shared<std::vector<FrameSpec>>();
+			layer->frames = new std::vector<FrameSpec>();
 		}
 		layer->frames->resize(frame_count);
 
@@ -936,9 +965,56 @@ static void fillTileAttribs(ITextureSource *tsrc, TileLayer *layer,
 		}
 	}
 }
-#endif
 
-#ifndef SERVER
+bool ContentFeatures::textureAlphaCheck(ITextureSource *tsrc, const TileDef *tiles, int length)
+{
+	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
+	static thread_local bool long_warning_printed = false;
+	std::set<std::string> seen;
+
+	for (int i = 0; i < length; i++) {
+		if (seen.find(tiles[i].name) != seen.end())
+			continue;
+		seen.insert(tiles[i].name);
+
+		// Load the texture and see if there's any transparent pixels
+		video::ITexture *texture = tsrc->getTexture(tiles[i].name);
+		video::IImage *image = driver->createImage(texture,
+			core::position2d<s32>(0, 0), texture->getOriginalSize());
+		if (!image)
+			continue;
+		core::dimension2d<u32> dim = image->getDimension();
+		bool ok = true;
+		for (u16 x = 0; x < dim.Width; x++) {
+			for (u16 y = 0; y < dim.Height; y++) {
+				if (image->getPixel(x, y).getAlpha() < 255) {
+					ok = false;
+					goto break_loop;
+				}
+			}
+		}
+
+break_loop:
+		image->drop();
+		if (ok)
+			continue;
+		warningstream << "Texture \"" << tiles[i].name << "\" of "
+			<< name << " has transparency, assuming "
+			"use_texture_alpha = \"clip\"." << std::endl;
+		if (!long_warning_printed) {
+			warningstream << "  This warning can be a false-positive if "
+				"unused pixels in the texture are transparent. However if "
+				"it is meant to be transparent, you *MUST* update the "
+				"nodedef and set use_texture_alpha = \"clip\"! This "
+				"compatibility code will be removed in a few releases."
+				<< std::endl;
+			long_warning_printed = true;
+		}
+		return true;
+	}
+	return false;
+}
+
 bool isWorldAligned(AlignStyle style, WorldAlignMode mode, NodeDrawType drawtype)
 {
 	if (style == ALIGN_STYLE_WORLD)
@@ -979,31 +1055,33 @@ void ContentFeatures::updateTextures(ITextureSource *tsrc, IShaderSource *shdsrc
 
 	bool is_liquid = false;
 
-	u8 material_type = (alpha == 255) ?
-		TILE_MATERIAL_BASIC : TILE_MATERIAL_ALPHA;
+	if (alpha == ALPHAMODE_LEGACY_COMPAT) {
+		// Before working with the alpha mode, resolve any legacy kludges
+		alpha = textureAlphaCheck(tsrc, tdef, 6) ? ALPHAMODE_CLIP : ALPHAMODE_OPAQUE;
+	}
+
+	MaterialType material_type = alpha == ALPHAMODE_OPAQUE ?
+		TILE_MATERIAL_OPAQUE : (alpha == ALPHAMODE_CLIP ? TILE_MATERIAL_BASIC :
+		TILE_MATERIAL_ALPHA);
 
 	switch (drawtype) {
 	default:
 	case NDT_NORMAL:
-		material_type = (alpha == 255) ?
-			TILE_MATERIAL_OPAQUE : TILE_MATERIAL_ALPHA;
 		solidness = 2;
 		break;
 	case NDT_AIRLIKE:
 		solidness = 0;
 		break;
 	case NDT_LIQUID:
-		assert(liquid_type == LIQUID_SOURCE);
 		if (tsettings.opaque_water)
-			alpha = 255;
+			alpha = ALPHAMODE_OPAQUE;
 		solidness = 1;
 		is_liquid = true;
 		break;
 	case NDT_FLOWINGLIQUID:
-		assert(liquid_type == LIQUID_FLOWING);
 		solidness = 0;
 		if (tsettings.opaque_water)
-			alpha = 255;
+			alpha = ALPHAMODE_OPAQUE;
 		is_liquid = true;
 		break;
 	case NDT_GLASSLIKE:
@@ -1056,12 +1134,15 @@ void ContentFeatures::updateTextures(ITextureSource *tsrc, IShaderSource *shdsrc
 	case NDT_MESH:
 	case NDT_NODEBOX:
 		solidness = 0;
-		if (waving == 1)
+		if (waving == 1) {
 			material_type = TILE_MATERIAL_WAVING_PLANTS;
-		else if (waving == 2)
+		} else if (waving == 2) {
 			material_type = TILE_MATERIAL_WAVING_LEAVES;
-		else if (waving == 3)
-			material_type = TILE_MATERIAL_WAVING_LIQUID_BASIC;
+		} else if (waving == 3) {
+			material_type = alpha == ALPHAMODE_OPAQUE ?
+				TILE_MATERIAL_WAVING_LIQUID_OPAQUE : (alpha == ALPHAMODE_CLIP ?
+				TILE_MATERIAL_WAVING_LIQUID_BASIC : TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT);
+		}
 		break;
 	case NDT_TORCHLIKE:
 	case NDT_SIGNLIKE:
@@ -1075,23 +1156,19 @@ void ContentFeatures::updateTextures(ITextureSource *tsrc, IShaderSource *shdsrc
 	}
 
 	if (is_liquid) {
-		// Vertex alpha is no longer supported, correct if necessary.
-		correctAlpha(tdef, 6);
-		correctAlpha(tdef_overlay, 6);
-		correctAlpha(tdef_spec, CF_SPECIAL_COUNT);
-
 		if (waving == 3) {
-			material_type = (alpha == 255) ? TILE_MATERIAL_WAVING_LIQUID_OPAQUE :
-				TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT;
+			material_type = alpha == ALPHAMODE_OPAQUE ?
+				TILE_MATERIAL_WAVING_LIQUID_OPAQUE : (alpha == ALPHAMODE_CLIP ?
+				TILE_MATERIAL_WAVING_LIQUID_BASIC : TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT);
 		} else {
-			material_type = (alpha == 255) ? TILE_MATERIAL_LIQUID_OPAQUE :
+			material_type = alpha == ALPHAMODE_OPAQUE ? TILE_MATERIAL_LIQUID_OPAQUE :
 				TILE_MATERIAL_LIQUID_TRANSPARENT;
 		}
 	}
 
 	u32 tile_shader = shdsrc->getShader("nodes_shader", material_type, drawtype);
 
-	u8 overlay_material = material_type;
+	MaterialType overlay_material = material_type;
 	if (overlay_material == TILE_MATERIAL_OPAQUE)
 		overlay_material = TILE_MATERIAL_BASIC;
 	else if (overlay_material == TILE_MATERIAL_LIQUID_OPAQUE)
@@ -1112,7 +1189,7 @@ void ContentFeatures::updateTextures(ITextureSource *tsrc, IShaderSource *shdsrc
 					tdef[j].backface_culling, tsettings);
 	}
 
-	u8 special_material = material_type;
+	MaterialType special_material = material_type;
 	if (drawtype == NDT_PLANTLIKE_ROOTED) {
 		if (waving == 1)
 			special_material = TILE_MATERIAL_WAVING_PLANTS;
@@ -1207,11 +1284,11 @@ void ContentFeatures::serializeOld(std::ostream &os, u16 protocol_version) const
 		const u8 version = protocol_version < 27 ? 7 : 8;
 		writeU8(os, version);
 
-		os << serializeString(name);
+		os << serializeString16(name);
 		writeU16(os, groups.size());
 		for (ItemGroupList::const_iterator i = groups.begin();
 				i != groups.end(); ++i) {
-			os << serializeString(i->first);
+			os << serializeString16(i->first);
 			writeS16(os, i->second);
 		}
 		writeU8(os, drawtype);
@@ -1237,10 +1314,10 @@ void ContentFeatures::serializeOld(std::ostream &os, u16 protocol_version) const
 		writeU8(os, diggable);
 		writeU8(os, climbable);
 		writeU8(os, buildable_to);
-		os << serializeString(""); // legacy: used to be metadata_name
+		os << serializeString16(""); // legacy: used to be metadata_name
 		writeU8(os, liquid_type);
-		os << serializeString(liquid_alternative_flowing);
-		os << serializeString(liquid_alternative_source);
+		os << serializeString16(liquid_alternative_flowing);
+		os << serializeString16(liquid_alternative_source);
 		writeU8(os, liquid_viscosity);
 		writeU8(os, liquid_renewable);
 		writeU8(os, light_source);
@@ -1257,7 +1334,7 @@ void ContentFeatures::serializeOld(std::ostream &os, u16 protocol_version) const
 		writeU8(os, leveled);
 		writeU8(os, liquid_range);
 		writeU8(os, waving);
-		os << serializeString(mesh);
+		os << serializeString16(mesh);
 		collision_box.serialize(os, protocol_version);
 		writeU8(os, floodable);
 		writeU16(os, connects_to_ids.size());
@@ -1677,6 +1754,7 @@ void NodeDefManager::applyTextureOverrides(const std::vector<TextureOverride> &o
 
 		ContentFeatures &nodedef = m_content_features[id];
 
+		// Override tiles
 		if (texture_override.hasTarget(OverrideTarget::TOP))
 			nodedef.tiledef[0].name = texture_override.texture;
 
@@ -1694,6 +1772,26 @@ void NodeDefManager::applyTextureOverrides(const std::vector<TextureOverride> &o
 
 		if (texture_override.hasTarget(OverrideTarget::FRONT))
 			nodedef.tiledef[5].name = texture_override.texture;
+
+
+		// Override special tiles, if applicable
+		if (texture_override.hasTarget(OverrideTarget::SPECIAL_1))
+			nodedef.tiledef_special[0].name = texture_override.texture;
+
+		if (texture_override.hasTarget(OverrideTarget::SPECIAL_2))
+			nodedef.tiledef_special[1].name = texture_override.texture;
+
+		if (texture_override.hasTarget(OverrideTarget::SPECIAL_3))
+			nodedef.tiledef_special[2].name = texture_override.texture;
+
+		if (texture_override.hasTarget(OverrideTarget::SPECIAL_4))
+			nodedef.tiledef_special[3].name = texture_override.texture;
+
+		if (texture_override.hasTarget(OverrideTarget::SPECIAL_5))
+			nodedef.tiledef_special[4].name = texture_override.texture;
+
+		if (texture_override.hasTarget(OverrideTarget::SPECIAL_6))
+			nodedef.tiledef_special[5].name = texture_override.texture;
 	}
 }
 
@@ -1740,7 +1838,7 @@ void NodeDefManager::serialize(std::ostream &os, u16 protocol_version) const
 		// strict version incompatibilities
 		std::ostringstream wrapper_os(std::ios::binary);
 		f->serialize(wrapper_os, protocol_version);
-		os2<<serializeString(wrapper_os.str());
+		os2<<serializeString16(wrapper_os.str());
 
 		// must not overflow
 		u16 next = count + 1;
@@ -1748,7 +1846,7 @@ void NodeDefManager::serialize(std::ostream &os, u16 protocol_version) const
 		count++;
 	}
 	writeU16(os, count);
-	os << serializeLongString(os2.str());
+	os << serializeString32(os2.str());
 }
 
 
@@ -1759,13 +1857,13 @@ void NodeDefManager::deSerialize(std::istream &is)
 	if (version != 1)
 		throw SerializationError("unsupported NodeDefinitionManager version");
 	u16 count = readU16(is);
-	std::istringstream is2(deSerializeLongString(is), std::ios::binary);
+	std::istringstream is2(deSerializeString32(is), std::ios::binary);
 	ContentFeatures f;
 	for (u16 n = 0; n < count; n++) {
 		u16 i = readU16(is2);
 
 		// Read it from the string wrapper
-		std::string wrapper = deSerializeString(is2);
+		std::string wrapper = deSerializeString16(is2);
 		std::istringstream wrapper_is(wrapper, std::ios::binary);
 		f.deSerialize(wrapper_is);
 
@@ -1873,7 +1971,7 @@ static void removeDupes(std::vector<content_t> &list)
 void NodeDefManager::resolveCrossrefs()
 {
 	for (ContentFeatures &f : m_content_features) {
-		if (f.liquid_type != LIQUID_NONE) {
+		if (f.liquid_type != LIQUID_NONE || f.drawtype == NDT_LIQUID || f.drawtype == NDT_FLOWINGLIQUID) {
 			f.liquid_alternative_flowing_id = getId(f.liquid_alternative_flowing);
 			f.liquid_alternative_source_id = getId(f.liquid_alternative_source);
 			continue;

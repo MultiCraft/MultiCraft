@@ -23,9 +23,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "filesys.h"
 #include "config.h"
 #include "constants.h"
-#include "porting.h"
 #include "mapgen/mapgen.h" // Mapgen::setDefaultSettings
 #include "util/string.h"
+
+#ifdef __ANDROID__
+#include "client/renderingengine.h"
+#endif
 
 #ifdef __APPLE__
 #ifdef __IOS__
@@ -35,8 +38,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 #endif
 
-void set_default_settings(Settings *settings)
+void set_default_settings()
 {
+	Settings *settings = Settings::getLayer(SL_DEFAULTS);
+	if (settings == nullptr)
+		settings = Settings::createLayer(SL_DEFAULTS);
+
 	// Client and server
 	settings->setDefault("language", "");
 	settings->setDefault("name", "");
@@ -60,7 +67,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("screenshot_format", "png");
 	settings->setDefault("screenshot_quality", "0");
 	settings->setDefault("client_unload_unused_data_timeout", "600");
-	settings->setDefault("client_mapblock_limit", "5000");
+	settings->setDefault("client_mapblock_limit", "7500");
 	settings->setDefault("enable_build_where_you_stand", "false");
 	settings->setDefault("curl_timeout", "5000");
 	settings->setDefault("curl_parallel_limit", "8");
@@ -81,6 +88,8 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("keymap_right", "KEY_KEY_D");
 	settings->setDefault("keymap_jump", "KEY_SPACE");
 	settings->setDefault("keymap_sneak", "KEY_LSHIFT");
+	settings->setDefault("keymap_dig", "KEY_LBUTTON");
+	settings->setDefault("keymap_place", "KEY_RBUTTON");
 	settings->setDefault("keymap_drop", "KEY_KEY_Q");
 	settings->setDefault("keymap_zoom", "KEY_KEY_Z");
 	settings->setDefault("keymap_inventory", "KEY_KEY_I");
@@ -171,8 +180,8 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("tooltip_show_delay", "400");
 	settings->setDefault("tooltip_append_itemname", "false");
 	settings->setDefault("fps_max", "60");
-	settings->setDefault("pause_fps_max", "20");
-	settings->setDefault("viewing_range", "100");
+	settings->setDefault("fps_max_unfocused", "20");
+	settings->setDefault("viewing_range", "190");
 #if ENABLE_GLES
 	settings->setDefault("near_plane", "0.1");
 #endif
@@ -246,6 +255,7 @@ void set_default_settings(Settings *settings)
 #endif
 	settings->setDefault("enable_particles", "true");
 	settings->setDefault("arm_inertia", "false");
+	settings->setDefault("show_nametag_backgrounds", "false");
 
 	settings->setDefault("enable_minimap", "true");
 	settings->setDefault("minimap_shape_round", "true");
@@ -270,7 +280,7 @@ void set_default_settings(Settings *settings)
 	// Input
 	settings->setDefault("invert_mouse", "false");
 	settings->setDefault("mouse_sensitivity", "0.2");
-	settings->setDefault("repeat_rightclick_time", "0.25");
+	settings->setDefault("repeat_place_time", "0.25");
 	settings->setDefault("safe_dig_and_place", "false");
 	settings->setDefault("random_input", "false");
 	settings->setDefault("aux1_descends", "false");
@@ -283,10 +293,11 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("joystick_type", "");
 	settings->setDefault("repeat_joystick_button_time", "0.17");
 	settings->setDefault("joystick_frustum_sensitivity", "170");
+	settings->setDefault("joystick_deadzone", "2048");
 
 	// Main menu
 	settings->setDefault("main_menu_path", "");
-	settings->setDefault("serverlist_file", "favoriteservers.txt");
+	settings->setDefault("serverlist_file", "favoriteservers.json");
 
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
@@ -348,6 +359,8 @@ void set_default_settings(Settings *settings)
 
 	// ContentDB
 	settings->setDefault("contentdb_url", "https://content.minetest.net");
+	settings->setDefault("contentdb_max_concurrent_downloads", "3");
+
 #ifdef __ANDROID__
 	settings->setDefault("contentdb_flag_blacklist", "nonfree, android_default");
 #else
@@ -384,23 +397,19 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("disallow_empty_password", "false");
 	settings->setDefault("disable_anticheat", "false");
 	settings->setDefault("enable_rollback_recording", "false");
-#ifdef NDEBUG
-	settings->setDefault("deprecated_lua_api_handling", "legacy");
-#else
 	settings->setDefault("deprecated_lua_api_handling", "log");
-#endif
 
 	settings->setDefault("kick_msg_shutdown", "Server shutting down.");
 	settings->setDefault("kick_msg_crash", "This server has experienced an internal error. You will now be disconnected.");
 	settings->setDefault("ask_reconnect_on_crash", "false");
 
-	settings->setDefault("chat_message_format", "<@name> @message");
+	settings->setDefault("chat_message_format", "@name: @message");
 	settings->setDefault("profiler_print_interval", "0");
-	settings->setDefault("active_object_send_range_blocks", "4");
-	settings->setDefault("active_block_range", "3");
+	settings->setDefault("active_object_send_range_blocks", "8");
+	settings->setDefault("active_block_range", "4");
 	//settings->setDefault("max_simultaneous_block_sends_per_client", "1");
 	// This causes frametime jitter on client side, or does it?
-	settings->setDefault("max_block_send_distance", "10");
+	settings->setDefault("max_block_send_distance", "12");
 	settings->setDefault("block_send_optimize_distance", "4");
 	settings->setDefault("server_side_occlusion_culling", "true");
 	settings->setDefault("csm_restriction_flags", "60");
@@ -415,19 +424,22 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("chat_message_limit_per_10sec", "5.0");
 	settings->setDefault("chat_message_limit_trigger_kick", "50");
 	settings->setDefault("sqlite_synchronous", "2");
+	settings->setDefault("map_compression_level_disk", "3");
+	settings->setDefault("map_compression_level_net", "-1");
 	settings->setDefault("full_block_send_enable_min_time_from_building", "2.0");
 	settings->setDefault("dedicated_server_step", "0.09");
 	settings->setDefault("active_block_mgmt_interval", "2.0");
 	settings->setDefault("abm_interval", "1.0");
+	settings->setDefault("abm_time_budget", "0.2");
 	settings->setDefault("nodetimer_interval", "0.2");
 	settings->setDefault("ignore_world_load_errors", "false");
 	settings->setDefault("remote_media", "");
 	settings->setDefault("debug_log_level", "warning");
 	settings->setDefault("debug_log_size_max", "50");
 	settings->setDefault("chat_log_level", "error");
-	settings->setDefault("emergequeue_limit_total", "512");
-	settings->setDefault("emergequeue_limit_diskonly", "64");
-	settings->setDefault("emergequeue_limit_generate", "64");
+	settings->setDefault("emergequeue_limit_total", "1024");
+	settings->setDefault("emergequeue_limit_diskonly", "128");
+	settings->setDefault("emergequeue_limit_generate", "128");
 	settings->setDefault("num_emerge_threads", "1");
 	settings->setDefault("secure.enable_security", "true");
 	settings->setDefault("secure.trusted_mods", "");
@@ -458,7 +470,7 @@ void set_default_settings(Settings *settings)
 	settings->setDefault("mapgen_limit", "31000");
 	settings->setDefault("chunksize", "5");
 	settings->setDefault("fixed_map_seed", "");
-	settings->setDefault("max_block_generate_distance", "8");
+	settings->setDefault("max_block_generate_distance", "10");
 	settings->setDefault("enable_mapgen_debug_info", "false");
 	Mapgen::setDefaultSettings(settings);
 
@@ -478,7 +490,6 @@ void set_default_settings(Settings *settings)
 	// Altered settings for macOS
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	settings->setDefault("keymap_sneak", "KEY_SHIFT");
-	settings->setDefault("keymap_toggle_debug", "KEY_KEY_V");
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 	settings->setDefault("vsync", "true");
 
@@ -495,8 +506,6 @@ void set_default_settings(Settings *settings)
 
 	// Mobile Platform
 #if defined(__ANDROID__) || defined(__IOS__)
-	settings->setDefault("screen_w", "0");
-	settings->setDefault("screen_h", "0");
 	settings->setDefault("fullscreen", "true");
 	settings->setDefault("touchtarget", "true");
 	settings->setDefault("TMPFolder", porting::path_cache);
@@ -524,10 +533,8 @@ void set_default_settings(Settings *settings)
 	if (memoryMax < 2) {
 		// minimal settings for less than 2GB RAM
 #elif __IOS__
-	if (iOS_ver < 11.0) {
-		// minimal settings for legacy 32-bit devices
-		settings->setDefault("enable_minimap", "false");
-		settings->setDefault("enable_clouds", "false");
+	if (false) {
+		// obsolete
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "60");
 		settings->setDefault("client_mapblock_limit", "50");
@@ -586,10 +593,7 @@ void set_default_settings(Settings *settings)
 		settings->setDefault("viewing_range", "80");
 		settings->setDefault("max_block_generate_distance", "5");
 
-#ifdef __ANDROID__
-		settings->setDefault("video_driver", "ogles2");
-		settings->setDefault("enable_shaders", "true");
-#elif __IOS__
+#ifdef __IOS__
 		if (@available(iOS 13, *)) {
 #endif
 		// enable visual shader effects
@@ -601,44 +605,50 @@ void set_default_settings(Settings *settings)
 #endif
 	}
 
+	std::string font_small = std::to_string(TTF_DEFAULT_FONT_SIZE - 1);
+
 	// Android Settings
 #ifdef __ANDROID__
-	settings->setDefault("video_driver", "ogles1");
-	settings->setDefault("enable_shaders", "false");
+	// Switch to olges2 with shaders on powerful Android devices
+	if (memoryMax >= 6) {
+		settings->setDefault("video_driver", "ogles2");
+		settings->setDefault("enable_shaders", "true");
+	} else {
+		settings->setDefault("video_driver", "ogles1");
+		settings->setDefault("enable_shaders", "false");
+	}
 
 	settings->setDefault("debug_log_level", "error");
 
-	// Apply settings according to screen size
-	float x_inches = (float) porting::getDisplaySize().X /
-			(160.f * porting::getDisplayDensity());
-
-	std::string font_size_str_small = std::to_string(TTF_DEFAULT_FONT_SIZE - 1);
-
-	if (x_inches <= 3.7) {
-		// small 4" phones
-		settings->setDefault("hud_scaling", "0.55");
-		settings->setDefault("font_size", font_size_str_small);
-		settings->setDefault("mouse_sensitivity", "0.3");
-	} else if (x_inches > 3.7 && x_inches <= 4.5) {
-		// medium phones
-		settings->setDefault("hud_scaling", "0.6");
-		settings->setDefault("font_size", font_size_str_small);
-		settings->setDefault("selectionbox_width", "6");
-	} else if (x_inches > 4.5 && x_inches <= 5.5) {
-		// large 6" phones
-		settings->setDefault("hud_scaling", "0.7");
-		settings->setDefault("mouse_sensitivity", "0.15");
-		settings->setDefault("selectionbox_width", "6");
-	} else if (x_inches > 5.5 && x_inches <= 6.5) {
-		// 7" tablets
-		settings->setDefault("hud_scaling", "0.9");
-		settings->setDefault("selectionbox_width", "6");
+	v2u32 window_size = RenderingEngine::getDisplaySize();
+	if (window_size.X > 0) {
+		float x_inches = window_size.X / (160.f * porting::getDisplayDensity());
+		if (x_inches <= 3.7) {
+			// small 4" phones
+			g_settings->setDefault("hud_scaling", "0.55");
+			g_settings->setDefault("font_size", font_small);
+			g_settings->setDefault("mouse_sensitivity", "0.3");
+		} else if (x_inches > 3.7 && x_inches <= 4.5) {
+			// medium phones
+			g_settings->setDefault("hud_scaling", "0.6");
+			g_settings->setDefault("font_size", font_small);
+			g_settings->setDefault("selectionbox_width", "6");
+		} else if (x_inches > 4.5 && x_inches <= 5.5) {
+			// large 6" phones
+			g_settings->setDefault("hud_scaling", "0.7");
+			g_settings->setDefault("mouse_sensitivity", "0.15");
+			g_settings->setDefault("selectionbox_width", "6");
+		} else if (x_inches > 5.5 && x_inches <= 6.5) {
+			// 7" tablets
+			g_settings->setDefault("hud_scaling", "0.9");
+			g_settings->setDefault("selectionbox_width", "6");
+		}
 	}
 #endif // Android
 
 	// iOS Settings
 #ifdef __IOS__
-	// Switch to olges2 with shaders on the new iOS version
+	// Switch to olges2 with shaders in new iOS versions
 	if (@available(iOS 13, *)) {
 		settings->setDefault("video_driver", "ogles2");
 		settings->setDefault("enable_shaders", "true");
@@ -655,14 +665,17 @@ void set_default_settings(Settings *settings)
 		// 4" iPhone and iPod Touch
 		settings->setDefault("hud_scaling", "0.55");
 		settings->setDefault("mouse_sensitivity", "0.33");
+		settings->setDefault("font_size", font_small);
 	} else if SDVersion4and7Inch {
 		// 4.7" iPhone
-		settings->setDefault("hud_scaling", "0.65");
+		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("mouse_sensitivity", "0.27");
+		settings->setDefault("font_size", font_small);
 	} else if SDVersion5and5Inch {
 		// 5.5" iPhone Plus
-		settings->setDefault("hud_scaling", "0.7");
+		settings->setDefault("hud_scaling", "0.65");
 		settings->setDefault("mouse_sensitivity", "0.3");
+		settings->setDefault("font_size", font_small);
 	} else if (SDVersion5and8Inch || SDVersion6and1Inch || SDVersion6and5Inch) {
 		// 5.8+" iPhones
 		settings->setDefault("hud_scaling", "0.85");
@@ -680,18 +693,14 @@ void set_default_settings(Settings *settings)
 	}
 
 	// Settings for the Rounded Screen and Home Bar
-	if (@available(iOS 11, *)) {
-		UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
-		int bottomPadding = (int) window.safeAreaInsets.bottom;
+	UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
 
-		if (bottomPadding > 0) {
-			settings->setDefault("hud_move_upwards", "20");
-			if (SDVersioniPhone12Series)
-				settings->setDefault("round_screen", "75");
-			else
-				settings->setDefault("round_screen", "35");
-		}
-	}
+	if (window.safeAreaInsets.bottom > 0) {
+		settings->setDefault("hud_move_upwards", "20");
+		if (SDVersioniPhone12Series)
+			settings->setDefault("round_screen", "75");
+		else
+			settings->setDefault("round_screen", "35");
 #endif // iOS
 #endif
 }

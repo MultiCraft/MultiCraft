@@ -93,7 +93,6 @@ import static com.multicraft.game.helpers.Constants.NO_SPACE_LEFT;
 import static com.multicraft.game.helpers.Constants.REQUEST_CONNECTION;
 import static com.multicraft.game.helpers.Constants.REQUEST_UPDATE;
 import static com.multicraft.game.helpers.Constants.UPDATE_LINK;
-import static com.multicraft.game.helpers.Constants.WORLDS;
 import static com.multicraft.game.helpers.Constants.versionName;
 import static com.multicraft.game.helpers.PreferencesHelper.TAG_BUILD_NUMBER;
 import static com.multicraft.game.helpers.PreferencesHelper.TAG_LAUNCH_TIMES;
@@ -136,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements CallBackListener 
 				Toast.makeText(MainActivity.this, intent.getStringExtra(ACTION_FAILURE), Toast.LENGTH_LONG).show();
 				showRestartDialog("");
 			} else if (progress == UNZIP_SUCCESS) {
-				deleteFiles(Arrays.asList(FILES, WORLDS, GAMES), getCacheDir().toString());
+				deleteFiles(Arrays.asList(FILES, GAMES), getCacheDir().toString());
 				runGame();
 			}
 		}
@@ -385,7 +384,6 @@ public class MainActivity extends AppCompatActivity implements CallBackListener 
 
 	private void startCopy(boolean isAll) {
 		zips = getZipsFromAssets(this);
-		if (!isAll) zips.remove(WORLDS);
 		copySub = Completable.fromAction(() -> runOnUiThread(() -> copyAssets(zips)))
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())

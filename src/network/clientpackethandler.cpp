@@ -208,6 +208,9 @@ void Client::handleCommand_AccessDenied(NetworkPacket* pkt)
 		m_access_denied_reconnect = reconnect & 1;
 	} else if (denyCode == SERVER_ACCESSDENIED_CUSTOM_STRING) {
 		*pkt >> m_access_denied_reason;
+	} else if (denyCode == SERVER_ACCESSDENIED_TOO_MANY_USERS) {
+		m_access_denied_reason = accessDeniedStrings[denyCode];
+		m_access_denied_reconnect = true;
 	} else if (denyCode < SERVER_ACCESSDENIED_MAX) {
 		m_access_denied_reason = accessDeniedStrings[denyCode];
 	} else {
@@ -523,7 +526,7 @@ void Client::handleCommand_ActiveObjectMessages(NetworkPacket* pkt)
 			if (!is.good())
 				break;
 
-			std::string message = deSerializeString(is);
+			std::string message = deSerializeString16(is);
 
 			// Pass on to the environment
 			m_env.processActiveObjectMessage(id, message);
@@ -947,12 +950,12 @@ void Client::handleCommand_DetachedInventory(NetworkPacket* pkt)
 		std::string datastring(pkt->getString(0), pkt->getSize());
 		std::istringstream is(datastring, std::ios_base::binary);
 
-		std::string name = deSerializeString(is);
+		std::string name = deSerializeString16(is);
 
 		infostream << "Client: Detached inventory update: \"" << name
 				<< "\"" << std::endl;
 
-		Inventory *inv = NULL;
+		Inventory *inv = nullptr;
 		if (m_detached_inventories.count(name) > 0)
 			inv = m_detached_inventories[name];
 		else {
@@ -1047,7 +1050,7 @@ void Client::handleCommand_AddParticleSpawner(NetworkPacket* pkt)
 	p.minsize            = readF(is, m_proto_ver);
 	p.maxsize            = readF(is, m_proto_ver);
 	p.collisiondetection = readU8(is);
-	p.texture            = deSerializeLongString(is);
+	p.texture            = deSerializeString32(is);
 
 	server_id = readU32(is);
 
@@ -1148,16 +1151,10 @@ void Client::handleCommand_HudRemove(NetworkPacket* pkt)
 
 	*pkt >> server_id;
 
-	auto i = m_hud_server_to_client.find(server_id);
-	if (i != m_hud_server_to_client.end()) {
-		int client_id = i->second;
-		m_hud_server_to_client.erase(i);
-
-		ClientEvent *event = new ClientEvent();
-		event->type     = CE_HUDRM;
-		event->hudrm.id = client_id;
-		m_client_event_queue.push(event);
-	}
+	ClientEvent *event = new ClientEvent();
+	event->type     = CE_HUDRM;
+	event->hudrm.id = server_id;
+	m_client_event_queue.push(event);
 }
 
 void Client::handleCommand_HudChange(NetworkPacket* pkt)
@@ -1184,19 +1181,16 @@ void Client::handleCommand_HudChange(NetworkPacket* pkt)
 	else
 		*pkt >> intdata;
 
-	std::unordered_map<u32, u32>::const_iterator i = m_hud_server_to_client.find(server_id);
-	if (i != m_hud_server_to_client.end()) {
-		ClientEvent *event = new ClientEvent();
-		event->type              = CE_HUDCHANGE;
-		event->hudchange.id      = i->second;
-		event->hudchange.stat    = (HudElementStat)stat;
-		event->hudchange.v2fdata = new v2f(v2fdata);
-		event->hudchange.v3fdata = new v3f(v3fdata);
-		event->hudchange.sdata   = new std::string(sdata);
-		event->hudchange.data    = intdata;
-		event->hudchange.v2s32data = new v2s32(v2s32data);
-		m_client_event_queue.push(event);
-	}
+	ClientEvent *event = new ClientEvent();
+	event->type              = CE_HUDCHANGE;
+	event->hudchange.id      = server_id;
+	event->hudchange.stat    = (HudElementStat)stat;
+	event->hudchange.v2fdata = new v2f(v2fdata);
+	event->hudchange.v3fdata = new v3f(v3fdata);
+	event->hudchange.sdata   = new std::string(sdata);
+	event->hudchange.data    = intdata;
+	event->hudchange.v2s32data = new v2s32(v2s32data);
+	m_client_event_queue.push(event);
 }
 
 void Client::handleCommand_HudSetFlags(NetworkPacket* pkt)
@@ -1217,15 +1211,24 @@ void Client::handleCommand_HudSetFlags(NetworkPacket* pkt)
 	m_minimap_disabled_by_server = !(player->hud_flags & HUD_FLAG_MINIMAP_VISIBLE);
 	bool m_minimap_radar_disabled_by_server = !(player->hud_flags & HUD_FLAG_MINIMAP_RADAR_VISIBLE);
 
+	// Not so satisying code to keep compatibility with old fixed mode system
+	// -->
+
 	// Hide minimap if it has been disabled by the server
 	if (m_minimap && m_minimap_disabled_by_server && was_minimap_visible)
 		// defers a minimap update, therefore only call it if really
 		// needed, by checking that minimap was visible before
-		m_minimap->setMinimapMode(MINIMAP_MODE_OFF);
+		m_minimap->setModeIndex(0);
 
-	// Switch to surface mode if radar disabled by server
-	if (m_minimap && m_minimap_radar_disabled_by_server && was_minimap_radar_visible)
-		m_minimap->setMinimapMode(MINIMAP_MODE_SURFACEx1);
+	// If radar has been disabled, try to find a non radar mode or fall back to 0
+	if (m_minimap && m_minimap_radar_disabled_by_server
+			&& was_minimap_radar_visible) {
+		while (m_minimap->getModeIndex() > 0 &&
+				m_minimap->getModeDef().type == MINIMAP_TYPE_RADAR)
+			m_minimap->nextMode();
+	}
+	// <--
+	// End of 'not so satifying code'
 }
 
 void Client::handleCommand_HudSetParam(NetworkPacket* pkt)
@@ -1260,11 +1263,11 @@ void Client::handleCommand_HudSetSky(NetworkPacket* pkt)
 
 		SkyboxParams skybox;
 		skybox.bgcolor = video::SColor(readARGB8(is));
-		skybox.type = std::string(deSerializeString(is));
+		skybox.type = std::string(deSerializeString16(is));
 		u16 count = readU16(is);
 
 		for (size_t i = 0; i < count; i++)
-			skybox.textures.emplace_back(deSerializeString(is));
+			skybox.textures.emplace_back(deSerializeString16(is));
 
 		skybox.clouds = true;
 		try {
@@ -1663,4 +1666,31 @@ void Client::handleCommand_ModChannelSignal(NetworkPacket *pkt)
 	// If signal is valid, forward it to client side mods
 	if (valid_signal)
 		m_script->on_modchannel_signal(channel, signal);
+}
+
+void Client::handleCommand_MinimapModes(NetworkPacket *pkt)
+{
+	u16 count; // modes
+	u16 mode;  // wanted current mode index after change
+
+	*pkt >> count >> mode;
+
+	if (m_minimap)
+		m_minimap->clearModes();
+
+	for (size_t index = 0; index < count; index++) {
+		u16 type;
+		std::string label;
+		u16 size;
+		std::string texture;
+		u16 scale;
+
+		*pkt >> type >> label >> size >> texture >> scale;
+
+		if (m_minimap)
+			m_minimap->addMode(MinimapType(type), size, label, texture, scale);
+	}
+
+	if (m_minimap)
+		m_minimap->setModeIndex(mode);
 }

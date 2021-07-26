@@ -22,9 +22,10 @@ local multicraft_developers = {
 	"Bektur Mambetov (ubulem) <berkut87@gmail.com>",
 	"Alexander Zavrin (Ransom.00)",
 	"luk3yx",
-	"An0n3m0us",
-	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
+	"Nathan Salapat (NathanS21) <nathan@nathansalapat.com>",
 	"Vitaliy Lobachevskiy (numberZero) <numzer0@yandex.ru>",
+	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
+	"An0n3m0us",
 	"sfan5 <sfan5@live.de>",
 	"Stuart Jones (stujones11) <stujones111@gmail.com>",
 	"And other people who helped make the world better!"
@@ -36,28 +37,37 @@ local core_developers = {
 	"Nathanaël Courant (Nore/Ekdohibs) <nore@mesecons.net>",
 	"Loic Blot (nerzhul/nrz) <loic.blot@unix-experience.fr>",
 	"paramat",
-	"Auke Kok (sofar) <sofar@foo-projects.org>",
 	"Andrew Ward (rubenwardy) <rw@rubenwardy.com>",
 	"Krock/SmallJoker <mk939@ymail.com>",
 	"Lars Hofhansl <larsh@apache.org>",
+	"Pierre-Yves Rollo <dev@pyrollo.com>",
+	"v-rob <robinsonvincent89@gmail.com>",
 }
 
+-- For updating active/previous contributors, see the script in ./util/gather_git_credits.py
+
 local active_contributors = {
-	"Hugues Ross [Formspecs]",
+	"Wuzzy [devtest game, visual corrections]",
+	"Zughy [Visual improvements, various fixes]",
 	"Maksim (MoNTE48) [Android]",
-	"DS [Formspecs]",
-	"pyrollo [Formspecs: Hypertext]",
-	"v-rob [Formspecs]",
-	"Jordach [set_sky]",
-	"random-geek [Formspecs]",
-	"Wuzzy [Pathfinder, builtin, translations]",
-	"ANAND (ClobberXD) [Fixes, per-player FOV]",
-	"Warr1024 [Fixes]",
-	"Paul Ouellette (pauloue) [Fixes, Script API]",
-	"Jean-Patrick G (kilbith) <jeanpatrick.guerrero@gmail.com> [Audiovisuals]",
-	"HybridDog [Script API]",
+	"numzero [Graphics and rendering]",
+	"appgurueu [Various internal fixes]",
+	"Desour [Formspec and vector API changes]",
+	"HybridDog [Rendering fixes and documentation]",
+	"Hugues Ross [Graphics-related improvements]",
+	"ANAND (ClobberXD) [Mouse buttons rebinding]",
+	"luk3yx [Fixes]",
+	"hecks [Audiovisuals, Lua API]",
+	"LoneWolfHT [Object crosshair, documentation fixes]",
+	"Lejo [Server-related improvements]",
+	"EvidenceB [Compass HUD element]",
+	"Paul Ouellette (pauloue) [Lua API, documentation]",
+	"TheTermos [Collision detection, physics]",
+	"David CARLIER [Unix & Haiku build fixes]",
 	"dcbrwn [Object shading]",
-	"srifqi [Fixes]",
+	"Elias Fleckenstein [API features/fixes]",
+	"Jean-Patrick Guerrero (kilbith) [model element, visual fixes]",
+	"k.h.lai [Memory leak fixes, documentation]",
 }
 
 local previous_core_developers = {
@@ -73,30 +83,23 @@ local previous_core_developers = {
 	"sapier",
 	"Zeno",
 	"ShadowNinja <shadowninja@minetest.net>",
+	"Auke Kok (sofar) <sofar@foo-projects.org>",
 }
 
 local previous_contributors = {
 	"Nils Dagsson Moskopp (erlehmann) <nils@dieweltistgarnichtso.net> [Minetest Logo]",
-	"Dániel Juhász (juhdanad) <juhdanad@gmail.com>",
 	"red-001 <red-001@outlook.ie>",
-	"numberZero [Audiovisuals: meshgen]",
 	"Giuseppe Bilotta",
+	"Dániel Juhász (juhdanad) <juhdanad@gmail.com>",
 	"MirceaKitsune <mirceakitsune@gmail.com>",
 	"Constantin Wenger (SpeedProg)",
 	"Ciaran Gultnieks (CiaranG)",
 	"stujones11 [Android UX improvements]",
-	"Jeija <jeija@mesecons.net> [HTTP, particles]",
-	"Vincent Glize (Dumbeldor) [Cleanups, CSM APIs]",
-	"Ben Deutsch [Rendering, Fixes, SQLite auth]",
-	"TeTpaAka [Hand overriding, nametag colors]",
-	"Rui [Sound Pitch]",
-	"Duane Robertson <duane@duanerobertson.com> [MGValleys]",
-	"Raymoo [Tool Capabilities]",
 	"Rogier <rogier777@gmail.com> [Fixes]",
 	"Gregory Currie (gregorycu) [optimisation]",
-	"TriBlade9 <triblade9@mail.com> [Audiovisuals]",
-	"T4im [Profiler]",
-	"Jurgen Doser (doserj) <jurgen.doser@gmail.com>",
+	"srifqi [Fixes]",
+	"JacobF",
+	"Jeija <jeija@mesecons.net> [HTTP, particles]",
 }
 
 local function buildCreditList(source)
@@ -112,11 +115,11 @@ return {
 	caption = fgettext("Credits"),
 	cbf_formspec = function(tabview, name, tabdata)
 		local version = core.get_version()
-		return "label[0.1,-0.1;" ..
-			"MultiCraft Open Source Project, ver. " .. version.string .. "\n" ..
+		local fs = "label[0.1,-0.1;" ..
+			"MultiCraft Open Source, ver. " .. version.string .. "\n" ..
 			"Copyright (C) 2014-2021 MultiCraft Development Team\n" ..
 			"Licence: LGPLv3.0+ and CC-BY-SA 4.0, Home page: http://multicraft.world\n" ..
-			"Created and Powered by Minetest Engine, ver. 5.3.0]" ..
+			"Created and Powered by Minetest Engine, ver. 5.4.1]" ..
 --			"button[10,-0.5;2,2;homepage;multicraft.world]" ..
 			"tablecolumns[color;text]" ..
 			"tableoptions[background=#999999;highlight=#00000000;border=true]" ..
@@ -132,10 +135,23 @@ return {
 			"#FFFF00," .. fgettext("Previous Contributors") .. ",," ..
 			buildCreditList(previous_contributors) .. "," ..
 			";1]"
+
+	--[[if PLATFORM ~= "Android" then
+			fs = fs .. "tooltip[userdata;" ..
+					fgettext("Opens the directory that contains user-provided worlds, games, mods,\n" ..
+							"and texture packs in a file manager / explorer.") .. "]"
+			fs = fs .. "button[0,4.75;3.5,1;userdata;" .. fgettext("Open User Data Directory") .. "]"
+		end]]
+
+		return fs
 	end,
 	cbf_button_handler = function(this, fields, name, tabdata)
 		if fields.homepage then
 			core.open_url("http://multicraft.world")
+		end
+
+		if fields.userdata then
+			core.open_dir(core.get_user_path())
 		end
 	end,
 }

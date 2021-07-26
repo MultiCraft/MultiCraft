@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <map>
 #include <vector>
 #include "util/basic_macros.h"
+#include "irrlichttypes.h"
 #include <IGUIFont.h>
 #include <IGUISkin.h>
 #include <IGUIEnvironment.h>
@@ -48,7 +49,7 @@ struct FontSpec {
 
 	u16 getHash()
 	{
-		return (mode << 2) | (bold << 1) | italic;
+		return (mode << 2) | (static_cast<u8>(bold) << 1) | static_cast<u8>(italic);
 	}
 
 	unsigned int size;
@@ -61,7 +62,7 @@ class FontEngine
 {
 public:
 
-	FontEngine(Settings* main_settings, gui::IGUIEnvironment* env);
+	FontEngine(gui::IGUIEnvironment* env);
 
 	~FontEngine();
 
@@ -124,8 +125,8 @@ public:
 	/** get default font size */
 	unsigned int getDefaultFontSize();
 
-	/** initialize font engine */
-	void initialize(Settings* main_settings, gui::IGUIEnvironment* env);
+	/** get font size for a specific mode */
+	unsigned int getFontSize(FontMode mode);
 
 	/** update internal parameters from settings */
 	void readSettings();
@@ -145,9 +146,6 @@ private:
 
 	/** clean cache */
 	void cleanCache();
-
-	/** pointer to settings for registering callbacks or reading config */
-	Settings* m_settings = nullptr;
 
 	/** pointer to irrlicht gui environment */
 	gui::IGUIEnvironment* m_env = nullptr;

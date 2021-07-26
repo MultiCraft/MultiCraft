@@ -68,7 +68,7 @@ minetest.register_entity("testentities:mesh_unshaded", {
 
 -- Advanced visual tests
 
--- A test entity for testing animated and yaw-modulated sprites
+-- An entity for testing animated and yaw-modulated sprites
 minetest.register_entity("testentities:yawsprite", {
 	initial_properties = {
 		selectionbox = {-0.3, -0.5, -0.3, 0.3, 0.3, 0.3},
@@ -79,6 +79,59 @@ minetest.register_entity("testentities:yawsprite", {
 		initial_sprite_basepos = {x=0, y=0},
 	},
 	on_activate = function(self, staticdata)
-		self.object:set_sprite({x=0, y=0}, 1, 0, true)
+		self.object:set_sprite({x=0, y=0}, 3, 0.5, true)
+	end,
+})
+
+-- An entity for testing animated upright sprites
+minetest.register_entity("testentities:upright_animated", {
+	initial_properties = {
+		visual = "upright_sprite",
+		textures = {"testnodes_anim.png"},
+		spritediv = {x = 1, y = 4},
+	},
+	on_activate = function(self)
+		self.object:set_sprite({x=0, y=0}, 4, 1.0, false)
+	end,
+})
+
+minetest.register_entity("testentities:nametag", {
+	initial_properties = {
+		visual = "sprite",
+		textures = { "testentities_sprite.png" },
+	},
+
+	on_activate = function(self, staticdata)
+		if staticdata ~= "" then
+			local data = minetest.deserialize(staticdata)
+			self.color = data.color
+			self.bgcolor = data.bgcolor
+		else
+			self.color = {
+				r = math.random(0, 255),
+				g = math.random(0, 255),
+				b = math.random(0, 255),
+			}
+
+			if math.random(0, 10) > 5 then
+				self.bgcolor = {
+					r = math.random(0, 255),
+					g = math.random(0, 255),
+					b = math.random(0, 255),
+					a = math.random(0, 255),
+				}
+			end
+		end
+
+		assert(self.color)
+		self.object:set_properties({
+			nametag = tostring(math.random(1000, 10000)),
+			nametag_color = self.color,
+			nametag_bgcolor = self.bgcolor,
+		})
+	end,
+
+	get_staticdata = function(self)
+		return minetest.serialize({ color = self.color, bgcolor = self.bgcolor })
 	end,
 })

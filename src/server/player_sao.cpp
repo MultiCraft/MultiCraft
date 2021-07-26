@@ -55,6 +55,7 @@ PlayerSAO::PlayerSAO(ServerEnvironment *env_, RemotePlayer *player_, session_t p
 	m_prop.backface_culling = false;
 	m_prop.makes_footstep_sound = true;
 	m_prop.stepheight = PLAYER_DEFAULT_STEPHEIGHT * BS;
+	m_prop.show_on_minimap = true;
 	m_hp = m_prop.hp_max;
 	m_breath = m_prop.breath_max;
 	// Disable zoom in survival mode using a value of 0
@@ -109,7 +110,7 @@ std::string PlayerSAO::getClientInitializationData(u16 protocol_version)
 
 	// Protocol >= 15
 	writeU8(os, 1); // version
-	os << serializeString(m_player->getName()); // name
+	os << serializeString16(m_player->getName()); // name
 	writeU8(os, 1); // is_player
 	writeS16(os, getId()); // id
 	if (protocol_version >= 37) {
@@ -129,27 +130,27 @@ std::string PlayerSAO::getClientInitializationData(u16 protocol_version)
 	}
 
 	std::ostringstream msg_os(std::ios::binary);
-	msg_os << serializeLongString(getPropertyPacket(
+	msg_os << serializeString32(getPropertyPacket(
 		protocol_version)); // message 1
-	msg_os << serializeLongString(generateUpdateArmorGroupsCommand()); // 2
-	msg_os << serializeLongString(generateUpdateAnimationCommand(
+	msg_os << serializeString32(generateUpdateArmorGroupsCommand()); // 2
+	msg_os << serializeString32(generateUpdateAnimationCommand(
 		protocol_version)); // 3
 	for (const auto &bone_pos : m_bone_position) {
-		msg_os << serializeLongString(generateUpdateBonePositionCommand(
+		msg_os << serializeString32(generateUpdateBonePositionCommand(
 			bone_pos.first, bone_pos.second.X, bone_pos.second.Y,
-			protocol_version)); // m_bone_position.size
+			protocol_version)); // 3 + N
 	}
-	msg_os << serializeLongString(generateUpdateAttachmentCommand(
-		protocol_version)); // 4
-	msg_os << serializeLongString(generateUpdatePhysicsOverrideCommand(
-		protocol_version)); // 5
+	msg_os << serializeString32(generateUpdateAttachmentCommand(
+		protocol_version)); // 4 + m_bone_position.size
+	msg_os << serializeString32(generateUpdatePhysicsOverrideCommand(
+		protocol_version)); // 5 + m_bone_position.size
 
 	int message_count = 5 + m_bone_position.size();
 
 	for (const auto &id : getAttachmentChildIds()) {
 		if (ServerActiveObject *obj = m_env->getActiveObject(id)) {
 			message_count++;
-			msg_os << serializeLongString(obj->generateUpdateInfantCommand(
+			msg_os << serializeString32(obj->generateUpdateInfantCommand(
 				id, protocol_version));
 		}
 	}
@@ -164,7 +165,7 @@ std::string PlayerSAO::getClientInitializationData(u16 protocol_version)
 
 void PlayerSAO::getStaticData(std::string * result) const
 {
-	FATAL_ERROR("Obsolete function");
+	FATAL_ERROR("This function shall not be called for PlayerSAO");
 }
 
 void PlayerSAO::step(float dtime, bool send_recommended)
@@ -280,10 +281,13 @@ void PlayerSAO::step(float dtime, bool send_recommended)
 	// otherwise it's calculated normally.
 	// If the object gets detached this comes into effect automatically from
 	// the last known origin.
-	if (isAttached()) {
-		v3f pos = m_env->getActiveObject(m_attachment_parent_id)->getBasePosition();
+	if (auto *parent = getParent()) {
+		v3f pos = parent->getBasePosition();
 		m_last_good_position = pos;
 		setBasePosition(pos);
+
+		if (m_player)
+			m_player->setSpeed(v3f());
 	}
 
 	if (!send_recommended)
@@ -491,22 +495,32 @@ u16 PlayerSAO::punch(v3f dir,
 	return hitparams.wear;
 }
 
+void PlayerSAO::rightClick(ServerActiveObject *clicker)
+{
+	m_env->getScriptIface()->on_rightclickplayer(this, clicker);
+}
+
 void PlayerSAO::setHP(s32 hp, const PlayerHPChangeReason &reason)
 {
-	s32 oldhp = m_hp;
+	if (hp == (s32)m_hp)
+		return; // Nothing to do
 
-	hp = rangelim(hp, 0, m_prop.hp_max);
+	if (m_hp <= 0 && hp < (s32)m_hp)
+		return; // Cannot take more damage
 
-	if (oldhp != hp) {
-		s32 hp_change = m_env->getScriptIface()->on_player_hpchange(this, hp - oldhp, reason);
+	{
+		s32 hp_change = m_env->getScriptIface()->on_player_hpchange(this, hp - m_hp, reason);
 		if (hp_change == 0)
 			return;
 
-		hp = rangelim(oldhp + hp_change, 0, m_prop.hp_max);
+		hp = m_hp + hp_change;
 	}
 
+	s32 oldhp = m_hp;
+	hp = rangelim(hp, 0, m_prop.hp_max);
+
 	if (hp < oldhp && isImmortal())
-		return;
+		return; // Do not allow immortal players to be damaged
 
 	m_hp = hp;
 
@@ -561,7 +575,7 @@ bool PlayerSAO::setWieldedItem(const ItemStack &item)
 void PlayerSAO::disconnected()
 {
 	m_peer_id = PEER_ID_INEXISTENT;
-	m_pending_removal = true;
+	markForRemoval();
 }
 
 void PlayerSAO::unlinkPlayerSessionAndSave()
@@ -610,7 +624,8 @@ void PlayerSAO::setMaxSpeedOverride(const v3f &vel)
 
 bool PlayerSAO::checkMovementCheat()
 {
-	if (isAttached() || m_is_singleplayer ||
+	if (m_is_singleplayer ||
+			isAttached() ||
 			g_settings->getBool("disable_anticheat")) {
 		m_last_good_position = m_base_position;
 		return false;

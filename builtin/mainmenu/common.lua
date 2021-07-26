@@ -56,44 +56,21 @@ function image_column(tooltip)
 		"11=" .. core.formspec_escape(defaulttexturedir .. "server_ping_1.png")
 end
 
---------------------------------------------------------------------------------
-function order_favorite_list(list, mobile)
-	local res = {}
-	local non_mobile_servers = {}
-	-- orders the multicraft list before support
-	for i = 1, #list do
-		local fav = list[i]
-		if mobile and not fav.mobile_friendly then
-			non_mobile_servers[("%s:%s"):format(fav.address, fav.port)] = fav
-		elseif fav.server_id == "multicraft" then
-			res[#res + 1] = fav
-		end
-	end
-	for i = 1, #list do
-		local fav = list[i]
-		if (mobile and fav.mobile_friendly or not mobile) and
-				is_server_protocol_compat(fav.proto_min, fav.proto_max) and
-				fav.server_id ~= "multicraft" then
-			res[#res + 1] = fav
-		end
-	end
-	return res, non_mobile_servers
-end
 
 --------------------------------------------------------------------------------
-function render_serverlist_row(spec, is_favorite, is_approved)
+function render_serverlist_row(spec, is_favorite)
 	-- Get information from non_mobile_servers.
-	if is_favorite and not spec.proto_min and menudata.non_mobile_servers and
-			spec.address and spec.port then
+	if is_favorite and not spec.proto_min and spec.address and spec.port and
+			serverlistmgr.non_mobile_servers then
 		local id = ("%s:%s"):format(spec.address, spec.port)
-		spec = menudata.non_mobile_servers[id] or spec
+		spec = serverlistmgr.non_mobile_servers[id] or spec
 	end
 
 	local text = ""
 	if spec.name then
 		text = text .. core.formspec_escape(spec.name:trim())
 	elseif spec.address then
-		text = text .. spec.address:trim()
+		text = text .. core.formspec_escape(spec.address:trim())
 		if spec.port then
 			text = text .. ":" .. spec.port
 		end
@@ -104,12 +81,10 @@ function render_serverlist_row(spec, is_favorite, is_approved)
 	local details
 	if is_favorite then
 		details = "1,"
+	elseif spec.server_id == "multicraft" then
+		details = "2,"
 	else
-		if is_approved then
-			details = "2,"
-		else
-			details = "3,"
-		end
+		details = "3,"
 	end
 
 	if spec.lag then
@@ -166,35 +141,15 @@ end
 
 --------------------------------------------------------------------------------
 os.tempfolder = function()
-	if core.settings:get("TMPFolder") then
-		return core.settings:get("TMPFolder") .. DIR_DELIM .. "MT_" .. math.random(0,10000)
-	end
+	local temp = core.get_temp_path()
+	return temp .. DIR_DELIM .. "MT_" .. math.random(0, 10000)
+end
 
-	local filetocheck = os.tmpname()
-	os.remove(filetocheck)
-
-	-- luacheck: ignore
-	-- https://blogs.msdn.microsoft.com/vcblog/2014/06/18/c-runtime-crt-features-fixes-and-breaking-changes-in-visual-studio-14-ctp1/
-	--   The C runtime (CRT) function called by os.tmpname is tmpnam.
-	--   Microsofts tmpnam implementation in older CRT / MSVC releases is defective.
-	--   tmpnam return values starting with a backslash characterize this behavior.
-	-- https://sourceforge.net/p/mingw-w64/bugs/555/
-	--   MinGW tmpnam implementation is forwarded to the CRT directly.
-	-- https://sourceforge.net/p/mingw-w64/discussion/723797/thread/55520785/
-	--   MinGW links to an older CRT release (msvcrt.dll).
-	--   Due to legal concerns MinGW will never use a newer CRT.
-	--
-	--   Make use of TEMP to compose the temporary filename if an old
-	--   style tmpnam return value is detected.
-	if filetocheck:sub(1, 1) == "\\" then
-		local tempfolder = os.getenv("TEMP")
-		return tempfolder .. filetocheck
-	end
-
-	local randname = "MTTempModFolder_" .. math.random(0,10000)
-	local backstring = filetocheck:reverse()
-	return filetocheck:sub(0, filetocheck:len() - backstring:find(DIR_DELIM) + 1) ..
-		randname
+--------------------------------------------------------------------------------
+os.tmpname = function()
+	local path = os.tempfolder()
+	io.open(path, "w"):close()
+	return path
 end
 
 --------------------------------------------------------------------------------
@@ -224,42 +179,6 @@ function menu_handle_key_up_down(fields, textlist, settingname)
 		return true
 	end
 	return false
-end
-
---------------------------------------------------------------------------------
-function asyncOnlineFavourites(mobile)
-	if not menudata.public_known then
-		menudata.public_known = {{
-			name = fgettext("Loading..."),
-			description = fgettext_ne("Try reenabling public serverlist and check your internet connection.")
-		}}
-	end
-	menudata.favorites = menudata.public_known
-	menudata.favorites_is_public = true
-
-	if not menudata.public_downloading then
-		menudata.public_downloading = true
-	else
-		return
-	end
-
-	core.handle_async(
-		function(param)
-			return core.get_favorites("online")
-		end,
-		nil,
-		function(result)
-			menudata.public_downloading = nil
-			local favs, non_mobile = order_favorite_list(result, mobile)
-			if favs[1] then
-				menudata.public_known = favs
-				menudata.favorites = menudata.public_known
-				menudata.favorites_is_public = true
-				menudata.non_mobile_servers = non_mobile
-			end
-			core.event_handler("Refresh")
-		end
-	)
 end
 
 --------------------------------------------------------------------------------

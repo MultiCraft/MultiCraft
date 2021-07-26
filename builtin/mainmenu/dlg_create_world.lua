@@ -61,6 +61,7 @@ local flag_checkboxes = {
 		fgettext("Low humidity and high heat causes shallow or dry rivers") },
 	},
 	flat = {
+		cb_caverns,
 		{ "hills", fgettext("Hills"), "hills" },
 		{ "lakes", fgettext("Lakes"), "lakes" },
 	},
@@ -366,8 +367,18 @@ local function create_world_buttonhandler(this, fields)
 		local gameindex = core.get_textlist_index("games")
 
 		if gameindex ~= nil then
+			-- For unnamed worlds use the generated name 'world<number>',
+			-- where the number increments: it is set to 1 larger than the largest
+			-- generated name number found.
 			if worldname == "" then
-				worldname = "World " .. math.random(1000, 9999)
+				local worldnum_max = 0
+				for _, world in ipairs(menudata.worldlist:get_list()) do
+					if world.name:match("^World %d+$") then
+						local worldnum = tonumber(world.name:sub(6))
+						worldnum_max = math.max(worldnum_max, worldnum)
+					end
+				end
+				worldname = "World " .. worldnum_max + 1
 			end
 
 			core.settings:set("fixed_map_seed", fields["te_seed"])
@@ -436,7 +447,7 @@ local function create_world_buttonhandler(this, fields)
 	end
 
 	if fields["mgv6_biomes"] then
-		local entry = minetest.formspec_escape(fields["mgv6_biomes"])
+		local entry = core.formspec_escape(fields["mgv6_biomes"])
 		for b=1, #mgv6_biomes do
 			if entry == mgv6_biomes[b][1] then
 				local ftable = core.settings:get_flags("mgv6_spflags")

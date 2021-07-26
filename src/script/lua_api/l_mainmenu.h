@@ -58,7 +58,7 @@ private:
 	 * @param path path to check
 	 * @return true if the path may be modified
 	 */
-	static bool mayModifyPath(const std::string &path);
+	static bool mayModifyPath(std::string path);
 
 	//api calls
 
@@ -73,10 +73,6 @@ private:
 	static int l_get_worlds(lua_State *L);
 
 	static int l_get_mapgen_names(lua_State *L);
-
-	static int l_get_favorites(lua_State *L);
-
-	static int l_delete_favorite(lua_State *L);
 
 	static int l_gettext(lua_State *L);
 
@@ -112,6 +108,8 @@ private:
 
 	static int l_get_mainmenu_path(lua_State *L);
 
+	static int l_get_user_path(lua_State *L);
+
 	static int l_get_modpath(lua_State *L);
 
 	static int l_get_clientmodpath(lua_State *L);
@@ -126,11 +124,15 @@ private:
 
 	static int l_get_cache_path(lua_State *L);
 
+	static int l_get_temp_path(lua_State *L);
+
 	static int l_create_dir(lua_State *L);
 
 	static int l_delete_dir(lua_State *L);
 
 	static int l_copy_dir(lua_State *L);
+
+	static int l_is_dir(lua_State *L);
 
 	static int l_extract_zip(lua_State *L);
 
@@ -150,9 +152,16 @@ private:
 	// other
 	static int l_open_url(lua_State *L);
 
+	static int l_open_dir(lua_State *L);
+
 
 	// async
 	static int l_do_async_callback(lua_State *L);
+
+	// MultiCraft
+	static int l_load_translation(lua_State *L);
+
+	static int l_sleep_ms(lua_State *L);
 
 public:
 

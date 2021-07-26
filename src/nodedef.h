@@ -231,6 +231,14 @@ enum AlignStyle : u8 {
 	ALIGN_STYLE_USER_DEFINED,
 };
 
+enum AlphaMode : u8 {
+	ALPHAMODE_BLEND,
+	ALPHAMODE_CLIP,
+	ALPHAMODE_OPAQUE,
+	ALPHAMODE_LEGACY_COMPAT, /* means either opaque or clip */
+};
+
+
 /*
 	Stand-alone definition of a TileSpec (basically a server-side TileSpec)
 */
@@ -260,6 +268,11 @@ struct TileDef
 		NodeDrawType drawtype);
 };
 
+// Defines the number of special tiles per nodedef
+//
+// NOTE: When changing this value, the enum entries of OverrideTarget and
+//       parser in TextureOverrideSource must be updated so that all special
+//       tiles can be overridden.
 #define CF_SPECIAL_COUNT 6
 
 struct ContentFeatures
@@ -310,9 +323,7 @@ struct ContentFeatures
 	// These will be drawn over the base tiles.
 	TileDef tiledef_overlay[6];
 	TileDef tiledef_special[CF_SPECIAL_COUNT]; // eg. flowing liquid
-	// If 255, the node is opaque.
-	// Otherwise it uses texture alpha.
-	u8 alpha;
+	AlphaMode alpha;
 	// The color of the node.
 	video::SColor color;
 	std::string palette_name;
@@ -408,24 +419,50 @@ struct ContentFeatures
 	*/
 
 	ContentFeatures();
-	~ContentFeatures() = default;
+	~ContentFeatures();
 	void reset();
 	void serialize(std::ostream &os, u16 protocol_version) const;
 	void deSerialize(std::istream &is);
 	void deSerializeOld(std::istream &is, int version);
 	void serializeOld(std::ostream &os, u16 protocol_version) const;
-	/*!
-	 * Since vertex alpha is no longer supported, this method
-	 * adds opacity directly to the texture pixels.
-	 *
-	 * \param tiles array of the tile definitions.
-	 * \param length length of tiles
-	 */
-	void correctAlpha(TileDef *tiles, int length);
 
 	/*
 		Some handy methods
 	*/
+	void setDefaultAlphaMode()
+	{
+		switch (drawtype) {
+		case NDT_NORMAL:
+		case NDT_LIQUID:
+		case NDT_FLOWINGLIQUID:
+			alpha = ALPHAMODE_OPAQUE;
+			break;
+		case NDT_NODEBOX:
+		case NDT_MESH:
+			alpha = ALPHAMODE_LEGACY_COMPAT; // this should eventually be OPAQUE
+			break;
+		default:
+			alpha = ALPHAMODE_CLIP;
+			break;
+		}
+	}
+
+	bool needsBackfaceCulling() const
+	{
+		switch (drawtype) {
+		case NDT_TORCHLIKE:
+		case NDT_SIGNLIKE:
+		case NDT_FIRELIKE:
+		case NDT_RAILLIKE:
+		case NDT_PLANTLIKE:
+		case NDT_PLANTLIKE_ROOTED:
+		case NDT_MESH:
+			return false;
+		default:
+			return true;
+		}
+	}
+
 	bool isLiquid() const{
 		return (liquid_type != LIQUID_NONE);
 	}
@@ -443,6 +480,21 @@ struct ContentFeatures
 	void updateTextures(ITextureSource *tsrc, IShaderSource *shdsrc,
 		scene::IMeshManipulator *meshmanip, Client *client, const TextureSettings &tsettings);
 #endif
+
+private:
+#ifndef SERVER
+	/*
+	 * Checks if any tile texture has any transparent pixels.
+	 * Prints a warning and returns true if that is the case, false otherwise.
+	 * This is supposed to be used for use_texture_alpha backwards compatibility.
+	 */
+	bool textureAlphaCheck(ITextureSource *tsrc, const TileDef *tiles,
+		int length);
+#endif
+
+	void setAlphaFromLegacy(u8 legacy_alpha);
+
+	u8 getAlphaForLegacy() const;
 };
 
 /*!

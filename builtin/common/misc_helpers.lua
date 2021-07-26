@@ -696,3 +696,7 @@ function core.privs_to_string(privs, delim)
 	end
 	return table.concat(list, delim)
 end
+
+function core.is_nan(number)
+	return number ~= number
+end

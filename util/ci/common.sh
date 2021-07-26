@@ -5,15 +5,10 @@ install_linux_deps() {
 	local pkgs=(libirrlicht-dev cmake libbz2-dev libpng-dev \
 		libjpeg-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev \
 		libhiredis-dev libogg-dev libgmp-dev libvorbis-dev libopenal-dev \
-		gettext libpq-dev postgresql-server-dev-all libleveldb-dev \
-		libcurl4-openssl-dev)
-	# for better coverage, build some jobs with luajit
-	if [ -n "$WITH_LUAJIT" ]; then
-		pkgs+=(libluajit-5.1-dev)
-	fi
+		gettext libpq-dev libleveldb-dev libcurl4-openssl-dev)
 
 	sudo apt-get update
-	sudo apt-get install -y --no-install-recommends ${pkgs[@]}
+	sudo apt-get install -y --no-install-recommends ${pkgs[@]} "$@"
 }
 
 # Mac OSX build only

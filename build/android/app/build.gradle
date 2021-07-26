@@ -113,17 +113,8 @@ task prepareAssetsGames() {
 	}
 }
 
-task zipAssetsWorlds(type: Zip) {
-	archiveFileName = "worlds.zip"
-	destinationDirectory = file("src/main/assets/data")
-	from("../../worlds") {
-		into "worlds"
-	}
-}
-
 preBuild.dependsOn zipAssetsFiles
 preBuild.dependsOn zipAssetsGames
-preBuild.dependsOn zipAssetsWorlds
 
 // Map for the version code that gives each ABI a value.
 def abiCodes = ['armeabi-v7a': 0, 'arm64-v8a': 1]
