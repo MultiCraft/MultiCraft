@@ -343,8 +343,8 @@ bool Hud::calculateScreenPos(const v3s16 &camera_offset, HudElement *e, v2s32 *p
 
 void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 {
-	u32 text_height = g_fontengine->getTextHeight();
-	irr::gui::IGUIFont* font = g_fontengine->getFont();
+	const u32 text_height = g_fontengine->getTextHeight();
+	gui::IGUIFont *const font = g_fontengine->getFont();
 
 	bool show_touch_only = false;
 #if HAVE_TOUCHSCREENGUI
@@ -401,7 +401,6 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 
 		switch (e->type) {
 			case HUD_ELEM_TEXT: {
-				irr::gui::IGUIFont *textfont = font;
 				float font_size = g_fontengine->getDefaultFontSize();
 
 				if (e->size.X > 0)
@@ -409,8 +408,9 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 				else if (e->size.Y > 0)
 					 font_size = MYMAX(font_size * (float) e->size.Y / 100, 1.0f);
 
-				if (font_size != g_fontengine->getDefaultFontSize())
-					textfont = g_fontengine->getFont(font_size);
+				FontSpec spec(font_size, (e->style & HUD_STYLE_MONO) ? FM_Mono : FM_Unspecified,
+					e->style & HUD_STYLE_BOLD, e->style & HUD_STYLE_ITALIC, 0);
+				auto textfont = g_fontengine->getFont(spec);
 
 				video::SColor color(255, (e->number >> 16) & 0xFF,
 										 (e->number >> 8)  & 0xFF,
@@ -426,7 +426,8 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 				// The text size on Android is not proportional with the actual scaling
 				if (below_center) {
 					font_size = MYMAX(font_size * 0.9f, 1.0f);
-					textfont = g_fontengine->getFont(font_size);
+					spec.size = font_size;
+					textfont = g_fontengine->getFont(spec);
 					textsize = textfont->getDimension(text.c_str());
 				}
 #endif

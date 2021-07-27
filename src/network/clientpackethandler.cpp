@@ -1102,7 +1102,7 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	v2s32 size;
 	s16 z_index = 0;
 	std::string text2;
-	u32 style = 0; // Used in later MT versions, here for compatibility
+	u32 style = 0;
 	bool unhideable = false;
 	bool touch_only = false;
 
@@ -1136,6 +1136,7 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	event->hudadd->size      = size;
 	event->hudadd->z_index   = z_index;
 	event->hudadd->text2     = text2;
+	event->hudadd->style     = style;
 	event->hudadd->unhideable = unhideable;
 	event->hudadd->touch_only = touch_only;
 	m_client_event_queue.push(event);
@@ -1172,7 +1173,7 @@ void Client::handleCommand_HudChange(NetworkPacket* pkt)
 		*pkt >> sdata;
 	else if (stat == HUD_STAT_WORLD_POS)
 		*pkt >> v3fdata;
-	else if (stat == HUD_STAT_SIZE )
+	else if (stat == HUD_STAT_SIZE)
 		*pkt >> v2s32data;
 	else
 		*pkt >> intdata;

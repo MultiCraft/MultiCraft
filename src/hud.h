@@ -34,6 +34,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define HUD_CORNER_LOWER  1
 #define HUD_CORNER_CENTER 2
 
+#define HUD_STYLE_BOLD   1
+#define HUD_STYLE_ITALIC 2
+#define HUD_STYLE_MONO   4
+
 // Note that these visibility flags do not determine if the hud items are
 // actually drawn, but rather, whether to draw the item should the rest
 // of the game state permit it.
@@ -140,6 +144,7 @@ struct HudElement {
 	v2s32 size;
 	s16 z_index = 0;
 	std::string text2;
+	u32 style;
 	bool unhideable = false;
 	bool touch_only = false;
 };
