@@ -93,3 +93,10 @@ endif(WIN32)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Irrlicht DEFAULT_MSG IRRLICHT_LIBRARY IRRLICHT_INCLUDE_DIR)
 
+if(IRRLICHT_FOUND AND NOT TARGET IrrlichtMt::IrrlichtMt)
+	add_library(IrrlichtMt::IrrlichtMt UNKNOWN IMPORTED)
+	set_target_properties(IrrlichtMt::IrrlichtMt PROPERTIES
+		IMPORTED_LOCATION "${IRRLICHT_LIBRARY}"
+		INTERFACE_INCLUDE_DIRECTORIES "${IRRLICHT_INCLUDE_DIR}")
+endif()
+

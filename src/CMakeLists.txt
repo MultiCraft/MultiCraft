@@ -591,7 +591,6 @@ endif()
 include_directories(
 	${PROJECT_BINARY_DIR}
 	${PROJECT_SOURCE_DIR}
-	${IRRLICHT_INCLUDE_DIR}
 	${ZLIB_INCLUDE_DIR}
 	${ZSTD_INCLUDE_DIR}
 	${PNG_INCLUDE_DIR}
@@ -632,7 +631,7 @@ if(BUILD_CLIENT)
 		${PROJECT_NAME}
 		${ZLIB_LIBRARIES}
 		${ZSTD_LIBRARY}
-		${IRRLICHT_LIBRARY}
+		IrrlichtMt::IrrlichtMt
 		${JPEG_LIBRARIES}
 		${BZIP2_LIBRARIES}
 		${PNG_LIBRARIES}
@@ -760,6 +759,11 @@ endif(BUILD_CLIENT)
 if(BUILD_SERVER)
 	add_executable(${PROJECT_NAME}server ${server_SRCS} ${extra_windows_SRCS})
 	add_dependencies(${PROJECT_NAME}server GenerateVersion)
+
+	get_target_property(
+		IRRLICHT_INCLUDES IrrlichtMt::IrrlichtMt INTERFACE_INCLUDE_DIRECTORIES)
+	# Doesn't work without PRIVATE/PUBLIC/INTERFACE mode specified.
+	target_include_directories(${PROJECT_NAME}server PRIVATE ${IRRLICHT_INCLUDES})
 	target_link_libraries(
 		${PROJECT_NAME}server
 		${ZLIB_LIBRARIES}
