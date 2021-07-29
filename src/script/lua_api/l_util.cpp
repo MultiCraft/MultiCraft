@@ -42,6 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/hex.h"
 #include "util/hashing.h"
 #include "util/string.h"
+#include "util/png.h"
 #include <algorithm>
 #include "translation.h"
 #if defined(__ANDROID__) || defined(__APPLE__)
@@ -568,6 +569,43 @@ int ModApiUtil::l_colorspec_to_colorstring(lua_State *L)
 	return 0;
 }
 
+// colorspec_to_bytes(colorspec)
+int ModApiUtil::l_colorspec_to_bytes(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+
+	video::SColor color(0);
+	if (read_color(L, 1, &color)) {
+		u8 colorbytes[4] = {
+			(u8) color.getRed(),
+			(u8) color.getGreen(),
+			(u8) color.getBlue(),
+			(u8) color.getAlpha(),
+		};
+		lua_pushlstring(L, (const char*) colorbytes, 4);
+		return 1;
+	}
+
+	return 0;
+}
+
+// encode_png(w, h, data, level)
+int ModApiUtil::l_encode_png(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+
+	// The args are already pre-validated on the lua side.
+	u32 width = readParam<int>(L, 1);
+	u32 height = readParam<int>(L, 2);
+	const char *data = luaL_checklstring(L, 3, NULL);
+	s32 compression = readParam<int>(L, 4);
+
+	std::string out = encodePNG((const u8*)data, width, height, compression);
+
+	lua_pushlstring(L, out.data(), out.size());
+	return 1;
+}
+
 #ifndef SERVER
 int ModApiUtil::l_upgrade(lua_State *L)
 {
@@ -766,6 +804,9 @@ void ModApiUtil::Initialize(lua_State *L, int top)
 	API_FCT(get_version);
 	API_FCT(sha1);
 	API_FCT(colorspec_to_colorstring);
+	API_FCT(colorspec_to_bytes);
+
+	API_FCT(encode_png);
 
 #ifndef SERVER
 	API_FCT(upgrade);
@@ -798,6 +839,7 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(get_version);
 	API_FCT(sha1);
 	API_FCT(colorspec_to_colorstring);
+	API_FCT(colorspec_to_bytes);
 
 	API_FCT(get_screen_info);
 	API_FCT(get_system_ram);
@@ -839,6 +881,7 @@ void ModApiUtil::InitializeAsync(lua_State *L, int top)
 	API_FCT(get_version);
 	API_FCT(sha1);
 	API_FCT(colorspec_to_colorstring);
+	API_FCT(colorspec_to_bytes);
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");

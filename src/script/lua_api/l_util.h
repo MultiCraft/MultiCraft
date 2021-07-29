@@ -104,6 +104,12 @@ private:
 	// colorspec_to_colorstring(colorspec)
 	static int l_colorspec_to_colorstring(lua_State *L);
 
+	// colorspec_to_bytes(colorspec)
+	static int l_colorspec_to_bytes(lua_State *L);
+
+	// encode_png(w, h, data, level)
+	static int l_encode_png(lua_State *L);
+
 #ifndef SERVER
 	// upgrade(string, string)
 	static int l_upgrade(lua_State *L);
