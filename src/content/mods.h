@@ -67,6 +67,9 @@ struct ModSpec
 	 */
 	std::string virtual_path;
 
+	// For logging purposes
+	std::vector<const char *> deprecation_msgs;
+
 	// if modpack:
 	std::map<std::string, ModSpec> modpack_content;
 
@@ -80,6 +83,7 @@ struct ModSpec
 	}
 
 	bool isTrusted() const;
+	void checkAndLog() const;
 };
 
 // Retrieves depends, optdepends, is_modpack and modpack_content

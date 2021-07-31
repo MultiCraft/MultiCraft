@@ -39,6 +39,29 @@ bool ModSpec::isTrusted() const
 	return mod_path && *mod_path && fs::PathStartsWith(path, mod_path);
 }
 
+void ModSpec::checkAndLog() const
+{
+	if (!string_allowed(name, MODNAME_ALLOWED_CHARS)) {
+		throw ModError("Error loading mod \"" + name +
+			"\": Mod name does not follow naming conventions: "
+				"Only characters [a-z0-9_] are allowed.");
+	}
+
+	// Log deprecation messages
+	auto handling_mode = get_deprecated_handling_mode();
+	if (!deprecation_msgs.empty() && handling_mode != DeprecatedHandlingMode::Ignore) {
+		std::ostringstream os;
+		os << "Mod " << name << " at " << path << ":" << std::endl;
+		for (auto msg : deprecation_msgs)
+			os << "\t" << msg << std::endl;
+
+		if (handling_mode == DeprecatedHandlingMode::Error)
+			throw ModError(os.str());
+		else
+			warningstream << os.str();
+	}
+}
+
 bool parseDependsString(std::string &dep, std::unordered_set<char> &symbols)
 {
 	dep = trim(dep);
@@ -52,21 +75,6 @@ bool parseDependsString(std::string &dep, std::unordered_set<char> &symbols)
 	}
 	dep = trim(dep.substr(0, pos));
 	return !dep.empty();
-}
-
-static void log_mod_deprecation(const ModSpec &spec, const std::string &warning)
-{
-	auto handling_mode = get_deprecated_handling_mode();
-	if (handling_mode != DeprecatedHandlingMode::Ignore) {
-		std::ostringstream os;
-		os << warning << " (" << spec.name << " at " << spec.path << ")" << std::endl;
-
-		if (handling_mode == DeprecatedHandlingMode::Error) {
-			throw ModError(os.str());
-		} else {
-			warningstream << os.str();
-		}
-	}
 }
 
 void parseModContents(ModSpec &spec)
@@ -98,7 +106,7 @@ void parseModContents(ModSpec &spec)
 		if (info.exists("name"))
 			spec.name = info.get("name");
 		else
-			log_mod_deprecation(spec, "Mods not having a mod.conf file with the name is deprecated.");
+			spec.deprecation_msgs.push_back("Mods not having a mod.conf file with the name is deprecated.");
 
 		if (info.exists("author"))
 			spec.author = info.get("author");
@@ -139,7 +147,7 @@ void parseModContents(ModSpec &spec)
 			std::ifstream is((spec.path + DIR_DELIM + "depends.txt").c_str());
 
 			if (is.good())
-				log_mod_deprecation(spec, "depends.txt is deprecated, please use mod.conf instead.");
+				spec.deprecation_msgs.push_back("depends.txt is deprecated, please use mod.conf instead.");
 
 			while (is.good()) {
 				std::string dep;
@@ -162,7 +170,7 @@ void parseModContents(ModSpec &spec)
 		if (info.exists("description"))
 			spec.desc = info.get("description");
 		else if (fs::ReadFile(spec.path + DIR_DELIM + "description.txt", spec.desc))
-			log_mod_deprecation(spec, "description.txt is deprecated, please use mod.conf instead.");
+			spec.deprecation_msgs.push_back("description.txt is deprecated, please use mod.conf instead.");
 	}
 }
 

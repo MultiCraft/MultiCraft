@@ -67,12 +67,8 @@ void ServerModManager::loadMods(ServerScripting *script)
 
 	// Load and run "mod" scripts
 	for (const ModSpec &mod : m_sorted_mods) {
-		if (!string_allowed(mod.name, MODNAME_ALLOWED_CHARS)) {
-			throw ModError("Error loading mod \"" + mod.name +
-					"\": Mod name does not follow naming "
-					"conventions: "
-					"Only characters [a-z0-9_] are allowed.");
-		}
+		mod.checkAndLog();
+
 		std::string script_path = mod.path + DIR_DELIM + "init.lua";
 		auto t = porting::getTimeMs();
 
