@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <unordered_map>
 
 #include "irrlichttypes_bloated.h"
+#include "common/c_content.h"
 #include "common/c_types.h"
 
 extern "C" {
@@ -132,7 +133,8 @@ void                push_v2f            (lua_State *L, v2f p);
 
 void                warn_if_field_exists(lua_State *L, int table,
                                          const char *fieldname,
-                                         const std::string &message);
+                                         const std::string &message,
+                                         ContentFeatures *f = nullptr);
 
 size_t write_array_slice_float(lua_State *L, int table_index, float *data,
 	v3u16 data_size, v3u16 slice_offset, v3u16 slice_size);

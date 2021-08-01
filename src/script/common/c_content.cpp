@@ -554,7 +554,7 @@ void read_content_features(lua_State *L, ContentFeatures &f, int index)
 	if(lua_isnil(L, -1)){
 		lua_pop(L, 1);
 		warn_if_field_exists(L, index, "tile_images",
-				"Deprecated; new name is \"tiles\".");
+				"Deprecated; new name is \"tiles\".", &f);
 		lua_getfield(L, index, "tile_images");
 	}
 	if(lua_istable(L, -1)){
@@ -617,7 +617,7 @@ void read_content_features(lua_State *L, ContentFeatures &f, int index)
 	if(lua_isnil(L, -1)){
 		lua_pop(L, 1);
 		warn_if_field_exists(L, index, "special_materials",
-				"Deprecated; new name is \"special_tiles\".");
+				"Deprecated; new name is \"special_tiles\".", &f);
 		lua_getfield(L, index, "special_materials");
 	}
 	if(lua_istable(L, -1)){
@@ -645,14 +645,14 @@ void read_content_features(lua_State *L, ContentFeatures &f, int index)
 
 	warn_if_field_exists(L, index, "alpha",
 		"Obsolete, only limited compatibility provided; "
-		"replaced by \"use_texture_alpha\"");
+		"replaced by \"use_texture_alpha\"", &f);
 	if (getintfield_default(L, index, "alpha", 255) != 255)
 		f.alpha = ALPHAMODE_BLEND;
 
 	lua_getfield(L, index, "use_texture_alpha");
 	if (lua_isboolean(L, -1)) {
 		warn_if_field_exists(L, index, "use_texture_alpha",
-			"Boolean values are deprecated; use the new choices");
+			"Boolean values are deprecated; use the new choices", &f);
 		if (lua_toboolean(L, -1))
 			f.alpha = (f.drawtype == NDT_NORMAL) ? ALPHAMODE_CLIP : ALPHAMODE_BLEND;
 	} else if (check_field_or_nil(L, -1, LUA_TSTRING, "use_texture_alpha")) {
@@ -1180,12 +1180,14 @@ void pushnode(lua_State *L, const MapNode &n, const NodeDefManager *ndef)
 
 /******************************************************************************/
 void warn_if_field_exists(lua_State *L, int table,
-		const char *name, const std::string &message)
+		const char *name, const std::string &message, ContentFeatures *f)
 {
 	lua_getfield(L, table, name);
 	if (!lua_isnil(L, -1)) {
-		warningstream << "Field \"" << name << "\": "
-				<< message << std::endl;
+		warningstream << "Field \"" << name;
+		if (f != nullptr)
+		 	warningstream << "\" in node \"" << f->name;
+		warningstream << "\": " << message << std::endl;
 		infostream << script_get_backtrace(L) << std::endl;
 	}
 	lua_pop(L, 1);
