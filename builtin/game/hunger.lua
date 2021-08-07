@@ -3,7 +3,7 @@
 	Copyright (C) BlockMen (2013-2015)
 	Copyright (C) Auke Kok <sofar@foo-projects.org> (2016)
 	Copyright (C) Minetest Mods Team (2016-2019)
-	Copyright (C) MultiCraft Development Team (2016-2020)
+	Copyright (C) MultiCraft Development Team (2016-2021)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -66,26 +66,18 @@ local attribute = {
 
 local function is_player(player)
 	return (
-		minetest.is_player(player) and
-		not player.is_fake_player)
-end
-
-local function get_int_attribute(player, key)
-	local level = player:get_attribute(key)
-	if level then
-		return tonumber(level)
-	else
-		return nil
-	end
+		core.is_player(player) and
+		not player.is_fake_player
+	)
 end
 
 --- SATURATION API ---
 function hunger.get_saturation(player)
-	return get_int_attribute(player, attribute.saturation)
+	return player:get_meta():get_int(attribute.saturation)
 end
 
 function hunger.set_saturation(player, level)
-	player:set_attribute(attribute.saturation, level)
+	player:get_meta():set_int(attribute.saturation, level)
 	hud.change_item(player, "hunger", {number = min(settings.visual_max, level)})
 end
 
@@ -105,7 +97,7 @@ function hunger.update_saturation(player, level)
 
 	local old = hunger.get_saturation(player)
 
-	if not old or old == level then  -- To suppress HUD update
+	if not old or old == level then -- To suppress HUD update
 		return
 	end
 
@@ -133,17 +125,14 @@ hunger.change = hunger.change_saturation -- for backwards compatablity
 
 --- POISON API ---
 function hunger.is_poisoned(player)
-	return player:get_attribute(attribute.poisoned) == "yes"
+	return player:get_meta():get_string(attribute.poisoned) == "yes"
 end
 
 function hunger.set_poisoned(player, poisoned)
-	if poisoned then
-		hud.change_item(player, "hunger", {text = "hunger_poisen.png"})
-		player:set_attribute(attribute.poisoned, "yes")
-	else
-		hud.change_item(player, "hunger", {text = "hunger.png"})
-		player:set_attribute(attribute.poisoned, "no")
-	end
+	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
+	local attr = poisoned and "yes" or "no"
+	hud.change_item(player, "hunger", {text = texture})
+	player:get_meta():set_string(attribute.poisoned, attr)
 end
 
 local function poison_tick(player, ticks, interval, elapsed)
@@ -193,11 +182,11 @@ hunger.exhaustion_reasons = {
 }
 
 function hunger.get_exhaustion(player)
-	return get_int_attribute(player, attribute.exhaustion)
+	return player:get_meta():get_int(attribute.exhaustion)
 end
 
 function hunger.set_exhaustion(player, exhaustion)
-	player:set_attribute(attribute.exhaustion, exhaustion)
+	player:get_meta():set_int(attribute.exhaustion, exhaustion)
 end
 
 hunger.registered_on_exhaust_players = {}
@@ -237,7 +226,7 @@ local function move_tick()
 	for _, player in pairs(connected_players()) do
 		local controls = player:get_player_control()
 		local is_moving = controls.up or controls.down or controls.left or controls.right
-		local velocity = player:get_player_velocity()
+		local velocity = player:get_velocity()
 		velocity.y = 0
 		local horizontal_speed = vlength(velocity)
 		local has_velocity = horizontal_speed > 0.05
@@ -346,10 +335,10 @@ core.register_on_joinplayer(function(player)
 	-- reset poisoned
 	hunger.set_poisoned(player, false)
 	-- set saturation
-	player:set_attribute(attribute.saturation, level)
+	player:get_meta():set_int(attribute.saturation, level)
 
 	-- we must manually update the HUD
-	if level and (level < settings.visual_max) then
+	if level < settings.visual_max then
 		core.after(1, function()
 			hud.change_item(player, "hunger", {number = min(settings.visual_max, level)})
 		end)
