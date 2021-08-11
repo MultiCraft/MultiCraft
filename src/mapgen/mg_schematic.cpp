@@ -269,6 +269,17 @@ void Schematic::placeOnMap(ServerMap *map, v3s16 p, u32 flags,
 
 	//// Carry out post-map-modification actions
 
+	if (force_place) {
+		v3s16 npos;
+		for (npos.X = p.X; npos.X < p.X + s.X; npos.X++) {
+			for (npos.Y = p.Y; npos.Y < p.Y + s.Y; npos.Y++) {
+				for (npos.Z = p.Z; npos.Z < p.Z + s.Z; npos.Z++) {
+					map->removeNodeMetadata(npos);
+				}
+			}
+		}
+	}
+
 	//// Create & dispatch map modification events to observers
 	MapEditEvent event;
 	event.type = MEET_OTHER;
