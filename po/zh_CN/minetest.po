@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: Chinese (Simplified) (Minetest)\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2021-06-16 18:27+0200\n"
-"PO-Revision-Date: 2021-08-02 16:34+0000\n"
-"Last-Translator: Emily Ellis <e222d29f@outlook.com>\n"
+"PO-Revision-Date: 2021-08-13 21:34+0000\n"
+"Last-Translator: Zhaolin Lau <zhaolinlau@gmail.com>\n"
 "Language-Team: Chinese (Simplified) <https://hosted.weblate.org/projects/"
 "minetest/minetest/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -4013,7 +4013,7 @@ msgstr ""
 msgid ""
 "If the execution of a chat command takes longer than this specified time in\n"
 "seconds, add the time information to the chat command message"
-msgstr ""
+msgstr "如果聊天命令的执行时间长于此指定以秒为单位时间，请将时间信息添加到聊天命令消息中。"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -5449,7 +5449,7 @@ msgid ""
 "Maximum number of concurrent downloads. Downloads exceeding this limit will "
 "be queued.\n"
 "This should be lower than curl_parallel_limit."
-msgstr ""
+msgstr "最大并发下载数。 超过此限制的下载将排队。 这应该低于 curl_parallel_limit（卷曲平行限制）。"
 
 #: src/settings_translation_file.cpp
 msgid "Maximum number of forceloaded mapblocks."
@@ -5524,7 +5524,7 @@ msgstr "单个文件下载（如mod下载）的最大时间。"
 msgid ""
 "Maximum time an interactive request (e.g. server list fetch) may take, "
 "stated in milliseconds."
-msgstr ""
+msgstr "交互式请求（例如服务器列表获取）可能需要的最长时间，以毫秒为单位。"
 
 #: src/settings_translation_file.cpp
 msgid "Maximum users"
@@ -6283,6 +6283,8 @@ msgid ""
 "Set the shadow strength.\n"
 "Lower value means lighter shadows, higher value means darker shadows."
 msgstr ""
+"设置阴影强度。\n"
+"较低的值表示较亮的阴影，较高的值表示较暗的阴影。"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6291,6 +6293,9 @@ msgid ""
 "resources.\n"
 "Minimun value 0.001 seconds max value 0.2 seconds"
 msgstr ""
+"设置阴影更新时间。\n"
+"较低的值意味着阴影和贴图更新更快，但会消耗更多资源。\n"
+"最小值 0.001 秒 最大值 0.2 秒"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6298,6 +6303,9 @@ msgid ""
 "Lower values mean sharper shadows bigger values softer.\n"
 "Minimun value 1.0 and max value 10.0"
 msgstr ""
+"设置软阴影半径大小。\n"
+"较低的值意味着更清晰的阴影更大的值更柔和。\n"
+"最小值 1.0 和最大值 10.0"
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -6305,6 +6313,9 @@ msgid ""
 "Value of 0 means no tilt / vertical orbit.\n"
 "Minimun value 0.0 and max value 60.0"
 msgstr ""
+"以度为单位设置太阳/月亮轨道的倾斜度\n"
+"值 0 表示没有倾斜/垂直轨道。\n"
+"最小值 0.0 和最大值 60.0"
 
 #: src/settings_translation_file.cpp
 #, fuzzy
@@ -6345,6 +6356,9 @@ msgid ""
 "On false, 16 bits texture will be used.\n"
 "This can cause much more artifacts in the shadow."
 msgstr ""
+"将阴影纹理质量设置为 32 位。\n"
+"如果为 false（否），将使用 16 位纹理。\n"
+"这可能会导致阴影中出现更多阴影。"
 
 #: src/settings_translation_file.cpp
 msgid "Shader path"
@@ -6368,11 +6382,11 @@ msgstr "截图品质"
 
 #: src/settings_translation_file.cpp
 msgid "Shadow map max distance in nodes to render shadows"
-msgstr ""
+msgstr "渲染阴影的节点中的阴影贴图最大距离"
 
 #: src/settings_translation_file.cpp
 msgid "Shadow map texture in 32 bits"
-msgstr ""
+msgstr "32 位阴影贴图纹理"
 
 #: src/settings_translation_file.cpp
 #, fuzzy
@@ -6393,7 +6407,7 @@ msgstr "后备字体阴影偏移（单位为像素），0 表示不绘制阴影�
 
 #: src/settings_translation_file.cpp
 msgid "Shadow strength"
-msgstr ""
+msgstr "阴影强度"
 
 #: src/settings_translation_file.cpp
 msgid "Shape of the minimap. Enabled = round, disabled = square."
@@ -6452,7 +6466,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Sky Body Orbit Tilt"
-msgstr ""
+msgstr "天体轨道倾斜"
 
 #: src/settings_translation_file.cpp
 msgid "Slice w"
