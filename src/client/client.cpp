@@ -1924,7 +1924,7 @@ bool Client::afterContentReceived()
 	tu_args.guienv = guienv;
 	tu_args.last_time_ms = porting::getTimeMs();
 	tu_args.last_percent = 0;
-	tu_args.text_base =  wgettext("Initializing nodes");
+	tu_args.text_base = wgettext("Initializing nodes");
 	tu_args.tsrc = m_tsrc;
 	result = m_nodedef->updateTextures(this, texture_update_progress, &tu_args);
 	delete[] tu_args.text_base;
