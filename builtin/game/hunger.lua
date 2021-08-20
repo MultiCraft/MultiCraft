@@ -125,7 +125,8 @@ hunger.change = hunger.change_saturation -- for backwards compatablity
 
 --- POISON API ---
 function hunger.is_poisoned(player)
-	return player:get_meta():get_string(attribute.poisoned) == "yes"
+	local poisoned = player:get_meta():get_string(attribute.poisoned)
+	return poisoned and poisoned == "yes"
 end
 
 function hunger.set_poisoned(player, poisoned)
