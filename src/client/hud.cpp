@@ -933,13 +933,14 @@ void Hud::drawSelectionMesh()
 	}
 }
 
-void Hud::toggleBlockBounds()
+enum Hud::BlockBoundsMode Hud::toggleBlockBounds()
 {
 	m_block_bounds_mode = static_cast<BlockBoundsMode>(m_block_bounds_mode + 1);
 
 	if (m_block_bounds_mode >= BLOCK_BOUNDS_MAX) {
 		m_block_bounds_mode = BLOCK_BOUNDS_OFF;
 	}
+	return m_block_bounds_mode;
 }
 
 void Hud::disableBlockBounds()
@@ -966,7 +967,7 @@ void Hud::drawBlockBounds()
 
 	v3f offset = intToFloat(client->getCamera()->getOffset(), BS);
 
-	s8 radius = m_block_bounds_mode == BLOCK_BOUNDS_ALL ? 2 : 0;
+	s8 radius = m_block_bounds_mode == BLOCK_BOUNDS_NEAR ? 2 : 0;
 
 	v3f halfNode = v3f(BS, BS, BS) / 2.0f;
 

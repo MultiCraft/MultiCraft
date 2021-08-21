@@ -725,6 +725,7 @@ protected:
 	void toggleFast();
 	void toggleNoClip();
 	void toggleCinematic();
+	void toggleBlockBounds();
 	void toggleAutoforward();
 
 	void toggleMinimap(bool shift_pressed);
@@ -2145,7 +2146,7 @@ void Game::processKeyInput()
 	} else if (wasKeyDown(KeyType::SCREENSHOT)) {
 		client->makeScreenshot();
 	} else if (wasKeyDown(KeyType::TOGGLE_BLOCK_BOUNDS)) {
-		hud->toggleBlockBounds();
+		toggleBlockBounds();
 	} else if (wasKeyDown(KeyType::TOGGLE_HUD)) {
 		m_game_ui->toggleHud();
 	} else if (wasKeyDown(KeyType::TOGGLE_NAMETAGS)) {
@@ -2429,6 +2430,27 @@ void Game::toggleCinematic()
 		m_game_ui->showTranslatedStatusText("Cinematic mode enabled");
 	else
 		m_game_ui->showTranslatedStatusText("Cinematic mode disabled");
+}
+
+void Game::toggleBlockBounds()
+{
+	enum Hud::BlockBoundsMode newmode = hud->toggleBlockBounds();
+	switch (newmode) {
+		case Hud::BLOCK_BOUNDS_OFF:
+			m_game_ui->showTranslatedStatusText("Block bounds hidden");
+			break;
+		case Hud::BLOCK_BOUNDS_CURRENT:
+			m_game_ui->showTranslatedStatusText("Block bounds shown for current block");
+			break;
+		case Hud::BLOCK_BOUNDS_NEAR:
+			m_game_ui->showTranslatedStatusText("Block bounds shown for nearby blocks");
+			break;
+		case Hud::BLOCK_BOUNDS_MAX:
+			m_game_ui->showTranslatedStatusText("Block bounds shown for all blocks");
+			break;
+		default:
+			break;
+	}
 }
 
 // Autoforward by toggling continuous forward.
