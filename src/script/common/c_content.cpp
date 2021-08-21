@@ -2021,15 +2021,17 @@ void push_hud_element(lua_State *L, HudElement *elem)
 	lua_setfield(L, -2, "touch_only");
 }
 
-HudElementStat read_hud_change(lua_State *L, HudElement *elem, void **value)
+bool read_hud_change(lua_State *L, HudElementStat &stat, HudElement *elem, void **value)
 {
-	HudElementStat stat = HUD_STAT_NUMBER;
-	std::string statstr;
-	if (lua_isstring(L, 3)) {
+	std::string statstr = lua_tostring(L, 3);
+	{
 		int statint;
-		statstr = lua_tostring(L, 3);
-		stat = string_to_enum(es_HudElementStat, statint, statstr) ?
-				(HudElementStat)statint : stat;
+		if (!string_to_enum(es_HudElementStat, statint, statstr)) {
+			script_log_unique(L, "Unknown HUD stat type: " + statstr, warningstream);
+			return false;
+		}
+
+		stat = (HudElementStat)statint;
 	}
 
 	switch (stat) {
@@ -2100,7 +2102,8 @@ HudElementStat read_hud_change(lua_State *L, HudElement *elem, void **value)
 			*value = &elem->touch_only;
 			break;
 	}
-	return stat;
+
+	return true;
 }
 
 /******************************************************************************/
