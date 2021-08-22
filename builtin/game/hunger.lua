@@ -73,7 +73,9 @@ end
 
 --- SATURATION API ---
 function hunger.get_saturation(player)
-	return player:get_meta():get_int(attribute.saturation)
+	-- This uses get_string so that nil is returned when there is no value as
+	-- get_string() will return an empty string and tonumber("") == nil.
+	return tonumber(player:get_meta():get_string(attribute.saturation))
 end
 
 function hunger.set_saturation(player, level)
@@ -125,7 +127,8 @@ hunger.change = hunger.change_saturation -- for backwards compatablity
 
 --- POISON API ---
 function hunger.is_poisoned(player)
-	return player:get_meta():get_string(attribute.poisoned) == "yes"
+	local poisoned = player:get_meta():get_string(attribute.poisoned)
+	return poisoned and poisoned == "yes"
 end
 
 function hunger.set_poisoned(player, poisoned)
