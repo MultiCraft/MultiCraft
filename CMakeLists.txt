@@ -3,6 +3,13 @@ if(POLICY CMP0177)
 	cmake_policy(SET CMP0177 NEW)
 endif()
 
+# Set policies up to 3.9 since we want to enable the IPO option
+if(${CMAKE_VERSION} VERSION_LESS 3.9)
+	cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+else()
+	cmake_policy(VERSION 3.9)
+endif()
+
 # This can be read from ${PROJECT_NAME} after project() is called
 project(multicraft)
 set(PROJECT_NAME_CAPITALIZED "MultiCraft")
