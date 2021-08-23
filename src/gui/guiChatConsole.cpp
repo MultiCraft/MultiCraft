@@ -334,7 +334,7 @@ void GUIChatConsole::drawText()
 					false,
 					false,
 					&AbsoluteClippingRect);
-			} else 
+			} else
 #endif
 			{
 				// Otherwise use standard text
@@ -563,8 +563,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			const c8 *text = os_operator->getTextFromClipboard();
 			if (!text)
 				return true;
-			std::basic_string<unsigned char> str((const unsigned char*)text);
-			prompt.input(std::wstring(str.begin(), str.end()));
+			prompt.input(utf8_to_wide(text));
 			return true;
 		}
 		else if(event.KeyInput.Key == KEY_KEY_X && event.KeyInput.Control)
