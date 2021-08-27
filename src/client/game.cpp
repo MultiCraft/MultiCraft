@@ -2698,12 +2698,13 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 
 	if (m_cache_enable_joysticks) {
 		f32 sens_scale = getSensitivityScaleFactor();
-		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime * sens_scale;
+		f32 c = m_cache_joystick_frustum_sensitivity * dtime * sens_scale;
 		f32 yaw = 0;
 		f32 pitch = 0;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		yaw = input->sdl_game_controller.getCameraYaw();
-		pitch = input->sdl_game_controller.getCameraPitch();
+		// SDL gives the raw axis values
+		yaw = input->sdl_game_controller.getCameraYaw() / 32767.f;
+		pitch = input->sdl_game_controller.getCameraPitch() / 32767.f;
 		cam->camera_yaw -= yaw * c;
 		cam->camera_pitch += pitch * c;
 #else
@@ -2728,18 +2729,12 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 
 void Game::updatePlayerControl(const CameraOrientation &cam)
 {
+	LocalPlayer *player = client->getEnv().getLocalPlayer();
+
 	//TimeTaker tt("update player control", NULL, PRECISION_NANO);
 
-	// DO NOT use the isKeyDown method for the forward, backward, left, right
-	// buttons, as the code that uses the controls needs to be able to
-	// distinguish between the two in order to know when to use joysticks.
-
 	PlayerControl control(
-		input->isKeyDown(KeyType::FORWARD),
-		input->isKeyDown(KeyType::BACKWARD),
-		input->isKeyDown(KeyType::LEFT),
-		input->isKeyDown(KeyType::RIGHT),
-		isKeyDown(KeyType::JUMP),
+		isKeyDown(KeyType::JUMP) || player->getAutojump(),
 		isKeyDown(KeyType::AUX1),
 		isKeyDown(KeyType::SNEAK),
 		isKeyDown(KeyType::ZOOM),
@@ -2748,45 +2743,50 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		isKeyDown(KeyType::PLACE),
 		cam.camera_pitch,
 		cam.camera_yaw,
-#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		input->sdl_game_controller.getMoveSideward(),
-		input->sdl_game_controller.getMoveForward()
-#else
-		input->joystick.getAxisWithoutDead(JA_SIDEWARD_MOVE),
-		input->joystick.getAxisWithoutDead(JA_FORWARD_MOVE)
-#endif
+		input->getMovementSpeed(),
+		input->getMovementDirection()
 	);
 
-	u32 keypress_bits = (
-			( (u32)(isKeyDown(KeyType::FORWARD)                       & 0x1) << 0) |
-			( (u32)(isKeyDown(KeyType::BACKWARD)                      & 0x1) << 1) |
-			( (u32)(isKeyDown(KeyType::LEFT)                          & 0x1) << 2) |
-			( (u32)(isKeyDown(KeyType::RIGHT)                         & 0x1) << 3) |
-			( (u32)(isKeyDown(KeyType::JUMP)                          & 0x1) << 4) |
-			( (u32)(isKeyDown(KeyType::AUX1)                          & 0x1) << 5) |
-			( (u32)(isKeyDown(KeyType::SNEAK)                         & 0x1) << 6) |
-			( (u32)(isKeyDown(KeyType::DIG)                           & 0x1) << 7) |
-			( (u32)(isKeyDown(KeyType::PLACE)                         & 0x1) << 8) |
-			( (u32)(isKeyDown(KeyType::ZOOM)                          & 0x1) << 9) |
-			( (u32)(isKeyDown(KeyType::TABB)                          & 0x1) << 10)
-		);
-
-	LocalPlayer *player = client->getEnv().getLocalPlayer();
-
-	// autojump if set: simulate "jump" key
-	if (player->getAutojump()) {
-		control.jump = true;
-		keypress_bits |= 1U << 4;
-	}
-
-	// autoforward if set: simulate "up" key
+	// autoforward if set: move towards pointed position at maximum speed
 	if (player->getPlayerSettings().continuous_forward &&
 #if !DEBUG
 			(simple_singleplayer_mode || server) &&
 #endif
 			client->activeObjectsReceived() && !player->isDead()) {
-		control.up = true;
-		keypress_bits |= 1U << 0;
+		control.movement_speed = 1.0f;
+		control.movement_direction = 0.0f;
+	}
+
+	u32 keypress_bits = (
+			( (u32)(control.jump  & 0x1) << 4) |
+			( (u32)(control.aux1  & 0x1) << 5) |
+			( (u32)(control.sneak & 0x1) << 6) |
+			( (u32)(control.dig   & 0x1) << 7) |
+			( (u32)(control.place & 0x1) << 8) |
+			( (u32)(control.zoom  & 0x1) << 9) |
+			( (u32)(control.tabb  & 0x1) << 10)
+		);
+
+	// Set direction keys to ensure mod compatibility
+	if (control.movement_speed > 0.001f) {
+		float absolute_direction;
+
+		// Check in original orientation (absolute value indicates forward / backward)
+		absolute_direction = abs(control.movement_direction);
+		if (absolute_direction < (3.0f / 8.0f * M_PI))
+			keypress_bits |= (u32)(0x1 << 0); // Forward
+		if (absolute_direction > (5.0f / 8.0f * M_PI))
+			keypress_bits |= (u32)(0x1 << 1); // Backward
+
+		// Rotate entire coordinate system by 90 degrees (absolute value indicates left / right)
+		absolute_direction = control.movement_direction + M_PI_2;
+		if (absolute_direction >= M_PI)
+			absolute_direction -= 2 * M_PI;
+		absolute_direction = abs(absolute_direction);
+		if (absolute_direction < (3.0f / 8.0f * M_PI))
+			keypress_bits |= (u32)(0x1 << 2); // Left
+		if (absolute_direction > (5.0f / 8.0f * M_PI))
+			keypress_bits |= (u32)(0x1 << 3); // Right
 	}
 
 	client->setPlayerControl(control);

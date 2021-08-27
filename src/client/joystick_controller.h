@@ -144,7 +144,10 @@ public:
 		return m_axes_vals[axis];
 	}
 
-	s16 getAxisWithoutDead(JoystickAxis axis);
+	float getAxisWithoutDead(JoystickAxis axis);
+
+	float getMovementDirection();
+	float getMovementSpeed();
 
 	f32 doubling_dtime;
 
@@ -203,6 +206,8 @@ public:
 	s16 getMoveForward() { return m_move_forward; }
 	s16 getCameraYaw() { return m_camera_yaw; }
 	s16 getCameraPitch() { return m_camera_pitch; }
+	// Forgets the stick position, so a stick still held presses its movement keys again
+	void clearMovement() { m_move_sideward = 0; m_move_forward = 0; }
 
 	void setActive(bool value) { m_active = value; }
 	static bool isActive() { return m_active; }
