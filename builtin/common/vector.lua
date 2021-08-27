@@ -5,7 +5,7 @@ Note: The vector.*-functions must be able to accept old vectors that had no meta
 
 -- localize functions
 local setmetatable = setmetatable
--- math.hypot and math.round come from misc_helpers.lua, loaded after this file
+-- math.round comes from misc_helpers.lua, loaded after this file
 local floor = math.floor
 local min, max, pi = math.min, math.max, math.pi
 
@@ -79,7 +79,7 @@ metatable.__eq = vector.equals
 -- unary operations
 
 function vector.length(v)
-	return math.hypot(v.x, math.hypot(v.y, v.z))
+	return math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z)
 end
 -- Note: we can not use __len because it is already used for primitive table length
 
@@ -112,7 +112,7 @@ function vector.distance(a, b)
 	local x = a.x - b.x
 	local y = a.y - b.y
 	local z = a.z - b.z
-	return math.hypot(x, math.hypot(y, z))
+	return math.sqrt(x * x + y * y + z * z)
 end
 
 function vector.direction(pos1, pos2)
