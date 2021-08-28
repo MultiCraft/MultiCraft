@@ -684,13 +684,6 @@ void GUIEngine::stopSound(s32 handle)
 	m_sound_manager->stopSound(handle);
 }
 
-/******************************************************************************/
-unsigned int GUIEngine::queueAsync(const std::string &serialized_func,
-		const std::string &serialized_params)
-{
-	return m_script->queueAsync(serialized_func, serialized_params);
-}
-
 
 /******************************************************************************/
 #if defined(__ANDROID__) || defined(__APPLE__)
