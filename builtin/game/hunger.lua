@@ -138,8 +138,9 @@ function hunger.set_poisoned(player, poisoned)
 	player:get_meta():set_string(attribute.poisoned, attr)
 end
 
-local function poison_tick(player, ticks, interval, elapsed)
-	if not hunger.is_poisoned(player) then
+local function poison_tick(name, ticks, interval, elapsed)
+	local player = minetest.get_player_by_name(name)
+	if not player or not hunger.is_poisoned(player) then
 		return
 	elseif elapsed > ticks then
 		hunger.set_poisoned(player, false)
@@ -148,7 +149,7 @@ local function poison_tick(player, ticks, interval, elapsed)
 		if hp > 0 then
 			player:set_hp(hp)
 		end
-		core.after(interval, poison_tick, player, ticks, interval, elapsed + 1)
+		core.after(interval, poison_tick, name, ticks, interval, elapsed + 1)
 	end
 end
 
@@ -169,7 +170,7 @@ function hunger.poison(player, ticks, interval)
 		return
 	end
 	hunger.set_poisoned(player, true)
-	poison_tick(player, ticks, interval, 0)
+	poison_tick(player:get_player_name(), ticks, interval, 0)
 end
 --- END POISON API ---
 
