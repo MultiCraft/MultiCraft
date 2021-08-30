@@ -72,11 +72,9 @@ function serverlistmgr.sync()
 	core.handle_async(
 		function(param)
 			local http = core.get_http_api()
-			local url = ("%s%s?proto_version_min=%d&proto_version_max=%d"):format(
+			local url = ("%s/list%s?proto_version_min=%d&proto_version_max=%d"):format(
 				core.settings:get("serverlist_url"),
-				(PLATFORM == "Android" or PLATFORM == "iOS") and
-					core.decode_base64("OjMwMDAvc2VydmVybGlzdC5qc29u") or
-					core.decode_base64("L2xpc3Q"),
+				(PLATFORM == "Android" or PLATFORM == "iOS" or PLATFORM == "OSX") and "_prod" or "",
 				core.get_min_supp_proto(),
 				core.get_max_supp_proto())
 

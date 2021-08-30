@@ -136,7 +136,7 @@ void init_gettext(const char *path, const std::string &configured_language,
 		// Add user specified locale to environment
 		setenv("LANGUAGE", configured_language.c_str(), 1);
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__APPLE__)
 		setenv("LANG", configured_language.c_str(), 1);
 #endif
 
