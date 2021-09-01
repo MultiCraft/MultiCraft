@@ -246,6 +246,7 @@ endif(ENABLE_REDIS)
 
 find_package(SQLite3 REQUIRED)
 
+
 OPTION(ENABLE_PROMETHEUS "Enable prometheus client support" FALSE)
 set(USE_PROMETHEUS FALSE)
 
@@ -304,6 +305,10 @@ if(ENABLE_OPENSSL)
 endif(ENABLE_OPENSSL)
 
 
+find_package(ZLIB REQUIRED)
+find_package(Zstd REQUIRED)
+
+
 if(NOT MSVC)
 	set(USE_GPROF FALSE CACHE BOOL "Use -pg flag for g++")
 endif()
@@ -338,17 +343,10 @@ if(WIN32)
 	endif()
 	set(PLATFORM_LIBS ws2_32.lib version.lib shlwapi.lib ${PLATFORM_LIBS})
 
-	# Zlib stuff
-	find_path(ZLIB_INCLUDE_DIR "zlib.h" DOC "Zlib include directory")
-	find_library(ZLIB_LIBRARIES "zlib" DOC "Path to zlib library")
-
-	find_path(ZSTD_INCLUDE_DIR "zstd.h" DOC "Zstd include directory")
-	find_library(ZSTD_LIBRARY "zstd" DOC "Path to zstd library")
-
-	# Dll's are automatically copied to the output directory by vcpkg when VCPKG_APPLOCAL_DEPS=ON
+	# DLLs are automatically copied to the output directory by vcpkg when VCPKG_APPLOCAL_DEPS=ON
 	if(NOT VCPKG_APPLOCAL_DEPS)
-		find_file(ZLIB_DLL NAMES "zlib.dll" "zlib1.dll" DOC "Path to zlib.dll for installation (optional)")
-		find_file(ZSTD_DLL NAMES "zstd.dll" DOC "Path to zstd.dll for installation (optional)")
+		find_file(ZLIB_DLL NAMES "" DOC "Path to Zlib DLL for installation (optional)")
+		find_file(ZSTD_DLL NAMES "" DOC "Path to Zstd DLL for installation (optional)")
 		if(ENABLE_SOUND)
 			set(OPENAL_DLL "" CACHE FILEPATH "Path to OpenAL32.dll for installation (optional)")
 			set(OGG_DLL "" CACHE FILEPATH "Path to libogg.dll for installation (optional)")
@@ -396,8 +394,6 @@ else()
 		##
 	endif(BUILD_CLIENT)
 
-	find_package(ZLIB REQUIRED)
-	find_package(Zstd REQUIRED)
 	set(PLATFORM_LIBS -lpthread ${CMAKE_DL_LIBS})
 	if(APPLE)
 		set(PLATFORM_LIBS "-framework CoreFoundation" ${PLATFORM_LIBS})

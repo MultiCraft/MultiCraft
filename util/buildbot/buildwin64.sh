@@ -223,7 +223,7 @@ cmake -S $sourcedir -B . \
 	-DIRRLICHT_LIBRARY=$libdir/irrlicht/lib/Win32-gcc/libIrrlicht.a \
 	\
 	-DZLIB_INCLUDE_DIR=$libdir/zlib/include \
-	-DZLIB_LIBRARIES=$libdir/zlib/lib/libz.a \
+	-DZLIB_LIBRARY=$libdir/zlib/lib/libz.a \
 	\
 	-DPNG_INCLUDE_DIR="$libdir/libpng/include" \
 	-DPNG_LIBRARIES="$libdir/libpng/build/libpng16.a" \
