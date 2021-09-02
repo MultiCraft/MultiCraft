@@ -2526,7 +2526,7 @@ bool Server::addMediaFile(const std::string &filename,
 	std::string filedata;
 	if (!fs::ReadFile(filepath, filedata)) {
 		errorstream << "Server::addMediaFile(): Failed to open \""
-					<< filename << "\" for reading" << std::endl;
+					<< filepath << "\" for reading" << std::endl;
 		return false;
 	}
 
@@ -2541,15 +2541,12 @@ bool Server::addMediaFile(const std::string &filename,
 
 	unsigned char *digest = sha1.getDigest();
 	std::string sha1_base64 = base64_encode(digest, 20);
-	std::string sha1_hex = hex_encode((char*) digest, 20);
 	if (digest_to)
 		*digest_to = std::string((char*) digest, 20);
 	free(digest);
 
 	// Put in list
 	m_media[filename] = MediaInfo(filepath, sha1_base64);
-	verbosestream << "Server: " << sha1_hex << " is " << filename
-			<< std::endl;
 
 	if (filedata_to)
 		*filedata_to = std::move(filedata);

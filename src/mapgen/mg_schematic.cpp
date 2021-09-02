@@ -468,18 +468,12 @@ bool Schematic::serializeToLua(std::ostream *os,
 }
 
 
-bool Schematic::loadSchematicFromFile(const std::string &filename,
-	const NodeDefManager *ndef, StringMap *replace_names)
+bool Schematic::loadSchematicFromStream(std::istream *is,
+	const std::string &filename, const NodeDefManager *ndef,
+	StringMap *replace_names)
 {
-	std::ifstream is(filename.c_str(), std::ios_base::binary);
-	if (!is.good()) {
-		errorstream << __FUNCTION__ << ": unable to open file '"
-			<< filename << "'" << std::endl;
-		return false;
-	}
-
 	size_t origsize = m_nodenames.size();
-	if (!deserializeFromMts(&is, &m_nodenames))
+	if (!deserializeFromMts(is, &m_nodenames))
 		return false;
 
 	m_nnlistsizes.push_back(m_nodenames.size() - origsize);
@@ -499,6 +493,19 @@ bool Schematic::loadSchematicFromFile(const std::string &filename,
 		ndef->pendNodeResolve(this);
 
 	return true;
+}
+
+
+bool Schematic::loadSchematicFromFile(const std::string &filename,
+	const NodeDefManager *ndef, StringMap *replace_names)
+{
+	std::ifstream is(filename.c_str(), std::ios_base::binary);
+	if (!is.good()) {
+		errorstream << __FUNCTION__ << ": unable to open file '"
+		<< filename << "'" << std::endl;
+		return false;
+	}
+	return loadSchematicFromStream(&is, filename, ndef, replace_names);
 }
 
 

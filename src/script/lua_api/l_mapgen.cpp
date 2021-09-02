@@ -177,6 +177,29 @@ Schematic *load_schematic(lua_State *L, int index, const NodeDefManager *ndef,
 		schem = SchematicManager::create(SCHEMATIC_NORMAL);
 
 		std::string filepath = lua_tostring(L, index);
+
+		lua_getglobal(L, "core");
+		lua_getfield(L, -1, "cached_mts_files");
+		lua_remove(L, -2); // Remove core
+		if (lua_istable(L, -1)) {
+			lua_getfield(L, -1, filepath.c_str());
+			lua_remove(L, -2); // Remove cached_mts_files
+			if (lua_isstring(L, -1)) {
+				size_t len = 0;
+				const char *raw = lua_tolstring(L, -1, &len);
+				const std::string data = std::string(raw, len);
+				std::istringstream is(data);
+				lua_pop(L, 1); // Remove the schematic
+				if (!schem->loadSchematicFromStream(&is, filepath, ndef,
+						replace_names)) {
+					delete schem;
+					return NULL;
+				}
+				return schem;
+			}
+		}
+		lua_pop(L, 1);
+
 		if (!fs::IsPathAbsolute(filepath))
 			filepath = ModApiBase::getCurrentModPath(L) + DIR_DELIM + filepath;
 

@@ -99,6 +99,8 @@ public:
 
 	virtual void resolveNodeNames();
 
+	bool loadSchematicFromStream(std::istream *is, const std::string &filename,
+		const NodeDefManager *ndef, StringMap *replace_names = NULL);
 	bool loadSchematicFromFile(const std::string &filename,
 		const NodeDefManager *ndef, StringMap *replace_names = NULL);
 	bool saveSchematicToFile(const std::string &filename,
