@@ -73,7 +73,7 @@ function messagebox(name, message)
 	return dialog_create(name,
 			function()
 				return ([[
-					size[12,6,false]
+					size[12,5.4,false]
 					background[0,0;0,0;%s;true;32]
 					textarea[1,1;10,4;;;%s]
 					button[5,4.5;2,0.8;ok;%s]
