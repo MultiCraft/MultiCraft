@@ -71,7 +71,7 @@ private:
 	static int l_sound_fade(lua_State *L);
 
 	// dynamic_add_media(filepath)
-	static int l_dynamic_add_media_raw(lua_State *L);
+	static int l_dynamic_add_media(lua_State *L);
 
 	// dynamic_remove_media(filename)
 	static int l_dynamic_remove_media(lua_State *L);

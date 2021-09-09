@@ -52,6 +52,12 @@ public:
 
 	// Note that this calls collectgarbage() first.
 	size_t getMemoryUsageKB();
+
+	/* dynamic media handling */
+	u32 allocateDynamicMediaCallback(int f_idx);
+	void freeDynamicMediaCallback(u32 token);
+	void on_dynamic_media_added(u32 token, const char *playername);
+
 private:
 	void getAuthHandler();
 	void readPrivileges(int index, std::set<std::string> &result);
