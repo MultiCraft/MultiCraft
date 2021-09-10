@@ -2401,7 +2401,7 @@ void Server::sendMetadataChanged(const std::list<v3s16> &meta_updates, float far
 
 		// Send the meta changes
 		std::ostringstream os(std::ios::binary);
-		meta_updates_list.serialize(os, client->net_proto_version, false, true);
+		meta_updates_list.serialize(os, client->serialization_version, false, true, true);
 		std::ostringstream oss(std::ios::binary);
 		if (m_clients.getMulticraftProtocolVersion(i) > 3 || m_simple_singleplayer_mode)
 			compressZstd(os.str(), oss);
