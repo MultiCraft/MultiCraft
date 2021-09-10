@@ -33,14 +33,17 @@ local function fast_new(x, y, z)
 end
 
 function vector.new(a, b, c)
-	if type(a) == "table" then
-		assert(a.x and a.y and a.z, "Invalid vector passed to vector.new()")
-		return fast_new(a.x, a.y, a.z)
-	elseif a then
-		assert(b and c, "Invalid arguments for vector.new()")
+	if a and b and c then
 		return fast_new(a, b, c)
 	end
-	return fast_new(0, 0, 0)
+
+	-- deprecated, use vector.copy and vector.zero directly
+	if type(a) == "table" then
+		return vector.copy(a)
+	else
+		assert(not a, "Invalid arguments for vector.new()")
+		return vector.zero()
+	end
 end
 
 function vector.zero()
