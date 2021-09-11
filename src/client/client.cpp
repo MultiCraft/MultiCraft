@@ -1853,13 +1853,13 @@ bool Client::drawLoadScreen(const std::wstring &text, float dtime, int percent) 
 	return true;
 }
 
-typedef struct TextureUpdateArgs {
+struct TextureUpdateArgs {
 	gui::IGUIEnvironment *guienv;
 	u64 last_time_ms;
 	u16 last_percent;
 	const wchar_t* text_base;
 	ITextureSource *tsrc;
-} TextureUpdateArgs;
+};
 
 void texture_update_progress(void *args, u32 progress, u32 max_progress)
 {
@@ -1879,8 +1879,8 @@ void texture_update_progress(void *args, u32 progress, u32 max_progress)
 		if (do_draw) {
 			float dtime = (float)(time_ms - targs->last_time_ms) / 1000.0f;
 			targs->last_time_ms = time_ms;
-			std::basic_stringstream<wchar_t> strm;
-			strm << targs->text_base << " " << targs->last_percent << "%...";
+			std::wostringstream strm;
+			strm << targs->text_base << L" " << targs->last_percent << L"%...";
 			RenderingEngine::draw_load_screen(strm.str(), targs->guienv, targs->tsrc, dtime,
 				72 + (u16) ((18. / 100.) * (double) targs->last_percent));
 		}

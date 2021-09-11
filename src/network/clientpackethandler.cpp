@@ -263,7 +263,7 @@ void Client::handleCommand_NodemetaChanged(NetworkPacket *pkt)
 		return;
 
 	std::istringstream is(pkt->readLongString(), std::ios::binary);
-	std::stringstream sstr;
+	std::stringstream sstr(std::ios::binary);
 	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
 		decompressZstd(is, sstr);
 	else
@@ -787,15 +787,14 @@ void Client::handleCommand_NodeDef(NetworkPacket* pkt)
 
 	// Decompress node definitions
 	std::istringstream tmp_is(pkt->readLongString(), std::ios::binary);
-	std::ostringstream tmp_os;
+	std::stringstream tmp_os(std::ios::binary | std::ios::in | std::ios::out);
 	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
 		decompressZstd(tmp_is, tmp_os);
 	else
 		decompressZlib(tmp_is, tmp_os);
 
 	// Deserialize node definitions
-	std::istringstream tmp_is2(tmp_os.str());
-	m_nodedef->deSerialize(tmp_is2);
+	m_nodedef->deSerialize(tmp_os);
 	m_nodedef_received = true;
 }
 
@@ -810,15 +809,14 @@ void Client::handleCommand_ItemDef(NetworkPacket* pkt)
 
 	// Decompress item definitions
 	std::istringstream tmp_is(pkt->readLongString(), std::ios::binary);
-	std::ostringstream tmp_os;
+	std::stringstream tmp_os(std::ios::binary | std::ios::in | std::ios::out);
 	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
 		decompressZstd(tmp_is, tmp_os);
 	else
 		decompressZlib(tmp_is, tmp_os);
 
 	// Deserialize node definitions
-	std::istringstream tmp_is2(tmp_os.str());
-	m_itemdef->deSerialize(tmp_is2);
+	m_itemdef->deSerialize(tmp_os);
 	m_itemdef_received = true;
 }
 

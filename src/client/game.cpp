@@ -1789,7 +1789,7 @@ bool Game::getServerContent()
 				dtime, progress);
 			delete[] text;
 		} else {
-			std::stringstream message;
+			std::ostringstream message;
 			std::fixed(message);
 			message.precision(0);
 			float receive = client->mediaReceiveProgress() * 100;
