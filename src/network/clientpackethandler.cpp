@@ -263,7 +263,7 @@ void Client::handleCommand_NodemetaChanged(NetworkPacket *pkt)
 		return;
 
 	std::istringstream is(pkt->readLongString(), std::ios::binary);
-	std::stringstream sstr(std::ios::binary);
+	std::stringstream sstr(std::ios::binary | std::ios::in | std::ios::out);
 	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
 		decompressZstd(is, sstr);
 	else
