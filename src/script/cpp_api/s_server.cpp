@@ -196,3 +196,19 @@ std::string ScriptApiServer::formatChatMessage(const std::string &name,
 
 	return ret;
 }
+
+size_t ScriptApiServer::getMemoryUsageKB() {
+	lua_State *L = getStack();
+
+	// Call collectgarbage() to try and improve the accuracy
+	lua_getglobal(L, "collectgarbage");
+	lua_call(L, 0, 0);
+
+	// Call collectgarbage("count") to obtain the memory usage
+	lua_getglobal(L, "collectgarbage");
+	lua_pushstring(L, "count");
+	lua_call(L, 1, 1);
+	double memory_usage_kb = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	return memory_usage_kb;
+}

@@ -49,6 +49,9 @@ public:
 		const std::string &password);
 	bool setPassword(const std::string &playername,
 		const std::string &password);
+
+	// Note that this calls collectgarbage() first.
+	size_t getMemoryUsageKB();
 private:
 	void getAuthHandler();
 	void readPrivileges(int index, std::set<std::string> &result);

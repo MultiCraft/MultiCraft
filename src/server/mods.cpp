@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "scripting_server.h"
 #include "content/subgames.h"
 #include "porting.h"
+#include "settings.h"
 #include "util/metricsbackend.h"
 
 /**
@@ -59,6 +60,9 @@ void ServerModManager::loadMods(ServerScripting *script)
 		infostream << mod.name << " ";
 	}
 	infostream << std::endl;
+
+	const bool log_mem = g_settings->getBool("log_mod_memory_usage_on_load");
+
 	// Load and run "mod" scripts
 	for (const ModSpec &mod : m_sorted_mods) {
 		if (!string_allowed(mod.name, MODNAME_ALLOWED_CHARS)) {
@@ -69,7 +73,22 @@ void ServerModManager::loadMods(ServerScripting *script)
 		}
 		std::string script_path = mod.path + DIR_DELIM + "init.lua";
 		auto t = porting::getTimeMs();
-		script->loadMod(script_path, mod.name);
+
+		// This is behind a setting since getMemoryUsageKB calls
+		// collectgarbage() first which will slow down load times.
+		if (log_mem) {
+			size_t old_usage = script->getMemoryUsageKB();
+			script->loadMod(script_path, mod.name);
+			size_t new_usage = script->getMemoryUsageKB();
+			actionstream << "Mod \"" << mod.name << "\" loaded, ";
+			if (new_usage >= old_usage)
+				actionstream << "using " << (new_usage - old_usage);
+			else
+				actionstream << "somehow freeing " << (old_usage - new_usage);
+			actionstream << "KB of memory" << std::endl;
+		} else {
+			script->loadMod(script_path, mod.name);
+		}
 		infostream << "Mod \"" << mod.name << "\" loaded after "
 			<< (porting::getTimeMs() - t) << " ms" << std::endl;
 	}

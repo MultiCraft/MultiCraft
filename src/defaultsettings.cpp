@@ -441,6 +441,7 @@ void set_default_settings()
 	settings->setDefault("emergequeue_limit_diskonly", "128");
 	settings->setDefault("emergequeue_limit_generate", "128");
 	settings->setDefault("num_emerge_threads", "1");
+	settings->setDefault("log_mod_memory_usage_on_load", "false");
 	settings->setDefault("secure.enable_security", "true");
 	settings->setDefault("secure.trusted_mods", "");
 	settings->setDefault("secure.http_mods", "");
