@@ -478,16 +478,23 @@ void GUIEngine::drawBackground(video::IVideoDriver *driver)
 		return;
 	}
 
+	// Chop background image to the smaller screen dimension
+	v2u32 bg_size = screensize;
+	v2f32 scale(
+			(f32) bg_size.X / sourcesize.X,
+			(f32) bg_size.Y / sourcesize.Y);
+	if (scale.X < scale.Y)
+		bg_size.X = (int) (scale.Y * sourcesize.X);
+	else
+		bg_size.Y = (int) (scale.X * sourcesize.Y);
+	v2s32 offset = v2s32(
+		(s32) screensize.X - (s32) bg_size.X,
+		(s32) screensize.Y - (s32) bg_size.Y
+	) / 2;
 	/* Draw background texture */
-	float aspectRatioScreen = (float) screensize.X / screensize.Y;
-	float aspectRatioSource = (float) sourcesize.X / sourcesize.Y;
-
-	int sourceX = aspectRatioSource > aspectRatioScreen ? (sourcesize.X - sourcesize.Y * aspectRatioScreen) / 2 : 0;
-	int sourceY = aspectRatioSource < aspectRatioScreen ? (sourcesize.Y - sourcesize.X / aspectRatioScreen) / 2 : 0;
-
 	draw2DImageFilterScaled(driver, texture,
-		core::rect<s32>(0, 0, screensize.X, screensize.Y),
-		core::rect<s32>(sourceX, sourceY, sourcesize.X - sourceX, sourcesize.Y - sourceY),
+		core::rect<s32>(offset.X, offset.Y, bg_size.X + offset.X, bg_size.Y + offset.Y),
+		core::rect<s32>(0, 0, sourcesize.X, sourcesize.Y),
 		NULL, NULL, true);
 }
 
