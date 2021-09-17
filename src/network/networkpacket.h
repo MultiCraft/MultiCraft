@@ -117,7 +117,8 @@ public:
 	NetworkPacket &operator<<(video::SColor src);
 
 	// Temp, we remove SharedBuffer when migration finished
-	SharedBuffer<u8> oldForgePacket();
+	// ^ this comment has been here for 4 years
+	Buffer<u8> oldForgePacket();
 
 	inline void setProtocolVersion(const u16 protocol_version)
 	{
