@@ -21,6 +21,7 @@ core.features = {
 	use_texture_alpha_string_modes = true,
 	degrotate_240_steps = true,
 	abm_min_max_y = true,
+	dynamic_add_media_table = true,
 	compress_zstd = true,
 	item_meta_range = true,
 	bidi_text_supported = true,
