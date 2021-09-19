@@ -816,8 +816,9 @@ int ModApiMainMenu::l_get_video_modes(lua_State *L)
 /******************************************************************************/
 int ModApiMainMenu::l_gettext(lua_State *L)
 {
-	std::string text = strgettext(std::string(luaL_checkstring(L, 1)));
-	lua_pushstring(L, text.c_str());
+	const char *srctext = luaL_checkstring(L, 1);
+	const char *text = *srctext ? gettext(srctext) : "";
+	lua_pushstring(L, text);
 
 	return 1;
 }
@@ -971,6 +972,6 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(download_file);
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
-	//API_FCT(gettext); (gettext lib isn't threadsafe)
+	API_FCT(gettext);
 	API_FCT(sleep_ms);
 }
