@@ -658,11 +658,10 @@ int ModApiMainMenu::l_extract_zip(lua_State *L)
 	std::string absolute_destination = fs::RemoveRelativePathComponents(destination);
 
 	if (ModApiMainMenu::mayModifyPath(absolute_destination)) {
-		fs::CreateAllDirs(absolute_destination);
-
 		std::string errorMessage;
-		lua_pushboolean(L, fs::extractZipFile(RenderingEngine::get_filesystem(),
-				zipfile, destination, password, &errorMessage));
+		auto fs = RenderingEngine::get_filesystem();
+		bool ok = fs::extractZipFile(fs, zipfile, destination, password, &errorMessage);
+		lua_pushboolean(L, ok);
 		if (!errorMessage.empty()) {
 			lua_pushstring(L, errorMessage.c_str());
 			return 2;
@@ -967,7 +966,7 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(delete_dir);
 	API_FCT(copy_dir);
 	API_FCT(is_dir);
-	//API_FCT(extract_zip); //TODO remove dependency to GuiEngine
+	API_FCT(extract_zip);
 	API_FCT(may_modify_path);
 	API_FCT(download_file);
 	API_FCT(get_min_supp_proto);
