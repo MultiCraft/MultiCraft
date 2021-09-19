@@ -849,7 +849,7 @@ private:
 		CameraOrientation *cam);
 	void handleClientEvent_CloudParams(ClientEvent *event, CameraOrientation *cam);
 
-	void updateChat(f32 dtime, const v2u32 &screensize);
+	void updateChat(f32 dtime);
 
 	bool nodePlacement(const ItemDefinition &selected_def, const ItemStack &selected_item,
 		const v3s16 &nodepos, const v3s16 &neighbourpos, const PointedThing &pointed,
@@ -2975,7 +2975,7 @@ void Game::processClientEvents(CameraOrientation *cam)
 	}
 }
 
-void Game::updateChat(f32 dtime, const v2u32 &screensize)
+void Game::updateChat(f32 dtime)
 {
 	// Get new messages from error log buffer
 	while (!m_chat_log_buf.empty())
@@ -2991,8 +2991,14 @@ void Game::updateChat(f32 dtime, const v2u32 &screensize)
 	chat_backend->step(dtime);
 
 	// Display all messages in a static text element
-	m_game_ui->setChatText(chat_backend->getRecentChat(),
-		chat_backend->getRecentBuffer().getLineCount());
+	auto &buf = chat_backend->getRecentBuffer();
+	if (buf.getLinesModified()) {
+		buf.resetLinesModified();
+		m_game_ui->setChatText(chat_backend->getRecentChat(), buf.getLineCount());
+	}
+
+	// Make sure that the size is still correct
+	m_game_ui->updateChatSize();
 }
 
 void Game::updateCamera(u32 busy_time, f32 dtime)
@@ -3917,9 +3923,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		Get chat messages from client
 	*/
 
-	v2u32 screensize = driver->getScreenSize();
-
-	updateChat(dtime, screensize);
+	updateChat(dtime);
 
 	/*
 		Inventory
@@ -4033,6 +4037,8 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	/*
 		Profiler graph
 	*/
+	v2u32 screensize = driver->getScreenSize();
+
 	if (m_game_ui->m_flags.show_profiler_graph)
 		graph->draw(10, screensize.Y - 10, driver, g_fontengine->getFont());
 

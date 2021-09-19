@@ -111,6 +111,13 @@ public:
 	// Scroll to top of buffer (oldest)
 	void scrollTop();
 
+	// Functions for keeping track of whether the lines were modified by any
+	// preceding operations
+	// If they were not changed, getLineCount() and getLine() output the same as
+	// before
+	bool getLinesModified() const { return m_lines_modified; }
+	void resetLinesModified() { m_lines_modified = false; }
+
 	// Format a chat line for the given number of columns.
 	// Appends the formatted lines to the destination array and
 	// returns the number of formatted lines.
@@ -138,6 +145,11 @@ private:
 	std::vector<ChatFormattedLine> m_formatted;
 	// Empty formatted line, for error returns
 	ChatFormattedLine m_empty_formatted_line;
+
+	// Whether the lines were modified since last markLinesUnchanged()
+	// Is always set to true when m_unformatted is modified, because that's what
+	// determines the output of getLineCount() and getLine()
+	bool m_lines_modified = true;
 };
 
 class ChatPrompt
