@@ -819,7 +819,10 @@ int ModApiMainMenu::l_get_cache_path(lua_State *L)
 /******************************************************************************/
 int ModApiMainMenu::l_get_temp_path(lua_State *L)
 {
-	lua_pushstring(L, fs::TempPath().c_str());
+	if (lua_isnoneornil(L, 1) || !lua_toboolean(L, 1))
+		lua_pushstring(L, fs::TempPath().c_str());
+	else
+		lua_pushstring(L, fs::CreateTempFile().c_str());
 	return 1;
 }
 
@@ -1069,8 +1072,9 @@ int ModApiMainMenu::l_get_active_driver(lua_State *L)
 /******************************************************************************/
 int ModApiMainMenu::l_gettext(lua_State *L)
 {
-	std::string text = strgettext(std::string(luaL_checkstring(L, 1)));
-	lua_pushstring(L, text.c_str());
+	const char *srctext = luaL_checkstring(L, 1);
+	const char *text = *srctext ? gettext(srctext) : "";
+	lua_pushstring(L, text);
 
 	return 1;
 }
@@ -1217,6 +1221,6 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(cancel_all_download_files);
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
-	//API_FCT(gettext); (gettext lib isn't threadsafe)
+	API_FCT(gettext);
 	API_FCT(sleep_ms);
 }
