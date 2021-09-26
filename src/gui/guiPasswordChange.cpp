@@ -25,6 +25,10 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
 
+#ifdef HAVE_TOUCHSCREENGUI
+	#include "client/renderingengine.h"
+#endif
+
 #include "porting.h"
 #include "gettext.h"
 #include "client/renderingengine.h"
@@ -80,8 +84,8 @@ void GUIPasswordChange::regenerateGui(v2u32 screensize)
 	/*
 		Calculate new sizes and positions
 	*/
-#if defined(__ANDROID__) || defined(__IOS__)
-	const float s = m_gui_scale * porting::getDisplayDensity() / 2;
+#ifdef HAVE_TOUCHSCREENGUI
+	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 2;
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
 #else

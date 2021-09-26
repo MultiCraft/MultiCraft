@@ -102,6 +102,12 @@ endif()
 
 option(ENABLE_GLES "Use OpenGL ES instead of OpenGL" FALSE)
 mark_as_advanced(ENABLE_GLES)
+
+option(ENABLE_TOUCH "Enable Touchscreen support" FALSE)
+if(ENABLE_TOUCH)
+	add_definitions(-DHAVE_TOUCHSCREENGUI)
+endif()
+
 if(BUILD_CLIENT)
 	if(ENABLE_GLES)
 		find_package(OpenGLES2 REQUIRED)

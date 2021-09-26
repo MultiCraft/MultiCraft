@@ -487,6 +487,7 @@ void set_default_settings()
 	settings->setDefault("high_precision_fpu", "true");
 	settings->setDefault("enable_console", "false");
 	settings->setDefault("screen_dpi", "72");
+	settings->setDefault("display_density_factor", "1");
 
 	settings->setDefault("mainmenu_last_selected_world", "1");
 	settings->setDefault("device_is_tablet", "false");
@@ -509,13 +510,16 @@ void set_default_settings()
 	settings->setDefault("serverlist_url", "servers.multicraft.world");
 #endif
 
-	// Mobile Platform
-#if defined(__ANDROID__) || defined(__IOS__)
-	settings->setDefault("fullscreen", "true");
+#ifdef HAVE_TOUCHSCREENGUI
 	settings->setDefault("touchtarget", "true");
 	settings->setDefault("touchscreen_threshold", "20");
 	settings->setDefault("fixed_virtual_joystick", "true");
 	settings->setDefault("virtual_joystick_triggers_aux", "false");
+#endif
+
+	// Mobile Platform
+#if defined(__ANDROID__) || defined(__IOS__)
+	settings->setDefault("fullscreen", "true");
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
 	settings->setDefault("curl_verify_cert", "false");
