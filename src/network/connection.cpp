@@ -592,7 +592,7 @@ u16 Channel::getOutgoingSequenceNumber(bool& successful)
 			// ugly cast but this one is required in order to tell compiler we
 			// know about difference of two unsigned may be negative in general
 			// but we already made sure it won't happen in this case
-			if (((u16)(next_outgoing_seqnum - lowest_unacked_seqnumber)) > window_size) {
+			if (((u16)(next_outgoing_seqnum - lowest_unacked_seqnumber)) > m_window_size) {
 				successful = false;
 				return 0;
 			}
@@ -602,7 +602,7 @@ u16 Channel::getOutgoingSequenceNumber(bool& successful)
 			// know about difference of two unsigned may be negative in general
 			// but we already made sure it won't happen in this case
 			if ((next_outgoing_seqnum + (u16)(SEQNUM_MAX - lowest_unacked_seqnumber)) >
-				window_size) {
+					m_window_size) {
 				successful = false;
 				return 0;
 			}
@@ -680,7 +680,7 @@ void Channel::UpdateTimers(float dtime)
 			packet_too_late = current_packet_too_late;
 			packets_successful = current_packet_successful;
 
-			if (current_bytes_transfered > (unsigned int) (window_size*512/2)) {
+			if (current_bytes_transfered > (unsigned int) (m_window_size*512/2)) {
 				reasonable_amount_of_data_transmitted = true;
 			}
 			current_packet_loss = 0;
@@ -700,7 +700,7 @@ void Channel::UpdateTimers(float dtime)
 		if (packets_successful > 0) {
 			successful_to_lost_ratio = (float)packet_loss / packets_successful;
 		} else if (packet_loss > 0) {
-			setWindowSize(window_size - 10);
+			setWindowSize(m_window_size - 10);
 			done = true;
 		}
 
@@ -709,16 +709,16 @@ void Channel::UpdateTimers(float dtime)
 				/* don't even think about increasing if we didn't even
 				 * use major parts of our window */
 				if (reasonable_amount_of_data_transmitted)
-					setWindowSize(window_size + 100);
+					setWindowSize(m_window_size + 100);
 			} else if (successful_to_lost_ratio < 0.05f) {
 				/* don't even think about increasing if we didn't even
 				 * use major parts of our window */
 				if (reasonable_amount_of_data_transmitted)
-					setWindowSize(window_size + 50);
+					setWindowSize(m_window_size + 50);
 			} else if (successful_to_lost_ratio > 0.15f) {
-				setWindowSize(window_size - 100);
+				setWindowSize(m_window_size - 100);
 			} else if (successful_to_lost_ratio > 0.1f) {
-				setWindowSize(window_size - 50);
+				setWindowSize(m_window_size - 50);
 			}
 		}
 	}
