@@ -625,7 +625,7 @@ shadow_poisson_filter (Poisson filtering) bool true
 #   but also uses more resources.
 shadow_filters (Shadow filter quality) enum 1 0,1,2
 
-#    Enable colored shadows. 
+#    Enable colored shadows.
 #    On true translucent nodes cast colored shadows. This is expensive.
 shadow_map_color (Colored shadows) bool false
 
