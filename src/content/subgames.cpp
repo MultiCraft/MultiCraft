@@ -116,6 +116,10 @@ SubgameSpec findSubgame(const std::string &id)
 	if (mod_path && *mod_path)
 		mods_paths["cache"] = mod_path;
 
+	for (const std::string &mod_path : getEnvModPaths()) {
+		mods_paths[fs::AbsolutePath(mod_path)] = mod_path;
+	}
+
 	// Get meta
 	std::string conf_path = game_path + DIR_DELIM + "game.conf";
 	Settings conf;
@@ -401,4 +405,14 @@ void loadGameConfAndInitWorld(const std::string &path, const std::string &name,
 	// The Settings object is no longer needed for created worlds
 	if (new_game_settings)
 		delete game_settings;
+}
+
+std::vector<std::string> getEnvModPaths()
+{
+	const char *c_mod_path = getenv("MINETEST_MOD_PATH");
+	std::vector<std::string> paths;
+	Strfnd search_paths(c_mod_path ? c_mod_path : "");
+	while (!search_paths.at_end())
+		paths.push_back(search_paths.next(PATH_DELIM));
+	return paths;
 }
