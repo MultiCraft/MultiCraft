@@ -108,6 +108,10 @@ CMakeDoxy*
 compile_commands.json
 *.apk
 *.zip
+# Visual Studio
+*.vcxproj*
+*.sln
+.vs/
 
 # Optional user provided library folder
 lib/irrlichtmt
