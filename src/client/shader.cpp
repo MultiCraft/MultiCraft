@@ -570,7 +570,7 @@ u32 ShaderSource::getShaderIdDirect(const std::string &name,
 	}
 
 	// Only the dynamic shadows read DRAW_TYPE, without them one program serves every drawtype
-	if (!g_settings->getBool("enable_dynamic_shadows"))
+	if (!(false && g_settings->getBool("enable_dynamic_shadows")))
 		drawtype = NDT_NORMAL;
 
 	// Check if already have such instance
@@ -926,7 +926,7 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 		<< "," << light_boost[2] << ")\n";
 	shaders_header << "#define LIGHT_SCALE " << light_boost[3] << "\n";
 
-	if (g_settings->getBool("enable_dynamic_shadows")) {
+	if (false && g_settings->getBool("enable_dynamic_shadows")) {
 		shaders_header << "#define ENABLE_DYNAMIC_SHADOWS 1\n";
 		if (g_settings->getBool("shadow_map_color"))
 			shaders_header << "#define COLORED_SHADOWS 1\n";

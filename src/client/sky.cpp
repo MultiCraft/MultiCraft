@@ -117,7 +117,7 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 
 	m_directional_colored_fog = g_settings->getBool("directional_colored_fog");
 
-	if (!m_is_mainmenu && g_settings->getBool("enable_dynamic_shadows")) {
+	if (false && !m_is_mainmenu && g_settings->getBool("enable_dynamic_shadows")) {
 		float val = g_settings->getFloat("shadow_sky_body_orbit_tilt");
 		m_sky_body_orbit_tilt = rangelim(val, 0.0f, 60.0f);
 	}
