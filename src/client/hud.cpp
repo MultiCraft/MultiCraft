@@ -1089,11 +1089,15 @@ void drawItemStack(
 
 	bool draw_overlay = false;
 
+	bool has_mesh = false;
+	ItemMesh *imesh;
+
 	// Render as mesh if animated or no inventory image
 	if ((enable_animations && rotation_kind < IT_ROT_NONE) || inventory_image.empty()) {
-		ItemMesh *imesh = client->idef()->getWieldMesh(def.name, client);
-		if (!imesh || !imesh->mesh)
-			return;
+		imesh = client->idef()->getWieldMesh(def.name, client);
+		has_mesh = imesh && imesh->mesh;
+	}
+	if (has_mesh) {
 		scene::IMesh *mesh = imesh->mesh;
 
 		const std::string &tiles = item.getTiles();
@@ -1201,10 +1205,17 @@ void drawItemStack(
 	} else { // Otherwise just draw as 2D
 		video::ITexture *texture =
 			client->getTextureSource()->getTextureTransient(inventory_image);
-		if (!texture)
-			return;
-		video::SColor color =
-			client->idef()->getItemstackColor(item, client);
+		video::SColor color;
+		if (texture) {
+			color = client->idef()->getItemstackColor(item, client);
+		} else {
+			color = video::SColor(255, 255, 255, 255);
+			ITextureSource *tsrc = client->getTextureSource();
+			texture = tsrc->getTexture("no_texture.png");
+			if (!texture)
+				return;
+		}
+
 		const video::SColor colors[] = { color, color, color, color };
 
 		draw2DImageFilterScaled(driver, texture, rect,
