@@ -179,10 +179,6 @@ function core.is_protected(pos, name)
 	return false
 end
 
-function core.is_protected_action()
-	return false
-end
-
 function core.record_protection_violation(pos, name)
 	for _, func in pairs(core.registered_on_protection_violation) do
 		func(pos, name)

@@ -1089,7 +1089,7 @@ core.register_chatcommand("msg", {
 		end
 		core.log("action", "PM from " .. name .. " to " .. sendto
 				.. ": " .. message)
-		core.chat_send_player(sendto, minetest.colorize("green",
+		core.chat_send_player(sendto, core.colorize("green",
 				"PM from " .. name .. ": " .. message))
 		return true, "Message sent."
 	end,
@@ -1200,6 +1200,7 @@ core.register_chatcommand("setspawn", {
 		end
 		local pos = core.pos_to_string(player:get_pos(), 1)
 		core.settings:set("static_spawnpoint", pos)
+		core.settings:write()
 		return true, "The spawn point are set to " .. pos
 	end
 })

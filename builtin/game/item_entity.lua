@@ -2,6 +2,7 @@
 
 local abs, min, floor, random, pi = math.abs, math.min, math.floor, math.random, math.pi
 local vnormalize = vector.normalize
+
 function core.spawn_item(pos, item)
 	-- Take item in any format
 	local stack = ItemStack(item)
@@ -213,7 +214,6 @@ core.register_entity(":__builtin:item", {
 			y = pos.y + self.object:get_properties().collisionbox[2] - 0.05,
 			z = pos.z
 		})
-		local node_inside = core.get_node_or_nil(pos)
 		-- Delete in 'ignore' nodes
 		if node and node.name == "ignore" then
 			self.itemstring = ""
@@ -315,6 +315,7 @@ core.register_entity(":__builtin:item", {
 
 		local vel = self.object:get_velocity()
 		local def = node and core.registered_nodes[node.name]
+		local node_inside = core.get_node_or_nil(pos)
 		local def_inside = node_inside and core.registered_nodes[node_inside.name]
 --		local is_moving = (def and not def.walkable) or
 --			vel.x ~= 0 or vel.y ~= 0 or vel.z ~= 0

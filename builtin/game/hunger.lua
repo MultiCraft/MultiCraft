@@ -139,7 +139,7 @@ function hunger.set_poisoned(player, poisoned)
 end
 
 local function poison_tick(name, ticks, interval, elapsed)
-	local player = minetest.get_player_by_name(name)
+	local player = core.get_player_by_name(name)
 	if not player or not hunger.is_poisoned(player) then
 		return
 	elseif elapsed > ticks then

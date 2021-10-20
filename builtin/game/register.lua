@@ -107,9 +107,6 @@ function core.register_entity(name, prototype)
 	prototype.mod_origin = core.get_current_modname() or "??"
 end
 
--- Intllib
-Sl = intllib.make_gettext_pair("locales")
-
 function core.register_item(name, itemdef)
 	-- Check name
 	if name == nil then
@@ -157,12 +154,6 @@ function core.register_item(name, itemdef)
 	-- Flowing liquid uses param2
 	if itemdef.type == "node" and itemdef.liquidtype == "flowing" then
 		itemdef.paramtype2 = "flowingliquid"
-	end
-
-	-- Intllib
-	if itemdef.description and itemdef.description ~= "" then
-		itemdef.description = Sl(itemdef.description:gsub("@", "\001"))
-			:gsub("\001", "@")
 	end
 
 	-- BEGIN Legacy stuff
@@ -390,12 +381,13 @@ core.register_node(":ignore", {
 })
 
 -- The hand (bare definition)
+local creative_mode = core.settings:get_bool("creative_mode")
 core.register_item(":", {
 	type = "none",
-	wield_image = "blank.png",
+	wield_image = "wieldhand.png",
 	tool_capabilities = {
 		full_punch_interval = 0.5,
-		damage_groups = {fleshy = core.settings:get_bool("creative_mode") and 5 or 1}
+		damage_groups = {fleshy = creative_mode and 5 or 1}
 	},
 	groups = {not_in_creative_inventory=1},
 })

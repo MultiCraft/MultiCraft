@@ -442,6 +442,7 @@ function core.spawn_falling_node(pos)
 	return convert_to_falling_node(pos, node)
 end
 
+-- Declared as local function above
 function drop_attached_node(p)
 	local n = core.get_node(p)
 	local drops = core.get_node_drops(n, "")
