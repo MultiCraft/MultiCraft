@@ -89,10 +89,10 @@ struct DigParams
 	// Digging time in seconds
 	float time;
 	// Caused wear
-	u16 wear;
+	u32 wear; // u32 because wear could be 65536 (single-use tool)
 	std::string main_group;
 
-	DigParams(bool a_diggable = false, float a_time = 0.0f, u16 a_wear = 0,
+	DigParams(bool a_diggable = false, float a_time = 0.0f, u32 a_wear = 0,
 			const std::string &a_main_group = ""):
 		diggable(a_diggable),
 		time(a_time),
@@ -102,21 +102,24 @@ struct DigParams
 };
 
 DigParams getDigParams(const ItemGroupList &groups,
-		const ToolCapabilities *tp);
+		const ToolCapabilities *tp,
+		const u16 initial_wear = 0);
 
 struct HitParams
 {
 	s16 hp;
-	u16 wear;
+	// Caused wear
+	u32 wear; // u32 because wear could be 65536 (single-use weapon)
 
-	HitParams(s16 hp_ = 0, u16 wear_ = 0):
+	HitParams(s16 hp_ = 0, u32 wear_ = 0):
 		hp(hp_),
 		wear(wear_)
 	{}
 };
 
 HitParams getHitParams(const ItemGroupList &armor_groups,
-		const ToolCapabilities *tp, float time_from_last_punch);
+		const ToolCapabilities *tp, float time_from_last_punch,
+		u16 initial_wear = 0);
 
 HitParams getHitParams(const ItemGroupList &armor_groups,
 		const ToolCapabilities *tp);
@@ -136,7 +139,8 @@ PunchDamageResult getPunchDamage(
 		const ItemGroupList &armor_groups,
 		const ToolCapabilities *toolcap,
 		const ItemStack *punchitem,
-		float time_from_last_punch
+		float time_from_last_punch,
+		u16 initial_wear = 0
 );
 
 f32 getToolRange(const ItemStack &wielded_item, const ItemStack &hand_item,
