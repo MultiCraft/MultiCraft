@@ -25,6 +25,7 @@ varying vec3 eyeVec;
 	uniform float f_textureresolution;
 	uniform mat4 m_ShadowViewProj;
 	uniform float f_shadowfar;
+	uniform vec3 dayLight;
 	varying float normalOffsetScale;
 	varying float adj_shadow_strength;
 	varying float cosLight;
@@ -494,6 +495,53 @@ void main(void)
 	color = base.rgb * nodeColor;
 
 	vec3 lightColor = varColor.rgb;
+
+#ifdef ENABLE_DYNAMIC_SHADOWS
+	float shadow_int = 0.0;
+	vec3 shadow_color = vec3(0.0, 0.0, 0.0);
+	vec3 posLightSpace = getLightSpacePosition();
+
+	float distance_rate = (1 - pow(clamp(2.0 * length(posLightSpace.xy - 0.5),0.0,1.0), 20.0));
+	float f_adj_shadow_strength = max(adj_shadow_strength-mtsmoothstep(0.9,1.1,  posLightSpace.z  ),0.0);
+
+	if (distance_rate > 1e-7) {
+	
+#ifdef COLORED_SHADOWS
+		vec4 visibility;
+		if (cosLight > 0.0)
+			visibility = getShadowColor(ShadowMapSampler, posLightSpace.xy, posLightSpace.z);
+		else
+			visibility = vec4(1.0, 0.0, 0.0, 0.0);
+		shadow_int = visibility.r;
+		shadow_color = visibility.gba;
+#else
+		if (cosLight > 0.0)
+			shadow_int = getShadow(ShadowMapSampler, posLightSpace.xy, posLightSpace.z);
+		else
+			shadow_int = 1.0;
+#endif
+		shadow_int *= distance_rate;
+		shadow_int = clamp(shadow_int, 0.0, 1.0);
+
+	}
+
+	// turns out that nightRatio falls off much faster than
+	// actual brightness of artificial light in relation to natual light.
+	// Power ratio was measured on torches in MTG (brightness = 14).
+	float adjusted_night_ratio = pow(nightRatio, 0.6);
+
+	if (f_normal_length != 0 && cosLight < 0.035) {
+		shadow_int = max(shadow_int, 1 - clamp(cosLight, 0.0, 0.035)/0.035);
+	}
+
+	shadow_int *= f_adj_shadow_strength;
+	
+	// The shadow dims the natural light the vertex brings; the point lights after it stay whole
+	lightColor =
+			adjusted_night_ratio * lightColor + // artificial light
+			(1.0 - adjusted_night_ratio) * // natural light
+					lightColor * (1.0 - shadow_int * (1.0 - shadow_color)); // filtered
+#endif
 #if POINT_LIGHTS
 #ifdef SETTINGS_UNIFORMS
 	curve = lightCurve;
@@ -515,41 +563,10 @@ void main(void)
 	vec4 col = vec4(color.rgb * lightColor, 1.0);
 
 #ifdef ENABLE_DYNAMIC_SHADOWS
-	float shadow_int = 0.0;
-	vec3 shadow_color = vec3(0.0, 0.0, 0.0);
-	vec3 posLightSpace = getLightSpacePosition();
-
-	float distance_rate = (1 - pow(clamp(2.0 * length(posLightSpace.xy - 0.5),0.0,1.0), 20.0));
-	float f_adj_shadow_strength = max(adj_shadow_strength-mtsmoothstep(0.9,1.1,  posLightSpace.z  ),0.0);
-
-	if (distance_rate > 1e-7) {
-	
-#ifdef COLORED_SHADOWS
-		vec4 visibility;
-		if (cosLight > 0.0)
-			visibility = getShadowColor(ShadowMapSampler, posLightSpace.xy, posLightSpace.z);
-		else
-			visibility = vec4(1.0, 0.0, 0.0, 0.0);
-		shadow_int = visibility.r;
-		shadow_color = visibility.gba;
-#else
-		shadow_int = getShadow(ShadowMapSampler, posLightSpace.xy, posLightSpace.z);
-#endif
-		shadow_int *= distance_rate;
-		shadow_int *= 1.0 - nightRatio;
-
-
-	}
-
-	if (f_normal_length != 0 && cosLight < 0.035) {
-		shadow_int = max(shadow_int, min(clamp(1.0-nightRatio, 0.0, 1.0), 1 - clamp(cosLight, 0.0, 0.035)/0.035));
-	}
-
-	shadow_int = 1.0 - (shadow_int * f_adj_shadow_strength);
-	
-	// apply shadow (+color) as a factor to the material color
-	col.rgb = col.rgb * (1.0 - (1.0 - shadow_color) * (1.0 - pow(shadow_int, 2.0)));
+	// reflected filtered sunlight/moonlight
+	col.rgb += (1.0 - adjusted_night_ratio) * dayLight * shadow_color * shadow_int;
 	// col.r = 0.5 * clamp(getPenumbraRadius(ShadowMapSampler, posLightSpace.xy, posLightSpace.z, 1.0) / SOFTSHADOWRADIUS, 0.0, 1.0) + 0.5 * col.r;
+	// col.r = adjusted_night_ratio; // debug night ratio adjustment
 #endif
 
 #if ENABLE_TONE_MAPPING
