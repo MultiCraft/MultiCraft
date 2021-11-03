@@ -553,6 +553,7 @@ core.register_chatcommand("set", {
 		local arg, setname, setvalue = string.match(param, "(-[n]) ([^ ]+) (.+)")
 		if arg and arg == "-n" and setname and setvalue then
 			core.settings:set(setname, setvalue)
+			core.settings:write()
 			return true, setname .. " = " .. setvalue
 		end
 
@@ -562,6 +563,7 @@ core.register_chatcommand("set", {
 				return false, "Failed. Use '/set -n <name> <value>' to create a new setting."
 			end
 			core.settings:set(setname, setvalue)
+			core.settings:write()
 			return true, setname .. " = " .. setvalue
 		end
 
