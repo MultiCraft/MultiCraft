@@ -276,6 +276,11 @@ add_subdirectory(lib/chacha)
 add_subdirectory(lib/luautf8)
 add_subdirectory(lib/luachacha)
 add_subdirectory(lib/sheenbidi)
+if(NOT USE_LUAJIT)
+	set(LUA_BIT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/bitop)
+	set(LUA_BIT_LIBRARY bitop)
+	add_subdirectory(lib/bitop)
+endif()
 
 # JsonCpp doesn't compile well on GCC 4.8
 if(NOT USE_SYSTEM_JSONCPP)

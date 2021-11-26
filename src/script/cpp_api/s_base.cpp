@@ -37,6 +37,8 @@ extern "C" {
 #include "lualib.h"
 #if USE_LUAJIT
 	#include "luajit.h"
+#else
+	#include "bit.h"
 #endif
 LUALIB_API int luaopen_utf8(lua_State *L);
 LUALIB_API int luaopen_chacha(lua_State *L);
@@ -89,6 +91,11 @@ ScriptApiBase::ScriptApiBase(ScriptingType type):
 		clientOpenLibs(m_luastack);
 	else
 		luaL_openlibs(m_luastack);
+
+	// Load bit library
+	lua_pushcfunction(m_luastack, luaopen_bit);
+	lua_pushstring(m_luastack, LUA_BITLIBNAME);
+	lua_call(m_luastack, 1, 0);
 
 	lua_pushcfunction(m_luastack, luaopen_utf8);
 	lua_call(m_luastack, 0, 0);
