@@ -333,8 +333,8 @@ int ModApiServer::l_ban_player(lua_State *L)
 	return 1;
 }
 
-// kick_player(name, [reason]) -> success
-int ModApiServer::l_kick_player(lua_State *L)
+// disconnect_player(name, [reason]) -> success
+int ModApiServer::l_disconnect_player(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
 
@@ -342,11 +342,11 @@ int ModApiServer::l_kick_player(lua_State *L)
 		throw LuaError("Can't kick player before server has started up");
 
 	const char *name = luaL_checkstring(L, 1);
-	std::string message("Kicked");
+	std::string message;
 	if (lua_isstring(L, 2))
-		message.append(": ").append(readParam<std::string>(L, 2));
+		message.append(readParam<std::string>(L, 2));
 	else
-		message.append(".");
+		message.append("Disconnected.");
 
 	Server *server = getServer(L);
 
@@ -606,7 +606,7 @@ void ModApiServer::Initialize(lua_State *L, int top)
 	API_FCT(get_ban_list);
 	API_FCT(get_ban_description);
 	API_FCT(ban_player);
-	API_FCT(kick_player);
+	API_FCT(disconnect_player);
 	API_FCT(remove_player);
 	API_FCT(unban_player_or_ip);
 	API_FCT(notify_authentication_modified);
