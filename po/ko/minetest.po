@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Korean (Minetest)\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-16 18:27+0200\n"
+"POT-Creation-Date: 2021-11-27 19:42+0100\n"
 "PO-Revision-Date: 2020-12-05 15:29+0000\n"
 "Last-Translator: HunSeongPark <gnstjd980831@naver.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/minetest/minetest/"
@@ -63,11 +63,6 @@ msgstr "리스폰"
 msgid "You died"
 msgstr "사망했습니다"
 
-#: builtin/client/death_formspec.lua
-#, fuzzy
-msgid "You died."
-msgstr "사망했습니다"
-
 #: builtin/common/chatcommands.lua
 #, fuzzy
 msgid "Available commands:"
@@ -98,6 +93,10 @@ msgstr ""
 #: builtin/fstk/dialog.lua builtin/fstk/ui.lua src/gui/modalMenu.cpp
 msgid "OK"
 msgstr "확인"
+
+#: builtin/fstk/ui.lua
+msgid "<none available>"
+msgstr ""
 
 #: builtin/fstk/ui.lua
 msgid "An error occurred in a Lua script:"
@@ -303,6 +302,13 @@ msgstr "설치"
 #, fuzzy
 msgid "Install missing dependencies"
 msgstr "종속성 선택:"
+
+#: builtin/mainmenu/dlg_contentstore.lua
+#, fuzzy
+msgid "Install: Unsupported file type or broken archive"
+msgstr ""
+"모드 설치: \"$1\"는(은) 지원 되지 않는 파일 형식 이거나 손상된 압축 파일입니"
+"다"
 
 #: builtin/mainmenu/dlg_contentstore.lua
 #: builtin/mainmenu/dlg_settings_advanced.lua
@@ -633,7 +639,8 @@ msgid "Offset"
 msgstr "오프셋"
 
 #: builtin/mainmenu/dlg_settings_advanced.lua
-msgid "Persistance"
+#, fuzzy
+msgid "Persistence"
 msgstr "플레이어 전송 거리"
 
 #: builtin/mainmenu/dlg_settings_advanced.lua
@@ -742,16 +749,6 @@ msgstr "모드 설치: $1를(을) 찾을 수 없습니다"
 #: builtin/mainmenu/pkgmgr.lua
 msgid "Install Mod: Unable to find suitable folder name for modpack $1"
 msgstr "모드 설치: 모드 팩 $1 (이)의 올바른 폴더이름을 찾을 수 없습니다"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Install: Unsupported file type \"$1\" or broken archive"
-msgstr ""
-"모드 설치: \"$1\"는(은) 지원 되지 않는 파일 형식 이거나 손상된 압축 파일입니"
-"다"
-
-#: builtin/mainmenu/pkgmgr.lua
-msgid "Install: file: \"$1\""
-msgstr "모드 설치: 파일: \"$1\""
 
 #: builtin/mainmenu/pkgmgr.lua
 msgid "Unable to find a valid mod or modpack"
@@ -1128,10 +1125,6 @@ msgstr "부드러운 조명 효과"
 msgid "Texturing:"
 msgstr "질감:"
 
-#: builtin/mainmenu/tab_settings.lua
-msgid "To enable shaders the OpenGL driver needs to be used."
-msgstr "쉐이더를 사용하려면 OpenGL 드라이버를 사용할 필요가 있습니다."
-
 #: builtin/mainmenu/tab_settings.lua src/settings_translation_file.cpp
 msgid "Tone Mapping"
 msgstr "톤 매핑"
@@ -1164,7 +1157,7 @@ msgstr "물 등의 물결효과"
 msgid "Waving Plants"
 msgstr "움직이는 식물 효과"
 
-#: src/client/client.cpp
+#: src/client/client.cpp src/client/game.cpp
 msgid "Connection timed out."
 msgstr "연결 시간이 초과했습니다."
 
@@ -1193,7 +1186,8 @@ msgid "Connection error (timed out?)"
 msgstr "연결 오류 (시간초과)"
 
 #: src/client/clientlauncher.cpp
-msgid "Could not find or load game \""
+#, fuzzy
+msgid "Could not find or load game: "
 msgstr "게임을 찾지 못했거나 로딩할 수 없습니다\""
 
 #: src/client/clientlauncher.cpp
@@ -1266,6 +1260,16 @@ msgid "- Server Name: "
 msgstr "- 서버 이름: "
 
 #: src/client/game.cpp
+#, fuzzy
+msgid "A serialization error occurred:"
+msgstr "오류가 발생했습니다:"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Access denied. Reason: %s"
+msgstr ""
+
+#: src/client/game.cpp
 msgid "Automatic forward disabled"
 msgstr "자동 전진 비활성화"
 
@@ -1274,12 +1278,32 @@ msgid "Automatic forward enabled"
 msgstr "자동 전진 활성화"
 
 #: src/client/game.cpp
+msgid "Block bounds hidden"
+msgstr ""
+
+#: src/client/game.cpp
+msgid "Block bounds shown for all blocks"
+msgstr ""
+
+#: src/client/game.cpp
+msgid "Block bounds shown for current block"
+msgstr ""
+
+#: src/client/game.cpp
+msgid "Block bounds shown for nearby blocks"
+msgstr ""
+
+#: src/client/game.cpp
 msgid "Camera update disabled"
 msgstr "카메라 업데이트 비활성화"
 
 #: src/client/game.cpp
 msgid "Camera update enabled"
 msgstr "카메라 업데이트 활성화"
+
+#: src/client/game.cpp
+msgid "Can't show block bounds (need 'basic_debug' privilege)"
+msgstr ""
 
 #: src/client/game.cpp
 msgid "Change Password"
@@ -1294,12 +1318,21 @@ msgid "Cinematic mode enabled"
 msgstr "시네마틱 모드 활성화"
 
 #: src/client/game.cpp
+#, fuzzy
+msgid "Client disconnected"
+msgstr "클라이언트 모딩"
+
+#: src/client/game.cpp
 msgid "Client side scripting is disabled"
 msgstr "클라이언트 스크립트가 비활성화됨"
 
 #: src/client/game.cpp
 msgid "Connecting to server..."
 msgstr "서버 연결중..."
+
+#: src/client/game.cpp
+msgid "Connection failed for unknown reason"
+msgstr ""
 
 #: src/client/game.cpp
 msgid "Continue"
@@ -1337,6 +1370,11 @@ msgstr ""
 "-마우스 오른쪽 클릭: 두기/사용하기\n"
 "-마우스 휠:아이템 선택\n"
 "-%s: 채팅\n"
+
+#: src/client/game.cpp
+#, c-format
+msgid "Couldn't resolve address: %s"
+msgstr ""
 
 #: src/client/game.cpp
 msgid "Creating client..."
@@ -1544,6 +1582,21 @@ msgid "Sound unmuted"
 msgstr "음소거 해제"
 
 #: src/client/game.cpp
+#, c-format
+msgid "The server is probably running a different version of %s."
+msgstr ""
+
+#: src/client/game.cpp
+#, c-format
+msgid "Unable to connect to %s because IPv6 is disabled"
+msgstr ""
+
+#: src/client/game.cpp
+#, c-format
+msgid "Unable to listen on %s because IPv6 is disabled"
+msgstr ""
+
+#: src/client/game.cpp src/unittest/test_gettext.cpp
 #, c-format
 msgid "Viewing range changed to %d"
 msgstr "시야 범위 %d로 바꿈"
@@ -1886,6 +1939,15 @@ msgstr "표면 모드의 미니맵, 1배 확대"
 msgid "Minimap in texture mode"
 msgstr "최소 텍스처 크기"
 
+#: src/gui/guiChatConsole.cpp
+#, fuzzy
+msgid "Failed to open webpage"
+msgstr "$1을 다운로드하는 데에 실패했습니다"
+
+#: src/gui/guiChatConsole.cpp
+msgid "Opening webpage"
+msgstr ""
+
 #: src/gui/guiConfirmRegistration.cpp src/gui/guiPasswordChange.cpp
 msgid "Passwords do not match!"
 msgstr "비밀번호가 맞지 않습니다!"
@@ -1894,7 +1956,7 @@ msgstr "비밀번호가 맞지 않습니다!"
 msgid "Register and Join"
 msgstr "등록하고 참여"
 
-#: src/gui/guiConfirmRegistration.cpp
+#: src/gui/guiConfirmRegistration.cpp src/unittest/test_gettext.cpp
 #, c-format
 msgid ""
 "You are about to join this server with the name \"%s\" for the first time.\n"
@@ -2099,7 +2161,8 @@ msgid "Muted"
 msgstr "음소거"
 
 #: src/gui/guiVolumeChange.cpp
-msgid "Sound Volume: "
+#, fuzzy, c-format
+msgid "Sound Volume: %d%%"
 msgstr "볼륨 조절: "
 
 #. ~ Imperative, as in "Enter/type in text".
@@ -2349,6 +2412,10 @@ msgid ""
 "screens."
 msgstr ""
 "화면에 맞게 dpi 구성을 조정합니다 (X11 미지원 / Android 만 해당). 4k 화면 용."
+
+#: src/settings_translation_file.cpp
+msgid "Adjust the detected display density, used for scaling UI elements."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 #, c-format
@@ -2647,6 +2714,11 @@ msgid "Chat command time message threshold"
 msgstr "채팅 메세지 강제퇴장 임계값"
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Chat commands"
+msgstr "채팅 명렁어"
+
+#: src/settings_translation_file.cpp
 msgid "Chat font size"
 msgstr "채팅 글자 크기"
 
@@ -2679,8 +2751,9 @@ msgid "Chat toggle key"
 msgstr "채팅 스위치"
 
 #: src/settings_translation_file.cpp
-msgid "Chatcommands"
-msgstr "채팅 명렁어"
+#, fuzzy
+msgid "Chat weblinks"
+msgstr "채팅 보이기"
 
 #: src/settings_translation_file.cpp
 msgid "Chunk size"
@@ -2697,6 +2770,12 @@ msgstr "시네마틱 모드 스위치"
 #: src/settings_translation_file.cpp
 msgid "Clean transparent textures"
 msgstr "깨끗하고 투명한 텍스처"
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Clickable weblinks (middle-click or Ctrl+left-click) enabled in chat console "
+"output."
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Client"
@@ -2785,6 +2864,22 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid "Command key"
 msgstr "명령 키"
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Compression level to use when saving mapblocks to disk.\n"
+"-1 - use default compression level\n"
+"0 - least compression, fastest\n"
+"9 - best compression, slowest"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Compression level to use when sending mapblocks to the client.\n"
+"-1 - use default compression level\n"
+"0 - least compression, fastest\n"
+"9 - best compression, slowest"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Connect glass"
@@ -2886,7 +2981,7 @@ msgstr "십자선 투명도"
 #, fuzzy
 msgid ""
 "Crosshair alpha (opaqueness, between 0 and 255).\n"
-"Also controls the object crosshair color"
+"This also applies to the object crosshair."
 msgstr "십자선 투명도 (불투명 함, 0과 255 사이)."
 
 #: src/settings_translation_file.cpp
@@ -2965,8 +3060,8 @@ msgstr "기본 스택 크기"
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Define shadow filtering quality\n"
-"This simulates the soft shadows effect by applying a PCF or poisson disk\n"
+"Define shadow filtering quality.\n"
+"This simulates the soft shadows effect by applying a PCF or Poisson disk\n"
 "but also uses more resources."
 msgstr ""
 
@@ -3086,6 +3181,10 @@ msgid "Disallow empty passwords"
 msgstr "비밀번호 없으면 불가"
 
 #: src/settings_translation_file.cpp
+msgid "Display Density Scaling Factor"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Domain name of server, to be displayed in the serverlist."
 msgstr "도메인 서버의 이름은 서버리스트에 표시 됩니다."
 
@@ -3131,7 +3230,14 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Enable colored shadows. \n"
+"Enable Poisson disk filtering.\n"
+"On true uses Poisson disk to make \"soft shadows\". Otherwise uses PCF "
+"filtering."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Enable colored shadows.\n"
 "On true translucent nodes cast colored shadows. This is expensive."
 msgstr ""
 
@@ -3159,13 +3265,6 @@ msgstr "모드 보안 적용"
 #: src/settings_translation_file.cpp
 msgid "Enable players getting damage and dying."
 msgstr "플레이어는 데미지를 받고 죽을 수 있습니다."
-
-#: src/settings_translation_file.cpp
-msgid ""
-"Enable poisson disk filtering.\n"
-"On true uses poisson disk to make \"soft shadows\". Otherwise uses PCF "
-"filtering."
-msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Enable random user input (only used for testing)."
@@ -3585,7 +3684,7 @@ msgstr "글로벌 콜백"
 msgid ""
 "Global map generation attributes.\n"
 "In Mapgen v6 the 'decorations' flag controls all decorations except trees\n"
-"and junglegrass, in all other mapgens this flag controls all decorations."
+"and jungle grass, in all other mapgens this flag controls all decorations."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4023,7 +4122,7 @@ msgid ""
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Instrument chatcommands on registration."
+msgid "Instrument chat commands on registration."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -4107,7 +4206,7 @@ msgid "Joystick button repetition interval"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Joystick deadzone"
+msgid "Joystick dead zone"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5167,7 +5266,7 @@ msgid "Map save interval"
 msgstr "맵 저장 간격"
 
 #: src/settings_translation_file.cpp
-msgid "Map update time"
+msgid "Map shadows update frames"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5466,7 +5565,7 @@ msgid "Mod channels"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "Modifies the size of the hudbar elements."
+msgid "Modifies the size of the HUD elements."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5607,7 +5706,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Number of extra blocks that can be loaded by /clearobjects at once.\n"
-"This is a trade-off between sqlite transaction overhead and\n"
+"This is a trade-off between SQLite transaction overhead and\n"
 "memory consumption (4096=100MB, as a rule of thumb)."
 msgstr ""
 
@@ -5634,6 +5733,10 @@ msgid ""
 "Open the pause menu when the window's focus is lost. Does not pause if a "
 "formspec is\n"
 "open."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Optional override for chat weblink color."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -5786,9 +5889,9 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Prometheus listener address.\n"
-"If minetest is compiled with ENABLE_PROMETHEUS option enabled,\n"
+"If Minetest is compiled with ENABLE_PROMETHEUS option enabled,\n"
 "enable metrics listener for Prometheus on that address.\n"
-"Metrics can be fetch on http://127.0.0.1:30000/metrics"
+"Metrics can be fetched on http://127.0.0.1:30000/metrics"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6109,24 +6212,16 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Set the shadow update time.\n"
-"Lower value means shadows and map updates faster, but it consume more "
-"resources.\n"
-"Minimun value 0.001 seconds max value 0.2 seconds"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
 "Set the soft shadow radius size.\n"
-"Lower values mean sharper shadows bigger values softer.\n"
-"Minimun value 1.0 and max value 10.0"
+"Lower values mean sharper shadows, bigger values mean softer shadows.\n"
+"Minimum value: 1.0; maximum value: 10.0"
 msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Set the tilt of Sun/Moon orbit in degrees\n"
+"Set the tilt of Sun/Moon orbit in degrees.\n"
 "Value of 0 means no tilt / vertical orbit.\n"
-"Minimun value 0.0 and max value 60.0"
+"Minimum value: 0.0; maximum value: 60.0"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6241,7 +6336,7 @@ msgstr ""
 "설정 적용 후 재시작이 필요합니다."
 
 #: src/settings_translation_file.cpp
-msgid "Show nametag backgrounds by default"
+msgid "Show name tag backgrounds by default"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6354,6 +6449,14 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Spread a complete update of shadow map over given amount of frames.\n"
+"Higher values might make shadows laggy, lower values\n"
+"will consume more resources.\n"
+"Minimum value: 1; maximum value: 16"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Spread of light curve boost range.\n"
 "Controls the width of the range to be boosted.\n"
 "Standard deviation of the light curve boost Gaussian."
@@ -6462,7 +6565,7 @@ msgstr "텍스처 경로"
 msgid ""
 "Texture size to render the shadow map on.\n"
 "This must be a power of two.\n"
-"Bigger numbers create better shadowsbut it is also more expensive."
+"Bigger numbers create better shadows but it is also more expensive."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6480,7 +6583,7 @@ msgid "The URL for the content repository"
 msgstr ""
 
 #: src/settings_translation_file.cpp
-msgid "The deadzone of the joystick"
+msgid "The dead zone of the joystick"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6552,7 +6655,7 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "The sensitivity of the joystick axes for moving the\n"
-"ingame view frustum around."
+"in-game view frustum around."
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -6724,7 +6827,7 @@ msgstr "이중 선형 필터링은 질감 스케일링을 할 때 사용 합니�
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Use mip mapping to scale textures. May slightly increase performance,\n"
+"Use mipmapping to scale textures. May slightly increase performance,\n"
 "especially when using a high resolution texture pack.\n"
 "Gamma correct downscaling is not supported."
 msgstr ""
@@ -6910,6 +7013,11 @@ msgid "Waving plants"
 msgstr "흔들리는 식물 효과"
 
 #: src/settings_translation_file.cpp
+#, fuzzy
+msgid "Weblink color"
+msgstr "선택 박스 컬러"
+
+#: src/settings_translation_file.cpp
 msgid ""
 "When gui_scaling_filter is true, all GUI images need to be\n"
 "filtered in software, but some images are generated directly\n"
@@ -6935,7 +7043,7 @@ msgid ""
 "can be blurred, so automatically upscale them with nearest-neighbor\n"
 "interpolation to preserve crisp pixels. This sets the minimum texture size\n"
 "for the upscaled textures; higher values look sharper, but require more\n"
-"memory.  Powers of 2 are recommended. This setting is ONLY applies if\n"
+"memory. Powers of 2 are recommended. This setting is ONLY applied if\n"
 "bilinear/trilinear/anisotropic filtering is enabled.\n"
 "This is also used as the base node texture size for world-aligned\n"
 "texture autoscaling."
@@ -6960,7 +7068,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
-"Whether nametag backgrounds should be shown by default.\n"
+"Whether name tag backgrounds should be shown by default.\n"
 "Mods may still set a background."
 msgstr ""
 
@@ -7089,24 +7197,6 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Y-level of seabed."
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"ZLib compression level to use when saving mapblocks to disk.\n"
-"-1 - Zlib's default compression level\n"
-"0 - no compresson, fastest\n"
-"9 - best compression, slowest\n"
-"(levels 1-3 use Zlib's \"fast\" method, 4-9 use the normal method)"
-msgstr ""
-
-#: src/settings_translation_file.cpp
-msgid ""
-"ZLib compression level to use when sending mapblocks to the client.\n"
-"-1 - Zlib's default compression level\n"
-"0 - no compresson, fastest\n"
-"9 - best compression, slowest\n"
-"(levels 1-3 use Zlib's \"fast\" method, 4-9 use the normal method)"
 msgstr ""
 
 #: src/settings_translation_file.cpp
@@ -7243,6 +7333,9 @@ msgstr ""
 #~ msgid "Generate normalmaps"
 #~ msgstr "Normalmaps 생성"
 
+#~ msgid "Install: file: \"$1\""
+#~ msgstr "모드 설치: 파일: \"$1\""
+
 #, fuzzy
 #~ msgid "Lava depth"
 #~ msgstr "큰 동굴 깊이"
@@ -7348,6 +7441,9 @@ msgstr ""
 #~ msgid "This font will be used for certain languages."
 #~ msgstr "이 글꼴은 특정 언어에 사용 됩니다."
 
+#~ msgid "To enable shaders the OpenGL driver needs to be used."
+#~ msgstr "쉐이더를 사용하려면 OpenGL 드라이버를 사용할 필요가 있습니다."
+
 #~ msgid "Toggle Cinematic"
 #~ msgstr "시네마틱 스위치"
 
@@ -7362,6 +7458,10 @@ msgstr ""
 
 #~ msgid "Yes"
 #~ msgstr "예"
+
+#, fuzzy
+#~ msgid "You died."
+#~ msgstr "사망했습니다"
 
 #~ msgid "needs_fallback_font"
 #~ msgstr "yes"
