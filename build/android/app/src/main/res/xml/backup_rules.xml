@@ -3,10 +3,4 @@
 	<exclude
 		domain="sharedpref"
 		path="MultiCraftSettings.xml" />
-	<exclude
-		domain="sharedpref"
-		path="RateMe.xml" />
-	<exclude
-		domain="sharedpref"
-		path="com.multicraft.game_preferences.xml" />
 </full-backup-content>

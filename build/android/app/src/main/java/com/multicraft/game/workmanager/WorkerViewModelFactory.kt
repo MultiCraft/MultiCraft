@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2020 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
-Copyright (C) 2014-2020 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2021 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
+Copyright (C) 2014-2021 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -18,24 +18,23 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-package com.multicraft.game.helpers;
+package com.multicraft.game.workmanager
 
-import android.app.Activity;
+import android.app.Application
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
-public class AdManager {
-	public static void initAd(final Activity activity, boolean consent) {
-		// NDA code here
-	}
 
-	public static void setAdsCallback(final Activity activity) {
-		// NDA code here
-	}
-
-	public static void startAd(final Activity activity, boolean isFirstTime, boolean isShowNow) {
-		// NDA code here
-	}
-
-	public static void stopAd() {
-		// NDA code here
+class WorkerViewModelFactory(
+	private val application: Application,
+	private val zips: Array<String>
+) :
+	ViewModelProvider.Factory {
+	override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+		if (modelClass.isAssignableFrom(WorkerViewModel::class.java)) {
+			@Suppress("UNCHECKED_CAST")
+			return WorkerViewModel(application, zips) as T
+		}
+		throw IllegalArgumentException("Unknown ViewModel class")
 	}
 }

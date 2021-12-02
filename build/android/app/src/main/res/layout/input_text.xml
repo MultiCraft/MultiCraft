@@ -1,0 +1,13 @@
+<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/inputLayout"
+	style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:padding="12dp">
+
+	<com.multicraft.game.CustomEditText
+		android:id="@+id/editText"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:hint="@string/input_text" />
+</com.google.android.material.textfield.TextInputLayout>

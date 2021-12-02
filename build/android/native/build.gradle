@@ -2,13 +2,12 @@ apply plugin: 'com.android.library'
 apply plugin: 'de.undercouch.download'
 
 android {
-	compileSdkVersion 29
-	buildToolsVersion '30.0.3'
-	ndkVersion '22.0.7026061'
+	compileSdkVersion 31
+	buildToolsVersion '31.0.0'
+	ndkVersion '23.1.7779620'
 	defaultConfig {
-		minSdkVersion 16
-		//noinspection OldTargetApi
-		targetSdkVersion 29
+		minSdkVersion 19
+		targetSdkVersion 31
 		externalNativeBuild {
 			ndkBuild {
 				arguments '-j' + Runtime.getRuntime().availableProcessors(),

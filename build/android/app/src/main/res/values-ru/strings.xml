@@ -1,44 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
 	<!-- подготовка к запуску -->
 	<string name="preparing">Подготовка к запуску&#8230;</string>
 	<string name="loading">Загрузка&#8230;</string>
 	<string name="loadingp">Загрузка&#8230; %d%%</string>
-	<string name="downloading">Загрузка новой версии&#8230;</string>
-	<string name="downloadingp">Загрузка новой версии&#8230; %d%%</string>
 	<string name="notification_title">Загрузка MultiCraft</string>
 	<string name="notification_description">Осталось меньше минуты&#8230;</string>
 	<string name="restart">Произошла ошибка, игра будет перезапущена автоматически</string>
 	<string name="no_space">Недостаточно места для записи файлов игры, пожалуйста освободите место в памяти</string>
 
-	<!-- разрешения -->
-	<string name="explain">Разрешение на запись необходимо для распаковки текстур и игровых файлов.</string>
-	<string name="location">Доступ к местоположению обеспечивает Вам лучшее взаимодействие с игрой</string>
-	<string name="close_game">Закрыть игру</string>
-	<string name="settings">Настройки</string>
-	<string name="denied">Вы не можете играть в MultiCraft без разрешения на запись.\nПожалуйста, включите его в [Настройки] -> [Разрешения]></string>
-
-	<!-- диалог оценки -->
-	<string name="rate_dialog_title">Оцените MultiCraft!</string>
-	<string name="rate_description">Поделитесь впечатлениями</string>
-	<string name="rate_submit">ОЦЕНИТЬ</string>
-	<string name="sad">Нам жаль, что Вам не понравилась игра!</string>
-	<string name="thank">Пожалуйста, оставьте отзыв для нас. Спасибо!</string>
-
-	<string name="recommend">Загрузка\nрекомендации\nдля Вас:\n%d сек.</string>
-
-	<!-- диалог обновления -->
-	<string name="available">Доступна Новая Версия!</string>
-	<string name="ignore">Игнорировать</string>
-	<string name="later">Позже</string>
-	<string name="update">Обновить</string>
+	<string name="input_text">Введите Текст</string>
+	<string name="input_password">Пароль</string>
+	<string name="done">Готово</string>
 
 	<!-- диалог отсутствия подключения -->
-	<string name="conn_message">Для полноценной игры, MultiCraft требует подключение к интернету.\nВ противном случае невозможно обновление игры, а так же не доступен мультиплеер!</string>
+	<string name="conn_title">Нет Интернет Подключения!</string>
+	<string name="conn_message">Для полноценной игры, MultiCraft требует подключение к Интернету.\nВ противном случае вам будет недоступно Обновление игры и режим Мультиплеера!</string>
 	<string name="conn_mobile">3G/4G</string>
-
-	<!-- диалог удаления старой версии -->
-	<string name="del_message">Удалить старую версию MultiCraft?</string>
+	<string name="ignore">Игнорировать</string>
 
 </resources>

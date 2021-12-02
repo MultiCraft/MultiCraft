@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2020 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
-Copyright (C) 2014-2020 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2021 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
+Copyright (C) 2014-2021 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -18,16 +18,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-package com.multicraft.game;
+package com.multicraft.game
 
-import androidx.multidex.MultiDexApplication;
+import android.content.Context
+import android.util.AttributeSet
+import android.view.KeyEvent
+import android.view.inputmethod.InputMethodManager
 
-import com.bugsnag.android.Bugsnag;
-
-public class MyApplication extends MultiDexApplication {
-	@Override
-	public void onCreate() {
-		super.onCreate();
-		Bugsnag.start(this);
+class CustomEditText constructor(context: Context, attrs: AttributeSet) :
+	com.google.android.material.textfield.TextInputEditText(context, attrs) {
+	override fun onKeyPreIme(keyCode: Int, event: KeyEvent): Boolean {
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			val mgr = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+			mgr.hideSoftInputFromWindow(this.windowToken, 0)
+		}
+		return false
 	}
 }

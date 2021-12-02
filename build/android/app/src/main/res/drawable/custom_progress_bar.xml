@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/background">
+	<item>
 		<shape>
 			<stroke
 				android:width="2.5dp"
@@ -17,7 +17,7 @@
 		</shape>
 	</item>
 
-	<item android:id="@+id/progress">
+	<item>
 		<clip>
 			<shape>
 				<corners android:radius="40dip" />
