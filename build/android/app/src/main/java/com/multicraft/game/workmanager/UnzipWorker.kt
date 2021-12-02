@@ -32,12 +32,9 @@ import androidx.work.workDataOf
 import com.multicraft.game.R
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.Utilities.copyInputStreamToFile
-import net.lingala.zip4j.ZipFile
-import net.lingala.zip4j.io.inputstream.ZipInputStream
-import net.lingala.zip4j.model.LocalFileHeader
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
+import java.util.zip.ZipFile
 
 class UnzipWorker(private val appContext: Context, workerParams: WorkerParameters) :
 	CoroutineWorker(appContext, workerParams) {
@@ -68,18 +65,16 @@ class UnzipWorker(private val appContext: Context, workerParams: WorkerParameter
 		return try {
 			var per = 0
 			val zipList = zips.map { ZipFile(File(appContext.cacheDir, it)) }
-			val size = zipList.sumOf { it.fileHeaders.size }
+			val size = zipList.sumOf { it.size() }
 			zipList.forEach { zip ->
-				var localFileHeader: LocalFileHeader?
-				FileInputStream(zip.file).use { fileInputStream ->
-					ZipInputStream(fileInputStream).use { zipInputStream ->
-						while (zipInputStream.nextEntry.also { localFileHeader = it } != null) {
-							if (localFileHeader == null) continue
-							val extracted = File(appContext.filesDir, localFileHeader!!.fileName)
-							if (localFileHeader!!.isDirectory)
-								extracted.mkdirs()
+				zip.use {
+					it.entries().asSequence().forEach { entry ->
+						zip.getInputStream(entry).use { input ->
+							val filePath = File(appContext.filesDir, entry.name)
+							if (entry.isDirectory)
+								filePath.mkdirs()
 							else
-								extracted.copyInputStreamToFile(zipInputStream)
+								filePath.copyInputStreamToFile(input)
 							val currentProgress = 100 * ++per / size
 							if (currentProgress > previousProgress) {
 								previousProgress = currentProgress

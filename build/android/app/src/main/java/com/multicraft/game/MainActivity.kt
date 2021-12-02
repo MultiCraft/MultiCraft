@@ -28,7 +28,6 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.provider.Settings.ACTION_WIFI_SETTINGS
 import android.provider.Settings.ACTION_WIRELESS_SETTINGS
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import androidx.appcompat.app.AlertDialog
