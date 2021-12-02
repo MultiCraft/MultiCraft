@@ -39,9 +39,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkInfo
 import com.multicraft.game.databinding.ActivityMainBinding
-import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.Constants.NO_SPACE_LEFT
 import com.multicraft.game.helpers.Constants.REQUEST_CONNECTION
+import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.TAG_LAUNCH_TIMES
 import com.multicraft.game.helpers.PreferenceHelper.TAG_SHORTCUT_EXIST
@@ -61,7 +61,6 @@ import com.multicraft.game.workmanager.WorkerViewModelFactory
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 	private lateinit var binding: ActivityMainBinding

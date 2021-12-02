@@ -43,7 +43,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 import com.multicraft.game.MainActivity
 import com.multicraft.game.R
-import com.multicraft.game.helpers.ApiLevelHelper.isKitKat
+import com.multicraft.game.helpers.ApiLevelHelper.isLollipop
 import com.multicraft.game.helpers.ApiLevelHelper.isMarshmallow
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_SHORTCUT_EXIST
@@ -67,7 +67,7 @@ object Utilities {
 
 	@JvmStatic
 	fun makeFullScreen(window: Window) {
-		if (!isKitKat()) {
+		if (isLollipop()) {
 			WindowCompat.setDecorFitsSystemWindows(window, false)
 			WindowInsetsControllerCompat(window, window.decorView).let {
 				it.hide(statusBars() or navigationBars())
