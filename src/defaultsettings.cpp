@@ -487,6 +487,7 @@ void set_default_settings()
 	settings->setDefault("screen_dpi", "72");
 
 	settings->setDefault("mainmenu_last_selected_world", "1");
+	settings->setDefault("device_is_tablet", "false");
 
 	// Altered settings for macOS
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
@@ -644,6 +645,9 @@ void set_default_settings()
 			g_settings->setDefault("hud_scaling", "0.9");
 			g_settings->setDefault("selectionbox_width", "6");
 		}
+
+		if (x_inches >= 7.0)
+			settings->setDefault("device_is_tablet", "true");
 	}
 #endif // Android
 
@@ -660,6 +664,9 @@ void set_default_settings()
 
 	settings->setDefault("debug_log_level", "none");
 	settings->setDefault("password_save", "true");
+
+	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+		settings->setDefault("device_is_tablet", "true");
 
 	// Set the size of the elements depending on the screen size
 	if SDVersion4Inch {
@@ -687,6 +694,7 @@ void set_default_settings()
 		settings->setDefault("hud_scaling", "0.9");
 		settings->setDefault("mouse_sensitivity", "0.25");
 		settings->setDefault("selectionbox_width", "6");
+		settings->setDefault("device_is_tablet", "false");
 	} else {
 		// iPad
 		settings->setDefault("mouse_sensitivity", "0.3");

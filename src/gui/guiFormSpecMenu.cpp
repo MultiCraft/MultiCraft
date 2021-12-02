@@ -3321,6 +3321,10 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 			// In Android, the preferred imgsize should be larger to accommodate the
 			// smaller screensize.
 			double prefer_imgsize = padded_screensize.Y / 10 * gui_scaling;
+
+			// Try to fit 13 coordinates on large tablets.
+			if (g_settings->getBool("device_is_tablet"))
+				prefer_imgsize = padded_screensize.Y / 13 * gui_scaling;
 #else
 			// Desktop computers have more space, so try to fit 15 coordinates.
 			double prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
