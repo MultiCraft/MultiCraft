@@ -1,53 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
 	<string name="app_name" translatable="false">MultiCraft</string>
 
 	<!-- preparation for start -->
 	<string name="preparing">Preparing to launch&#8230;</string>
 	<string name="loading">Loading&#8230;</string>
 	<string name="loadingp">Loading&#8230; %d%%</string>
-	<string name="downloading">Downloading new version&#8230;</string>
-	<string name="downloadingp">Downloading new version&#8230; %d%%</string>
 	<string name="notification_title">Loading MultiCraft</string>
 	<string name="notification_description">Less than 1 minute&#8230;</string>
 	<string name="restart">Unexpected issue, the game will be restarted automatically</string>
 	<string name="no_space">No space left for game files, please free space in the memory</string>
 	<string name="ok" translatable="false">OK</string>
 
-	<!-- permission block -->
-	<string name="explain">Storage permissions is necessary to unpack textures and game data.</string>
-	<string name="location">Location permission provide you better interaction with game</string>
-	<string name="close_game">Close game</string>
-	<string name="settings">App settings</string>
-	<string name="denied">You cannot play MultiCraft without storage permission.\nPlease turn on it at [Settings] -> [Permissions]></string>
-
-	<!-- rate dialog -->
-	<string name="rate_dialog_title">Please, rate MultiCraft!</string>
-	<string name="rate_description">Describe your experience</string>
-	<string name="rate_submit">SUBMIT</string>
-	<string name="sad">We are sorry that you did not like the game!</string>
-	<string name="thank">Please leave a review for us. Thank you!</string>
-
-	<string name="recommend">Loading\nrecommendation\nfor you:\n%d sec.</string>
-
-	<!-- update dialog -->
-	<string name="available">New Version Available!</string>
-	<string name="update">Update</string>
-	<string name="later">Later</string>
-	<string name="ignore">Ignore</string>
+	<string name="input_text">Text Input</string>
+	<string name="input_password">Password</string>
+	<string name="done">Done</string>
 
 	<!-- no connection dialog -->
-	<string name="conn_message">MultiCraft requires an internet connection to use all game features.\nOtherwise, you will not get updates and multiplayer will be not available!</string>
+	<string name="conn_title">No Internet Connection!</string>
+	<string name="conn_message">MultiCraft requires an Internet connection to use all game features.\nOtherwise, you will not get Updates and Multiplayer mode will be not available!</string>
 	<string name="conn_wifi" translatable="false">Wi-Fi</string>
 	<string name="conn_mobile">Mobile Data</string>
-
-	<!-- uninstall old version dialog -->
-	<string name="del_message">Uninstall an old version of MultiCraft?</string>
-
-	<!-- GDPR -->
-	<string name="gdpr_main_text" translatable="false"><b>We care about your privacy and data security. We keep this app free by showing ads.\n<big>Can we continue to use your data to tailor ads for you?</big></b>\n\n<small>Our partners will collect data and use a unique identifier on your device to show you ads. By agreeing, you confirm that you are 16 years old. You can learn how we and our partners collect and use data on <a href="https://www.appodeal.com/privacy-policy">Privacy Policy</a>.</small></string>
-	<string name="gdpr_agree" translatable="false">Yes, I allow</string>
-	<string name="gdpr_disagree" translatable="false">No</string>
+	<string name="ignore">Ignore</string>
 
 </resources>
