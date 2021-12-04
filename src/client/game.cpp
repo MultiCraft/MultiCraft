@@ -1433,7 +1433,7 @@ bool Game::createClient(const GameStartData &start_data)
 
 bool Game::initGui()
 {
-	m_game_ui->init();
+	m_game_ui->init(client);
 
 	// Remove stale "recent" chat messages from previous connections
 	chat_backend->clearRecentChat();

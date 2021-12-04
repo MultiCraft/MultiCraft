@@ -62,7 +62,7 @@ public:
 		bool show_profiler_graph = false;
 	};
 
-	void init();
+	void init(Client *client);
 	void update(const RunStats &stats, Client *client, MapDrawControl *draw_control,
 			const CameraOrientation &cam, const PointedThing &pointed_old,
 			const GUIChatConsole *chat_console, float dtime);

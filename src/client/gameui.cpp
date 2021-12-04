@@ -51,7 +51,7 @@ GameUI::GameUI()
 		m_statustext_initial_color = video::SColor(255, 0, 0, 0);
 
 }
-void GameUI::init()
+void GameUI::init(Client *client)
 {
 	// First line of debug text
 	m_guitext = gui::StaticText::add(guienv, utf8_to_wide(PROJECT_NAME_C).c_str(),
@@ -74,11 +74,14 @@ void GameUI::init()
 	// At the middle of the screen
 	// Object infos are shown in this
 	u32 chat_font_height = m_guitext_chat->getActiveFont()->getDimension(L"Ay").Height;
+	float scale = RenderingEngine::getDisplayDensity() * client->getHudScaling();
+#if defined(__ANDROID__) || defined(__IOS__)
+	scale /= 2;
+#endif
 	m_guitext_info = gui::StaticText::add(guienv, L"",
-		core::rect<s32>(0, 0, 400, g_fontengine->getTextHeight() * 5 + 5) +
-			v2s32(100, chat_font_height *
-			(g_settings->getU16("recent_chat_messages") + 3)) *
-			RenderingEngine::getDisplayDensity(),
+		core::rect<s32>(0, 0, 400, g_fontengine->getTextHeight() * 6) +
+			v2s32(100 + client->getRoundScreen(),
+			chat_font_height * (g_settings->getU16("recent_chat_messages") + 3) * scale),
 			false, true, guiroot);
 
 	// Status text (displays info when showing and hiding GUI stuff, etc.)
