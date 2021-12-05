@@ -1539,7 +1539,7 @@ bool Game::createClient(const GameStartData &start_data)
 		str += L" [";
 		str += text;
 		str += L"]";
-		delete text;
+		delete[] text;
 	}
 	str += L" [";
 	str += driver->getName();
