@@ -282,11 +282,6 @@ if(NOT USE_LUAJIT)
 	add_subdirectory(lib/bitop)
 endif()
 
-# JsonCpp doesn't compile well on GCC 4.8
-if(NOT USE_SYSTEM_JSONCPP)
-	set(GCC_MINIMUM_VERSION "4.9")
-endif()
-
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "${GCC_MINIMUM_VERSION}")
 		message(FATAL_ERROR "Insufficient gcc version, found ${CMAKE_CXX_COMPILER_VERSION}. "
