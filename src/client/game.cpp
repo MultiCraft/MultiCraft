@@ -2273,13 +2273,18 @@ void Game::openInventory()
 		return; // CSM prevented inventory opening
 
 	PlayerInventoryFormSource *fs_src = new PlayerInventoryFormSource(client);
+	const std::string form = fs_src->getForm();
+	if (form.empty()) {
+		delete fs_src;
+		return;
+	}
+
 	TextDest *txt_dst = new TextDestPlayerInventory(client);
 	auto *&formspec = m_game_ui->updateFormspec("");
 	GUIFormSpecMenu::create(formspec, client, m_rendering_engine->get_gui_env(),
 			&input->joystick, fs_src,
 		txt_dst, client->getFormspecPrepend(), sound);
 
-	const std::string form = fs_src->getForm();
 	formspec->setFormSpec(form, inventoryloc);
 
 	if (form.find("acknowledge_open[]") != std::string::npos) {
