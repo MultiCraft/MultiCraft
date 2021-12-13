@@ -16,12 +16,10 @@ local LIST_FORMSPEC_DESCRIPTION = [[
 		tablecolumns[color;tree;text;text]
 		table[0,0.5;12.8,4.8;list;%s;%i]
 		box[0,5.5;12.8,1.5;#000]
-	]] ..
---	textarea[0.3,5.5;13.05,1.9;;;%s] -- for compatibility with 0.4
-	[[
 		label[0.3,5.5;%s]
 		button_exit[5,7;3,1;quit;%s]
 	]]
+--	textarea[0.3,5.5;13.05,1.9;;;%s] -- label for compatibility with 0.4
 
 local formspec_escape = core.formspec_escape
 local check_player_privs = core.check_player_privs
@@ -60,17 +58,26 @@ local function build_chatcommands_formspec(name, sel, copy)
 		"Double-click to copy the entry to the chat history."
 
 	for i, data in ipairs(mod_cmds) do
-		rows[#rows + 1] = COLOR_BLUE .. ",0," .. formspec_escape(data[1]) .. ","
-		for j, cmds in ipairs(data[2]) do
+		for _, cmds in ipairs(data[2]) do
 			local has_priv = check_player_privs(name, cmds[2].privs)
-			rows[#rows + 1] = ("%s,1,%s,%s"):format(
-				has_priv and COLOR_GREEN or COLOR_GRAY,
-				cmds[1], formspec_escape(cmds[2].params))
-			if sel == #rows then
-				description = cmds[2].description
-				if copy then
-					core.chat_send_player(name, ("Command: %s %s"):format(
-						core.colorize("#0FF", "/" .. cmds[1]), cmds[2].params))
+			if has_priv then
+				rows[#rows + 1] = COLOR_BLUE .. ",0," .. formspec_escape(data[1]) .. ","
+				break
+			end
+		end
+		for _, cmds in ipairs(data[2]) do
+			local has_priv = check_player_privs(name, cmds[2].privs)
+			if has_priv then
+				rows[#rows + 1] = ("%s,1,%s,%s"):format(
+				--	has_priv and COLOR_GREEN or COLOR_GRAY,
+					COLOR_GREEN,
+					cmds[1], formspec_escape(cmds[2].params))
+				if sel == #rows then
+					description = cmds[2].description
+					if copy then
+						core.chat_send_player(name, ("Command: %s %s"):format(
+							core.colorize("#0FF", "/" .. cmds[1]), cmds[2].params))
+					end
 				end
 			end
 		end
