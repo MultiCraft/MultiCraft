@@ -214,10 +214,8 @@ size_t ScriptApiServer::getMemoryUsageKB() {
 	return memory_usage_kb;
 }
 
-u32 ScriptApiServer::allocateDynamicMediaCallback(int f_idx)
+u32 ScriptApiServer::allocateDynamicMediaCallback(lua_State *L, int f_idx)
 {
-	lua_State *L = getStack();
-
 	if (f_idx < 0)
 		f_idx = lua_gettop(L) + f_idx + 1;
 
@@ -251,7 +249,7 @@ u32 ScriptApiServer::allocateDynamicMediaCallback(int f_idx)
 
 void ScriptApiServer::freeDynamicMediaCallback(u32 token)
 {
-	lua_State *L = getStack();
+	SCRIPTAPI_PRECHECKHEADER
 
 	verbosestream << "freeDynamicMediaCallback(" << token << ")" << std::endl;
 
