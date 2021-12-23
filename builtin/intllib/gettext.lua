@@ -1,16 +1,9 @@
-local strsub, strrep = string.sub, string.rep
-local strmatch, strgsub = string.match, string.gsub
-
-local function trim(str)
-	return strmatch(str, "^%s*(.-)%s*$")
-end
-
 local escapes = { n="\n", r="\r", t="\t" }
 
 local function unescape(str)
-	return (strgsub(str, "(\\+)([nrt]?)", function(bs, c)
+	return (str:gsub("(\\+)([nrt]?)", function(bs, c)
 		local bsl = #bs
-		local realbs = strrep("\\", bsl/2)
+		local realbs = ("\\"):rep(bsl/2)
 		if bsl%2 == 1 then
 			c = escapes[c] or c
 		end
@@ -27,14 +20,14 @@ local function parse_po(str)
 	end
 	for _, line in ipairs(str:split("\n")) do repeat
 		lineno = lineno + 1
-		line = trim(line)
+		line = line:trim()
 
-		if line == "" or strmatch(line, "^#") then
+		if line == "" or line:match("^#") then
 			state, msgid, msgid_plural = nil, nil, nil
 			break -- continue
 		end
 
-		local mid = strmatch(line, "^%s*msgid%s*\"(.*)\"%s*$")
+		local mid = line:match("^%s*msgid%s*\"(.*)\"%s*$")
 		if mid then
 			if state == "id" then
 				return perror("unexpected msgid")
@@ -43,7 +36,7 @@ local function parse_po(str)
 			break -- continue
 		end
 
-		mid = strmatch(line, "^%s*msgid_plural%s*\"(.*)\"%s*$")
+		mid = line:match("^%s*msgid_plural%s*\"(.*)\"%s*$")
 		if mid then
 			if state ~= "id" then
 				return perror("unexpected msgid_plural")
@@ -52,15 +45,14 @@ local function parse_po(str)
 			break -- continue
 		end
 
-		local ind, mstr = strmatch(line,
-				"^%s*msgstr([0-9%[%]]*)%s*\"(.*)\"%s*$")
+		local ind, mstr = line:match("^%s*msgstr([0-9%[%]]*)%s*\"(.*)\"%s*$")
 		if ind then
 			if not msgid then
 				return perror("missing msgid")
 			elseif ind == "" then
 				msgstrind = 0
-			elseif strmatch(ind, "%[[0-9]+%]") then
-				msgstrind = tonumber(strsub(ind, 2, -2))
+			elseif ind:match("%[[0-9]+%]") then
+				msgstrind = tonumber(ind:sub(2, -2))
 			else
 				return perror("malformed msgstr")
 			end
@@ -73,7 +65,7 @@ local function parse_po(str)
 			break -- continue
 		end
 
-		mstr = strmatch(line, "^%s*\"(.*)\"%s*$")
+		mstr = line:match("^%s*\"(.*)\"%s*$")
 		if mstr then
 			if state == "id" then
 				msgid = msgid..unescape(mstr)
@@ -107,9 +99,9 @@ end
 -- It handles enough stuff to parse the `Plural-Forms` header correctly.
 -- Note that it assumes the C expression is valid to begin with.
 local function compile_plural_forms(str)
-	local plural = strmatch(str, "plural=([^;]+);?$")
+	local plural = str:match("plural=([^;]+);?$")
 	local function replace_ternary(s)
-		local c, t, f = strmatch(s, "^(.-)%?(.-):(.*)")
+		local c, t, f = s:match(s"^(.-)%?(.-):(.*)")
 		if c then
 			return ("__if("
 					..replace_ternary(c)
@@ -120,10 +112,10 @@ local function compile_plural_forms(str)
 		return s
 	end
 	plural = replace_ternary(plural)
-	plural = strgsub(plural, "&&", " and ")
-	plural = strgsub(plural, "||", " or ")
-	plural = strgsub(plural, "!=", "~=")
-	plural = strgsub(plural, "!", " not ")
+	plural = plural:gsub("&&", " and ")
+	plural = plural:gsub("||", " or ")
+	plural = plural:gsub("!=", "~=")
+	plural = plural:gsub("!", " not ")
 	local f, err = loadstring([[
 		local function __if(c, t, f)
 			if c and c~=0 then return t else return f end
@@ -150,7 +142,7 @@ end
 local function parse_headers(str)
 	local headers = { }
 	for _, line in ipairs(str:split("\n")) do
-		local k, v = strmatch(line, "^([^:]+):%s*(.*)")
+		local k, v = line:match("^([^:]+):%s*(.*)")
 		if k then
 			headers[k] = v
 		end

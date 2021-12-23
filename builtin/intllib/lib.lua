@@ -1,5 +1,3 @@
-intllib = intllib or {}
-
 local INS_CHAR = "@"
 intllib.INSERTION_CHAR = INS_CHAR
 
@@ -10,7 +8,7 @@ local escapes = {
 	["t"]  = "\t",
 	["r"]  = "\r",
 	["f"]  = "\f",
-	[INS_CHAR]  = INS_CHAR..INS_CHAR,
+	[INS_CHAR] = INS_CHAR..INS_CHAR,
 }
 
 local function unescape(str)

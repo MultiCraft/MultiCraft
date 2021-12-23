@@ -3,7 +3,7 @@ intllib = {
 	strings = {},
 }
 
-local path = core.get_builtin_path() .. DIR_DELIM .. "intllib" .. DIR_DELIM
+local path = core.get_builtin_path() .. "intllib" .. DIR_DELIM
 dofile(path .. "lib.lua")
 
 local LANG = core.settings:get("language")
@@ -67,15 +67,14 @@ function intllib.Getter(modname)
 end
 
 
-local strfind, strsub = string.find, string.sub
 local langs
 
 local function split(str, sep)
 	local pos, endp = 1, #str+1
 	return function()
 		if (not pos) or pos > endp then return end
-		local s, e = strfind(str, sep, pos, true)
-		local part = strsub(str, pos, s and s-1)
+		local s, e = str:find(sep, pos, true)
+		local part = str:sub(pos, s and s-1)
 		pos = e and e + 1
 		return part
 	end
@@ -89,14 +88,14 @@ function intllib.get_detected_languages()
 	local function addlang(l)
 		local sep
 		langs[#langs+1] = l
-		sep = strfind(l, ".", 1, true)
+		sep = l:find(".", 1, true)
 		if sep then
-			l = strsub(l, 1, sep-1)
+			l = l:sub(1, sep-1)
 			langs[#langs+1] = l
 		end
-		sep = strfind(l, "_", 1, true)
+		sep = l:find("_", 1, true)
 		if sep then
-			langs[#langs+1] = strsub(l, 1, sep-1)
+			langs[#langs+1] = l:sub(1, sep-1)
 		end
 	end
 
@@ -138,8 +137,9 @@ local function catgettext(catalogs, msgid)
 	end
 end
 
+local floor = math.floor
 local function catngettext(catalogs, msgid, msgid_plural, n)
-	n = math.floor(n)
+	n = floor(n)
 	for _, cat in ipairs(catalogs) do
 		local msgstr = cat and cat[msgid]
 		if msgstr then
