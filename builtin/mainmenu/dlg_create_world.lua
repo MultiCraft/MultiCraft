@@ -98,8 +98,9 @@ local function create_world_formspec(dialogdata)
 	-- Error out when no games found
 	if #pkgmgr.games == 0 then
 		return "size[12.25,3,false]" ..
+			"bgcolor[#0000]" ..
 			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]" ..
+				"bg_common.png") .. ";true;40]" ..
 			"box[0,0;12,2;#ff8800]" ..
 			"textarea[0.3,0;11.7,2;;;"..
 			fgettext("You have no games installed.") .. "\n" ..
@@ -320,8 +321,9 @@ local function create_world_formspec(dialogdata)
 
 	local retval =
 		"size[12.25,7,false]" ..
+		"bgcolor[#0000]" ..
 		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]" ..
+			"bg_common.png") .. ";true;40]" ..
 
 		-- Left side
 		"container[0,0]"..
@@ -351,6 +353,7 @@ local function create_world_formspec(dialogdata)
 		"container_end[]"..
 
 		-- Menu buttons
+		"style[world_create_confirm;bgcolor=#00d12b]" ..
 		"button[3.25,6.5;3,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
 		"button[6.25,6.5;3,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
 

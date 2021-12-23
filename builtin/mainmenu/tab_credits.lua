@@ -123,7 +123,7 @@ return {
 			"button[9.5,0;2.5,0.5;homepage;Home Page]" ..
 			"button[9.5,0.8;2.5,0.5;privacy;Privacy Policy]" ..
 			"tablecolumns[color;text]" ..
-			"tableoptions[background=#999999;highlight=#00000000;border=true]" ..
+			"tableoptions[background=#33314B;highlight=#00000000;border=true]" ..
 			"table[0,1.5;11.8,4;list_credits;" ..
 			"#FFFF00," .. fgettext("MultiCraft Developers") .. ",," ..
 			buildCreditList(multicraft_developers) .. ",,," ..

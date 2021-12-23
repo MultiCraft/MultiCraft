@@ -56,36 +56,22 @@ local function add_tab(self,tab)
 	end
 end
 
-local function get_bg(tsize, tabname)
-	local bg =
-		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]"
-
-	if tabname then
-		bg = bg ..
-			"background[0,0;" .. tsize.width .. "," .. tsize.height .. ";" ..
-			core.formspec_escape(defaulttexturedir ..
-				"bg_" .. tabname .. ".png") .. ";true]"
-	end
-
-	return bg
-end
-
 --------------------------------------------------------------------------------
 local function get_formspec(self)
 	local formspec = ""
 
 	if not self.hidden and (self.parent == nil or not self.parent.hidden) then
 		local name = self.tablist[self.last_tab_index].name
-		local tabname = (name == "local" or name == "online") and name
-				or (name == "local_default" and "local")
 
 		if self.parent == nil then
 			local tsize = self.tablist[self.last_tab_index].tabsize or
 					{width=self.width, height=self.height}
 			formspec = formspec ..
 					string.format("size[%f,%f,%s]",tsize.width,tsize.height,
-						dump(self.fixed_size)) .. get_bg(tsize, tabname)
+						dump(self.fixed_size)) ..
+					"bgcolor[#0000]" ..
+					"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+						"bg_common.png") .. ";true;40]"
 		end
 		formspec = formspec .. self:tab_header()
 		formspec = formspec ..

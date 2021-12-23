@@ -107,7 +107,7 @@ local function init_globals()
 	mm_texture.init()
 
 	-- Create main tabview
-	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0, y = 0})
+	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0.1, y = 0})
 
 	for i = 1, #pkgmgr.games do
 		if pkgmgr.games[i].id == "default" then
