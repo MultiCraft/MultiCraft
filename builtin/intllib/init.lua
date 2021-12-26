@@ -209,10 +209,14 @@ function intllib.get_strings(modname, langcode)
 end
 
 
-function core.get_translator_auto()
-	if LANG == "ru" then
-		-- Surrounded in brackets so there's only one return value
-		return (intllib.make_gettext_pair())
+function core.get_translator_auto(langs)
+	if type(langs) == "table" then
+		for _, l in ipairs(langs) do
+			if LANG == l then
+				-- Surrounded in brackets so there's only one return value
+				return (intllib.make_gettext_pair())
+			end
+		end
 	end
 
 	return core.get_translator(core.get_current_modname())
