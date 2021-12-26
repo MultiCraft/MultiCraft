@@ -203,11 +203,6 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 			keyIsDown.unset(key);
 			keyWasReleased.set(key);
 			break;
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-		case EMIE_MOUSE_WHEEL_X:
-			mouse_wheel -= event.MouseInput.Wheel;
-			return true;
-#endif
 		case EMIE_MOUSE_WHEEL:
 			mouse_wheel += event.MouseInput.Wheel;
 			break;

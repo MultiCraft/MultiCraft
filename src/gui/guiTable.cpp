@@ -900,19 +900,9 @@ bool GUITable::OnEvent(const SEvent &event)
 		core::position2d<s32> p(event.MouseInput.X, event.MouseInput.Y);
 
 		if (event.MouseInput.Event == EMIE_MOUSE_WHEEL) {
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-			// looks awful, works same
-			float wheel = event.MouseInput.Wheel;
-			if (wheel > 0.01) wheel = 2;
-			else if (wheel < -0.01) wheel = -2;
-			m_scrollbar->setPos(m_scrollbar->getPos() +
-					(s32) wheel *
-					- (s32) m_rowheight / 2);
-#else
 			m_scrollbar->setPos(m_scrollbar->getPos() +
 					(event.MouseInput.Wheel < 0 ? -3 : 3) *
 					- (s32) m_rowheight / 2);
-#endif
 			return true;
 		}
 

@@ -2,7 +2,7 @@
 
 # This file sets the appropriate compiler and flags for compiling for macOS without XCode
 sdk=macosx
-osver=10.10
+osver=10.11
 
 export OSX_ARCHES="x86_64 arm64"
 arches="-arch x86_64 -arch arm64"
