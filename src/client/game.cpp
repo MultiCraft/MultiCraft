@@ -1412,9 +1412,11 @@ bool Game::createClient(const GameStartData &start_data)
 	std::wstring str = utf8_to_wide(PROJECT_NAME_C);
 	str += L" ";
 	str += utf8_to_wide(g_version_hash);
+#ifndef NDEBUG
 	str += L" [";
 	str += driver->getName();
 	str += L"]";
+#endif
 	device->setWindowCaption(str.c_str());
 
 	LocalPlayer *player = client->getEnv().getLocalPlayer();
