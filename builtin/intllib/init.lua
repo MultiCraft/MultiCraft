@@ -207,3 +207,13 @@ function intllib.get_strings(modname, langcode)
 	end
 	return msgstr
 end
+
+
+function core.get_translator_auto()
+	if LANG == "ru" then
+		-- Surrounded in brackets so there's only one return value
+		return (intllib.make_gettext_pair())
+	end
+
+	return core.get_translator(core.get_current_modname())
+end
