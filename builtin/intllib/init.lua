@@ -158,7 +158,7 @@ function intllib.make_gettext_pair(modname)
 	if gettext_getters[modname] then
 		return unpack(gettext_getters[modname])
 	end
-	local modpath = core.get_modpath(modname) and core.get_modpath(modname)
+	local modpath = core.get_modpath(modname)
 	local localedir = modpath and modpath.."/locale"
 	local catalogs = localedir and gettext.load_catalogs(localedir) or {}
 	local getter = Getter(modname)
@@ -192,7 +192,7 @@ function intllib.get_strings(modname, langcode)
 	modname = modname or core.get_current_modname()
 	local msgstr = intllib.strings[modname]
 	if not msgstr then
-		local modpath = core.get_modpath(modname) and core.get_modpath(modname)
+		local modpath = core.get_modpath(modname)
 		msgstr = { }
 		if modpath then
 			for _, l in ipairs(get_locales(langcode)) do
