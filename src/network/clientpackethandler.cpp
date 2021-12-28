@@ -45,6 +45,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gettext.h"
 #include "skyparams.h"
 #include "client/renderingengine.h"
+#include <memory>
 
 void Client::handleCommand_Deprecated(NetworkPacket* pkt)
 {
@@ -1601,7 +1602,7 @@ void Client::handleCommand_MediaPush(NetworkPacket *pkt)
 	m_media_pushed_files.insert(filename);
 
 	// create a downloader for this file
-	auto downloader = new SingleMediaDownloader(cached);
+	auto downloader(std::make_shared<SingleMediaDownloader>(cached));
 	m_pending_media_downloads.emplace_back(token, downloader);
 	downloader->addFile(filename, raw_hash);
 	for (const auto &baseurl : m_remote_media_servers)
