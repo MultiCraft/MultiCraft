@@ -505,14 +505,12 @@ void set_default_settings()
 	settings->setDefault("enable_shaders", "false");
 
 	settings->setDefault("serverlist_url", "servers.multicraft.world");
-	settings->setDefault("TMPFolder", porting::path_cache);
 #endif
 
 	// Mobile Platform
 #if defined(__ANDROID__) || defined(__IOS__)
 	settings->setDefault("fullscreen", "true");
 	settings->setDefault("touchtarget", "true");
-	settings->setDefault("TMPFolder", porting::path_cache);
 	settings->setDefault("touchscreen_threshold", "20");
 	settings->setDefault("fixed_virtual_joystick", "true");
 	settings->setDefault("virtual_joystick_triggers_aux", "false");
