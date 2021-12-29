@@ -195,6 +195,7 @@ void set_default_settings()
 	settings->setDefault("leaves_style", "fancy");
 	settings->setDefault("connected_glass", "false");
 	settings->setDefault("smooth_lighting", "true");
+	settings->setDefault("performance_tradeoffs", "false");
 	settings->setDefault("lighting_alpha", "0.0");
 	settings->setDefault("lighting_beta", "1.5");
 	settings->setDefault("display_gamma", "1.0");
@@ -541,6 +542,7 @@ void set_default_settings()
 #if !defined(_IRR_COMPILE_WITH_ANGLE_)
 	settings->setDefault("video_driver", "ogles2");
 #endif
+	settings->setDefault("performance_tradeoffs", "true");
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
 	settings->setDefault("gui_scaling_filter_txr2img", "false");
