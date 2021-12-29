@@ -120,7 +120,9 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 {
 	removeChildren();
 
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__ANDROID__) || defined(__IOS__)
+	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 2;
+#elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
 #else
 	const float s = m_gui_scale;
