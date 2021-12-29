@@ -948,8 +948,7 @@ void drawItemStack(
 		return;
 	}
 
-	const static thread_local bool enable_animations =
-		g_settings->getBool("inventory_items_animations");
+	const bool enable_animations = client->getInvItemAnimEnabled();
 
 	const ItemDefinition &def = item.getDefinition(client->idef());
 

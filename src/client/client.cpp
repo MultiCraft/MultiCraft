@@ -135,6 +135,7 @@ Client::Client(
 	m_cache_save_interval = g_settings->getU16("server_map_save_interval");
 	m_round_screen = g_settings->getU16("round_screen");
 	m_hud_scaling = g_settings->getFloat("hud_scaling");
+	m_inv_item_anim_enabled = g_settings->getBool("inventory_items_animations");
 }
 
 void Client::loadMods()
