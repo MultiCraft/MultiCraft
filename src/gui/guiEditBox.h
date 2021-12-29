@@ -130,14 +130,6 @@ public:
 	//! called if an event happened.
 	virtual bool OnEvent(const SEvent &event);
 
-	//! Writes attributes of the element.
-	virtual void serializeAttributes(io::IAttributes *out,
-			io::SAttributeReadWriteOptions *options) const;
-
-	//! Reads attributes of the element
-	virtual void deserializeAttributes(
-			io::IAttributes *in, io::SAttributeReadWriteOptions *options);
-
 	//! Sets the scrollbar texture
 	void setScrollbarStyle(const StyleSpec &style, ISimpleTextureSource *tsrc)
 	{
