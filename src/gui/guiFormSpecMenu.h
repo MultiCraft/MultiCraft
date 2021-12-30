@@ -257,6 +257,7 @@ public:
 
 	void acceptInput(FormspecQuitMode quitmode=quit_mode_no);
 	bool preprocessEvent(const SEvent& event);
+	void clearSelection();
 	bool OnEvent(const SEvent& event);
 	bool doPause;
 	bool pausesGame() { return doPause; }

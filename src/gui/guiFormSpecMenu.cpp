@@ -4139,6 +4139,15 @@ enum ButtonEventType : u8
 	BET_OTHER
 };
 
+void GUIFormSpecMenu::clearSelection()
+{
+	m_selected_swap.clear();
+	delete m_selected_item;
+	m_selected_item = nullptr;
+	m_selected_amount = 0;
+	m_selected_dragging = false;
+}
+
 bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 {
 	if (event.EventType==EET_KEY_INPUT_EVENT) {
@@ -4579,6 +4588,9 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 	if (event.EventType == EET_GUI_EVENT) {
 		if (event.GUIEvent.EventType == gui::EGET_TAB_CHANGED
 				&& isVisible()) {
+			// reset selection
+			clearSelection();
+
 			// find the element that was clicked
 			for (GUIFormSpecMenu::FieldSpec &s : m_fields) {
 				if ((s.ftype == f_TabHeader) &&
@@ -4605,8 +4617,10 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 				(event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED) ||
 				(event.GUIEvent.EventType == gui::EGET_COMBO_BOX_CHANGED) ||
 				(event.GUIEvent.EventType == gui::EGET_SCROLL_BAR_CHANGED)) {
-			s32 caller_id = event.GUIEvent.Caller->getID();
+			// reset selection
+			clearSelection();
 
+			s32 caller_id = event.GUIEvent.Caller->getID();
 			if (caller_id == 257) {
 				if (m_allowclose) {
 					acceptInput(quit_mode_accept);
@@ -4717,6 +4731,9 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 
 		if (event.GUIEvent.EventType == gui::EGET_TABLE_CHANGED ||
 			event.GUIEvent.EventType == gui::EGET_EDITBOX_CHANGED) {
+			// reset selection
+			clearSelection();
+
 			int current_id = event.GUIEvent.Caller->getID();
 			if (current_id > 257) {
 				// find the element that was clicked or changed
