@@ -65,6 +65,7 @@ FontEngine::FontEngine(gui::IGUIEnvironment* env) :
 		g_settings->registerChangedCallback("font_path_bolditalic", fontSettingChanged, this);
 		g_settings->registerChangedCallback("font_shadow", fontSettingChanged, this);
 		g_settings->registerChangedCallback("font_shadow_alpha", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_size_divisible_by", fontSettingChanged, this);
 	}
 	else if (m_currentMode == FM_Fallback) {
 		g_settings->registerChangedCallback("font_size", fontSettingChanged, this); // fallback_font_size
@@ -75,6 +76,7 @@ FontEngine::FontEngine(gui::IGUIEnvironment* env) :
 
 	g_settings->registerChangedCallback("mono_font_path", fontSettingChanged, this);
 	g_settings->registerChangedCallback("mono_font_size", fontSettingChanged, this);
+	g_settings->registerChangedCallback("mono_font_size_divisible_by", fontSettingChanged, this);
 	g_settings->registerChangedCallback("screen_dpi", fontSettingChanged, this);
 	g_settings->registerChangedCallback("gui_scaling", fontSettingChanged, this);
 }
@@ -302,15 +304,16 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 			g_settings->getFloat("gui_scaling");
 	u32 size = std::max(std::floor(size_factor * spec.size), 1.0f);
 
+	// Constrain the font size to a certain multiple, if necessary
+	u16 divisible_by = g_settings->getU16(setting_prefix + "font_size_divisible_by");
+	if (divisible_by > 1) {
+		size = std::max<u32>(
+				std::round((double)size / divisible_by) * divisible_by, divisible_by);
+	}
+
 	u16 outline = spec.outline * size_factor;
 	u8 outline_type = spec.outline_type;
 	s8 character_spacing = spec.character_spacing;
-
-	/*if (size == 0) {
-		errorstream << "FontEngine: attempt to use font size 0" << std::endl;
-		errorstream << "  display density: " << RenderingEngine::getDisplayDensity() << std::endl;
-		abort();
-	}*/
 
 	u16 font_shadow       = 0;
 	u16 font_shadow_alpha = 0;

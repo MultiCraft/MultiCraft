@@ -326,11 +326,13 @@ void set_default_settings()
 	settings->setDefault("font_italic", "false");
 	settings->setDefault("font_shadow", "1");
 	settings->setDefault("font_shadow_alpha", "127");
+	settings->setDefault("font_size_divisible_by", "1");
 
 	settings->setDefault("mono_font_path", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
 	settings->setDefault("mono_font_path_italic", "");
 	settings->setDefault("mono_font_path_bold", "");
 	settings->setDefault("mono_font_path_bold_italic", "");
+	settings->setDefault("mono_font_size_divisible_by", "1");
 
 	std::string emoji_fonts;
 	std::string emoji_flags_font;
