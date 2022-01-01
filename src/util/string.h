@@ -770,3 +770,11 @@ inline bool isSurrogatePair(wchar_t high, wchar_t low)
 {
 	return isHighSurrogate(high) && isLowSurrogate(low);
 }
+
+/**
+ * Prints a sanitized version of a string without control characters.
+ * '\t' and '\n' are allowed, as are UTF-8 control characters (e.g. RTL).
+ * ASCII control characters are replaced with their hex encoding in angle
+ * brackets (e.g. "a\x1eb" -> "a<1e>b").
+ */
+void safe_print_string(std::ostream &os, const std::string &str);

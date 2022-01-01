@@ -44,6 +44,7 @@ void sendAnnounceInner(const AnnounceAction action, const std::string &json,
 	}
 
 	HTTPFetchRequest fetch_request;
+	fetch_request.caller = HTTPFETCH_PRINT_ERR;
 	fetch_request.url = serverlist_url + std::string("/announce");
 	fetch_request.method = HTTP_POST;
 	fetch_request.fields["json"] = json;
