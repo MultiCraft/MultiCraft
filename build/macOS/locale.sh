@@ -15,17 +15,11 @@ for lang in *; do
 	pushd $lang
 	for fn in *.po; do
 		# brew install gettext
-		/usr/local/Cellar/gettext/*/bin/msgfmt -o $mopath/${fn/.po/.mo} $fn
+		msgfmt -o $mopath/${fn/.po/.mo} $fn
 	done
 	popd
 done
 popd
 
 find $DEST -type d -name '.git' -print0 | xargs -0 -- rm -r
-find $DEST -type f -name '.git*' -delete
-find $DEST -type f -name '.DS_Store' -delete
-
-# remove broken languages
-for broken_lang in ja ko he; do
-	find $DEST -type d -name $broken_lang -print0 | xargs -0 -- rm -r
-done
+find $DEST -type f -name '.*' -delete

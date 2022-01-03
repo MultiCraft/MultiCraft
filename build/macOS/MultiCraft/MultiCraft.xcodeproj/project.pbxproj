@@ -150,7 +150,6 @@
 		8458617E24B1C3BC0040BA4F /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 8458617A24B1C3BA0040BA4F /* fonts */; };
 		8458617F24B1C3BC0040BA4F /* builtin in Resources */ = {isa = PBXBuildFile; fileRef = 8458617B24B1C3BB0040BA4F /* builtin */; };
 		8458618024B1C3BC0040BA4F /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 8458617C24B1C3BB0040BA4F /* textures */; };
-		847C6D4825D6DBE4008F5FC8 /* libintl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4625D6DBE4008F5FC8 /* libintl.cpp */; };
 		847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4A25D6F483008F5FC8 /* lutf8lib.c */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
 		84A1F9B2252E616B00000717 /* semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9AC252E616B00000717 /* semaphore.cpp */; };
@@ -162,6 +161,7 @@
 		84C8E20B257804A200C1E5D0 /* libopenal.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */; };
 		84C8E20C257804A200C1E5D0 /* libopenal.1.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
+		84EEE5E72782729B00F61929 /* libintl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EEE5E62782728E00F61929 /* libintl.a */; };
 		84F20D5925D52790009562A9 /* static_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5525D52790009562A9 /* static_text.cpp */; };
 		84F20D5A25D52790009562A9 /* CGUITTFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5725D52790009562A9 /* CGUITTFont.cpp */; };
 		84F20DA225D527C5009562A9 /* serverpackethandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D9325D527C4009562A9 /* serverpackethandler.cpp */; };
@@ -618,10 +618,6 @@
 		8458617A24B1C3BA0040BA4F /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../../../fonts; sourceTree = "<group>"; };
 		8458617B24B1C3BB0040BA4F /* builtin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = builtin; path = ../../../../builtin; sourceTree = "<group>"; };
 		8458617C24B1C3BB0040BA4F /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../../../../textures; sourceTree = "<group>"; };
-		847C6D3D25D6DB51008F5FC8 /* libintl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libintl.h; path = ../../deps/libintl/libintl.h; sourceTree = "<group>"; };
-		847C6D4525D6DBE4008F5FC8 /* Util.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Util.hpp; path = ../../deps/libintl/internal/Util.hpp; sourceTree = "<group>"; };
-		847C6D4625D6DBE4008F5FC8 /* libintl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = libintl.cpp; path = ../../deps/libintl/internal/libintl.cpp; sourceTree = "<group>"; };
-		847C6D4725D6DBE4008F5FC8 /* MessageCatalog.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MessageCatalog.hpp; path = ../../deps/libintl/internal/MessageCatalog.hpp; sourceTree = "<group>"; };
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
 		847C6D4A25D6F483008F5FC8 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = ../../../../lib/luautf8/lutf8lib.c; sourceTree = "<group>"; };
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
@@ -640,6 +636,7 @@
 		84A1F9BA252E617D00000717 /* scripting_server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_server.h; path = ../../../../src/script/scripting_server.h; sourceTree = "<group>"; };
 		84A1FA4C252E635900000717 /* locale */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locale; path = ../../locale; sourceTree = "<group>"; };
 		84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopenal.1.dylib; path = ../deps/openal/libopenal.1.dylib; sourceTree = "<group>"; };
+		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/lib/libintl.a; sourceTree = "<group>"; };
 		84F20D5425D52790009562A9 /* irrUString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrUString.h; path = ../../../../src/irrlicht_changes/irrUString.h; sourceTree = "<group>"; };
 		84F20D5525D52790009562A9 /* static_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = static_text.cpp; path = ../../../../src/irrlicht_changes/static_text.cpp; sourceTree = "<group>"; };
 		84F20D5625D52790009562A9 /* static_text.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = static_text.h; path = ../../../../src/irrlicht_changes/static_text.h; sourceTree = "<group>"; };
@@ -950,6 +947,7 @@
 			files = (
 				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
 				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
+				84EEE5E72782729B00F61929 /* libintl.a in Frameworks */,
 				84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */,
 				84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */,
 				84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */,
@@ -1112,15 +1110,6 @@
 			name = gui;
 			sourceTree = "<group>";
 		};
-		8436294A24B264B900DB1922 /* libintl */ = {
-			isa = PBXGroup;
-			children = (
-				847C6D4025D6DBD2008F5FC8 /* internal */,
-				847C6D3D25D6DB51008F5FC8 /* libintl.h */,
-			);
-			name = libintl;
-			sourceTree = "<group>";
-		};
 		845856A024B1322C0040BA4F = {
 			isa = PBXGroup;
 			children = (
@@ -1160,6 +1149,7 @@
 		84585BFF24B1347B0040BA4F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				84EEE5E62782728E00F61929 /* libintl.a */,
 				848CE6E427778E30001D3E0F /* libz.tbd */,
 				84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */,
 				8458617724B1BF2D0040BA4F /* AppKit.framework */,
@@ -1183,7 +1173,6 @@
 				84135C3C25D5270200CA4DCF /* database */,
 				84135C5225D5272B00CA4DCF /* gui */,
 				8458610424B13BD40040BA4F /* gmp */,
-				8436294A24B264B900DB1922 /* libintl */,
 				8458601724B1399F0040BA4F /* irrlicht_changes */,
 				84F20D5B25D5279D009562A9 /* mapgen */,
 				8458610824B13BF10040BA4F /* json */,
@@ -1612,16 +1601,6 @@
 			name = luautf8;
 			sourceTree = "<group>";
 		};
-		847C6D4025D6DBD2008F5FC8 /* internal */ = {
-			isa = PBXGroup;
-			children = (
-				847C6D4625D6DBE4008F5FC8 /* libintl.cpp */,
-				847C6D4725D6DBE4008F5FC8 /* MessageCatalog.hpp */,
-				847C6D4525D6DBE4008F5FC8 /* Util.hpp */,
-			);
-			name = internal;
-			sourceTree = "<group>";
-		};
 		84A1F9A5252E615B00000717 /* threading */ = {
 			isa = PBXGroup;
 			children = (
@@ -2026,7 +2005,6 @@
 				84135B6025D5264B00CA4DCF /* modchannels.cpp in Sources */,
 				84F20F0F25D52958009562A9 /* guiButtonItemImage.cpp in Sources */,
 				84F20DA925D527C5009562A9 /* clientpackethandler.cpp in Sources */,
-				847C6D4825D6DBE4008F5FC8 /* libintl.cpp in Sources */,
 				84135B7E25D5264C00CA4DCF /* voxel.cpp in Sources */,
 				84135C2325D526D700CA4DCF /* client.cpp in Sources */,
 				84F20E2925D5282A009562A9 /* l_sound.cpp in Sources */,
@@ -2319,7 +2297,7 @@
 					"${SRCROOT}/../../../lib/lua/src",
 					"${SRCROOT}/../deps/irrlicht/include",
 					"${SRCROOT}/../deps/freetype/include/freetype2",
-					"${SRCROOT}/../deps/libintl",
+					"${SRCROOT}/../deps/gettext/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2331,6 +2309,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype/lib",
+					"-L${SRCROOT}/../deps/gettext/lib",
 					"-L${SRCROOT}/../deps/irrlicht",
 					"-L${SRCROOT}/../deps/openal",
 					"-Wl,-dead_strip",
@@ -2379,7 +2358,7 @@
 					"${SRCROOT}/../../../lib/lua/src",
 					"${SRCROOT}/../deps/irrlicht/include",
 					"${SRCROOT}/../deps/freetype/include/freetype2",
-					"${SRCROOT}/../deps/libintl",
+					"${SRCROOT}/../deps/gettext/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -2391,6 +2370,7 @@
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype/lib",
+					"-L${SRCROOT}/../deps/gettext/lib",
 					"-L${SRCROOT}/../deps/irrlicht",
 					"-L${SRCROOT}/../deps/openal",
 					"-Wl,-dead_strip",
