@@ -486,7 +486,7 @@ public:
 		m_sky_bg_color.set(bgcolorfa, services);
 
 		// Fog distance
-		float fog_distance = 10000 * BS;
+		float fog_distance = -1.0f; // sentinel for disabled fog
 
 		if (m_fog_enabled && !*m_force_fog_off)
 			fog_distance = *m_fog_range;
@@ -617,6 +617,7 @@ struct GameRunData {
 	bool dig_instantly;
 	bool digging_blocked;
 	bool reset_jump_timer;
+	bool disable_fog;
 	float nodig_delay_timer;
 	float noplace_delay_timer;
 	float dig_time;
@@ -1370,7 +1371,7 @@ bool Game::createClient(const GameStartData &start_data)
 	}
 
 	auto *scsf = new GameGlobalShaderConstantSetterFactory(
-			&m_flags.force_fog_off, &runData.fog_range, client);
+			&runData.disable_fog, &runData.fog_range, client);
 	shader_src->addShaderConstantSetterFactory(scsf);
 
 	// Update cached textures, meshes and materials
@@ -3830,6 +3831,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		Fog range
 	*/
 
+	runData.disable_fog = !m_cache_enable_fog || m_flags.force_fog_off || draw_control->range_all;
 	if (draw_control->range_all) {
 #if !defined(__ANDROID__) && !defined(__IOS__)
 		runData.fog_range = 100000 * BS;
