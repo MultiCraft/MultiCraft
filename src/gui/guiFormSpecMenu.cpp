@@ -3422,7 +3422,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 			}
 #else
 			// Desktop computers have more space, so try to fit 15 coordinates.
-			s32 min_screen_dim = std::min(mydata.screensize.X, mydata.screensize.Y);
+			s32 min_screen_dim = std::min(padded_screensize.X, padded_screensize.Y);
 			double prefer_imgsize = min_screen_dim / 15 * gui_scaling;
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 			// a 1x panel reports fewer pixels than its pitch warrants, so boost
