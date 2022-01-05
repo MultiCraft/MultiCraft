@@ -3832,15 +3832,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	*/
 
 	runData.disable_fog = !m_cache_enable_fog || m_flags.force_fog_off || draw_control->range_all;
-	if (draw_control->range_all) {
-#if !defined(__ANDROID__) && !defined(__IOS__)
-		runData.fog_range = 100000 * BS;
-#else
-		runData.fog_range = draw_control->wanted_range * BS * 4;
-#endif
-	} else {
-		runData.fog_range = draw_control->wanted_range * BS;
-	}
+	runData.fog_range = draw_control->wanted_range * BS;
 
 	/*
 		Calculate general brightness
@@ -3925,27 +3917,16 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		Fog
 	*/
 
-	if (m_cache_enable_fog) {
-		driver->setFog(
-				sky->getBgColor(),
-				video::EFT_FOG_LINEAR,
-				runData.fog_range * m_cache_fog_start,
-				runData.fog_range * 1.0,
-				0.01,
-				false, // pixel fog
-				true // range fog
-		);
-	} else {
-		driver->setFog(
-				sky->getBgColor(),
-				video::EFT_FOG_LINEAR,
-				100000 * BS,
-				110000 * BS,
-				0.01f,
-				false, // pixel fog
-				false // range fog
-		);
-	}
+	driver->setFog(
+			sky->getBgColor(),
+			video::EFT_FOG_LINEAR,
+			runData.fog_range * m_cache_fog_start,
+			runData.fog_range * 1.0,
+			0.01,
+			false, // pixel fog
+			true // range fog
+	);
+
 
 	/*
 		Get chat messages from client
@@ -4040,8 +4021,21 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	} catch (SettingNotFoundException) {
 	}
 #endif
+
+	video::SOverrideMaterial &mat = driver->getOverrideMaterial();
+	mat.reset();
+	if (runData.disable_fog) {
+		mat.Material.FogEnable = false;
+		mat.EnableFlags |= video::EMF_FOG_ENABLE;
+		mat.EnablePasses = scene::ESNRP_SKY_BOX | scene::ESNRP_SOLID |
+				scene::ESNRP_TRANSPARENT | scene::ESNRP_TRANSPARENT_EFFECT |
+				scene::ESNRP_SHADOW;
+	}
+
 	RenderingEngine::draw_scene(skycolor, m_game_ui->m_flags.show_hud,
 			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair);
+
+	mat.reset();
 
 	/*
 		Profiler graph
