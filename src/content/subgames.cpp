@@ -371,6 +371,7 @@ void loadGameConfAndInitWorld(const std::string &path, const std::string &name,
 		conf.set("backend", "sqlite3");
 		conf.set("player_backend", "sqlite3");
 		conf.set("auth_backend", "sqlite3");
+		conf.set("mod_storage_backend", "sqlite3");
 #else
 		conf.set("backend", "leveldb");
 		conf.set("player_backend", "leveldb");
