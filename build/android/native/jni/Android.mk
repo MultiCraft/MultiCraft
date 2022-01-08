@@ -234,6 +234,9 @@ LOCAL_SRC_FILES += ../../../lib/jsoncpp/jsoncpp.cpp
 # Lua UTF-8 Lib
 LOCAL_SRC_FILES += ../../../lib/luautf8/lutf8lib.c
 
+# Lua ChaCha Lib
+LOCAL_SRC_FILES += $(wildcard ../../../lib/luachacha/*.c)
+
 LOCAL_STATIC_LIBRARIES += Curl Gettext Freetype Irrlicht LevelDB OpenAL mbedTLS mbedx509 mbedcrypto Vorbis LuaJIT android_native_app_glue $(PROFILER_LIBS)
 
 LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES

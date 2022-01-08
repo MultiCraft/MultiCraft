@@ -550,6 +550,7 @@ if(BUILD_CLIENT)
 		${PLATFORM_LIBS}
 		${CLIENT_PLATFORM_LIBS}
 		luautf8
+		luachacha
 	)
 	if(NOT USE_LUAJIT)
 		set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -628,6 +629,7 @@ if(BUILD_SERVER)
 		${GMP_LIBRARY}
 		${PLATFORM_LIBS}
 		luautf8
+		luachacha
 	)
 	set_target_properties(${PROJECT_NAME}server PROPERTIES
 		COMPILE_DEFINITIONS "SERVER")
