@@ -31,13 +31,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "log.h"
 #include "gettext.h"
 #include <algorithm>
+#include "irrlicht_changes/CGUITTFont.h"
 #include <string>
 #ifdef HAVE_TOUCHSCREENGUI
 #include "touchscreengui_mc.h"
-#endif
-
-#if USE_FREETYPE
-	#include "irrlicht_changes/CGUITTFont.h"
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
@@ -448,14 +445,11 @@ void GUIChatConsole::drawText()
 			s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
 			core::rect<s32> destrect(x, y, x + text_size, y + m_fontsize.Y);
 			x += text_size;
-#if USE_FREETYPE
 			if (m_font->getType() == irr::gui::EGFT_CUSTOM) {
-				// Draw colored text if FreeType is enabled
-				irr::gui::CGUITTFont* tmp = dynamic_cast<irr::gui::CGUITTFont*>(m_font);
+				// Draw colored text if possible
+				gui::CGUITTFont *tmp = static_cast<gui::CGUITTFont*>(m_font);
 				tmp->draw(fragment.text, destrect, false, false, &AbsoluteClippingRect);
-			} else
-#endif
-			{
+			} else {
 				// Otherwise use standard text
 				m_font->draw(fragment.text.c_str(), destrect,
 						video::SColor(255, 255, 255, 255), false, false,

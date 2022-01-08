@@ -19,7 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "config.h" // for USE_FREETYPE
+#include <vector>
+#include <list>
+#include <unordered_map>
+#include <string>
+#include "irrlichttypes_extrabloated.h"
 #include "StyleSpec.h"
 #include "scrollSwipe.h"
 
@@ -28,10 +32,7 @@ using namespace irr;
 class ISimpleTextureSource;
 class ISoundManager;
 class Client;
-
-#if USE_FREETYPE
-#include "irrlicht_changes/CGUITTFont.h"
-#endif
+class GUIScrollBar;
 
 class ParsedText
 {

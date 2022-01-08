@@ -112,4 +112,3 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #else
 #define TTF_DEFAULT_FONT_SIZE (18)
 #endif
-#define DEFAULT_FONT_SIZE (10)

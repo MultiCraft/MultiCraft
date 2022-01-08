@@ -37,9 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h" // for dpi
 #include "client/guiscalingfilter.h"
 
-#if USE_FREETYPE
-	#include "irrlicht_changes/CGUITTFont.h"
-#endif
+#include "irrlicht_changes/CGUITTFont.h"
 
 /*
 	GUITable

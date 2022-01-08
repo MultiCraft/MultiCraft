@@ -137,17 +137,10 @@ if(BUILD_CLIENT)
 	endif()
 endif()
 
-
-option(ENABLE_FREETYPE "Enable FreeType2 (TrueType fonts and basic unicode support)" TRUE)
 option(USE_CAIRO "Enable Cairo for COLRv1 emoji" TRUE)
-set(USE_FREETYPE FALSE)
 
-if(BUILD_CLIENT AND ENABLE_FREETYPE)
-	find_package(Freetype)
-	if(FREETYPE_FOUND)
-		message(STATUS "Freetype enabled.")
-		set(USE_FREETYPE TRUE)
-	endif()
+if(BUILD_CLIENT)
+	find_package(Freetype REQUIRED)
 
 	find_library(HARFBUZZ_LIBRARY NAMES harfbuzz libharfbuzz)
 	find_path(HARFBUZZ_INCLUDE_DIR NAMES harfbuzz/hb.h hb.h PATHS)
@@ -591,7 +584,6 @@ include_directories(
 	${ZLIB_INCLUDE_DIR}
 	${ZSTD_INCLUDE_DIR}
 	${PNG_INCLUDE_DIR}
-	${SOUND_INCLUDE_DIRS}
 	${SQLITE3_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
 	${CHACHA_INCLUDE_DIR}
@@ -599,7 +591,6 @@ include_directories(
 	${GMP_INCLUDE_DIR}
 	${JSON_INCLUDE_DIR}
 	${LUA_BIT_INCLUDE_DIR}
-	${X11_INCLUDE_DIR}
 	${PROJECT_SOURCE_DIR}/script
 )
 
@@ -607,8 +598,12 @@ if(USE_GETTEXT)
 	include_directories(${GETTEXT_INCLUDE_DIR})
 endif()
 
-if(USE_FREETYPE)
-	include_directories(${FREETYPE_INCLUDE_DIRS})
+if(BUILD_CLIENT)
+	include_directories(
+		${FREETYPE_INCLUDE_DIRS}
+		${SOUND_INCLUDE_DIRS}
+		${X11_INCLUDE_DIR}
+	)
 endif()
 
 if(USE_CURL)
@@ -640,6 +635,7 @@ if(BUILD_CLIENT)
 		${GMP_LIBRARY}
 		${JSON_LIBRARY}
 		${LUA_BIT_LIBRARY}
+		${FREETYPE_LIBRARY}
 		${PLATFORM_LIBS}
 		${CLIENT_PLATFORM_LIBS}
 		luautf8
@@ -720,18 +716,15 @@ if(BUILD_CLIENT)
 			endif()
 		endif()
 	endif()
-	if(USE_FREETYPE)
-		if(FREETYPE_PKGCONFIG_FOUND)
-			set_target_properties(${PROJECT_NAME}
-				PROPERTIES
-				COMPILE_FLAGS "${FREETYPE_CFLAGS_STR}"
-			)
-		endif()
-		target_link_libraries(
-			${PROJECT_NAME}
-			${FREETYPE_LIBRARY}
-			${HARFBUZZ_LIBRARY}
-			${CAIRO_LIBRARY}
+	target_link_libraries(
+		${PROJECT_NAME}
+		${HARFBUZZ_LIBRARY}
+		${CAIRO_LIBRARY}
+	)
+	if(FREETYPE_PKGCONFIG_FOUND)
+		set_target_properties(${PROJECT_NAME}
+			PROPERTIES
+			COMPILE_FLAGS "${FREETYPE_CFLAGS_STR}"
 		)
 	endif()
 	if (USE_CURSES)
@@ -1060,14 +1053,8 @@ if(BUILD_CLIENT)
 		endforeach()
 	endif()
 
-	# Install necessary fonts depending on configuration
-	if(USE_FREETYPE)
-		install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../fonts" DESTINATION "${SHAREDIR}"
-				FILES_MATCHING PATTERN "*.ttf" PATTERN "*.txt")
-	else()
-		install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../fonts" DESTINATION "${SHAREDIR}"
-				FILES_MATCHING PATTERN "*.png" PATTERN "*.xml")
-	endif()
+	install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../fonts" DESTINATION "${SHAREDIR}"
+			FILES_MATCHING PATTERN "*.ttf" PATTERN "*.txt")
 endif(BUILD_CLIENT)
 
 if(BUILD_SERVER)

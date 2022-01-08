@@ -13,16 +13,11 @@
 #include <SColor.h>
 #include <iostream>
 
-#if USE_FREETYPE
-	#include "CGUITTFont.h"
-#endif
-
+#include "CGUITTFont.h"
 #include "util/string.h"
 
 namespace irr
 {
-
-#if USE_FREETYPE
 
 namespace gui
 {
@@ -112,14 +107,12 @@ void StaticText::draw()
 					getTotalDimension(font, str.c_str()).Width;
 			}
 
-#if USE_FREETYPE
 			if (font->getType() == irr::gui::EGFT_CUSTOM) {
-				irr::gui::CGUITTFont *tmp = static_cast<irr::gui::CGUITTFont*>(font);
+				CGUITTFont *tmp = static_cast<CGUITTFont*>(font);
 				tmp->draw(str,
 					r, HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
 					(RestrainTextInside ? &AbsoluteClippingRect : NULL));
 			} else
-#endif
 			{
 				// Draw non-colored text
 				font->draw(str.c_str(),
@@ -607,8 +600,6 @@ s32 StaticText::getTextWidth() const
 
 
 } // end namespace gui
-
-#endif // USE_FREETYPE
 
 } // end namespace irr
 
