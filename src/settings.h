@@ -173,10 +173,11 @@ public:
 	bool getNoiseParamsFromValue(const std::string &name, NoiseParams &np) const;
 	bool getNoiseParamsFromGroup(const std::string &name, NoiseParams &np) const;
 
-	// return all keys used
+	// return all keys used in this object
 	std::vector<std::string> getNames() const;
+	// check if setting exists anywhere in the hierarchy
 	bool exists(const std::string &name) const;
-	// ignores the fallback layers, unlike exists()
+	// check if setting exists in this object ("locally")
 	bool existsLocal(const std::string &name) const;
 
 
