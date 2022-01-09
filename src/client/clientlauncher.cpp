@@ -76,9 +76,9 @@ ClientLauncher::~ClientLauncher()
 	if (rendering_engine && rendering_engine->get_raw_device())
 		rendering_engine->get_raw_device()->setEventReceiver(nullptr);
 
-	delete receiver;
-
 	delete input;
+
+	delete receiver;
 
 	delete g_fontengine;
 	delete g_gamecallback;

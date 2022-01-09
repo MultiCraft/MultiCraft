@@ -363,6 +363,8 @@ RealInputHandler::RealInputHandler(MyEventReceiver *receiver) : m_receiver(recei
 
 RealInputHandler::~RealInputHandler()
 {
+	m_receiver->joystick = nullptr;
+
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 #if defined(__IOS__) || defined(__ANDROID__)
 	SDL_RemoveEventWatch(SdlEventWatcher, nullptr);
