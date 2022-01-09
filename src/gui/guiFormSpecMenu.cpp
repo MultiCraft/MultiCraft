@@ -2326,7 +2326,7 @@ void GUIFormSpecMenu::parseBox(parserData* data, const std::string &element)
 void GUIFormSpecMenu::parseBackgroundColor(parserData* data, const std::string &element)
 {
 	std::vector<std::string> parts;
-	if (!precheckElement("bgcolor", element, 2, 3, parts))
+	if (!precheckElement("bgcolor", element, 1, 3, parts))
 		return;
 
 	const u32 parameter_count = parts.size();
@@ -2781,7 +2781,7 @@ bool GUIFormSpecMenu::parseStyle(parserData *data, const std::string &element, b
 void GUIFormSpecMenu::parseSetFocus(const std::string &element)
 {
 	std::vector<std::string> parts;
-	if (!precheckElement("set_focus", element, 2, 2, parts))
+	if (!precheckElement("set_focus", element, 1, 2, parts))
 		return;
 
 	if (m_is_form_regenerated)
