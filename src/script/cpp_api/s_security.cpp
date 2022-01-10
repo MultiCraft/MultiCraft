@@ -90,6 +90,7 @@ void ScriptApiSecurity::initializeSecurity()
 		"table",
 		"math",
 		"utf8",
+		"bit",
 	};
 	static const char *io_whitelist[] = {
 		"close",
@@ -260,6 +261,7 @@ void ScriptApiSecurity::initializeSecurityClient()
 		"table",
 		"math",
 		"utf8",
+		"bit",
 	};
 	static const char *os_whitelist[] = {
 		"clock",
