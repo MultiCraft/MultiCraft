@@ -3,7 +3,7 @@ FROM $DOCKER_IMAGE AS builder
 
 ENV MINETEST_GAME_VERSION master
 ENV PROMETHEUS_CPP_VERSION v1.3.0
-ENV IRRLICHT_VERSION master
+ENV IRRLICHT_VERSION 1.9.0mt4
 
 COPY .git /usr/src/multicraft/.git
 COPY CMakeLists.txt /usr/src/multicraft/CMakeLists.txt
