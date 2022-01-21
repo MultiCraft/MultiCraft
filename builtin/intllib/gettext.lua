@@ -20,7 +20,7 @@ local function parse_po(str)
 	end
 	for _, line in ipairs(str:split("\n")) do repeat
 		lineno = lineno + 1
-		line = line:trim()
+		line = line:trim8()
 
 		if line == "" or line:match("^#") then
 			state, msgid, msgid_plural = nil, nil, nil

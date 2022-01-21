@@ -56,12 +56,12 @@ function intllib.load_strings(filename)
 	end
 	local strings = {}
 	for line in file:lines() do
-		line = line:trim()
+		line = line:trim8()
 		if line ~= "" and line:sub(1, 1) ~= "#" then
 			local pos = find_eq(line)
 			if pos then
-				local msgid = unescape(line:sub(1, pos - 1):trim())
-				strings[msgid] = unescape(line:sub(pos + 1):trim())
+				local msgid = unescape(line:sub(1, pos - 1):trim8())
+				strings[msgid] = unescape(line:sub(pos + 1):trim8())
 			end
 		end
 	end
