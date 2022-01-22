@@ -261,8 +261,7 @@ int ModApiMainMenu::l_set_sky(lua_State *L)
 
 	lua_getfield(L, 1, "sky_color");
 	if (lua_istable(L, -1)) {
-		SkyboxDefaults sky_defaults;
-		SkyColor sky_color = sky_defaults.getSkyColorDefaults();
+		SkyColor sky_color = SkyboxDefaults::getSkyColorDefaults();
 
 		lua_getfield(L, -1, "day_sky");
 		read_color(L, -1, &sky_color.day_sky);
@@ -316,7 +315,7 @@ int ModApiMainMenu::l_set_stars(lua_State *L)
 
 	u16 count;
 	if (getintfield(L, 1, "count", count))
-		sky->setStarCount(count, false);
+		sky->setStarCount(count);
 
 	lua_getfield(L, 1, "star_color");
 	if (!lua_isnil(L, -1)) {
