@@ -592,10 +592,19 @@ IShaderConstantSetter* GameGlobalShaderConstantSetterFactory::create()
 /****************************************************************************
  ****************************************************************************/
 
-const float object_hit_delay = 0.2;
+const static float object_hit_delay = 0.2;
 
 struct FpsControl {
-	u32 last_time, busy_time, sleep_time;
+	FpsControl() : last_time(0), busy_time(0), sleep_time(0) {}
+
+	void reset();
+
+	void limit(IrrlichtDevice *device, f32 *dtime);
+
+	u32 getBusyMs() const { return busy_time / 1000; }
+
+	// all values in microseconds (us)
+	u64 last_time, busy_time, sleep_time;
 };
 
 
@@ -743,7 +752,7 @@ protected:
 	void updatePlayerControl(const CameraOrientation &cam);
 	void step(f32 dtime);
 	void processClientEvents(CameraOrientation *cam);
-	void updateCamera(u32 busy_time, f32 dtime);
+	void updateCamera(f32 dtime);
 	void updateSound(f32 dtime);
 	void processPlayerInteraction(f32 dtime, bool show_hud);
 	/*!
@@ -1102,7 +1111,7 @@ void Game::run()
 	Profiler::GraphValues dummyvalues;
 	g_profiler->graphGet(dummyvalues);
 
-	draw_times.last_time = m_rendering_engine->get_timer_time();
+	draw_times.reset();
 
 	set_light_table(g_settings->getFloat("display_gamma"));
 
@@ -1210,7 +1219,7 @@ void Game::run()
 
 		processClientEvents(&cam_view_target);
 		updateDebugState();
-		updateCamera(draw_times.busy_time, dtime);
+		updateCamera(dtime);
 		updateSound(dtime);
 		processPlayerInteraction(dtime, m_game_ui->m_flags.show_hud);
 		updateFrame(&graph, &stats, dtime, cam_view);
@@ -1661,11 +1670,11 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 		f32 dtime;
 		f32 wait_time = 0; // in seconds
 
-		fps_control.last_time = m_rendering_engine->get_timer_time();
+		fps_control.reset();
 
 		while ((result = RenderingEngine::run())) {
 
-			limitFps(&fps_control, &dtime);
+			fps_control.limit(device, &dtime);
 
 			// Update client and server
 			client->step(dtime);
@@ -1736,12 +1745,12 @@ bool Game::getServerContent()
 	FpsControl fps_control = {};
 	f32 dtime; // in seconds
 
-	fps_control.last_time = m_rendering_engine->get_timer_time();
+	fps_control.reset();
 
 	bool result = true;
 	while ((result = RenderingEngine::run())) {
 
-		limitFps(&fps_control, &dtime);
+		fps_control.limit(device, &dtime);
 
 		// Update client and server
 		client->step(dtime);
@@ -1946,10 +1955,10 @@ void Game::updateProfilers(const RunStats &stats, const FpsControl &draw_times,
 	}
 
 	// Update update graphs
-	g_profiler->graphAdd("Time non-rendering [ms]",
+	g_profiler->graphAdd("Time non-rendering [us]",
 		draw_times.busy_time - stats.drawtime);
 
-	g_profiler->graphAdd("Sleep [ms]", draw_times.sleep_time);
+	g_profiler->graphAdd("Sleep [us]", draw_times.sleep_time);
 	g_profiler->graphAdd("FPS", 1.0f / dtime);
 }
 
@@ -1982,9 +1991,9 @@ void Game::updateStats(RunStats *stats, const FpsControl &draw_times,
 	/* Busytime average and jitter calculation
 	 */
 	jp = &stats->busy_time_jitter;
-	jp->avg = jp->avg + draw_times.busy_time * 0.02;
+	jp->avg = jp->avg + draw_times.getBusyMs() * 0.02;
 
-	jitter = draw_times.busy_time - jp->avg;
+	jitter = draw_times.getBusyMs() - jp->avg;
 
 	if (jitter > jp->max)
 		jp->max = jitter;
@@ -3197,7 +3206,7 @@ void Game::updateChat(f32 dtime)
 	m_game_ui->updateChatSize();
 }
 
-void Game::updateCamera(u32 busy_time, f32 dtime)
+void Game::updateCamera(f32 dtime)
 {
 	LocalPlayer *player = client->getEnv().getLocalPlayer();
 
@@ -3236,7 +3245,7 @@ void Game::updateCamera(u32 busy_time, f32 dtime)
 	float tool_reload_ratio = runData.time_from_last_punch / full_punch_interval;
 
 	tool_reload_ratio = MYMIN(tool_reload_ratio, 1.0);
-	camera->update(player, dtime, busy_time / 1000.0f, tool_reload_ratio);
+	camera->update(player, dtime, tool_reload_ratio);
 	camera->step(dtime);
 
 	v3f camera_position = camera->getPosition();
@@ -4136,6 +4145,24 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 
 
 	/*
+		Damage camera tilt
+	*/
+	if (player->hurt_tilt_timer > 0.0f) {
+		player->hurt_tilt_timer -= dtime * 6.0f;
+
+		if (player->hurt_tilt_timer < 0.0f)
+			player->hurt_tilt_strength = 0.0f;
+	}
+
+	/*
+		Update minimap pos and rotation
+	*/
+	if (mapper && m_game_ui->m_flags.show_hud) {
+		mapper->setPos(floatToInt(player->getPosition(), BS));
+		mapper->setAngle(player->getYaw());
+	}
+
+	/*
 		Get chat messages from client
 	*/
 
@@ -4217,11 +4244,11 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	} while (false);
 
 	/*
-		Drawing begins
+		==================== Drawing begins ====================
 	*/
-	const video::SColor &skycolor = sky->getSkyColor();
+	const video::SColor skycolor = sky->getSkyColor();
 
-	TimeTaker tt_draw("Draw scene");
+	TimeTaker tt_draw("Draw scene", nullptr, PRECISION_MICRO);
 	driver->beginScene(true, true, skycolor);
 
 	GameGlobalShaderConstantSetter::beginFrame();
@@ -4287,31 +4314,13 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	}
 
 	/*
-		Damage camera tilt
-	*/
-	if (player->hurt_tilt_timer > 0.0f) {
-		player->hurt_tilt_timer -= dtime * 6.0f;
-
-		if (player->hurt_tilt_timer < 0.0f)
-			player->hurt_tilt_strength = 0.0f;
-	}
-
-	/*
-		Update minimap pos and rotation
-	*/
-	if (mapper && m_game_ui->m_flags.show_hud) {
-		mapper->setPos(floatToInt(player->getPosition(), BS));
-		mapper->setAngle(player->getYaw());
-	}
-
-	/*
-		End scene
+		==================== End scene ====================
 	*/
 	driver->endScene();
 
 	stats->drawtime = tt_draw.stop(true);
-	g_profiler->avg("Game::updateFrame(): draw scene [ms]", stats->drawtime);
-	g_profiler->graphAdd("Update frame [ms]", tt_update.stop(true));
+	g_profiler->graphAdd("Draw scene [us]", stats->drawtime);
+	g_profiler->avg("Game::updateFrame(): update frame [ms]", tt_update.stop(true));
 }
 
 /* Log times and stuff for visualization */
@@ -4355,27 +4364,23 @@ void Game::updateShadows()
  Misc
  ****************************************************************************/
 
-/* On some computers framerate doesn't seem to be automatically limited
- */
-inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
+void FpsControl::reset()
 {
-	// not using getRealTime is necessary for wine
-	device->getTimer()->tick(); // Maker sure device time is up-to-date
-	u32 time = device->getTimer()->getTime();
-	u32 last_time = fps_timings->last_time;
+	last_time = porting::getTimeUs();
+}
 
-	if (time > last_time)  // Make sure time hasn't overflowed
-		fps_timings->busy_time = time - last_time;
-	else
-		fps_timings->busy_time = 0;
-
-	u32 frametime_min = 1000 / (
+/*
+ * On some computers framerate doesn't seem to be automatically limited
+ */
+void FpsControl::limit(IrrlichtDevice *device, f32 *dtime)
+{
+	u64 frametime_min = 1000000.0f / (
 		device->isWindowFocused() && !g_menumgr.pausesGame()
 			? g_settings->getFloat("fps_max")
 			: g_settings->getFloat("fps_max_unfocused"));
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (g_menumgr.pausesGame() && !device->isWindowFocused())
-		frametime_min = 1000;
+		frametime_min = 1000000;
 #endif
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
 	// FPS limiting causes freezes on macOS
@@ -4383,28 +4388,36 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 		frametime_min = 0;
 #endif
 
-	if (fps_timings->busy_time < frametime_min) {
-		fps_timings->sleep_time = frametime_min - fps_timings->busy_time;
-		device->sleep(fps_timings->sleep_time);
+	u64 time = porting::getTimeUs();
+
+	if (time > last_time) // Make sure time hasn't overflowed
+		busy_time = time - last_time;
+	else
+		busy_time = 0;
+
+	if (busy_time < frametime_min) {
+		sleep_time = frametime_min - busy_time;
+		if (sleep_time > 1000)
+			sleep_ms(sleep_time / 1000);
 	} else {
-		fps_timings->sleep_time = 0;
+		sleep_time = 0;
 	}
 
-	/* Get the new value of the device timer. Note that device->sleep() may
-	 * not sleep for the entire requested time as sleep may be interrupted and
-	 * therefore it is arguably more accurate to get the new time from the
-	 * device rather than calculating it by adding sleep_time to time.
-	 */
+	// Read the timer again to accurately determine how long we actually slept,
+	// rather than calculating it by adding sleep_time to time.
+	time = porting::getTimeUs();
 
-	device->getTimer()->tick(); // Update device timer
-	time = device->getTimer()->getTime();
-
-	if (time > last_time)  // Make sure last_time hasn't overflowed
-		*dtime = (time - last_time) / 1000.0;
+	if (time > last_time) // Make sure last_time hasn't overflowed
+		*dtime = (time - last_time) / 1000000.0f;
 	else
 		*dtime = 0;
 
-	fps_timings->last_time = time;
+	last_time = time;
+}
+
+inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
+{
+	fps_timings->limit(device, dtime);
 
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (g_menumgr.pausesGame()) {

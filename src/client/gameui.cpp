@@ -108,9 +108,9 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 	std::ostringstream os(std::ios_base::binary);
 	// Minimal debug text must only contain info that can't give a gameplay advantage
 	if (m_flags.show_minimal_debug) {
-		static float drawtime_avg = 0;
-		drawtime_avg = drawtime_avg * 0.95 + stats.drawtime * 0.05;
-		u16 fps = 1.0 / stats.dtime_jitter.avg;
+		const u16 fps = 1.0 / stats.dtime_jitter.avg;
+		m_drawtime_avg *= 0.95f;
+		m_drawtime_avg += 0.05f * (stats.drawtime / 1000);
 
 		const wchar_t *driver_name = RenderingEngine::get_video_driver()->getName();
 
@@ -119,7 +119,7 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 			<< " | FPS: " << fps
 			<< " | " << (driver_name ? wide_to_utf8(std::wstring(driver_name).substr(0, 25)) : "")
 			<< std::setprecision(0)
-			<< " | drawtime: " << drawtime_avg << "ms"
+			<< " | drawtime: " << m_drawtime_avg << "ms"
 			<< std::setprecision(1)
 			<< " | dtime jitter: "
 			<< (stats.dtime_jitter.max_fraction * 100.0) << "%"
