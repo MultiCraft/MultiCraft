@@ -80,9 +80,6 @@ GUITable::GUITable(gui::IGUIEnvironment *env,
 	float density = RenderingEngine::getDisplayDensity();
 	float gui_scaling = g_settings->getFloat("gui_scaling");
 	scale = density * gui_scaling;
-#if defined(__ANDROID__) || defined(__IOS__)
-	density = 1; // dp scaling is applied by the skin
-#endif
 	core::rect<s32> relative_rect = m_scrollbar->getRelativePosition();
 	s32 width = (relative_rect.getWidth() / (2.0 / 3.0)) * density *
 			gui_scaling;
@@ -388,11 +385,7 @@ void GUITable::setTable(const TableOptions &options,
 					image = m_images[row->content_index];
 
 				// Get content width and update xmax
-#if defined(__ANDROID__) || defined(__IOS__)
 				row->content_width = image ? image->getOriginalSize().Width * scale : 0;
-#else
-				row->content_width = image ? image->getOriginalSize().Width : 0;
-#endif
 				row->content_width = MYMAX(row->content_width, width);
 				s32 row_xmax = row->x + padding + row->content_width;
 				xmax = MYMAX(xmax, row_xmax);
@@ -764,11 +757,7 @@ void GUITable::drawCell(const Cell *cell, video::SColor color,
 			core::rect<s32> source_rect(
 					core::position2d<s32>(0, 0),
 					image->getOriginalSize());
-#if defined(__ANDROID__) || defined(__IOS__)
 			s32 imgh = source_rect.LowerRightCorner.Y * scale;
-#else
-			s32 imgh = source_rect.LowerRightCorner.Y;
-#endif
 			s32 rowh = row_rect.getHeight();
 			if (imgh < rowh)
 				dest_pos.Y += (rowh - imgh) / 2;
@@ -777,15 +766,9 @@ void GUITable::drawCell(const Cell *cell, video::SColor color,
 
 			video::SColor colors[] = {color,color,color,color};
 
-#if defined(__ANDROID__) || defined(__IOS__)
 			core::rect<s32> image_pos(dest_pos.X, dest_pos.Y,
 						dest_pos.X + (image->getOriginalSize().Width * scale),
 						dest_pos.Y + (image->getOriginalSize().Height * scale));
-#else
-			core::rect<s32> image_pos(dest_pos.X, dest_pos.Y,
-						dest_pos.X + image->getOriginalSize().Width,
-						dest_pos.Y + image->getOriginalSize().Height);
-#endif
 
 			draw2DImageFilterScaled(driver, image, image_pos, source_rect,
 					&client_clip, colors, true);
