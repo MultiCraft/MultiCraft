@@ -369,6 +369,8 @@ void set_default_settings()
 
 
 	// Server
+	settings->setDefault("compat_origin_model", "true");
+	settings->setDefault("compat_send_original_model", "true");
 	settings->setDefault("disable_escape_sequences", "false");
 	settings->setDefault("strip_color_codes", "false");
 #if USE_PROMETHEUS

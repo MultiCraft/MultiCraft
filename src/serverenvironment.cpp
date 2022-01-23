@@ -467,6 +467,9 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 
 	m_player_database = openPlayerDatabase(player_backend_name, path_world, conf);
 	m_auth_database = openAuthDatabase(auth_backend_name, path_world, conf);
+
+	m_compat_send_original_model = g_settings->getBool("compat_origin_model") &&
+			g_settings->getBool("compat_send_original_model");
 }
 
 ServerEnvironment::~ServerEnvironment()
@@ -899,7 +902,7 @@ public:
 			for (ActiveABM &aabm : *m_aabms[c]) {
 				if ((p.Y < aabm.min_y) || (p.Y > aabm.max_y))
 					continue;
-				
+
 				if (myrand() % aabm.chance != 0)
 					continue;
 

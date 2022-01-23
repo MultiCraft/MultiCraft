@@ -91,6 +91,19 @@ struct MediaInfo
 	}
 };
 
+struct InMemoryMediaInfo
+{
+	std::string data;
+	std::string sha1_digest;
+
+	InMemoryMediaInfo(const std::string &data_="",
+	                  const std::string &sha1_digest_=""):
+		data(data_),
+		sha1_digest(sha1_digest_)
+	{
+	}
+};
+
 struct ServerSoundParams
 {
 	enum Type {
@@ -649,6 +662,7 @@ private:
 
 	// media files known to server
 	std::unordered_map<std::string, MediaInfo> m_media;
+	std::unordered_map<std::string, InMemoryMediaInfo> m_compat_media;
 
 	/*
 		Sounds
