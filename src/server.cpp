@@ -2759,7 +2759,7 @@ void Server::sendRequestedMedia(session_t peer_id,
 
 	const u16 protocol_version = m_clients.getProtocolVersion(peer_id);
 	for (const std::string &name : tosend) {
-		if (m_media.find(name) == m_media.end() || m_media[name].sha1_digest == "") {
+		if (m_media.find(name) == m_media.end()) {
 			errorstream<<"Server::sendRequestedMedia(): Client asked for "
 					<<"unknown file \""<<(name)<<"\""<<std::endl;
 			continue;
@@ -2773,6 +2773,12 @@ void Server::sendRequestedMedia(session_t peer_id,
 				m_compat_media.find(name) != m_compat_media.end()) {
 			file_bunches[file_bunches.size()-1].emplace_back(name, tpath,
 					m_compat_media[name].data);
+			continue;
+		}
+
+		if (tpath.empty()) {
+			errorstream<<"Server::sendRequestedMedia(): New client asked for "
+					<<"compatibility media file \""<<(name)<<"\""<<std::endl;
 			continue;
 		}
 
