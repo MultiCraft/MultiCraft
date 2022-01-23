@@ -594,10 +594,8 @@ std::string PlayerSAO::getPropertyPacket(const u16 protocol_version)
 	ObjectProperties prop = m_prop;
 
 	// Use the renamed model if compat_send_original_model is enabled
-	if (m_env->getCompatSendOriginalModel() && protocol_version < 37 && (
-			m_prop.mesh == "character.b3d" ||
-			m_prop.mesh == "3d_armor_character.b3d" ||
-			m_prop.mesh == "skinsdb_3d_armor_character_5.b3d")) {
+	if (protocol_version < 37 && m_env->getCompatSendOriginalModel() &&
+			m_env->isCompatPlayerModel(m_prop.mesh)) {
 		prop.mesh = "_mc_compat_" + m_prop.mesh;
 	}
 

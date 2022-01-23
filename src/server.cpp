@@ -418,6 +418,17 @@ void Server::init()
 
 	m_modmgr->loadMods(m_script);
 
+	// m_compat_player_models is used to prevent constant re-parsing of the
+	// setting
+	std::string player_models = g_settings->get("compat_player_model");
+	player_models.erase(std::remove_if(player_models.begin(),
+			player_models.end(), static_cast<int(*)(int)>(&std::isspace)),
+			player_models.end());
+	if (player_models.empty() || isSingleplayer())
+		FATAL_ERROR_IF(!m_compat_player_models.empty(), "Compat player models list not empty");
+	else
+		m_compat_player_models = str_split(player_models, ',');
+
 	// Read Textures and calculate sha1 sums
 	fillMediaCache();
 
@@ -2619,9 +2630,7 @@ bool Server::addMediaFile(const std::string &filename,
 	m_media[filename] = MediaInfo(filepath, sha1_base64);
 
 	// Add a compatibility model if required
-	if (g_settings->getBool("compat_origin_model") && (
-			filename == "character.b3d" || filename == "3d_armor_character.b3d" ||
-			filename == "skinsdb_3d_armor_character_5.b3d")) {
+	if (isCompatPlayerModel(filename)) {
 		// Offset the mesh
 		const std::string filedata_compat = makeCompatPlayerModel(filedata);
 		if (filedata_compat != "") {

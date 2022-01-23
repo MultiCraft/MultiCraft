@@ -468,7 +468,7 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 	m_player_database = openPlayerDatabase(player_backend_name, path_world, conf);
 	m_auth_database = openAuthDatabase(auth_backend_name, path_world, conf);
 
-	m_compat_send_original_model = g_settings->getBool("compat_origin_model") &&
+	m_compat_send_original_model = !server->getCompatPlayerModels().empty() &&
 			g_settings->getBool("compat_send_original_model");
 }
 
@@ -2402,4 +2402,9 @@ bool ServerEnvironment::migrateAuthDatabase(
 		return false;
 	}
 	return true;
+}
+
+const bool ServerEnvironment::isCompatPlayerModel(const std::string &model_name)
+{
+	return m_server->isCompatPlayerModel(model_name);
 }

@@ -389,6 +389,15 @@ public:
 	// Environment mutex (envlock)
 	std::mutex m_env_mutex;
 
+	inline bool isCompatPlayerModel(const std::string &model_name)
+	{
+		return std::find(m_compat_player_models.begin(), m_compat_player_models.end(), model_name) != m_compat_player_models.end();
+	}
+	const std::vector<std::string> getCompatPlayerModels()
+	{
+		return m_compat_player_models;
+	}
+
 private:
 	friend class EmergeThread;
 	friend class RemoteClient;
@@ -696,6 +705,8 @@ private:
 	MetricCounterPtr m_aom_buffer_counter;
 	MetricCounterPtr m_packet_recv_counter;
 	MetricCounterPtr m_packet_recv_processed_counter;
+
+	std::vector<std::string> m_compat_player_models;
 };
 
 /*
