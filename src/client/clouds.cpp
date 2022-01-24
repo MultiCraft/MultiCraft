@@ -40,6 +40,21 @@ static void cloud_3d_setting_changed(const std::string &settingname, void *data)
 	((Clouds *)data)->readSettings();
 }
 
+static const std::vector<u16> quad_indices = []() {
+	int quad_count = 0x10000 / 4; // max number of quads that can be drawn with 16-bit indices
+	std::vector<u16> indices;
+	indices.reserve(quad_count * 6);
+	for (int k = 0; k < quad_count; k++) {
+		indices.push_back(4 * k + 0);
+		indices.push_back(4 * k + 1);
+		indices.push_back(4 * k + 2);
+		indices.push_back(4 * k + 2);
+		indices.push_back(4 * k + 3);
+		indices.push_back(4 * k + 0);
+	}
+	return indices;
+}();
+
 Clouds::Clouds(scene::ISceneManager* mgr,
 		s32 id,
 		u32 seed
@@ -100,8 +115,6 @@ void Clouds::render()
 		return;
 
 	ScopeProfiler sp(g_profiler, "Clouds::render()", SPT_AVG);
-
-	int num_faces_to_draw = m_enable_3d ? 6 : 1;
 
 	m_material.setFlag(video::EMF_BACK_FACE_CULLING, m_enable_3d);
 
@@ -170,10 +183,14 @@ void Clouds::render()
 
 	// Read noise
 
-	std::vector<bool> grid(m_cloud_radius_i * 2 * m_cloud_radius_i * 2);
-	std::vector<video::S3DVertex> vertices;
-	vertices.reserve(16 * m_cloud_radius_i * m_cloud_radius_i);
-
+	const int grid_length = 2 * m_cloud_radius_i;
+	std::vector<bool> grid(grid_length * grid_length);
+	auto grid_index = [&] (int x, int z) -> int {
+		return (z + m_cloud_radius_i) * grid_length + (x + m_cloud_radius_i);
+	};
+	auto grid_point = [&] (int x, int z) -> bool {
+		return grid[grid_index(x, z)];
+	};
 	for(s16 zi = -m_cloud_radius_i; zi < m_cloud_radius_i; zi++) {
 		u32 si = (zi + m_cloud_radius_i) * m_cloud_radius_i * 2 + m_cloud_radius_i;
 
@@ -187,147 +204,78 @@ void Clouds::render()
 		}
 	}
 
-#define GETINDEX(x, z, radius) (((z)+(radius))*(radius)*2 + (x)+(radius))
-#define INAREA(x, z, radius) \
-	((x) >= -(radius) && (x) < (radius) && (z) >= -(radius) && (z) < (radius))
+	const float rel_y = m_camera_pos.Y - m_params.height * BS;
+	const bool draw_top = !m_enable_3d || rel_y >= m_params.thickness * BS;
+	const bool draw_bottom = rel_y < 0.0f;
 
-	for (s16 zi0= -m_cloud_radius_i; zi0 < m_cloud_radius_i; zi0++)
-	for (s16 xi0= -m_cloud_radius_i; xi0 < m_cloud_radius_i; xi0++)
+	const v3f origin = v3f(world_center_of_drawing_in_noise_f.X, m_params.height * BS, world_center_of_drawing_in_noise_f.Y) - intToFloat(m_camera_offset, BS);
+	const f32 rx = cloud_size;
+	// if clouds are flat, the top layer should be at the given height
+	const f32 ry = m_enable_3d ? m_params.thickness * BS : 0.0f;
+	const f32 rz = cloud_size;
+
+	// std::vector is great but it is slow
+	// reserve+push/insert is slow because extending needs to check vector size
+	// resize+direct access is slow because resize initializes the whole vector
+	// so... malloc! it can't overflow as there can't be too many faces to draw
+	const int max_quads_per_cell = m_enable_3d ? 4 : 1;
+	const int max_quad_id = m_enable_3d ? 6 : 1;
+	video::S3DVertex *buf = (video::S3DVertex *)malloc(grid.size() * max_quads_per_cell * 4 * sizeof(video::S3DVertex));
+	video::S3DVertex *pv = buf;
+
+	const v3f faces[6][4] = {
+		{{0, ry, 0}, {0, ry, rz}, {rx, ry, rz}, {rx, ry, 0}}, // top
+		{{0, ry, 0}, {rx, ry, 0}, {rx, 0, 0}, {0, 0, 0}}, // back
+		{{rx, ry, 0}, {rx, ry, rz}, {rx, 0, rz}, {rx, 0, 0}}, // right
+		{{rx, ry, rz}, {0, ry, rz}, {0, 0, rz}, {rx, 0, rz}}, // front
+		{{0, ry, rz}, {0, ry, 0}, {0, 0, 0}, {0, 0, rz}}, // left
+		{{rx, 0, rz}, {0, 0, rz}, {0, 0, 0}, {rx, 0, 0}}, // bottom
+	};
+	const v3f normals[6] = {{0, 1, 0}, {0, 0, -1}, {1, 0, 0}, {0, 0, 1}, {-1, 0, 0}, {0, -1, 0}};
+	const video::SColor colors[6] = {c_top, c_side_1, c_side_2, c_side_1, c_side_2, c_bottom};
+	const v2f tex_coords[4] = {{0, 1}, {1, 1}, {1, 0}, {0, 0}};
+
+	// Draw from back to front for proper transparency
+	for (s16 zi0= 1-(int)m_cloud_radius_i; zi0 < m_cloud_radius_i-1; zi0++)
+	for (s16 xi0= 1-(int)m_cloud_radius_i; xi0 < m_cloud_radius_i-1; xi0++)
 	{
 		s16 zi = zi0;
 		s16 xi = xi0;
-		// Draw from back to front for proper transparency
-		if(zi >= 0)
-			zi = m_cloud_radius_i - zi - 1;
-		if(xi >= 0)
-			xi = m_cloud_radius_i - xi - 1;
+		if (zi >= 0)
+			zi = m_cloud_radius_i - zi - 2;
+		if (xi >= 0)
+			xi = m_cloud_radius_i - xi - 2;
 
-		u32 i = GETINDEX(xi, zi, m_cloud_radius_i);
-
-		if (!grid[i])
+		if (!grid_point(xi, zi))
 			continue;
 
-		v2f p0 = v2f(xi,zi)*cloud_size + world_center_of_drawing_in_noise_f;
-
-		video::S3DVertex v[4] = {
-			video::S3DVertex(0,0,0, 0,0,0, c_top, 0, 1),
-			video::S3DVertex(0,0,0, 0,0,0, c_top, 1, 1),
-			video::S3DVertex(0,0,0, 0,0,0, c_top, 1, 0),
-			video::S3DVertex(0,0,0, 0,0,0, c_top, 0, 0)
+		bool do_draw[6] = {
+			draw_top,
+			zi > 0 && !grid_point(xi, zi - 1),
+			xi < 0 && !grid_point(xi + 1, zi),
+			zi < 0 && !grid_point(xi, zi + 1),
+			xi > 0 && !grid_point(xi - 1, zi),
+			draw_bottom,
 		};
 
-		const f32 rx = cloud_size / 2.0f;
-		// if clouds are flat, the top layer should be at the given height
-		const f32 ry = m_enable_3d ? m_params.thickness * BS : 0.0f;
-		const f32 rz = cloud_size / 2;
-
-		for(int i=0; i<num_faces_to_draw; i++)
-		{
-			switch(i)
-			{
-			case 0:	// top
-				for (video::S3DVertex &vertex : v) {
-					vertex.Normal.set(0,1,0);
-				}
-				v[0].Pos.set(-rx, ry,-rz);
-				v[1].Pos.set(-rx, ry, rz);
-				v[2].Pos.set( rx, ry, rz);
-				v[3].Pos.set( rx, ry,-rz);
-				break;
-			case 1: // back
-				if (INAREA(xi, zi - 1, m_cloud_radius_i)) {
-					u32 j = GETINDEX(xi, zi - 1, m_cloud_radius_i);
-					if(grid[j])
-						continue;
-				}
-				for (video::S3DVertex &vertex : v) {
-					vertex.Color = c_side_1;
-					vertex.Normal.set(0,0,-1);
-				}
-				v[0].Pos.set(-rx, ry,-rz);
-				v[1].Pos.set( rx, ry,-rz);
-				v[2].Pos.set( rx,  0,-rz);
-				v[3].Pos.set(-rx,  0,-rz);
-				break;
-			case 2: //right
-				if (INAREA(xi + 1, zi, m_cloud_radius_i)) {
-					u32 j = GETINDEX(xi+1, zi, m_cloud_radius_i);
-					if(grid[j])
-						continue;
-				}
-				for (video::S3DVertex &vertex : v) {
-					vertex.Color = c_side_2;
-					vertex.Normal.set(1,0,0);
-				}
-				v[0].Pos.set( rx, ry,-rz);
-				v[1].Pos.set( rx, ry, rz);
-				v[2].Pos.set( rx,  0, rz);
-				v[3].Pos.set( rx,  0,-rz);
-				break;
-			case 3: // front
-				if (INAREA(xi, zi + 1, m_cloud_radius_i)) {
-					u32 j = GETINDEX(xi, zi + 1, m_cloud_radius_i);
-					if(grid[j])
-						continue;
-				}
-				for (video::S3DVertex &vertex : v) {
-					vertex.Color = c_side_1;
-					vertex.Normal.set(0,0,-1);
-				}
-				v[0].Pos.set( rx, ry, rz);
-				v[1].Pos.set(-rx, ry, rz);
-				v[2].Pos.set(-rx,  0, rz);
-				v[3].Pos.set( rx,  0, rz);
-				break;
-			case 4: // left
-				if (INAREA(xi-1, zi, m_cloud_radius_i)) {
-					u32 j = GETINDEX(xi-1, zi, m_cloud_radius_i);
-					if(grid[j])
-						continue;
-				}
-				for (video::S3DVertex &vertex : v) {
-					vertex.Color = c_side_2;
-					vertex.Normal.set(-1,0,0);
-				}
-				v[0].Pos.set(-rx, ry, rz);
-				v[1].Pos.set(-rx, ry,-rz);
-				v[2].Pos.set(-rx,  0,-rz);
-				v[3].Pos.set(-rx,  0, rz);
-				break;
-			case 5: // bottom
-				for (video::S3DVertex &vertex : v) {
-					vertex.Color = c_bottom;
-					vertex.Normal.set(0,-1,0);
-				}
-				v[0].Pos.set( rx,  0, rz);
-				v[1].Pos.set(-rx,  0, rz);
-				v[2].Pos.set(-rx,  0,-rz);
-				v[3].Pos.set( rx,  0,-rz);
-				break;
-			}
-
-			v3f pos(p0.X, m_params.height * BS, p0.Y);
-			pos -= intToFloat(m_camera_offset, BS);
-
-			for (video::S3DVertex &vertex : v) {
-				vertex.Pos += pos;
-				vertices.push_back(vertex);
+		v3f const pos = origin + v3f(xi, 0.0f, zi) * cloud_size;
+		for (int i = 0; i < max_quad_id; i++) {
+			if (!do_draw[i])
+				continue;
+			for (int k = 0; k < 4; k++) {
+				pv->Pos = pos + faces[i][k];
+				pv->Normal = normals[i];
+				pv->Color = colors[i];
+				pv->TCoords = tex_coords[k];
+				pv++;
 			}
 		}
 	}
-	int quad_count = vertices.size() / 4;
-	std::vector<u16> indices;
-	indices.reserve(quad_count * 6);
-	for (int k = 0; k < quad_count; k++) {
-		indices.push_back(4 * k + 0);
-		indices.push_back(4 * k + 1);
-		indices.push_back(4 * k + 2);
-		indices.push_back(4 * k + 2);
-		indices.push_back(4 * k + 3);
-		indices.push_back(4 * k + 0);
-	}
-	driver->drawVertexPrimitiveList(vertices.data(), vertices.size(), indices.data(), 2 * quad_count,
+	int vertex_count = pv - buf;
+	int quad_count = vertex_count / 4;
+	driver->drawVertexPrimitiveList(buf, vertex_count, quad_indices.data(), 2 * quad_count,
 			video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
+	free(buf);
 
 	// Restore fog settings
 	driver->setFog(fog_color, fog_type, fog_start, fog_end, fog_density,
