@@ -4023,7 +4023,11 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 #endif
 
 	video::SOverrideMaterial &mat = driver->getOverrideMaterial();
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
+	mat.EnableFlags = 0;
+#else
 	mat.reset();
+#endif
 	if (runData.disable_fog) {
 		mat.Material.FogEnable = false;
 		mat.EnableFlags |= video::EMF_FOG_ENABLE;
@@ -4035,7 +4039,11 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	RenderingEngine::draw_scene(skycolor, m_game_ui->m_flags.show_hud,
 			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair);
 
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
+	mat.EnableFlags = 0;
+#else
 	mat.reset();
+#endif
 
 	/*
 		Profiler graph
