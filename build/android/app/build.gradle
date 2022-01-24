@@ -78,7 +78,7 @@ task prepareAssetsFiles() {
 		from "../native/deps/Android/Irrlicht/shaders" into "${assetsFolder}/client/shaders/Irrlicht"
 	}
 	copy {
-		from "${projRoot}/fonts/Retron2000.ttf" into "${assetsFolder}/fonts"
+		from "${projRoot}/fonts/MultiCraftFont.ttf" into "${assetsFolder}/fonts"
 	}
 	fileTree("${projRoot}/po").include("**/*.po").forEach { poFile ->
 		def moPath = "${assetsFolder}/locale/${poFile.parentFile.name}/LC_MESSAGES/"

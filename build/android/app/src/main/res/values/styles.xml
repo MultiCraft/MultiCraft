@@ -6,7 +6,7 @@
 		<item name="android:windowBackground">@drawable/bg</item>
 		<item name="android:windowFullscreen">true</item>
 		<item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
-		<item name="fontFamily">@font/retron2000</item>
+		<item name="fontFamily">@font/multicraftfont</item>
 	</style>
 
 </resources>

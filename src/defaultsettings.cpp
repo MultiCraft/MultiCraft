@@ -307,10 +307,10 @@ void set_default_settings()
 	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Arimo-Bold.ttf"));
 	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
 #else
-	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Retron2000.ttf"));
-	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Retron2000.ttf"));
-	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Retron2000.ttf"));
-	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Retron2000.ttf"));
+	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
+	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
+	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
+	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
 #endif
 	settings->setDefault("font_bold", "false");
 	settings->setDefault("font_italic", "false");
@@ -674,11 +674,13 @@ void set_default_settings()
 		settings->setDefault("hud_scaling", "0.55");
 		settings->setDefault("mouse_sensitivity", "0.33");
 		settings->setDefault("font_size", font_small);
+		settings->setDefault("fallback_font_size", font_small);
 	} else if SDVersion4and7Inch {
 		// 4.7" iPhone
 		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("mouse_sensitivity", "0.27");
 		settings->setDefault("font_size", font_small);
+		settings->setDefault("fallback_font_size", font_small);
 	} else if SDVersion5and5Inch {
 		// 5.5" iPhone Plus
 		settings->setDefault("hud_scaling", "0.65");
