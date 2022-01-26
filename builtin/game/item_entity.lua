@@ -27,7 +27,7 @@ local lava_destroy = core.settings:get_bool("item_lava_destroy", true)
 local function quick_flow_logic(node, pos_testing, dir)
 	local node_testing = core.get_node_or_nil(pos_testing)
 	if not node_testing then return 0 end
-	
+
 	local node_testing_def = core.registered_nodes[node_testing.name]
 	local liquid = node_testing_def and node_testing_def.liquidtype
 
@@ -323,7 +323,7 @@ core.register_entity(":__builtin:item", {
 				and def_inside.groups and def_inside.groups.lava then
 			core.sound_play("default_cool_lava", {
 				pos = pos, max_hear_distance = 10})
-			self.object.itemstring = ""
+			self.itemstring = ""
 			self.object:remove()
 			core.add_particlespawner({
 				amount = 3,
