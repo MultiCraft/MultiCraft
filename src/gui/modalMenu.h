@@ -102,7 +102,7 @@ private:
 	// wants to launch other menus
 	bool m_allow_focus_removal = false;
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	irr_ptr<gui::IGUIElement> m_hovered;
 
 	bool simulateMouseEvent(gui::IGUIElement *target, ETOUCH_INPUT_EVENT touch_event);

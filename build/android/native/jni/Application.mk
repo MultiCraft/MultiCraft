@@ -7,16 +7,14 @@ APP_MODULES := MultiCraft
 
 APP_CPPFLAGS := -Ofast -fvisibility=hidden -Wno-extra-tokens
 
-ifeq ($(APP_ABI),armeabi-v7a)
-APP_CPPFLAGS += -march=armv7-a -mfloat-abi=softfp -mfpu=vfpv3-d16 -mthumb
-endif
-
 #ifeq ($(APP_ABI),x86)
 #APP_CPPFLAGS += -march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32 -funroll-loops
 #endif
 
 ifndef NDEBUG
 APP_CPPFLAGS := -g -D_DEBUG -O0 -fno-omit-frame-pointer
+else
+APP_CPPFLAGS += -D__FILE__=__FILE_NAME__ -Wno-builtin-macro-redefined
 endif
 
 APP_CPPFLAGS += -fexceptions #-Werror=shorten-64-to-32

@@ -199,7 +199,6 @@ int main(int argc, char *argv[])
 	if (g_settings->getBool("enable_console"))
 		porting::attachOrCreateConsole();
 
-#if !defined(__ANDROID__) && !defined(__APPLE__) && !defined(NDEBUG)
 	// Run unit tests
 	if (cmd_args.getFlag("run-unittests")) {
 #if BUILD_UNITTESTS
@@ -210,7 +209,6 @@ int main(int argc, char *argv[])
 			<< std::endl;
 #endif
 	}
-#endif
 
 	GameStartData game_params;
 #ifdef SERVER

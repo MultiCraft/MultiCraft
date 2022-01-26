@@ -183,7 +183,7 @@ static bool isChild(gui::IGUIElement *tocheck, gui::IGUIElement *parent)
 	return false;
 }
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 
 bool GUIModalMenu::simulateMouseEvent(
 		gui::IGUIElement *target, ETOUCH_INPUT_EVENT touch_event)

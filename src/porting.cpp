@@ -718,9 +718,14 @@ static bool open_uri(const std::string &uri)
 	openURIAndroid(uri);
 	return true;
 #elif defined(__APPLE__)
+#ifdef __IOS__
+	ioswrap_open_url(uri.c_str());
+	return true;
+#else
 	const char *argv[] = {"open", uri.c_str(), NULL};
 	return posix_spawnp(NULL, "open", NULL, NULL, (char**)argv,
 		(*_NSGetEnviron())) == 0;
+#endif
 #else
 	const char *argv[] = {"xdg-open", uri.c_str(), NULL};
 	return posix_spawnp(NULL, "xdg-open", NULL, NULL, (char**)argv, environ) == 0;

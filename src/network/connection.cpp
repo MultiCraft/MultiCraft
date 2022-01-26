@@ -914,8 +914,10 @@ void Peer::Drop()
 UDPPeer::UDPPeer(u16 a_id, Address a_address, Connection* connection) :
 	Peer(a_address,a_id,connection)
 {
+#if !(defined(__ANDROID__) && defined(__aarch64__))
 	for (Channel &channel : channels)
 		channel.setWindowSize(START_RELIABLE_WINDOW_SIZE);
+#endif
 }
 
 bool UDPPeer::getAddress(MTProtocols type,Address& toset)
