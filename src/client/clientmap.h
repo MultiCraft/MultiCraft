@@ -29,6 +29,7 @@ struct MapDrawControl
 {
 	// Overrides limits by drawing everything
 	bool range_all = false;
+	bool extended_range = false;
 	// Wanted drawing range
 	float wanted_range = 0.0f;
 	// show a wire frame for debugging

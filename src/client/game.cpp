@@ -2397,14 +2397,15 @@ void Game::decreaseViewRange()
 
 void Game::toggleFullViewRange()
 {
-	draw_control->range_all = !draw_control->range_all;
 #if !defined(__ANDROID__) && !defined(__IOS__)
+	draw_control->range_all = !draw_control->range_all;
 	if (draw_control->range_all)
 		m_game_ui->showTranslatedStatusText("Enabled unlimited viewing range");
 	else
 		m_game_ui->showTranslatedStatusText("Disabled unlimited viewing range");
 #else
-	if (draw_control->range_all)
+	draw_control->extended_range = !draw_control->extended_range;
+	if (draw_control->extended_range)
 		m_game_ui->showTranslatedStatusText("Enabled far viewing range");
 	else
 		m_game_ui->showTranslatedStatusText("Disabled far viewing range");
