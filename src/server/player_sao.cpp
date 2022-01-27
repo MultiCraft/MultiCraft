@@ -592,13 +592,11 @@ std::string PlayerSAO::getPropertyPacket(const u16 protocol_version)
 	m_prop.is_visible = (true);
 
 	ObjectProperties prop = m_prop;
-	if (protocol_version < 37 && (m_prop.mesh == "3d_armor_character.b3d" ||
-			m_prop.mesh == "character.b3d" ||
-			m_prop.mesh == "skinsdb_3d_armor_character_5.b3d")) {
-		prop.mesh = "mc_compat_character.b3d";
-		for (u16 i = prop.textures.size(); i < 5; i++) {
-			prop.textures.emplace_back("blank.png");
-		}
+
+	// Use the renamed model if compat_send_original_model is enabled
+	if (protocol_version < 37 && m_env->getCompatSendOriginalModel() &&
+			m_env->isCompatPlayerModel(m_prop.mesh)) {
+		prop.mesh = "_mc_compat_" + m_prop.mesh;
 	}
 
 	// Remove a one-node offset from a copy of the object properties for MT 0.4

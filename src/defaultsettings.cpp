@@ -369,6 +369,8 @@ void set_default_settings()
 
 
 	// Server
+	settings->setDefault("compat_player_model", "character.b3d,3d_armor_character.b3d,skinsdb_3d_armor_character_5.b3d");
+	settings->setDefault("compat_send_original_model", "true");
 	settings->setDefault("disable_escape_sequences", "false");
 	settings->setDefault("strip_color_codes", "false");
 #if USE_PROMETHEUS
