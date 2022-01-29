@@ -12,7 +12,7 @@ fi
 
 cd gettext-src/gettext-runtime
 
-CFLAGS="$OSX_FLAGS -Dlocale_charset=intl_locale_charset" \
+CFLAGS="$OSX_FLAGS $OSX_ARCH -Dlocale_charset=intl_locale_charset" \
 PKG_CONFIG=/bin/false \
 ./configure --prefix=/ \
 	--disable-shared --enable-static

@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . sdk.sh
-FREETYPE_VERSION=2.10.4
+FREETYPE_VERSION=2.11.1
 
 if [ ! -d freetype-src ]; then
 	wget http://download.savannah.gnu.org/releases/freetype/freetype-$FREETYPE_VERSION.tar.gz
@@ -12,7 +12,7 @@ fi
 
 cd freetype-src
 
-CFLAGS=$OSX_FLAGS \
+CFLAGS="$OSX_FLAGS $OSX_ARCH" \
 PKG_CONFIG=/bin/false \
 ./configure --prefix=/ \
 	--disable-shared --enable-static \
