@@ -247,6 +247,7 @@ Profile saved to @1=
 
 ##### not used anymore #####
 
+Invalid time.=Orario non valido.
 [all | privs | <cmd>]=[all | privs | <comando>]
 Get help for commands or list privileges=Richiama la finestra d'aiuto dei comandi o dei privilegi
 Allows enabling various debug options that may affect gameplay=Permette di abilitare varie opzioni di debug che potrebbero influenzare l'esperienza di gioco
