@@ -64,13 +64,6 @@ local attribute = {
 	exhaustion = "hunger:exhaustion"
 }
 
-local function is_player(player)
-	return (
-		core.is_player(player) and
-		not player.is_fake_player
-	)
-end
-
 --- SATURATION API ---
 function hunger.get_saturation(player)
 	-- This uses get_string so that nil is returned when there is no value as
@@ -112,9 +105,10 @@ function hunger.update_saturation(player, level)
 end
 
 function hunger.change_saturation(player, change)
-	if not is_player(player) or not change or change == 0 then
+	if not change or change == 0 or not core.is_player(player) then
 		return false
 	end
+
 	local level = hunger.get_saturation(player) + change or 0
 	level = max(level, 0)
 	level = min(level, settings.level_max)
@@ -160,15 +154,17 @@ function hunger.register_on_poison(fun)
 end
 
 function hunger.poison(player, ticks, interval)
+	if not core.is_player(player) then
+		return
+	end
+
 	for _, fun in pairs(hunger.registered_on_poisons) do
 		local rv = fun(player, ticks, interval)
 		if rv == true then
 			return
 		end
 	end
-	if not is_player(player) then
-		return
-	end
+
 	hunger.set_poisoned(player, true)
 	poison_tick(player:get_player_name(), ticks, interval, 0)
 end
@@ -207,7 +203,7 @@ function hunger.exhaust_player(player, change, cause)
 		end
 	end
 
-	if not is_player(player) then
+	if not core.is_player(player) then
 		return
 	end
 

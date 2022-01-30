@@ -528,7 +528,7 @@ function core.item_throw(name, thrower, speed, accel, on_impact)
 end
 
 function core.item_drop(itemstack, dropper, pos)
-	local dropper_is_player = dropper and dropper:is_player()
+	local dropper_is_player = core.is_player(dropper)
 	local p = table.copy(pos)
 	local cnt = itemstack:get_count()
 	if not core.is_valid_pos(p) then

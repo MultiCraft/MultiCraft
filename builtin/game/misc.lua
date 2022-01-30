@@ -79,7 +79,8 @@ function core.is_player(player)
 	-- like a player if it has the is_player function
 	local t = type(player)
 	return (t == "userdata" or t == "table") and
-		type(player.is_player) == "function" and player:is_player()
+		type(player.is_player) == "function" and player:is_player() and
+		not player.is_fake_player
 end
 
 
