@@ -245,6 +245,7 @@ void set_default_settings()
 	settings->setDefault("round_screen", "0");
 	settings->setDefault("enable_local_map_saving", "false");
 	settings->setDefault("show_entity_selectionbox", "false");
+	settings->setDefault("transparency_sorting", "true");
 	settings->setDefault("texture_clean_transparent", "false");
 	settings->setDefault("texture_min_size", "0");
 	settings->setDefault("ambient_occlusion_gamma", "2.2");
@@ -275,7 +276,6 @@ void set_default_settings()
 	settings->setDefault("water_wave_speed", "5.0");
 	settings->setDefault("enable_waving_leaves", "false");
 	settings->setDefault("enable_waving_plants", "false");
-
 
 	// Input
 	settings->setDefault("invert_mouse", "false");

@@ -88,6 +88,7 @@ ClientMap::ClientMap(
 	m_cache_trilinear_filter  = g_settings->getBool("trilinear_filter");
 	m_cache_bilinear_filter   = g_settings->getBool("bilinear_filter");
 	m_cache_anistropic_filter = g_settings->getBool("anisotropic_filter");
+	m_cache_sort_chunks       = g_settings->getFlag("transparency_sorting");
 
 }
 
@@ -306,6 +307,20 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 
 	MeshBufListList drawbufs;
 
+	struct DrawListItem {
+		MapBlock *block;
+		float distance;
+		v3s16 block_pos;
+		operator float() const { return distance; }
+		operator v3s16() const { return block_pos; }
+		operator MapBlock *() const { return block; }
+		MapBlock &operator*() const { return *block; }
+		MapBlock *operator->() const { return block; }
+	};
+
+	std::vector<DrawListItem> block_list;
+	block_list.reserve(m_drawlist.size());
+
 	for (auto &i : m_drawlist) {
 		v3s16 block_pos = i.first;
 		MapBlock *block = i.second;
@@ -318,6 +333,17 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 		if (!isBlockInSight(block->getPos(), camera_position,
 				camera_direction, camera_fov, 100000 * BS, &d))
 			continue;
+
+		block_list.push_back({block, d, block_pos});
+	}
+
+	if (m_cache_sort_chunks)
+		std::sort(block_list.begin(), block_list.end(), [] (DrawListItem const &a, DrawListItem const &b) { return a.distance > b.distance; });
+
+	for (auto &i : block_list) {
+		v3s16 block_pos = i;
+		MapBlock *block = i;
+		float d = i;
 
 		// Mesh animation
 		if (pass == scene::ESNRP_SOLID) {
