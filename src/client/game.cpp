@@ -3924,8 +3924,10 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	*/
 
 	if (m_cache_enable_fog) {
+		auto fog_color = sky->getBgColor();
+		fog_color.setAlpha(0);
 		driver->setFog(
-				sky->getBgColor(),
+				fog_color,
 				video::EFT_FOG_LINEAR,
 				runData.fog_range * m_cache_fog_start,
 				runData.fog_range * 1.0,
