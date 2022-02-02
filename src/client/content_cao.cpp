@@ -1845,10 +1845,10 @@ void GenericCAO::processMessage(const std::string &data)
 			{
 				// TODO: Execute defined fast response
 				// As there is no definition, make a smoke puff
-				ClientSimpleObject *simple = createSmokePuff(
+				/*ClientSimpleObject *simple = createSmokePuff(
 						m_smgr, m_env, m_position,
 						v2f(m_prop.visual_size.X, m_prop.visual_size.Y) * BS);
-				m_env->addSimpleObject(simple);
+				m_env->addSimpleObject(simple);*/
 			} else if (m_reset_textures_timer < 0 && !m_prop.damage_texture_modifier.empty()) {
 				m_reset_textures_timer = 0.1;
 				if(damage >= 2)
@@ -1919,10 +1919,10 @@ bool GenericCAO::directReportPunch(v3f dir, const ItemStack *punchitem,
 			m_hp = 0;
 			// TODO: Execute defined fast response
 			// As there is no definition, make a smoke puff
-			ClientSimpleObject *simple = createSmokePuff(
+			/*ClientSimpleObject *simple = createSmokePuff(
 					m_smgr, m_env, m_position,
 					v2f(m_prop.visual_size.X, m_prop.visual_size.Y) * BS);
-			m_env->addSimpleObject(simple);
+			m_env->addSimpleObject(simple);*/
 		}
 		if (m_reset_textures_timer < 0 && !m_prop.damage_texture_modifier.empty()) {
 			m_reset_textures_timer = 0.1;
