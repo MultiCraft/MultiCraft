@@ -306,6 +306,20 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 
 	MeshBufListList drawbufs;
 
+	struct DrawListItem {
+		MapBlock *block;
+		float distance;
+		v3s16 block_pos;
+		operator float() const { return distance; }
+		operator v3s16() const { return block_pos; }
+		operator MapBlock *() const { return block; }
+		MapBlock &operator*() const { return *block; }
+		MapBlock *operator->() const { return block; }
+	};
+
+	std::vector<DrawListItem> block_list;
+	block_list.reserve(m_drawlist.size());
+
 	for (auto &i : m_drawlist) {
 		v3s16 block_pos = i.first;
 		MapBlock *block = i.second;
@@ -318,6 +332,20 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 		if (!isBlockInSight(block->getPos(), camera_position,
 				camera_direction, camera_fov, 100000 * BS, &d))
 			continue;
+
+		block_list.push_back({block, d, block_pos});
+	}
+
+	static bool sort_chunks = g_settings->getFlag("transparency_sort_chunks");
+	static bool sort_materials = g_settings->getFlag("transparency_sort_materials");
+
+	if (sort_chunks)
+		std::sort(block_list.begin(), block_list.end(), [] (DrawListItem const &a, DrawListItem const &b) { return a.distance > b.distance; });
+
+	for (auto &i : block_list) {
+		v3s16 block_pos = i;
+		MapBlock *block = i;
+		float d = i;
 
 		// Mesh animation
 		if (pass == scene::ESNRP_SOLID) {
@@ -387,6 +415,8 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 
 	// Render all layers in order
 	for (auto &lists : drawbufs.lists) {
+		if (sort_materials)
+			std::sort(lists.begin(), lists.end(), [] (MeshBufList const &a, MeshBufList const &b) { return std::less<video::ITexture *>()(a.m.TextureLayer[0].Texture, b.m.TextureLayer[0].Texture); });
 		for (MeshBufList &list : lists) {
 			// Check and abort if the machine is swapping a lot
 			if (draw.getTimerTime() > 2000) {

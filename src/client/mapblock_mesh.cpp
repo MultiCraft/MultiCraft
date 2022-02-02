@@ -1164,6 +1164,20 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 			} else {
 				p.layer.applyMaterialOptions(material);
 			}
+			static bool use_alpha_to_coverage = g_settings->getFlag("transparency_use_coverage");
+			static bool disable_z_write = g_settings->getFlag("transparency_no_depth");
+			switch (p.layer.material_type) {
+			case TILE_MATERIAL_ALPHA:
+			case TILE_MATERIAL_LIQUID_TRANSPARENT:
+			case TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT:
+				if (use_alpha_to_coverage)
+					material.AntiAliasing |= video::EAAM_ALPHA_TO_COVERAGE;
+				if (disable_z_write)
+					material.ZWriteEnable = video::EZW_OFF;
+				break;
+			default:
+				break;
+			}
 
 			scene::SMesh *mesh = (scene::SMesh *)m_mesh[layer];
 
