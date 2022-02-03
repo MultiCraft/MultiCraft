@@ -805,6 +805,13 @@ autoscale_mode (Autoscaling mode) enum disable disable,enable,force
 #    A restart is required after changing this.
 show_entity_selectionbox (Show entity selection boxes) bool false
 
+[***Transparency]
+transparency_use_coverage () bool false
+transparency_no_depth () bool false
+transparency_sort_chunks () bool true
+transparency_sort_materials () bool false
+
+
 [*Menus]
 
 #    Use a cloud animation for the main menu background.
