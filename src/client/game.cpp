@@ -2094,20 +2094,19 @@ void Game::openInventory()
 
 	infostream << "Game: Launching inventory" << std::endl;
 
-	PlayerInventoryFormSource *fs_src = new PlayerInventoryFormSource(client);
-
 	InventoryLocation inventoryloc;
 	inventoryloc.setCurrentPlayer();
 
-	if (!client->modsLoaded()
-			|| !client->getScript()->on_inventory_open(fs_src->m_client->getInventory(inventoryloc))) {
-		TextDest *txt_dst = new TextDestPlayerInventory(client);
-		auto *&formspec = m_game_ui->updateFormspec("");
-		GUIFormSpecMenu::create(formspec, client, &input->joystick, fs_src,
-			txt_dst, client->getFormspecPrepend(), sound);
+	if (client->modsLoaded() && client->getScript()->on_inventory_open(client->getInventory(inventoryloc)))
+		return; // CSM prevented inventory opening
 
-		formspec->setFormSpec(fs_src->getForm(), inventoryloc);
-	}
+	PlayerInventoryFormSource *fs_src = new PlayerInventoryFormSource(client);
+	TextDest *txt_dst = new TextDestPlayerInventory(client);
+	auto *&formspec = m_game_ui->updateFormspec("");
+	GUIFormSpecMenu::create(formspec, client, &input->joystick, fs_src,
+		txt_dst, client->getFormspecPrepend(), sound);
+
+	formspec->setFormSpec(fs_src->getForm(), inventoryloc);
 }
 
 
