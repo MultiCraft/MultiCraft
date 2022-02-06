@@ -8,37 +8,87 @@
 
 using namespace video;
 
-static constexpr ECOLOR_FORMAT depth_format = ECF_D24S8;
+static constexpr ECOLOR_FORMAT solid_format = ECF_A8R8G8B8;
+static constexpr ECOLOR_FORMAT depth_format = ECF_D16;
 static constexpr ECOLOR_FORMAT layer_formats[] = {
 	ECF_A16B16G16R16F,
 	ECF_R16F,
 };
 static constexpr auto layer_count = sizeof(layer_formats) / sizeof(layer_formats[0]);
 
+static const S3DVertex vertices[4] = {
+	S3DVertex(1.0, -1.0, 0.0, 0.0, 0.0, -1.0, SColor(255, 0, 255, 255), 1.0, 0.0),
+	S3DVertex(-1.0, -1.0, 0.0, 0.0, 0.0, -1.0, SColor(255, 255, 0, 255), 0.0, 0.0),
+	S3DVertex(-1.0, 1.0, 0.0, 0.0, 0.0, -1.0, SColor(255, 255, 255, 0), 0.0, 1.0),
+	S3DVertex(1.0, 1.0, 0.0, 0.0, 0.0, -1.0, SColor(255, 255, 255, 255), 1.0, 1.0),
+};
+static const u16 indices[6] = {0, 1, 2, 2, 3, 0};
+
+void RenderingOIT::OnPreRender(core::array<scene::ISceneNode *> &lightList) {
+	v2u32 ss = driver->getScreenSize();
+	if (screensize != ss) {
+		clearTextures();
+		screensize = ss;
+		initTextures();
+	}
+}
+
+void RenderingOIT::OnPostRender() {
+	driver->setRenderTargetEx(nullptr, 0);
+}
+
 void RenderingOIT::OnRenderPassPreRender(scene::E_SCENE_NODE_RENDER_PASS renderPass) {
-	if (renderPass == scene::ESNRP_TRANSPARENT)
-		preRender();
+	switch (renderPass) {
+		case scene::ESNRP_SOLID:
+			driver->setRenderTargetEx(rt_solid, ECBF_COLOR | ECBF_DEPTH, SColor(0, 0, 0, 0));
+			break;
+		case scene::ESNRP_TRANSPARENT:
+			driver->setRenderTargetEx(rt_transparent, ECBF_COLOR, SColor(255, 0, 0, 0));
+			break;
+		case scene::ESNRP_TRANSPARENT_EFFECT:
+			driver->setRenderTargetEx(rt_solid, 0);
+			break;
+		default:;
+	}
 }
 
 void RenderingOIT::OnRenderPassPostRender(scene::E_SCENE_NODE_RENDER_PASS renderPass) {
-	if (renderPass == scene::ESNRP_TRANSPARENT)
-		postRender();
+	switch (renderPass) {
+		case scene::ESNRP_SOLID:
+			driver->setRenderTargetEx(nullptr, 0);
+			driver->draw2DImage(solid, {0, 0}, true);
+			break;
+		case scene::ESNRP_TRANSPARENT:
+			driver->setRenderTargetEx(nullptr, 0);
+			driver->setMaterial(mat);
+			driver->drawVertexPrimitiveList(&vertices, 4, &indices, 2);
+			break;
+		case scene::ESNRP_TRANSPARENT_EFFECT:
+			driver->setRenderTargetEx(nullptr, 0);
+			driver->draw2DImage(solid, {0, 0}, true);
+			break;
+		default:;
+	}
 }
 
-
-RenderingOIT::RenderingOIT(IVideoDriver *_driver, Client *_client)
-	: driver(_driver)
+RenderingOIT::RenderingOIT(IrrlichtDevice *_device, Client *_client)
+	: device(_device)
+	, driver(device->getVideoDriver())
 	, color(layer_count)
 {
-	rt = driver->addRenderTarget();
+	rt_solid = driver->addRenderTarget();
+	rt_transparent = driver->addRenderTarget();
 	screensize = {-1u, -1u};
 	initMaterial(_client->getShaderSource());
+	device->getSceneManager()->setLightManager(this);
 }
 
 RenderingOIT::~RenderingOIT()
 {
+	device->getSceneManager()->setLightManager(nullptr);
 	clearTextures();
-	driver->removeRenderTarget(rt);
+	driver->removeRenderTarget(rt_solid);
+	driver->removeRenderTarget(rt_transparent);
 }
 
 void RenderingOIT::initMaterial(IShaderSource *s)
@@ -61,6 +111,7 @@ void RenderingOIT::initMaterial(IShaderSource *s)
 
 void RenderingOIT::initTextures()
 {
+	solid = driver->addRenderTargetTexture(screensize, "oit_solid", solid_format);
 	depth = driver->addRenderTargetTexture(screensize, "oit_depth", depth_format);
 	for (int k = 0; k < layer_count; k++) {
 		char name[32];
@@ -69,53 +120,17 @@ void RenderingOIT::initTextures()
 		mat.TextureLayer[k].Texture = color[k];
 	}
 	color.set_used(layer_count);
-	rt->setTexture(color, depth);
+	rt_solid->setTexture(solid, depth);
+	rt_transparent->setTexture(color, depth);
 }
 
 void RenderingOIT::clearTextures()
 {
-	rt->setTexture(nullptr, nullptr);
+	rt_solid->setTexture(nullptr, nullptr);
+	rt_transparent->setTexture(nullptr, nullptr);
 	for (int k = 0; k < layer_count; k++)
 		driver->removeTexture(color[k]);
 	color.set_used(0);
+	driver->removeTexture(solid);
 	driver->removeTexture(depth);
-}
-
-void RenderingOIT::preRender() {
-	v2u32 ss = driver->getScreenSize();
-	if (screensize != ss) {
-		clearTextures();
-		screensize = ss;
-		initTextures();
-	}
-	int fb_main, fb_my, fb_read;
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb_main);
-	driver->setRenderTargetEx(rt, ECBF_COLOR | ECBF_DEPTH, SColor(255, 0, 0, 0));
-	glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &fb_my);
-	glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &fb_read);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_main);
-	int err0 = glGetError();
-	glBlitFramebuffer(0, 0, ss.X, ss.Y, 0, 0, ss.X, ss.Y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-	int err1 = glGetError();
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, fb_read);
-	int err2 = glGetError();
-	if (err0 || err1 || err2)
-		printf("%d/%d/%d: %d/%d/%d\n", fb_main, fb_my, fb_read, err0, err1, err2);
-}
-
-void RenderingOIT::postRender() {
-	static const S3DVertex vertices[4] = {
-			S3DVertex(1.0, -1.0, 0.0, 0.0, 0.0, -1.0,
-					SColor(255, 0, 255, 255), 1.0, 0.0),
-			S3DVertex(-1.0, -1.0, 0.0, 0.0, 0.0, -1.0,
-					SColor(255, 255, 0, 255), 0.0, 0.0),
-			S3DVertex(-1.0, 1.0, 0.0, 0.0, 0.0, -1.0,
-					SColor(255, 255, 255, 0), 0.0, 1.0),
-			S3DVertex(1.0, 1.0, 0.0, 0.0, 0.0, -1.0,
-					SColor(255, 255, 255, 255), 1.0, 1.0),
-	};
-	static const u16 indices[6] = {0, 1, 2, 2, 3, 0};
-	driver->setRenderTargetEx(nullptr, 0);
-	driver->setMaterial(mat);
-	driver->drawVertexPrimitiveList(&vertices, 4, &indices, 2);
 }

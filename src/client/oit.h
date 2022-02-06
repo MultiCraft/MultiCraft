@@ -9,10 +9,13 @@ class IShaderSource;
 class RenderingOIT: public scene::ILightManager
 {
 protected:
+	IrrlichtDevice *device = nullptr;
 	video::IVideoDriver *driver = nullptr;
 	core::array<video::ITexture *> color;
+	video::ITexture *solid = nullptr;
 	video::ITexture *depth = nullptr;
-	video::IRenderTarget *rt = nullptr;
+	video::IRenderTarget *rt_solid = nullptr;
+	video::IRenderTarget *rt_transparent = nullptr;
 	video::SMaterial mat;
 	core::dimension2du screensize = {0, 0};
 
@@ -20,17 +23,9 @@ protected:
 	void initTextures();
 	void clearTextures();
 
-	void beforeSolid();
-	void afterSolid();
-	void beforeTransparent();
-	void afterTransparent();
-
 public:
-	void preRender();
-	void postRender();
-
-	void OnPreRender(core::array<scene::ISceneNode*> & lightList) override {}
-	void OnPostRender(void) override {}
+	void OnPreRender(core::array<scene::ISceneNode*> & lightList) override;
+	void OnPostRender(void) override;
 
 	void OnRenderPassPreRender(scene::E_SCENE_NODE_RENDER_PASS renderPass) override;
 	void OnRenderPassPostRender(scene::E_SCENE_NODE_RENDER_PASS renderPass) override;
@@ -38,6 +33,6 @@ public:
 	void OnNodePreRender(scene::ISceneNode* node) override {}
 	void OnNodePostRender(scene::ISceneNode* node) override {}
 
-	RenderingOIT(video::IVideoDriver *_driver, Client *_client);
+	RenderingOIT(IrrlichtDevice *_device, Client *_client);
 	~RenderingOIT() override;
 };

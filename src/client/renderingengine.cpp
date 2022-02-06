@@ -686,11 +686,12 @@ void RenderingEngine::_initialize(Client *client, Hud *hud)
 	const std::string &draw_mode = g_settings->get("3d_mode");
 	core.reset(createRenderingCore(draw_mode, m_device, client, hud));
 	core->initialize();
-	oit.reset(new RenderingOIT(m_device->getVideoDriver(), client));
+	oit.reset(new RenderingOIT(m_device, client));
 }
 
 void RenderingEngine::_finalize()
 {
+	oit.reset();
 	core.reset();
 }
 

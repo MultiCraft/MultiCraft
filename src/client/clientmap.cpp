@@ -386,9 +386,6 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 	core::matrix4 m; // Model matrix
 	v3f offset = intToFloat(m_camera_offset, BS);
 
-	if (is_transparent_pass)
-		RenderingEngine::get_instance()->oit->preRender();
-
 	// Render all layers in order
 	for (auto &lists : drawbufs.lists) {
 		for (MeshBufList &list : lists) {
@@ -413,9 +410,6 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 			}
 		}
 	}
-
-	if (is_transparent_pass)
-		RenderingEngine::get_instance()->oit->postRender();
 
 	g_profiler->avg(prefix + "draw meshes [ms]", draw.stop(true));
 
