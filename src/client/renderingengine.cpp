@@ -36,6 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "inputhandler.h"
 #include "gettext.h"
 #include "../gui/guiSkin.h"
+#include "oit.h"
 
 #if !defined(_WIN32) && !defined(__APPLE__) && !defined(__ANDROID__) && \
 		!defined(SERVER) && !defined(__HAIKU__) && !defined(__IOS__)
@@ -685,6 +686,7 @@ void RenderingEngine::_initialize(Client *client, Hud *hud)
 	const std::string &draw_mode = g_settings->get("3d_mode");
 	core.reset(createRenderingCore(draw_mode, m_device, client, hud));
 	core->initialize();
+	oit.reset(new RenderingOIT(m_device->getVideoDriver(), client));
 }
 
 void RenderingEngine::_finalize()

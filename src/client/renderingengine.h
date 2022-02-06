@@ -34,6 +34,7 @@ class Hud;
 class Minimap;
 
 class RenderingCore;
+class RenderingOIT;
 
 class RenderingEngine
 {
@@ -138,6 +139,8 @@ public:
 
 	static std::vector<core::vector3d<u32>> getSupportedVideoModes();
 	static std::vector<irr::video::E_DRIVER_TYPE> getSupportedVideoDrivers();
+
+	std::unique_ptr<RenderingOIT> oit;
 
 private:
 	void _draw_load_screen(const std::wstring &text, gui::IGUIEnvironment *guienv,

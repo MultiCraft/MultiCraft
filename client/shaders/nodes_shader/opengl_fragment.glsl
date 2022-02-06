@@ -91,8 +91,17 @@ void main(void)
 	// Note: clarity = (1 - fogginess)
 	float clarity = clamp(fogShadingParameter
 		- fogShadingParameter * length(eyeVec), 0.0, 1.0);
+#if MATERIAL_TYPE == TILE_MATERIAL_ALPHA || MATERIAL_TYPE == TILE_MATERIAL_LIQUID_TRANSPARENT || MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT
+	col = mix(skyBgColor, col, clarity);
+	col = vec4(col.rgb, base.a);
+	float transparency = 1.0 - col.a * clarity;
+	float weight = col.a * gl_FragCoord.w;
+	gl_FragData[0] = vec4(col.rgb * weight, transparency);
+	gl_FragData[1] = vec4(weight, 0.0, 0.0, 0.0);
+#else
 	col = mix(skyBgColor, col, clarity);
 	col = vec4(col.rgb, base.a);
 
 	gl_FragColor = col;
+#endif
 }

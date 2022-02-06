@@ -1165,6 +1165,18 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 				p.layer.applyMaterialOptions(material);
 			}
 
+			switch (p.layer.material_type) {
+			case TILE_MATERIAL_ALPHA:
+			case TILE_MATERIAL_LIQUID_TRANSPARENT:
+			case TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT:
+				material.ZWriteEnable = video::EZW_OFF;
+				material.BlendOperation = video::EBO_ADD;
+				material.MaterialTypeParam = video::pack_textureBlendFuncSeparate(video::EBF_ONE, video::EBF_ONE, video::EBF_ZERO, video::EBF_SRC_ALPHA);
+				break;
+			default:
+				break;
+			}
+
 			scene::SMesh *mesh = (scene::SMesh *)m_mesh[layer];
 
 			scene::SMeshBuffer *buf = new scene::SMeshBuffer();
