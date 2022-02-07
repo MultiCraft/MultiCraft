@@ -2,9 +2,6 @@
 #include "client/client.h"
 #include "client/shader.h"
 #include "client/tile.h"
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <GL/glext.h>
 
 using namespace video;
 
