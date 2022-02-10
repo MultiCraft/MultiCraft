@@ -217,6 +217,12 @@ function core.get_translator_auto(langs)
 				return (intllib.make_gettext_pair())
 			end
 		end
+	elseif langs then
+		-- If intllib can find any translations for this mod in the current
+		-- language then use intllib.
+		if next(intllib.get_strings()) then
+			return (intllib.make_gettext_pair())
+		end
 	end
 
 	return core.get_translator(core.get_current_modname())
