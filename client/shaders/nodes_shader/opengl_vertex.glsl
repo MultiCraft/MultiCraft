@@ -3,7 +3,7 @@ uniform mat4 mWorld;
 // Color of the light emitted by the sun.
 uniform vec3 dayLight;
 uniform vec3 eyePosition;
-uniform float fogDistance;
+uniform mediump float fogDistance;
 
 // The cameraOffset is the current center of the visible world.
 uniform vec3 cameraOffset;

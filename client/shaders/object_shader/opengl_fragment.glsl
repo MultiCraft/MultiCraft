@@ -2,7 +2,7 @@ uniform sampler2D baseTexture;
 
 uniform vec4 emissiveColor;
 uniform vec4 skyBgColor;
-uniform float fogDistance;
+uniform mediump float fogDistance;
 uniform vec3 eyePosition;
 
 varying vec3 vNormal;
@@ -15,7 +15,7 @@ varying mediump vec2 varTexCoord;
 centroid varying vec2 varTexCoord;
 #endif
 
-varying vec3 eyeVec;
+varying mediump vec3 eyeVec;
 varying float vIDiff;
 
 const float e = 2.718281828459;
@@ -92,9 +92,11 @@ void main(void)
 	// As additions usually come for free following a multiplication, the new formula
 	// should be more efficient as well.
 	// Note: clarity = (1 - fogginess)
-	float clarity = clamp(fogShadingParameter
-		- fogShadingParameter * length(eyeVec) / fogDistance, 0.0, 1.0);
-	col = mix(skyBgColor, col, clarity);
+	if (fogDistance > 0.0) { // -1.0 means disabled
+		float clarity = clamp(fogShadingParameter
+			- fogShadingParameter * length(eyeVec), 0.0, 1.0);
+		col = mix(skyBgColor, col, clarity);
+	}
 
 	gl_FragColor = vec4(col.rgb, base.a);
 }

@@ -486,7 +486,7 @@ public:
 		m_sky_bg_color.set(bgcolorfa, services);
 
 		// Fog distance
-		float fog_distance = 10000 * BS;
+		float fog_distance = -1.0f; // sentinel for disabled fog
 
 		if (m_fog_enabled && !*m_force_fog_off)
 			fog_distance = *m_fog_range;
@@ -617,6 +617,7 @@ struct GameRunData {
 	bool dig_instantly;
 	bool digging_blocked;
 	bool reset_jump_timer;
+	bool disable_fog;
 	float nodig_delay_timer;
 	float noplace_delay_timer;
 	float dig_time;
@@ -1371,7 +1372,7 @@ bool Game::createClient(const GameStartData &start_data)
 	}
 
 	auto *scsf = new GameGlobalShaderConstantSetterFactory(
-			&m_flags.force_fog_off, &runData.fog_range, client);
+			&runData.disable_fog, &runData.fog_range, client);
 	shader_src->addShaderConstantSetterFactory(scsf);
 
 	// Update cached textures, meshes and materials
@@ -2399,14 +2400,15 @@ void Game::decreaseViewRange()
 
 void Game::toggleFullViewRange()
 {
-	draw_control->range_all = !draw_control->range_all;
 #if !defined(__ANDROID__) && !defined(__IOS__)
+	draw_control->range_all = !draw_control->range_all;
 	if (draw_control->range_all)
 		m_game_ui->showTranslatedStatusText("Enabled unlimited viewing range");
 	else
 		m_game_ui->showTranslatedStatusText("Disabled unlimited viewing range");
 #else
-	if (draw_control->range_all)
+	draw_control->extended_range = !draw_control->extended_range;
+	if (draw_control->extended_range)
 		m_game_ui->showTranslatedStatusText("Enabled far viewing range");
 	else
 		m_game_ui->showTranslatedStatusText("Disabled far viewing range");
@@ -3833,15 +3835,8 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		Fog range
 	*/
 
-	if (draw_control->range_all) {
-#if !defined(__ANDROID__) && !defined(__IOS__)
-		runData.fog_range = 100000 * BS;
-#else
-		runData.fog_range = draw_control->wanted_range * BS * 4;
-#endif
-	} else {
-		runData.fog_range = draw_control->wanted_range * BS;
-	}
+	runData.disable_fog = !m_cache_enable_fog || m_flags.force_fog_off || draw_control->range_all;
+	runData.fog_range = draw_control->wanted_range * BS;
 
 	/*
 		Calculate general brightness
@@ -3926,27 +3921,16 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		Fog
 	*/
 
-	if (m_cache_enable_fog) {
-		driver->setFog(
-				sky->getBgColor(),
-				video::EFT_FOG_LINEAR,
-				runData.fog_range * m_cache_fog_start,
-				runData.fog_range * 1.0,
-				0.01,
-				false, // pixel fog
-				true // range fog
-		);
-	} else {
-		driver->setFog(
-				sky->getBgColor(),
-				video::EFT_FOG_LINEAR,
-				100000 * BS,
-				110000 * BS,
-				0.01f,
-				false, // pixel fog
-				false // range fog
-		);
-	}
+	driver->setFog(
+			sky->getBgColor(),
+			video::EFT_FOG_LINEAR,
+			runData.fog_range * m_cache_fog_start,
+			runData.fog_range * 1.0,
+			0.01,
+			false, // pixel fog
+			true // range fog
+	);
+
 
 	/*
 		Get chat messages from client
@@ -4041,8 +4025,29 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	} catch (SettingNotFoundException) {
 	}
 #endif
+
+	video::SOverrideMaterial &mat = driver->getOverrideMaterial();
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
+	mat.EnableFlags = 0;
+#else
+	mat.reset();
+#endif
+	if (runData.disable_fog) {
+		mat.Material.FogEnable = false;
+		mat.EnableFlags |= video::EMF_FOG_ENABLE;
+		mat.EnablePasses = scene::ESNRP_SKY_BOX | scene::ESNRP_SOLID |
+				scene::ESNRP_TRANSPARENT | scene::ESNRP_TRANSPARENT_EFFECT |
+				scene::ESNRP_SHADOW;
+	}
+
 	RenderingEngine::draw_scene(skycolor, m_game_ui->m_flags.show_hud,
 			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair);
+
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
+	mat.EnableFlags = 0;
+#else
+	mat.reset();
+#endif
 
 	/*
 		Profiler graph
