@@ -541,7 +541,7 @@ function core.item_drop(itemstack, dropper, pos)
 	local obj = core.add_item(p, item)
 	if obj then
 		if dropper_is_player then
-			local vel = dropper:get_player_velocity()
+			local vel = dropper.get_velocity and dropper:get_velocity() or vnew
 			local dir = dropper:get_look_dir()
 			dir.x = vel.x + dir.x * 4
 			dir.y = vel.y + dir.y * 4 + 2
