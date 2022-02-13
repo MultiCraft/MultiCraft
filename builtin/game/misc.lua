@@ -59,9 +59,13 @@ end
 core.register_on_joinplayer(function(player)
 	local player_name = player:get_player_name()
 	if not core.is_singleplayer() then
-		local status = core.get_server_status(player_name, true)
-		if status and status ~= "" then
-			core.chat_send_player(player_name, status)
+	--	local status = core.get_server_status(player_name, true)
+	--	if status and status ~= "" then
+	--		core.chat_send_player(player_name, status)
+	--	end
+		local motd = core.settings:get("motd")
+		if motd ~= "" then
+			core.chat_send_player(player_name, "# Server: " .. motd)
 		end
 	end
 	core.send_join_message(player_name)
