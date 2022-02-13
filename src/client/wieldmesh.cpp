@@ -40,6 +40,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MIN_EXTRUSION_MESH_RESOLUTION 16
 #define MAX_EXTRUSION_MESH_RESOLUTION 512
 
+/*!
+ * Applies overlays, textures and optionally materials to the given mesh and
+ * extracts tile colors for colorization.
+ * \param mattype overrides the buffer's material type, but can also
+ * be NULL to leave the original material.
+ * \param colors returns the colors of the mesh buffers in the mesh.
+ */
+static void postProcessNodeMesh(scene::SMesh *mesh, const ContentFeatures &f,
+		bool set_material, const video::E_MATERIAL_TYPE *mattype,
+		std::vector<ItemPartColor> *colors);
+
 static scene::IMesh *createExtrusionMesh(int resolution_x, int resolution_y)
 {
 	const f32 r = 0.5;
@@ -235,7 +246,7 @@ void WieldMeshSceneNode::setCube(const ContentFeatures &f,
 	scene::IMesh *cubemesh = g_extrusion_mesh_cache->createCube();
 	scene::SMesh *copy = cloneMesh(cubemesh);
 	cubemesh->drop();
-	postProcessNodeMesh(copy, f, false, true, &m_material_type, &m_colors, true);
+	postProcessNodeMesh(copy, f, true, &m_material_type, &m_colors);
 	changeToMesh(copy);
 	copy->drop();
 	m_meshnode->setScale(wield_scale * WIELD_SCALE_FACTOR);
@@ -559,8 +570,7 @@ void getItemMesh(Client *client, const ItemStack &item, ItemMesh *result)
 			} else
 				scaleMesh(mesh, v3f(1.2, 1.2, 1.2));
 			// add overlays
-			postProcessNodeMesh(mesh, f, false, false, nullptr,
-				&result->buffer_colors, true);
+			postProcessNodeMesh(mesh, f, false, nullptr, &result->buffer_colors);
 			if (f.drawtype == NDT_ALLFACES)
 				scaleMesh(mesh, v3f(f.visual_scale));
 			break;
@@ -654,9 +664,9 @@ scene::SMesh *getExtrudedMesh(ITextureSource *tsrc,
 	return mesh;
 }
 
-void postProcessNodeMesh(scene::SMesh *mesh, const ContentFeatures &f,
-	bool use_shaders, bool set_material, const video::E_MATERIAL_TYPE *mattype,
-	std::vector<ItemPartColor> *colors, bool apply_scale)
+static  void postProcessNodeMesh(scene::SMesh *mesh, const ContentFeatures &f,
+	bool set_material, const video::E_MATERIAL_TYPE *mattype,
+	std::vector<ItemPartColor> *colors)
 {
 	u32 mc = mesh->getMeshBufferCount();
 	// Allocate colors for existing buffers
@@ -694,7 +704,7 @@ void postProcessNodeMesh(scene::SMesh *mesh, const ContentFeatures &f,
 			} else {
 				material.setTexture(0, layer->texture);
 			}
-			if (apply_scale && tile->world_aligned) {
+			if (tile->world_aligned) {
 				u32 n = buf->getVertexCount();
 				for (u32 k = 0; k != n; ++k)
 					buf->getTCoords(k) /= layer->scale;
