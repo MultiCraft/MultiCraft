@@ -328,7 +328,6 @@ scene::SMesh *createSpecialNodeMesh(Client *client, content_t id, std::vector<It
 			if (p.layer.material_flags & MATERIAL_FLAG_ANIMATION) {
 				const FrameSpec &frame = (*p.layer.frames)[0];
 				p.layer.texture = frame.texture;
-				p.layer.normal_texture = frame.normal_texture;
 			}
 			for (video::S3DVertex &v : p.vertices) {
 				v.Color.setAlpha(255);
@@ -694,16 +693,6 @@ void postProcessNodeMesh(scene::SMesh *mesh, const ContentFeatures &f,
 				material.setTexture(0, animation_frame.texture);
 			} else {
 				material.setTexture(0, layer->texture);
-			}
-			if (use_shaders) {
-				if (layer->normal_texture) {
-					if (layer->animation_frame_count > 1) {
-						const FrameSpec &animation_frame = (*layer->frames)[0];
-						material.setTexture(1, animation_frame.normal_texture);
-					} else
-						material.setTexture(1, layer->normal_texture);
-				}
-				material.setTexture(2, layer->flags_texture);
 			}
 			if (apply_scale && tile->world_aligned) {
 				u32 n = buf->getVertexCount();
