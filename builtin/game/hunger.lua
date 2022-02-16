@@ -3,7 +3,7 @@
 	Copyright (C) BlockMen (2013-2015)
 	Copyright (C) Auke Kok <sofar@foo-projects.org> (2016)
 	Copyright (C) Minetest Mods Team (2016-2019)
-	Copyright (C) MultiCraft Development Team (2016-2021)
+	Copyright (C) MultiCraft Development Team (2016-2022)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU Lesser General Public License as published by
@@ -90,7 +90,7 @@ function hunger.register_on_update_saturation(fun)
 end
 
 function hunger.update_saturation(player, level)
-	for _, callback in pairs(hunger.registered_on_update_saturations) do
+	for _, callback in ipairs(hunger.registered_on_update_saturations) do
 		local result = callback(player, level)
 		if result then
 			return result
@@ -112,9 +112,10 @@ function hunger.update_saturation(player, level)
 end
 
 function hunger.change_saturation(player, change)
-	if not is_player(player) or not change or change == 0 then
+	if not change or change == 0 or not is_player(player) then
 		return false
 	end
+
 	local level = hunger.get_saturation(player) + change or 0
 	level = max(level, 0)
 	level = min(level, settings.level_max)
@@ -160,14 +161,14 @@ function hunger.register_on_poison(fun)
 end
 
 function hunger.poison(player, ticks, interval)
-	for _, fun in pairs(hunger.registered_on_poisons) do
+	if not is_player(player) then
+		return
+	end
+	for _, fun in ipairs(hunger.registered_on_poisons) do
 		local rv = fun(player, ticks, interval)
 		if rv == true then
 			return
 		end
-	end
-	if not is_player(player) then
-		return
 	end
 	hunger.set_poisoned(player, true)
 	poison_tick(player:get_player_name(), ticks, interval, 0)
@@ -200,7 +201,7 @@ function hunger.register_on_exhaust_player(fun)
 end
 
 function hunger.exhaust_player(player, change, cause)
-	for _, callback in pairs(hunger.registered_on_exhaust_players) do
+	for _, callback in ipairs(hunger.registered_on_exhaust_players) do
 		local result = callback(player, change, cause)
 		if result then
 			return result
@@ -227,7 +228,7 @@ end
 local connected_players = core.get_connected_players
 
 local function move_tick()
-	for _, player in pairs(connected_players()) do
+	for _, player in ipairs(connected_players()) do
 		local controls = player:get_player_control()
 		local is_moving = controls.up or controls.down or controls.left or controls.right
 		local velocity = player:get_velocity()
@@ -246,7 +247,7 @@ end
 
 local function hunger_tick()
 	-- lower saturation by 1 point after settings.tick seconds
-	for _, player in pairs(connected_players()) do
+	for _, player in ipairs(connected_players()) do
 		local saturation = hunger.get_saturation(player) or 0
 		if saturation > settings.tick_min then
 			hunger.update_saturation(player, saturation - 1)
@@ -256,7 +257,7 @@ end
 
 local function health_tick()
 	-- heal or damage player, depending on saturation
-	for _, player in pairs(connected_players()) do
+	for _, player in ipairs(connected_players()) do
 		local air = player:get_breath() or 0
 		local hp = player:get_hp() or 0
 		local saturation = hunger.get_saturation(player) or 0

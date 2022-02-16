@@ -27,9 +27,11 @@ local lava_destroy = core.settings:get_bool("item_lava_destroy", true)
 local function quick_flow_logic(node, pos_testing, dir)
 	local node_testing = core.get_node_or_nil(pos_testing)
 	if not node_testing then return 0 end
-	local liquid = core.registered_nodes[node_testing.name] and core.registered_nodes[node_testing.name].liquidtype
 
-	if not liquid or liquid ~= "flowing" and liquid ~= "source" then
+	local node_testing_def = core.registered_nodes[node_testing.name]
+	local liquid = node_testing_def and node_testing_def.liquidtype
+
+	if not liquid or (liquid ~= "flowing" and liquid ~= "source") then
 		return 0
 	end
 
@@ -313,19 +315,15 @@ core.register_entity(":__builtin:item", {
 			end
 		end
 
-		local vel = self.object:get_velocity()
-		local def = node and core.registered_nodes[node.name]
 		local node_inside = core.get_node_or_nil(pos)
 		local def_inside = node_inside and core.registered_nodes[node_inside.name]
---		local is_moving = (def and not def.walkable) or
---			vel.x ~= 0 or vel.y ~= 0 or vel.z ~= 0
---		local is_slippery = false
 
 		-- Destroy item when dropped into lava
 		if lava_destroy and def_inside
 				and def_inside.groups and def_inside.groups.lava then
 			core.sound_play("default_cool_lava", {
 				pos = pos, max_hear_distance = 10})
+			self.itemstring = ""
 			self.object:remove()
 			core.add_particlespawner({
 				amount = 3,
@@ -345,6 +343,8 @@ core.register_entity(":__builtin:item", {
 			return
 		end
 
+		local vel = self.object:get_velocity()
+
 		-- Moving items in the water flow (TenPlus1, MIT)
 		if water_flow and def_inside and def_inside.liquidtype == "flowing" then
 			local vec = quick_flow(pos, node_inside)
@@ -352,19 +352,8 @@ core.register_entity(":__builtin:item", {
 			return
 		end
 
-		-- Move item inside node to free space (TenPlus1, MIT)
-	--[[if not self.stuck and def_inside and def_inside.walkable and
-				not def_inside.liquid and node_inside.name ~= "air" and
-				def_inside.drawtype == "normal" then
-			local npos = core.find_node_near(pos, 1, "air")
-			if npos then
-				self.object:move_to(npos)
-			else
-				self.stuck = true
-			end
-		end]]
-
 		-- Slide on slippery nodes
+		local def = node and core.registered_nodes[node.name]
 		local keep_movement = false
 
 		if def then
@@ -436,9 +425,10 @@ if collection then
 		if not core.is_valid_pos(ppos) then
 			return
 		end
+
 		-- Detect
 		local objects = core.get_objects_inside_radius(ppos, 2)
-		for _, obj in pairs(objects) do
+		for _, obj in ipairs(objects) do
 			local entity = obj:get_luaentity()
 			if entity and entity.name == "__builtin:item" and
 					not entity.collectioner and
@@ -450,30 +440,29 @@ if collection then
 					-- Magnet
 					obj:move_to(ppos)
 					entity.collectioner = true
+
 					-- Collect
-					if entity.collectioner == true then
-						core.after(0.05, function()
-							core.sound_play("item_drop_pickup", {
-								pos = ppos,
-								max_hear_distance = 10,
-								gain = 0.2,
-								pitch = random(60,100)/100
-							})
-							entity.itemstring = ""
-							obj:remove()
-							item = inv:add_item("main", item)
-							if not item:is_empty() then
-								core.item_drop(item, player, ppos)
-							end
-						end)
-					end
+					core.after(0.05, function()
+						core.sound_play("item_drop_pickup", {
+							pos = ppos,
+							max_hear_distance = 10,
+							gain = 0.2,
+							pitch = random(60, 100) / 100
+						})
+						entity.itemstring = ""
+						obj:remove()
+						item = inv:add_item("main", item)
+						if not item:is_empty() then
+							core.item_drop(item, player, ppos)
+						end
+					end)
 				end
 			end
 		end
 	end
 
-	core.register_playerstep(function(dtime, playernames)
-		for _, name in pairs(playernames) do
+	core.register_playerstep(function(_, playernames)
+		for _, name in ipairs(playernames) do
 			local player = core.get_player_by_name(name)
 			if player and player:is_player() and player:get_hp() > 0 then
 				collect_items(player)
