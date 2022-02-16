@@ -909,8 +909,6 @@ static void fillTileAttribs(ITextureSource *tsrc, TileLayer *layer,
 	if (!tile.world_aligned)
 		layer->scale = 1;
 
-	layer->flags_texture = tsrc->getShaderFlagsTexture(layer->normal_texture ? true : false);
-
 	// Material flags
 	layer->material_flags = 0;
 	if (backface_culling)
@@ -958,9 +956,6 @@ static void fillTileAttribs(ITextureSource *tsrc, TileLayer *layer,
 					layer->texture->getOriginalSize(), i);
 
 			frame.texture = tsrc->getTextureForMesh(os.str(), &frame.texture_id);
-			if (layer->normal_texture)
-				frame.normal_texture = tsrc->getNormalTexture(os.str());
-			frame.flags_texture = layer->flags_texture;
 			(*layer->frames)[i] = frame;
 		}
 	}
