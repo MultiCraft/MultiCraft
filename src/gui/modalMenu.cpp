@@ -186,10 +186,10 @@ static bool isChild(gui::IGUIElement *tocheck, gui::IGUIElement *parent)
 
 #ifdef HAVE_TOUCHSCREENGUI
 
-bool GUIModalMenu::simulateMouseEvent(
-		gui::IGUIElement *target, ETOUCH_INPUT_EVENT touch_event)
+bool GUIModalMenu::convertToMouseEvent(
+		SEvent &mouse_event, ETOUCH_INPUT_EVENT touch_event) const noexcept
 {
-	SEvent mouse_event{}; // value-initialized, not unitialized
+	mouse_event = {};
 	mouse_event.EventType = EET_MOUSE_INPUT_EVENT;
 	mouse_event.MouseInput.X = m_pointer.X;
 	mouse_event.MouseInput.Y = m_pointer.Y;
@@ -209,11 +209,7 @@ bool GUIModalMenu::simulateMouseEvent(
 	default:
 		return false;
 	}
-	if (preprocessEvent(mouse_event))
-		return true;
-	if (!target)
-		return false;
-	return target->OnEvent(mouse_event);
+	return true;
 }
 
 void GUIModalMenu::enter(gui::IGUIElement *hovered)
@@ -311,9 +307,14 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 				enter(hovered);
 			}
 			gui::IGUIElement *focused = Environment->getFocus();
-			bool ret = simulateMouseEvent(focused, event.TouchInput.Event);
-			if (!ret && m_hovered != focused)
-				ret = simulateMouseEvent(m_hovered.get(), event.TouchInput.Event);
+			SEvent mouse_event;
+			if (!convertToMouseEvent(mouse_event, event.TouchInput.Event))
+				return false;
+			bool ret = preprocessEvent(mouse_event);
+			if (!ret && focused)
+				ret = focused->OnEvent(mouse_event);
+			if (!ret && m_hovered && m_hovered != focused)
+				ret = m_hovered->OnEvent(mouse_event);
 			if (event.TouchInput.Event == ETIE_LEFT_UP)
 				leave();
 			return ret;
