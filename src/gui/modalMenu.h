@@ -105,7 +105,7 @@ private:
 #ifdef HAVE_TOUCHSCREENGUI
 	irr_ptr<gui::IGUIElement> m_hovered;
 
-	bool simulateMouseEvent(gui::IGUIElement *target, ETOUCH_INPUT_EVENT touch_event);
+	bool convertToMouseEvent(SEvent &mouse_event, ETOUCH_INPUT_EVENT touch_event) const noexcept;
 	void enter(gui::IGUIElement *element);
 	void leave();
 #endif
