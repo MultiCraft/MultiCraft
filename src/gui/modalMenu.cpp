@@ -186,7 +186,8 @@ static bool isChild(gui::IGUIElement *tocheck, gui::IGUIElement *parent)
 
 #ifdef HAVE_TOUCHSCREENGUI
 
-bool GUIModalMenu::convertToMouseEvent(SEvent &mouse_event, ETOUCH_INPUT_EVENT touch_event) const noexcept
+bool GUIModalMenu::convertToMouseEvent(
+		SEvent &mouse_event, ETOUCH_INPUT_EVENT touch_event) const noexcept
 {
 	mouse_event = {};
 	mouse_event.EventType = EET_MOUSE_INPUT_EVENT;
