@@ -35,7 +35,6 @@ import androidx.core.graphics.BlendModeCompat
 import androidx.lifecycle.*
 import androidx.work.WorkInfo
 import com.multicraft.game.databinding.ActivityMainBinding
-import com.multicraft.game.databinding.RestartDialogBinding
 import com.multicraft.game.helpers.Constants.NO_SPACE_LEFT
 import com.multicraft.game.helpers.Constants.REQUEST_CONNECTION
 import com.multicraft.game.helpers.PreferenceHelper
@@ -48,10 +47,10 @@ import com.multicraft.game.helpers.PreferenceHelper.getStringValue
 import com.multicraft.game.helpers.PreferenceHelper.set
 import com.multicraft.game.helpers.Utilities.addShortcut
 import com.multicraft.game.helpers.Utilities.copyInputStreamToFile
-import com.multicraft.game.helpers.Utilities.finishApp
 import com.multicraft.game.helpers.Utilities.getIcon
 import com.multicraft.game.helpers.Utilities.isConnected
 import com.multicraft.game.helpers.Utilities.makeFullScreen
+import com.multicraft.game.helpers.Utilities.showRestartDialog
 import com.multicraft.game.workmanager.UnzipWorker.Companion.PROGRESS
 import com.multicraft.game.workmanager.WorkerViewModel
 import com.multicraft.game.workmanager.WorkerViewModelFactory
@@ -78,7 +77,7 @@ class MainActivity : AppCompatActivity() {
 				throw IOException("Bad disk space state")
 			lateInit()
 		} catch (e: IOException) {
-			showRestartDialog(!e.message!!.contains(NO_SPACE_LEFT))
+			showRestartDialog(this, !e.message!!.contains(NO_SPACE_LEFT))
 		}
 	}
 
@@ -147,7 +146,7 @@ class MainActivity : AppCompatActivity() {
 			startActivity(intent)
 		} else {
 			prefs[TAG_BUILD_VER] = "0"
-			showRestartDialog(false)
+			showRestartDialog(this)
 		}
 	}
 
@@ -174,14 +173,19 @@ class MainActivity : AppCompatActivity() {
 						File(cacheDir, it).copyInputStreamToFile(input)
 					}
 				} catch (e: IOException) {
-					runOnUiThread { showRestartDialog(!e.message!!.contains(NO_SPACE_LEFT)) }
+					runOnUiThread {
+						showRestartDialog(
+							this@MainActivity,
+							!e.message!!.contains(NO_SPACE_LEFT)
+						)
+					}
 					return@forEach
 				}
 			}
 			try {
 				startUnzipWorker(zips)
 			} catch (e: Exception) {
-				runOnUiThread { showRestartDialog() }
+				runOnUiThread { showRestartDialog(this@MainActivity) }
 			}
 		}
 	}
@@ -217,7 +221,7 @@ class MainActivity : AppCompatActivity() {
 
 				if (workInfo.state.isFinished) {
 					if (workInfo.state == WorkInfo.State.FAILED) {
-						showRestartDialog()
+						showRestartDialog(this)
 					} else if (workInfo.state == WorkInfo.State.SUCCEEDED) {
 						prefs[TAG_BUILD_VER] = versionName
 						startNative()
@@ -225,24 +229,6 @@ class MainActivity : AppCompatActivity() {
 				}
 			})
 		viewModel.startOneTimeWorkRequest()
-	}
-
-	private fun showRestartDialog(isRestart: Boolean = true) {
-		val message = if (isRestart) getString(R.string.restart) else getString(R.string.no_space)
-		val builder = AlertDialog.Builder(this)
-		builder.setIcon(getIcon(this))
-		val binding = RestartDialogBinding.inflate(layoutInflater)
-		builder.setView(binding.root)
-		val dialog = builder.create()
-		binding.errorDesc.text = message
-		binding.close.setOnClickListener {
-			dialog.dismiss()
-			finishApp(!isRestart, this@MainActivity)
-		}
-		binding.restart.setOnClickListener { finishApp(isRestart, this@MainActivity) }
-		dialog.window?.setBackgroundDrawableResource(R.drawable.custom_dialog_rounded_daynight)
-		makeFullScreen(dialog.window!!)
-		dialog.show()
 	}
 
 	// connection dialog

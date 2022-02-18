@@ -172,10 +172,6 @@ public class GameActivity extends NativeActivity {
 		return getResources().getDisplayMetrics().density;
 	}
 
-	public float getMemoryMax() {
-		return getTotalMem(this);
-	}
-
 	public void notifyServerConnect(boolean multiplayer) {
 		isMultiPlayer = multiplayer;
 	}

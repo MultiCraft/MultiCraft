@@ -94,8 +94,6 @@ android_app *app_global;
 JNIEnv      *jnienv;
 jclass       nativeActivity;
 
-static float device_memory_max = 0;
-
 jclass findClass(const std::string &classname)
 {
 	if (jnienv == nullptr)
@@ -269,22 +267,6 @@ std::string getInputDialogValue()
 	return text;
 }
 
-float getMemoryMax()
-{
-	if (device_memory_max == 0) {
-		jmethodID getMemory = jnienv->GetMethodID(nativeActivity,
-				"getMemoryMax", "()F");
-
-		if (getMemory == nullptr)
-			assert("porting::getMemoryMax unable to find java method" == nullptr);
-
-		device_memory_max = jnienv->CallFloatMethod(
-				app_global->activity->clazz, getMemory);
-	}
-
-	return device_memory_max;
-}
-
 bool hasRealKeyboard()
 {
 	return device_has_keyboard;
@@ -399,5 +381,12 @@ void upgrade(const std::string &item)
 
 	jstring jitem = jnienv->NewStringUTF(item.c_str());
 	jnienv->CallVoidMethod(app_global->activity->clazz, upgradeGame, jitem);
+}
+
+float getTotalSystemMemory() {
+	long pages = sysconf(_SC_PHYS_PAGES);
+	long page_size = sysconf(_SC_PAGE_SIZE);
+	float divisor = 1024 * 1024 * 1024;
+	return pages * page_size / divisor;
 }
 }

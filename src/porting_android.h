@@ -111,4 +111,8 @@ jstring getJniString(const std::string &message);
  * makes game better
  */
 void upgrade(const std::string &item);
+/**
+ * get total device memory
+ */
+float getTotalSystemMemory();
 }
