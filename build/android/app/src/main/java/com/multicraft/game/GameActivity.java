@@ -104,7 +104,6 @@ public class GameActivity extends NativeActivity {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public void showDialog(String s, String hint, String current, int editType) {
 		runOnUiThread(() -> showDialogUI(hint, current, editType));
 	}
@@ -164,7 +163,6 @@ public class GameActivity extends NativeActivity {
 		return messageReturnCode;
 	}
 
-	@SuppressWarnings("unused")
 	public String getDialogValue() {
 		messageReturnCode = -1;
 		return messageReturnValue;
@@ -185,7 +183,6 @@ public class GameActivity extends NativeActivity {
 	public void notifyExitGame() {
 	}
 
-	@SuppressWarnings("unused")
 	public void openURI(String uri) {
 		try {
 			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
@@ -194,12 +191,13 @@ public class GameActivity extends NativeActivity {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public void finishGame(String exc) {
 		finishApp(true, this);
 	}
 
-	@SuppressWarnings("unused")
 	public void handleError(String exc) {
+	}
+
+	public void upgrade(String item) {
 	}
 }

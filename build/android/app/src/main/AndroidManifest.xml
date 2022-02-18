@@ -54,6 +54,12 @@
 		</activity>
 
 		<activity
+			android:name="com.multicraft.game.CrashActivity"
+			android:exported="false"
+			android:screenOrientation="sensorLandscape"
+			android:theme="@style/AppTheme" />
+
+		<activity
 			android:name="com.multicraft.game.GameActivity"
 			android:configChanges="orientation|keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize"
 			android:exported="true"

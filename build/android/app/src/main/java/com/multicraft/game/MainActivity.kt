@@ -20,9 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game
 
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.graphics.Color
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
@@ -34,11 +32,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.*
 import androidx.work.WorkInfo
 import com.multicraft.game.databinding.ActivityMainBinding
+import com.multicraft.game.databinding.RestartDialogBinding
 import com.multicraft.game.helpers.Constants.NO_SPACE_LEFT
 import com.multicraft.game.helpers.Constants.REQUEST_CONNECTION
 import com.multicraft.game.helpers.PreferenceHelper
@@ -61,6 +58,7 @@ import com.multicraft.game.workmanager.WorkerViewModelFactory
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
+import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
 	private lateinit var binding: ActivityMainBinding
@@ -71,21 +69,24 @@ class MainActivity : AppCompatActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		Thread.setDefaultUncaughtExceptionHandler { _, _ ->
+			val intent = Intent(this@MainActivity, CrashActivity::class.java)
+			intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+			startActivity(intent)
+			exitProcess(0)
+		}
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.root)
 		prefs = PreferenceHelper.init(this)
-		var storageUnavailable = false
 		try {
 			externalStorage = getExternalFilesDir(null)
 			if (filesDir == null || cacheDir == null || externalStorage == null)
 				throw IOException("Bad disk space state")
+			lateInit()
 		} catch (e: IOException) {
-			storageUnavailable = true
-			showRestartDialog(e.message!!.contains(NO_SPACE_LEFT))
+			showRestartDialog(!e.message!!.contains(NO_SPACE_LEFT))
 		}
-		if (storageUnavailable) return
-		lateInit()
 	}
 
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -180,11 +181,15 @@ class MainActivity : AppCompatActivity() {
 						File(cacheDir, it).copyInputStreamToFile(input)
 					}
 				} catch (e: IOException) {
-					runOnUiThread { showRestartDialog(e.message!!.contains(NO_SPACE_LEFT)) }
+					runOnUiThread { showRestartDialog(!e.message!!.contains(NO_SPACE_LEFT)) }
 					return@forEach
 				}
 			}
-			startUnzipWorker(zips)
+			try {
+				startUnzipWorker(zips)
+			} catch (e: Exception) {
+				runOnUiThread { showRestartDialog() }
+			}
 		}
 	}
 
@@ -219,7 +224,7 @@ class MainActivity : AppCompatActivity() {
 
 				if (workInfo.state.isFinished) {
 					if (workInfo.state == WorkInfo.State.FAILED) {
-						showRestartDialog(false)
+						showRestartDialog()
 					} else if (workInfo.state == WorkInfo.State.SUCCEEDED) {
 						prefs[TAG_BUILD_VER] = versionName
 						startNative()
@@ -229,15 +234,22 @@ class MainActivity : AppCompatActivity() {
 		viewModel.startOneTimeWorkRequest()
 	}
 
-	private fun showRestartDialog(space: Boolean) {
-		val message = if (space) getString(R.string.no_space) else getString(R.string.restart)
+	private fun showRestartDialog(isRestart: Boolean = true) {
+		val message = if (isRestart) getString(R.string.restart) else getString(R.string.no_space)
 		val builder = AlertDialog.Builder(this)
-		builder.setMessage(message)
-			.setPositiveButton(R.string.ok) { _, _ -> finishApp(!space, this) }
-			.setCancelable(false)
+		builder.setIcon(getIcon(this))
+		val binding = RestartDialogBinding.inflate(layoutInflater)
+		builder.setView(binding.root)
 		val dialog = builder.create()
+		binding.errorDesc.text = message
+		binding.close.setOnClickListener {
+			dialog.dismiss()
+			finishApp(!isRestart, this@MainActivity)
+		}
+		binding.restart.setOnClickListener { finishApp(isRestart, this@MainActivity) }
+		dialog.window?.setBackgroundDrawableResource(R.drawable.custom_dialog_rounded_daynight)
 		makeFullScreen(dialog.window!!)
-		if (!isFinishing) dialog.show()
+		dialog.show()
 	}
 
 	// connection dialog

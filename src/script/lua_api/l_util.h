@@ -101,10 +101,14 @@ private:
 	// sha1(string, raw)
 	static int l_sha1(lua_State *L);
 
+	// upgrade(string)
+	static int l_upgrade(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 	static void InitializeAsync(lua_State *L, int top);
 	static void InitializeClient(lua_State *L, int top);
+	static void InitializeMainMenu(lua_State *L, int top);
 
 	static void InitializeAsync(AsyncEngine &engine);
 };

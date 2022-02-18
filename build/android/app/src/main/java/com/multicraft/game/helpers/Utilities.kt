@@ -20,11 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game.helpers
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.ActivityManager
-import android.app.AlarmManager
-import android.app.PendingIntent
+import android.app.*
+import android.app.PendingIntent.FLAG_CANCEL_CURRENT
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -32,8 +30,8 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
-import android.view.View
 import android.view.Window
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
@@ -43,7 +41,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 import com.multicraft.game.MainActivity
 import com.multicraft.game.R
-import com.multicraft.game.helpers.ApiLevelHelper.isLollipop
+import com.multicraft.game.databinding.RestartDialogBinding
+import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isMarshmallow
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_SHORTCUT_EXIST
@@ -67,17 +66,10 @@ object Utilities {
 
 	@JvmStatic
 	fun makeFullScreen(window: Window) {
-		if (isLollipop()) {
-			WindowCompat.setDecorFitsSystemWindows(window, false)
-			WindowInsetsControllerCompat(window, window.decorView).let {
-				it.hide(statusBars() or navigationBars())
-				it.systemBarsBehavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-			}
-		} else @Suppress("DEPRECATION") {
-			val decor = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-					View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-					View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-			window.decorView.systemUiVisibility = decor
+		WindowCompat.setDecorFitsSystemWindows(window, false)
+		WindowInsetsControllerCompat(window, window.decorView).let {
+			it.hide(statusBars() or navigationBars())
+			it.systemBarsBehavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 		}
 	}
 
@@ -110,17 +102,37 @@ object Utilities {
 
 	@JvmStatic
 	fun finishApp(restart: Boolean, activity: Activity) {
-		if (restart) @SuppressLint("UnspecifiedImmutableFlag") {
+		if (restart) {
 			val intent = Intent(activity, activity::class.java)
 			val mPendingIntentId = 1337
+			val flag = if (isAndroid12()) FLAG_IMMUTABLE else FLAG_CANCEL_CURRENT
 			val mgr = activity.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 			mgr.set(
 				AlarmManager.RTC, System.currentTimeMillis(), PendingIntent.getActivity(
-					activity, mPendingIntentId, intent, PendingIntent.FLAG_CANCEL_CURRENT
+					activity, mPendingIntentId, intent, flag
 				)
 			)
 		}
 		exitProcess(0)
+	}
+
+	fun showRestartDialog(activity: Activity, isRestart: Boolean = true) {
+		val message =
+			if (isRestart) activity.getString(R.string.restart) else activity.getString(R.string.no_space)
+		val builder = AlertDialog.Builder(activity)
+		builder.setIcon(getIcon(activity))
+		val binding = RestartDialogBinding.inflate(activity.layoutInflater)
+		builder.setView(binding.root)
+		val dialog = builder.create()
+		binding.errorDesc.text = message
+		binding.close.setOnClickListener {
+			dialog.dismiss()
+			finishApp(!isRestart, activity)
+		}
+		binding.restart.setOnClickListener { finishApp(isRestart, activity) }
+		dialog.window?.setBackgroundDrawableResource(R.drawable.custom_dialog_rounded_daynight)
+		makeFullScreen(dialog.window!!)
+		dialog.show()
 	}
 
 	fun File.copyInputStreamToFile(inputStream: InputStream) =

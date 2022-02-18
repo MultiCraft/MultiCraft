@@ -480,6 +480,21 @@ int ModApiUtil::l_sha1(lua_State *L)
 	return 1;
 }
 
+int ModApiUtil::l_upgrade(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+#ifdef __ANDROID__
+	const std::string item_name = luaL_checkstring(L, 1);
+	porting::upgrade(item_name);
+	lua_pushboolean(L, true);
+#else
+	// Not implemented on non-Android platforms
+	lua_pushnil(L);
+#endif
+
+	return 1;
+}
+
 void ModApiUtil::Initialize(lua_State *L, int top)
 {
 	API_FCT(log);
@@ -568,4 +583,9 @@ void ModApiUtil::InitializeAsync(lua_State *L, int top)
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
+}
+
+void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
+	Initialize(L, top);
+	API_FCT(upgrade);
 }

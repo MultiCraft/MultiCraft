@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-	compileSdkVersion 31
-	buildToolsVersion '31.0.0'
+	compileSdkVersion 32
+	buildToolsVersion '32.0.0'
 	ndkVersion '23.1.7779620'
 	defaultConfig {
 		applicationId 'com.multicraft.game'
-		minSdkVersion 19
-		targetSdkVersion 31
+		minSdkVersion 21
+		targetSdkVersion 32
 		versionName "${versionMajor}.${versionMinor}.${versionPatch}"
 		versionCode project.versionCode
 	}
@@ -135,9 +135,9 @@ dependencies {
 	implementation project(':native')
 
 	/* Third-party libraries */
-	implementation 'androidx.appcompat:appcompat:1.4.0'
-	implementation 'androidx.appcompat:appcompat-resources:1.4.0'
-	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.0'
+	implementation 'androidx.appcompat:appcompat:1.4.1'
+	implementation 'androidx.appcompat:appcompat-resources:1.4.1'
+	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.1'
 	implementation 'androidx.work:work-runtime-ktx:2.7.1'
-	implementation 'com.google.android.material:material:1.4.0'
+	implementation 'com.google.android.material:material:1.5.0'
 }

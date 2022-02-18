@@ -8,8 +8,6 @@
 	<string name="loadingp">Loading&#8230; %d%%</string>
 	<string name="notification_title">Loading MultiCraft</string>
 	<string name="notification_description">Less than 1 minute&#8230;</string>
-	<string name="restart">Unexpected issue, the game will be restarted automatically</string>
-	<string name="no_space">No space left for game files, please free space in the memory</string>
 	<string name="ok" translatable="false">OK</string>
 
 	<string name="input_text">Text Input</string>
@@ -23,4 +21,10 @@
 	<string name="conn_mobile">Mobile Data</string>
 	<string name="ignore">Ignore</string>
 
+	<!-- Crash -->
+	<string name="sorry">We are sorry!</string>
+	<string name="restart">Unfortunately, unexpected issue was happened, would you like to restart the app?</string>
+	<string name="no_space">No space left for game files, please free up space on the disk before restarting the app</string>
+	<string name="close_game">Close game</string>
+	<string name="restart_game">Restart</string>
 </resources>
