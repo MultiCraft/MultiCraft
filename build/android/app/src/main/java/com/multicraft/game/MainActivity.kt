@@ -58,7 +58,6 @@ import com.multicraft.game.workmanager.WorkerViewModelFactory
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
-import kotlin.system.exitProcess
 
 class MainActivity : AppCompatActivity() {
 	private lateinit var binding: ActivityMainBinding
@@ -69,12 +68,6 @@ class MainActivity : AppCompatActivity() {
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
-		Thread.setDefaultUncaughtExceptionHandler { _, _ ->
-			val intent = Intent(this@MainActivity, CrashActivity::class.java)
-			intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-			startActivity(intent)
-			exitProcess(0)
-		}
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.root)
