@@ -292,10 +292,10 @@ bool hasRealKeyboard()
 
 void handleError(const std::string &errType, const std::string &err) {
 	jmethodID report_err = jnienv->GetMethodID(nativeActivity,
-			   "handleError","(Ljava/lang/String;)V");
+		"handleError","(Ljava/lang/String;)V");
 
 	FATAL_ERROR_IF(report_err == nullptr,
-				   "porting::handleError unable to find java handleError method");
+		"porting::handleError unable to find java handleError method");
 
 	std::string errorMessage = errType + ": " + err;
 	jstring jerr = porting::getJniString(errorMessage);
@@ -308,7 +308,7 @@ void notifyServerConnect(bool is_multiplayer)
 			"notifyServerConnect", "(Z)V");
 
 	FATAL_ERROR_IF(notifyConnect == nullptr,
-			"porting::notifyServerConnect unable to find java notifyServerConnect method");
+		"porting::notifyServerConnect unable to find java notifyServerConnect method");
 
 	auto param = (jboolean) is_multiplayer;
 
@@ -354,7 +354,7 @@ void finishGame(const std::string &exc)
 	jmethodID finishMe;
 	try {
 		finishMe = jnienv->GetMethodID(nativeActivity,
-									   "finishGame", "(Ljava/lang/String;)V");
+			"finishGame", "(Ljava/lang/String;)V");
 	} catch (...) {
 		exit(-1);
 	}
@@ -392,10 +392,10 @@ jstring getJniString(const std::string &message)
 void upgrade(const std::string &item)
 {
 	jmethodID upgradeGame = jnienv->GetMethodID(nativeActivity,
-              "upgrade","(Ljava/lang/String;)V");
+			"upgrade","(Ljava/lang/String;)V");
 
 	FATAL_ERROR_IF(upgradeGame == nullptr,
-	               "porting::upgradeGame unable to find java upgrade method");
+		"porting::upgradeGame unable to find java upgrade method");
 
 	jstring jitem = jnienv->NewStringUTF(item.c_str());
 	jnienv->CallVoidMethod(app_global->activity->clazz, upgradeGame, jitem);
