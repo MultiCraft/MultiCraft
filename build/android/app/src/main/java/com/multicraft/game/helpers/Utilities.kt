@@ -20,7 +20,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game.helpers
 
-import android.app.*
+import android.app.Activity
+import android.app.ActivityManager
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_CANCEL_CURRENT
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
@@ -49,20 +52,9 @@ import com.multicraft.game.helpers.PreferenceHelper.TAG_SHORTCUT_EXIST
 import com.multicraft.game.helpers.PreferenceHelper.set
 import java.io.File
 import java.io.InputStream
-import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
 object Utilities {
-
-	@JvmStatic
-	fun getTotalMem(context: Context): Float {
-		val actManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-		val memInfo = ActivityManager.MemoryInfo()
-		actManager.getMemoryInfo(memInfo)
-		var memory = memInfo.totalMem * 1.0f / (1024 * 1024 * 1024)
-		memory = (memory * 100).roundToInt() / 100.0f
-		return memory
-	}
 
 	@JvmStatic
 	fun makeFullScreen(window: Window) {

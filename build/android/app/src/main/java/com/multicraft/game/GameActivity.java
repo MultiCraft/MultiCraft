@@ -25,7 +25,6 @@ import static android.text.InputType.TYPE_CLASS_TEXT;
 import static android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE;
 import static android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD;
 import static com.multicraft.game.helpers.Utilities.finishApp;
-import static com.multicraft.game.helpers.Utilities.getTotalMem;
 import static com.multicraft.game.helpers.Utilities.makeFullScreen;
 
 import android.app.NativeActivity;
