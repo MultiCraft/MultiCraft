@@ -20,9 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game
 
-import android.content.DialogInterface
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.graphics.Color
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
@@ -34,9 +32,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.*
 import androidx.work.WorkInfo
 import com.multicraft.game.databinding.ActivityMainBinding
 import com.multicraft.game.helpers.Constants.NO_SPACE_LEFT
@@ -51,10 +47,10 @@ import com.multicraft.game.helpers.PreferenceHelper.getStringValue
 import com.multicraft.game.helpers.PreferenceHelper.set
 import com.multicraft.game.helpers.Utilities.addShortcut
 import com.multicraft.game.helpers.Utilities.copyInputStreamToFile
-import com.multicraft.game.helpers.Utilities.finishApp
 import com.multicraft.game.helpers.Utilities.getIcon
 import com.multicraft.game.helpers.Utilities.isConnected
 import com.multicraft.game.helpers.Utilities.makeFullScreen
+import com.multicraft.game.helpers.Utilities.showRestartDialog
 import com.multicraft.game.workmanager.UnzipWorker.Companion.PROGRESS
 import com.multicraft.game.workmanager.WorkerViewModel
 import com.multicraft.game.workmanager.WorkerViewModelFactory
@@ -75,17 +71,14 @@ class MainActivity : AppCompatActivity() {
 		binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.root)
 		prefs = PreferenceHelper.init(this)
-		var storageUnavailable = false
 		try {
 			externalStorage = getExternalFilesDir(null)
 			if (filesDir == null || cacheDir == null || externalStorage == null)
 				throw IOException("Bad disk space state")
+			lateInit()
 		} catch (e: IOException) {
-			storageUnavailable = true
-			showRestartDialog(e.message!!.contains(NO_SPACE_LEFT))
+			showRestartDialog(this, !e.message!!.contains(NO_SPACE_LEFT))
 		}
-		if (storageUnavailable) return
-		lateInit()
 	}
 
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -153,7 +146,7 @@ class MainActivity : AppCompatActivity() {
 			startActivity(intent)
 		} else {
 			prefs[TAG_BUILD_VER] = "0"
-			showRestartDialog(false)
+			showRestartDialog(this)
 		}
 	}
 
@@ -180,11 +173,20 @@ class MainActivity : AppCompatActivity() {
 						File(cacheDir, it).copyInputStreamToFile(input)
 					}
 				} catch (e: IOException) {
-					runOnUiThread { showRestartDialog(e.message!!.contains(NO_SPACE_LEFT)) }
+					runOnUiThread {
+						showRestartDialog(
+							this@MainActivity,
+							!e.message!!.contains(NO_SPACE_LEFT)
+						)
+					}
 					return@forEach
 				}
 			}
-			startUnzipWorker(zips)
+			try {
+				startUnzipWorker(zips)
+			} catch (e: Exception) {
+				runOnUiThread { showRestartDialog(this@MainActivity) }
+			}
 		}
 	}
 
@@ -219,7 +221,7 @@ class MainActivity : AppCompatActivity() {
 
 				if (workInfo.state.isFinished) {
 					if (workInfo.state == WorkInfo.State.FAILED) {
-						showRestartDialog(false)
+						showRestartDialog(this)
 					} else if (workInfo.state == WorkInfo.State.SUCCEEDED) {
 						prefs[TAG_BUILD_VER] = versionName
 						startNative()
@@ -227,17 +229,6 @@ class MainActivity : AppCompatActivity() {
 				}
 			})
 		viewModel.startOneTimeWorkRequest()
-	}
-
-	private fun showRestartDialog(space: Boolean) {
-		val message = if (space) getString(R.string.no_space) else getString(R.string.restart)
-		val builder = AlertDialog.Builder(this)
-		builder.setMessage(message)
-			.setPositiveButton(R.string.ok) { _, _ -> finishApp(!space, this) }
-			.setCancelable(false)
-		val dialog = builder.create()
-		makeFullScreen(dialog.window!!)
-		if (!isFinishing) dialog.show()
 	}
 
 	// connection dialog

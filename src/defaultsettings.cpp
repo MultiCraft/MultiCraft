@@ -532,7 +532,7 @@ void set_default_settings()
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
 #ifdef __ANDROID__
-	float memoryMax = porting::getMemoryMax();
+	float memoryMax = porting::getTotalSystemMemory();
 #elif __IOS__
 	float iOS_ver = [[[UIDevice currentDevice] systemVersion] floatValue];
 #endif

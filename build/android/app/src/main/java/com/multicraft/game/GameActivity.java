@@ -25,7 +25,6 @@ import static android.text.InputType.TYPE_CLASS_TEXT;
 import static android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE;
 import static android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD;
 import static com.multicraft.game.helpers.Utilities.finishApp;
-import static com.multicraft.game.helpers.Utilities.getTotalMem;
 import static com.multicraft.game.helpers.Utilities.makeFullScreen;
 
 import android.app.NativeActivity;
@@ -104,7 +103,6 @@ public class GameActivity extends NativeActivity {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public void showDialog(String s, String hint, String current, int editType) {
 		runOnUiThread(() -> showDialogUI(hint, current, editType));
 	}
@@ -164,7 +162,6 @@ public class GameActivity extends NativeActivity {
 		return messageReturnCode;
 	}
 
-	@SuppressWarnings("unused")
 	public String getDialogValue() {
 		messageReturnCode = -1;
 		return messageReturnValue;
@@ -174,10 +171,6 @@ public class GameActivity extends NativeActivity {
 		return getResources().getDisplayMetrics().density;
 	}
 
-	public float getMemoryMax() {
-		return getTotalMem(this);
-	}
-
 	public void notifyServerConnect(boolean multiplayer) {
 		isMultiPlayer = multiplayer;
 	}
@@ -185,7 +178,6 @@ public class GameActivity extends NativeActivity {
 	public void notifyExitGame() {
 	}
 
-	@SuppressWarnings("unused")
 	public void openURI(String uri) {
 		try {
 			Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
@@ -194,12 +186,13 @@ public class GameActivity extends NativeActivity {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public void finishGame(String exc) {
 		finishApp(true, this);
 	}
 
-	@SuppressWarnings("unused")
 	public void handleError(String exc) {
+	}
+
+	public void upgrade(String item) {
 	}
 }

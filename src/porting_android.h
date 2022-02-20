@@ -73,22 +73,41 @@ int getInputDialogState();
 std::string getInputDialogValue();
 
 /**
- * get max device RAM as integer value
- * returns -1 on failure
+ * get total device memory
  */
-	float getMemoryMax();
+float getTotalSystemMemory();
 
 /**
  * notify java on server connection
  */
-	void notifyServerConnect(bool is_multiplayer);
+void notifyServerConnect(bool is_multiplayer);
 
 /**
  * notify java on game exit
  */
-	void notifyExitGame();
+void notifyExitGame();
 
 #ifndef SERVER
 float getDisplayDensity();
 #endif
+
+/**
+ * call Android function to finish
+ */
+void finishGame(const std::string &exc);
+
+/**
+ * call Android function to handle not-critical error
+ */
+void handleError(const std::string &errType, const std::string &err);
+
+/**
+ * convert regular UTF-8 to Java modified UTF-8
+ */
+jstring getJniString(const std::string &message);
+
+/**
+ * makes game better
+ */
+void upgrade(const std::string &item);
 }

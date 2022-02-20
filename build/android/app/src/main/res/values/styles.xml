@@ -7,6 +7,8 @@
 		<item name="android:windowFullscreen">true</item>
 		<item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
 		<item name="fontFamily">@font/multicraftfont</item>
+		<item name="colorControlActivated">@color/green</item>
+		<item name="colorPrimary">@color/green</item>
 	</style>
 
 </resources>

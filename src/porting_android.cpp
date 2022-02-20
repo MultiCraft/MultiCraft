@@ -42,7 +42,6 @@ extern "C" void external_pause_game();
 
 void android_main(android_app *app)
 {
-	int retval = 0;
 	porting::app_global = app;
 
 	Thread::setName("Main");
@@ -53,15 +52,15 @@ void android_main(android_app *app)
 		free(argv[0]);
 	} catch (std::exception &e) {
 		errorstream << "Uncaught exception in main thread: " << e.what() << std::endl;
-		retval = -1;
+		porting::finishGame(e.what());
 	} catch (...) {
 		errorstream << "Uncaught exception in main thread!" << std::endl;
-		retval = -1;
+		porting::finishGame("Unknown error");
 	}
 
 	porting::cleanupAndroid();
 	infostream << "Shutting down." << std::endl;
-	exit(retval);
+	exit(0);
 }
 
 /**
@@ -94,8 +93,6 @@ namespace porting {
 android_app *app_global;
 JNIEnv      *jnienv;
 jclass       nativeActivity;
-
-static float device_memory_max = 0;
 
 jclass findClass(const std::string &classname)
 {
@@ -270,25 +267,30 @@ std::string getInputDialogValue()
 	return text;
 }
 
-float getMemoryMax()
+float getTotalSystemMemory()
 {
-	if (device_memory_max == 0) {
-		jmethodID getMemory = jnienv->GetMethodID(nativeActivity,
-				"getMemoryMax", "()F");
-
-		if (getMemory == nullptr)
-			assert("porting::getMemoryMax unable to find java method" == nullptr);
-
-		device_memory_max = jnienv->CallFloatMethod(
-				app_global->activity->clazz, getMemory);
-	}
-
-	return device_memory_max;
+	long pages = sysconf(_SC_PHYS_PAGES);
+	long page_size = sysconf(_SC_PAGE_SIZE);
+	int divisor = 1024 * 1024 * 1024;
+	return pages * page_size / (float) divisor;
 }
 
 bool hasRealKeyboard()
 {
 	return device_has_keyboard;
+}
+
+void handleError(const std::string &errType, const std::string &err)
+{
+	jmethodID report_err = jnienv->GetMethodID(nativeActivity,
+		"handleError","(Ljava/lang/String;)V");
+
+	FATAL_ERROR_IF(report_err == nullptr,
+		"porting::handleError unable to find java handleError method");
+
+	std::string errorMessage = errType + ": " + err;
+	jstring jerr = porting::getJniString(errorMessage);
+	jnienv->CallVoidMethod(app_global->activity->clazz, report_err, jerr);
 }
 
 void notifyServerConnect(bool is_multiplayer)
@@ -297,7 +299,7 @@ void notifyServerConnect(bool is_multiplayer)
 			"notifyServerConnect", "(Z)V");
 
 	FATAL_ERROR_IF(notifyConnect == nullptr,
-			"porting::notifyServerConnect unable to find java getDensity method");
+		"porting::notifyServerConnect unable to find java notifyServerConnect method");
 
 	auto param = (jboolean) is_multiplayer;
 
@@ -334,4 +336,59 @@ float getDisplayDensity()
 	return value;
 }
 #endif // ndef SERVER
+
+void finishGame(const std::string &exc)
+{
+	if (jnienv->ExceptionCheck())
+		jnienv->ExceptionClear();
+
+	jmethodID finishMe;
+	try {
+		finishMe = jnienv->GetMethodID(nativeActivity,
+			"finishGame", "(Ljava/lang/String;)V");
+	} catch (...) {
+		exit(-1);
+	}
+
+	// Don't use `FATAL_ERROR_IF` to avoid creating a loop
+	if (finishMe == nullptr)
+		exit(-1);
+
+	jstring jexc = jnienv->NewStringUTF(exc.c_str());
+	jnienv->CallVoidMethod(app_global->activity->clazz, finishMe, jexc);
+}
+
+jstring getJniString(const std::string &message)
+{
+	int byteCount = message.length();
+	const jbyte *pNativeMessage = (const jbyte*) message.c_str();
+	jbyteArray bytes = jnienv->NewByteArray(byteCount);
+	jnienv->SetByteArrayRegion(bytes, 0, byteCount, pNativeMessage);
+
+	jclass charsetClass = jnienv->FindClass("java/nio/charset/Charset");
+	jmethodID forName = jnienv->GetStaticMethodID(
+			charsetClass, "forName", "(Ljava/lang/String;)Ljava/nio/charset/Charset;");
+	jstring utf8 = jnienv->NewStringUTF("UTF-8");
+	jobject charset = jnienv->CallStaticObjectMethod(charsetClass, forName, utf8);
+
+	jclass stringClass = jnienv->FindClass("java/lang/String");
+	jmethodID ctor = jnienv->GetMethodID(
+			stringClass, "<init>", "([BLjava/nio/charset/Charset;)V");
+
+	jstring jMessage = (jstring) jnienv->NewObject(stringClass, ctor, bytes, charset);
+
+	return jMessage;
+}
+
+void upgrade(const std::string &item)
+{
+	jmethodID upgradeGame = jnienv->GetMethodID(nativeActivity,
+			"upgrade","(Ljava/lang/String;)V");
+
+	FATAL_ERROR_IF(upgradeGame == nullptr,
+		"porting::upgradeGame unable to find java upgrade method");
+
+	jstring jitem = jnienv->NewStringUTF(item.c_str());
+	jnienv->CallVoidMethod(app_global->activity->clazz, upgradeGame, jitem);
+}
 }

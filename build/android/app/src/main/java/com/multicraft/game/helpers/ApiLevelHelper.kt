@@ -26,9 +26,9 @@ import android.os.Build.VERSION_CODES.*
 object ApiLevelHelper {
 	private fun isGreaterOrEqual(versionCode: Int) = SDK_INT >= versionCode
 
-	fun isLollipop() = isGreaterOrEqual(LOLLIPOP)
-
 	fun isMarshmallow() = isGreaterOrEqual(M)
 
 	fun isOreo() = isGreaterOrEqual(O)
+
+	fun isAndroid12() = isGreaterOrEqual(S)
 }

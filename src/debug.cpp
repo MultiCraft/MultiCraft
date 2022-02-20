@@ -56,7 +56,15 @@ void sanity_check_fn(const char *assertion, const char *file,
 	errorstream << file << ":" << line << ": " << function
 		<< ": An engine assumption '" << assertion << "' failed." << std::endl;
 
+#ifdef __ANDROID__
+	std::string capture = "An engine assumption failed: \"" + std::string(assertion) +
+		"\" in file: " + std::string(file) + ":" + std::to_string(line) +
+		" (" + std::string(function) + ")";
+
+		throw std::runtime_error(capture);
+#else
 	abort();
+#endif
 }
 
 void fatal_error_fn(const char *msg, const char *file,
@@ -71,7 +79,15 @@ void fatal_error_fn(const char *msg, const char *file,
 	errorstream << file << ":" << line << ": " << function
 		<< ": A fatal error occurred: " << msg << std::endl;
 
+#ifdef __ANDROID__
+	std::string capture = "A fatal error occurred: \"" + std::string(msg) +
+		"\" in file: " + std::string(file) + ":" + std::to_string(line) +
+		" (" + std::string(function) + ")";
+
+	throw std::runtime_error(capture);
+#else
 	abort();
+#endif
 }
 
 #ifdef _MSC_VER
