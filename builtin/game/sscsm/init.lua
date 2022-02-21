@@ -300,6 +300,11 @@ sscsm.register_on_com_receive("sscsm:com_test", function(name, msg)
 	end
 end)
 
+sscsm.register_on_com_receive("sscsm:error", function(name, msg)
+	minetest.log("error", "[SSCSM] Error reported from " .. name .. ": " ..
+		tostring(msg))
+end)
+
 function sscsm.has_sscsms_enabled(name)
 	return has_sscsms[name] or false
 end

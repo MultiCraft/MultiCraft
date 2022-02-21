@@ -338,6 +338,13 @@ sscsm.register_on_mods_loaded(function()
 	sscsm.com_send('sscsm:com_test', {flags = sscsm.restriction_flags})
 end)
 
+if core.global_exists("set_error_handler") then
+	set_error_handler(function(err)
+		sscsm.com_send("sscsm:error", tostring(err))
+	end)
+	set_error_handler = nil
+end
+
 if not core.global_exists("utf8") or not utf8.lower then
 	utf8 = string
 end
