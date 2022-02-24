@@ -389,6 +389,14 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 
 	// Render all layers in order
 	for (auto &lists : drawbufs.lists) {
+		if (m_cache_transparency_sorting) {
+			static const auto comparator = [] (MeshBufList const &a, MeshBufList const &b) {
+				// comparing pointers with < is UB unless they belong to the same array, but std::less is always allowed
+				static const std::less<video::ITexture *> texture_less;
+				return texture_less(a.m.TextureLayer[0].Texture, b.m.TextureLayer[0].Texture);
+			};
+			std::sort(lists.begin(), lists.end(), comparator);
+		}
 		for (MeshBufList &list : lists) {
 			// Check and abort if the machine is swapping a lot
 			if (draw.getTimerTime() > 2000) {
