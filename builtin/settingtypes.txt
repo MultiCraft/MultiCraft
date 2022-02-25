@@ -810,7 +810,6 @@ show_entity_selectionbox (Show entity selection boxes) bool false
 #    Note: different materials are sorted independently
 transparency_sorting (Transparency sorting) bool true
 
-
 [*Menus]
 
 #    Use a cloud animation for the main menu background.

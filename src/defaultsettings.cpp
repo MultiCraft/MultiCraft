@@ -277,6 +277,7 @@ void set_default_settings()
 	settings->setDefault("enable_waving_leaves", "false");
 	settings->setDefault("enable_waving_plants", "false");
 
+
 	// Input
 	settings->setDefault("invert_mouse", "false");
 	settings->setDefault("mouse_sensitivity", "0.2");
