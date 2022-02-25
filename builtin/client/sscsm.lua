@@ -152,12 +152,6 @@ function Env:del(k)
 	self._raw[k] = nil
 end
 
--- function Env:copy()
---	 local new = {_seen = copy(safe_funcs)}
---	 new._raw = copy(self._raw, new._seen)
---	 return setmetatable(new, {__index = Env}) or new
--- end
-
 -- Load code into a callable function.
 function Env:loadstring(code, file)
 	if code:byte(1) == 27 then return nil, "Invalid code!" end
