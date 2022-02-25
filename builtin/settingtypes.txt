@@ -805,6 +805,11 @@ autoscale_mode (Autoscaling mode) enum disable disable,enable,force
 #    A restart is required after changing this.
 show_entity_selectionbox (Show entity selection boxes) bool false
 
+#    Sort transparent materials from back to front for proper rendering
+#    Note: works on a per-chunk basis
+#    Note: different materials are sorted independently
+transparency_sorting (Transparency sorting) bool true
+
 [*Menus]
 
 #    Use a cloud animation for the main menu background.

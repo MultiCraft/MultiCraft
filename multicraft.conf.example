@@ -939,6 +939,12 @@
 #    type: bool
 # show_entity_selectionbox = false
 
+#    Sort transparent materials from back to front for proper rendering
+#    Note: works on a per-chunk basis
+#    Note: different materials are sorted independently
+#    type: bool
+# transparency_sorting = true
+
 ## Menus
 
 #    Use a cloud animation for the main menu background.

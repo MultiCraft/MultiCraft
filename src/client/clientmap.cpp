@@ -88,6 +88,7 @@ ClientMap::ClientMap(
 	m_cache_trilinear_filter  = g_settings->getBool("trilinear_filter");
 	m_cache_bilinear_filter   = g_settings->getBool("bilinear_filter");
 	m_cache_anistropic_filter = g_settings->getBool("anisotropic_filter");
+	m_cache_transparency_sorting = g_settings->getFlag("transparency_sorting");
 
 }
 
@@ -147,8 +148,8 @@ void ClientMap::updateDrawList()
 {
 	ScopeProfiler sp(g_profiler, "CM::updateDrawList()", SPT_AVG);
 
-	for (auto &i : m_drawlist) {
-		MapBlock *block = i.second;
+	for (auto const &i : m_drawlist) {
+		MapBlock *block = i.block;
 		block->refDrop();
 	}
 	m_drawlist.clear();
@@ -247,7 +248,7 @@ void ClientMap::updateDrawList()
 
 			// Add to set
 			block->refGrab();
-			m_drawlist[block->getPos()] = block;
+			m_drawlist.push_back({block, d});
 
 			sector_blocks_drawn++;
 		} // foreach sectorblocks
@@ -255,6 +256,12 @@ void ClientMap::updateDrawList()
 		if (sector_blocks_drawn != 0)
 			m_last_drawn_sectors.insert(sp);
 	}
+
+	if (m_drawlist.capacity() > m_drawlist.size() / 4)
+		m_drawlist.shrink_to_fit();
+
+	if (m_cache_transparency_sorting)
+		std::sort(m_drawlist.begin(), m_drawlist.end(), [] (DrawListItem const &a, DrawListItem const &b) { return a.distance > b.distance; });
 
 	g_profiler->avg("MapBlock meshes in range [#]", blocks_in_range_with_mesh);
 	g_profiler->avg("MapBlocks occlusion culled [#]", blocks_occlusion_culled);
@@ -306,16 +313,11 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 
 	MeshBufListList drawbufs;
 
-	for (auto &i : m_drawlist) {
-		v3s16 block_pos = i.first;
-		MapBlock *block = i.second;
-
-		// If the mesh of the block happened to get deleted, ignore it
-		if (!block->mesh)
-			continue;
-
-		float d = 0.0;
-		if (!isBlockInSight(block->getPos(), camera_position,
+	for (auto &item : m_drawlist) {
+		MapBlock *block = item.block;
+		v3s16 block_pos = block->getPos();
+		float d;
+		if (!isBlockInSight(block_pos, camera_position,
 				camera_direction, camera_fov, 100000 * BS, &d))
 			continue;
 
@@ -387,6 +389,14 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 
 	// Render all layers in order
 	for (auto &lists : drawbufs.lists) {
+		if (m_cache_transparency_sorting) {
+			static const auto comparator = [] (MeshBufList const &a, MeshBufList const &b) {
+				// comparing pointers with < is UB unless they belong to the same array, but std::less is always allowed
+				static const std::less<video::ITexture *> texture_less;
+				return texture_less(a.m.TextureLayer[0].Texture, b.m.TextureLayer[0].Texture);
+			};
+			std::sort(lists.begin(), lists.end(), comparator);
+		}
 		for (MeshBufList &list : lists) {
 			// Check and abort if the machine is swapping a lot
 			if (draw.getTimerTime() > 2000) {

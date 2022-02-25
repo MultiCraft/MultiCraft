@@ -123,18 +123,18 @@ bool isBlockInSight(v3s16 blockpos_b, v3f camera_pos, v3f camera_dir,
 	v3f blockpos_relative = blockpos - camera_pos;
 
 	// Total distance
-	f32 d = MYMAX(0, blockpos_relative.getLength() - block_max_radius);
+	f32 d = blockpos_relative.getLength();
 
 	if (distance_ptr)
 		*distance_ptr = d;
 
 	// If block is far away, it's not in sight
-	if (d > range)
+	if (d > range + block_max_radius)
 		return false;
 
 	// If block is (nearly) touching the camera, don't
 	// bother validating further (that is, render it anyway)
-	if (d == 0)
+	if (d <= block_max_radius)
 		return true;
 
 	// Adjust camera position, for purposes of computing the angle,
