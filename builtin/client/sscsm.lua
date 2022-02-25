@@ -130,7 +130,6 @@ function Env.new_empty()
 	self._raw["_G"] = self._raw
 	return setmetatable(self, {__index = Env}) or self
 end
--- function Env:get(k) return self._raw[self._seen[k] or k] end
 function Env:set(k, v) self._raw[copy(k, self._seen)] = copy(v, self._seen) end
 function Env:set_copy(k, v)
 	self:set(k, v)
