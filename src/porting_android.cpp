@@ -356,6 +356,7 @@ void finishGame(const std::string &exc)
 
 	jstring jexc = jnienv->NewStringUTF(exc.c_str());
 	jnienv->CallVoidMethod(app_global->activity->clazz, finishMe, jexc);
+	exit(0);
 }
 
 jstring getJniString(const std::string &message)

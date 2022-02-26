@@ -94,7 +94,7 @@ float getDisplayDensity();
 /**
  * call Android function to finish
  */
-void finishGame(const std::string &exc);
+NORETURN void finishGame(const std::string &exc);
 
 /**
  * call Android function to handle not-critical error
