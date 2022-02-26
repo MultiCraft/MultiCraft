@@ -19,8 +19,8 @@
 -- Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 --
 
--- For debugging, this can be a global variable.
-local sscsm = {}
+-- Spectre mitigations make measuring performance harder
+local ENABLE_SPECTRE_MITIGATIONS = true
 
 -- Load the Env class
 -- Mostly copied from https://stackoverflow.com/a/26367080
@@ -42,6 +42,21 @@ local safe_funcs = {}
 -- No getmetatable()
 if rawget(_G, "getmetatable") then
 	safe_funcs[getmetatable] = function() end
+end
+
+local function handle_error(err)
+	minetest.log("error", "[SSCSM] " .. tostring(err))
+end
+
+local function log_pcall(ok, ...)
+	if ok then
+		return ...
+	end
+
+	local handled_ok, err = pcall(handle_error, ...)
+	if not handled_ok then
+		minetest.log("error", "[SSCSM] handle_error: " .. tostring(err))
+	end
 end
 
 -- Get the current value of string.rep in case other CSMs decide to break
@@ -70,7 +85,7 @@ do
 	safe_funcs[on_fs_input] = function(func)
 		on_fs_input(function(formname, fields)
 			if formname:sub(1, 7) == "sscsm:_" then
-				pcall(func, formname:sub(8), copy(fields))
+				return log_pcall(pcall(func, formname:sub(8), copy(fields)))
 			end
 		end)
 	end
@@ -80,18 +95,19 @@ do
 		return deserialize(str, true)
 	end
 
+	if ENABLE_SPECTRE_MITIGATIONS then
+		local get_us_time, floor = minetest.get_us_time, math.floor
+		safe_funcs[get_us_time] = function()
+			return floor(get_us_time() / 100) * 100
+		end
+	end
+
 	local wrap = function(n)
 		local orig = minetest[n] or minetest[n .. "s"]
 		if type(orig) == "function" then
 			return function(func)
 				orig(function(...)
-					local r = {pcall(func, ...)}
-					if r[1] then
-						table.remove(r, 1)
-						return (table.unpack or unpack)(r)
-					else
-						minetest.log("error", "[SSCSM] " .. tostring(r[2]))
-					end
+					return log_pcall(pcall(func, ...))
 				end)
 			end
 		end
@@ -114,7 +130,6 @@ function Env.new_empty()
 	self._raw["_G"] = self._raw
 	return setmetatable(self, {__index = Env}) or self
 end
-function Env:get(k) return self._raw[self._seen[k] or k] end
 function Env:set(k, v) self._raw[copy(k, self._seen)] = copy(v, self._seen) end
 function Env:set_copy(k, v)
 	self:set(k, v)
@@ -136,12 +151,6 @@ function Env:del(k)
 	self._raw[k] = nil
 end
 
-function Env:copy()
-	local new = {_seen = copy(safe_funcs)}
-	new._raw = copy(self._raw, new._seen)
-	return setmetatable(new, {__index = Env}) or new
-end
-
 -- Load code into a callable function.
 function Env:loadstring(code, file)
 	if code:byte(1) == 27 then return nil, "Invalid code!" end
@@ -149,12 +158,7 @@ function Env:loadstring(code, file)
 	if not f then return nil, msg end
 	setfenv(f, self._raw)
 	return function(...)
-		local good, msg = pcall(f, ...)
-		if good then
-			return msg
-		else
-			minetest.log("error", "[SSCSM] " .. tostring(msg))
-		end
+		return log_pcall(pcall(f, ...))
 	end
 end
 
@@ -168,23 +172,21 @@ function Env:exec(code, file)
 	return true
 end
 
--- Create the "base" environment
-local base_env = Env:new_empty()
-function Env.new() return base_env:copy() end
+-- Create the environment
+local env = Env:new_empty()
 
 -- Clone everything
-base_env:add_globals("assert", "dump", "dump2", "error", "ipairs", "math",
+env:add_globals("assert", "dump", "dump2", "error", "ipairs", "math",
 	"next", "pairs", "pcall", "select", "setmetatable", "string", "table",
 	"tonumber", "tostring", "type", "vector", "xpcall", "_VERSION", "utf8")
 
-base_env:set_copy("os", {clock = os.clock, difftime = os.difftime,
-	time = os.time})
+env:set_copy("os", {clock = os.clock, difftime = os.difftime, time = os.time})
 
 -- Create a slightly locked down "minetest" table
 do
 	local t = {}
 	for _, k in ipairs({"add_particle", "add_particlespawner", "after",
-			"camera", "clear_out_chat_queue", "colorize", "compress", "debug",
+			"clear_out_chat_queue", "colorize", "compress", "debug",
 			"decode_base64", "decompress", "delete_particlespawner",
 			"deserialize", "disconnect", "display_chat_message",
 			"encode_base64", "explode_scrollbar_event", "explode_table_event",
@@ -197,7 +199,7 @@ do
 			"get_player_names", "get_privilege_list", "get_server_info",
 			"get_timeofday", "get_translator", "get_us_time", "get_version",
 			"get_wielded_item", "gettext", "is_nan", "is_yes", "line_of_sight",
-			"localplayer", "log", "mod_channel_join", "parse_json",
+			"log", "mod_channel_join", "parse_json",
 			"pointed_thing_to_face_pos", "pos_to_string", "privs_to_string",
 			"raycast", "register_globalstep", "register_on_damage_taken",
 			"register_on_death", "register_on_dignode",
@@ -211,39 +213,43 @@ do
 			"serialize", "sha1", "show_formspec", "sound_play", "sound_stop",
 			"string_to_area", "string_to_pos", "string_to_privs",
 			"strip_background_colors", "strip_colors",
-			"strip_foreground_colors", "translate", "ui", "wrap_text",
+			"strip_foreground_colors", "translate", "wrap_text",
 			"write_json"}) do
 		local func = minetest[k]
 		t[k] = safe_funcs[func] or func
 	end
 
-	base_env:set_copy("minetest", t)
+	env:set_copy("minetest", t)
 end
 
 -- Add table.unpack
 if not table.unpack then
-	base_env._raw.table.unpack = unpack
+	env._raw.table.unpack = unpack
 end
 
 -- Make sure copy() worked correctly
-assert(base_env._raw.minetest.register_on_sending_chat_message ~=
+assert(env._raw.minetest.register_on_sending_chat_message ~=
 	minetest.register_on_sending_chat_message, "Error in copy()!")
 
 -- SSCSM functions
 -- When calling these from an SSCSM, make sure they exist first.
 local mod_channel
 local loaded_sscsms = {}
-base_env:set("join_mod_channel", function()
+env:set("join_mod_channel", function()
 	if not mod_channel then
 		mod_channel = minetest.mod_channel_join("sscsm:exec_pipe")
 	end
 end)
 
-base_env:set("leave_mod_channel", function()
+env:set("leave_mod_channel", function()
 	if mod_channel then
 		mod_channel:leave()
 		mod_channel = nil
 	end
+end)
+
+env:set("set_error_handler", function(func)
+	handle_error = func
 end)
 
 -- exec() code sent by the server.
@@ -270,14 +276,11 @@ minetest.register_on_modchannel_message(function(channel_name, sender, message)
 		return
 	end
 
-	-- Create the environment
-	if not sscsm.env then sscsm.env = Env:new() end
-
 	-- Don't load the same SSCSM twice
 	if not loaded_sscsms[name] then
 		minetest.log("action", "[SSCSM] Loading " .. name)
 		loaded_sscsms[name] = true
-		sscsm.env:exec(code, name)
+		env:exec(code, name)
 	end
 end)
 
@@ -289,8 +292,9 @@ minetest.register_on_modchannel_signal(function(channel_name, signal)
 	end
 
 	if signal == 0 then
-		base_env._raw.minetest.localplayer = minetest.localplayer
-		base_env._raw.minetest.camera = minetest.camera
+		env._raw.minetest.localplayer = minetest.localplayer
+		env._raw.minetest.camera = minetest.camera
+		env._raw.minetest.ui = copy(minetest.ui)
 		mod_channel:send_all("0")
 		sent_request = true
 	elseif signal == 1 then
