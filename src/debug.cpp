@@ -61,7 +61,7 @@ void sanity_check_fn(const char *assertion, const char *file,
 		"\" in file: " + std::string(file) + ":" + std::to_string(line) +
 		" (" + std::string(function) + ")";
 
-		throw std::runtime_error(capture);
+	porting::finishGame(capture);
 #else
 	abort();
 #endif
@@ -84,7 +84,7 @@ void fatal_error_fn(const char *msg, const char *file,
 		"\" in file: " + std::string(file) + ":" + std::to_string(line) +
 		" (" + std::string(function) + ")";
 
-	throw std::runtime_error(capture);
+	porting::finishGame(capture);
 #else
 	abort();
 #endif
