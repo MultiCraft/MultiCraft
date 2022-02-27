@@ -502,7 +502,11 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 	bool fast_move = fast_allowed && player_settings.fast_move;
 	bool pitch_move = (free_move || in_liquid) && player_settings.pitch_move;
 	// When aux1_descends is enabled the fast key is used to go down, so fast isn't possible
+#ifndef HAVE_TOUCHSCREENGUI
 	bool fast_climb = fast_move && control.aux1 && !player_settings.aux1_descends;
+#else
+	bool fast_climb = fast_move && !player_settings.aux1_descends;
+#endif
 	bool always_fly_fast = player_settings.always_fly_fast;
 
 	// Whether superspeed mode is used or not
@@ -541,7 +545,10 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 		// New minecraft-like descend control
 
 		// Auxiliary button 1 (E)
-		if (control.aux1) {
+#ifndef HAVE_TOUCHSCREENGUI
+		if (control.aux1)
+#endif
+		{
 			if (!is_climbing) {
 				// aux1 is "Turbo button"
 				if (fast_move)
@@ -604,7 +611,11 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 				else
 					speedV.Y = movement_speed_walk;
 			} else {
+#ifndef HAVE_TOUCHSCREENGUI
 				if (fast_move && control.aux1)
+#else
+				if (fast_move)
+#endif
 					speedV.Y = movement_speed_fast;
 				else
 					speedV.Y = movement_speed_walk;
@@ -661,7 +672,11 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 	if ((!touching_ground && !free_move && !is_climbing && !in_liquid) ||
 			(!free_move && m_can_jump && control.jump)) {
 		// Jumping and falling
+#ifndef HAVE_TOUCHSCREENGUI
 		if (superspeed || (fast_move && control.aux1))
+#else
+		if (superspeed || fast_move)
+#endif
 			incH = movement_acceleration_fast * BS * dtime;
 		else
 			incH = movement_acceleration_air * BS * dtime;

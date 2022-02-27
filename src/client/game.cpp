@@ -928,9 +928,7 @@ private:
 	bool m_does_lost_focus_pause_game = false;
 
 	int m_reset_HW_buffer_counter = 0;
-#ifdef HAVE_TOUCHSCREENGUI
-	bool m_cache_hold_aux1;
-#endif
+
 #if defined(__ANDROID__) || defined(__IOS__)
 	bool m_android_chat_open;
 #endif
@@ -968,11 +966,6 @@ Game::Game() :
 		&settingChangedCallback, this);
 
 	readSettings();
-
-#ifdef HAVE_TOUCHSCREENGUI
-	m_cache_hold_aux1 = false;	// This is initialised properly later
-#endif
-
 }
 
 
@@ -1092,11 +1085,6 @@ void Game::run()
 	draw_times.last_time = RenderingEngine::get_timer_time();
 
 	set_light_table(g_settings->getFloat("display_gamma"));
-
-#ifdef HAVE_TOUCHSCREENGUI
-	m_cache_hold_aux1 = g_settings->getBool("fast_move")
-			&& client->checkPrivilege("fast");
-#endif
 
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
@@ -2215,10 +2203,6 @@ void Game::toggleFast()
 	} else {
 		m_game_ui->showTranslatedStatusText("Fast mode disabled");
 	}
-
-#ifdef HAVE_TOUCHSCREENGUI
-	m_cache_hold_aux1 = fast_move && has_fast_privs;
-#endif
 }
 
 
@@ -2530,18 +2514,6 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 			( (u32)(isKeyDown(KeyType::PLACE)                         & 0x1) << 8) |
 			( (u32)(isKeyDown(KeyType::ZOOM)                          & 0x1) << 9)
 		);
-
-#ifdef HAVE_TOUCHSCREENGUI
-	/* For touch, simulate holding down AUX1 (fast move) if the user has
-	 * the fast_move setting toggled on. If there is an aux1 key defined for
-	 * touch then its meaning is inverted (i.e. holding aux1 means walk and
-	 * not fast)
-	 */
-	if (m_cache_hold_aux1 && !porting::hasRealKeyboard()) {
-		control.aux1 = control.aux1 ^ true;
-		keypress_bits ^= ((u32)(1U << 5));
-	}
-#endif
 
 	LocalPlayer *player = client->getEnv().getLocalPlayer();
 
