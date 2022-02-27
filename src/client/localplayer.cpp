@@ -172,11 +172,13 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 	if (!collision_info || collision_info->empty())
 		m_standing_node = floatToInt(m_position, BS);
 
+#if 0
 	// Temporary option for old move code
 	if (!physics_override_new_move) {
 		old_move(dtime, env, pos_max_d, collision_info);
 		return;
 	}
+#endif
 
 	Map *map = &env->getMap();
 	const NodeDefManager *nodemgr = m_client->ndef();
@@ -426,7 +428,7 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 		m_client->getEventManager()->put(new SimpleTriggerEvent(MtEvent::PLAYER_REGAIN_GROUND));
 
 		// Set camera impact value to be used for view bobbing
-		camera_impact = getSpeed().Y * -1;
+		camera_impact = -initial_speed.Y;
 	}
 
 	{
@@ -652,16 +654,18 @@ void LocalPlayer::applyControl(float dtime, Environment *env)
 		speedH = speedH.normalize() * movement_speed_fast;
 	else if (control.sneak && !free_move && !in_liquid && !in_liquid_stable) {
 		speedH = speedH.normalize() * movement_speed_crouch;
-		if (!m_sneak_offset && !getParent() && (physics_override_speed != 0)) {
-			eye_offset_first += v3f(0,-3,0);
-			eye_offset_third += v3f(0,-3,0);
-			m_sneak_offset = true;
-		}
 	} else {
 		speedH = speedH.normalize() * movement_speed_walk;
-		if (m_sneak_offset && !getParent() && (physics_override_speed != 0)) {
-			eye_offset_first += v3f(0,3,0);
-			eye_offset_third += v3f(0,3,0);
+	}
+
+	if (!free_move && !in_liquid && !in_liquid_stable && !getParent() && (physics_override_speed != 0)) {
+		if (!m_sneak_offset && control.sneak) {
+			eye_offset_first.Y -= 3.0f;
+			eye_offset_third.Y -= 3.0f;
+			m_sneak_offset = true;
+		} else if (m_sneak_offset && !control.sneak) {
+			eye_offset_first.Y += 3.0f;
+			eye_offset_third.Y += 3.0f;
 			m_sneak_offset = false;
 		}
 	}
@@ -809,6 +813,7 @@ void LocalPlayer::accelerate(const v3f &target_speed, const f32 max_increase_H,
 	m_speed += d;
 }
 
+#if 0
 // Temporary option for old move code
 void LocalPlayer::old_move(f32 dtime, Environment *env, f32 pos_max_d,
 	std::vector<CollisionInfo> *collision_info)
@@ -1125,6 +1130,7 @@ void LocalPlayer::old_move(f32 dtime, Environment *env, f32 pos_max_d,
 	// Autojump
 	handleAutojump(dtime, env, result, initial_position, initial_speed, pos_max_d);
 }
+#endif
 
 float LocalPlayer::getSlipFactor(Environment *env, const v3f &speedH)
 {
