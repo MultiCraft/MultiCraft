@@ -88,8 +88,9 @@ function ui.update()
 		formspec = {
 			"formspec_version[3]",
 			"size[14,8.25]",
-			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]",
+			"bgcolor[#0000]",
+			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;40]",
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
 				fgettext("The server has requested a reconnect:"), error_message),
@@ -108,7 +109,7 @@ function ui.update()
 		end
 		local restart_btn = "button[5,6.6;4,1;btn_reconnect_no;" .. fgettext("Close") .. "]"
 		if maintab == "local" or maintab == "local_default" and
-				connect_time and connect_time < os.time() - 30 then
+				connect_time and os.time() - connect_time > 30 then
 			restart_btn =
 				"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..
 				"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Close") .. "]"
@@ -116,8 +117,9 @@ function ui.update()
 		formspec = {
 			"formspec_version[3]",
 			"size[14,8.25]",
-			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]",
+			"bgcolor[#0000]",
+			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;40]",
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
 				error_title, error_message),

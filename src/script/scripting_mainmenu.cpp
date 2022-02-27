@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "lua_api/l_base.h"
 #include "lua_api/l_http.h"
 #include "lua_api/l_mainmenu.h"
+#include "lua_api/l_noise.h"
 #include "lua_api/l_sound.h"
 #include "lua_api/l_util.h"
 #include "lua_api/l_settings.h"
@@ -82,6 +83,7 @@ void MainMenuScripting::initializeModApi(lua_State *L, int top)
 /******************************************************************************/
 void MainMenuScripting::registerLuaClasses(lua_State *L, int top)
 {
+	LuaSecureRandom::Register(L);
 	LuaSettings::Register(L);
 }
 

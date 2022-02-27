@@ -901,29 +901,14 @@ function pkgmgr.get_game(index)
 end
 
 --------------------------------------------------------------------------------
-local default_game_idx
-function pkgmgr.get_game_no_default(index)
-	if default_game_idx and index >= default_game_idx then
-		index = index + 1
-	end
-	return pkgmgr.get_game(index)
-end
-
-function pkgmgr.create_world_no_default(worldname, gameindex)
-	if default_game_idx and gameindex >= default_game_idx then
-		gameindex = gameindex + 1
-	end
-	return core.create_world(worldname, gameindex)
-end
-
---------------------------------------------------------------------------------
+pkgmgr.default_game_idx = math.huge
 function pkgmgr.update_gamelist()
 	pkgmgr.games = core.get_games()
 
 	-- Update default_game_idx
 	for i, game in ipairs(pkgmgr.games) do
 		if game.id == "default" then
-			default_game_idx = i
+			pkgmgr.default_game_idx = i
 			break
 		end
 	end

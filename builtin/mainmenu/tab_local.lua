@@ -19,6 +19,8 @@ local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
 local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
+local esc = core.formspec_escape
+
 local function current_game()
 	local last_game_id = core.settings:get("menu_last_game")
 	local game = pkgmgr.find_by_gameid(last_game_id)
@@ -77,11 +79,11 @@ local function singleplayer_refresh_gamebar()
 
 			local image = nil
 			local text = nil
-			local tooltip = core.formspec_escape(pkgmgr.games[i].name)
+			local tooltip = esc(pkgmgr.games[i].name)
 
 			if pkgmgr.games[i].menuicon_path ~= nil and
 				pkgmgr.games[i].menuicon_path ~= "" then
-				image = core.formspec_escape(pkgmgr.games[i].menuicon_path)
+				image = esc(pkgmgr.games[i].menuicon_path)
 			else
 				local part1 = pkgmgr.games[i].id:sub(1,5)
 				local part2 = pkgmgr.games[i].id:sub(6,10)
@@ -99,7 +101,7 @@ local function singleplayer_refresh_gamebar()
 	end
 
 	if not mobile then
-		local plus_image = core.formspec_escape(defaulttexturedir .. "plus.png")
+		local plus_image = esc(defaulttexturedir .. "plus.png")
 		btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
 	end
 end
@@ -124,8 +126,11 @@ local function get_formspec()
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 
+	-- Default index
+	if index == 0 then index = 1 end
+
 	local creative_checkbox = core.settings:get_bool("creative_mode") and
-			"creative_checkbox" or "blank"
+			"creative_checkbox.png" or "blank.png"
 
 	local creative_bg = "creative_bg.png"
 	if lang and lang == "ru" then
@@ -133,32 +138,33 @@ local function get_formspec()
 	end
 
 	local retval =
-			"image_button[0,4.84;3.31,0.92;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";world_delete;;true;false]" ..
+			"style[world_delete;fgimg=" .. esc(defaulttexturedir .. "world_delete.png") ..
+				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_delete_hover.png") .. "]" ..
+			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
 			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
-			"image_button[3.14,4.84;3.3,0.92;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";world_create;;true;false]" ..
+
+			"style[world_create;fgimg=" .. esc(defaulttexturedir .. "world_new.png") ..
+				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_new_hover.png") .. "]" ..
+			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
+
 			"button[9.5,4.8;2.5,1;world_configure;".. fgettext("Configure") .. "]" ..
 
-			"image_button[6.72,1.43;4.96,1.41;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";play;;true;false]" ..
+			"style[play;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
+				";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
+			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
 			"image_button[7.2,3.09;4,0.83;" ..
-				core.formspec_escape(defaulttexturedir) .. creative_bg ..
-				";;;true;false]" ..
+				esc(defaulttexturedir) .. creative_bg .. ";;;true;false]" ..
 			"image_button[7.2,3.09;4,0.83;" ..
-				core.formspec_escape(defaulttexturedir) .. creative_checkbox ..
-					".png;cb_creative_mode;;true;false]" ..
+				esc(defaulttexturedir) .. creative_checkbox .. ";cb_creative_mode;;true;false]" ..
 
-			"tableoptions[background=#27233F;border=false]" ..
-			"table[-0.01,0;6.28,4.64;sp_worlds;" ..
-			menu_render_worldlist() ..
-			";" .. index .. "]"
+			"background9[0,0;6.5,4.8;" ..
+				esc(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
+			"tableoptions[background=#0000;border=false]" ..
+			"table[0,0;6.28,4.64;sp_worlds;" ..
+				menu_render_worldlist() .. ";" .. index .. "]"
 
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
@@ -176,7 +182,7 @@ local function get_formspec()
 				"label[6.6,-0.3;" .. fgettext("Name") .. ":" .. "]" ..
 				"label[9.3,-0.3;" .. fgettext("Password") .. ":" .. "]" ..
 				"field[6.9,0.6;2.8,0.5;te_playername;;" ..
-					core.formspec_escape(core.settings:get("name")) .. "]" ..
+					esc(core.settings:get("name")) .. "]" ..
 				"pwdfield[9.6,0.6;2.8,0.5;te_passwd;]"
 	end
 

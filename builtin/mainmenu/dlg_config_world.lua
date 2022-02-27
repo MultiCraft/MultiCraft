@@ -70,8 +70,9 @@ local function get_formspec(data)
 
 	local retval =
 		"size[11.5,7.5,false]" ..
-		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]" ..
+		"bgcolor[#0000]" ..
+		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;40]" ..
 		"label[0.5,0;" .. fgettext("World:") .. "]" ..
 		"label[1.75,0;" .. data.worldspec.name .. "]"
 

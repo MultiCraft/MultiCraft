@@ -55,6 +55,8 @@ local tabs = {}
 if not mobile then
 	tabs.settings = dofile(menupath .. DIR_DELIM .. "tab_settings.lua")
 	tabs.content  = dofile(menupath .. DIR_DELIM .. "tab_content.lua")
+else
+	tabs.settings = dofile(menupath .. DIR_DELIM .. "tab_settings_simple.lua")
 end
 
 tabs.credits  = dofile(menupath .. DIR_DELIM .. "tab_credits.lua")
@@ -62,13 +64,7 @@ tabs.local_default_game = dofile(menupath .. DIR_DELIM .. "tab_local_default.lua
 tabs.local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua")
 tabs.play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua")
 
-local htabs = {}
-local hpath = menupath .. DIR_DELIM .. "hosting" .. DIR_DELIM .. "init.lua"
-local hosting = io.open(hpath, "r")
-if hosting then
-	htabs = dofile(hpath)
-	io.close(hosting)
-end
+local func = loadfile(menupath .. DIR_DELIM .. "hosting" .. DIR_DELIM .. "init.lua")
 
 --------------------------------------------------------------------------------
 local function main_event_handler(tabview, event)
@@ -79,7 +75,7 @@ local function main_event_handler(tabview, event)
 end
 
 --------------------------------------------------------------------------------
-local function init_globals()
+function menudata.init_tabs()
 	-- Init gamedata
 	gamedata.worldindex = 0
 
@@ -107,7 +103,7 @@ local function init_globals()
 	mm_texture.init()
 
 	-- Create main tabview
-	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0, y = 0})
+	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0.1, y = 0})
 
 	for i = 1, #pkgmgr.games do
 		if pkgmgr.games[i].id == "default" then
@@ -123,26 +119,28 @@ local function init_globals()
 		end
 	end
 
-	for _, page in pairs(htabs) do
-		tv_main:add(page)
+	if func then
+		func(tv_main)
 	end
 	tv_main:add(tabs.play_online)
 
 	if not mobile then
-		tv_main:set_autosave_tab(true)
 		tv_main:add(tabs.content)
-		tv_main:add(tabs.settings)
 	end
+	tv_main:add(tabs.settings)
 	tv_main:add(tabs.credits)
 
+	tv_main:set_autosave_tab(true)
 	tv_main:set_global_event_handler(main_event_handler)
 	tv_main:set_fixed_size(false)
 
-	if not mobile then
-		local last_tab = core.settings:get("maintab_LAST")
-		if last_tab and tv_main.current_tab ~= last_tab then
-			tv_main:set_tab(last_tab)
-		end
+	local last_tab = core.settings:get("maintab_LAST")
+	if last_tab and tv_main.current_tab ~= last_tab then
+		tv_main:set_tab(last_tab)
+	end
+
+	if last_tab ~= "local" and not core.settings:get_bool("menu_clouds") then
+		mm_texture.set_dirt_bg()
 	end
 
 	-- In case the folder of the last selected game has been deleted,
@@ -157,10 +155,9 @@ local function init_globals()
 	ui.set_default("maintab")
 	tv_main:show()
 
-	core.set_clouds(false)
-	mm_texture.set_dirt_bg()
+	core.set_clouds(core.settings:get_bool("menu_clouds"))
 
 	ui.update()
 end
 
-init_globals()
+menudata.init_tabs()

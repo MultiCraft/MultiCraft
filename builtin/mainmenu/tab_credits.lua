@@ -18,14 +18,14 @@
 --------------------------------------------------------------------------------
 
 local multicraft_developers = {
-	"Maksim Gamarnik (MoNTE48) <MoNTE48@mail.ua>",
+	"Maksim Gamarnik (MoNTE48) <Maksym48@pm.me>",
 	"Bektur Mambetov (ubulem) <berkut87@gmail.com>",
 	"Alexander Zavrin (Ransom.00)",
 	"luk3yx",
 	"Nathan Salapat (NathanS21) <nathan@nathansalapat.com>",
 	"Vitaliy Lobachevskiy (numberZero) <numzer0@yandex.ru>",
-	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
 	"An0n3m0us",
+	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
 	"sfan5 <sfan5@live.de>",
 	"Stuart Jones (stujones11) <stujones111@gmail.com>",
 	"And other people who helped make the world better!"
@@ -112,19 +112,21 @@ end
 
 return {
 	name = "credits",
-	caption = fgettext("Credits"),
+	caption = "", -- fgettext("Credits"),
 	cbf_formspec = function(tabview, name, tabdata)
 		local version = core.get_version()
-		local fs = "label[0.1,-0.2;" ..
+		local fs = "label[0.05,-0.2;" ..
 			"MultiCraft Open Source, ver. " .. version.string .. "\n" ..
-			"Copyright (C) 2014-2021 MultiCraft Development Team\n" ..
+			"Copyright (C) 2014-2022 MultiCraft Development Team\n" ..
 			"License: GNU LGPLv3.0+ and CC BY-SA 4.0\n" ..
 			"Created and Powered by Minetest Engine, ver. 5.4.1]" ..
 			"button[9.5,0;2.5,0.5;homepage;Home Page]" ..
 			"button[9.5,0.8;2.5,0.5;privacy;Privacy Policy]" ..
+			"background9[0.1,1.5;11.85,4.15;" ..
+				core.formspec_escape(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
 			"tablecolumns[color;text]" ..
-			"tableoptions[background=#999999;highlight=#00000000;border=true]" ..
-			"table[0,1.5;11.8,4;list_credits;" ..
+			"tableoptions[background=#0000;highlight=#00000000;border=false]" ..
+			"table[0.1,1.5;11.65,4;list_credits;" ..
 			"#FFFF00," .. fgettext("MultiCraft Developers") .. ",," ..
 			buildCreditList(multicraft_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Minetest Developers") .. ",," ..
@@ -134,8 +136,7 @@ return {
 			"#FFFF00," .. fgettext("Previous Core Developers") ..",," ..
 			buildCreditList(previous_core_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Previous Contributors") .. ",," ..
-			buildCreditList(previous_contributors) .. "," ..
-			";1]"
+			buildCreditList(previous_contributors) .. ";1]"
 
 	--[[if PLATFORM ~= "Android" then
 			fs = fs .. "tooltip[userdata;" ..

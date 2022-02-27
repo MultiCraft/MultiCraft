@@ -509,7 +509,7 @@ void GUIEngine::drawHeader(video::IVideoDriver *driver)
 	if (free_space > splashsize.Y) {
 		core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
 		splashrect += v2s32((screensize.Width/2)-(splashsize.X/2),
-				((free_space/2)-splashsize.Y/2)+10);
+				((free_space/2)-splashsize.Y/2));
 
 	draw2DImageFilterScaled(driver, texture, splashrect,
 		core::rect<s32>(core::position2d<s32>(0,0),

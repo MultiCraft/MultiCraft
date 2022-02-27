@@ -61,21 +61,22 @@ local function create_world_formspec()
 	mglist = mglist:sub(1, -2)
 
 	local retval =
-		"size[12,6,false]" ..
-		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]" ..
-		"label[1.5,1.2;" .. fgettext("World name") .. ":" .. "]"..
-		"field[4.5,1.5;6,0.5;te_world_name;;]" ..
+		"size[12,5.4,false]" ..
+		"bgcolor[#0000]" ..
+		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;40]" ..
+		"label[1.5,0.9;" .. fgettext("World name") .. ":" .. "]"..
+		"field[4.5,1.2;6,0.5;te_world_name;;]" ..
 
-		"label[1.5,2.2;" .. fgettext("Seed") .. ":" .. "]"..
-		"field[4.5,2.5;6,0.5;te_seed;;".. current_seed .. "]" ..
+		"label[1.5,1.9;" .. fgettext("Seed") .. ":" .. "]"..
+		"field[4.5,2.2;6,0.5;te_seed;;".. current_seed .. "]" ..
 
-		"label[1.5,3.2;" .. fgettext("Mapgen") .. ":" .. "]"..
-		"dropdown[4.2,3.05;6.3;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
+		"label[1.5,2.9;" .. fgettext("Mapgen") .. ":" .. "]"..
+		"dropdown[4.2,2.75;6.3;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
 
 		"style[world_create_confirm;bgcolor=#00d12b]" ..
-		"button[3.5,4.8;2.5,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
-		"button[6,4.8;2.5,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
+		"button[3.5,4.4;2.5,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
+		"button[6,4.4;2.5,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
 
 	return retval
 

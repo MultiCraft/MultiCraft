@@ -98,8 +98,9 @@ local function create_world_formspec(dialogdata)
 	-- Error out when no games found
 	if #pkgmgr.games == 0 then
 		return "size[12.25,3,false]" ..
-			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]" ..
+			"bgcolor[#0000]" ..
+			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;40]" ..
 			"box[0,0;12,2;#ff8800]" ..
 			"textarea[0.3,0;11.7,2;;;"..
 			fgettext("You have no games installed.") .. "\n" ..
@@ -134,7 +135,7 @@ local function create_world_formspec(dialogdata)
 		end
 	end
 
-	local game_by_gameidx = pkgmgr.get_game_no_default(gameidx)
+	local game_by_gameidx = core.get_game(gameidx)
 	local disallowed_mapgen_settings = {}
 	if game_by_gameidx ~= nil then
 		local gamepath = game_by_gameidx.path
@@ -318,10 +319,16 @@ local function create_world_formspec(dialogdata)
 		gamelist_height = 0.5
 	end
 
+	local _gameidx = gameidx
+	if _gameidx >= pkgmgr.default_game_idx then
+		_gameidx = _gameidx - 1
+	end
+
 	local retval =
 		"size[12.25,7,false]" ..
-		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]" ..
+		"bgcolor[#0000]" ..
+		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;40]" ..
 
 		-- Left side
 		"container[0,0]"..
@@ -338,7 +345,7 @@ local function create_world_formspec(dialogdata)
 
 		"label[0,3.35;" .. fgettext("Game") .. "]"..
 		"textlist[0,3.85;5.8,"..gamelist_height..";games;" ..
-		pkgmgr.gamelist() .. ";" .. gameidx .. ";false]" ..
+		pkgmgr.gamelist() .. ";" .. _gameidx .. ";false]" ..
 		"container[0,4.5]" ..
 		devtest_only ..
 		"container_end[]" ..
@@ -351,6 +358,7 @@ local function create_world_formspec(dialogdata)
 		"container_end[]"..
 
 		-- Menu buttons
+		"style[world_create_confirm;bgcolor=#00d12b]" ..
 		"button[3.25,6.5;3,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
 		"button[6.25,6.5;3,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
 
@@ -367,7 +375,11 @@ local function create_world_buttonhandler(this, fields)
 		local gameindex = core.get_textlist_index("games")
 
 		if gameindex ~= nil then
-			-- For unnamed worlds use the generated name 'world<number>',
+			if gameindex >= pkgmgr.default_game_idx then
+				gameindex = gameindex + 1
+			end
+
+			-- For unnamed worlds use the generated name 'World <number>',
 			-- where the number increments: it is set to 1 larger than the largest
 			-- generated name number found.
 			if worldname == "" then
@@ -386,7 +398,7 @@ local function create_world_buttonhandler(this, fields)
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then
 				core.settings:set("mg_name",fields["dd_mapgen"])
-				message = pkgmgr.create_world_no_default(worldname,gameindex)
+				message = core.create_world(worldname,gameindex)
 			else
 				message = fgettext("A world named \"$1\" already exists", worldname)
 			end
@@ -414,6 +426,9 @@ local function create_world_buttonhandler(this, fields)
 
 	if fields["games"] then
 		local gameindex = core.get_textlist_index("games")
+		if gameindex >= pkgmgr.default_game_idx then
+			gameindex = gameindex + 1
+		end
 		core.settings:set("menu_last_game", pkgmgr.games[gameindex].id)
 		return true
 	end

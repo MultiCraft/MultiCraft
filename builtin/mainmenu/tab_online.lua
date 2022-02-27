@@ -40,57 +40,56 @@ local function get_formspec(tabview, name, tabdata)
 	if PLATFORM == "Android" or PLATFORM == "iOS" then
 		search_panel =
 			"field[0.2,0.1;5.19,1;te_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"image_button[4.89,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png")
-				.. ";btn_mp_search;;true;false]" ..
-			"image_button[5.59,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png")
-				.. ";btn_mp_refresh;;true;false]" ..
+			"style[btn_mp_search;content_offset=0]" ..
+			"image_button[4.89,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png") ..
+				";btn_mp_search;;true;false]" ..
+			"image_button[5.59,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png") ..
+				";btn_mp_refresh;;true;false]" ..
 			"image_button[6.29,-0.13;0.83,0.83;" .. esc(defaulttexturedir ..
-				(serverlistmgr.mobile_only and "online_mobile" or "online_pc") .. ".png")
-				.. ";btn_mp_mobile;;true;false]"
+				(serverlistmgr.mobile_only and "online_mobile" or "online_pc") .. ".png") ..
+				";btn_mp_mobile;;true;false]"
 	else
 		search_panel =
-		"field[0.2,0.1;5.8,1;te_search;;" .. core.formspec_escape(tabdata.search_for) .. "]" ..
-		"image_button[5.5,-0.13;0.83,0.83;" .. core.formspec_escape(defaulttexturedir .. "search.png")
-			.. ";btn_mp_search;;true;false]" ..
-		"image_button[6.26,-0.13;0.83,0.83;" .. core.formspec_escape(defaulttexturedir .. "refresh.png")
-				.. ";btn_mp_refresh;;true;false]"
+			"field[0.2,0.1;5.8,1;te_search;;" .. esc(tabdata.search_for) .. "]" ..
+			"style[btn_mp_search;content_offset=0]" ..
+			"image_button[5.5,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png") ..
+				";btn_mp_search;;true;false]" ..
+			"image_button[6.26,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png") ..
+				";btn_mp_refresh;;true;false]"
 	end
 
 	local retval =
 		-- Search
-		search_panel..
+		search_panel ..
 
 		-- Address / Port
-		"label[7.1,-0.3;" .. fgettext("Address") .. ":" .. "]" ..
-		"label[10.15,-0.3;" .. fgettext("Port") .. ":" .. "]" ..
-		"field[7.4,0.6;3.2,0.5;te_address;;" ..
+		"field[7.4,0.6;3.2,0.5;te_address;" .. fgettext("Address") .. ":" .. ";" ..
 			esc(core.settings:get("address")) .. "]" ..
-		"field[10.45,0.6;1.95,0.5;te_port;;" ..
+		"field[10.45,0.6;1.95,0.5;te_port;" .. fgettext("Port") .. ":" .. ";" ..
 			esc(core.settings:get("remote_port")) .. "]" ..
 
 		-- Name
-		"label[7.1,0.85;" .. fgettext("Name") .. ":" .. "]" ..
-		"label[10.15,0.85;" .. fgettext("Password") .. ":" .. "]" ..
-		"field[7.4,1.75;3.2,0.5;te_name;;" ..
+		"field[7.4,1.75;3.2,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
 			esc(core.settings:get("name")) .. "]" ..
 
 		-- Description Background
-		"box[7.1,2.1;4.8,2.65;#999999]" ..
+		"box[7.1,2.1;4.8,2.65;#33314B99]" ..
 
 		-- Connect
-		"image_button[8.8,4.88;3.3,0.9;" ..
-			esc(defaulttexturedir .. "blank.png")
-			.. ";btn_mp_connect;;true;false]" ..
+		"style[btn_mp_connect;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
+			";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
+		"image_button[8.8,4.88;3.3,0.9;;btn_mp_connect;;true;false]" ..
 		"tooltip[btn_mp_connect;".. fgettext("Connect") .. "]"
 
-		local pwd = password_save and esc(core.settings:get("password")) or password_tmp
+		local pwd = password_save and core.settings:get("password") or password_tmp
 		-- Password
-		retval = retval .. "pwdfield[10.45,1.8;1.95,0.39;te_pwd;;" .. pwd .. "]"
+		retval = retval .. "pwdfield[10.45,1.8;1.95,0.39;te_pwd;" ..
+			fgettext("Password") .. ":" .. ";" .. esc(pwd) .. "]"
 
 	if tabdata.selected and selected then
 		if gamedata.fav then
-			retval = retval .. "image_button[7.1,4.91;0.83,0.83;" .. esc(defaulttexturedir .. "trash.png")
-				.. ";btn_delete_favorite;;true;false]"
+			retval = retval .. "image_button[7.1,4.91;0.83,0.83;" ..
+				esc(defaulttexturedir .. "trash.png") .. ";btn_delete_favorite;;true;false]"
 		end
 		if selected.description then
 			retval = retval .. "textarea[7.5,2.2;4.8,3;;" ..
@@ -98,12 +97,14 @@ local function get_formspec(tabview, name, tabdata)
 		end
 	end
 
-	--favourites
+	--favorites
 	retval = retval ..
-		"tableoptions[background=#27233F;border=false]" ..
+		"background9[-0.07,0.7;7.19,5.08;" ..
+			esc(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
+		"tableoptions[background=#0000;border=false]" ..
 		"tablecolumns[" ..
 		image_column(fgettext("Favorite")) .. ",align=center;" ..
-		image_column(fgettext("Lag")) .. ",padding=0.25;" ..
+		image_column(fgettext("Lag")) .. ",padding=0.5;" ..
 		"color,span=3;" ..
 		"text,align=right;" ..               -- clients
 		"text,align=center,padding=0.25;" .. -- "/"
@@ -111,7 +112,7 @@ local function get_formspec(tabview, name, tabdata)
 		image_column(fgettext("Server mode")) .. ",padding=0.5;" ..
 		"color,span=1;" ..
 		"text,padding=0.5]" ..
-		"table[-0.09,0.7;6.99,4.93;favorites;"
+		"table[-0.1,0.7;7,4.94;favorites;"
 
 	if menudata.search_result then
 		local favs = serverlistmgr.get_favorites()
@@ -140,7 +141,7 @@ local function get_formspec(tabview, name, tabdata)
 						table.insert(serverlistmgr.servers, i, table.remove(serverlistmgr.servers, j))
 					end
 				end
-				if favs[i].address ~= serverlistmgr.servers[i].address then
+				if serverlistmgr.servers[i] and favs[i].address ~= serverlistmgr.servers[i].address then
 					table.insert(serverlistmgr.servers, i, favs[i])
 				end
 			end

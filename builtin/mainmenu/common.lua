@@ -99,7 +99,7 @@ function render_serverlist_row(spec, is_favorite)
 			details = details .. "11,"
 		end
 	else
-		details = details .. "0,"
+		details = details .. "11,"
 	end
 
 	if spec.clients and spec.clients_max then

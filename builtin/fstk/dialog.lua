@@ -74,7 +74,8 @@ function messagebox(name, message)
 			function()
 				return ([[
 					size[12,5.4,false]
-					background[0,0;0,0;%s;true;32]
+					bgcolor[#0000]
+					background9[0,0;14,8;%s;true;40]
 					textarea[1,1;10,4;;;%s]
 					button[5,4.5;2,0.8;ok;%s]
 				]]):format(bg, message, fgettext("OK"))

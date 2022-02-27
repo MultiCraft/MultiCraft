@@ -19,12 +19,13 @@
 
 local function rename_modpack_formspec(dialogdata)
 	local retval =
-		"size[11.5,4.5,false]" ..
-		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]" ..
-		"button[3.25,3.5;2.5,0.5;dlg_rename_modpack_confirm;"..
+		"size[12,5.4,false]" ..
+		"bgcolor[#0000]" ..
+		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;40]" ..
+		"button[3,4.8;3,0.5;dlg_rename_modpack_confirm;"..
 				fgettext("Accept") .. "]" ..
-		"button[5.75,3.5;2.5,0.5;dlg_rename_modpack_cancel;"..
+		"button[3,4.8;3,0.5;dlg_rename_modpack_cancel;"..
 				fgettext("Cancel") .. "]"
 
 	local input_y = 2

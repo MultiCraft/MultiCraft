@@ -18,6 +18,8 @@
 local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
 
+local esc = core.formspec_escape
+
 local default_worlds = {
 	{name = "World 1", mg_name = "v7p", seed = "15823438331521897617"},
 	{name = "World 2", mg_name = "v7p", seed = "1841722166046826822"},
@@ -73,12 +75,12 @@ local function get_formspec()
 		if selected ~= nil and selected < #menudata.worldlist:get_list() then
 			index = selected
 		else
-			index = #menudata.worldlist:get_list()
+			index = 1
 		end
 	end
 
 	local creative_checkbox = core.settings:get_bool("creative_mode") and
-			"creative_checkbox" or "blank"
+			"creative_checkbox.png" or "blank.png"
 
 	local creative_bg = "creative_bg.png"
 	if lang and lang == "ru" then
@@ -86,32 +88,38 @@ local function get_formspec()
 	end
 
 	local retval =
-			"image_button[0,4.84;3.31,0.92;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";world_delete;;true;false]" ..
+			"style[world_delete;fgimg=" .. esc(defaulttexturedir .. "world_delete.png") ..
+				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_delete_hover.png") .. "]" ..
+			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
 			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
-			"image_button[3.14,4.84;3.3,0.92;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";world_create;;true;false]" ..
+
+			"style[world_create;fgimg=" .. esc(defaulttexturedir .. "world_new.png") ..
+				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_new_hover.png") .. "]" ..
+			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"image_button[6.72,1.43;4.96,1.41;" ..
-				core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";play;;true;false]" ..
+			"style[play;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
+				";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
+			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
 			"image_button[7.2,3.09;4,0.83;" ..
-				core.formspec_escape(defaulttexturedir) .. creative_bg ..
-				";;;true;false]" ..
+				esc(defaulttexturedir) .. creative_bg .. ";;;true;false]" ..
 			"image_button[7.2,3.09;4,0.83;" ..
-				core.formspec_escape(defaulttexturedir) .. creative_checkbox ..
-					".png;cb_creative_mode;;true;false]" ..
+				esc(defaulttexturedir) .. creative_checkbox .. ";cb_creative_mode;;true;false]" ..
 
-			"tableoptions[background=#27233F;border=false]" ..
-			"table[-0.01,0;6.28,4.64;sp_worlds;" ..
-			menu_render_worldlist() ..
-			";" .. index .. "]"
+			"background9[0,0;6.5,4.8;" ..
+				esc(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
+			"tableoptions[background=#0000;border=false]" ..
+			"table[0,0;6.28,4.64;sp_worlds;" ..
+				menu_render_worldlist() .. ";" .. index .. "]"
 
+	if PLATFORM == "Android" then
+		retval = retval ..
+			"image_button[10.6,-0.1;1.5,1.5;" ..
+				esc(defaulttexturedir) .. "gift_btn.png;upgrade;;true;false;" ..
+				esc(defaulttexturedir) .. "gift_btn_pressed.png]"
+	end
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
@@ -128,7 +136,7 @@ local function get_formspec()
 				"label[6.6,-0.3;" .. fgettext("Name") .. ":" .. "]" ..
 				"label[9.3,-0.3;" .. fgettext("Password") .. ":" .. "]" ..
 				"field[6.9,0.6;2.8,0.5;te_playername;;" ..
-					core.formspec_escape(core.settings:get("name")) .. "]" ..
+					esc(core.settings:get("name")) .. "]" ..
 				"pwdfield[9.6,0.6;2.8,0.5;te_passwd;]"
 	end
 
@@ -253,6 +261,10 @@ local function main_button_handler(this, fields, name)
 		end
 
 		return true
+	end
+
+	if fields["upgrade"] then
+		core.upgrade("")
 	end
 
 --[[if fields["world_configure"] ~= nil then

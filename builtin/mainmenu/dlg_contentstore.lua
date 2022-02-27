@@ -702,8 +702,9 @@ function store.get_formspec(dlgdata)
 		formspec = {
 			"formspec_version[3]",
 			"size[15.75,9.5;false]",
-			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]",
+			"bgcolor[#0000]" ..
+			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;40]",
 			"position[0.5,0.55]",
 
 			"style[status,downloading,queued;border=false]",
@@ -769,8 +770,9 @@ function store.get_formspec(dlgdata)
 	else
 		formspec = {
 			"size[12,7;false]",
-			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]",
+			"bgcolor[#0000]" ..
+			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;40]",
 			"position[0.5,0.55]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
 			"container[0,", H - 0.8 - 0.375, "]",

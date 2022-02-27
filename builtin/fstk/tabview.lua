@@ -56,36 +56,30 @@ local function add_tab(self,tab)
 	end
 end
 
-local function get_bg(tsize, tabname)
-	local bg =
-		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]"
-
-	if tabname then
-		bg = bg ..
-			"background[0,0;" .. tsize.width .. "," .. tsize.height .. ";" ..
-			core.formspec_escape(defaulttexturedir ..
-				"bg_" .. tabname .. ".png") .. ";true]"
-	end
-
-	return bg
-end
-
 --------------------------------------------------------------------------------
 local function get_formspec(self)
 	local formspec = ""
 
 	if not self.hidden and (self.parent == nil or not self.parent.hidden) then
 		local name = self.tablist[self.last_tab_index].name
-		local tabname = (name == "local" or name == "online") and name
-				or (name == "local_default" and "local")
 
 		if self.parent == nil then
 			local tsize = self.tablist[self.last_tab_index].tabsize or
 					{width=self.width, height=self.height}
+			local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 			formspec = formspec ..
 					string.format("size[%f,%f,%s]",tsize.width,tsize.height,
-						dump(self.fixed_size)) .. get_bg(tsize, tabname)
+						dump(self.fixed_size)) ..
+					"bgcolor[#0000]" ..
+					"background9[0,0;0,0;" .. defaulttexturedir .. "bg_common.png;true;40]" ..
+					"style[settings_tab;content_offset=0]" ..
+					"image_button[12.02,1.3;1,1.55;" ..
+						defaulttexturedir .. "settings_menu.png;settings_tab;;true;false;" ..
+						defaulttexturedir .. "settings_menu_pressed.png]" ..
+					"style[authors_tab;content_offset=0]" ..
+					"image_button[12.02,2.7;1,1.55;" ..
+						defaulttexturedir .. "authors_menu.png;authors_tab;;true;false;" ..
+						defaulttexturedir .. "authors_menu_pressed.png]"
 		end
 		formspec = formspec .. self:tab_header()
 		formspec = formspec ..
@@ -99,6 +93,7 @@ local function get_formspec(self)
 	return formspec
 end
 
+local set_tab_by_name
 --------------------------------------------------------------------------------
 local function handle_buttons(self,fields)
 
@@ -112,6 +107,14 @@ local function handle_buttons(self,fields)
 
 	if self.glb_btn_handler ~= nil and
 		self.glb_btn_handler(self,fields) then
+		return true
+	end
+
+	if fields.authors_tab then
+		set_tab_by_name(self, "credits")
+		return true
+	elseif fields.settings_tab then
+		set_tab_by_name(self, "settings")
 		return true
 	end
 
@@ -208,7 +211,8 @@ local function handle_tab_buttons(self,fields)
 end
 
 --------------------------------------------------------------------------------
-local function set_tab_by_name(self, name)
+-- Declared as a local variable above handle_buttons
+function set_tab_by_name(self, name)
 	for i=1,#self.tablist,1 do
 		if self.tablist[i].name == name then
 			switch_to_tab(self, i)

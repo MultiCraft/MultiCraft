@@ -788,8 +788,9 @@ local function create_change_setting_formspec(dialogdata)
 
 	return (
 		"size[" .. width .. "," .. height + 0.25 .. ",false]" ..
-		"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;32]" ..
+		"bgcolor[#0000]" ..
+		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";true;40]" ..
 		create_textfield(description_box, setting_name, comment_text) ..
 		formspec ..
 		"button[" .. width / 2 - 2.5 .. "," .. height - 0.4 .. ";2.5,1;btn_done;" ..
@@ -952,8 +953,9 @@ end
 
 local function create_settings_formspec(tabview, _, tabdata)
 	local formspec = "size[12,5.4;false]" ..
-			"background[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;32]" ..
+			"bgcolor[#0000]" ..
+			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
+				"bg_common.png") .. ";true;40]" ..
 			"tablecolumns[color;tree;text,width=28;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..
 			"field[0.3,0.1;10.2,1;search_string;;" .. core.formspec_escape(search_string) .. "]" ..

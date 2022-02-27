@@ -46,6 +46,12 @@ end
 --------------------------------------------------------------------------------
 function mm_texture.reset()
 	mm_texture.gameid = nil
+	local have_bg      = false
+	local have_overlay = mm_texture.set_generic("overlay")
+
+	if not have_overlay then
+		have_bg = mm_texture.set_generic("background")
+	end
 
 	mm_texture.clear("header")
 	mm_texture.clear("footer")
@@ -54,7 +60,13 @@ function mm_texture.reset()
 	mm_texture.set_generic("footer")
 	mm_texture.set_generic("header")
 
-	mm_texture.set_dirt_bg()
+	if not have_bg then
+		if core.settings:get_bool("menu_clouds") then
+			core.set_clouds(true)
+		else
+			mm_texture.set_dirt_bg()
+		end
+	end
 end
 
 --------------------------------------------------------------------------------
