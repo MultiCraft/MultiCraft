@@ -20,10 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game.helpers
 
-import android.app.Activity
-import android.app.ActivityManager
-import android.app.AlarmManager
-import android.app.PendingIntent
+import android.app.*
 import android.app.PendingIntent.FLAG_CANCEL_CURRENT
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
