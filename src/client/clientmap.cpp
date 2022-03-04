@@ -321,11 +321,12 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 				camera_direction, camera_fov, 100000 * BS, &d))
 			continue;
 
+		MapBlockMesh *mapBlockMesh = block->mesh;
+		if (!mapBlockMesh)
+			continue;
+
 		// Mesh animation
 		if (pass == scene::ESNRP_SOLID) {
-			//MutexAutoLock lock(block->mesh_mutex);
-			MapBlockMesh *mapBlockMesh = block->mesh;
-			assert(mapBlockMesh);
 			// Pretty random but this should work somewhat nicely
 			bool faraway = d >= BS * 50;
 			if (mapBlockMesh->isAnimationForced() || !faraway ||
@@ -344,11 +345,6 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 			Get the meshbuffers of the block
 		*/
 		{
-			//MutexAutoLock lock(block->mesh_mutex);
-
-			MapBlockMesh *mapBlockMesh = block->mesh;
-			assert(mapBlockMesh);
-
 			for (int layer = 0; layer < MAX_TILE_LAYERS; layer++) {
 				scene::IMesh *mesh = mapBlockMesh->getMesh(layer);
 				assert(mesh);
