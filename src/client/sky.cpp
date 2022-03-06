@@ -39,10 +39,7 @@ static video::SMaterial baseMaterial()
 {
 	video::SMaterial mat;
 	mat.Lighting = false;
-#if ENABLE_GLES
-	mat.ZBuffer = video::ECFN_DISABLED;
-#elif defined(__MACH__) && defined(__APPLE__) && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR > 8
-	// ugly but for making cpp_lint happy...
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR > 8
 	mat.ZBuffer = video::ECFN_DISABLED;
 #else
 	mat.ZBuffer = video::ECFN_NEVER;

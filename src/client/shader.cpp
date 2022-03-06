@@ -40,7 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/tile.h"
 #include "config.h"
 
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 #ifdef _IRR_COMPILE_WITH_OGLES1_
 #include <GLES/gl.h>
 #else
@@ -49,7 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #else
 #ifndef __APPLE__
 #include <GL/gl.h>
-#else
+#elif !defined(__IOS__)
 #define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl.h>
 #endif
@@ -604,7 +604,7 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 	}
 
 	bool use_discard = use_gles;
-#ifdef __unix__
+#if defined(__unix__) && !defined(__APPLE__)
 	// For renderers that should use discard instead of GL_ALPHA_TEST
 	const char* gl_renderer = (const char*)glGetString(GL_RENDERER);
 	if (strstr(gl_renderer, "GC7000"))

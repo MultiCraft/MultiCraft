@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "renderingengine.h"
 
 
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 #ifdef _IRR_COMPILE_WITH_OGLES1_
 #include <GLES/gl.h>
 #else
