@@ -48,7 +48,7 @@ void set_default_settings()
 	settings->setDefault("language", "");
 	settings->setDefault("name", "");
 	settings->setDefault("bind_address", "");
-	settings->setDefault("serverlist_url", "servers.minetest.net");
+	settings->setDefault("serverlist_url", "servers.multicraft.world");
 
 	// Client
 	settings->setDefault("address", "");
@@ -374,6 +374,7 @@ void set_default_settings()
 	settings->setDefault("compat_send_original_model", "true");
 	settings->setDefault("disable_escape_sequences", "false");
 	settings->setDefault("strip_color_codes", "false");
+	settings->setDefault("announce_mt", "true");
 #if USE_PROMETHEUS
 	settings->setDefault("prometheus_listener_address", "127.0.0.1:30000");
 #endif
@@ -506,8 +507,6 @@ void set_default_settings()
 
 	// Shaders work but may reduce performance on iGPU
 	settings->setDefault("enable_shaders", "false");
-
-	settings->setDefault("serverlist_url", "servers.multicraft.world");
 #endif
 
 #ifdef HAVE_TOUCHSCREENGUI
@@ -526,7 +525,6 @@ void set_default_settings()
 	settings->setDefault("pause_on_lost_focus", "true");
 	settings->setDefault("max_objects_per_block", "16");
 	settings->setDefault("doubletap_jump", "true");
-	settings->setDefault("serverlist_url", "servers.multicraft.world");
 	settings->setDefault("gui_scaling_filter_txr2img", "false");
 	settings->setDefault("autosave_screensize", "false");
 

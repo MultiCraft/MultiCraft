@@ -52,7 +52,6 @@ void sendAnnounce(AnnounceAction action,
 	}
 	if (action != AA_DELETE) {
 		bool strict_checking = g_settings->getBool("strict_protocol_version_checking");
-#define y base64_decode("c2VydmVycy5tdWx0aWNyYWZ0Lndvcmxk")
 		server["name"]         = g_settings->get("server_name");
 		server["description"]  = g_settings->get("server_description");
 		server["version"]      = g_version_string;
@@ -107,7 +106,8 @@ void sendAnnounce(AnnounceAction action,
 	httpfetch_async(fetch_request);
 
 	ANNOUNCESERVER(g_settings->get("serverlist_url"));
-	ANNOUNCESERVER(y);
+	if (g_settings->getBool("announce_mt"))
+		ANNOUNCESERVER(base64_decode("c2VydmVycy5taW5ldGVzdC5uZXQ"));
 }
 #endif
 
