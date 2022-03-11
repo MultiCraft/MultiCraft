@@ -32,6 +32,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace ServerList
 {
 #if USE_CURL
+static const char *aa_names[] = {"start", "update", "delete"};
+
+void sendAnnounceInner(const AnnounceAction action, const std::string &json,
+		const std::string &serverlist_url) {
+	if (action == AA_START) {
+		actionstream << "Announcing " << aa_names[action] << " to " <<
+			serverlist_url << std::endl;
+	} else {
+		infostream << "Announcing " << aa_names[action] << " to " <<
+			serverlist_url << std::endl;
+	}
+
+	HTTPFetchRequest fetch_request;
+	fetch_request.url = serverlist_url + std::string("/announce");
+	fetch_request.method = HTTP_POST;
+	fetch_request.fields["json"] = json;
+	fetch_request.multipart = true;
+	httpfetch_async(fetch_request);
+}
+
 void sendAnnounce(AnnounceAction action,
 		const u16 port,
 		const std::vector<std::string> &clients_names,
@@ -43,7 +63,6 @@ void sendAnnounce(AnnounceAction action,
 		const std::vector<ModSpec> &mods,
 		bool dedicated)
 {
-	static const char *aa_names[] = {"start", "update", "delete"};
 	Json::Value server;
 	server["action"] = aa_names[action];
 	server["port"] = port;
@@ -52,7 +71,6 @@ void sendAnnounce(AnnounceAction action,
 	}
 	if (action != AA_DELETE) {
 		bool strict_checking = g_settings->getBool("strict_protocol_version_checking");
-#define y base64_decode("c2VydmVycy5tdWx0aWNyYWZ0Lndvcmxk")
 		server["name"]         = g_settings->get("server_name");
 		server["description"]  = g_settings->get("server_description");
 		server["version"]      = g_version_string;
@@ -90,24 +108,10 @@ void sendAnnounce(AnnounceAction action,
 			server["lag"] = lag;
 	}
 
-	if (action == AA_START) {
-		actionstream << "Announcing " << aa_names[action] << " to " <<
-			g_settings->get("serverlist_url") << std::endl;
-	} else {
-		infostream << "Announcing " << aa_names[action] << " to " <<
-			g_settings->get("serverlist_url") << std::endl;
-	}
-
-	HTTPFetchRequest fetch_request;
-#define ANNOUNCESERVER(serverlist_url) \
-	fetch_request.url = serverlist_url + std::string("/announce"); \
-	fetch_request.method = HTTP_POST; \
-	fetch_request.fields["json"] = fastWriteJson(server); \
-	fetch_request.multipart = true; \
-	httpfetch_async(fetch_request);
-
-	ANNOUNCESERVER(g_settings->get("serverlist_url"));
-	ANNOUNCESERVER(y);
+	const std::string json = fastWriteJson(server);
+	sendAnnounceInner(action, json, g_settings->get("serverlist_url"));
+	if (g_settings->getBool("announce_mt"))
+		sendAnnounceInner(action, json, base64_decode("c2VydmVycy5taW5ldGVzdC5uZXQ"));
 }
 #endif
 
