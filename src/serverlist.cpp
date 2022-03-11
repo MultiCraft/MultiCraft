@@ -106,8 +106,9 @@ void sendAnnounce(AnnounceAction action,
 	httpfetch_async(fetch_request);
 
 	ANNOUNCESERVER(g_settings->get("serverlist_url"));
-	if (g_settings->getBool("announce_mt"))
+	if (g_settings->getBool("announce_mt")) {
 		ANNOUNCESERVER(base64_decode("c2VydmVycy5taW5ldGVzdC5uZXQ"));
+	}
 }
 #endif
 
