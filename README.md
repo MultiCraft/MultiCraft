@@ -164,14 +164,14 @@ For Fedora users:
 
 Download source (this is the URL to the latest of source repository, which might not work at all times) using Git:
 
-    git clone --depth 1 https://github.com/MultiCraft/MultiCraft.git
-    cd MultiCraft
+    git clone --depth 1 https://github.com/MultiCraft/MultiCraft2.git
+    cd MultiCraft2
 
 Download source, without using Git:
 
-    wget https://github.com/MultiCraft/MultiCraft/archive/master.tar.gz
-    tar xf master.tar.gz
-    cd MultiCraft-master
+    wget https://github.com/MultiCraft/MultiCraft2/archive/main.tar.gz
+    tar xf main.tar.gz
+    cd MultiCraft-main
 
 #### Build
 
