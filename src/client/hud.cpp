@@ -60,6 +60,7 @@ Hud::Hud(gui::IGUIEnvironment *guienv, Client *client, LocalPlayer *player,
 		RenderingEngine::getDisplayDensity() + 0.5f);
 	m_hotbar_imagesize *= m_hud_scaling;
 	m_padding = m_hotbar_imagesize / 12;
+	m_hud_move_upwards = g_settings->getU16("hud_move_upwards");
 
 	for (auto &hbar_color : hbar_colors)
 		hbar_color = video::SColor(255, 255, 255, 255);
@@ -373,10 +374,10 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				core::dimension2d<u32> textsize = textfont->getDimension(text.c_str());
 #if defined(__ANDROID__) || defined(__IOS__)
 				// The text size on Android is not proportional with the actual scaling
-				irr::gui::IGUIFont *font_scaled = font_size <= 3 ?
-					textfont : g_fontengine->getFont(font_size - 3);
-				if (e->offset.X < -20)
-					textsize = font_scaled->getDimension(text.c_str());
+				auto small_font_size = font_size * 0.9f;
+				irr::gui::IGUIFont *font_scaled = small_font_size < 1 ?
+					textfont : g_fontengine->getFont(small_font_size);
+				textsize = font_scaled->getDimension(text.c_str());
 #endif
 				v2s32 offset((e->align.X - 1.0) * (textsize.Width / 2),
 				             (e->align.Y - 1.0) * (textsize.Height / 2));
@@ -384,14 +385,13 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				                     text_height * e->scale.Y * m_scale_factor);
 				v2s32 offs(e->offset.X * m_scale_factor,
 				           e->offset.Y * m_scale_factor);
+				if (e->offset.Y < -50)
+					pos.Y -= m_hud_move_upwards;
 #if defined(__ANDROID__) || defined(__IOS__)
-				if (e->offset.X < -20)
-					font_scaled->draw(text.c_str(), size + pos + offset + offs, color);
-				else
+				font_scaled->draw(text.c_str(), size + pos + offset + offs, color);
+#else
+				textfont->draw(text.c_str(), size + pos + offset + offs, color);
 #endif
-				{
-					textfont->draw(text.c_str(), size + pos + offset + offs, color);
-				}
 				break; }
 			case HUD_ELEM_STATBAR: {
 				v2s32 offs(e->offset.X, e->offset.Y);
@@ -443,14 +443,17 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				const video::SColor color(255, 255, 255, 255);
 				const video::SColor colors[] = {color, color, color, color};
 				core::dimension2di imgsize(texture->getOriginalSize());
-				v2s32 dstsize(imgsize.Width * e->scale.X * m_scale_factor,
-				              imgsize.Height * e->scale.Y * m_scale_factor);
+				v2s32 dstsize(imgsize.Width * e->scale.X,
+				              imgsize.Height * e->scale.Y);
 				if (e->scale.X < 0)
 					dstsize.X = m_screensize.X * (e->scale.X * -0.01);
 				if (e->scale.Y < 0)
 					dstsize.Y = m_screensize.Y * (e->scale.Y * -0.01);
+				dstsize.X *= m_scale_factor;
+				dstsize.Y *= m_scale_factor;
 				v2s32 offset((e->align.X - 1.0) * dstsize.X / 2,
 				             (e->align.Y - 1.0) * dstsize.Y / 2);
+				offset.Y -= m_hud_move_upwards;
 				core::rect<s32> rect(0, 0, dstsize.X, dstsize.Y);
 				rect += pos + offset + v2s32(e->offset.X * m_scale_factor,
 				                             e->offset.Y * m_scale_factor);
@@ -619,14 +622,13 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 		dstd = srcd;
 		dstd.Height *= m_scale_factor;
 		dstd.Width  *= m_scale_factor;
-		offset.X *= m_scale_factor;
-		offset.Y *= m_scale_factor;
 	} else {
 		dstd.Height = size.Y * m_scale_factor;
 		dstd.Width  = size.X * m_scale_factor;
-		offset.X *= m_scale_factor;
-		offset.Y *= m_scale_factor;
 	}
+
+	offset.X *= m_scale_factor;
+	offset.Y *= m_scale_factor;
 
 	v2s32 p = pos;
 	if (corner & HUD_CORNER_LOWER)
@@ -634,7 +636,7 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 
 	p += offset;
 
-	p.Y -= g_settings->getU16("hud_move_upwards");
+	p.Y -= m_hud_move_upwards;
 
 	v2s32 steppos;
 	switch (drawdir) {
@@ -748,7 +750,7 @@ void Hud::drawHotbar(u16 playeritem) {
 	s32 hotbar_itemcount = player->hud_hotbar_itemcount;
 	s32 width = hotbar_itemcount * (m_hotbar_imagesize + m_padding * 2);
 	v2s32 pos = centerlowerpos - v2s32(width / 2, m_hotbar_imagesize + m_padding * 2.4);
-	pos.Y -= g_settings->getU16("hud_move_upwards");
+	pos.Y -= m_hud_move_upwards;
 
 	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
 	if ((float) width / (float) window_size.X <=

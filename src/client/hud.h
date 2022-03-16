@@ -110,6 +110,7 @@ private:
 	v2s32 m_displaycenter;
 	s32 m_hotbar_imagesize; // Takes hud_scaling into account, updated by resizeHotbar()
 	s32 m_padding; // Takes hud_scaling into account, updated by resizeHotbar()
+	s32 m_hud_move_upwards;
 	video::SColor hbar_colors[4];
 
 	std::vector<aabb3f> m_selection_boxes;
