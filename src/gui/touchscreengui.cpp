@@ -589,16 +589,9 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 	m_rarecontrolsbar.addButton(inventory_id, L"inv",  "inventory_btn.png");
 	m_rarecontrolsbar.addButton(drop_id,      L"drop", "drop_btn.png");*/
 
-	const bool minimap = g_settings->getBool("enable_minimap");
-
 	double button_075 = 1;
 	s32 button_05 = 1;
 	double button_05b = 0;
-	if (!minimap) {
-		button_075 = 0.75;
-		button_05 = 2;
-		button_05b = button_size * 0.5;
-	}
 
 	// init pause button [1]
 	initButton(escape_id,
@@ -609,14 +602,12 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 			L"Exit", false);
 
 	// init minimap button [2]
-	if (minimap) {
-		initButton(minimap_id,
-				rect<s32>(m_screensize.X / 2 - button_size,
-						  0,
-						  m_screensize.X / 2,
-						  button_size),
-				L"minimap", false);
-	}
+	initButton(minimap_id,
+			rect<s32>(m_screensize.X / 2 - button_size,
+					  0,
+					  m_screensize.X / 2,
+					  button_size),
+			L"minimap", false);
 
 	// init rangeselect button [3]
 	initButton(range_id,
@@ -729,12 +720,11 @@ void TouchScreenGUI::handleButtonEvent(touch_gui_button_id button,
 		assert(pos != btn->ids.end());
 		btn->ids.erase(pos);
 
-		if (!btn->ids.empty())
-			return;
-
-		translated->KeyInput.PressedDown = false;
-		btn->repeatcounter               = -1;
-		m_receiver->OnEvent(*translated);
+		if (btn->ids.empty()) {
+			translated->KeyInput.PressedDown = false;
+			btn->repeatcounter               = -1;
+			m_receiver->OnEvent(*translated);
+		}
 	}
 	delete translated;
 }
@@ -793,7 +783,8 @@ void TouchScreenGUI::handleReleaseEvent(size_t evt_id)
 			m_joystick_status[i] = false;
 		applyJoystickStatus();
 
-		m_joystick_btn_off->guibutton->setVisible(true);
+		if (m_visible)
+			m_joystick_btn_off->guibutton->setVisible(true);
 		m_joystick_btn_bg->guibutton->setVisible(false);
 		m_joystick_btn_center->guibutton->setVisible(false);
 	} else {
@@ -1000,7 +991,7 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 					s32 dy = Y - m_pointerpos[event.TouchInput.ID].Y;
 
 					// adapt to similar behaviour as pc screen
-					double d = g_settings->getFloat("mouse_sensitivity");
+					double d = rangelim(g_settings->getFloat("mouse_sensitivity"), 0.1, 1.0);
 
 					m_camera_yaw_change -= dx * d;
 					m_camera_pitch = MYMIN(MYMAX(m_camera_pitch + (dy * d), -180), 180);
@@ -1177,10 +1168,6 @@ void TouchScreenGUI::step(float dtime)
 	for (auto &button : m_buttons) {
 		if (!button.ids.empty()) {
 			button.repeatcounter += dtime;
-
-			// in case we're moving around digging does not happen
-			if (m_has_move_id)
-				m_move_has_really_moved = true;
 
 			if (button.repeatcounter < button.repeatdelay)
 				continue;
