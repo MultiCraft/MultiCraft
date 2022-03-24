@@ -35,6 +35,8 @@ local function create_world_formspec()
 	local game_by_gameidx = core.get_game(gameidx)
 	if game_by_gameidx ~= nil then
 		local allowed_mapgens = {"v7p", "flat", "valleys"}
+
+		-- Is this loop needed?
 		for key, value in pairs(allowed_mapgens) do
 			allowed_mapgens[key] = value:trim()
 		end
@@ -46,6 +48,8 @@ local function create_world_formspec()
 				end
 			end
 		end
+
+		mapgens[#mapgens + 1] = "superflat"
 	end
 
 	local mglist = ""
@@ -106,8 +110,25 @@ local function create_world_buttonhandler(this, fields)
 
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then
-				core.settings:set("mg_name",fields["dd_mapgen"])
+				local old_mg_flags
+				if fields["dd_mapgen"] == "superflat" then
+					core.settings:set("mg_name", "flat")
+					old_mg_flags = core.settings:get("mg_flags")
+					core.settings:set("mg_flags", "nocaves,nodungeons,nodecorations")
+				else
+					core.settings:set("mg_name",fields["dd_mapgen"])
+				end
 				message = core.create_world(worldname,gameindex)
+
+				-- Restore the old mg_flags setting if creating a superflat world
+				if fields["dd_mapgen"] == "superflat" then
+					core.settings:set("mg_name", "superflat")
+					if old_mg_flags then
+						core.settings:set("mg_flags", old_mg_flags)
+					else
+						core.settings:remove("mg_flags")
+					end
+				end
 			else
 				message = fgettext("A world named \"$1\" already exists", worldname)
 			end
