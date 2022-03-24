@@ -35,17 +35,9 @@ local function create_world_formspec()
 	local game_by_gameidx = core.get_game(gameidx)
 	if game_by_gameidx ~= nil then
 		local allowed_mapgens = {"v7p", "flat", "valleys"}
-
-		-- Is this loop needed?
-		for key, value in pairs(allowed_mapgens) do
-			allowed_mapgens[key] = value:trim()
-		end
-
-		if #allowed_mapgens > 0 then
-			for i = #mapgens, 1, -1 do
-				if table.indexof(allowed_mapgens, mapgens[i]) == -1 then
-					table.remove(mapgens, i)
-				end
+		for i = #mapgens, 1, -1 do
+			if table.indexof(allowed_mapgens, mapgens[i]) == -1 then
+				table.remove(mapgens, i)
 			end
 		end
 
