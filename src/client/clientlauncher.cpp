@@ -158,31 +158,23 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 	skin->setColor(gui::EGDC_3D_SHADOW, video::SColor(255, 0, 0, 0));
 	skin->setColor(gui::EGDC_HIGH_LIGHT, video::SColor(255, 70, 120, 50));
 	skin->setColor(gui::EGDC_HIGH_LIGHT_TEXT, video::SColor(255, 255, 255, 255));
-#ifdef HAVE_TOUCHSCREENGUI
-	float density = RenderingEngine::getDisplayDensity();
-	skin->setSize(gui::EGDS_CHECK_BOX_WIDTH, (s32)(17.0f * density));
+	float density = RenderingEngine::getDisplayDensity() * g_settings->getFloat("gui_scaling");
+	skin->setSize(gui::EGDS_CHECK_BOX_WIDTH, (s32)(18.0f * density));
 	skin->setSize(gui::EGDS_SCROLLBAR_SIZE, (s32)(14.0f * density));
 	skin->setSize(gui::EGDS_WINDOW_BUTTON_WIDTH, (s32)(15.0f * density));
-	if (density > 1.5f) {
-		std::string sprite_path = porting::path_share + DIR_DELIM + "textures"
-		                          + DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM;
-		if (density > 3.5f)
-			sprite_path.append("checkbox_64.png");
-		else if (density > 2.0f)
-			sprite_path.append("checkbox_32.png");
-		else
-			sprite_path.append("checkbox_16.png");
-		// Texture dimensions should be a power of 2
-		gui::IGUISpriteBank *sprites = skin->getSpriteBank();
-		video::IVideoDriver *driver = RenderingEngine::get_video_driver();
-		video::ITexture *sprite_texture = driver->getTexture(sprite_path.c_str());
-		if (sprite_texture) {
-			s32 sprite_id = sprites->addTextureAsSprite(sprite_texture);
-			if (sprite_id != -1)
-				skin->setIcon(gui::EGDI_CHECK_BOX_CHECKED, sprite_id);
-		}
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
+	// Load check icon for the checkbox
+	// TODO other icons
+	std::string sprite_path = porting::path_share + DIR_DELIM + "textures"
+				+ DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM + "checkbox.png";
+	if (auto *sprite_texture = RenderingEngine::get_video_driver()->getTexture(sprite_path.c_str())) {
+		auto *sprites = skin->getSpriteBank();
+		s32 sprite_id = sprites->addTextureAsSprite(sprite_texture);
+		if (sprite_id != -1)
+			skin->setIcon(gui::EGDI_CHECK_BOX_CHECKED, sprite_id);
 	}
 #endif
+
 	g_fontengine = new FontEngine(guienv);
 	FATAL_ERROR_IF(g_fontengine == NULL, "Font engine creation failed.");
 
