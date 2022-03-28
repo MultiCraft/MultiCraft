@@ -176,9 +176,14 @@ public:
 	{
 		StyleSpec temp = styles[StyleSpec::STATE_DEFAULT];
 		temp.state_map = state;
+#ifdef HAVE_TOUCHSCREENGUI
+		// always render pressed as hovered on touchscreen
+		if (state & STATE_PRESSED)
+			state = State(state | STATE_HOVERED);
+#endif
 		for (int i = StyleSpec::STATE_DEFAULT + 1; i <= state; i++) {
 			if ((state & i) != 0) {
-				temp = temp | styles[i];
+				temp |= styles[i];
 			}
 		}
 
