@@ -4440,9 +4440,9 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "no_prepend[]"
 		<< "bgcolor[#320000b4;true]"
 		<< "background9[0,0;0,0;bg_common.png;true;40]"
-		<< "pwdfield[1,1.4;8.5,0.8;old_pw;" << strgettext("Old Password") << ";" << old_pw << "]"
-		<< "pwdfield[1,3;8.5,0.8;new_pw;" << strgettext("New Password") << ";" << new_pw << "]"
-		<< "pwdfield[1,4.6;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ";" << confirm_pw << "]"
+		<< "pwdfield[1,1.4;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
+		<< "pwdfield[1,3;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
+		<< "pwdfield[1,4.6;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
 		<< "button[1,5.9;4.1,0.8;btn_change_pw;" << strgettext("Change") << "]"
 		<< "button_exit[5.4,5.9;4.1,0.8;btn_cancel;" << strgettext("Cancel") << "]";
 
