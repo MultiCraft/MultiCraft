@@ -246,7 +246,6 @@
 		84F20F0A25D52958009562A9 /* guiBackgroundImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EE325D52956009562A9 /* guiBackgroundImage.cpp */; };
 		84F20F0B25D52958009562A9 /* guiHyperText.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EE425D52956009562A9 /* guiHyperText.cpp */; };
 		84F20F0C25D52958009562A9 /* guiAnimatedImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EE525D52956009562A9 /* guiAnimatedImage.cpp */; };
-		84F20F0D25D52958009562A9 /* guiPasswordChange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EE725D52956009562A9 /* guiPasswordChange.cpp */; };
 		84F20F0E25D52958009562A9 /* modalMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EE825D52956009562A9 /* modalMenu.cpp */; };
 		84F20F0F25D52958009562A9 /* guiButtonItemImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EE925D52957009562A9 /* guiButtonItemImage.cpp */; };
 		84F20F1025D52958009562A9 /* guiVolumeChange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EEA25D52957009562A9 /* guiVolumeChange.cpp */; };
@@ -800,7 +799,6 @@
 		84F20ECA25D52954009562A9 /* guiHyperText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiHyperText.h; path = ../../../../src/gui/guiHyperText.h; sourceTree = "<group>"; };
 		84F20ECB25D52954009562A9 /* guiEditBoxWithScrollbar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiEditBoxWithScrollbar.cpp; path = ../../../../src/gui/guiEditBoxWithScrollbar.cpp; sourceTree = "<group>"; };
 		84F20ECC25D52955009562A9 /* guiButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiButton.h; path = ../../../../src/gui/guiButton.h; sourceTree = "<group>"; };
-		84F20ECD25D52955009562A9 /* guiPasswordChange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiPasswordChange.h; path = ../../../../src/gui/guiPasswordChange.h; sourceTree = "<group>"; };
 		84F20ECE25D52955009562A9 /* intlGUIEditBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intlGUIEditBox.h; path = ../../../../src/gui/intlGUIEditBox.h; sourceTree = "<group>"; };
 		84F20ECF25D52955009562A9 /* guiFormSpecMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiFormSpecMenu.cpp; path = ../../../../src/gui/guiFormSpecMenu.cpp; sourceTree = "<group>"; };
 		84F20ED125D52955009562A9 /* guiButtonImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiButtonImage.h; path = ../../../../src/gui/guiButtonImage.h; sourceTree = "<group>"; };
@@ -825,7 +823,6 @@
 		84F20EE425D52956009562A9 /* guiHyperText.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiHyperText.cpp; path = ../../../../src/gui/guiHyperText.cpp; sourceTree = "<group>"; };
 		84F20EE525D52956009562A9 /* guiAnimatedImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiAnimatedImage.cpp; path = ../../../../src/gui/guiAnimatedImage.cpp; sourceTree = "<group>"; };
 		84F20EE625D52956009562A9 /* guiSkin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiSkin.h; path = ../../../../src/gui/guiSkin.h; sourceTree = "<group>"; };
-		84F20EE725D52956009562A9 /* guiPasswordChange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiPasswordChange.cpp; path = ../../../../src/gui/guiPasswordChange.cpp; sourceTree = "<group>"; };
 		84F20EE825D52956009562A9 /* modalMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modalMenu.cpp; path = ../../../../src/gui/modalMenu.cpp; sourceTree = "<group>"; };
 		84F20EE925D52957009562A9 /* guiButtonItemImage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiButtonItemImage.cpp; path = ../../../../src/gui/guiButtonItemImage.cpp; sourceTree = "<group>"; };
 		84F20EEA25D52957009562A9 /* guiVolumeChange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiVolumeChange.cpp; path = ../../../../src/gui/guiVolumeChange.cpp; sourceTree = "<group>"; };
@@ -1032,8 +1029,6 @@
 				84F20EF125D52957009562A9 /* guiKeyChangeMenu.cpp */,
 				84F20EFF25D52958009562A9 /* guiKeyChangeMenu.h */,
 				84F20EFC25D52958009562A9 /* guiMainMenu.h */,
-				84F20EE725D52956009562A9 /* guiPasswordChange.cpp */,
-				84F20ECD25D52955009562A9 /* guiPasswordChange.h */,
 				84F20EF525D52957009562A9 /* guiPathSelectMenu.cpp */,
 				84F20EDA25D52955009562A9 /* guiPathSelectMenu.h */,
 				84FD8E3326A0B04900EF2BFA /* guiScene.cpp */,
@@ -2047,7 +2042,6 @@
 				84135C1825D526D700CA4DCF /* filecache.cpp in Sources */,
 				84F20E3425D5282A009562A9 /* l_settings.cpp in Sources */,
 				84F20EB125D528D7009562A9 /* packages.cpp in Sources */,
-				84F20F0D25D52958009562A9 /* guiPasswordChange.cpp in Sources */,
 				84F20F0525D52958009562A9 /* profilergraph.cpp in Sources */,
 				84135C2625D526D700CA4DCF /* guiscalingfilter.cpp in Sources */,
 				84F20E4225D5282A009562A9 /* l_auth.cpp in Sources */,

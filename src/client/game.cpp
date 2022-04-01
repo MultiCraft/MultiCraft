@@ -46,7 +46,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gui/guiConfirmRegistration.h"
 #include "gui/guiFormSpecMenu.h"
 #include "gui/guiKeyChangeMenu.h"
-#include "gui/guiPasswordChange.h"
 #include "gui/guiVolumeChange.h"
 #include "gui/mainmenumanager.h"
 #include "gui/profilergraph.h"
@@ -170,6 +169,21 @@ struct LocalFormspecHandler : public TextDest
 			if (fields.find("btn_change_password") != fields.end()) {
 				g_gamecallback->changePassword();
 				return;
+			}
+
+			return;
+		}
+
+		if (m_formname == "MT_CHANGE_PW") {
+			if (fields.find("btn_change_pw") != fields.end()) {
+				const std::string old_pw = fields.at("old_pw");
+				const std::string new_pw = fields.at("new_pw");
+				const std::string confirm_pw = fields.at("confirm_pw");
+				if (new_pw != confirm_pw) {
+					g_gamecallback->changePassword(old_pw, new_pw, confirm_pw);
+					return;
+				}
+				m_client->sendChangePassword(old_pw, new_pw, true);
 			}
 
 			return;
@@ -809,6 +823,8 @@ private:
 
 	void showDeathFormspec();
 	void showPauseMenu();
+	void showChangePasswordDialog(std::string old_pw, std::string new_pw,
+		std::string confirm_pw);
 
 	void pauseAnimation();
 	void resumeAnimation();
@@ -1716,9 +1732,12 @@ inline bool Game::handleCallbacks()
 	}
 
 	if (g_gamecallback->changepassword_requested) {
-		(new GUIPasswordChange(guienv, guiroot, -1,
-				       &g_menumgr, client, texture_src))->drop();
+		showChangePasswordDialog(g_gamecallback->old_pw_tmp,
+				g_gamecallback->new_pw_tmp, g_gamecallback->confirm_pw_tmp);
 		g_gamecallback->changepassword_requested = false;
+		g_gamecallback->old_pw_tmp.clear();
+		g_gamecallback->new_pw_tmp.clear();
+		g_gamecallback->confirm_pw_tmp.clear();
 	}
 
 	if (g_gamecallback->changevolume_requested) {
@@ -4333,7 +4352,7 @@ void Game::showPauseMenu()
 		<< strgettext("Continue") << "]";
 
 	if (!simple_singleplayer_mode) {
-		os << "button_exit[3.5," << (ypos++) << ";4,0.5;btn_change_password;"
+		os << "button[3.5," << (ypos++) << ";4,0.5;btn_change_password;"
 			<< strgettext("Change Password") << "]";
 	}
 
@@ -4406,6 +4425,39 @@ void Game::showPauseMenu()
 	runData.pause_game_timer = 0;
 	if (simple_singleplayer_mode)
 		pauseAnimation();
+}
+
+void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
+		std::string confirm_pw)
+{
+	str_formspec_escape(old_pw);
+	str_formspec_escape(new_pw);
+	str_formspec_escape(confirm_pw);
+
+	std::ostringstream os;
+	os << "formspec_version[5]"
+		<< "size[10.5,7.9]"
+		<< "no_prepend[]"
+		<< "bgcolor[#320000b4;true]"
+		<< "background9[0,0;0,0;bg_common.png;true;40]"
+		<< "pwdfield[1,1.4;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
+		<< "pwdfield[1,3;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
+		<< "pwdfield[1,4.6;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
+		<< "button[1,5.9;4.1,0.8;btn_change_pw;" << strgettext("Change") << "]"
+		<< "button_exit[5.4,5.9;4.1,0.8;btn_cancel;" << strgettext("Cancel") << "]";
+
+	if (new_pw != confirm_pw)
+		os << "label[1,7.2;\x1b(c@red)" << strgettext("Passwords do not match!") << "]";
+
+	/* Create menu */
+	/* Note: FormspecFormSource and LocalFormspecHandler  *
+	 * are deleted by guiFormSpecMenu                     */
+	FormspecFormSource *fs_src = new FormspecFormSource(os.str());
+	LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_CHANGE_PW", client);
+
+	auto *&formspec = m_game_ui->getFormspecGUI();
+	GUIFormSpecMenu::create(formspec, client, &input->joystick,
+			fs_src, txt_dst, client->getFormspecPrepend(), sound);
 }
 
 /****************************************************************************/

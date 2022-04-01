@@ -1247,11 +1247,17 @@ void Client::clearOutChatQueue()
 }
 
 void Client::sendChangePassword(const std::string &oldpassword,
-	const std::string &newpassword)
+	const std::string &newpassword, const bool close_form)
 {
 	LocalPlayer *player = m_env.getLocalPlayer();
 	if (player == NULL)
 		return;
+
+	if (close_form) {
+		auto formspec = m_game_ui->getFormspecGUI();
+		if (formspec)
+			formspec->quitMenu();
+	}
 
 	// get into sudo mode and then send new password to server
 	m_password = oldpassword;

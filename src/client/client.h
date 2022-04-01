@@ -240,7 +240,7 @@ public:
 	void sendChatMessage(const std::wstring &message);
 	void clearOutChatQueue();
 	void sendChangePassword(const std::string &oldpassword,
-		const std::string &newpassword);
+		const std::string &newpassword, const bool close_form = false);
 	void sendDamage(u16 damage);
 	void sendBreath(u16 breath);
 	void sendRespawn();
