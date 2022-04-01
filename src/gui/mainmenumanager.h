@@ -32,7 +32,8 @@ public:
 	virtual void exitToOS() = 0;
 	virtual void keyConfig() = 0;
 	virtual void disconnect() = 0;
-	virtual void changePassword() = 0;
+	virtual void changePassword(const std::string &old_pw = "",
+		const std::string &new_pw = "", const std::string &confirm_pw = "") = 0;
 	virtual void changeVolume() = 0;
 
 	virtual void signalKeyConfigChange() = 0;
@@ -119,9 +120,13 @@ public:
 		disconnect_requested = true;
 	}
 
-	virtual void changePassword()
+	virtual void changePassword(const std::string &old_pw = "",
+		const std::string &new_pw = "", const std::string &confirm_pw = "")
 	{
 		changepassword_requested = true;
+		old_pw_tmp = old_pw;
+		new_pw_tmp = new_pw;
+		confirm_pw_tmp = confirm_pw;
 	}
 
 	virtual void changeVolume()
@@ -142,6 +147,10 @@ public:
 
 	bool disconnect_requested = false;
 	bool changepassword_requested = false;
+	std::string old_pw_tmp;
+	std::string new_pw_tmp;
+	std::string confirm_pw_tmp;
+
 	bool changevolume_requested = false;
 	bool keyconfig_requested = false;
 	bool shutdown_requested = false;

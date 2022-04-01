@@ -1507,7 +1507,7 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 			);
 
 		spec.send = true;
-		gui::IGUIEditBox *e = Environment->addEditBox(0, rect, true,
+		gui::IGUIEditBox *e = Environment->addEditBox(wpassword.c_str(), rect, true,
 				data->current_parent, spec.fid);
 
 		if (spec.fname == m_focused_element) {
