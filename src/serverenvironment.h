@@ -368,13 +368,13 @@ public:
 
 	const bool isCompatPlayerModel(const std::string &model_name);
 	inline bool getCompatSendOriginalModel() { return m_compat_send_original_model; }
-private:
 
 	/**
 	 * called if env_meta.txt doesn't exist (e.g. new world)
 	 */
 	void loadDefaultMeta();
 
+private:
 	static PlayerDatabase *openPlayerDatabase(const std::string &name,
 			const std::string &savedir, const Settings &conf);
 	static AuthDatabase *openAuthDatabase(const std::string &name,

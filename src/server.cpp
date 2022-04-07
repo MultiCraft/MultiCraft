@@ -482,7 +482,13 @@ void Server::init()
 	// Register us to receive map edit events
 	servermap->addEventReceiver(this);
 
-	m_env->loadMeta();
+	try {
+		m_env->loadMeta();
+	} catch (SerializationError &e) {
+		warningstream << "Environment metadata is corrupted: " << e.what() << std::endl;
+		warningstream << "Loading the default instead" << std::endl;
+		m_env->loadDefaultMeta();
+	}
 
 	// Those settings can be overwritten in world.mt, they are
 	// intended to be cached after environment loading.
