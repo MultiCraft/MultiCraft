@@ -1233,6 +1233,9 @@
 #    type: string
 # bind_address =
 
+#    Disable to prevent clients that don't support protocol version 37 from connecting.
+# enable_proto_compat = true
+
 #    Enable to disallow old clients from connecting.
 #    Older clients are compatible in the sense that they will not crash when connecting
 #    to new servers, but they may not support all new features that you are expecting.

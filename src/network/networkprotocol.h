@@ -212,6 +212,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // Server's supported network protocol range
 #define SERVER_PROTOCOL_VERSION_MIN 25
+#define SERVER_PROTOCOL_VERSION_MIN_NOCOMPAT 37
 #define SERVER_PROTOCOL_VERSION_MAX LATEST_PROTOCOL_VERSION
 
 // Client's supported network protocol range
