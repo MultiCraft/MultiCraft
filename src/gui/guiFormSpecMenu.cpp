@@ -3789,10 +3789,6 @@ void GUIFormSpecMenu::showTooltip(const std::wstring &text,
 	tooltip_offset_y  = 0;
 	if (m_pointer.X > (s32)screenSize.X / 2)
 		tooltip_offset_x = -(tooltip_offset_x + tooltip_width);
-
-	// Hide tooltip after ETIE_LEFT_UP
-	if (m_pointer.X == 0)
-		return;
 #endif
 
 	// Calculate and set the tooltip position
@@ -4335,14 +4331,8 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 						count = MYMIN(s_count, 10);
 					else if (button == BET_WHEEL_DOWN)
 						count = 1;
-					else { // left
-#ifdef HAVE_TOUCHSCREENGUI
-						if (s.listname == "craft")
-							count = 1;
-						else
-#endif
+					else // left
 						count = s_count;
-					}
 
 					if (!event.MouseInput.Shift) {
 						// no shift: select item
@@ -4363,8 +4353,14 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 						move_amount = 1;
 					else if (button == BET_MIDDLE)
 						move_amount = MYMIN(m_selected_amount, 10);
-					else if (button == BET_LEFT)
+					else if (button == BET_LEFT) {
+#ifdef HAVE_TOUCHSCREENGUI
+						if (s.listname == "craft")
+							move_amount = 1;
+						else
+#endif
 						move_amount = m_selected_amount;
+					}
 					// else wheeldown
 
 					if (identical) {

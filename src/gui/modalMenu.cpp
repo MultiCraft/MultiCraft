@@ -315,8 +315,10 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 				ret = focused->OnEvent(mouse_event);
 			if (!ret && m_hovered && m_hovered != focused)
 				ret = m_hovered->OnEvent(mouse_event);
-			if (event.TouchInput.Event == ETIE_LEFT_UP)
+			if (event.TouchInput.Event == ETIE_LEFT_UP) {
+				m_pointer = v2s32(0, 0);
 				leave();
+			}
 			return ret;
 		}
 		case 2: {

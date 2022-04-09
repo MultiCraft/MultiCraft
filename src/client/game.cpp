@@ -3633,7 +3633,7 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 	bool nohit_enabled = ((ItemGroupList) playeritem_def.groups)["nohit"] != 0;
 
 #ifdef HAVE_TOUCHSCREENGUI
-	if (isKeyDown(KeyType::PLACE) && !nohit_enabled) {
+	if (wasKeyPressed(KeyType::PLACE) && !nohit_enabled) {
 #else
 	if (isKeyDown(KeyType::DIG) && !nohit_enabled) {
 #endif
