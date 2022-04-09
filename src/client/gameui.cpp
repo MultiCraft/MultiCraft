@@ -74,9 +74,9 @@ void GameUI::init(Client *client)
 	// At the middle of the screen
 	// Object infos are shown in this
 	u32 chat_font_height = m_guitext_chat->getActiveFont()->getDimension(L"Ay").Height;
-	float scale = RenderingEngine::getDisplayDensity() * client->getHudScaling();
-#if defined(__ANDROID__) || defined(__IOS__)
-	scale /= 2;
+	float scale = 1.0f;
+#if defined(__ANDROID__) || defined(__APPLE__)
+	scale = RenderingEngine::getDisplayDensity() * client->getHudScaling() * 0.5f;
 #endif
 	m_guitext_info = gui::StaticText::add(guienv, L"",
 		core::rect<s32>(0, 0, 400, g_fontengine->getTextHeight() * 6) +

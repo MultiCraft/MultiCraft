@@ -121,7 +121,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	removeChildren();
 
 #ifdef HAVE_TOUCHSCREENGUI
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 2;
+	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
 #else

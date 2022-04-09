@@ -503,8 +503,13 @@ void set_default_settings()
 	settings->setDefault("vsync", "true");
 
 	float ScaleFactor = [[NSScreen mainScreen] backingScaleFactor];
-	if (ScaleFactor >= 2)
-		settings->setDefault("screen_dpi", "128");
+	settings->setDefault("screen_dpi", std::to_string(ScaleFactor * 72));
+	if (ScaleFactor >= 2) {
+		settings->setDefault("hud_scaling", "1.5");
+	} else {
+		settings->setDefault("hud_scaling", "1.25");
+		settings->setDefault("gui_scaling", "1.5");
+	}
 
 	// Shaders work but may reduce performance on iGPU
 	settings->setDefault("enable_shaders", "false");
@@ -690,9 +695,13 @@ void set_default_settings()
 		// 5.5" iPhone Plus
 		settings->setDefault("hud_scaling", "0.65");
 		settings->setDefault("mouse_sensitivity", "0.3");
-		settings->setDefault("font_size", font_small);
-	} else if (SDVersion5and8Inch || SDVersion6and1Inch || SDVersion6and5Inch) {
-		// 5.8+" iPhones
+	} else if (SDVersion5and8Inch || SDVersion6and1Inch) {
+		// 5.8" and 6.1" iPhones
+		settings->setDefault("hud_scaling", "0.8");
+		settings->setDefault("mouse_sensitivity", "0.35");
+		settings->setDefault("selectionbox_width", "6");
+	} else if SDVersion6and5Inch {
+		// 6.5" iPhone
 		settings->setDefault("hud_scaling", "0.85");
 		settings->setDefault("mouse_sensitivity", "0.35");
 		settings->setDefault("selectionbox_width", "6");
@@ -701,7 +710,6 @@ void set_default_settings()
 		settings->setDefault("hud_scaling", "0.9");
 		settings->setDefault("mouse_sensitivity", "0.25");
 		settings->setDefault("selectionbox_width", "6");
-		settings->setDefault("device_is_tablet", "false");
 	} else {
 		// iPad
 		settings->setDefault("mouse_sensitivity", "0.3");
@@ -709,14 +717,16 @@ void set_default_settings()
 	}
 
 	// Settings for the Rounded Screen and Home Bar
-	UIWindow *window = UIApplication.sharedApplication.windows.firstObject;
+	UIWindow *window = UIApplication.sharedApplication.keyWindow;
+	CGFloat safeAreaBottom = window.safeAreaInsets.bottom;
 
-	if (window.safeAreaInsets.bottom > 0) {
-		settings->setDefault("hud_move_upwards", "20");
-		if (SDVersioniPhone12Series)
+	if (safeAreaBottom > 0) {
+		settings->setDefault("hud_move_upwards", std::to_string(safeAreaBottom));
+		if SDVersioniPhone12Series
 			settings->setDefault("round_screen", "75");
 		else
 			settings->setDefault("round_screen", "35");
+	}
 #endif // iOS
 #endif
 }

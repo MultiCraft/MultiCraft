@@ -3297,12 +3297,19 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 			double fitx_imgsize;
 			double fity_imgsize;
 
+#if defined(__ANDROID__) || defined(__IOS__)
+			v2f padded_screensize(
+				mydata.screensize.X * 0.9f,
+				mydata.screensize.Y
+			);
+#else
 			// Pad the screensize with 5% of the screensize on all sides to ensure
 			// that even the largest formspecs don't touch the screen borders.
 			v2f padded_screensize(
 				mydata.screensize.X * 0.9f,
 				mydata.screensize.Y * 0.9f
 			);
+#endif
 
 			if (mydata.real_coordinates) {
 				fitx_imgsize = padded_screensize.X / mydata.invsize.X;
