@@ -6,9 +6,10 @@ cmake_policy(SET CMP0025 OLD)
 project(multicraft)
 set(PROJECT_NAME_CAPITALIZED "MultiCraft")
 
-set(CMAKE_CXX_STANDARD 11)
-set(GCC_MINIMUM_VERSION "4.8")
-set(CLANG_MINIMUM_VERSION "3.4")
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(GCC_MINIMUM_VERSION "5.1")
+set(CLANG_MINIMUM_VERSION "3.5")
 
 # Also remember to set PROTOCOL_VERSION in network/networkprotocol.h when releasing
 set(VERSION_MAJOR 2)

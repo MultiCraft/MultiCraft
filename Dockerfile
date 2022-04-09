@@ -1,4 +1,4 @@
-FROM alpine:3.11
+FROM alpine:3.14
 
 ENV MINETEST_GAME_VERSION master
 
@@ -49,7 +49,7 @@ RUN mkdir build && \
 	make -j2 && \
 	make install
 
-FROM alpine:3.11
+FROM alpine:3.14
 
 RUN apk add --no-cache sqlite-libs curl gmp libstdc++ libgcc libpq luajit && \
 	adduser -D multicraft --uid 30000 -h /var/lib/multicraft && \
