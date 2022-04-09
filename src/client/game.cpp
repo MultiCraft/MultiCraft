@@ -692,7 +692,7 @@ public:
 	void pauseGame();
 #endif
 #ifdef __IOS__
-	void customStatustext(const std::wstring &text, float time);
+	void customStatustext(const std::wstring &text);
 #endif
 
 protected:
@@ -1108,17 +1108,6 @@ void Game::run()
 	while (RenderingEngine::run()
 			&& !(*kill || g_gamecallback->shutdown_requested
 			|| (server && server->isShutdownRequested()))) {
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-		if (!device->isWindowFocused()) {
-			sleep_ms(50);
-			continue;
-		}
-#elif defined(__ANDROID__) || defined(__IOS__)
-		if (device->isWindowMinimized()) {
-			sleep_ms(50);
-			continue;
-		}
-#endif
 
 		const irr::core::dimension2d<u32> &current_screen_size =
 			RenderingEngine::get_video_driver()->getScreenSize();
@@ -1137,6 +1126,20 @@ void Game::run()
 		//    RenderingEngine::run() from this iteration
 		//  + Sleep time until the wanted FPS are reached
 		limitFps(&draw_times, &dtime);
+
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+		if (!device->isWindowFocused()) {
+			if (m_does_lost_focus_pause_game && !isMenuActive())
+				showPauseMenu();
+			sleep_ms(50);
+			continue;
+		}
+#elif defined(__ANDROID__) || defined(__IOS__)
+		if (device->isWindowMinimized()) {
+			sleep_ms(50);
+			continue;
+		}
+#endif
 
 		// Prepare render data for next iteration
 
@@ -1197,7 +1200,7 @@ void Game::shutdown()
 	g_touchscreengui->hide();
 #endif
 
-	showOverlayMessage(N_("Shutting down..."), 0, 0, false);
+	showOverlayMessage(N_("Shutting down..."), 0, 0);
 
 	if (clouds)
 		clouds->drop();
@@ -2558,19 +2561,6 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 
 inline void Game::step(f32 *dtime)
 {
-#if defined(__ANDROID__) || defined(__IOS__)
-	if (g_menumgr.pausesGame()) {
-		runData.pause_game_timer += *dtime;
-		float disconnect_time = 180.0f;
-#ifdef __IOS__
-		disconnect_time = simple_singleplayer_mode ? 60.0f : 120.0f;
-#endif
-		if (runData.pause_game_timer > disconnect_time) {
-			g_gamecallback->disconnect();
-			return;
-		}
-	}
-#endif
 	bool can_be_and_is_paused =
 			(simple_singleplayer_mode && g_menumgr.pausesGame());
 
@@ -4145,7 +4135,8 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 #endif
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	// FPS limiting causes freezes on macOS
-	frametime_min = 0;
+	if (!g_menumgr.pausesGame())
+		frametime_min = 0;
 #endif
 
 	if (fps_timings->busy_time < frametime_min) {
@@ -4170,6 +4161,20 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 		*dtime = 0;
 
 	fps_timings->last_time = time;
+
+#if defined(__ANDROID__) || defined(__IOS__)
+	if (g_menumgr.pausesGame()) {
+		runData.pause_game_timer += *dtime;
+		float disconnect_time = 180.0f;
+#ifdef __IOS__
+		disconnect_time = simple_singleplayer_mode ? 60.0f : 120.0f;
+#endif
+		if (runData.pause_game_timer > disconnect_time) {
+			g_gamecallback->disconnect();
+			return;
+		}
+	}
+#endif
 }
 
 void Game::showOverlayMessage(const char *msg, float dtime, int percent, bool draw_clouds)
@@ -4226,13 +4231,9 @@ void Game::pauseGame()
 #endif
 
 #ifdef __IOS__
-void Game::customStatustext(const std::wstring &text, float time)
+void Game::customStatustext(const std::wstring &text)
 {
-	m_statustext = text;
-	if (m_statustext == L"")
-		runData.statustext_time = 0;
-	else
-		runData.statustext_time = time;
+	m_game_ui->showStatusText(text);
 }
 #endif
 
@@ -4339,14 +4340,14 @@ void Game::showPauseMenu()
 	str_formspec_escape(control_text);
 #endif
 
-#ifndef __IOS__
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
-#else
-	float ypos = 1.5f;
+#if __IOS__
+	ypos += 0.5f;
 #endif
 	std::ostringstream os;
 
 	os << "formspec_version[1]" << SIZE_TAG
+		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
 		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_continue;"
 		<< strgettext("Continue") << "]";
@@ -4368,8 +4369,10 @@ void Game::showPauseMenu()
 #endif
 	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << "]";
+#ifndef __IOS__
 	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_exit_os;"
 		<< strgettext("Exit to OS")   << "]"
+#endif
 /*		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
 		<< "textarea[0.4,0.25;3.9,6.25;;" << PROJECT_NAME_C " " VERSION_STRING "\n"
 		<< "\n"
@@ -4523,11 +4526,11 @@ extern "C" void external_pause_game()
 #endif
 
 #ifdef __IOS__
-extern "C" void external_statustext(const char *text, float duration)
+extern "C" void external_statustext(const char *text)
 {
 	if (!g_game)
 		return;
 	std::wstring s = utf8_to_wide(std::string(text));
-	g_game->customStatustext(s, duration);
+	g_game->customStatustext(s);
 }
 #endif

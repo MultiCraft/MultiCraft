@@ -327,7 +327,7 @@ core.register_on_receiving_chat_message(function(message)
 	for _, func in ipairs(callbacks) do
 		local ok, err = pcall(func, msg)
 		if not ok then
-			core.log('error', '[SSCSM] ' .. tostring(err))
+			sscsm.com_send("sscsm:error", tostring(err))
 		end
 	end
 	return true

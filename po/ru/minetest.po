@@ -5303,7 +5303,7 @@ msgstr "Максимальное количество пакетов за ите
 
 #: src/settings_translation_file.cpp
 msgid "Maximum FPS"
-msgstr "Максимум кадровой частоты (FPS)"
+msgstr "Максимальный FPS"
 
 #: src/settings_translation_file.cpp
 msgid "Maximum FPS when the window is not focused, or when the game is paused."

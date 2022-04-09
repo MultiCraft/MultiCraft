@@ -60,6 +60,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "defaultsettings.h"
 #endif
 
+#ifdef __IOS__
+namespace irr {
+	class CIrrDeviceiOS : public IrrlichtDevice {
+	public:
+		void *getViewController();
+	};
+}
+#endif
+
 RenderingEngine *RenderingEngine::s_singleton = nullptr;
 
 
@@ -138,7 +147,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	params.EventReceiver = receiver;
 	params.HighPrecisionFPU = g_settings->getBool("high_precision_fpu");
 	params.ZBufferBits = 24;
-#if defined(__ANDROID__) || defined(__IOS__)
+#ifdef __ANDROID__
 	params.PrivateData = porting::app_global;
 #endif
 #if ENABLE_GLES

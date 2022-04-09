@@ -48,6 +48,7 @@ local function formspec(tabview, name, tabdata)
 	local range = tonumber(core.settings:get("viewing_range"))
 	local sensitivity = tonumber(core.settings:get("mouse_sensitivity")) * 2000
 	local touchtarget = core.settings:get_bool("touchtarget") or false
+	local fancy_leaves = core.settings:get("leaves_style") == "fancy"
 	local sound = tonumber(core.settings:get("sound_volume")) ~= 0 and true or false
 
 	local tab_string =
@@ -67,7 +68,7 @@ local function formspec(tabview, name, tabdata)
 		"checkbox[0.25,2.3;cb_inventory_items_animations;" .. fgettext("Inv. animations") .. ";"
 				.. dump(core.settings:get_bool("inventory_items_animations")) .. "]" ..
 		"checkbox[0.25,2.9;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
-				.. dump(sound) .. "]" ..
+				.. dump(fancy_leaves) .. "]" ..
 		"checkbox[0.25,3.5;cb_touchtarget;" .. fgettext("Touchtarget") .. ";"
 				.. dump(touchtarget) .. "]" ..
 		"checkbox[0.25,4.1;cb_sound;" .. fgettext("Sound") .. ";"
@@ -141,9 +142,6 @@ end
 
 --------------------------------------------------------------------------------
 local function handle_settings_buttons(this, fields, tabname, tabdata)
-	-- Note dropdowns have to be handled LAST!
-	local ddhandled = false
-
 --[[if fields["btn_advanced_settings"] ~= nil then
 		local adv_settings_dlg = create_adv_settings_dlg()
 		adv_settings_dlg:set_parent(this)
@@ -180,8 +178,8 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		return true
 	end
 	if fields["cb_fancy_leaves"] then
-		core.settings:set("dd_leaves_style", fields["cb_fancy_leaves"] and "fancy" or "opaque")
-		ddhandled = true
+		core.settings:set("leaves_style", fields["cb_fancy_leaves"] and "fancy" or "opaque")
+		return true
 	end
 	if fields["cb_touchtarget"] then
 		core.settings:set("touchtarget", fields["cb_touchtarget"])
@@ -214,6 +212,9 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		core.show_keys_menu()
 		return true
 	end]]
+
+	-- Note dropdowns have to be handled LAST!
+	local ddhandled = false
 
 	if fields["cb_touchscreen_target"] then
 		core.settings:set("touchtarget", fields["cb_touchscreen_target"])

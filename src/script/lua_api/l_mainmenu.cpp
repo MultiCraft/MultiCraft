@@ -755,6 +755,10 @@ bool ModApiMainMenu::mayModifyPath(std::string path)
 	if (fs::PathStartsWith(path, fs::RemoveRelativePathComponents(porting::path_cache)))
 		return true;
 
+	std::string path_share = fs::RemoveRelativePathComponents(porting::path_share);
+	if (fs::PathStartsWith(path, path_share + DIR_DELIM "builtin"))
+		return true;
+
 	return false;
 }
 

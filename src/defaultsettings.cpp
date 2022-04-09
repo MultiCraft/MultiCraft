@@ -76,7 +76,7 @@ void set_default_settings()
 	settings->setDefault("enable_remote_media_server", "true");
 	settings->setDefault("enable_client_modding", "true");
 	settings->setDefault("max_out_chat_queue_size", "20");
-	settings->setDefault("pause_on_lost_focus", "false");
+	settings->setDefault("pause_on_lost_focus", "true");
 	settings->setDefault("enable_register_confirmation", "false");
 
 	// Keymap
@@ -248,7 +248,7 @@ void set_default_settings()
 	settings->setDefault("transparency_sorting", "true");
 	settings->setDefault("texture_clean_transparent", "false");
 	settings->setDefault("texture_min_size", "0");
-	settings->setDefault("ambient_occlusion_gamma", "2.2");
+	settings->setDefault("ambient_occlusion_gamma", "1.8");
 #if ENABLE_GLES
 	settings->setDefault("enable_shaders", "false");
 #else
@@ -528,7 +528,6 @@ void set_default_settings()
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
 	settings->setDefault("curl_verify_cert", "false");
-	settings->setDefault("pause_on_lost_focus", "true");
 	settings->setDefault("max_objects_per_block", "16");
 	settings->setDefault("doubletap_jump", "true");
 	settings->setDefault("gui_scaling_filter_txr2img", "false");

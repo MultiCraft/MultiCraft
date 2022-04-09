@@ -286,10 +286,10 @@ inline const char *getPlatformName()
 		defined(__NetBSD__) || defined(__OpenBSD__)
 	"BSD"
 #elif defined(__APPLE__) && defined(__MACH__)
-	#if TARGET_OS_MAC
-		"OSX"
-	#elif TARGET_OS_IPHONE
+	#if TARGET_OS_IPHONE
 		"iOS"
+	#elif TARGET_OS_MAC
+		"OSX"
 	#else
 		"Apple"
 	#endif

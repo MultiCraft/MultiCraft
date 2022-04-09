@@ -38,14 +38,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if USE_SOUND
 	#include "sound_openal.h"
 #endif
-#ifdef __IOS__
-namespace irr {
-	class CIrrDeviceiOS : public IrrlichtDevice {
-	public:
-		void *getViewController();
-	};
-}
-#endif
 
 /* mainmenumanager.h
  */

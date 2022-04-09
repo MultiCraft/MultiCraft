@@ -23,15 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gui/mainmenumanager.h"
 #include "hud.h"
 
-#if defined(__ANDROID__)
-#include "porting_android.h"
-#endif
-
 #ifdef __IOS__
 #include "porting_ios.h"
-#endif
-
-#if defined(__IOS__)
 extern "C" void external_pause_game();
 #endif
 
