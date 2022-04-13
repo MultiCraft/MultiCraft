@@ -332,7 +332,10 @@ public:
 		m_version_major = major;
 		m_version_minor = minor;
 		m_version_patch = patch;
-		m_full_version = full;
+		m_full_version = full.c_str();
+		const size_t pos = full.find('\x00');
+		if (pos != std::string::npos)
+			m_platform = full.substr(pos + 1);
 	}
 
 	/* read version information */
@@ -340,7 +343,8 @@ public:
 	u8 getMinor() const { return m_version_minor; }
 	u8 getPatch() const { return m_version_patch; }
 	const std::string &getFullVer() const { return m_full_version; }
-	
+	const std::string &getPlatform() const { return m_platform; }
+
 	void setLangCode(const std::string &code) { m_lang_code = code; }
 	const std::string &getLangCode() const { return m_lang_code; }
 
@@ -426,6 +430,7 @@ private:
 	u8 m_version_patch = 0;
 
 	std::string m_full_version = "unknown";
+	std::string m_platform = "unknown";
 
 	u16 m_deployed_compression = 0;
 
