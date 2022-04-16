@@ -1301,7 +1301,8 @@ void Client::sendRespawn()
 void Client::sendReady()
 {
 	const char *platform_name = porting::getPlatformName();
-	const size_t version_len = strlen(g_version_hash) + 1 + strlen(platform_name);
+	const std::string sysinfo = porting::get_sysinfo();
+	const size_t version_len = strlen(g_version_hash) + 1 + strlen(platform_name) + 1 + sysinfo.size();
 	NetworkPacket pkt(TOSERVER_CLIENT_READY,
 			1 + 1 + 1 + 1 + 2 + sizeof(char) * version_len + 2);
 
@@ -1311,6 +1312,8 @@ void Client::sendReady()
 	pkt.putRawString(g_version_hash, (u16) strlen(g_version_hash));
 	pkt << (u8) 0;
 	pkt.putRawString(platform_name, (u16) strlen(platform_name));
+	pkt << ' ';
+	pkt.putRawString(sysinfo.c_str(), sysinfo.size());
 	pkt << (u16)FORMSPEC_API_VERSION;
 	Send(&pkt);
 }
