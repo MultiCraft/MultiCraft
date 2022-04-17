@@ -1312,7 +1312,7 @@ void Client::sendReady()
 	pkt.putRawString(g_version_hash, (u16) strlen(g_version_hash));
 	pkt << (u8) 0;
 	pkt.putRawString(platform_name, (u16) strlen(platform_name));
-	pkt << ' ';
+	pkt << (u8) 0;
 	pkt.putRawString(sysinfo.c_str(), sysinfo.size());
 	pkt << (u16)FORMSPEC_API_VERSION;
 	Send(&pkt);

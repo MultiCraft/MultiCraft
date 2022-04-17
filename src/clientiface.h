@@ -334,8 +334,13 @@ public:
 		m_version_patch = patch;
 		m_full_version = full.c_str();
 		const size_t pos = full.find('\x00');
-		if (pos != std::string::npos)
-			m_platform = full.substr(pos + 1);
+		if (pos != std::string::npos) {
+			m_platform = full.substr(pos + 1).c_str();
+
+			const size_t pos2 = full.find('\x00', pos + 1);
+			if (pos2 != std::string::npos)
+				m_sysinfo = full.substr(pos2 + 1);
+		}
 	}
 
 	/* read version information */
@@ -344,6 +349,7 @@ public:
 	u8 getPatch() const { return m_version_patch; }
 	const std::string &getFullVer() const { return m_full_version; }
 	const std::string &getPlatform() const { return m_platform; }
+	const std::string &getSysInfo() const { return m_sysinfo; }
 
 	void setLangCode(const std::string &code) { m_lang_code = code; }
 	const std::string &getLangCode() const { return m_lang_code; }
@@ -431,6 +437,7 @@ private:
 
 	std::string m_full_version = "unknown";
 	std::string m_platform = "unknown";
+	std::string m_sysinfo = "unknown";
 
 	u16 m_deployed_compression = 0;
 
