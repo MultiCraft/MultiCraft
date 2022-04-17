@@ -51,9 +51,8 @@ void NodeMetadata::serialize(std::ostream &os, u8 version, bool disk,
 			continue;
 
 		os << serializeString16(sv.first);
-		if (!formspec_prepend.empty() && sv.first == "formspec" &&
-				sv.second.find("no_prepend[]") == std::string::npos)
-			os << serializeString32(sv.second + formspec_prepend);
+		if (!formspec_prepend.empty() && sv.first == "formspec")
+			os << serializeString32(insert_formspec_prepend(sv.second, formspec_prepend));
 		else
 			os << serializeString32(sv.second);
 		if (version >= 2)

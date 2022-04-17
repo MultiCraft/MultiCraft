@@ -1542,9 +1542,8 @@ void Server::SendShowFormspecMessage(session_t peer_id, const std::string &forms
 	} else {
 		m_formspec_state_data[peer_id] = formname;
 		RemotePlayer *player = m_env->getPlayer(peer_id);
-		if (player && player->protocol_version < 37 &&
-				formspec.find("no_prepend[]") == std::string::npos)
-			pkt.putLongString(formspec + player->formspec_prepend);
+		if (player && player->protocol_version < 37)
+			pkt.putLongString(insert_formspec_prepend(formspec, player->formspec_prepend));
 		else
 			pkt.putLongString(formspec);
 	}
@@ -1935,10 +1934,9 @@ void Server::SendPlayerInventoryFormspec(session_t peer_id)
 		return;
 
 	NetworkPacket pkt(TOCLIENT_INVENTORY_FORMSPEC, 0, peer_id);
-	if (player->protocol_version < 37 && player->inventory_formspec.find(
-			"no_prepend[]") == std::string::npos)
-		pkt.putLongString(player->inventory_formspec +
-			player->formspec_prepend);
+	if (player->protocol_version < 37)
+		pkt.putLongString(insert_formspec_prepend(player->inventory_formspec,
+			player->formspec_prepend));
 	else
 		pkt.putLongString(player->inventory_formspec);
 
