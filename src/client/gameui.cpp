@@ -214,7 +214,7 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 	// Update chat text
 	if (m_chat_text_needs_update) {
 		m_chat_text_needs_update = false;
-		if ((!m_flags.show_hud || (!m_flags.show_debug && !m_flags.show_minimap)) &&
+		if ((!m_flags.show_hud || (!m_flags.show_minimal_debug && !m_flags.show_minimap)) &&
 				client->getRoundScreen() > 0) {
 			// Cache the space count
 			if (!m_space_count) {
