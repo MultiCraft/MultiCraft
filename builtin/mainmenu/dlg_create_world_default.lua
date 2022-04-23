@@ -94,8 +94,20 @@ local function create_world_buttonhandler(this, fields)
 		end
 
 		if gameindex ~= 0 then
+			-- For unnamed worlds use the generated name 'World <number>',
+			-- where the number increments: it is set to 1 larger than the largest
+			-- generated name number found.
 			if worldname == "" then
-				worldname = "World " .. math.random(1000, 9999)
+				menudata.worldlist:set_filtercriteria(nil) -- to count all existing worlds
+				local worldnum_max = 0
+				for _, world in ipairs(menudata.worldlist:get_list()) do
+					-- Match "World 1" and "World 1 a" (but not "World 1a")
+					local worldnum = world.name:match("^World (%d+)$") or world.name:match("^World (%d+) ")
+					if worldnum then
+						worldnum_max = math.max(worldnum_max, tonumber(worldnum))
+					end
+				end
+				worldname = "World " .. worldnum_max + 1
 			end
 
 			core.settings:set("fixed_map_seed", fields["te_seed"])

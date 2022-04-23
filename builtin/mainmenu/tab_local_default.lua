@@ -17,6 +17,7 @@
 
 local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
+local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
 local esc = core.formspec_escape
 
@@ -105,6 +106,7 @@ local function get_formspec()
 
 			"image_button[7.2,3.09;4,0.83;" ..
 				esc(defaulttexturedir) .. creative_bg .. ";;;true;false]" ..
+			"style[cb_creative_mode;content_offset=0]" ..
 			"image_button[7.2,3.09;4,0.83;" ..
 				esc(defaulttexturedir) .. creative_checkbox .. ";cb_creative_mode;;true;false]" ..
 
@@ -121,7 +123,7 @@ local function get_formspec()
 				esc(defaulttexturedir) .. "gift_btn_pressed.png]"
 	end
 
-	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
+	if not mobile then
 		retval = retval ..
 				"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
 					dump(core.settings:get_bool("enable_server")) .. "]"

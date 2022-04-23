@@ -157,6 +157,7 @@ local function get_formspec()
 
 			"image_button[7.2,3.09;4,0.83;" ..
 				esc(defaulttexturedir) .. creative_bg .. ";;;true;false]" ..
+			"style[cb_creative_mode;content_offset=0]" ..
 			"image_button[7.2,3.09;4,0.83;" ..
 				esc(defaulttexturedir) .. creative_checkbox .. ";cb_creative_mode;;true;false]" ..
 
@@ -166,8 +167,7 @@ local function get_formspec()
 			"table[0,0;6.28,4.64;sp_worlds;" ..
 				menu_render_worldlist() .. ";" .. index .. "]"
 
-
-	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
+	if not mobile then
 		retval = retval ..
 				"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
 					dump(core.settings:get_bool("enable_server")) .. "]"

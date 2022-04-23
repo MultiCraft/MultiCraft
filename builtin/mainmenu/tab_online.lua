@@ -19,6 +19,10 @@
 local password_save = core.settings:get_bool("password_save")
 local password_tmp = ""
 
+local esc = core.formspec_escape
+local lower = utf8.lower
+local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
+
 local function get_formspec(tabview, name, tabdata)
 	-- Update the cached supported proto info,
 	-- it may have changed after a change by the settings menu.
@@ -34,27 +38,23 @@ local function get_formspec(tabview, name, tabdata)
 		tabdata.search_for = ""
 	end
 
-	local esc = core.formspec_escape
-
 	local search_panel
-	if PLATFORM == "Android" or PLATFORM == "iOS" then
+	if mobile then
 		search_panel =
-			"field[0.2,0.1;5.19,1;te_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"style[btn_mp_search;content_offset=0]" ..
-			"image_button[4.89,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png") ..
+			"field[0.2,0.1;5.1,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+			"image_button[4.87,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png") ..
 				";btn_mp_search;;true;false]" ..
-			"image_button[5.59,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png") ..
+			"image_button[5.62,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png") ..
 				";btn_mp_refresh;;true;false]" ..
-			"image_button[6.29,-0.13;0.83,0.83;" .. esc(defaulttexturedir ..
+			"image_button[6.37,-0.13;0.83,0.83;" .. esc(defaulttexturedir ..
 				(serverlistmgr.mobile_only and "online_mobile" or "online_pc") .. ".png") ..
 				";btn_mp_mobile;;true;false]"
 	else
 		search_panel =
-			"field[0.2,0.1;5.8,1;te_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"style[btn_mp_search;content_offset=0]" ..
-			"image_button[5.5,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png") ..
+			"field[0.2,0.1;5.8,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+			"image_button[5.62,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png") ..
 				";btn_mp_search;;true;false]" ..
-			"image_button[6.26,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png") ..
+			"image_button[6.37,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png") ..
 				";btn_mp_refresh;;true;false]"
 	end
 
@@ -280,16 +280,19 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		return true
 	end
 
-	if fields.btn_mp_clear then
-		tabdata.search_for = ""
-		menudata.search_result = nil
+	if fields.btn_mp_refresh or fields.btn_mp_mobile then
+		if fields.btn_mp_mobile then
+			serverlistmgr.mobile_only = not serverlistmgr.mobile_only
+		end
+		serverlistmgr.sync()
 		return true
 	end
 
-	if fields.btn_mp_search or fields.key_enter_field == "te_search" then
+	if (fields.Dte_search or fields.btn_mp_search) and not
+			(fields.btn_mp_connect or fields.key_enter) then
 		tabdata.selected = 1
-		local input = fields.te_search:lower()
-		tabdata.search_for = fields.te_search
+		local input = lower(fields.Dte_search)
+		tabdata.search_for = fields.Dte_search
 
 		if #serverlistmgr.servers < 2 then
 			return true
@@ -317,13 +320,13 @@ local function main_button_handler(tabview, fields, name, tabdata)
 			for k = 1, #keywords do
 				local keyword = keywords[k]
 				if server.name then
-					local sername = server.name:lower()
+					local sername = lower(server.name)
 					local _, count = sername:gsub(keyword, keyword)
 					found = found + count * 4
 				end
 
 				if server.description then
-					local desc = server.description:lower()
+					local desc = lower(server.description)
 					local _, count = desc:gsub(keyword, keyword)
 					found = found + count * 2
 				end
@@ -344,17 +347,6 @@ local function main_button_handler(tabview, fields, name, tabdata)
 			core.settings:set("remote_port", first_server.port)
 			gamedata.serverdescription = first_server.description
 		end
-		return true
-	end
-
-	if fields.btn_mp_refresh then
-		serverlistmgr.sync()
-		return true
-	end
-
-	if fields.btn_mp_mobile then
-		serverlistmgr.mobile_only = not serverlistmgr.mobile_only
-		serverlistmgr.sync()
 		return true
 	end
 
