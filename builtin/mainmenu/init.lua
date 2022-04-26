@@ -155,7 +155,7 @@ function menudata.init_tabs()
 	end
 
 	ui.set_default("maintab")
-	
+
 	core.set_clouds(core.settings:get_bool("menu_clouds"))
 	check_new_version()
 	tv_main:show()
