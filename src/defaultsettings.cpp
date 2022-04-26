@@ -368,6 +368,13 @@ void set_default_settings()
 	settings->setDefault("contentdb_flag_blacklist", "nonfree, desktop_default");
 #endif
 
+	settings->setDefault("update_information_url", "https://multicraft.world/release_info.json");
+	settings->setDefault("update_last_checked", "");
+#if UPDATE_CHECKER_DEFAULT
+	settings->setDefault("update_last_known", "");
+#else
+	settings->setDefault("update_last_known", "all");
+#endif
 
 	// Server
 	settings->setDefault("compat_player_model", "character.b3d,3d_armor_character.b3d,skinsdb_3d_armor_character_5.b3d");

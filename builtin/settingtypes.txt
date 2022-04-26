@@ -998,6 +998,17 @@ client_mapblock_limit (Mapblock limit) int 7500
 #    Whether to show the client debug info (has the same effect as hitting F5).
 show_debug (Show debug info) bool false
 
+#    URL to JSON file which provides information about the newest MultiCraft release
+update_information_url (Update information URL) string https://multicraft.world/release_info.json
+
+#    Unix timestamp (integer) of when the client last checked for an update
+#    Set this value to "all" to never check for updates.
+update_last_checked (Last update check) string
+
+#    Version number which was last checked for an update.
+#    Hexadecimal representation: 0xMMIIPP, where M=Major, I=Minor, P=Patch
+update_last_known (Last known version update) int 0
+
 [Server / Singleplayer]
 
 #    Name of the server, to be displayed when players join and in the serverlist.

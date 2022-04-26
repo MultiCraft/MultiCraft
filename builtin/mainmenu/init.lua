@@ -50,6 +50,8 @@ if not mobile then
 	dofile(menupath .. DIR_DELIM .. "dlg_settings_advanced.lua")
 end
 
+dofile(menupath .. DIR_DELIM .. "dlg_version_info.lua")
+
 local tabs = {}
 
 if not mobile then
@@ -153,10 +155,10 @@ function menudata.init_tabs()
 	end
 
 	ui.set_default("maintab")
-	tv_main:show()
-
+	
 	core.set_clouds(core.settings:get_bool("menu_clouds"))
-
+	check_new_version()
+	tv_main:show()
 	ui.update()
 end
 
