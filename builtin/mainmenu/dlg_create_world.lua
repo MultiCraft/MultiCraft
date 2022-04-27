@@ -109,6 +109,7 @@ local function create_world_formspec(dialogdata)
 	end
 
 	local mapgens = core.get_mapgen_names()
+	mapgens[#mapgens + 1] = "superflat"
 
 	local current_seed = core.settings:get("fixed_map_seed") or ""
 	local current_mg   = core.settings:get("mg_name")
@@ -142,13 +143,21 @@ local function create_world_formspec(dialogdata)
 		local gameconfig = Settings(gamepath.."/game.conf")
 
 		local allowed_mapgens = (gameconfig:get("allowed_mapgens") or ""):split()
-		for key, value in pairs(allowed_mapgens) do
-			allowed_mapgens[key] = value:trim()
+		for key, value in ipairs(allowed_mapgens) do
+			value = value:trim()
+			allowed_mapgens[key] = value
+			if value == "flat" then
+				allowed_mapgens[#allowed_mapgens + 1] = "superflat"
+			end
 		end
 
 		local disallowed_mapgens = (gameconfig:get("disallowed_mapgens") or ""):split()
-		for key, value in pairs(disallowed_mapgens) do
-			disallowed_mapgens[key] = value:trim()
+		for key, value in ipairs(disallowed_mapgens) do
+			value = value:trim()
+			disallowed_mapgens[key] = value
+			if value == "flat" then
+				disallowed_mapgens[#disallowed_mapgens + 1] = "superflat"
+			end
 		end
 
 		if #allowed_mapgens > 0 then
@@ -194,7 +203,7 @@ local function create_world_formspec(dialogdata)
 	mglist = mglist:sub(1, -2)
 
 	local mg_main_flags = function(mapgen, y)
-		if mapgen == "singlenode" then
+		if mapgen == "singlenode" or mapgen == "superflat" then
 			return "", y
 		end
 		if disallowed_mapgen_settings["mg_flags"] then
@@ -397,8 +406,25 @@ local function create_world_buttonhandler(this, fields)
 
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then
-				core.settings:set("mg_name",fields["dd_mapgen"])
+				local old_mg_flags
+				if fields["dd_mapgen"] == "superflat" then
+					core.settings:set("mg_name", "flat")
+					old_mg_flags = core.settings:get("mg_flags")
+					core.settings:set("mg_flags", "nocaves,nodungeons,nodecorations")
+				else
+					core.settings:set("mg_name", fields["dd_mapgen"])
+				end
 				message = core.create_world(worldname,gameindex)
+
+				-- Restore the old mg_flags setting if creating a superflat world
+				if fields["dd_mapgen"] == "superflat" then
+					core.settings:set("mg_name", "superflat")
+					if old_mg_flags then
+						core.settings:set("mg_flags", old_mg_flags)
+					else
+						core.settings:remove("mg_flags")
+					end
+				end
 			else
 				message = fgettext("A world named \"$1\" already exists", worldname)
 			end
