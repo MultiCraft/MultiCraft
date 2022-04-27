@@ -303,10 +303,18 @@ core.register_on_modchannel_signal(function(channel_name, signal)
 	end
 end)
 
+local function is_fully_connected()
+	-- TOSERVER_CLIENT_READY is sent on a different reliable channel to all mod
+	-- channel messages. There's no "is_connected" or "register_on_connected"
+	-- in CSMs, the next best thing is checking the privilege list and position
+	-- as those are only sent after the server receives TOSERVER_CLIENT_READY.
+	return core.localplayer and (next(core.get_privilege_list()) or
+		not vector.equals(minetest.localplayer:get_pos(), {x = 0, y = -0.5, z = 0}))
+end
+
 local function attempt_to_join_mod_channel()
-	-- Wait for minetest.localplayer to become available.
-	if not minetest.localplayer then
-		minetest.after(0.05, attempt_to_join_mod_channel)
+	-- Wait for core.localplayer to become available.
+	if not is_fully_connected() then
 		core.after(0.05, attempt_to_join_mod_channel)
 		return
 	end
