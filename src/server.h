@@ -147,7 +147,7 @@ struct ClientInfo {
 	u8 ser_vers;
 	u16 prot_vers;
 	u8 major, minor, patch;
-	std::string vers_string, lang_code;
+	std::string vers_string, platform, sysinfo, lang_code;
 };
 
 class Server : public con::PeerHandler, public MapEventReceiver,

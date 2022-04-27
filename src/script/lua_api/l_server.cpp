@@ -250,6 +250,14 @@ int ModApiServer::l_get_player_information(lua_State *L)
 	lua_pushstring(L, info.vers_string.c_str());
 	lua_settable(L, table);
 
+	lua_pushstring(L,"platform");
+	lua_pushstring(L, info.platform.c_str());
+	lua_settable(L, table);
+
+	lua_pushstring(L,"sysinfo");
+	lua_pushstring(L, info.sysinfo.c_str());
+	lua_settable(L, table);
+
 	lua_pushstring(L,"state");
 	lua_pushstring(L, ClientInterface::state2Name(info.state).c_str());
 	lua_settable(L, table);

@@ -1281,6 +1281,8 @@ bool Server::getClientInfo(session_t peer_id, ClientInfo &ret)
 	ret.minor = client->getMinor();
 	ret.patch = client->getPatch();
 	ret.vers_string = client->getFullVer();
+	ret.platform = client->getPlatform();
+	ret.sysinfo = client->getSysInfo();
 
 	ret.lang_code = client->getLangCode();
 
