@@ -412,7 +412,7 @@ local function create_world_buttonhandler(this, fields)
 					old_mg_flags = core.settings:get("mg_flags")
 					core.settings:set("mg_flags", "nocaves,nodungeons,nodecorations")
 				else
-					core.settings:set("mg_name",fields["dd_mapgen"])
+					core.settings:set("mg_name", fields["dd_mapgen"])
 				end
 				message = core.create_world(worldname,gameindex)
 
