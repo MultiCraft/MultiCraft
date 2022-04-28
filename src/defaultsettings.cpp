@@ -370,10 +370,10 @@ void set_default_settings()
 
 	settings->setDefault("update_information_url", "https://multicraft.world/release_info.json");
 	settings->setDefault("update_last_checked", "");
-#if UPDATE_CHECKER_DEFAULT
+#if ENABLE_UPDATE_CHECKER
 	settings->setDefault("update_last_known", "");
 #else
-	settings->setDefault("update_last_known", "all");
+	settings->setDefault("update_last_known", "disabled");
 #endif
 
 	// Server

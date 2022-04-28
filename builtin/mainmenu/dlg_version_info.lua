@@ -42,7 +42,7 @@ local function version_info_buttonhandler(this, fields)
 		return true
 	end
 	-- if fields.version_check_never then
-	-- 	core.settings:set("update_last_known", "all")
+	-- 	core.settings:set("update_last_known", "disabled")
 	-- 	this:delete()
 	-- 	return true
 	-- end
@@ -118,7 +118,7 @@ end
 
 function check_new_version()
 	local url = core.settings:get("update_information_url")
-	if core.settings:get("update_last_known") == "all" or
+	if core.settings:get("update_last_known") == "disabled" or
 			url == "" then
 		-- Never show any updates
 		return
