@@ -248,3 +248,18 @@ core.event_handler = function(event)
 		return
 	end
 end
+
+
+--------------------------------------------------------------------------------
+if core.settings:get("just_reconnected") then
+	core.settings:remove("just_reconnected")
+elseif gamedata and gamedata.errormessage == "AsyncErr: Failed to bind socket (port already in use?)" and
+		(maintab == "local" or maintab == "local_default") and not core.settings:get_bool("enable_server") then
+	core.settings:set("just_reconnected", "true")
+	gamedata.singleplayer = true
+	gamedata.selected_world =
+		tonumber(core.settings:get("mainmenu_last_selected_world"))
+	gamedata.errormessage = nil
+	gamedata.do_reconnect = true
+	core.start()
+end
