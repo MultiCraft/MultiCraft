@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2014 sapier
-Copyright (C) 2014-2020 Maksim Gamarnik [MoNTE48] MoNTE48@mail.ua
+Copyright (C) 2014-2022 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -215,6 +215,7 @@ private:
 	std::map<int, rect<s32>> m_hud_rects;
 	std::map<size_t, irr::EKEY_CODE> m_hud_ids;
 	bool m_visible; // is the gui visible
+	bool m_buttons_initialized = false;
 
 	// value in degree
 	double m_camera_yaw_change = 0.0;

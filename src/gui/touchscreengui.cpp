@@ -2,7 +2,7 @@
 Copyright (C) 2014 sapier
 Copyright (C) 2018 srifqi, Muhammad Rifqi Priyo Susanto
 		<muhammadrifqipriyosusanto@gmail.com>
-Copyright (C) 2014-2020 Maksim Gamarnik [MoNTE48] MoNTE48@mail.ua
+Copyright (C) 2014-2022 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -632,6 +632,8 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 					  m_screensize.X,
 					  button_size),
 			L"Chat", false);
+
+	m_buttons_initialized = true;
 }
 
 touch_gui_button_id TouchScreenGUI::getButtonID(s32 x, s32 y)
@@ -1145,6 +1147,9 @@ TouchScreenGUI::~TouchScreenGUI()
 			button.guibutton = nullptr;
 		}
 	}
+
+	if (!m_buttons_initialized)
+		return;
 
 	if (m_joystick_btn_off->guibutton) {
 		m_joystick_btn_off->guibutton->drop();
