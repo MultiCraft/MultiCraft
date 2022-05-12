@@ -61,6 +61,7 @@ end
 
 local checked_worlds = false
 local function get_formspec()
+	mm_texture.set_dirt_bg()
 	menudata.worldlist:set_filtercriteria("default")
 
 	-- Only check the worlds once (on restart)

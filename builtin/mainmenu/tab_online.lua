@@ -136,7 +136,7 @@ local function get_formspec(tabview, name, tabdata)
 		if #favs > 0 then
 			for i = 1, #favs do
 				for j = 1, #serverlistmgr.servers do
-					if serverlistmgr.servers[j].address == favs[i].address and
+					if serverlistmgr.servers[j] and serverlistmgr.servers[j].address == favs[i].address and
 							serverlistmgr.servers[j].port == favs[i].port then
 						table.insert(serverlistmgr.servers, i, table.remove(serverlistmgr.servers, j))
 					end
