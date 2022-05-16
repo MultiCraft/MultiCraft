@@ -30,7 +30,7 @@ class WorkerViewModelFactory(
 	private val zips: Array<String>
 ) :
 	ViewModelProvider.Factory {
-	override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+	override fun <T : ViewModel> create(modelClass: Class<T>): T {
 		if (modelClass.isAssignableFrom(WorkerViewModel::class.java)) {
 			@Suppress("UNCHECKED_CAST")
 			return WorkerViewModel(application, zips) as T
