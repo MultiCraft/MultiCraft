@@ -51,5 +51,9 @@ void main(void)
 		: directional_ambient(normalize(inVertexNormal));
 #endif
 
+#ifdef GL_ES
+	varColor = inVertexColor.bgra;
+#else
 	varColor = inVertexColor;
+#endif
 }
