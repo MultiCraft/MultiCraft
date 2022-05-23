@@ -99,7 +99,7 @@ function ui.update()
 				"set_focus[btn_reconnect_yes;true]"
 		else
 			restart_btn =
-				"button[5,6.6;4,1;btn_reconnect_yes;" .. fgettext("OK") .. "]" ..
+				"button[5,6.6;4,1;btn_reconnect_no;" .. fgettext("OK") .. "]" ..
 				"set_focus[btn_reconnect_yes;true]"
 		end
 		formspec = {
