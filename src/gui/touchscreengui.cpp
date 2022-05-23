@@ -133,7 +133,7 @@ TouchScreenGUI *g_touchscreengui;
 static void load_button_texture(button_info *btn, const char *path,
 		const rect<s32> &button_rect, ISimpleTextureSource *tsrc, video::IVideoDriver *driver)
 {
-	unsigned int tid;
+	u32 tid;
 	video::ITexture *texture = guiScalingImageButton(driver,
 			tsrc->getTexture(path, &tid), button_rect.getWidth(),
 			button_rect.getHeight());
@@ -163,7 +163,7 @@ AutoHideButtonBar::AutoHideButtonBar(IrrlichtDevice *device,
 }
 
 void AutoHideButtonBar::init(ISimpleTextureSource *tsrc,
-		const char *starter_img, int button_id, const v2s32 &UpperLeft,
+		const char *starter_img, s32 button_id, const v2s32 &UpperLeft,
 		const v2s32 &LowerRight, autohide_button_bar_dir dir, float timeout)
 {
 	m_texturesource = tsrc;
@@ -209,7 +209,7 @@ void AutoHideButtonBar::addButton(touch_gui_button_id button_id,
 				<< std::endl;
 		return;
 	}
-	int button_size = 0;
+	s32 button_size = 0;
 
 	if ((m_dir == AHBB_Dir_Top_Bottom) || (m_dir == AHBB_Dir_Bottom_Top))
 		button_size = m_lower_right.X - m_upper_left.X;
@@ -219,8 +219,8 @@ void AutoHideButtonBar::addButton(touch_gui_button_id button_id,
 	irr::core::rect<int> current_button;
 
 	if ((m_dir == AHBB_Dir_Right_Left) || (m_dir == AHBB_Dir_Left_Right)) {
-		int x_start = 0;
-		int x_end = 0;
+		s32 x_start = 0;
+		s32 x_end = 0;
 
 		if (m_dir == AHBB_Dir_Left_Right) {
 			x_start = m_lower_right.X + (button_size * 1.25 * m_buttons.size())
@@ -435,10 +435,11 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device, IEventReceiver *receiver)
 	}
 
 	m_touchscreen_threshold = g_settings->getU16("touchscreen_threshold");
+	m_mouse_sensitivity = rangelim(g_settings->getFloat("mouse_sensitivity"), 0.1, 1.0);
 	m_fixed_joystick = g_settings->getBool("fixed_virtual_joystick");
 	m_joystick_triggers_special1 = g_settings->getBool("virtual_joystick_triggers_aux");
 	m_screensize = m_device->getVideoDriver()->getScreenSize();
-	button_size = MYMIN(m_screensize.Y / 4.5f,
+	button_size = std::min(m_screensize.Y / 4.5f,
 			RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("hud_scaling") * 65.0f);
 }
@@ -460,7 +461,7 @@ void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_
 }
 
 button_info *TouchScreenGUI::initJoystickButton(touch_gui_button_id id,
-		const rect<s32> &button_rect, int texture_id, bool visible)
+		const rect<s32> &button_rect, s32 texture_id, bool visible)
 {
 	auto *btn = new button_info();
 	btn->guibutton = m_guienv->addButton(button_rect, nullptr, id, L"O");
@@ -645,7 +646,7 @@ touch_gui_button_id TouchScreenGUI::getButtonID(s32 x, s32 y)
 				rootguielement->getElementFromPoint(core::position2d<s32>(x, y));
 
 		if (element)
-			for (unsigned int i = 0; i < after_last_element_id; i++)
+			for (u32 i = 0; i < after_last_element_id; i++)
 				if (element == m_buttons[i].guibutton)
 					return (touch_gui_button_id) i;
 	}
@@ -655,7 +656,7 @@ touch_gui_button_id TouchScreenGUI::getButtonID(s32 x, s32 y)
 
 touch_gui_button_id TouchScreenGUI::getButtonID(size_t eventID)
 {
-	for (unsigned int i = 0; i < after_last_element_id; i++) {
+	for (u32 i = 0; i < after_last_element_id; i++) {
 		button_info *btn = &m_buttons[i];
 
 		auto id = std::find(btn->ids.begin(), btn->ids.end(), eventID);
@@ -781,7 +782,7 @@ void TouchScreenGUI::handleReleaseEvent(size_t evt_id)
 		m_has_joystick_id = false;
 
 		// reset joystick
-		for (unsigned int i = 0; i < 4; i++)
+		for (u32 i = 0; i < 4; i++)
 			m_joystick_status[i] = false;
 		applyJoystickStatus();
 
@@ -993,7 +994,7 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 					s32 dy = Y - m_pointerpos[event.TouchInput.ID].Y;
 
 					// adapt to similar behaviour as pc screen
-					double d = rangelim(g_settings->getFloat("mouse_sensitivity"), 0.1, 1.0);
+					double d = m_mouse_sensitivity;
 
 					m_camera_yaw_change -= dx * d;
 					m_camera_pitch = MYMIN(MYMAX(m_camera_pitch + (dy * d), -180), 180);
@@ -1044,14 +1045,14 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 
 void TouchScreenGUI::handleChangedButton(const SEvent &event)
 {
-	for (unsigned int i = 0; i < after_last_element_id; i++) {
+	for (u32 i = 0; i < after_last_element_id; i++) {
 		if (m_buttons[i].ids.empty())
 			continue;
 
 		for (auto iter = m_buttons[i].ids.begin();
 				iter != m_buttons[i].ids.end(); ++iter) {
 			if (event.TouchInput.ID == *iter) {
-				int current_button_id =
+				s32 current_button_id =
 						getButtonID(event.TouchInput.X, event.TouchInput.Y);
 
 				if (current_button_id == i)
@@ -1069,7 +1070,7 @@ void TouchScreenGUI::handleChangedButton(const SEvent &event)
 		}
 	}
 
-	int current_button_id = getButtonID(event.TouchInput.X, event.TouchInput.Y);
+	s32 current_button_id = getButtonID(event.TouchInput.X, event.TouchInput.Y);
 
 	if (current_button_id == after_last_element_id)
 		return;
@@ -1122,7 +1123,7 @@ bool TouchScreenGUI::quickTapDetection()
 
 void TouchScreenGUI::applyJoystickStatus()
 {
-	for (unsigned int i = 0; i < 5; i++) {
+	for (u32 i = 0; i < 5; i++) {
 		if (i == 4 && !m_joystick_triggers_special1)
 			continue;
 
@@ -1191,7 +1192,7 @@ void TouchScreenGUI::step(float dtime)
 	}
 
 	// joystick
-	for (unsigned int i = 0; i < 4; i++) {
+	for (u32 i = 0; i < 4; i++) {
 		if (m_joystick_status[i]) {
 			applyJoystickStatus();
 			break;
@@ -1235,7 +1236,7 @@ void TouchScreenGUI::resetHud()
 	m_hud_rects.clear();
 }
 
-void TouchScreenGUI::registerHudItem(int index, const rect<s32> &rect)
+void TouchScreenGUI::registerHudItem(s32 index, const rect<s32> &rect)
 {
 	m_hud_rects[index] = rect;
 }
