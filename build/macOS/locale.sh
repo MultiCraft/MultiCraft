@@ -21,5 +21,10 @@ for lang in *; do
 done
 popd
 
-find $DEST -type d -name '.git' -print0 | xargs -0 -- rm -r
+find $DEST -type d -name '.git' -print0 | xargs -0 -- rm -rf
 find $DEST -type f -name '.*' -delete
+
+# remove broken languages
+for broken_lang in ar he hi ky ms_Arab th; do
+	find $DEST -type d -name $broken_lang -print0 | xargs -0 -- rm -rf
+done

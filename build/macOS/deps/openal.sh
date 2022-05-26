@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . sdk.sh
-OPENAL_VERSION=1.21.1
+OPENAL_VERSION=1.22.0
 
 if [ ! -d openal-src ]; then
 	wget https://github.com/kcat/openal-soft/archive/$OPENAL_VERSION.tar.gz
