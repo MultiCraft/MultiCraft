@@ -1101,7 +1101,7 @@ msgstr "ワールドが存在しません: "
 #. When in doubt, test your translation.
 #: src/client/fontengine.cpp
 msgid "needs_fallback_font"
-msgstr "yes"
+msgstr "no"
 
 #: src/client/game.cpp
 msgid ""

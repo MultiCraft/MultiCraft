@@ -302,16 +302,17 @@ void set_default_settings()
 
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
 	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-Italic.ttf"));
 	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Arimo-Bold.ttf"));
 	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
 #else
-	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
-	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
-	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
-	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
+	std::string MultiCraftFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf");
+	settings->setDefault("font_path", MultiCraftFont);
+	settings->setDefault("font_path_italic", MultiCraftFont);
+	settings->setDefault("font_path_bold", MultiCraftFont);
+	settings->setDefault("font_path_bold_italic", MultiCraftFont);
 #endif
 	settings->setDefault("font_bold", "false");
 	settings->setDefault("font_italic", "false");
@@ -332,11 +333,11 @@ void set_default_settings()
 	settings->setDefault("fallback_font_path", "/system/fonts/DroidSans.ttf");
 #endif
 #ifdef __IOS__
-	settings->setDefault("mono_font_path", g_settings->get("font_path"));
-	settings->setDefault("mono_font_path_italic", g_settings->get("font_path"));
-	settings->setDefault("mono_font_path_bold", g_settings->get("font_path"));
-	settings->setDefault("mono_font_path_bold_italic", g_settings->get("font_path"));
-	settings->setDefault("fallback_font_path", g_settings->get("font_path"));
+	settings->setDefault("mono_font_path", MultiCraftFont);
+	settings->setDefault("mono_font_path_italic", MultiCraftFont);
+	settings->setDefault("mono_font_path_bold", MultiCraftFont);
+	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
+	settings->setDefault("fallback_font_path", MultiCraftFont);
 #endif
 #endif
 
