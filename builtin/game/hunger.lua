@@ -67,12 +67,17 @@ local attribute = {
 local function is_player(player)
 	return (
 		core.is_player(player) and
-		not player.is_fake_player
+		not player.is_fake_player and
+		not core.is_creative_enabled(player:get_player_name())
 	)
 end
 
 --- SATURATION API ---
 function hunger.get_saturation(player)
+	if not is_player(player) then
+		return settings.level_max
+	end
+
 	-- This uses get_string so that nil is returned when there is no value as
 	-- get_string() will return an empty string and tonumber("") == nil.
 	return tonumber(player:get_meta():get_string(attribute.saturation))
@@ -90,6 +95,10 @@ function hunger.register_on_update_saturation(fun)
 end
 
 function hunger.update_saturation(player, level)
+	if not is_player(player) then
+		return
+	end
+
 	for _, callback in ipairs(hunger.registered_on_update_saturations) do
 		local result = callback(player, level)
 		if result then
@@ -123,16 +132,24 @@ function hunger.change_saturation(player, change)
 	return true
 end
 
-hunger.change = hunger.change_saturation -- for backwards compatablity
+hunger.change = hunger.change_saturation -- for backwards compatibility
 --- END SATURATION API ---
 
 --- POISON API ---
 function hunger.is_poisoned(player)
+	if not is_player(player) then
+		return false
+	end
+
 	local poisoned = player:get_meta():get_string(attribute.poisoned)
 	return poisoned and poisoned == "yes"
 end
 
 function hunger.set_poisoned(player, poisoned)
+	if not is_player(player) then
+		return
+	end
+
 	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
 	local attr = poisoned and "yes" or "no"
 	hud.change_item(player, "hunger", {text = texture})
@@ -164,6 +181,7 @@ function hunger.poison(player, ticks, interval)
 	if not is_player(player) then
 		return
 	end
+
 	for _, fun in ipairs(hunger.registered_on_poisons) do
 		local rv = fun(player, ticks, interval)
 		if rv == true then
@@ -201,15 +219,15 @@ function hunger.register_on_exhaust_player(fun)
 end
 
 function hunger.exhaust_player(player, change, cause)
+	if not is_player(player) then
+		return
+	end
+
 	for _, callback in ipairs(hunger.registered_on_exhaust_players) do
 		local result = callback(player, change, cause)
 		if result then
 			return result
 		end
-	end
-
-	if not is_player(player) then
-		return
 	end
 
 	local exhaustion = hunger.get_exhaustion(player) or 0
