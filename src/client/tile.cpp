@@ -1068,13 +1068,6 @@ video::IImage * Align2Npot2(video::IImage * image,
 	if (dim.Width == width)
 		return image;
 
-#ifdef __IOS__
-	if (height > 64 || width > 64) {
-		height /= 2;
-		width /= 2;
-	}
-#endif
-
 	video::IImage *targetimage =
 			driver->createImage(video::ECF_A8R8G8B8,
 					core::dimension2d<u32>(width, height));
