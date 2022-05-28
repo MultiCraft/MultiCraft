@@ -68,10 +68,11 @@ local function get_formspec(self)
 					{width=self.width, height=self.height}
 			local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 			formspec = formspec ..
-					string.format("size[%f,%f,%s]",tsize.width,tsize.height,
+					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height,
 						dump(self.fixed_size)) ..
 					"bgcolor[#0000]" ..
-					"background9[0,0;0,0;" .. defaulttexturedir .. "bg_common.png;true;40]" ..
+					"container[1,0]" ..
+					"background9[-0.2,-0.26;" .. tsize.width + 0.4 .. "," .. tsize.height + 0.75 .. ";" .. defaulttexturedir .. "bg_common.png;false;40]" ..
 					"style[settings_tab;content_offset=0]" ..
 					"image_button[12.02,1.3;1,1.55;" ..
 						defaulttexturedir .. "settings_menu.png;settings_tab;;true;false;" ..
@@ -81,6 +82,7 @@ local function get_formspec(self)
 						defaulttexturedir .. "authors_menu.png;authors_tab;;true;false;" ..
 						defaulttexturedir .. "authors_menu_pressed.png]"
 		end
+
 		formspec = formspec .. self:tab_header()
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
@@ -89,6 +91,10 @@ local function get_formspec(self)
 					self.tablist[self.last_tab_index].tabdata,
 					self.tablist[self.last_tab_index].tabsize
 					)
+
+		if self.parent == nil then
+			formspec = formspec .. "container_end[]"
+		end
 	end
 	return formspec
 end

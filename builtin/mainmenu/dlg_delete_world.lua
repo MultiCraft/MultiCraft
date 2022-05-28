@@ -24,16 +24,18 @@ local function delete_world_formspec(dialogdata)
 	end
 
 	local retval =
-		"size[12,5.4,false]" ..
+		"size[14,5.4,false]" ..
+		"container[1,0]" ..
 		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;40]" ..
+		"background9[-0.2,-0.26;12.4,6.15;" .. core.formspec_escape(defaulttexturedir ..
+			"bg_common.png") .. ";false;40]" ..
 		"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir ..
 			"blank.png") .. ";;" .. fgettext("Delete World \"$1\"?", delete_name) ..
 			";true;false;]" ..
 		"style[world_delete_confirm;bgcolor=red]" ..
 		"button[3,4.8;3,0.5;world_delete_confirm;" .. fgettext("Delete") .. "]" ..
-		"button[6,4.8;3,0.5;world_delete_cancel;" .. fgettext("Cancel") .. "]"
+		"button[6,4.8;3,0.5;world_delete_cancel;" .. fgettext("Cancel") .. "]" ..
+		"container_end[]"
 	return retval
 end
 

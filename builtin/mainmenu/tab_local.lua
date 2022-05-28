@@ -71,7 +71,7 @@ local function singleplayer_refresh_gamebar()
 
 	local btnbar = buttonbar_create("game_button_bar",
 		game_buttonbar_button_handler,
-		{x=-1.35, y=-0.32}, "vertical", {x=1, y=6.14})
+		{x=-0.35, y=-0.32}, "vertical", {x=1, y=6.14})
 
 	for i=1, #pkgmgr.games do
 		if pkgmgr.games[i].id ~= "default" then
