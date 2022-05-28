@@ -72,7 +72,9 @@ local function get_formspec(self)
 						dump(self.fixed_size)) ..
 					"bgcolor[#0000]" ..
 					"container[1,0]" ..
-					"background9[-0.2,-0.26;" .. tsize.width + 0.4 .. "," .. tsize.height + 0.75 .. ";" .. defaulttexturedir .. "bg_common.png;false;40]" ..
+					"background9[-0.2,-0.26;" .. tsize.width + 0.4 .. "," ..
+						tsize.height + 0.75 .. ";" .. defaulttexturedir ..
+						"bg_common.png;false;40]" ..
 					"style[settings_tab;content_offset=0]" ..
 					"image_button[12.02,1.3;1,1.55;" ..
 						defaulttexturedir .. "settings_menu.png;settings_tab;;true;false;" ..
