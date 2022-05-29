@@ -73,11 +73,13 @@ function messagebox(name, message)
 	return dialog_create(name,
 			function()
 				return ([[
-					size[12,5.4,false]
+					size[14,5.4,false]
+					container[1,0]
 					bgcolor[#0000]
-					background9[0,0;14,8;%s;true;40]
+					background9[-0.2,-0.26;12.4,6.15;%s;false;40]
 					textarea[1,1;10,4;;;%s]
 					button[5,4.5;2,0.8;ok;%s]
+					container_end[]
 				]]):format(bg, message, fgettext("OK"))
 			end,
 			function(this, fields)

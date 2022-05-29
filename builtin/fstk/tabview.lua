@@ -278,6 +278,7 @@ local tabview_metatable = {
 tabview_metatable.__index = tabview_metatable
 
 --------------------------------------------------------------------------------
+tabview_uses_container = true
 function tabview_create(name, size, tabheaderpos)
 	local self = {}
 
