@@ -195,8 +195,18 @@ struct LocalFormspecHandler : public TextDest
 			return;
 		}
 
-		if (m_client->modsLoaded())
-			m_client->getScript()->on_formspec_input(m_formname, fields);
+		if (m_client->modsLoaded()) {
+			try {
+				m_client->getScript()->on_formspec_input(m_formname, fields);
+			} catch (LuaError &e) {
+				const std::string error_message = std::string("LuaError: ") + e.what() +
+						strgettext("\nCheck debug.txt for details.");
+				m_client->setFatalError(error_message);
+#ifdef __ANDROID__
+				porting::handleError("LuaError (on_formspec_input)", error_message);
+#endif
+			}
+		}
 	}
 
 	Client *m_client = nullptr;

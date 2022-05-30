@@ -157,6 +157,8 @@ public:
 	/** default destructor */
 	virtual ~GUIEngine();
 
+	void handleMainMenuLuaError(const char* errmsg);
+
 	/**
 	 * return MainMenuScripting interface
 	 */

@@ -48,7 +48,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /******************************************************************************/
 void TextDestGuiEngine::gotText(const StringMap &fields)
 {
-	m_engine->getScriptIface()->handleMainMenuButtons(fields);
+	try {
+		m_engine->getScriptIface()->handleMainMenuButtons(fields);
+	} catch (LuaError &e) {
+		m_engine->handleMainMenuLuaError(e.what());
+	}
 }
 
 /******************************************************************************/
@@ -199,16 +203,24 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 
 		run();
 	} catch (LuaError &e) {
-		errorstream << "Main menu error: " << e.what() << std::endl;
-		m_data->script_data.errormessage = e.what();
-#ifdef __ANDROID__
-		porting::handleError("Main menu error", e.what());
-#endif
+		handleMainMenuLuaError(e.what());
 	}
 
 	m_menu->quitMenu();
 	m_menu->drop();
 	m_menu = NULL;
+}
+
+void GUIEngine::handleMainMenuLuaError(const char* errmsg) {
+	errorstream << "Main menu error: " << errmsg << std::endl;
+	m_data->script_data.errormessage = errmsg;
+#ifdef __ANDROID__
+	porting::handleError("Main menu error", errmsg);
+#endif
+
+	// Make the menu quit. Since an error message has been set this won't
+	// actually start the game.
+	m_startgame = true;
 }
 
 /******************************************************************************/
