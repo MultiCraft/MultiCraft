@@ -17,7 +17,9 @@
 
 local bg = core.formspec_escape(defaulttexturedir .. "bg_common.png")
 local function outdated_server_formspec(this)
-	local message = fgettext("The server you are trying to connect to is outdated!")
+	local message = fgettext("The server you are trying to connect to is outdated!") .. "\n" ..
+		fgettext("Support for older servers may be removed at any time.")
+
 	return ([[
 		size[14,5.4,false]
 		container[1,0]
