@@ -15,21 +15,28 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+local blank = core.formspec_escape(defaulttexturedir .. "blank.png")
 local bg = core.formspec_escape(defaulttexturedir .. "bg_common.png")
 local function outdated_server_formspec(this)
-	local message = fgettext("The server you are trying to connect to is outdated!") .. "\n" ..
-		fgettext("Support for older servers may be removed at any time.")
-
 	return ([[
 		size[14,5.4,false]
 		container[1,0]
 		bgcolor[#0000]
 		background9[-0.2,-0.26;12.4,6.15;%s;false;40]
-		textarea[1,1;10,4;;;%s]
+		image_button[1,1;10,0.8;%s;;%s;false;false]
+		image_button[1,1.7;10,0.8;%s;;%s;false;false]
 		button[2,4.5;4,0.8;cancel;%s]
 		button[6,4.5;4,0.8;continue;%s]
 		container_end[]
-	]]):format(bg, message, fgettext("Cancel"), fgettext("Join anyway"))
+	]]):format(
+		bg,
+		blank,
+		fgettext("The server you are trying to connect to is outdated!"),
+		blank,
+		fgettext("Support for older servers may be removed at any time."),
+		fgettext("Cancel"),
+		fgettext("Join anyway")
+	)
 end
 
 local function outdated_server_buttonhandler(this, fields)
