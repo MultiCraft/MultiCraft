@@ -162,6 +162,17 @@ local function get_formspec(tabview, name, tabdata)
 	return retval
 end
 
+local function is_favorite(server)
+	local favs = serverlistmgr.get_favorites()
+	for fav_id = 1, #favs do
+		if server.address == favs[fav_id].address and
+				server.port == favs[fav_id].port then
+			return true
+		end
+	end
+	return false
+end
+
 --------------------------------------------------------------------------------
 local function main_button_handler(tabview, fields, name, tabdata)
 	local serverlist = menudata.search_result or serverlistmgr.servers
@@ -363,16 +374,21 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		if fav_idx and fav_idx <= #serverlist and
 				fav.address == gamedata.address and
 				fav.port    == gamedata.port then
+			if not is_server_protocol_compat_or_error(
+						fav.proto_min, fav.proto_max) then
+				return true
+			elseif fav.proto_max < 37 and not is_favorite(fav) then
+				local dlg = create_outdated_server_dlg(fav)
+				dlg:set_parent(tabview)
+				tabview:hide()
+				dlg:show()
+				return true
+			end
 
 			serverlistmgr.add_favorite(fav)
 
 			gamedata.servername        = fav.name
 			gamedata.serverdescription = fav.description
-
-			if not is_server_protocol_compat_or_error(
-						fav.proto_min, fav.proto_max) then
-				return true
-			end
 		else
 			gamedata.servername        = ""
 			gamedata.serverdescription = ""

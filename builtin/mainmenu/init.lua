@@ -41,6 +41,7 @@ dofile(menupath .. DIR_DELIM .. "textures.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_create_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_create_world_default.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
+dofile(menupath .. DIR_DELIM .. "dlg_outdated_server.lua")
 
 if not mobile then
 	dofile(menupath .. DIR_DELIM .. "dlg_config_world.lua")
