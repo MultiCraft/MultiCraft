@@ -46,9 +46,19 @@ local function add_tab(self,tab)
 		tabdata = {},
 	}
 
-	self.tablist[#self.tablist + 1] = newtab
+	-- Hidden tabs have a negative index
+	local i
+	if tab.hidden then
+		i = -1
+		while self.tablist[i] do
+			i = i - 1
+		end
+	else
+		i = #self.tablist + 1
+	end
+	self.tablist[i] = newtab
 
-	if self.last_tab_index == #self.tablist then
+	if self.last_tab_index == i then
 		self.current_tab = tab.name
 		if tab.on_activate ~= nil then
 			tab.on_activate(nil,tab.name)
@@ -168,18 +178,15 @@ end
 --------------------------------------------------------------------------------
 local function tab_header(self)
 
-	local toadd = ""
-
-	for i=1,#self.tablist,1 do
-
-		if toadd ~= "" then
-			toadd = toadd .. ","
-		end
-
-		toadd = toadd .. self.tablist[i].caption
+	local captions = {}
+	for i = 1, #self.tablist do
+		captions[i] = self.tablist[i].caption
 	end
+
+	local toadd = table.concat(captions, ",")
 	return string.format("tabheader[%f,%f;%s;%s;%i;true;false]",
-			self.header_x, self.header_y, self.name, toadd, self.last_tab_index);
+			self.header_x, self.header_y, self.name, toadd,
+			math.max(self.last_tab_index, 1))
 end
 
 --------------------------------------------------------------------------------
@@ -221,8 +228,10 @@ end
 --------------------------------------------------------------------------------
 -- Declared as a local variable above handle_buttons
 function set_tab_by_name(self, name)
-	for i=1,#self.tablist,1 do
-		if self.tablist[i].name == name then
+	-- This uses pairs so that hidden tabs (with a negative index) are searched
+	-- as well
+	for i, tab in pairs(self.tablist) do
+		if tab.name == name then
 			switch_to_tab(self, i)
 			return true
 		end

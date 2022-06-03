@@ -165,7 +165,10 @@ local function get_formspec()
 				esc(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" ..
-				menu_render_worldlist() .. ";" .. index .. "]"
+				menu_render_worldlist() .. ";" .. index .. "]" ..
+			"image_button[9,-0.1;1.5,1.5;" ..
+				esc(defaulttexturedir) .. "no_texture_airlike.png;default_game;;true;false;" ..
+				esc(defaulttexturedir) .. "no_texture_airlike.png]"
 
 	if not mobile then
 		retval = retval ..
@@ -174,16 +177,18 @@ local function get_formspec()
 	end
 
 	if core.settings:get_bool("enable_server") then
-		retval = retval ..
-				"checkbox[6.6,0.65;cb_server_announce;" .. fgettext("Announce Server") .. ";" ..
-					dump(core.settings:get_bool("server_announce")) .. "]" ..
+		if core.settings:get_bool("server_announce") then
+			retval = retval ..
+					"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"
+		end
 
+		retval = retval ..
 				-- Name / Password
-				"label[6.6,-0.3;" .. fgettext("Name") .. ":" .. "]" ..
-				"label[9.3,-0.3;" .. fgettext("Password") .. ":" .. "]" ..
-				"field[6.9,0.6;2.8,0.5;te_playername;;" ..
+				"label[6.6,3.7;" .. fgettext("Name") .. ":" .. "]" ..
+				"label[9.3,3.7;" .. fgettext("Password") .. ":" .. "]" ..
+				"field[6.9,4.6;2.8,0.5;te_playername;;" ..
 					esc(core.settings:get("name")) .. "]" ..
-				"pwdfield[9.6,0.6;2.8,0.5;te_passwd;]"
+				"pwdfield[9.6,4.6;2.8,0.5;te_passwd;]"
 	end
 
 	return retval
@@ -324,6 +329,11 @@ local function main_button_handler(this, fields, name)
 
 		return true
 	end
+
+	if fields["default_game"] then
+		this:set_tab("local_default")
+		return true
+	end
 end
 
 local function on_change(type, old_tab, new_tab)
@@ -353,6 +363,7 @@ end
 return {
 	name = "local",
 	caption = fgettext("Other games"),
+	hidden = true,
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
 	on_change = on_change
