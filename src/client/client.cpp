@@ -243,7 +243,7 @@ const std::string &Client::getBuiltinLuaPath()
 
 const std::string &Client::getClientModsLuaPath()
 {
-	static const std::string clientmods_dir = porting::path_share + DIR_DELIM + "clientmods";
+	static const std::string clientmods_dir = porting::path_user + DIR_DELIM + "clientmods";
 	return clientmods_dir;
 }
 
