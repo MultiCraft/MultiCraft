@@ -2211,7 +2211,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2226,7 +2226,7 @@
 					"USE_SYSTEM_GMP=0",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=0",
+					"VERSION_PATCH=1",
 					"VERSION_EXTRA=\"\"",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2247,7 +2247,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype/lib",
@@ -2271,7 +2271,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2288,7 +2288,7 @@
 					"USE_SYSTEM_GMP=0",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=0",
+					"VERSION_PATCH=1",
 					"VERSION_EXTRA=\"\"",
 				);
 				HEADER_SEARCH_PATHS = (
@@ -2309,7 +2309,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 2.0;
+				MARKETING_VERSION = 2.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype/lib",
