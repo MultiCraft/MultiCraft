@@ -357,9 +357,11 @@ local function main_button_handler(tabview, fields, name, tabdata)
 			end)
 			menudata.search_result = search_result
 			local first_server = search_result[1]
-			core.settings:set("address",     first_server.address)
-			core.settings:set("remote_port", first_server.port)
-			gamedata.serverdescription = first_server.description
+			if first_server.address and first_server.port then
+				core.settings:set("address",     first_server.address)
+				core.settings:set("remote_port", first_server.port)
+				gamedata.serverdescription = first_server.description
+			end
 		end
 		return true
 	end
