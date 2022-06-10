@@ -19,14 +19,9 @@
 
 local function rename_modpack_formspec(dialogdata)
 	local retval =
-		"size[14,5.4,false]" ..
-		"container[1,0]" ..
-		"bgcolor[#0000]" ..
-		"background9[-0.2,-0.26;12.4,6.15;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";false;40]" ..
 		"button[3,4.8;3,0.5;dlg_rename_modpack_confirm;"..
 				fgettext("Accept") .. "]" ..
-		"button[3,4.8;3,0.5;dlg_rename_modpack_cancel;"..
+		"button[6,4.8;3,0.5;dlg_rename_modpack_cancel;"..
 				fgettext("Cancel") .. "]"
 
 	local input_y = 2
@@ -38,8 +33,7 @@ local function rename_modpack_formspec(dialogdata)
 	end
 	retval = retval ..
 		"field[2.5," .. input_y .. ";7,0.5;te_modpack_name;" ..
-		fgettext("Rename Modpack:") .. ";" .. dialogdata.mod.dir_name .. "]" ..
-		"container_end[]"
+		fgettext("Rename Modpack:") .. ";" .. dialogdata.mod.dir_name .. "]"
 
 	return retval
 end
@@ -72,7 +66,7 @@ function create_rename_modpack_dlg(modpack)
 	local retval = dialog_create("dlg_delete_mod",
 					rename_modpack_formspec,
 					rename_modpack_buttonhandler,
-					nil)
+					nil, true)
 	retval.data.mod = modpack
 	return retval
 end

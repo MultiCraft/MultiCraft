@@ -952,11 +952,7 @@ local function handle_change_setting_buttons(this, fields)
 end
 
 local function create_settings_formspec(tabview, _, tabdata)
-	local formspec = "size[14,5.4;false]" ..
-			"container[1,0]" ..
-			"bgcolor[#0000]" ..
-			"background9[-0.2,-0.26;12.4,6.15;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";false;40]" ..
+	local formspec =
 			"tablecolumns[color;tree;text,width=28;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..
 			"field[0.3,0.1;10.2,1;search_string;;" .. core.formspec_escape(search_string) .. "]" ..
@@ -1008,8 +1004,7 @@ local function create_settings_formspec(tabview, _, tabdata)
 			"button[10,4.9;2,1;btn_edit;" .. fgettext("Edit") .. "]" ..
 			"button[7,4.9;3,1;btn_restore;" .. fgettext("Restore Default") .. "]" ..
 			"checkbox[0,4.3;cb_tech_settings;" .. fgettext("Show technical names") .. ";"
-					.. dump(core.settings:get_bool("main_menu_technical_settings")) .. "]" ..
-			"container_end[]"
+					.. dump(core.settings:get_bool("main_menu_technical_settings")) .. "]"
 
 	return formspec
 end
@@ -1105,7 +1100,7 @@ function create_adv_settings_dlg()
 	local dlg = dialog_create("settings_advanced",
 				create_settings_formspec,
 				handle_settings_buttons,
-				nil)
+				nil, true)
 
 				return dlg
 end
