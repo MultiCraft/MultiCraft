@@ -202,7 +202,7 @@ local function button_header(self)
 		if not tab.hidden and tab.caption ~= "" then
 			visible_tabs[#visible_tabs + 1] = tab
 
-			local w = utf8.len(core.get_translated_string(tab.caption)) / 5
+			local w = utf8.len(core.get_translated_string(tab.caption)) / 6
 			btn_widths[#visible_tabs] = w
 			total_width = total_width + w
 		end
