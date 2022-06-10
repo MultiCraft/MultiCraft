@@ -202,7 +202,7 @@ local function button_header(self)
 		if not tab.hidden and tab.caption ~= "" then
 			visible_tabs[#visible_tabs + 1] = tab
 
-			local w = utf8.len(tab.caption:gsub("\027%([^%)]+%)", ""):gsub("\027.", "")) / 5
+			local w = utf8.len(core.get_translated_string(tab.caption)) / 5
 			btn_widths[#visible_tabs] = w
 			total_width = total_width + w
 		end
@@ -210,19 +210,12 @@ local function button_header(self)
 
 	local toadd = "style_type[button;noclip=true]"
 
-	-- local x = (self.width - (#visible_tabs * 1.75)) / 2
-	-- for i = 1, #visible_tabs do
-		-- toadd = toadd .. "button[" .. x + (i - 1) * 1.75 .. ",-1;2,0.8;" ..
-		-- 	self.name .. ":" .. i .. ";" .. visible_tabs[i].caption .. "]"
-	-- end
-
 	-- The formspec is 15.4875 "real" coordinates wide
 	local x = (12.39 - total_width) / 2 - 0.3
-	print(x, total_width)
 	for i = 1, #visible_tabs do
 		local caption = visible_tabs[i].caption
 		local w = btn_widths[i]
-		toadd = toadd .. "button[" .. x .. ",-1;" .. w + 0.225 .. ",0.8;" ..
+		toadd = toadd .. "button[" .. x .. ",-1.05;" .. w + 0.225 .. ",0.8;" ..
 			self.name .. ":" .. i .. ";" .. caption .. "]"
 		x = x + w
 	end
