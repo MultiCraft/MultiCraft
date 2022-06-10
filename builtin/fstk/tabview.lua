@@ -208,7 +208,7 @@ local function button_header(self)
 		end
 	end
 
-	local toadd = "style_type[button;noclip=true]"
+	local toadd = ""
 
 	-- The formspec is 15.4875 "real" coordinates wide
 	local x = (12.39 - total_width) / 2 - 0.3
