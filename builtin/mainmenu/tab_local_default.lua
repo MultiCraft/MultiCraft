@@ -60,7 +60,7 @@ local function create_default_worlds()
 end
 
 local checked_worlds = false
-local function get_formspec(this)
+local function get_formspec()
 	mm_texture.set_dirt_bg()
 	menudata.worldlist:set_filtercriteria("default")
 
@@ -117,14 +117,11 @@ local function get_formspec(this)
 			"table[0,0;6.28,4.64;sp_worlds;" ..
 				menu_render_worldlist() .. ";" .. index .. "]"
 
-	for _, tab in pairs(this.tablist) do
-		if tab.name == "local" then
-			retval = retval ..
-				"image_button[9,-0.1;1.5,1.5;" ..
-					esc(defaulttexturedir) .. "no_texture_airlike.png;other_games;;true;false;" ..
-					esc(defaulttexturedir) .. "no_texture_airlike.png]"
-			break
-		end
+	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
+		retval = retval ..
+			"image_button[9,-0.1;1.5,1.5;" ..
+				esc(defaulttexturedir) .. "no_texture_airlike.png;other_games;;true;false;" ..
+				esc(defaulttexturedir) .. "no_texture_airlike.png]"
 	end
 
 	if PLATFORM == "Android" then
