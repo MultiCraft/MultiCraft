@@ -82,7 +82,7 @@ local function get_formspec(self)
 						dump(self.fixed_size)) ..
 					"bgcolor[#0000]" ..
 					"container[1,1]" ..
-					"background9[-0.2,-0.26;" .. tsize.width + 0.4 .. "," ..
+					"background9[-0.2,-1.26;" .. tsize.width + 0.4 .. "," ..
 						tsize.height + 1.75 .. ";" .. defaulttexturedir ..
 						"bg_common.png;false;40]" ..
 					"style[settings_tab;content_offset=0]" ..
@@ -95,7 +95,7 @@ local function get_formspec(self)
 						defaulttexturedir .. "authors_menu_pressed.png]"
 		end
 
-		formspec = formspec .. self:tab_header()
+		formspec = formspec .. self:button_header()
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
 					self,
@@ -176,6 +176,7 @@ end
 
 
 --------------------------------------------------------------------------------
+--[[
 local function tab_header(self)
 
 	local captions = {}
@@ -188,18 +189,44 @@ local function tab_header(self)
 			self.header_x, self.header_y, self.name, toadd,
 			math.max(self.last_tab_index, 1))
 end
+]]
 
 
 --------------------------------------------------------------------------------
 local function button_header(self)
 
-	local toadd = ""
+	local visible_tabs = {}
+	local btn_widths = {}
+	local total_width = 0
+	for i, tab in ipairs(self.tablist) do
+		if not tab.hidden and tab.caption ~= "" then
+			visible_tabs[#visible_tabs + 1] = tab
 
-	local x = (self.width - (#self.tablist * 1.75)) / 2
-	for i=1,#self.tablist,1 do
-		toadd = toadd .. "button[" .. x + (i - 1) * 1.75 .. ",0;2,0.8;" ..
-			self.name .. ":" .. i .. ";" .. self.tablist[i].caption .. "]"
+			local w = utf8.len(tab.caption:gsub("\027%([^%)]+%)", ""):gsub("\027.", "")) / 5
+			btn_widths[#visible_tabs] = w
+			total_width = total_width + w
+		end
 	end
+
+	local toadd = "style_type[button;noclip=true]"
+
+	-- local x = (self.width - (#visible_tabs * 1.75)) / 2
+	-- for i = 1, #visible_tabs do
+		-- toadd = toadd .. "button[" .. x + (i - 1) * 1.75 .. ",-1;2,0.8;" ..
+		-- 	self.name .. ":" .. i .. ";" .. visible_tabs[i].caption .. "]"
+	-- end
+
+	-- The formspec is 15.4875 "real" coordinates wide
+	local x = (12.39 - total_width) / 2 - 0.3
+	print(x, total_width)
+	for i = 1, #visible_tabs do
+		local caption = visible_tabs[i].caption
+		local w = btn_widths[i]
+		toadd = toadd .. "button[" .. x .. ",-1;" .. w + 0.225 .. ",0.8;" ..
+			self.name .. ":" .. i .. ";" .. caption .. "]"
+		x = x + w
+	end
+
 	return toadd
 end
 
@@ -304,7 +331,7 @@ local tabview_metatable = {
 			function(self,handler) self.glb_evt_handler = handler end,
 	set_fixed_size =
 			function(self,state) self.fixed_size = state end,
-	tab_header = tab_header,
+	-- tab_header = tab_header,
 	button_header = button_header,
 	handle_tab_buttons = handle_tab_buttons
 }
