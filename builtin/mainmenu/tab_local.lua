@@ -362,7 +362,7 @@ end
 --------------------------------------------------------------------------------
 return {
 	name = "local",
-	caption = fgettext("Other games"),
+	caption = fgettext("Singleplayer"),
 	hidden = true,
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
