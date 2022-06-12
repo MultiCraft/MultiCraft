@@ -20,6 +20,7 @@ local password_save = core.settings:get_bool("password_save")
 local password_tmp = ""
 
 local esc = core.formspec_escape
+local defaulttexturedir = esc(defaulttexturedir)
 local lower = utf8.lower
 local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
@@ -42,20 +43,20 @@ local function get_formspec(tabview, name, tabdata)
 	if mobile then
 		search_panel =
 			"field[0.2,0.1;5.1,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"image_button[4.87,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png") ..
-				";btn_mp_search;;true;false]" ..
-			"image_button[5.62,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png") ..
-				";btn_mp_refresh;;true;false]" ..
-			"image_button[6.37,-0.13;0.83,0.83;" .. esc(defaulttexturedir ..
-				(serverlistmgr.mobile_only and "online_mobile" or "online_pc") .. ".png") ..
+			"image_button[4.87,-0.13;0.83,0.83;" .. defaulttexturedir ..
+				"search.png;btn_mp_search;;true;false]" ..
+			"image_button[5.62,-0.13;0.83,0.83;" .. defaulttexturedir ..
+				"refresh.png;btn_mp_refresh;;true;false]" ..
+			"image_button[6.37,-0.13;0.83,0.83;" .. defaulttexturedir ..
+				(serverlistmgr.mobile_only and "online_mobile" or "online_pc") .. ".png" ..
 				";btn_mp_mobile;;true;false]"
 	else
 		search_panel =
 			"field[0.2,0.1;5.8,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"image_button[5.62,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "search.png") ..
-				";btn_mp_search;;true;false]" ..
-			"image_button[6.37,-0.13;0.83,0.83;" .. esc(defaulttexturedir .. "refresh.png") ..
-				";btn_mp_refresh;;true;false]"
+			"image_button[5.62,-0.13;0.83,0.83;" .. defaulttexturedir ..
+				"search.png;btn_mp_search;;true;false]" ..
+			"image_button[6.37,-0.13;0.83,0.83;" .. defaulttexturedir ..
+				"refresh.png;btn_mp_refresh;;true;false]"
 	end
 
 	local retval =
@@ -76,8 +77,8 @@ local function get_formspec(tabview, name, tabdata)
 		"box[7.1,2.1;4.8,2.65;#33314B99]" ..
 
 		-- Connect
-		"style[btn_mp_connect;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
-			";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
+		"style[btn_mp_connect;fgimg=" .. defaulttexturedir ..
+			"btn_play.png;fgimg_hovered=" .. defaulttexturedir .. "btn_play_hover.png]" ..
 		"image_button[8.8,4.88;3.3,0.9;;btn_mp_connect;;true;false]" ..
 		"tooltip[btn_mp_connect;".. fgettext("Connect") .. "]"
 
@@ -89,7 +90,7 @@ local function get_formspec(tabview, name, tabdata)
 	if tabdata.selected and selected then
 		if gamedata.fav then
 			retval = retval .. "image_button[7.1,4.91;0.83,0.83;" ..
-				esc(defaulttexturedir .. "trash.png") .. ";btn_delete_favorite;;true;false]"
+				defaulttexturedir .. "trash.png;btn_delete_favorite;;true;false]"
 		end
 		if selected.description then
 			retval = retval .. "textarea[7.5,2.2;4.8,3;;" ..
@@ -100,7 +101,7 @@ local function get_formspec(tabview, name, tabdata)
 	--favorites
 	retval = retval ..
 		"background9[-0.07,0.7;7.19,5.08;" ..
-			esc(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
+			defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 		"tableoptions[background=#0000;border=false]" ..
 		"tablecolumns[" ..
 		image_column(fgettext("Favorite")) .. ",align=center;" ..

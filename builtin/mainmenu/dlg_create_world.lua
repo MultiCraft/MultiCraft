@@ -402,7 +402,9 @@ local function create_world_buttonhandler(this, fields)
 				worldname = "World " .. worldnum_max + 1
 			end
 
-			core.settings:set("fixed_map_seed", fields["te_seed"])
+			if fields["te_seed"] then
+				core.settings:set("fixed_map_seed", fields["te_seed"])
+			end
 
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then

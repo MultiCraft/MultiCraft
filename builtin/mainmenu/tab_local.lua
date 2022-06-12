@@ -17,9 +17,9 @@
 
 local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
-local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
 local esc = core.formspec_escape
+local defaulttexturedir = esc(defaulttexturedir)
 
 local function current_game()
 	local last_game_id = core.settings:get("menu_last_game")
@@ -100,10 +100,8 @@ local function singleplayer_refresh_gamebar()
 		end
 	end
 
-	if not mobile then
-		local plus_image = esc(defaulttexturedir .. "plus.png")
-		btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
-	end
+	local plus_image = defaulttexturedir .. "plus.png"
+	btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
 end
 
 local function filter_default()
@@ -138,59 +136,54 @@ local function get_formspec()
 	end
 
 	local retval =
-			"style[world_delete;fgimg=" .. esc(defaulttexturedir .. "world_delete.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_delete_hover.png") .. "]" ..
+			"style[world_delete;fgimg=" .. defaulttexturedir ..
+				"world_delete.png;fgimg_hovered=" .. defaulttexturedir .. "world_delete_hover.png]" ..
 			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
 			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
 
-			"style[world_create;fgimg=" .. esc(defaulttexturedir .. "world_new.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_new_hover.png") .. "]" ..
+			"style[world_create;fgimg=" .. defaulttexturedir ..
+				"world_new.png;fgimg_hovered=" .. defaulttexturedir .. "world_new_hover.png]" ..
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"image_button[9.33,4.84;2.67,0.87;" .. esc(defaulttexturedir .. "select_mods_btn.png") ..
-			";world_configure;".. fgettext("Select Mods") .. ";false;false]" ..
+			"image_button[9.33,4.84;2.67,0.87;" .. defaulttexturedir ..
+				"select_btn.png;world_configure;".. fgettext("Select Mods") .. ";false;false]" ..
 
-			"style[play;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
+			"style[play;fgimg=" .. defaulttexturedir .. "btn_play.png;fgimg_hovered=" ..
+				defaulttexturedir .. "btn_play_hover.png]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
-			"image_button[7.2,3.09;4,0.83;" ..
-				esc(defaulttexturedir) .. creative_bg .. ";;;true;false]" ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_bg .. ";;;true;false]" ..
 			"style[cb_creative_mode;content_offset=0]" ..
-			"image_button[7.2,3.09;4,0.83;" ..
-				esc(defaulttexturedir) .. creative_checkbox .. ";cb_creative_mode;;true;false]" ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_checkbox ..
+				";cb_creative_mode;;true;false]" ..
 
-			"background9[0,0;6.5,4.8;" ..
-				esc(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
+			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
-			"table[0,0;6.28,4.64;sp_worlds;" ..
-				menu_render_worldlist() .. ";" .. index .. "]" ..
-			"image_button[9,-0.1;1.5,1.5;" ..
-				esc(defaulttexturedir) .. "no_texture_airlike.png;default_game;;true;false;" ..
-				esc(defaulttexturedir) .. "no_texture_airlike.png]"
+			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
+			"image_button[9,-0.1;1.5,1.5;" .. defaulttexturedir ..
+				"no_texture_airlike.png;default_game;;true;false;" ..
+				defaulttexturedir .. "no_texture_airlike.png]"
 
 	local enable_server = core.settings:get_bool("enable_server")
 	if enable_server then
 		retval = retval ..
-				"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
-					dump(enable_server) .. "]"
+			"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
+				dump(enable_server) .. "]"
 	end
 
 	if enable_server then
 		if core.settings:get_bool("server_announce") then
 			retval = retval ..
-					"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"
+				"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"
 		end
 
 		retval = retval ..
-				-- Name / Password
-				"label[6.6,3.7;" .. fgettext("Name") .. ":" .. "]" ..
-				"label[9.3,3.7;" .. fgettext("Password") .. ":" .. "]" ..
-				"field[6.9,4.6;2.8,0.5;te_playername;;" ..
-					esc(core.settings:get("name")) .. "]" ..
-				"pwdfield[9.6,4.6;2.8,0.5;te_passwd;]"
+			-- Name / Password
+			"field[6.9,4.6;2.8,0.5;te_playername;" .. fgettext("Name") .. ":;" ..
+				esc(core.settings:get("name")) .. "]" ..
+			"pwdfield[9.6,4.6;2.8,0.5;te_passwd;" .. fgettext("Password") .. ":]"
 	end
 
 	return retval
