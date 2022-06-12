@@ -100,9 +100,6 @@ local function get_formspec()
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"image_button[9.33,4.84;2.67,0.87;" .. defaulttexturedir ..
-				"select_btn.png;world_configure;".. fgettext("Select Mods") .. ";false;false]" ..
-
 			"style[play;fgimg=" .. defaulttexturedir .. "btn_play.png;fgimg_hovered=" ..
 				defaulttexturedir .. "btn_play_hover.png]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
@@ -119,14 +116,14 @@ local function get_formspec()
 
 	if PLATFORM == "Android" then
 		retval = retval ..
-			"image_button[10.6,-0.1;1.5,1.5;" ..
+			"image_button[6.6,-0.1;1.5,1.5;" ..
 				defaulttexturedir .. "gift_btn.png;upgrade;;true;false;" ..
 				defaulttexturedir .. "gift_btn_pressed.png]"
 	end
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
-			"image_button[9,-0.1;1.5,1.5;" ..
+			"image_button[10.6,-0.1;1.5,1.5;" ..
 				defaulttexturedir .. "no_texture_airlike.png;other_games;;true;false;" ..
 				defaulttexturedir .. "no_texture_airlike.png]"
 	end

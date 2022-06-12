@@ -96,7 +96,7 @@ local function get_formspec(tabview, name, tabdata)
 		retval = retval ..
 				"image[5.5,0;3,2;" .. core.formspec_escape(modscreenshot) .. "]" ..
 				"label[8.25,0.6;" .. core.formspec_escape(selected_pkg.name) .. "]" ..
-				"box[5.5,2.2;6.15,2.35;#000]"
+				"box[5.5,2.2;6.2,2.4;#000]"
 
 		if selected_pkg.type == "mod" then
 			if selected_pkg.is_modpack then

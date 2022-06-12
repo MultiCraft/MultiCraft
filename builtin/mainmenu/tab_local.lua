@@ -36,14 +36,14 @@ local function singleplayer_refresh_gamebar()
 	end
 
 	local function game_buttonbar_button_handler(fields)
-		if fields.game_open_cdb then
+		--[[if fields.game_open_cdb then
 			local maintab = ui.find_by_name("maintab")
 			local dlg = create_store_dlg("game")
 			dlg:set_parent(maintab)
 			maintab:hide()
 			dlg:show()
 			return true
-		end
+		end]]
 
 		for key, value in pairs(fields) do
 			for j=1, #pkgmgr.games do
@@ -146,9 +146,6 @@ local function get_formspec()
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"image_button[9.33,4.84;2.67,0.87;" .. defaulttexturedir ..
-				"select_btn.png;world_configure;".. fgettext("Select Mods") .. ";false;false]" ..
-
 			"style[play;fgimg=" .. defaulttexturedir .. "btn_play.png;fgimg_hovered=" ..
 				defaulttexturedir .. "btn_play_hover.png]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
@@ -162,9 +159,15 @@ local function get_formspec()
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
-			"image_button[9,-0.1;1.5,1.5;" .. defaulttexturedir ..
+			"image_button[10.6,-0.1;1.5,1.5;" .. defaulttexturedir ..
 				"no_texture_airlike.png;default_game;;true;false;" ..
 				defaulttexturedir .. "no_texture_airlike.png]"
+
+	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
+		retval = retval ..
+			"image_button[9.33,4.84;2.67,0.87;" .. defaulttexturedir ..
+			"select_btn.png;world_configure;".. fgettext("Select Mods") .. ";false;false]"
+	end
 
 	local enable_server = core.settings:get_bool("enable_server")
 	if enable_server then
@@ -327,6 +330,11 @@ local function main_button_handler(this, fields, name)
 
 	if fields["default_game"] then
 		this:set_tab("local_default")
+		return true
+	end
+
+	if fields.game_open_cdb then
+		this:set_tab("content")
 		return true
 	end
 end

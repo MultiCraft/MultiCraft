@@ -89,8 +89,10 @@ local function get_formspec(tabview, name, tabdata)
 
 	if tabdata.selected and selected then
 		if gamedata.fav then
-			retval = retval .. "image_button[7.1,4.91;0.83,0.83;" ..
-				defaulttexturedir .. "trash.png;btn_delete_favorite;;true;false]"
+			retval = retval ..
+				"style[btn_delete_favorite;fgimg=" .. defaulttexturedir ..
+					"trash.png;fgimg_hovered=" .. defaulttexturedir .. "trash_hover.png]" ..
+				"image_button[7.1,4.91;0.83,0.83;;btn_delete_favorite;;true;false]"
 		end
 		if selected.description then
 			retval = retval .. "textarea[7.5,2.2;4.8,3;;" ..
