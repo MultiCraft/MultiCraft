@@ -131,13 +131,14 @@ local function get_formspec()
 				esc(defaulttexturedir) .. "gift_btn_pressed.png]"
 	end
 
-	if not mobile then
+	local enable_server = core.settings:get_bool("enable_server")
+	if enable_server then
 		retval = retval ..
 				"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
-					dump(core.settings:get_bool("enable_server")) .. "]"
+					dump(enable_server) .. "]"
 	end
 
-	if core.settings:get_bool("enable_server") then
+	if enable_server then
 		if core.settings:get_bool("server_announce") then
 			retval = retval ..
 					"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"

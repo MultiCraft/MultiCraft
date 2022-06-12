@@ -148,7 +148,8 @@ local function get_formspec()
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"button[9.5,4.8;2.5,1;world_configure;".. fgettext("Select Mods") .. "]" ..
+			"image_button[9.33,4.84;2.67,0.87;" .. esc(defaulttexturedir .. "select_mods_btn.png") ..
+			";world_configure;".. fgettext("Select Mods") .. ";false;false]" ..
 
 			"style[play;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
 				";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
@@ -170,13 +171,14 @@ local function get_formspec()
 				esc(defaulttexturedir) .. "no_texture_airlike.png;default_game;;true;false;" ..
 				esc(defaulttexturedir) .. "no_texture_airlike.png]"
 
-	if not mobile then
+	local enable_server = core.settings:get_bool("enable_server")
+	if enable_server then
 		retval = retval ..
 				"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
-					dump(core.settings:get_bool("enable_server")) .. "]"
+					dump(enable_server) .. "]"
 	end
 
-	if core.settings:get_bool("enable_server") then
+	if enable_server then
 		if core.settings:get_bool("server_announce") then
 			retval = retval ..
 					"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"
