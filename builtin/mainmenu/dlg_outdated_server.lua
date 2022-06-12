@@ -18,11 +18,15 @@
 local blank = core.formspec_escape(defaulttexturedir .. "blank.png")
 local function outdated_server_formspec(this)
 	return ([[
-		image_button[1,1;10,0.8;%s;;%s;false;false]
-		image_button[1,1.7;10,0.8;%s;;%s;false;false]
+		style_type[image_button;content_offset=0]
+		image[4.9,0.3;2.5,2.5;%s]
+		image_button[1,2.5;10,0.8;%s;;%s;false;false]
+		image_button[1,3.2;10,0.8;%s;;%s;false;false]
 		button[2,4.5;4,0.8;cancel;%s]
+		style[continue;bgcolor=yellow]
 		button[6,4.5;4,0.8;continue;%s]
 	]]):format(
+		core.formspec_escape(defaulttexturedir .. "attention.png"),
 		blank,
 		fgettext("The server you are trying to connect to is outdated!"),
 		blank,
