@@ -17,7 +17,7 @@
 
 local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
-local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
+-- local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
 local esc = core.formspec_escape
 
