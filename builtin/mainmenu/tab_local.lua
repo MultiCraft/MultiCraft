@@ -148,7 +148,7 @@ local function get_formspec()
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"button[9.5,4.8;2.5,1;world_configure;".. fgettext("Configure") .. "]" ..
+			"button[9.5,4.8;2.5,1;world_configure;".. fgettext("Select Mods") .. "]" ..
 
 			"style[play;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
 				";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
