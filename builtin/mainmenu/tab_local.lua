@@ -116,6 +116,7 @@ local function filter_default()
 				return
 			end
 		end
+		menudata.worldlist:set_filtercriteria("empty")
 	end
 end
 

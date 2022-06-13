@@ -275,7 +275,7 @@ local function create_world_formspec(dialogdata)
 		end
 		y = y + 0.3
 
-		form = form .. "label[0,"..(y+0.1)..";" .. fgettext("Biomes") .. "]"
+		form = form .. "label[0,"..(y+0.1)..";" .. fgettext("Biomes") .. ":]"
 		y = y + 0.6
 
 		form = form .. "dropdown[0,"..y..";6.3;mgv6_biomes;"
@@ -306,7 +306,7 @@ local function create_world_formspec(dialogdata)
 	y = y + 0.3
 	str_flags, y = mg_main_flags(current_mg, y)
 	if str_flags ~= "" then
-		label_flags = "label[0,"..y_start..";" .. fgettext("Mapgen flags") .. "]"
+		label_flags = "label[0,"..y_start..";" .. fgettext("Mapgen flags") .. ":]"
 		y_start = y + 0.4
 	else
 		y_start = 0.0
@@ -314,7 +314,7 @@ local function create_world_formspec(dialogdata)
 	y = y_start + 0.3
 	str_spflags = mg_specific_flags(current_mg, y)
 	if str_spflags ~= "" then
-		label_spflags = "label[0,"..y_start..";" .. fgettext("Mapgen-specific flags") .. "]"
+		label_spflags = "label[0,"..y_start..";" .. fgettext("Mapgen-specific flags") .. ":]"
 	end
 
 	-- Warning if only devtest is installed
