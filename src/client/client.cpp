@@ -1762,7 +1762,7 @@ void texture_update_progress(void *args, u32 progress, u32 max_progress)
 			std::basic_stringstream<wchar_t> strm;
 			strm << targs->text_base << " " << targs->last_percent << "%...";
 			RenderingEngine::draw_load_screen(strm.str(), targs->guienv, targs->tsrc, 0,
-				72 + (u16) ((18. / 100.) * (double) targs->last_percent), true);
+				72 + (u16) ((18. / 100.) * (double) targs->last_percent));
 		}
 }
 

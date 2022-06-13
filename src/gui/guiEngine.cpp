@@ -515,6 +515,7 @@ void GUIEngine::drawHeader(video::IVideoDriver *driver)
 	v2s32 splashsize(((f32)texture->getOriginalSize().Width) * mult,
 			((f32)texture->getOriginalSize().Height) * mult);
 
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	// Don't draw the header if there isn't enough room
 	s32 free_space = (((s32)screensize.Height)-320)/2;
 
@@ -522,6 +523,12 @@ void GUIEngine::drawHeader(video::IVideoDriver *driver)
 		core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
 		splashrect += v2s32((screensize.Width/2)-(splashsize.X/2),
 				((free_space/2)-splashsize.Y/2));
+#else
+		core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
+		splashrect += v2s32((screensize.Width/2)-(splashsize.X/2),
+				splashsize.Y/4);
+	{
+#endif
 
 	draw2DImageFilterScaled(driver, texture, splashrect,
 		core::rect<s32>(core::position2d<s32>(0,0),

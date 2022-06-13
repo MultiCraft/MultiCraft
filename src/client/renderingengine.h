@@ -104,7 +104,7 @@ public:
 
 	inline static void draw_load_screen(const std::wstring &text,
 			gui::IGUIEnvironment *guienv, ITextureSource *tsrc,
-			float dtime = 0, int percent = 0, bool clouds = true)
+			float dtime = 0, int percent = 0, bool clouds = false)
 	{
 		s_singleton->_draw_load_screen(
 				text, guienv, tsrc, dtime, percent, clouds);
@@ -142,7 +142,7 @@ public:
 private:
 	void _draw_load_screen(const std::wstring &text, gui::IGUIEnvironment *guienv,
 			ITextureSource *tsrc, float dtime = 0, int percent = 0,
-			bool clouds = true);
+			bool clouds = false);
 
 	void _draw_menu_scene(gui::IGUIEnvironment *guienv, float dtime = 0,
 			bool clouds = true);
