@@ -233,6 +233,11 @@ function set_tab_by_name(self, name)
 	for i, tab in pairs(self.tablist) do
 		if tab.name == name then
 			switch_to_tab(self, i)
+
+			if name ~= "local" then
+				mm_texture.set_dirt_bg()
+			end
+
 			return true
 		end
 	end
