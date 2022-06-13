@@ -23,13 +23,14 @@ local function delete_world_formspec(dialogdata)
 		delete_name = delete_name .. " (" .. game_name .. ")"
 	end
 
-	return
+	local retval =
 		"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir ..
 			"blank.png") .. ";;" .. fgettext("Delete World \"$1\"?", delete_name) ..
 			";true;false;]" ..
 		"style[world_delete_confirm;bgcolor=red]" ..
 		"button[3,4.8;3,0.5;world_delete_confirm;" .. fgettext("Delete") .. "]" ..
 		"button[6,4.8;3,0.5;world_delete_cancel;" .. fgettext("Cancel") .. "]"
+	return retval
 end
 
 local function delete_world_buttonhandler(this, fields)
