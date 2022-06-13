@@ -202,19 +202,21 @@ local function button_header(self)
 		if not tab.hidden and tab.caption ~= "" then
 			visible_tabs[#visible_tabs + 1] = tab
 
-			local w = utf8.len(core.get_translated_string(tab.caption)) / 6
+			local w = utf8.len(core.get_translated_string(tab.caption))
 			btn_widths[#visible_tabs] = w
 			total_width = total_width + w
 		end
 	end
 
 	local toadd = ""
+	local coords_per_char = 12 / total_width
 
 	-- The formspec is 15.4875 "real" coordinates wide
-	local x = (12.39 - total_width) / 2 - 0.3
+	-- local x = (12.39 - total_width) / 2 - 0.3
+	local x = -0.105
 	for i = 1, #visible_tabs do
 		local caption = visible_tabs[i].caption
-		local w = btn_widths[i]
+		local w = btn_widths[i] * coords_per_char
 		toadd = toadd .. "button[" .. x .. ",-1.05;" .. w + 0.225 .. ",0.8;" ..
 			self.name .. ":" .. i .. ";" .. caption .. "]"
 		x = x + w
