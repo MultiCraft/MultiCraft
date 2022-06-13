@@ -143,9 +143,10 @@ local function get_formspec()
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
-			"image_button[10.6,-0.1;1.5,1.5;" .. defaulttexturedir ..
-				"no_texture_airlike.png;switch_local_default;;true;false;" ..
-				defaulttexturedir .. "no_texture_airlike.png]"
+
+			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
+				defaulttexturedir .. "switch_local_default_hover.png]" ..
+			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..

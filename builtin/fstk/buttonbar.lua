@@ -189,7 +189,7 @@ function buttonbar_create(name, cbf_buttonhandler, pos, orientation, size)
 	local self = {}
 	self.name = name
 	self.type = "addon"
-	self.bgcolor = "#8fb9de"
+	self.bgcolor = "#7f9dd5"
 	self.pos = pos
 	self.size = size
 	self.orientation = orientation

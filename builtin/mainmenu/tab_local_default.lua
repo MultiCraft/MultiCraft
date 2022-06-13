@@ -120,9 +120,9 @@ local function get_formspec(this)
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
-			"image_button[10.6,-0.1;1.5,1.5;" ..
-				defaulttexturedir .. "no_texture_airlike.png;other_games;;true;false;" ..
-				defaulttexturedir .. "no_texture_airlike.png]"
+			"style[switch_local;fgimg=" .. defaulttexturedir .. "switch_local.png;fgimg_hovered=" ..
+				defaulttexturedir .. "switch_local_hover.png]" ..
+			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
 	end
 
 	local enable_server = core.settings:get_bool("enable_server")
@@ -268,7 +268,7 @@ local function main_button_handler(this, fields, name)
 		return true
 	end
 
-	if fields["other_games"] then
+	if fields["switch_local"] then
 		this:set_tab("local")
 		return true
 	end
