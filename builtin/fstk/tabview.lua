@@ -194,7 +194,7 @@ local function switch_to_tab(self, index)
 	--first call on_change for tab to leave
 	if self.tablist[self.last_tab_index].on_change ~= nil then
 		self.tablist[self.last_tab_index].on_change("LEAVE",
-				self.current_tab, self.tablist[index].name)
+				self.current_tab, self.tablist[index].name, self)
 	end
 
 	--update tabview data
@@ -209,7 +209,7 @@ local function switch_to_tab(self, index)
 	-- call for tab to enter
 	if self.tablist[index].on_change ~= nil then
 		self.tablist[index].on_change("ENTER",
-				old_tab,self.current_tab)
+				old_tab,self.current_tab,self)
 	end
 end
 
@@ -263,7 +263,7 @@ local function show_tabview(self)
 	-- call for tab to enter
 	if self.tablist[self.last_tab_index].on_change ~= nil then
 		self.tablist[self.last_tab_index].on_change("ENTER",
-				nil,self.current_tab)
+				nil,self.current_tab,self)
 	end
 end
 

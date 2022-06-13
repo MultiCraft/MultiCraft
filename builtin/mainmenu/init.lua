@@ -97,7 +97,7 @@ function menudata.init_tabs()
 	menudata.worldlist:set_sortmode("alphabetic")
 
 	if not core.settings:get("menu_last_game") then
-		local default_game = core.settings:get("default_game") or "minetest"
+		local default_game = core.settings:get("default_game") or "default"
 		core.settings:set("menu_last_game", default_game)
 	end
 
@@ -133,6 +133,7 @@ function menudata.init_tabs()
 	end
 
 	if last_tab ~= "local" then
+		core.set_clouds(false)
 		mm_texture.set_dirt_bg()
 	end
 

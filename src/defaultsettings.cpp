@@ -363,7 +363,7 @@ void set_default_settings()
 	settings->setDefault("chat_font_size", "0"); // Default "font_size"
 
 	// ContentDB
-	settings->setDefault("contentdb_url", "https://content.minetest.net");
+	settings->setDefault("contentdb_url", "https://content.multicraft.world");
 	settings->setDefault("contentdb_max_concurrent_downloads", "3");
 
 #ifdef __ANDROID__
