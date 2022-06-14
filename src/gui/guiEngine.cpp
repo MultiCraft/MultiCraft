@@ -519,7 +519,7 @@ void GUIEngine::drawHeader(video::IVideoDriver *driver)
 	// Don't draw the header if there isn't enough room
 	s32 free_space = (((s32)screensize.Height)-320)/2;
 
-	if (!free_space > splashsize.Y)
+	if (free_space <= splashsize.Y)
 		return;
 
 	core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
