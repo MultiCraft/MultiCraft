@@ -24,10 +24,6 @@ local function delete_world_formspec(dialogdata)
 	end
 
 	local retval =
-		"size[12,5.4,false]" ..
-		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;40]" ..
 		"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir ..
 			"blank.png") .. ";;" .. fgettext("Delete World \"$1\"?", delete_name) ..
 			";true;false;]" ..
@@ -64,7 +60,7 @@ function create_delete_world_dlg(name_to_del, index_to_del, game_to_del)
 	local retval = dialog_create("delete_world",
 					delete_world_formspec,
 					delete_world_buttonhandler,
-					nil)
+					nil, true)
 	retval.data.delete_name  = name_to_del
 	retval.data.delete_game  = game_to_del
 	retval.data.delete_index = index_to_del

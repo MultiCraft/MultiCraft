@@ -18,13 +18,11 @@
 --------------------------------------------------------------------------------
 
 local function delete_content_formspec(dialogdata)
+	local title = dialogdata.content.title or dialogdata.content.name
 	local retval =
-		"size[12,5.4,false]" ..
-		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;40]" ..
-		"label[2,2;" ..
-		fgettext("Are you sure you want to delete \"$1\"?", dialogdata.content.name) .. "]"..
+		"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir) ..
+			"blank.png;;" .. fgettext("Are you sure you want to delete \"$1\"?", title) ..
+			";true;false;]" ..
 		"style[dlg_delete_content_confirm;bgcolor=red]" ..
 		"button[3,4.8;3,0.5;dlg_delete_content_confirm;" .. fgettext("Delete") .. "]" ..
 		"button[6,4.8;3,0.5;dlg_delete_content_cancel;" .. fgettext("Cancel") .. "]"
@@ -75,7 +73,7 @@ function create_delete_content_dlg(content)
 	local retval = dialog_create("dlg_delete_content",
 					delete_content_formspec,
 					delete_content_buttonhandler,
-					nil)
+					nil, true)
 	retval.data.content = content
 	return retval
 end

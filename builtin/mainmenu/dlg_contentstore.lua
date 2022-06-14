@@ -705,21 +705,20 @@ function store.get_formspec(dlgdata)
 			"bgcolor[#0000]" ..
 			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
 				"bg_common.png") .. ";true;40]",
-			"position[0.5,0.55]",
 
 			"style[status,downloading,queued;border=false]",
 
 			"container[0.375,0.375]",
 			"field[0,0;7.225,0.8;search_string;;", core.formspec_escape(search_string), "]",
 			"field_close_on_enter[search_string;false]",
-			"image_button[7.3,0;0.8,0.8;", core.formspec_escape(defaulttexturedir .. "search.png"), ";search;]",
-			"image_button[8.125,0;0.8,0.8;", core.formspec_escape(defaulttexturedir .. "clear.png"), ";clear;]",
-			"dropdown[9.6,0;2.4,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
+			"image_button[7.3,0;0.8,0.8;", core.formspec_escape(defaulttexturedir .. "search.png"), ";search;;true;false]",
+		--	"image_button[8.125,0;0.8,0.8;", core.formspec_escape(defaulttexturedir .. "clear.png"), ";clear;;true;false]",
+		--	"dropdown[9.6,0;2.4,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
 			"container_end[]",
 
 			-- Page nav buttons
 			"container[0,", H - 0.8 - 0.375, "]",
-			"button[0.375,0;4,0.8;back;", fgettext("Back to Main Menu"), "]",
+			"button[0.375,0;5,0.8;back;", "< " .. fgettext("Back to Main Menu"), "]",
 
 			"container[", W - 0.375 - 0.8*4 - 2,  ",0]",
 			"image_button[0,0;0.8,0.8;", core.formspec_escape(defaulttexturedir), "start_icon.png;pstart;]",
@@ -752,7 +751,7 @@ function store.get_formspec(dlgdata)
 			end
 
 			if num_avail_updates == 0 then
-				formspec[#formspec + 1] = "button[12.75,0.375;2.625,0.8;status;"
+				formspec[#formspec + 1] = "button[12.65,0.375;2.825,0.8;status;"
 				formspec[#formspec + 1] = fgettext("No updates")
 				formspec[#formspec + 1] = "]"
 			else
@@ -773,7 +772,6 @@ function store.get_formspec(dlgdata)
 			"bgcolor[#0000]" ..
 			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
 				"bg_common.png") .. ";true;40]",
-			"position[0.5,0.55]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
 			"container[0,", H - 0.8 - 0.375, "]",
 			"button[0,0;4,0.8;back;", fgettext("Back to Main Menu"), "]",
@@ -851,11 +849,13 @@ function store.get_formspec(dlgdata)
 
 		-- description
 		local description_width = W - 0.375*5 - 0.85 - 2*0.7
+		formspec[#formspec + 1] = "style_type[textarea;font_size=-2]"
 		formspec[#formspec + 1] = "textarea[1.855,0.3;"
 		formspec[#formspec + 1] = tostring(description_width)
 		formspec[#formspec + 1] = ",0.8;;;"
 		formspec[#formspec + 1] = core.formspec_escape(package.short_description)
 		formspec[#formspec + 1] = "]"
+		formspec[#formspec + 1] = "style_type[textarea;font_size=]"
 
 		formspec[#formspec + 1] = "container_end[]"
 	end

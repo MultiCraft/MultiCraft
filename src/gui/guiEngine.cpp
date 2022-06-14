@@ -515,19 +515,28 @@ void GUIEngine::drawHeader(video::IVideoDriver *driver)
 	v2s32 splashsize(((f32)texture->getOriginalSize().Width) * mult,
 			((f32)texture->getOriginalSize().Height) * mult);
 
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	// Don't draw the header if there isn't enough room
 	s32 free_space = (((s32)screensize.Height)-320)/2;
 
-	if (free_space > splashsize.Y) {
-		core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
-		splashrect += v2s32((screensize.Width/2)-(splashsize.X/2),
-				((free_space/2)-splashsize.Y/2));
+	if (free_space <= splashsize.Y)
+		return;
+
+	core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
+	splashrect += v2s32((screensize.Width/2)-(splashsize.X/2),
+			((free_space/2)-splashsize.Y/2));
+#else
+	core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
+	splashrect += v2s32((screensize.Width/2)-(splashsize.X/2), 0);
+
+	if (g_settings->getBool("device_is_tablet"))
+		splashrect += v2s32(0, splashsize.Y/4);
+#endif
 
 	draw2DImageFilterScaled(driver, texture, splashrect,
 		core::rect<s32>(core::position2d<s32>(0,0),
 		core::dimension2di(texture->getOriginalSize())),
 		NULL, NULL, true);
-	}
 }
 
 /******************************************************************************/
@@ -630,7 +639,7 @@ void GUIEngine::updateTopLeftTextSize()
 {
 	core::rect<s32> rect(0, 0, g_fontengine->getTextWidth(m_toplefttext.c_str()),
 		g_fontengine->getTextHeight());
-	rect += v2s32(4, 0);
+	rect += v2s32(5 + g_settings->getU16("round_screen"), 0);
 
 	m_irr_toplefttext->remove();
 	m_irr_toplefttext = gui::StaticText::add(RenderingEngine::get_gui_env(),

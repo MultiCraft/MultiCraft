@@ -46,9 +46,19 @@ local function add_tab(self,tab)
 		tabdata = {},
 	}
 
-	self.tablist[#self.tablist + 1] = newtab
+	-- Hidden tabs have a negative index
+	local i
+	if tab.hidden then
+		i = -1
+		while self.tablist[i] do
+			i = i - 1
+		end
+	else
+		i = #self.tablist + 1
+	end
+	self.tablist[i] = newtab
 
-	if self.last_tab_index == #self.tablist then
+	if self.last_tab_index == i then
 		self.current_tab = tab.name
 		if tab.on_activate ~= nil then
 			tab.on_activate(nil,tab.name)
@@ -68,10 +78,13 @@ local function get_formspec(self)
 					{width=self.width, height=self.height}
 			local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 			formspec = formspec ..
-					string.format("size[%f,%f,%s]",tsize.width,tsize.height,
+					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height,
 						dump(self.fixed_size)) ..
 					"bgcolor[#0000]" ..
-					"background9[0,0;0,0;" .. defaulttexturedir .. "bg_common.png;true;40]" ..
+					"container[1,0]" ..
+					"background9[-0.2,-0.26;" .. tsize.width + 0.4 .. "," ..
+						tsize.height + 0.75 .. ";" .. defaulttexturedir ..
+						"bg_common.png;false;40]" ..
 					"style[settings_tab;content_offset=0]" ..
 					"image_button[12.02,1.3;1,1.55;" ..
 						defaulttexturedir .. "settings_menu.png;settings_tab;;true;false;" ..
@@ -81,6 +94,7 @@ local function get_formspec(self)
 						defaulttexturedir .. "authors_menu.png;authors_tab;;true;false;" ..
 						defaulttexturedir .. "authors_menu_pressed.png]"
 		end
+
 		formspec = formspec .. self:tab_header()
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
@@ -89,6 +103,10 @@ local function get_formspec(self)
 					self.tablist[self.last_tab_index].tabdata,
 					self.tablist[self.last_tab_index].tabsize
 					)
+
+		if self.parent == nil then
+			formspec = formspec .. "container_end[]"
+		end
 	end
 	return formspec
 end
@@ -160,18 +178,15 @@ end
 --------------------------------------------------------------------------------
 local function tab_header(self)
 
-	local toadd = ""
-
-	for i=1,#self.tablist,1 do
-
-		if toadd ~= "" then
-			toadd = toadd .. ","
-		end
-
-		toadd = toadd .. self.tablist[i].caption
+	local captions = {}
+	for i = 1, #self.tablist do
+		captions[i] = self.tablist[i].caption
 	end
+
+	local toadd = table.concat(captions, ",")
 	return string.format("tabheader[%f,%f;%s;%s;%i;true;false]",
-			self.header_x, self.header_y, self.name, toadd, self.last_tab_index);
+			self.header_x, self.header_y, self.name, toadd,
+			math.max(self.last_tab_index, 1))
 end
 
 --------------------------------------------------------------------------------
@@ -179,7 +194,7 @@ local function switch_to_tab(self, index)
 	--first call on_change for tab to leave
 	if self.tablist[self.last_tab_index].on_change ~= nil then
 		self.tablist[self.last_tab_index].on_change("LEAVE",
-				self.current_tab, self.tablist[index].name)
+				self.current_tab, self.tablist[index].name, self)
 	end
 
 	--update tabview data
@@ -194,7 +209,7 @@ local function switch_to_tab(self, index)
 	-- call for tab to enter
 	if self.tablist[index].on_change ~= nil then
 		self.tablist[index].on_change("ENTER",
-				old_tab,self.current_tab)
+				old_tab,self.current_tab,self)
 	end
 end
 
@@ -213,9 +228,16 @@ end
 --------------------------------------------------------------------------------
 -- Declared as a local variable above handle_buttons
 function set_tab_by_name(self, name)
-	for i=1,#self.tablist,1 do
-		if self.tablist[i].name == name then
+	-- This uses pairs so that hidden tabs (with a negative index) are searched
+	-- as well
+	for i, tab in pairs(self.tablist) do
+		if tab.name == name then
 			switch_to_tab(self, i)
+
+			if name ~= "local" then
+				mm_texture.set_dirt_bg()
+			end
+
 			return true
 		end
 	end
@@ -241,7 +263,7 @@ local function show_tabview(self)
 	-- call for tab to enter
 	if self.tablist[self.last_tab_index].on_change ~= nil then
 		self.tablist[self.last_tab_index].on_change("ENTER",
-				nil,self.current_tab)
+				nil,self.current_tab,self)
 	end
 end
 
@@ -270,6 +292,7 @@ local tabview_metatable = {
 tabview_metatable.__index = tabview_metatable
 
 --------------------------------------------------------------------------------
+tabview_uses_container = true
 function tabview_create(name, size, tabheaderpos)
 	local self = {}
 

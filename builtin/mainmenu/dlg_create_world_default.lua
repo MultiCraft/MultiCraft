@@ -56,11 +56,7 @@ local function create_world_formspec()
 	end
 	mglist = mglist:sub(1, -2)
 
-	local retval =
-		"size[12,5.4,false]" ..
-		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;40]" ..
+	return
 		"label[1.5,0.9;" .. fgettext("World name") .. ":" .. "]"..
 		"field[4.5,1.2;6,0.5;te_world_name;;]" ..
 
@@ -73,9 +69,6 @@ local function create_world_formspec()
 		"style[world_create_confirm;bgcolor=#00d12b]" ..
 		"button[3.5,4.4;2.5,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
 		"button[6,4.4;2.5,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
-
-	return retval
-
 end
 
 local function create_world_buttonhandler(this, fields)
@@ -110,7 +103,9 @@ local function create_world_buttonhandler(this, fields)
 				worldname = "World " .. worldnum_max + 1
 			end
 
-			core.settings:set("fixed_map_seed", fields["te_seed"])
+			if fields["te_seed"] then
+				core.settings:set("fixed_map_seed", fields["te_seed"])
+			end
 
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then
@@ -169,7 +164,7 @@ function create_create_world_default_dlg(update_worldlistfilter)
 	local retval = dialog_create("sp_create_world",
 					create_world_formspec,
 					create_world_buttonhandler,
-					nil)
+					nil, true)
 	retval.update_worldlist_filter = update_worldlistfilter
 
 	return retval

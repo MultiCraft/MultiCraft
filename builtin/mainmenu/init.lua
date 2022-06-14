@@ -38,15 +38,16 @@ dofile(menupath .. DIR_DELIM .. "pkgmgr.lua")
 dofile(menupath .. DIR_DELIM .. "serverlistmgr.lua")
 dofile(menupath .. DIR_DELIM .. "textures.lua")
 
+dofile(menupath .. DIR_DELIM .. "dlg_config_world.lua")
+dofile(menupath .. DIR_DELIM .. "dlg_contentstore.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_create_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_create_world_default.lua")
+dofile(menupath .. DIR_DELIM .. "dlg_delete_content.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
+dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")
+dofile(menupath .. DIR_DELIM .. "dlg_outdated_server.lua")
 
 if not mobile then
-	dofile(menupath .. DIR_DELIM .. "dlg_config_world.lua")
-	dofile(menupath .. DIR_DELIM .. "dlg_delete_content.lua")
-	dofile(menupath .. DIR_DELIM .. "dlg_contentstore.lua")
-	dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")
 	dofile(menupath .. DIR_DELIM .. "dlg_settings_advanced.lua")
 end
 
@@ -54,11 +55,11 @@ local tabs = {}
 
 if not mobile then
 	tabs.settings = dofile(menupath .. DIR_DELIM .. "tab_settings.lua")
-	tabs.content  = dofile(menupath .. DIR_DELIM .. "tab_content.lua")
 else
 	tabs.settings = dofile(menupath .. DIR_DELIM .. "tab_settings_simple.lua")
 end
 
+tabs.content  = dofile(menupath .. DIR_DELIM .. "tab_content.lua")
 tabs.credits  = dofile(menupath .. DIR_DELIM .. "tab_credits.lua")
 tabs.local_default_game = dofile(menupath .. DIR_DELIM .. "tab_local_default.lua")
 tabs.local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua")
@@ -96,7 +97,7 @@ function menudata.init_tabs()
 	menudata.worldlist:set_sortmode("alphabetic")
 
 	if not core.settings:get("menu_last_game") then
-		local default_game = core.settings:get("default_game") or "minetest"
+		local default_game = core.settings:get("default_game") or "default"
 		core.settings:set("menu_last_game", default_game)
 	end
 
@@ -112,21 +113,13 @@ function menudata.init_tabs()
 		end
 	end
 
-	for i = 1, #pkgmgr.games do
-		if pkgmgr.games[i].id ~= "default" then
-			tv_main:add(tabs.local_game)
-			break
-		end
-	end
-
+	tv_main:add(tabs.local_game)
 	if func then
 		func(tv_main)
 	end
 	tv_main:add(tabs.play_online)
 
-	if not mobile then
-		tv_main:add(tabs.content)
-	end
+	tv_main:add(tabs.content)
 	tv_main:add(tabs.settings)
 	tv_main:add(tabs.credits)
 
@@ -139,7 +132,8 @@ function menudata.init_tabs()
 		tv_main:set_tab(last_tab)
 	end
 
-	if last_tab ~= "local" and not core.settings:get_bool("menu_clouds") then
+	if last_tab ~= "local" then
+		core.set_clouds(false)
 		mm_texture.set_dirt_bg()
 	end
 
@@ -154,8 +148,6 @@ function menudata.init_tabs()
 
 	ui.set_default("maintab")
 	tv_main:show()
-
-	core.set_clouds(core.settings:get_bool("menu_clouds"))
 
 	ui.update()
 end

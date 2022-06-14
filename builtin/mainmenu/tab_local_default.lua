@@ -17,9 +17,9 @@
 
 local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
-local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
 local esc = core.formspec_escape
+local defaulttexturedir = esc(defaulttexturedir)
 
 local default_worlds = {
 	{name = "World 1", mg_name = "v7p", seed = "15823438331521897617"},
@@ -60,10 +60,7 @@ local function create_default_worlds()
 end
 
 local checked_worlds = false
-local function get_formspec()
-	mm_texture.set_dirt_bg()
-	menudata.worldlist:set_filtercriteria("default")
-
+local function get_formspec(this)
 	-- Only check the worlds once (on restart)
 	if not checked_worlds and #menudata.worldlist:get_list() == 0 then
 		create_default_worlds()
@@ -90,57 +87,62 @@ local function get_formspec()
 	end
 
 	local retval =
-			"style[world_delete;fgimg=" .. esc(defaulttexturedir .. "world_delete.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_delete_hover.png") .. "]" ..
+			"style[world_delete;fgimg=" .. defaulttexturedir ..
+			"world_delete.png;fgimg_hovered=" .. defaulttexturedir .. "world_delete_hover.png]" ..
 			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
 			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
 
-			"style[world_create;fgimg=" .. esc(defaulttexturedir .. "world_new.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_new_hover.png") .. "]" ..
+			"style[world_create;fgimg=" .. defaulttexturedir ..
+				"world_new.png;fgimg_hovered=" .. defaulttexturedir .. "world_new_hover.png]" ..
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"style[play;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
+			"style[play;fgimg=" .. defaulttexturedir .. "btn_play.png;fgimg_hovered=" ..
+				defaulttexturedir .. "btn_play_hover.png]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
-			"image_button[7.2,3.09;4,0.83;" ..
-				esc(defaulttexturedir) .. creative_bg .. ";;;true;false]" ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_bg .. ";;;true;false]" ..
 			"style[cb_creative_mode;content_offset=0]" ..
-			"image_button[7.2,3.09;4,0.83;" ..
-				esc(defaulttexturedir) .. creative_checkbox .. ";cb_creative_mode;;true;false]" ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_checkbox ..
+				";cb_creative_mode;;true;false]" ..
 
-			"background9[0,0;6.5,4.8;" ..
-				esc(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
+			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
-			"table[0,0;6.28,4.64;sp_worlds;" ..
-				menu_render_worldlist() .. ";" .. index .. "]"
+			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
 	if PLATFORM == "Android" then
 		retval = retval ..
-			"image_button[10.6,-0.1;1.5,1.5;" ..
-				esc(defaulttexturedir) .. "gift_btn.png;upgrade;;true;false;" ..
-				esc(defaulttexturedir) .. "gift_btn_pressed.png]"
+			"image_button[6.6,-0.1;1.5,1.5;" ..
+				defaulttexturedir .. "gift_btn.png;upgrade;;true;false;" ..
+				defaulttexturedir .. "gift_btn_pressed.png]"
 	end
 
-	if not mobile then
+	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
-				"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
-					dump(core.settings:get_bool("enable_server")) .. "]"
+			"style[switch_local;fgimg=" .. defaulttexturedir .. "switch_local.png;fgimg_hovered=" ..
+				defaulttexturedir .. "switch_local_hover.png]" ..
+			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
 	end
 
-	if core.settings:get_bool("enable_server") then
+	local enable_server = core.settings:get_bool("enable_server")
+	if enable_server then
 		retval = retval ..
-				"checkbox[6.6,0.65;cb_server_announce;" .. fgettext("Announce Server") .. ";" ..
-					dump(core.settings:get_bool("server_announce")) .. "]" ..
+			"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
+				dump(enable_server) .. "]"
+	end
 
-				-- Name / Password
-				"label[6.6,-0.3;" .. fgettext("Name") .. ":" .. "]" ..
-				"label[9.3,-0.3;" .. fgettext("Password") .. ":" .. "]" ..
-				"field[6.9,0.6;2.8,0.5;te_playername;;" ..
-					esc(core.settings:get("name")) .. "]" ..
-				"pwdfield[9.6,0.6;2.8,0.5;te_passwd;]"
+	if enable_server then
+		if core.settings:get_bool("server_announce") then
+			retval = retval ..
+				"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"
+		end
+
+		retval = retval ..
+			-- Name / Password
+			"field[6.9,4.6;2.8,0.5;te_playername;" .. fgettext("Name") .. ":;" ..
+				esc(core.settings:get("name")) .. "]" ..
+			"pwdfield[9.6,4.6;2.8,0.5;te_passwd;" .. fgettext("Password") .. ":]"
 	end
 
 	return retval
@@ -266,6 +268,11 @@ local function main_button_handler(this, fields, name)
 		return true
 	end
 
+	if fields["switch_local"] then
+		this:set_tab("local")
+		return true
+	end
+
 	if fields["upgrade"] then
 		core.upgrade("")
 	end
@@ -288,10 +295,27 @@ local function main_button_handler(this, fields, name)
 	end]]
 end
 
+local function on_change(type, _, _, this)
+	if (type == "ENTER") then
+		local gameid = core.settings:get("menu_last_game")
+
+		local game = pkgmgr.find_by_gameid(gameid)
+		if game then
+			if gameid ~= "default"  then
+				this:set_tab("local")
+			else
+				mm_texture.update("singleplayer",game)
+				menudata.worldlist:set_filtercriteria("default")
+			end
+		end
+	end
+end
+
 --------------------------------------------------------------------------------
 return {
 	name = "local_default",
 	caption = fgettext("Singleplayer"),
 	cbf_formspec = get_formspec,
-	cbf_button_handler = main_button_handler
+	cbf_button_handler = main_button_handler,
+	on_change = on_change
 }

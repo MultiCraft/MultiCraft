@@ -799,7 +799,7 @@ protected:
 	void limitFps(FpsControl *fps_timings, f32 *dtime);
 
 	void showOverlayMessage(const char *msg, float dtime, int percent,
-			bool draw_clouds = true);
+			bool draw_clouds = false);
 
 	static void settingChangedCallback(const std::string &setting_name, void *data);
 	void readSettings();

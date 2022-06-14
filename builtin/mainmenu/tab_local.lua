@@ -17,9 +17,9 @@
 
 local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
-local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
 local esc = core.formspec_escape
+local defaulttexturedir = esc(defaulttexturedir)
 
 local function current_game()
 	local last_game_id = core.settings:get("menu_last_game")
@@ -36,14 +36,14 @@ local function singleplayer_refresh_gamebar()
 	end
 
 	local function game_buttonbar_button_handler(fields)
-		if fields.game_open_cdb then
+		--[[if fields.game_open_cdb then
 			local maintab = ui.find_by_name("maintab")
 			local dlg = create_store_dlg("game")
 			dlg:set_parent(maintab)
 			maintab:hide()
 			dlg:show()
 			return true
-		end
+		end]]
 
 		for key, value in pairs(fields) do
 			for j=1, #pkgmgr.games do
@@ -71,7 +71,7 @@ local function singleplayer_refresh_gamebar()
 
 	local btnbar = buttonbar_create("game_button_bar",
 		game_buttonbar_button_handler,
-		{x=-1.35, y=-0.32}, "vertical", {x=1, y=6.14})
+		{x=-0.35, y=-0.32}, "vertical", {x=1, y=6.14})
 
 	for i=1, #pkgmgr.games do
 		if pkgmgr.games[i].id ~= "default" then
@@ -100,29 +100,11 @@ local function singleplayer_refresh_gamebar()
 		end
 	end
 
-	if not mobile then
-		local plus_image = esc(defaulttexturedir .. "plus.png")
-		btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
-	end
-end
-
-local function filter_default()
-	local gameid = core.settings:get("menu_last_game")
-	if not gameid or gameid == "" or gameid == "default" then
-		for j=1, #pkgmgr.games do
-			local name = pkgmgr.games[j].id
-			if name and name ~= "default" then
-				menudata.worldlist:set_filtercriteria(name)
-				core.settings:set("menu_last_game", name)
-				mm_texture.update("singleplayer", current_game())
-				return
-			end
-		end
-	end
+	local plus_image = defaulttexturedir .. "plus.png"
+	btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
 end
 
 local function get_formspec()
-	filter_default()
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 
@@ -138,52 +120,58 @@ local function get_formspec()
 	end
 
 	local retval =
-			"style[world_delete;fgimg=" .. esc(defaulttexturedir .. "world_delete.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_delete_hover.png") .. "]" ..
+			"style[world_delete;fgimg=" .. defaulttexturedir ..
+				"world_delete.png;fgimg_hovered=" .. defaulttexturedir .. "world_delete_hover.png]" ..
 			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
 			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
 
-			"style[world_create;fgimg=" .. esc(defaulttexturedir .. "world_new.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "world_new_hover.png") .. "]" ..
+			"style[world_create;fgimg=" .. defaulttexturedir ..
+				"world_new.png;fgimg_hovered=" .. defaulttexturedir .. "world_new_hover.png]" ..
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
-			"button[9.5,4.8;2.5,1;world_configure;".. fgettext("Configure") .. "]" ..
-
-			"style[play;fgimg=" .. esc(defaulttexturedir .. "btn_play.png") ..
-				";fgimg_hovered=" .. esc(defaulttexturedir .. "btn_play_hover.png") .. "]" ..
+			"style[play;fgimg=" .. defaulttexturedir .. "btn_play.png;fgimg_hovered=" ..
+				defaulttexturedir .. "btn_play_hover.png]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
-			"image_button[7.2,3.09;4,0.83;" ..
-				esc(defaulttexturedir) .. creative_bg .. ";;;true;false]" ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_bg .. ";;;true;false]" ..
 			"style[cb_creative_mode;content_offset=0]" ..
-			"image_button[7.2,3.09;4,0.83;" ..
-				esc(defaulttexturedir) .. creative_checkbox .. ";cb_creative_mode;;true;false]" ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_checkbox ..
+				";cb_creative_mode;;true;false]" ..
 
-			"background9[0,0;6.5,4.8;" ..
-				esc(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
+			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
-			"table[0,0;6.28,4.64;sp_worlds;" ..
-				menu_render_worldlist() .. ";" .. index .. "]"
+			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
 
-	if not mobile then
+			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
+				defaulttexturedir .. "switch_local_default_hover.png]" ..
+			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
+
+	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
-				"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
-					dump(core.settings:get_bool("enable_server")) .. "]"
+			"image_button[9.33,4.84;2.67,0.87;" .. defaulttexturedir ..
+			"select_btn.png;world_configure;".. fgettext("Select Mods") .. ";false;false]"
 	end
 
-	if core.settings:get_bool("enable_server") then
+	local enable_server = core.settings:get_bool("enable_server")
+	if enable_server then
 		retval = retval ..
-				"checkbox[6.6,0.65;cb_server_announce;" .. fgettext("Announce Server") .. ";" ..
-					dump(core.settings:get_bool("server_announce")) .. "]" ..
+			"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
+				dump(enable_server) .. "]"
+	end
 
-				-- Name / Password
-				"label[6.6,-0.3;" .. fgettext("Name") .. ":" .. "]" ..
-				"label[9.3,-0.3;" .. fgettext("Password") .. ":" .. "]" ..
-				"field[6.9,0.6;2.8,0.5;te_playername;;" ..
-					esc(core.settings:get("name")) .. "]" ..
-				"pwdfield[9.6,0.6;2.8,0.5;te_passwd;]"
+	if enable_server then
+		if core.settings:get_bool("server_announce") then
+			retval = retval ..
+				"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"
+		end
+
+		retval = retval ..
+			-- Name / Password
+			"field[6.9,4.6;2.8,0.5;te_playername;" .. fgettext("Name") .. ":;" ..
+				esc(core.settings:get("name")) .. "]" ..
+			"pwdfield[9.6,4.6;2.8,0.5;te_passwd;" .. fgettext("Password") .. ":]"
 	end
 
 	return retval
@@ -324,17 +312,47 @@ local function main_button_handler(this, fields, name)
 
 		return true
 	end
+
+	if fields["switch_local_default"] then
+		core.settings:set("menu_last_game", "default")
+		this:set_tab("local_default")
+
+		return true
+	end
+
+	if fields["game_open_cdb"] then
+		this:set_tab("content")
+
+		return true
+	end
 end
 
 local function on_change(type, old_tab, new_tab)
 	if (type == "ENTER") then
+		local gameid = core.settings:get("menu_last_game")
+		if not gameid or gameid == "" or gameid == "default" then
+			local game_set
+			for _, game in ipairs(pkgmgr.games) do
+				local name = game.id
+				if name and name ~= "default" then
+					core.settings:set("menu_last_game", name)
+					game_set = true
+					break
+				end
+			end
+			if not game_set then
+				menudata.worldlist:set_filtercriteria("empty")
+			end
+		end
+
 		local game = current_game()
 
 		if game then
 			menudata.worldlist:set_filtercriteria(game.id)
-			core.set_topleft_text("Powered by Minetest Engine")
 			mm_texture.update("singleplayer",game)
 		end
+
+		core.set_topleft_text("Powered by Minetest Engine")
 
 		singleplayer_refresh_gamebar()
 		ui.find_by_name("game_button_bar"):show()
@@ -352,7 +370,8 @@ end
 --------------------------------------------------------------------------------
 return {
 	name = "local",
-	caption = fgettext("Other games"),
+	caption = fgettext("Singleplayer"),
+	hidden = true,
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
 	on_change = on_change
