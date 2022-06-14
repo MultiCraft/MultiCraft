@@ -212,12 +212,23 @@ local function button_header(self)
 
 	-- The formspec is 15.4875 "real" coordinates wide
 	-- local x = (12.39 - total_width) / 2 - 0.3
-	local x = -0.105
+	local x = -0.10
 	for i = 1, #visible_tabs do
 		local caption = visible_tabs[i].caption
 		local w = btn_widths[i] * coords_per_char
-		toadd = toadd .. "button[" .. x .. ",-1.05;" .. w + 0.225 .. ",0.8;" ..
-			self.name .. ":" .. i .. ";" .. caption .. "]"
+		local texture = "upper_buttons_middle"
+		if i == 1 then
+			texture = "upper_buttons_left"
+		elseif i == #visible_tabs then
+			texture = "upper_buttons_right"
+		end
+		toadd = toadd ..
+		"style_type[image_button;padding=-10;bgimg=" .. defaulttexturedir ..
+			texture .. ".png;bgimg_hovered=" .. defaulttexturedir ..
+			texture .. "_hover.png;bgimg_middle=20;content_offset=0]" ..
+		"image_button[" .. x .. ",-1.05;" .. w + 0.22 .. ",0.9;;" ..
+			self.name .. ":" .. i .. ";" .. caption .. ";true;false]" ..
+		"style_type[image_button;padding=;bgimg=;bgimg_hovered=;bgimg_middle=;content_offset=]"
 		x = x + w
 	end
 
