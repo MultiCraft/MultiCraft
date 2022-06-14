@@ -194,7 +194,6 @@ end
 
 --------------------------------------------------------------------------------
 local function button_header(self)
-
 	local visible_tabs = {}
 	local btn_widths = {}
 	local total_width = 0
@@ -331,7 +330,7 @@ local tabview_metatable = {
 			function(self,handler) self.glb_evt_handler = handler end,
 	set_fixed_size =
 			function(self,state) self.fixed_size = state end,
-	-- tab_header = tab_header,
+--	tab_header = tab_header,
 	button_header = button_header,
 	handle_tab_buttons = handle_tab_buttons
 }
