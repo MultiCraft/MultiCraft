@@ -97,7 +97,7 @@ function menudata.init_tabs()
 	menudata.worldlist:set_sortmode("alphabetic")
 
 	if not core.settings:get("menu_last_game") then
-		local default_game = core.settings:get("default_game") or "minetest"
+		local default_game = core.settings:get("default_game") or "default"
 		core.settings:set("menu_last_game", default_game)
 	end
 
@@ -113,13 +113,7 @@ function menudata.init_tabs()
 		end
 	end
 
-	for i = 1, #pkgmgr.games do
-		if pkgmgr.games[i].id ~= "default" then
-			tv_main:add(tabs.local_game)
-			break
-		end
-	end
-
+	tv_main:add(tabs.local_game)
 	if func then
 		func(tv_main)
 	end
@@ -138,7 +132,8 @@ function menudata.init_tabs()
 		tv_main:set_tab(last_tab)
 	end
 
-	if last_tab ~= "local" and not core.settings:get_bool("menu_clouds") then
+	if last_tab ~= "local" then
+		core.set_clouds(false)
 		mm_texture.set_dirt_bg()
 	end
 
@@ -153,8 +148,6 @@ function menudata.init_tabs()
 
 	ui.set_default("maintab")
 	tv_main:show()
-
-	core.set_clouds(core.settings:get_bool("menu_clouds"))
 
 	ui.update()
 end

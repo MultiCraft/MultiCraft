@@ -104,23 +104,7 @@ local function singleplayer_refresh_gamebar()
 	btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
 end
 
-local function filter_default()
-	local gameid = core.settings:get("menu_last_game")
-	if not gameid or gameid == "" or gameid == "default" then
-		for j=1, #pkgmgr.games do
-			local name = pkgmgr.games[j].id
-			if name and name ~= "default" then
-				menudata.worldlist:set_filtercriteria(name)
-				core.settings:set("menu_last_game", name)
-				mm_texture.update("singleplayer", current_game())
-				return
-			end
-		end
-	end
-end
-
 local function get_formspec()
-	filter_default()
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 
@@ -159,9 +143,10 @@ local function get_formspec()
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
-			"image_button[10.6,-0.1;1.5,1.5;" .. defaulttexturedir ..
-				"no_texture_airlike.png;default_game;;true;false;" ..
-				defaulttexturedir .. "no_texture_airlike.png]"
+
+			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
+				defaulttexturedir .. "switch_local_default_hover.png]" ..
+			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
@@ -328,26 +313,46 @@ local function main_button_handler(this, fields, name)
 		return true
 	end
 
-	if fields["default_game"] then
+	if fields["switch_local_default"] then
+		core.settings:set("menu_last_game", "default")
 		this:set_tab("local_default")
+
 		return true
 	end
 
-	if fields.game_open_cdb then
+	if fields["game_open_cdb"] then
 		this:set_tab("content")
+
 		return true
 	end
 end
 
 local function on_change(type, old_tab, new_tab)
 	if (type == "ENTER") then
+		local gameid = core.settings:get("menu_last_game")
+		if not gameid or gameid == "" or gameid == "default" then
+			local game_set
+			for _, game in ipairs(pkgmgr.games) do
+				local name = game.id
+				if name and name ~= "default" then
+					core.settings:set("menu_last_game", name)
+					game_set = true
+					break
+				end
+			end
+			if not game_set then
+				menudata.worldlist:set_filtercriteria("empty")
+			end
+		end
+
 		local game = current_game()
 
 		if game then
 			menudata.worldlist:set_filtercriteria(game.id)
-			core.set_topleft_text("Powered by Minetest Engine")
 			mm_texture.update("singleplayer",game)
 		end
+
+		core.set_topleft_text("Powered by Minetest Engine")
 
 		singleplayer_refresh_gamebar()
 		ui.find_by_name("game_button_bar"):show()

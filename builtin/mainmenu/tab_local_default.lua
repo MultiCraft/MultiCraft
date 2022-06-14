@@ -60,10 +60,7 @@ local function create_default_worlds()
 end
 
 local checked_worlds = false
-local function get_formspec()
-	mm_texture.set_dirt_bg()
-	menudata.worldlist:set_filtercriteria("default")
-
+local function get_formspec(this)
 	-- Only check the worlds once (on restart)
 	if not checked_worlds and #menudata.worldlist:get_list() == 0 then
 		create_default_worlds()
@@ -123,9 +120,9 @@ local function get_formspec()
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
-			"image_button[10.6,-0.1;1.5,1.5;" ..
-				defaulttexturedir .. "no_texture_airlike.png;other_games;;true;false;" ..
-				defaulttexturedir .. "no_texture_airlike.png]"
+			"style[switch_local;fgimg=" .. defaulttexturedir .. "switch_local.png;fgimg_hovered=" ..
+				defaulttexturedir .. "switch_local_hover.png]" ..
+			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
 	end
 
 	local enable_server = core.settings:get_bool("enable_server")
@@ -271,7 +268,7 @@ local function main_button_handler(this, fields, name)
 		return true
 	end
 
-	if fields["other_games"] then
+	if fields["switch_local"] then
 		this:set_tab("local")
 		return true
 	end
@@ -298,10 +295,27 @@ local function main_button_handler(this, fields, name)
 	end]]
 end
 
+local function on_change(type, _, _, this)
+	if (type == "ENTER") then
+		local gameid = core.settings:get("menu_last_game")
+
+		local game = pkgmgr.find_by_gameid(gameid)
+		if game then
+			if gameid ~= "default"  then
+				this:set_tab("local")
+			else
+				mm_texture.update("singleplayer",game)
+				menudata.worldlist:set_filtercriteria("default")
+			end
+		end
+	end
+end
+
 --------------------------------------------------------------------------------
 return {
 	name = "local_default",
 	caption = fgettext("Singleplayer"),
 	cbf_formspec = get_formspec,
-	cbf_button_handler = main_button_handler
+	cbf_button_handler = main_button_handler,
+	on_change = on_change
 }

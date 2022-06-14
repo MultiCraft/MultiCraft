@@ -85,13 +85,14 @@ function ui.update()
 		local error_message = core.formspec_escape(gamedata.errormessage)
 
 		local error_title
-		if gamedata.errormessage:find("ModError") then
+		local mod_error = gamedata.errormessage:find("ModError") or gamedata.errormessage:find("LuaError")
+		if mod_error then
 			error_title = fgettext("An error occurred in a Lua script:")
 		else
 			error_title = fgettext("An error occurred:")
 		end
 		local restart_btn
-		if (maintab == "local" or maintab == "local_default") and
+		if (maintab == "local" or maintab == "local_default") and mod_error and
 				core.get_us_time() - connect_time > 30 then
 			restart_btn =
 				"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..

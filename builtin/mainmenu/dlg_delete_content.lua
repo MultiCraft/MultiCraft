@@ -19,13 +19,15 @@
 
 local function delete_content_formspec(dialogdata)
 	local title = dialogdata.content.title or dialogdata.content.name
-	return
+	local retval =
 		"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir) ..
 			"blank.png;;" .. fgettext("Are you sure you want to delete \"$1\"?", title) ..
 			";true;false;]" ..
 		"style[dlg_delete_content_confirm;bgcolor=red]" ..
 		"button[3,4.8;3,0.5;dlg_delete_content_confirm;" .. fgettext("Delete") .. "]" ..
 		"button[6,4.8;3,0.5;dlg_delete_content_cancel;" .. fgettext("Cancel") .. "]"
+
+	return retval
 end
 
 --------------------------------------------------------------------------------
