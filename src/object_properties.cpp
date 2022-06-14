@@ -159,7 +159,14 @@ void ObjectProperties::serialize(std::ostream &os, u16 protocol_version) const
 	if (protocol_version < 37 && (visual == "item" || visual == "wielditem") &&
 			!wield_item.empty()) {
 		writeU16(os, 1);
-		os << serializeString16(wield_item);
+		// MT 0.4.15 and below only expect the item name, if anything else
+		// (such as an item count or metadata) is sent then older clients will
+		// show the object as an unknown item.
+		const size_t pos = wield_item.find(' ');
+		if (pos == std::string::npos)
+			os << serializeString16(wield_item);
+		else
+			os << serializeString16(wield_item.substr(0, pos));
 	} else {
 		writeU16(os, textures.size());
 		for (const std::string &texture : textures) {

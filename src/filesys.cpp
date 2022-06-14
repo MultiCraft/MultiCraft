@@ -286,11 +286,12 @@ bool IsDirDelimiter(char c)
 
 bool RecursiveDelete(const std::string &path)
 {
+	infostream<<"Removing \""<<path<<"\""<<std::endl;
+
+#if 0
 	/*
 		Execute the 'rm' command directly, by fork() and execve()
 	*/
-
-	infostream<<"Removing \""<<path<<"\""<<std::endl;
 
 	pid_t child_pid = fork();
 
@@ -326,6 +327,28 @@ bool RecursiveDelete(const std::string &path)
 		}while(tpid != child_pid);
 		return (child_status == 0);
 	}
+#else
+	/*
+		Executing fork() and execve() is unsafe and unavailable on some platforms
+	*/
+
+	bool success = true;
+	std::vector<std::string> paths;
+	paths.push_back(path);
+	fs::GetRecursiveSubPaths(path, paths, true, {});
+
+	// Go backwards to successfully delete the output of GetRecursiveSubPaths
+	for (int i = paths.size() - 1; i >= 0; i--) {
+		const std::string &p = paths[i];
+		bool did = DeleteSingleFileOrEmptyDirectory(p);
+		if (!did) {
+			errorstream << "Failed to delete " << p << std::endl;
+			success = false;
+		}
+	}
+
+	return success;
+#endif
 }
 
 bool DeleteSingleFileOrEmptyDirectory(const std::string &path)

@@ -919,8 +919,8 @@ function pkgmgr.gamelist()
 	local retval = ""
 	if #pkgmgr.games > 0 then
 		for i = 1, #pkgmgr.games do
-			if retval ~= "" then retval = retval .. "," end
 			if pkgmgr.games[i].id ~= "default" then
+				if retval ~= "" then retval = retval .. "," end
 				retval = retval .. core.formspec_escape(pkgmgr.games[i].name)
 			end
 		end

@@ -3299,7 +3299,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 #if defined(__ANDROID__) || defined(__IOS__)
 			v2f padded_screensize(
-				mydata.screensize.X * 0.9f,
+				mydata.screensize.X,
 				mydata.screensize.Y
 			);
 #else

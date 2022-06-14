@@ -220,7 +220,7 @@ void set_default_settings()
 	settings->setDefault("fall_bobbing_amount", "1.0");
 	settings->setDefault("enable_3d_clouds", "true");
 	settings->setDefault("cloud_radius", "12");
-	settings->setDefault("menu_clouds", "false");
+	settings->setDefault("menu_clouds", "true");
 	settings->setDefault("opaque_water", "false");
 	settings->setDefault("console_height", "0.6");
 	settings->setDefault("console_color", "(0,0,0)");
@@ -302,16 +302,17 @@ void set_default_settings()
 
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
 	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-Italic.ttf"));
 	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Arimo-Bold.ttf"));
 	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
 #else
-	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
-	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
-	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
-	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
+	std::string MultiCraftFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf");
+	settings->setDefault("font_path", MultiCraftFont);
+	settings->setDefault("font_path_italic", MultiCraftFont);
+	settings->setDefault("font_path_bold", MultiCraftFont);
+	settings->setDefault("font_path_bold_italic", MultiCraftFont);
 #endif
 	settings->setDefault("font_bold", "false");
 	settings->setDefault("font_italic", "false");
@@ -325,18 +326,21 @@ void set_default_settings()
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallbackFull.ttf"));
 #else
 #ifdef __ANDROID__
-	settings->setDefault("mono_font_path", "/system/fonts/DroidSansMono.ttf");
-	settings->setDefault("mono_font_path_italic", porting::getDataPath("fonts" DIR_DELIM "DroidSansMono.ttf"));
-	settings->setDefault("mono_font_path_bold", porting::getDataPath("fonts" DIR_DELIM "DroidSansMono.ttf"));
-	settings->setDefault("mono_font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "DroidSansMono.ttf"));
-	settings->setDefault("fallback_font_path", "/system/fonts/DroidSans.ttf");
+	settings->setDefault("mono_font_path", "/system/fonts/Roboto-Regular.ttf");
+	settings->setDefault("mono_font_path_italic", "/system/fonts/Roboto-Regular.ttf");
+	settings->setDefault("mono_font_path_bold", "/system/fonts/Roboto-Regular.ttf");
+	settings->setDefault("mono_font_path_bold_italic", "/system/fonts/Roboto-Regular.ttf");
+	if (android_get_device_api_level() >= __ANDROID_API_N__)
+		settings->setDefault("fallback_font_path", "/system/fonts/NotoSansCJK-Regular.ttc");
+	else
+		settings->setDefault("fallback_font_path", "/system/fonts/DroidSans.ttf");
 #endif
 #ifdef __IOS__
-	settings->setDefault("mono_font_path", g_settings->get("font_path"));
-	settings->setDefault("mono_font_path_italic", g_settings->get("font_path"));
-	settings->setDefault("mono_font_path_bold", g_settings->get("font_path"));
-	settings->setDefault("mono_font_path_bold_italic", g_settings->get("font_path"));
-	settings->setDefault("fallback_font_path", g_settings->get("font_path"));
+	settings->setDefault("mono_font_path", MultiCraftFont);
+	settings->setDefault("mono_font_path_italic", MultiCraftFont);
+	settings->setDefault("mono_font_path_bold", MultiCraftFont);
+	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
+	settings->setDefault("fallback_font_path", MultiCraftFont);
 #endif
 #endif
 
@@ -359,7 +363,7 @@ void set_default_settings()
 	settings->setDefault("chat_font_size", "0"); // Default "font_size"
 
 	// ContentDB
-	settings->setDefault("contentdb_url", "https://content.minetest.net");
+	settings->setDefault("contentdb_url", "https://content.multicraft.world");
 	settings->setDefault("contentdb_max_concurrent_downloads", "3");
 
 #ifdef __ANDROID__
@@ -558,7 +562,7 @@ void set_default_settings()
 		settings->setDefault("client_mapblock_limit", "50");
 		settings->setDefault("fps_max", "30");
 		settings->setDefault("pause_fps_max", "5");
-		settings->setDefault("viewing_range", "25");
+		settings->setDefault("viewing_range", "30");
 		settings->setDefault("smooth_lighting", "false");
 		settings->setDefault("enable_3d_clouds", "false");
 		settings->setDefault("active_block_range", "1");
@@ -573,16 +577,13 @@ void set_default_settings()
 #elif __IOS__
 	} else if (iOS_ver < 13.0) {
 		// low settings
-		settings->setDefault("enable_minimap", "false");
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "120");
 		settings->setDefault("client_mapblock_limit", "200");
 		settings->setDefault("fps_max", "35");
 		settings->setDefault("pause_fps_max", "10");
-		settings->setDefault("viewing_range", "30");
+		settings->setDefault("viewing_range", "40");
 		settings->setDefault("smooth_lighting", "false");
-		settings->setDefault("enable_3d_clouds", "false");
-		settings->setDefault("cloud_radius", "6");
 		settings->setDefault("active_block_range", "1");
 		settings->setDefault("dedicated_server_step", "0.2");
 		settings->setDefault("abm_interval", "2.0");
@@ -602,13 +603,12 @@ void set_default_settings()
 		settings->setDefault("client_mapblock_limit", "300");
 		settings->setDefault("fps_max", "35");
 		settings->setDefault("viewing_range", "60");
-		settings->setDefault("cloud_radius", "6");
 		settings->setDefault("active_block_range", "2");
 		settings->setDefault("max_block_generate_distance", "3");
 	} else {
 		// high settings
 		settings->setDefault("client_mapblock_limit", "500");
-		settings->setDefault("viewing_range", "80");
+		settings->setDefault("viewing_range", "125");
 		settings->setDefault("max_block_generate_distance", "5");
 
 #ifdef __IOS__
@@ -636,11 +636,9 @@ void set_default_settings()
 		settings->setDefault("enable_shaders", "false");
 	}
 
-	settings->setDefault("debug_log_level", "error");
-
 	v2u32 window_size = RenderingEngine::getDisplaySize();
 	if (window_size.X > 0) {
-		float x_inches = window_size.X / (160.f * porting::getDisplayDensity());
+		float x_inches = window_size.X / (160.f * RenderingEngine::getDisplayDensity());
 		if (x_inches <= 3.7) {
 			// small 4" phones
 			g_settings->setDefault("hud_scaling", "0.55");
@@ -701,6 +699,8 @@ void set_default_settings()
 		// 5.5" iPhone Plus
 		settings->setDefault("hud_scaling", "0.65");
 		settings->setDefault("mouse_sensitivity", "0.3");
+		settings->setDefault("font_size", font_small);
+		settings->setDefault("fallback_font_size", font_small);
 	} else if (SDVersion5and8Inch || SDVersion6and1Inch) {
 		// 5.8" and 6.1" iPhones
 		settings->setDefault("hud_scaling", "0.8");
@@ -723,15 +723,9 @@ void set_default_settings()
 	}
 
 	// Settings for the Rounded Screen and Home Bar
-	UIWindow *window = UIApplication.sharedApplication.keyWindow;
-	CGFloat safeAreaBottom = window.safeAreaInsets.bottom;
-
-	if (safeAreaBottom > 0) {
-		settings->setDefault("hud_move_upwards", std::to_string(safeAreaBottom));
-		if SDVersioniPhone12Series
-			settings->setDefault("round_screen", "75");
-		else
-			settings->setDefault("round_screen", "35");
+	if SDVersionRoundScreen {
+		settings->setDefault("hud_move_upwards", "22");
+		settings->setDefault("round_screen", SDVersioniPhone12Series ? "80" : "40");
 	}
 #endif // iOS
 #endif

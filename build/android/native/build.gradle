@@ -4,7 +4,7 @@ apply plugin: 'de.undercouch.download'
 android {
 	compileSdkVersion 32
 	buildToolsVersion '32.0.0'
-	ndkVersion '23.1.7779620'
+	ndkVersion '23.2.8568313'
 	defaultConfig {
 		minSdkVersion 21
 		targetSdkVersion 32
@@ -92,3 +92,7 @@ task getIconv(dependsOn: downloadIconv, type: Copy) {
 
 preBuild.dependsOn getDeps
 preBuild.dependsOn getIconv
+
+android.defaultConfig.externalNativeBuild.ndkBuild {
+	arguments 'prebuilt=$(if $(strip $(wildcard $(prebuilt_path))),$(prebuilt_path),.)'
+}

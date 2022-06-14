@@ -71,21 +71,23 @@ local function buttonbar_formspec(self)
 
 	if (self.have_move_buttons) then
 		local btn_dec_pos = {}
-		btn_dec_pos.x = self.pos.x + (self.btn_size * 0.05)
-		btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
 		local btn_inc_pos = {}
 		local btn_size = {}
 
 		if self.orientation == "horizontal" then
 			btn_size.x = 0.5
 			btn_size.y = self.btn_size
+			btn_dec_pos.x = self.pos.x + (self.btn_size * 0.05)
+			btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
 			btn_inc_pos.x = self.pos.x + self.size.x - 0.5
 			btn_inc_pos.y = self.pos.y + (self.btn_size * 0.05)
 		else
 			btn_size.x = self.btn_size
 			btn_size.y = 0.5
-			btn_inc_pos.x = self.pos.x + (self.btn_size * 0.05)
-			btn_inc_pos.y = self.pos.y + self.size.y - 0.5
+			btn_dec_pos.x = self.pos.x + (self.btn_size * 0.1)
+			btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
+			btn_inc_pos.x = self.pos.x + (self.btn_size * 0.1)
+			btn_inc_pos.y = self.pos.y + self.size.y - (self.btn_size * 0.4)
 		end
 
 		local text_dec = "<"
@@ -103,7 +105,7 @@ local function buttonbar_formspec(self)
 		formspec = formspec ..
 			string.format("image_button[%f,%f;%f,%f;;btnbar_inc_%s;%s;true;true]",
 					btn_inc_pos.x, btn_inc_pos.y, btn_size.x, btn_size.y,
-					 self.name, text_inc)
+					self.name, text_inc)
 	end
 
 	return formspec
@@ -112,7 +114,7 @@ end
 local function buttonbar_buttonhandler(self, fields)
 
 	if fields["btnbar_inc_" .. self.name] ~= nil and
-		self.startbutton < #self.buttons then
+		self.startbutton < #self.buttons - 4 then
 
 		self.startbutton = self.startbutton + 1
 		return true
@@ -187,7 +189,7 @@ function buttonbar_create(name, cbf_buttonhandler, pos, orientation, size)
 	local self = {}
 	self.name = name
 	self.type = "addon"
-	self.bgcolor = "#8fb9de"
+	self.bgcolor = "#7f9dd5"
 	self.pos = pos
 	self.size = size
 	self.orientation = orientation

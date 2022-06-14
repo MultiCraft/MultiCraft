@@ -118,7 +118,9 @@ local function save_favorites(favorites)
 		core.settings:set("serverlist_file", filename:sub(1, #filename - 4) .. ".json")
 	end
 
-	assert(core.create_dir(get_favorites_path(true)))
+	if not core.create_dir(get_favorites_path(true)) then
+		core.log("error", "Failed to create favorites path")
+	end
 	core.safe_file_write(get_favorites_path(), core.write_json(favorites))
 end
 
@@ -240,6 +242,10 @@ end
 
 --------------------------------------------------------------------------------
 function serverlistmgr.add_favorite(new_favorite)
+	if new_favorite.address == nil or new_favorite.port == nil then
+		return
+	end
+
 	assert(type(new_favorite.port) == "number")
 
 	-- Whitelist favorite keys

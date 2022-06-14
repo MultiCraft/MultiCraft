@@ -23,9 +23,8 @@ local function vector_absmax(v)
 end
 
 core.register_on_punchplayer(function(player, hitter, time_from_last_punch, tool_capabilities, unused_dir, damage)
-	if player:get_hp() == 0
-	or player:get_animation().range ~= "stand" then
-		return -- RIP or attached
+	if player:get_hp() == 0 then
+		return -- RIP
 	end
 
 	-- Server::handleCommand_Interact() adds eye offset to one but not the other

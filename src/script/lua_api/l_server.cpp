@@ -250,6 +250,14 @@ int ModApiServer::l_get_player_information(lua_State *L)
 	lua_pushstring(L, info.vers_string.c_str());
 	lua_settable(L, table);
 
+	lua_pushstring(L,"platform");
+	lua_pushstring(L, info.platform.c_str());
+	lua_settable(L, table);
+
+	lua_pushstring(L,"sysinfo");
+	lua_pushstring(L, info.sysinfo.c_str());
+	lua_settable(L, table);
+
 	lua_pushstring(L,"state");
 	lua_pushstring(L, ClientInterface::state2Name(info.state).c_str());
 	lua_settable(L, table);
@@ -305,12 +313,15 @@ int ModApiServer::l_kick_player(lua_State *L)
 	else
 		message.append(".");
 
-	RemotePlayer *player = dynamic_cast<ServerEnvironment *>(getEnv(L))->getPlayer(name);
-	if (player == NULL) {
+	Server *server = getServer(L);
+
+	RemotePlayer *player = server->getEnv().getPlayer(name);
+	if (!player) {
 		lua_pushboolean(L, false); // No such player
 		return 1;
 	}
-	getServer(L)->DenyAccess_Legacy(player->getPeerId(), utf8_to_wide(message));
+
+	server->DenyAccess(player->getPeerId(), SERVER_ACCESSDENIED_CUSTOM_STRING, message);
 	lua_pushboolean(L, true);
 	return 1;
 }

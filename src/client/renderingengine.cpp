@@ -558,7 +558,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 			float imgR = scale;
 #else
 			float imgRatio = (float) img_size.Height / img_size.Width;
-			u32 imgW = npot2(screensize.X / 2.0f);
+			u32 imgW = npot2(screensize.X / 2);
 			if (imgW > (screensize.X * 0.7) && imgW >= 1024)
 				imgW /= 2;
 			u32 imgH = imgW * imgRatio;
@@ -608,7 +608,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 				core::rect<s32>(507, 24, 508, 40)
 			};
 
-			for (const auto & i : rects) {
+			for (const auto &i : rects) {
 				const s32 clipx = (percent * imgW) / 100;
 				core::rect<s32> r(
 					MYMIN(i.UpperLeftCorner.X * imgR, clipx), i.UpperLeftCorner.Y * imgR,
@@ -616,12 +616,12 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 				);
 				if (r.getArea() <= 0)
 					break;
-				get_video_driver()->draw2DRectangle(
+				driver->draw2DRectangle(
 					video::SColor(255, 255 - percent * 2, percent * 2, 25),
 					r + img_pos, nullptr);
 			}
 
-			draw2DImageFilterScaled(get_video_driver(), progress_img,
+			draw2DImageFilterScaled(driver, progress_img,
 					core::rect<s32>(img_pos.X, img_pos.Y,
 							img_pos.X + (percent * imgW) / 100,
 							img_pos.Y + imgH),
@@ -633,7 +633,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 	}
 
 	guienv->drawAll();
-	get_video_driver()->endScene();
+	driver->endScene();
 	guitext->remove();
 }
 
@@ -825,7 +825,8 @@ v2u32 RenderingEngine::getDisplaySize()
 #else // __ANDROID__/__IOS__
 float RenderingEngine::getDisplayDensity()
 {
-	return porting::getDisplayDensity();
+	static const float density = porting::getDisplayDensity();
+	return density;
 }
 
 v2u32 RenderingEngine::getDisplaySize()

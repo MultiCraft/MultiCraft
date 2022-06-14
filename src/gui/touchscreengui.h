@@ -1,6 +1,6 @@
 /*
 Copyright (C) 2014 sapier
-Copyright (C) 2014-2020 Maksim Gamarnik [MoNTE48] MoNTE48@mail.ua
+Copyright (C) 2014-2022 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -103,7 +103,7 @@ struct button_info
 	bool immediate_release;
 
 	// 0: false, 1: (true) first texture, 2: (true) second texture
-	int togglable = 0;
+	s32 togglable = 0;
 	std::vector<const char *> textures;
 };
 
@@ -112,7 +112,7 @@ class AutoHideButtonBar
 public:
 	AutoHideButtonBar(IrrlichtDevice *device, IEventReceiver *receiver);
 
-	void init(ISimpleTextureSource *tsrc, const char *starter_img, int button_id,
+	void init(ISimpleTextureSource *tsrc, const char *starter_img, s32 button_id,
 			const v2s32 &UpperLeft, const v2s32 &LowerRight,
 			autohide_button_bar_dir dir, float timeout);
 
@@ -195,7 +195,7 @@ public:
 
 	void step(float dtime);
 	void resetHud();
-	void registerHudItem(int index, const rect<s32> &rect);
+	void registerHudItem(s32 index, const rect<s32> &rect);
 	void Toggle(bool visible);
 
 	void hide();
@@ -212,9 +212,11 @@ private:
 	v2u32 m_screensize;
 	s32 button_size;
 	double m_touchscreen_threshold;
+	double m_mouse_sensitivity;
 	std::map<int, rect<s32>> m_hud_rects;
 	std::map<size_t, irr::EKEY_CODE> m_hud_ids;
 	bool m_visible; // is the gui visible
+	bool m_buttons_initialized = false;
 
 	// value in degree
 	double m_camera_yaw_change = 0.0;
@@ -267,7 +269,7 @@ private:
 
 	// initialize a joystick button
 	button_info *initJoystickButton(touch_gui_button_id id,
-			const rect<s32> &button_rect, int texture_id,
+			const rect<s32> &button_rect, s32 texture_id,
 			bool visible = true);
 
 	void moveJoystick(const SEvent &event, float dx, float dy);
@@ -275,8 +277,8 @@ private:
 	struct id_status
 	{
 		size_t id;
-		int X;
-		int Y;
+		s32 X;
+		s32 Y;
 	};
 
 	// vector to store known ids and their initial touch positions

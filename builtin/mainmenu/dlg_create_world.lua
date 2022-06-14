@@ -109,6 +109,7 @@ local function create_world_formspec(dialogdata)
 	end
 
 	local mapgens = core.get_mapgen_names()
+	mapgens[#mapgens + 1] = "superflat"
 
 	local current_seed = core.settings:get("fixed_map_seed") or ""
 	local current_mg   = core.settings:get("mg_name")
@@ -142,13 +143,21 @@ local function create_world_formspec(dialogdata)
 		local gameconfig = Settings(gamepath.."/game.conf")
 
 		local allowed_mapgens = (gameconfig:get("allowed_mapgens") or ""):split()
-		for key, value in pairs(allowed_mapgens) do
-			allowed_mapgens[key] = value:trim()
+		for key, value in ipairs(allowed_mapgens) do
+			value = value:trim()
+			allowed_mapgens[key] = value
+			if value == "flat" then
+				allowed_mapgens[#allowed_mapgens + 1] = "superflat"
+			end
 		end
 
 		local disallowed_mapgens = (gameconfig:get("disallowed_mapgens") or ""):split()
-		for key, value in pairs(disallowed_mapgens) do
-			disallowed_mapgens[key] = value:trim()
+		for key, value in ipairs(disallowed_mapgens) do
+			value = value:trim()
+			disallowed_mapgens[key] = value
+			if value == "flat" then
+				disallowed_mapgens[#disallowed_mapgens + 1] = "superflat"
+			end
 		end
 
 		if #allowed_mapgens > 0 then
@@ -194,7 +203,7 @@ local function create_world_formspec(dialogdata)
 	mglist = mglist:sub(1, -2)
 
 	local mg_main_flags = function(mapgen, y)
-		if mapgen == "singlenode" then
+		if mapgen == "singlenode" or mapgen == "superflat" then
 			return "", y
 		end
 		if disallowed_mapgen_settings["mg_flags"] then
@@ -266,7 +275,7 @@ local function create_world_formspec(dialogdata)
 		end
 		y = y + 0.3
 
-		form = form .. "label[0,"..(y+0.1)..";" .. fgettext("Biomes") .. "]"
+		form = form .. "label[0,"..(y+0.1)..";" .. fgettext("Biomes") .. ":]"
 		y = y + 0.6
 
 		form = form .. "dropdown[0,"..y..";6.3;mgv6_biomes;"
@@ -297,7 +306,7 @@ local function create_world_formspec(dialogdata)
 	y = y + 0.3
 	str_flags, y = mg_main_flags(current_mg, y)
 	if str_flags ~= "" then
-		label_flags = "label[0,"..y_start..";" .. fgettext("Mapgen flags") .. "]"
+		label_flags = "label[0,"..y_start..";" .. fgettext("Mapgen flags") .. ":]"
 		y_start = y + 0.4
 	else
 		y_start = 0.0
@@ -305,7 +314,7 @@ local function create_world_formspec(dialogdata)
 	y = y_start + 0.3
 	str_spflags = mg_specific_flags(current_mg, y)
 	if str_spflags ~= "" then
-		label_spflags = "label[0,"..y_start..";" .. fgettext("Mapgen-specific flags") .. "]"
+		label_spflags = "label[0,"..y_start..";" .. fgettext("Mapgen-specific flags") .. ":]"
 	end
 
 	-- Warning if only devtest is installed
@@ -334,16 +343,16 @@ local function create_world_formspec(dialogdata)
 		"container[0,0]"..
 		"field[0.3,0.6;6,0.5;te_world_name;" ..
 		fgettext("World name") ..
-		";" .. core.formspec_escape(worldname) .. "]" ..
+		":;" .. core.formspec_escape(worldname) .. "]" ..
 
 		"field[0.3,1.7;6,0.5;te_seed;" ..
 		fgettext("Seed") ..
-		";".. current_seed .. "]" ..
+		":;".. current_seed .. "]" ..
 
-		"label[0,2;" .. fgettext("Mapgen") .. "]"..
+		"label[0,2;" .. fgettext("Mapgen") .. ":]"..
 		"dropdown[0,2.5;6.3;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
 
-		"label[0,3.35;" .. fgettext("Game") .. "]"..
+		"label[0,3.35;" .. fgettext("Game") .. ":]"..
 		"textlist[0,3.85;5.8,"..gamelist_height..";games;" ..
 		pkgmgr.gamelist() .. ";" .. _gameidx .. ";false]" ..
 		"container[0,4.5]" ..
@@ -393,12 +402,31 @@ local function create_world_buttonhandler(this, fields)
 				worldname = "World " .. worldnum_max + 1
 			end
 
-			core.settings:set("fixed_map_seed", fields["te_seed"])
+			if fields["te_seed"] then
+				core.settings:set("fixed_map_seed", fields["te_seed"])
+			end
 
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then
-				core.settings:set("mg_name",fields["dd_mapgen"])
+				local old_mg_flags
+				if fields["dd_mapgen"] == "superflat" then
+					core.settings:set("mg_name", "flat")
+					old_mg_flags = core.settings:get("mg_flags")
+					core.settings:set("mg_flags", "nocaves,nodungeons,nodecorations")
+				else
+					core.settings:set("mg_name", fields["dd_mapgen"])
+				end
 				message = core.create_world(worldname,gameindex)
+
+				-- Restore the old mg_flags setting if creating a superflat world
+				if fields["dd_mapgen"] == "superflat" then
+					core.settings:set("mg_name", "superflat")
+					if old_mg_flags then
+						core.settings:set("mg_flags", old_mg_flags)
+					else
+						core.settings:remove("mg_flags")
+					end
+				end
 			else
 				message = fgettext("A world named \"$1\" already exists", worldname)
 			end

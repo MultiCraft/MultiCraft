@@ -45,7 +45,7 @@ if rawget(_G, "getmetatable") then
 end
 
 local function handle_error(err)
-	minetest.log("error", "[SSCSM] " .. tostring(err))
+	core.log("error", "[SSCSM] " .. tostring(err))
 end
 
 local function log_pcall(ok, ...)
@@ -55,7 +55,7 @@ local function log_pcall(ok, ...)
 
 	local handled_ok, err = pcall(handle_error, ...)
 	if not handled_ok then
-		minetest.log("error", "[SSCSM] handle_error: " .. tostring(err))
+		core.log("error", "[SSCSM] handle_error: " .. tostring(err))
 	end
 end
 
@@ -69,19 +69,19 @@ do
 		return rep(str, n)
 	end
 
-	local show_formspec = minetest.show_formspec
+	local show_formspec = core.show_formspec
 	safe_funcs[show_formspec] = function(formname, ...)
 		if type(formname) == "string" then
 			return show_formspec("sscsm:_" .. formname, ...)
 		end
 	end
 
-	local after = minetest.after
+	local after = core.after
 	safe_funcs[after] = function(n, ...)
 		if type(n) == "number" then return after(n, pcall, ...) end
 	end
 
-	local on_fs_input = minetest.register_on_formspec_input
+	local on_fs_input = core.register_on_formspec_input
 	safe_funcs[on_fs_input] = function(func)
 		on_fs_input(function(formname, fields)
 			if formname:sub(1, 7) == "sscsm:_" then
@@ -90,20 +90,20 @@ do
 		end)
 	end
 
-	local deserialize = minetest.deserialize
+	local deserialize = core.deserialize
 	safe_funcs[deserialize] = function(str)
 		return deserialize(str, true)
 	end
 
 	if ENABLE_SPECTRE_MITIGATIONS then
-		local get_us_time, floor = minetest.get_us_time, math.floor
+		local get_us_time, floor = core.get_us_time, math.floor
 		safe_funcs[get_us_time] = function()
 			return floor(get_us_time() / 100) * 100
 		end
 	end
 
 	local wrap = function(n)
-		local orig = minetest[n] or minetest[n .. "s"]
+		local orig = core[n] or core[n .. "s"]
 		if type(orig) == "function" then
 			return function(func)
 				orig(function(...)
@@ -120,7 +120,7 @@ do
 			"register_on_modchannel_message", "register_on_modchannel_signal",
 			"register_on_inventory_open", "register_on_sending_chat_message",
 			"register_on_receiving_chat_message"}) do
-		safe_funcs[minetest[k]] = wrap(k)
+		safe_funcs[core[k]] = wrap(k)
 	end
 end
 
@@ -165,7 +165,7 @@ end
 function Env:exec(code, file)
 	local f, msg = self:loadstring(code, file)
 	if not f then
-		minetest.log("error", "[SSCSM] Syntax error: " .. tostring(msg))
+		core.log("error", "[SSCSM] Syntax error: " .. tostring(msg))
 		return false
 	end
 	f()
@@ -182,7 +182,7 @@ env:add_globals("assert", "dump", "dump2", "error", "ipairs", "math",
 
 env:set_copy("os", {clock = os.clock, difftime = os.difftime, time = os.time})
 
--- Create a slightly locked down "minetest" table
+-- Create a slightly locked down "core" table
 do
 	local t = {}
 	for _, k in ipairs({"add_particle", "add_particlespawner", "after",
@@ -215,7 +215,7 @@ do
 			"strip_background_colors", "strip_colors",
 			"strip_foreground_colors", "translate", "wrap_text",
 			"write_json"}) do
-		local func = minetest[k]
+		local func = core[k]
 		t[k] = safe_funcs[func] or func
 	end
 
@@ -229,7 +229,7 @@ end
 
 -- Make sure copy() worked correctly
 assert(env._raw.minetest.register_on_sending_chat_message ~=
-	minetest.register_on_sending_chat_message, "Error in copy()!")
+	core.register_on_sending_chat_message, "Error in copy()!")
 
 -- SSCSM functions
 -- When calling these from an SSCSM, make sure they exist first.
@@ -237,7 +237,7 @@ local mod_channel
 local loaded_sscsms = {}
 env:set("join_mod_channel", function()
 	if not mod_channel then
-		mod_channel = minetest.mod_channel_join("sscsm:exec_pipe")
+		mod_channel = core.mod_channel_join("sscsm:exec_pipe")
 	end
 end)
 
@@ -253,7 +253,7 @@ env:set("set_error_handler", function(func)
 end)
 
 -- exec() code sent by the server.
-minetest.register_on_modchannel_message(function(channel_name, sender, message)
+core.register_on_modchannel_message(function(channel_name, sender, message)
 	if channel_name ~= "sscsm:exec_pipe" or (sender and sender ~= "") then
 		return
 	end
@@ -266,7 +266,7 @@ minetest.register_on_modchannel_message(function(channel_name, sender, message)
 		local s, e = message:find("\n")
 		if not s or not e then return end
 		local target = message:sub(2, s - 1)
-		if target ~= minetest.localplayer:get_name() then return end
+		if target ~= core.localplayer:get_name() then return end
 		message = message:sub(e + 1)
 		s, e = message:find("\n")
 		if not s or not e then return end
@@ -278,7 +278,7 @@ minetest.register_on_modchannel_message(function(channel_name, sender, message)
 
 	-- Don't load the same SSCSM twice
 	if not loaded_sscsms[name] then
-		minetest.log("action", "[SSCSM] Loading " .. name)
+		core.log("action", "[SSCSM] Loading " .. name)
 		loaded_sscsms[name] = true
 		env:exec(code, name)
 	end
@@ -286,15 +286,15 @@ end)
 
 -- Send "0" when the "sscsm:exec_pipe" channel is first joined.
 local sent_request = false
-minetest.register_on_modchannel_signal(function(channel_name, signal)
+core.register_on_modchannel_signal(function(channel_name, signal)
 	if sent_request or channel_name ~= "sscsm:exec_pipe" then
 		return
 	end
 
 	if signal == 0 then
-		env._raw.minetest.localplayer = minetest.localplayer
-		env._raw.minetest.camera = minetest.camera
-		env._raw.minetest.ui = copy(minetest.ui)
+		env._raw.minetest.localplayer = core.localplayer
+		env._raw.minetest.camera = core.camera
+		env._raw.minetest.ui = copy(core.ui)
 		mod_channel:send_all("0")
 		sent_request = true
 	elseif signal == 1 then
@@ -303,14 +303,23 @@ minetest.register_on_modchannel_signal(function(channel_name, signal)
 	end
 end)
 
+local function is_fully_connected()
+	-- TOSERVER_CLIENT_READY is sent on a different reliable channel to all mod
+	-- channel messages. There's no "is_connected" or "register_on_connected"
+	-- in CSMs, the next best thing is checking the privilege list and position
+	-- as those are only sent after the server receives TOSERVER_CLIENT_READY.
+	return core.localplayer and (next(core.get_privilege_list()) or
+		not vector.equals(minetest.localplayer:get_pos(), {x = 0, y = -0.5, z = 0}))
+end
+
 local function attempt_to_join_mod_channel()
-	-- Wait for minetest.localplayer to become available.
-	if not minetest.localplayer then
-		minetest.after(0.05, attempt_to_join_mod_channel)
+	-- Wait for core.localplayer to become available.
+	if not is_fully_connected() then
+		core.after(0.05, attempt_to_join_mod_channel)
 		return
 	end
 
 	-- Join the mod channel
-	mod_channel = minetest.mod_channel_join("sscsm:exec_pipe")
+	mod_channel = core.mod_channel_join("sscsm:exec_pipe")
 end
-minetest.after(0, attempt_to_join_mod_channel)
+core.after(0, attempt_to_join_mod_channel)

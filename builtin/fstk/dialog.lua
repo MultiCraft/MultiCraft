@@ -50,7 +50,8 @@ local dialog_metatable = {
 }
 dialog_metatable.__index = dialog_metatable
 
-function dialog_create(name,get_formspec,buttonhandler,eventhandler)
+local bg = core.formspec_escape(defaulttexturedir .. "bg_common.png")
+function dialog_create(name, get_formspec, buttonhandler, eventhandler, add_background)
 	local self = {}
 
 	self.name = name
@@ -58,7 +59,21 @@ function dialog_create(name,get_formspec,buttonhandler,eventhandler)
 	self.hidden = true
 	self.data = {}
 
-	self.formspec      = get_formspec
+	if add_background then
+		function self.formspec(data)
+			return ([[
+				size[14,5.4,false]
+				container[1,0]
+				bgcolor[#0000]
+				background9[-0.2,-0.26;12.4,6.15;%s;false;40]
+				%s
+				container_end[]
+			]]):format(bg, get_formspec(data))
+		end
+	else
+		self.formspec = get_formspec
+	end
+
 	self.buttonhandler = buttonhandler
 	self.user_eventhandler  = eventhandler
 
@@ -69,16 +84,12 @@ function dialog_create(name,get_formspec,buttonhandler,eventhandler)
 end
 
 function messagebox(name, message)
-	local bg = core.formspec_escape(defaulttexturedir .. "bg_common.png")
 	return dialog_create(name,
 			function()
 				return ([[
-					size[12,5.4,false]
-					bgcolor[#0000]
-					background9[0,0;14,8;%s;true;40]
 					textarea[1,1;10,4;;;%s]
 					button[5,4.5;2,0.8;ok;%s]
-				]]):format(bg, message, fgettext("OK"))
+				]]):format(message, fgettext("OK"))
 			end,
 			function(this, fields)
 				if fields.ok then
@@ -86,5 +97,5 @@ function messagebox(name, message)
 					return true
 				end
 			end,
-			nil)
+			nil, true)
 end

@@ -250,11 +250,11 @@ end
 
 function core.formspec_escape(text)
 	if text ~= nil then
-		text = string.gsub(text,"\\","\\\\")
-		text = string.gsub(text,"%]","\\]")
-		text = string.gsub(text,"%[","\\[")
-		text = string.gsub(text,";","\\;")
-		text = string.gsub(text,",","\\,")
+		text = text:gsub("\\", "\\\\")
+		text = text:gsub("%]", "\\]")
+		text = text:gsub("%[", "\\[")
+		text = text:gsub(";", "\\;")
+		text = text:gsub(",", "\\,")
 	end
 	return text
 end

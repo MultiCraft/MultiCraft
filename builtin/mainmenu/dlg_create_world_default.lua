@@ -35,17 +35,13 @@ local function create_world_formspec()
 	local game_by_gameidx = core.get_game(gameidx)
 	if game_by_gameidx ~= nil then
 		local allowed_mapgens = {"v7p", "flat", "valleys"}
-		for key, value in pairs(allowed_mapgens) do
-			allowed_mapgens[key] = value:trim()
-		end
-
-		if #allowed_mapgens > 0 then
-			for i = #mapgens, 1, -1 do
-				if table.indexof(allowed_mapgens, mapgens[i]) == -1 then
-					table.remove(mapgens, i)
-				end
+		for i = #mapgens, 1, -1 do
+			if table.indexof(allowed_mapgens, mapgens[i]) == -1 then
+				table.remove(mapgens, i)
 			end
 		end
+
+		mapgens[#mapgens + 1] = "superflat"
 	end
 
 	local mglist = ""
@@ -60,11 +56,7 @@ local function create_world_formspec()
 	end
 	mglist = mglist:sub(1, -2)
 
-	local retval =
-		"size[12,5.4,false]" ..
-		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;40]" ..
+	return
 		"label[1.5,0.9;" .. fgettext("World name") .. ":" .. "]"..
 		"field[4.5,1.2;6,0.5;te_world_name;;]" ..
 
@@ -77,9 +69,6 @@ local function create_world_formspec()
 		"style[world_create_confirm;bgcolor=#00d12b]" ..
 		"button[3.5,4.4;2.5,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
 		"button[6,4.4;2.5,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
-
-	return retval
-
 end
 
 local function create_world_buttonhandler(this, fields)
@@ -98,16 +87,47 @@ local function create_world_buttonhandler(this, fields)
 		end
 
 		if gameindex ~= 0 then
+			-- For unnamed worlds use the generated name 'World <number>',
+			-- where the number increments: it is set to 1 larger than the largest
+			-- generated name number found.
 			if worldname == "" then
-				worldname = "World " .. math.random(1000, 9999)
+				menudata.worldlist:set_filtercriteria(nil) -- to count all existing worlds
+				local worldnum_max = 0
+				for _, world in ipairs(menudata.worldlist:get_list()) do
+					-- Match "World 1" and "World 1 a" (but not "World 1a")
+					local worldnum = world.name:match("^World (%d+)$") or world.name:match("^World (%d+) ")
+					if worldnum then
+						worldnum_max = math.max(worldnum_max, tonumber(worldnum))
+					end
+				end
+				worldname = "World " .. worldnum_max + 1
 			end
 
-			core.settings:set("fixed_map_seed", fields["te_seed"])
+			if fields["te_seed"] then
+				core.settings:set("fixed_map_seed", fields["te_seed"])
+			end
 
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then
-				core.settings:set("mg_name",fields["dd_mapgen"])
+				local old_mg_flags
+				if fields["dd_mapgen"] == "superflat" then
+					core.settings:set("mg_name", "flat")
+					old_mg_flags = core.settings:get("mg_flags")
+					core.settings:set("mg_flags", "nocaves,nodungeons,nodecorations")
+				else
+					core.settings:set("mg_name", fields["dd_mapgen"])
+				end
 				message = core.create_world(worldname,gameindex)
+
+				-- Restore the old mg_flags setting if creating a superflat world
+				if fields["dd_mapgen"] == "superflat" then
+					core.settings:set("mg_name", "superflat")
+					if old_mg_flags then
+						core.settings:set("mg_flags", old_mg_flags)
+					else
+						core.settings:remove("mg_flags")
+					end
+				end
 			else
 				message = fgettext("A world named \"$1\" already exists", worldname)
 			end
@@ -131,7 +151,6 @@ local function create_world_buttonhandler(this, fields)
 		return true
 	end
 
-
 	if fields["world_create_cancel"] then
 		this:delete()
 		return true
@@ -145,7 +164,7 @@ function create_create_world_default_dlg(update_worldlistfilter)
 	local retval = dialog_create("sp_create_world",
 					create_world_formspec,
 					create_world_buttonhandler,
-					nil)
+					nil, true)
 	retval.update_worldlist_filter = update_worldlistfilter
 
 	return retval

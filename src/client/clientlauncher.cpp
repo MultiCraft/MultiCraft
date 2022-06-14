@@ -279,7 +279,8 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 #endif
 
 #if defined(__ANDROID__) || defined(__IOS__)
-			porting::notifyExitGame();
+			if (!g_gamecallback->shutdown_requested)
+				porting::notifyExitGame();
 #endif
 
 		} //try

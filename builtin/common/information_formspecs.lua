@@ -4,6 +4,7 @@ local COLOR_GRAY = "#BBB"
 
 local LIST_FORMSPEC = [[
 		size[13,6.5]
+		background9[0,0;14,8;bg_common.png;true;40]
 		label[0,-0.1;%s]
 		tablecolumns[color;tree;text;text]
 		table[0,0.5;12.8,5.5;list;%s;0]
@@ -12,14 +13,14 @@ local LIST_FORMSPEC = [[
 
 local LIST_FORMSPEC_DESCRIPTION = [[
 		size[13,7.5]
+		background9[0,0;14,8;bg_common.png;true;40]
 		label[0,-0.1;%s]
 		tablecolumns[color;tree;text;text]
 		table[0,0.5;12.8,4.8;list;%s;%i]
 		box[0,5.5;12.8,1.5;#000]
-		label[0.3,5.5;%s]
+		textarea[0.3,5.5;13.05,1.9;;%s;]
 		button_exit[5,7;3,1;quit;%s]
 	]]
---	textarea[0.3,5.5;13.05,1.9;;;%s] -- label for compatibility with 0.4
 
 local formspec_escape = core.formspec_escape
 local check_player_privs = core.check_player_privs

@@ -39,6 +39,8 @@ ChatBuffer::ChatBuffer(u32 scrollback):
 
 void ChatBuffer::addLine(const std::wstring &name, const std::wstring &text)
 {
+	m_lines_modified = true;
+
 	ChatLine line(name, text);
 	m_unformatted.push_back(line);
 
@@ -61,6 +63,7 @@ void ChatBuffer::clear()
 	m_unformatted.clear();
 	m_formatted.clear();
 	m_scroll = 0;
+	m_lines_modified = true;
 }
 
 u32 ChatBuffer::getLineCount() const
@@ -88,14 +91,11 @@ void ChatBuffer::deleteOldest(u32 count)
 	u32 del_unformatted = 0;
 	u32 del_formatted = 0;
 
-	while (count > 0 && del_unformatted < m_unformatted.size())
-	{
+	while (count > 0 && del_unformatted < m_unformatted.size()) {
 		++del_unformatted;
 
 		// keep m_formatted in sync
-		if (del_formatted < m_formatted.size())
-		{
-
+		if (del_formatted < m_formatted.size()) {
 			sanity_check(m_formatted[del_formatted].first);
 			++del_formatted;
 			while (del_formatted < m_formatted.size() &&
@@ -108,6 +108,9 @@ void ChatBuffer::deleteOldest(u32 count)
 
 	m_unformatted.erase(m_unformatted.begin(), m_unformatted.begin() + del_unformatted);
 	m_formatted.erase(m_formatted.begin(), m_formatted.begin() + del_formatted);
+
+	if (del_unformatted > 0)
+		m_lines_modified = true;
 
 	if (at_bottom)
 		m_scroll = getBottomScrollPos();

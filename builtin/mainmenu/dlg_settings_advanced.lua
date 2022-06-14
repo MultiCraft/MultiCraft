@@ -952,10 +952,7 @@ local function handle_change_setting_buttons(this, fields)
 end
 
 local function create_settings_formspec(tabview, _, tabdata)
-	local formspec = "size[12,5.4;false]" ..
-			"bgcolor[#0000]" ..
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]" ..
+	local formspec =
 			"tablecolumns[color;tree;text,width=28;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..
 			"field[0.3,0.1;10.2,1;search_string;;" .. core.formspec_escape(search_string) .. "]" ..
@@ -1103,7 +1100,7 @@ function create_adv_settings_dlg()
 	local dlg = dialog_create("settings_advanced",
 				create_settings_formspec,
 				handle_settings_buttons,
-				nil)
+				nil, true)
 
 				return dlg
 end
