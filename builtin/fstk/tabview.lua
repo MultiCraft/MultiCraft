@@ -95,6 +95,7 @@ local function get_formspec(self)
 						defaulttexturedir .. "authors_menu_pressed.png]"
 		end
 
+	--	formspec = formspec .. self:tab_header()
 		formspec = formspec .. self:button_header()
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
@@ -176,8 +177,7 @@ end
 
 
 --------------------------------------------------------------------------------
---[[
-local function tab_header(self)
+--[[local function tab_header(self)
 
 	local captions = {}
 	for i = 1, #self.tablist do
@@ -188,8 +188,7 @@ local function tab_header(self)
 	return string.format("tabheader[%f,%f;%s;%s;%i;true;false]",
 			self.header_x, self.header_y, self.name, toadd,
 			math.max(self.last_tab_index, 1))
-end
-]]
+end]]
 
 
 --------------------------------------------------------------------------------
