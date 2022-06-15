@@ -5,7 +5,7 @@ Copyright (C) 2022 MultiCraft Development Team
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or
+the Free Software Foundation; either version 3.0 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -20,7 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 local minetest_url -- Filled by HTTP callback
 
-local blank = core.formspec_escape(defaulttexturedir .. "blank.png")
+local defaulttexturedir = core.formspec_escape(defaulttexturedir)
+
 local function version_info_formspec()
 	return ([[
 		style_type[image_button;content_offset=0]
@@ -32,10 +33,10 @@ local function version_info_formspec()
 		style[version_check_visit;bgcolor=green]
 		button[6,4.5;4,0.8;version_check_visit;%s]
 	]]):format(
-		core.formspec_escape(defaulttexturedir .. "logo.png"),
-		blank,
+		defaulttexturedir .. "logo.png",
+		defaulttexturedir .. "blank.png",
 		fgettext("A new MultiCraft version is available!"),
-		blank,
+		defaulttexturedir .. "blank.png",
 		fgettext("Updating is strongly recommended."),
 		fgettext("Remind me later"),
 		fgettext("Update now")
@@ -112,7 +113,7 @@ local function on_version_info_received(json)
 		return
 	end
 
-	-- core.settings:set("update_last_known", tostring(new_number))
+--	core.settings:set("update_last_known", tostring(new_number))
 
 	local tabs = ui.find_by_name("maintab")
 	tabs:hide()
