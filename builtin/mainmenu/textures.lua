@@ -18,7 +18,7 @@
 
 mm_texture = {}
 
-local small_screen = (PLATFORM ~= "Android" and PLATFORM ~= "iOS") or core.settings:get_bool("device_is_tablet")
+local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
 --------------------------------------------------------------------------------
 function mm_texture.init()
