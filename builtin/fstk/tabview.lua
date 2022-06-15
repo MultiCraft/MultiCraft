@@ -222,13 +222,13 @@ local function button_header(self)
 		elseif i == #visible_tabs then
 			texture = "upper_buttons_right"
 		end
+		local btn_name = self.name .. "_" .. i
 		toadd = toadd ..
-		"style_type[image_button;padding=-10;bgimg=" .. defaulttexturedir ..
-			texture .. ".png;bgimg_hovered=" .. defaulttexturedir ..
-			texture .. "_hover.png;bgimg_middle=20;content_offset=0]" ..
-		"image_button[" .. x .. ",-1.1;" .. w + 0.22 .. ",0.9;;" ..
-			self.name .. ":" .. i .. ";" .. caption .. ";true;false]" ..
-		"style_type[image_button;padding=;bgimg=;bgimg_hovered=;bgimg_middle=;content_offset=]"
+			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir ..
+				texture .. ".png;bgimg_hovered=" .. defaulttexturedir ..
+				texture .. "_hover.png;bgimg_middle=20;content_offset=0]" ..
+			"image_button[" .. x .. ",-1.1;" .. w + 0.22 .. ",0.9;;" ..
+				btn_name .. ";" .. caption .. ";true;false]"
 		x = x + w
 	end
 
@@ -268,11 +268,11 @@ local function handle_tab_buttons(self,fields)
 		return true
 	end
 
-	local s = self.name .. ':'
-	local n = #s
+	local name_prefix = self.name .. "_"
+	local name_prefix_len = #name_prefix
 	for field in pairs(fields) do
-		if field:sub(1, n) == s then
-			local index = tonumber(field:sub(n + 1))
+		if field:sub(1, name_prefix_len) == name_prefix then
+			local index = tonumber(field:sub(name_prefix_len + 1))
 			switch_to_tab(self, index)
 			return true
 		end
