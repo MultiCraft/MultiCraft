@@ -3289,6 +3289,23 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 				mydata.screensize.X,
 				mydata.screensize.Y
 			);
+
+			// Try and find a tabheader[] element in the formspec
+			for (unsigned int j = i; j < elements.size(); j++) {
+				// This could use split() but since we don't parse parameters
+				// here it's probably faster to use find().
+				const size_t pos = elements[j].find('[');
+				if (pos == std::string::npos)
+					continue;
+
+				// If we find a tabheader then decrease padded_screensize.Y and
+				// stop searching through the formspec.
+				const std::string element_type = trim(elements[j].substr(0, pos));
+				if (element_type == "tabheader") {
+					padded_screensize.Y *= 0.9f;
+					break;
+				}
+			}
 #else
 			// Pad the screensize with 5% of the screensize on all sides to ensure
 			// that even the largest formspecs don't touch the screen borders.
