@@ -23,6 +23,14 @@ local update_download_url -- Filled by HTTP callback
 local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 
 local function version_info_formspec(data)
+	local changelog = data.changelog
+
+	-- Hack to work around https://github.com/minetest/minetest/issues/11727
+	if changelog:sub(2, 2) == " " then
+		changelog = changelog:sub(1, 1) .. "\194\160" .. changelog:sub(3)
+	end
+	print(dump(changelog))
+
 	return ([[
 		style_type[image_button;content_offset=0]
 		image[4.9,0;2.5,2.5;%s]
@@ -36,7 +44,7 @@ local function version_info_formspec(data)
 		defaulttexturedir .. "logo.png",
 		defaulttexturedir .. "blank.png",
 		fgettext("A new MultiCraft version is available!"),
-		core.formspec_escape(data.changelog),
+		core.formspec_escape(changelog),
 		fgettext("Remind me later"),
 		fgettext("Update now")
 	)
