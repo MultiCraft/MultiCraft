@@ -224,8 +224,16 @@ local function button_header(self)
 		local btn_name = self.name .. "_" .. i
 		toadd = toadd ..
 			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir ..
-				texture .. ".png;bgimg_hovered=" .. defaulttexturedir ..
-				texture .. "_hover.png;bgimg_middle=20;content_offset=0]" ..
+				texture
+
+		if i == self.last_tab_index then
+			toadd = toadd .. "_selected.png;"
+		else
+			toadd = toadd .. ".png;bgimg_hovered=" .. defaulttexturedir ..
+				texture .. "_hover.png;"
+		end
+
+		toadd = toadd .. "bgimg_middle=20;content_offset=0]" ..
 			"image_button[" .. x .. ",-1.1;" .. w + 0.22 .. ",0.9;;" ..
 				btn_name .. ";" .. caption .. ";true;false]"
 		x = x + w
