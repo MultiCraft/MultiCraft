@@ -114,7 +114,7 @@ end
 local function buttonbar_buttonhandler(self, fields)
 
 	if fields["btnbar_inc_" .. self.name] ~= nil and
-		self.startbutton < #self.buttons - 4 then
+		self.startbutton < #self.buttons - 5 then
 
 		self.startbutton = self.startbutton + 1
 		return true
@@ -189,7 +189,7 @@ function buttonbar_create(name, cbf_buttonhandler, pos, orientation, size)
 	local self = {}
 	self.name = name
 	self.type = "addon"
-	self.bgcolor = "#7f9dd5"
+	self.bgcolor = "#759ddabf"
 	self.pos = pos
 	self.size = size
 	self.orientation = orientation
