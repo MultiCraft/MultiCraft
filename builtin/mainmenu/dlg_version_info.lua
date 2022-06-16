@@ -27,9 +27,10 @@ local function version_info_formspec(data)
 
 	-- Hack to work around https://github.com/minetest/minetest/issues/11727
 	if changelog:sub(2, 2) == " " then
-		changelog = changelog:sub(1, 1) .. "\194\160" .. changelog:sub(3)
+		local idx = changelog:find("\n", 3, true) or #changelog + 1
+		changelog = "\194\160" .. changelog:sub(1, idx - 1) .. "\194\160" ..
+			changelog:sub(idx)
 	end
-	print(dump(changelog))
 
 	return ([[
 		style_type[image_button;content_offset=0]
