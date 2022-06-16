@@ -23,7 +23,6 @@ local update_download_url -- Filled by HTTP callback
 local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 
 local function version_info_formspec(data)
-	print(dump(data.changelog))
 	return ([[
 		style_type[image_button;content_offset=0]
 		image[4.9,0;2.5,2.5;%s]
