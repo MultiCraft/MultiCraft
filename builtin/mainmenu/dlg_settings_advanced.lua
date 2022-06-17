@@ -957,7 +957,7 @@ local function create_settings_formspec(tabview, _, tabdata)
 			"tableoptions[background=#00000000;border=false]" ..
 			"field[0.3,0.1;10.2,1;search_string;;" .. core.formspec_escape(search_string) .. "]" ..
 			"field_close_on_enter[search_string;false]" ..
-			"button[10.2,-0.2;2,1;search;" .. fgettext("Search") .. "]" ..
+			"button[10.1,-0.22;2,1;search;" .. fgettext("Search") .. "]" ..
 			"table[0,0.8;12,3.5;list_settings;"
 
 	local current_level = 0

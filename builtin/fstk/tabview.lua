@@ -78,12 +78,12 @@ local function get_formspec(self)
 					{width=self.width, height=self.height}
 			local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 			formspec = formspec ..
-					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height,
+					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height + 1,
 						dump(self.fixed_size)) ..
 					"bgcolor[#0000]" ..
-					"container[1,0]" ..
-					"background9[-0.2,-0.26;" .. tsize.width + 0.4 .. "," ..
-						tsize.height + 0.75 .. ";" .. defaulttexturedir ..
+					"container[1,1]" ..
+					"background9[-0.2,-1.26;" .. tsize.width + 0.4 .. "," ..
+						tsize.height + 1.75 .. ";" .. defaulttexturedir ..
 						"bg_common.png;false;40]" ..
 					"style[settings_tab;content_offset=0]" ..
 					"image_button[12.02,1.3;1,1.55;" ..
@@ -95,7 +95,8 @@ local function get_formspec(self)
 						defaulttexturedir .. "authors_menu_pressed.png]"
 		end
 
-		formspec = formspec .. self:tab_header()
+	--	formspec = formspec .. self:tab_header()
+		formspec = formspec .. self:button_header()
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
 					self,
@@ -176,7 +177,7 @@ end
 
 
 --------------------------------------------------------------------------------
-local function tab_header(self)
+--[[local function tab_header(self)
 
 	local captions = {}
 	for i = 1, #self.tablist do
@@ -187,6 +188,58 @@ local function tab_header(self)
 	return string.format("tabheader[%f,%f;%s;%s;%i;true;false]",
 			self.header_x, self.header_y, self.name, toadd,
 			math.max(self.last_tab_index, 1))
+end]]
+
+
+--------------------------------------------------------------------------------
+local function button_header(self)
+	local visible_tabs = {}
+	local btn_widths = {}
+	local total_width = 0
+	for i, tab in ipairs(self.tablist) do
+		if not tab.hidden and tab.caption ~= "" then
+			visible_tabs[#visible_tabs + 1] = tab
+
+			local w = utf8.len(core.get_translated_string(tab.caption))
+			btn_widths[#visible_tabs] = w
+			total_width = total_width + w
+		end
+	end
+
+	local toadd = ""
+	local coords_per_char = 12 / total_width
+
+	-- The formspec is 15.4875 "real" coordinates wide
+	-- local x = (12.39 - total_width) / 2 - 0.3
+	local x = -0.1
+	for i = 1, #visible_tabs do
+		local caption = visible_tabs[i].caption
+		local w = btn_widths[i] * coords_per_char
+		local texture = "upper_buttons_middle"
+		if i == 1 then
+			texture = "upper_buttons_left"
+		elseif i == #visible_tabs then
+			texture = "upper_buttons_right"
+		end
+		local btn_name = self.name .. "_" .. i
+		toadd = toadd ..
+			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir ..
+				texture
+
+		if i == math.abs(self.last_tab_index) then
+			toadd = toadd .. "_selected.png;"
+		else
+			toadd = toadd .. ".png;bgimg_hovered=" .. defaulttexturedir ..
+				texture .. "_hover.png;"
+		end
+
+		toadd = toadd .. "bgimg_middle=20;content_offset=0]" ..
+			"image_button[" .. x .. ",-1.1;" .. w + 0.22 .. ",0.9;;" ..
+				btn_name .. ";" .. caption .. ";true;false]"
+		x = x + w
+	end
+
+	return toadd
 end
 
 --------------------------------------------------------------------------------
@@ -220,6 +273,16 @@ local function handle_tab_buttons(self,fields)
 		local index = tonumber(fields[self.name])
 		switch_to_tab(self, index)
 		return true
+	end
+
+	local name_prefix = self.name .. "_"
+	local name_prefix_len = #name_prefix
+	for field in pairs(fields) do
+		if field:sub(1, name_prefix_len) == name_prefix then
+			local index = tonumber(field:sub(name_prefix_len + 1))
+			switch_to_tab(self, index)
+			return true
+		end
 	end
 
 	return false
@@ -285,14 +348,14 @@ local tabview_metatable = {
 			function(self,handler) self.glb_evt_handler = handler end,
 	set_fixed_size =
 			function(self,state) self.fixed_size = state end,
-	tab_header = tab_header,
+--	tab_header = tab_header,
+	button_header = button_header,
 	handle_tab_buttons = handle_tab_buttons
 }
 
 tabview_metatable.__index = tabview_metatable
 
 --------------------------------------------------------------------------------
-tabview_uses_container = true
 function tabview_create(name, size, tabheaderpos)
 	local self = {}
 

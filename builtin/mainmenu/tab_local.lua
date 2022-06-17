@@ -71,7 +71,7 @@ local function singleplayer_refresh_gamebar()
 
 	local btnbar = buttonbar_create("game_button_bar",
 		game_buttonbar_button_handler,
-		{x=-0.35, y=-0.32}, "vertical", {x=1, y=6.14})
+		{x=-0.35, y=-0.32}, "vertical", {x=1, y=7.14})
 
 	for i=1, #pkgmgr.games do
 		if pkgmgr.games[i].id ~= "default" then
@@ -100,8 +100,7 @@ local function singleplayer_refresh_gamebar()
 		end
 	end
 
-	local plus_image = defaulttexturedir .. "plus.png"
-	btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
+	btnbar:add_button("game_open_cdb", "", "", fgettext("Install games from ContentDB"), true)
 end
 
 local function get_formspec()
@@ -150,8 +149,9 @@ local function get_formspec()
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
-			"image_button[9.33,4.84;2.67,0.87;" .. defaulttexturedir ..
-			"select_btn.png;world_configure;".. fgettext("Select Mods") .. ";false;false]"
+			"style[world_configure;padding=-10;bgimg=" .. defaulttexturedir ..
+				"select_btn.png;bgimg_middle=20]" ..
+			"image_button[9.3,4.84;2.7,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
 	end
 
 	local enable_server = core.settings:get_bool("enable_server")

@@ -18,6 +18,8 @@
 
 mm_texture = {}
 
+local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
+
 --------------------------------------------------------------------------------
 function mm_texture.init()
 	mm_texture.defaulttexturedir = core.get_texturepath() .. DIR_DELIM .. "base" ..
@@ -58,7 +60,9 @@ function mm_texture.reset()
 	core.set_clouds(false)
 
 	mm_texture.set_generic("footer")
-	mm_texture.set_generic("header")
+	if not small_screen then
+		mm_texture.set_generic("header")
+	end
 
 	if not have_bg then
 	--	if core.settings:get_bool("menu_clouds") then
@@ -95,7 +99,9 @@ function mm_texture.update_game(gamedetails)
 	end
 
 	mm_texture.set_game("footer",gamedetails)
-	mm_texture.set_game("header",gamedetails)
+	if not small_screen then
+		mm_texture.set_game("header",gamedetails)
+	end
 
 	mm_texture.gameid = gamedetails.id
 end

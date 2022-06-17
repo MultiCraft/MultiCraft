@@ -60,7 +60,9 @@ local function get_formspec(tabview, name, tabdata)
 
 	local retval =
 		"label[0.05,-0.25;".. fgettext("Installed Packages:") .. "]" ..
+		"background9[0,0.23;5.3,4.46;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 		"tablecolumns[color;tree;text]" ..
+		"tableoptions[background=#0000;border=false]" ..
 		"table[0,0.25;5.1,4.3;pkglist;" ..
 		pkgmgr.render_packagelist(packages) ..
 		";" .. tabdata.selected_pkg .. "]" ..
@@ -96,7 +98,7 @@ local function get_formspec(tabview, name, tabdata)
 		retval = retval ..
 				"image[5.5,0;3,2;" .. core.formspec_escape(modscreenshot) .. "]" ..
 				"label[8.25,0.6;" .. core.formspec_escape(selected_pkg.name) .. "]" ..
-				"box[5.5,2.2;6.2,2.4;#000]"
+				"box[5.5,2.2;6.2,2.4;#33314B99]"
 
 		if selected_pkg.type == "mod" then
 			if selected_pkg.is_modpack then
