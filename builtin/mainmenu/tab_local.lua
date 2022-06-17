@@ -100,8 +100,7 @@ local function singleplayer_refresh_gamebar()
 		end
 	end
 
-	local plus_image = defaulttexturedir .. "plus.png"
-	btnbar:add_button("game_open_cdb", "", plus_image, fgettext("Install games from ContentDB"))
+	btnbar:add_button("game_open_cdb", "", "", fgettext("Install games from ContentDB"), true)
 end
 
 local function get_formspec()

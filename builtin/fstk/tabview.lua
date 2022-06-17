@@ -226,7 +226,7 @@ local function button_header(self)
 			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir ..
 				texture
 
-		if i == self.last_tab_index then
+		if i == math.abs(self.last_tab_index) then
 			toadd = toadd .. "_selected.png;"
 		else
 			toadd = toadd .. ".png;bgimg_hovered=" .. defaulttexturedir ..

@@ -15,6 +15,9 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+local esc = core.formspec_escape
+local defaulttexturedir = esc(defaulttexturedir)
+
 --------------------------------------------------------------------------------
 
 local multicraft_developers = {
@@ -105,7 +108,7 @@ local previous_contributors = {
 local function buildCreditList(source)
 	local ret = {}
 	for i = 1, #source do
-		ret[i] = core.formspec_escape(source[i])
+		ret[i] = esc(source[i])
 	end
 	return table.concat(ret, ",,")
 end
@@ -120,10 +123,16 @@ return {
 			"Copyright (C) 2014-2022 MultiCraft Development Team\n" ..
 			"License: GNU LGPLv3.0+ and CC BY-SA 4.0\n" ..
 			"Created and Powered by Minetest Engine, ver. 5.4.1]" ..
-			"button[9.5,0;2.5,0.5;homepage;Home Page]" ..
-			"button[9.5,0.8;2.5,0.5;privacy;Privacy Policy]" ..
-			"background9[0.1,1.5;11.85,4.15;" ..
-				core.formspec_escape(defaulttexturedir) .. "worldlist_bg.png" .. ";false;40]" ..
+
+			"style[homepage;padding=-10;bgimg=" .. defaulttexturedir ..
+				"select_btn.png;bgimg_middle=20]" ..
+			"image_button[9.5,-0.25;2.5,0.9;;homepage;Home Page;true;false]" ..
+			"style[privacy;padding=-10;bgimg=" .. defaulttexturedir ..
+				"select_btn.png;bgimg_middle=20]" ..
+			"image_button[9.5,0.6;2.5,0.9;;privacy;Privacy Policy;true;false]" ..
+
+			"background9[0.1,1.5;11.85,4.15;" .. defaulttexturedir ..
+				"worldlist_bg.png" .. ";false;40]" ..
 			"tablecolumns[color;text]" ..
 			"tableoptions[background=#0000;highlight=#00000000;border=false]" ..
 			"table[0.1,1.5;11.65,4;list_credits;" ..

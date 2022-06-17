@@ -16,6 +16,8 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
+local defaulttexturedir = core.formspec_escape(defaulttexturedir)
+
 local function buttonbar_formspec(self)
 
 	if self.hidden then
@@ -50,17 +52,30 @@ local function buttonbar_formspec(self)
 			(self.orientation == "horizontal" and
 			(btn_pos.x + self.btn_size <= self.pos.x + self.size.x)) then
 
-		local borders="true"
+			local button = self.buttons[i]
 
-		if self.buttons[i].image ~= nil then
-			borders="false"
-		end
+			local borders="true"
 
-		formspec = formspec ..
-			string.format("image_button[%f,%f;%f,%f;%s;%s;%s;true;%s]tooltip[%s;%s]",
-					btn_pos.x, btn_pos.y, self.btn_size, self.btn_size,
-					self.buttons[i].image, btn_name, self.buttons[i].caption,
-					borders, btn_name, self.buttons[i].tooltip)
+			if button.image ~= nil then
+				borders="false"
+			end
+
+			if button.cdb then
+				formspec = formspec ..
+					"style[" .. btn_name .. ";bgimg=" .. defaulttexturedir ..
+						"btn_download.png;bgimg_hovered=" .. defaulttexturedir .. "btn_download_hover.png]" ..
+
+					("image_button[%f,%f;%f,%f;;%s;%s;true;%s]tooltip[%s;%s]"):format(
+						btn_pos.x, btn_pos.y, self.btn_size, self.btn_size,
+						btn_name, button.caption,
+						borders, btn_name, button.tooltip)
+			else
+				formspec = formspec ..
+					("image_button[%f,%f;%f,%f;%s;%s;%s;true;%s]tooltip[%s;%s]"):format(
+						btn_pos.x, btn_pos.y, self.btn_size, self.btn_size,
+						button.image, btn_name, button.caption,
+						borders, btn_name, button.tooltip)
+			end
 		else
 			--print("end of displayable buttons: orientation: " .. self.orientation)
 			--print( "button_end: " .. (btn_pos.y + self.btn_size - (self.btn_size * 0.05)))
@@ -83,29 +98,41 @@ local function buttonbar_formspec(self)
 			btn_inc_pos.y = self.pos.y + (self.btn_size * 0.05)
 		else
 			btn_size.x = self.btn_size
-			btn_size.y = 0.5
+			btn_size.y = self.btn_size * 0.5
 			btn_dec_pos.x = self.pos.x + (self.btn_size * 0.1)
 			btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
 			btn_inc_pos.x = self.pos.x + (self.btn_size * 0.1)
-			btn_inc_pos.y = self.pos.y + self.size.y - (self.btn_size * 0.4)
+			btn_inc_pos.y = self.size.y - (self.btn_size * 0.75)
 		end
 
-		local text_dec = "<"
-		local text_inc = ">"
-		if self.orientation == "vertical" then
-			text_dec = "^"
-			text_inc = "v"
-		end
+		if self.orientation == "horizontal" then
+			local text_dec = "<"
+			local text_inc = ">"
 
-		formspec = formspec ..
-			string.format("image_button[%f,%f;%f,%f;;btnbar_dec_%s;%s;true;true]",
+			formspec = formspec ..
+				("image_button[%f,%f;%f,%f;;btnbar_dec_%s;%s;true;true]"):format(
 					btn_dec_pos.x, btn_dec_pos.y, btn_size.x, btn_size.y,
 					self.name, text_dec)
 
-		formspec = formspec ..
-			string.format("image_button[%f,%f;%f,%f;;btnbar_inc_%s;%s;true;true]",
+			formspec = formspec ..
+				("image_button[%f,%f;%f,%f;;btnbar_inc_%s;%s;true;true]"):format(
 					btn_inc_pos.x, btn_inc_pos.y, btn_size.x, btn_size.y,
 					self.name, text_inc)
+		else
+			formspec = formspec ..
+				"style[btnbar_dec_" .. self.name .. ";bgimg=" .. defaulttexturedir ..
+					"btn_up.png;bgimg_hovered=" .. defaulttexturedir .. "btn_up_hover.png]" ..
+				("image_button[%f,%f;%f,%f;;btnbar_dec_%s;;true;false]"):format(
+					btn_dec_pos.x, btn_dec_pos.y, btn_size.x, btn_size.y,
+					self.name)
+
+			formspec = formspec ..
+				"style[btnbar_inc_" .. self.name .. ";bgimg=" .. defaulttexturedir ..
+					"btn_down.png;bgimg_hovered=" .. defaulttexturedir .. "btn_down_hover.png]" ..
+				("image_button[%f,%f;%f,%f;;btnbar_inc_%s;;true;false]"):format(
+					btn_inc_pos.x, btn_inc_pos.y, btn_size.x, btn_size.y,
+					self.name)
+		end
 	end
 
 	return formspec
@@ -142,7 +169,7 @@ local buttonbar_metatable = {
 
 	delete = function(self) ui.delete(self) end,
 
-	add_button = function(self, name, caption, image, tooltip)
+	add_button = function(self, name, caption, image, tooltip, cdb)
 			if caption == nil then caption = "" end
 			if image == nil then image = "" end
 			if tooltip == nil then tooltip = "" end
@@ -151,7 +178,8 @@ local buttonbar_metatable = {
 				name = name,
 				caption = caption,
 				image = image,
-				tooltip = tooltip
+				tooltip = tooltip,
+				cdb = cdb
 			}
 			if self.orientation == "horizontal" then
 				if ( (self.btn_size * #self.buttons) + (self.btn_size * 0.05 *2)
