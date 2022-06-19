@@ -49,6 +49,7 @@ local function add_tab(self,tab)
 	-- Hidden tabs have a negative index
 	local i
 	if tab.hidden then
+		newtab.tabdata.hidden = true
 		i = -1
 		while self.tablist[i] do
 			i = i - 1

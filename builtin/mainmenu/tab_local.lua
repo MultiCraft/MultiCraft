@@ -103,7 +103,7 @@ local function singleplayer_refresh_gamebar()
 	btnbar:add_button("game_open_cdb", "", "", fgettext("Install games from ContentDB"), true)
 end
 
-local function get_formspec()
+local function get_formspec(_, _, tab_data)
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 
@@ -143,7 +143,7 @@ local function get_formspec()
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
-	if default_game_exists then
+	if tab_data.hidden then
 		retval = retval ..
 			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
 				defaulttexturedir .. "switch_local_default_hover.png]" ..
@@ -374,7 +374,6 @@ end
 return {
 	name = "local",
 	caption = fgettext("Singleplayer"),
-	hidden = default_game_exists,
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
 	on_change = on_change
