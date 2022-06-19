@@ -270,11 +270,11 @@ end
 --------------------------------------------------------------------------------
 local function handle_tab_buttons(self,fields)
 	--save tab selection to config file
-	if fields[self.name] then
-		local index = tonumber(fields[self.name])
-		switch_to_tab(self, index)
-		return true
-	end
+	-- if fields[self.name] then
+	-- 	local index = tonumber(fields[self.name])
+	-- 	switch_to_tab(self, index)
+	-- 	return true
+	-- end
 
 	local name_prefix = self.name .. "_"
 	local name_prefix_len = #name_prefix
