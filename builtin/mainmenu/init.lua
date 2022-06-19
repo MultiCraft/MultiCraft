@@ -106,9 +106,11 @@ function menudata.init_tabs()
 	-- Create main tabview
 	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0.1, y = 0})
 
+	default_game_exists = false
 	for i = 1, #pkgmgr.games do
 		if pkgmgr.games[i].id == "default" then
 			tv_main:add(tabs.local_default_game)
+			default_game_exists = true
 			break
 		end
 	end

@@ -141,11 +141,14 @@ local function get_formspec()
 
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
-			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
+			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
+	if default_game_exists then
+		retval = retval ..
 			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
 				defaulttexturedir .. "switch_local_default_hover.png]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
+	end
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
@@ -371,7 +374,7 @@ end
 return {
 	name = "local",
 	caption = fgettext("Singleplayer"),
-	hidden = true,
+	hidden = default_game_exists,
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
 	on_change = on_change
