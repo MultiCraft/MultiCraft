@@ -26,6 +26,8 @@
 -- element.getFormspec() returns formspec of tabview                          --
 --------------------------------------------------------------------------------
 
+local defaulttexturedir = core.formspec_escape(defaulttexturedir)
+
 --------------------------------------------------------------------------------
 local function add_tab(self,tab)
 	assert(tab.size == nil or (type(tab.size) == table and
@@ -77,7 +79,6 @@ local function get_formspec(self)
 		if self.parent == nil then
 			local tsize = self.tablist[self.last_tab_index].tabsize or
 					{width=self.width, height=self.height}
-			local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 			formspec = formspec ..
 					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height + 1,
 						dump(self.fixed_size)) ..
