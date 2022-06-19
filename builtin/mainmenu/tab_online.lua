@@ -373,7 +373,6 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		gamedata.address    = fields.te_address
 		gamedata.port       = tonumber(fields.te_port) or 30000
 		gamedata.selected_world = 0
-
 		local fav_idx = core.get_table_index("favorites")
 		local fav = serverlist[fav_idx]
 
