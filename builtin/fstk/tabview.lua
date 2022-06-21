@@ -91,10 +91,14 @@ local function get_formspec(self)
 					"background9[12.1,1.06;1.04,2.51;" .. defaulttexturedir .. "side_menu.png;false;29]" ..
 					"style_type[image_button;content_offset=0]" ..
 
-					"image_button[12.05,1.25;1,1;" .. defaulttexturedir .. "settings_menu.png;settings_tab;;true;false;" .. defaulttexturedir .. "settings_menu_pressed.png]" ..
+					"image_button[12.05,1.25;1,1;" .. defaulttexturedir ..
+					"settings_menu.png;settings_tab;;true;false;" ..
+					defaulttexturedir .. "settings_menu_pressed.png]" ..
 					"tooltip[settings_tab;" .. fgettext("Settings") .. "]" ..
 
-					"image_button[12.05,2.38;1,1;" .. defaulttexturedir .. "authors_menu.png;authors_tab;;true;false;" .. defaulttexturedir .. "authors_menu_pressed.png]" ..
+					"image_button[12.05,2.38;1,1;" .. defaulttexturedir ..
+					"authors_menu.png;authors_tab;;true;false;" .. defaulttexturedir ..
+					"authors_menu_pressed.png]" ..
 					"tooltip[authors_tab;" .. fgettext("Credits") .. "]" ..
 
 					"style_type[image_button;content_offset=]"
