@@ -70,6 +70,21 @@ local function add_tab(self,tab)
 end
 
 --------------------------------------------------------------------------------
+local function make_side_pane_tab(y, tab_name, tooltip, selected)
+	local formspec = "style[" .. tab_name .. "_tab;content_offset=0;bgimg=" ..
+			defaulttexturedir .. tab_name
+	if selected then
+		formspec = formspec .. "_menu_selected.png]"
+	else
+		formspec = formspec .. "_menu.png;bgimg_hovered=" ..
+				defaulttexturedir .. tab_name .. "_menu_hover.png]"
+	end
+
+	return formspec ..
+			"image_button[12.15," .. y .. ";1,1.55;;" .. tab_name .. "_tab;;true;false]" ..
+			"tooltip[" .. tab_name .. "_tab;" .. tooltip .. "]"
+end
+
 local function get_formspec(self)
 	local formspec = ""
 
@@ -88,20 +103,21 @@ local function get_formspec(self)
 						tsize.height + 1.75 .. ";" .. defaulttexturedir ..
 						"bg_common.png;false;40]" ..
 
-					"background9[12.1,1.06;1.04,2.51;" .. defaulttexturedir .. "side_menu.png;false;29]" ..
-					"style_type[image_button;content_offset=0]" ..
+					"background9[12.1,0.81;1.04,3;" .. defaulttexturedir .. "side_menu.png;false;29]" ..
+					make_side_pane_tab(0.85, "settings", fgettext("Settings"), name == "settings") ..
+					"image[12.15,2.2;1,0.1;" .. defaulttexturedir .. "side_menu_divider.png]" ..
+					make_side_pane_tab(2.25, "authors", fgettext("Credits"), name == "credits")
 
-					"image_button[12.05,1.25;1,1;" .. defaulttexturedir ..
-					"settings_menu.png;settings_tab;;true;false;" ..
-					defaulttexturedir .. "settings_menu_pressed.png]" ..
-					"tooltip[settings_tab;" .. fgettext("Settings") .. "]" ..
-
-					"image_button[12.05,2.38;1,1;" .. defaulttexturedir ..
-					"authors_menu.png;authors_tab;;true;false;" .. defaulttexturedir ..
-					"authors_menu_pressed.png]" ..
-					"tooltip[authors_tab;" .. fgettext("Credits") .. "]" ..
-
-					"style_type[image_button;content_offset=]"
+				--[[
+					"style[settings_tab;content_offset=0]" ..
+					"image_button[12.02,1.3;1,1.55;" ..
+						defaulttexturedir .. "settings_menu.png;settings_tab;;true;false;" ..
+						defaulttexturedir .. "settings_menu_pressed.png]" ..
+					"style[authors_tab;content_offset=0]" ..
+					"image_button[12.02,2.7;1,1.55;" ..
+						defaulttexturedir .. "authors_menu.png;authors_tab;;true;false;" ..
+						defaulttexturedir .. "authors_menu_pressed.png]"
+				]]
 		end
 
 	--	formspec = formspec .. self:tab_header()
