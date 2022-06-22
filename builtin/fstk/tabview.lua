@@ -71,7 +71,7 @@ end
 
 --------------------------------------------------------------------------------
 local function make_side_pane_tab(y, tab_name, tooltip, selected)
-	local formspec = "style[" .. tab_name .. "_tab;content_offset=0;bgimg=" ..
+	local formspec = "style[" .. tab_name .. "_tab;bgimg=" ..
 			defaulttexturedir .. tab_name
 	if selected then
 		formspec = formspec .. "_menu_selected.png]"
@@ -81,7 +81,7 @@ local function make_side_pane_tab(y, tab_name, tooltip, selected)
 	end
 
 	return formspec ..
-			"image_button[12.15," .. y .. ";1,1.55;;" .. tab_name .. "_tab;;true;false]" ..
+			"image_button[12.1," .. y .. ";1,1.5;;" .. tab_name .. "_tab;;true;false]" ..
 			"tooltip[" .. tab_name .. "_tab;" .. tooltip .. "]"
 end
 
@@ -103,14 +103,14 @@ local function get_formspec(self)
 						tsize.height + 1.75 .. ";" .. defaulttexturedir ..
 						"bg_common.png;false;40]" ..
 
-					"background9[12.1,0.81;1.04,3;" .. defaulttexturedir .. "side_menu.png;false;29]" ..
-					make_side_pane_tab(0.85, "settings", fgettext("Settings"), name == "settings") ..
-					"image[12.15,2.2;1,0.1;" .. defaulttexturedir .. "side_menu_divider.png]" ..
-					make_side_pane_tab(2.25, "authors", fgettext("Credits"), name == "credits")
+					"background9[12.13,1.05;0.9,2.6;" .. defaulttexturedir .. "side_menu.png;false;30]" ..
+					make_side_pane_tab(0.9, "settings", fgettext("Settings"), name == "settings") ..
+					"image[12.15,2.24;0.9,0.08;" .. defaulttexturedir .. "side_menu_divider.png]" ..
+					make_side_pane_tab(2.3, "authors", fgettext("Credits"), name == "credits")
 		end
 
-		formspec = formspec .. self:button_header()
-		formspec = formspec ..
+	--	formspec = formspec .. self:tab_header()
+		formspec = formspec .. self:button_header() ..
 				self.tablist[self.last_tab_index].get_formspec(
 					self,
 					name,
