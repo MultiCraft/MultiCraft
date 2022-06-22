@@ -107,20 +107,8 @@ local function get_formspec(self)
 					make_side_pane_tab(0.85, "settings", fgettext("Settings"), name == "settings") ..
 					"image[12.15,2.2;1,0.1;" .. defaulttexturedir .. "side_menu_divider.png]" ..
 					make_side_pane_tab(2.25, "authors", fgettext("Credits"), name == "credits")
-
-				--[[
-					"style[settings_tab;content_offset=0]" ..
-					"image_button[12.02,1.3;1,1.55;" ..
-						defaulttexturedir .. "settings_menu.png;settings_tab;;true;false;" ..
-						defaulttexturedir .. "settings_menu_pressed.png]" ..
-					"style[authors_tab;content_offset=0]" ..
-					"image_button[12.02,2.7;1,1.55;" ..
-						defaulttexturedir .. "authors_menu.png;authors_tab;;true;false;" ..
-						defaulttexturedir .. "authors_menu_pressed.png]"
-				]]
 		end
 
-	--	formspec = formspec .. self:tab_header()
 		formspec = formspec .. self:button_header()
 		formspec = formspec ..
 				self.tablist[self.last_tab_index].get_formspec(
