@@ -73,7 +73,9 @@ function create_delete_content_dlg(content)
 	if content.type == "game" then
 		for _, world in ipairs(menudata.worldlist:get_raw_list()) do
 			if world.gameid == content.id then
-				return messagebox("dlg_delete_content", fgettext("You cannot delete this game, you have worlds that use it!"))
+				return messagebox("dlg_delete_content",
+					fgettext("You cannot delete this game!") .. "\n" ..
+					fgettext("You have worlds that use it."))
 			end
 		end
 	end
