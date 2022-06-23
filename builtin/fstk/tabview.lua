@@ -105,7 +105,7 @@ local function get_formspec(self)
 
 					"background9[12.13,1.05;0.9,2.6;" .. defaulttexturedir .. "side_menu.png;false;30]" ..
 					make_side_pane_tab(0.9, "settings", fgettext("Settings"), name == "settings") ..
-					"image[12.15,2.24;0.9,0.08;" .. defaulttexturedir .. "side_menu_divider.png]" ..
+					"image[12.15,2.26;0.9,0.06;" .. defaulttexturedir .. "side_menu_divider.png]" ..
 					make_side_pane_tab(2.3, "authors", fgettext("Credits"), name == "credits")
 		end
 
