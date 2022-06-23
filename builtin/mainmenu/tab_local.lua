@@ -152,8 +152,8 @@ local function get_formspec(_, _, tab_data)
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
-			"style[world_configure;padding=-10;bgimg=" .. defaulttexturedir ..
-				"select_btn.png;bgimg_middle=20]" ..
+			"style[world_configure;padding=-5;bgimg=" .. defaulttexturedir ..
+				"select_btn.png;bgimg_middle=10]" ..
 			"image_button[9.3,4.84;2.7,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
 	end
 
