@@ -59,6 +59,12 @@ end
 
 --------------------------------------------------------------------------------
 function render_serverlist_row(spec, is_favorite)
+	-- I'm not sure why spec can be nil here but showing an empty server list
+	-- entry is probably better than crashing.
+	if not spec then
+		spec = {}
+	end
+
 	-- Get information from non_mobile_servers.
 	if is_favorite and not spec.proto_min and spec.address and spec.port and
 			serverlistmgr.non_mobile_servers then
