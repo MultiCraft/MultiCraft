@@ -24,8 +24,11 @@ local function buttonbar_formspec(self)
 		return ""
 	end
 
-	local formspec = string.format("box[%f,%f;%f,%f;%s]",
-			self.pos.x,self.pos.y ,self.size.x,self.size.y,self.bgcolor)
+	-- local formspec = string.format("box[%f,%f;%f,%f;%s]",
+	-- 		self.pos.x,self.pos.y ,self.size.x,self.size.y,self.bgcolor)
+
+	local formspec = string.format("background9[%f,%f;%f,%f;%sside_menu_left.png;false;30]",
+			self.pos.x, self.pos.y - 0.1, self.size.x + 0.2, self.size.y + 0.35, defaulttexturedir)
 
 	for i=self.startbutton,#self.buttons,1 do
 		local btn_name = self.buttons[i].name
@@ -102,7 +105,7 @@ local function buttonbar_formspec(self)
 			btn_dec_pos.x = self.pos.x + (self.btn_size * 0.1)
 			btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
 			btn_inc_pos.x = self.pos.x + (self.btn_size * 0.1)
-			btn_inc_pos.y = self.size.y - (self.btn_size * 0.75)
+			btn_inc_pos.y = self.pos.y + self.size.y - (self.btn_size * 0.5)
 		end
 
 		if self.orientation == "horizontal" then
