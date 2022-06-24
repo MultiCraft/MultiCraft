@@ -70,6 +70,7 @@ local function get_formspec(tabview, name, tabdata)
 			"select_btn.png;bgimg_middle=10]" ..
 		"image_button[-0.11,4.8;5.5,0.92;;btn_contentdb;" .. fgettext("Browse online content") .. ";true;false]"
 
+
 	local selected_pkg
 	if filterlist.size(packages) >= tabdata.selected_pkg then
 		selected_pkg = packages:get_list()[tabdata.selected_pkg]

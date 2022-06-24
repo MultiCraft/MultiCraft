@@ -59,8 +59,6 @@ end
 
 --------------------------------------------------------------------------------
 function render_serverlist_row(spec, is_favorite)
-	-- I'm not sure why spec can be nil here but showing an empty server list
-	-- entry is probably better than crashing.
 	if not spec then
 		spec = {}
 	end

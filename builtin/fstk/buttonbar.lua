@@ -24,9 +24,6 @@ local function buttonbar_formspec(self)
 		return ""
 	end
 
-	-- local formspec = string.format("box[%f,%f;%f,%f;%s]",
-	-- 		self.pos.x,self.pos.y ,self.size.x,self.size.y,self.bgcolor)
-
 	local formspec = string.format("background9[%f,%f;%f,%f;%sside_menu_left.png;false;30]",
 			self.pos.x - 0.05, self.pos.y - 0.1, self.size.x + 0.25, self.size.y + 0.35, defaulttexturedir)
 
