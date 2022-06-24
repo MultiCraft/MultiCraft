@@ -66,8 +66,9 @@ local function get_formspec(tabview, name, tabdata)
 		"table[0,0.25;5.1,4.3;pkglist;" ..
 		pkgmgr.render_packagelist(packages) ..
 		";" .. tabdata.selected_pkg .. "]" ..
-		"button[0,4.85;5.25,0.5;btn_contentdb;".. fgettext("Browse online content") .. "]"
-
+		"style[btn_contentdb;padding=-5;bgimg=" .. defaulttexturedir ..
+			"select_btn.png;bgimg_middle=10]" ..
+		"image_button[-0.11,4.8;5.5,0.92;;btn_contentdb;" .. fgettext("Browse online content") .. ";true;false]"
 
 	local selected_pkg
 	if filterlist.size(packages) >= tabdata.selected_pkg then
