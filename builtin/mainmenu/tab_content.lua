@@ -145,8 +145,7 @@ local function get_formspec(tabview, name, tabdata)
 		retval = retval .. "textarea[5.85,2.2;6.35,2.9;;" ..
 			fgettext("Information:") .. ";" .. desc .. "]"
 
-		if core.may_modify_path(selected_pkg.path) and not
-			(selected_pkg.type == "game" and selected_pkg.name == "default") then
+		if core.may_modify_path(selected_pkg.path) then
 			retval = retval ..
 				"button[5.5,4.65;3.25,1;btn_mod_mgr_delete_mod;" ..
 				fgettext("Uninstall Package") .. "]"
