@@ -85,6 +85,7 @@ function messagebox(name, message)
 	return dialog_create(name,
 			function()
 				return ([[
+					set_focus[ok;true]
 					textarea[1,1;10,4;;;%s]
 					button[5,4.5;2,0.8;ok;%s]
 				]]):format(message, fgettext("OK"))
