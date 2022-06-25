@@ -324,7 +324,14 @@ local function main_button_handler(this, fields, name)
 	end
 
 	if fields["game_open_cdb"] then
-		this:set_tab("content")
+		if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
+			this:set_tab("content")
+		else
+			local dlg = create_store_dlg()
+			dlg:set_parent(this)
+			this:hide()
+			dlg:show()
+		end
 
 		return true
 	end
