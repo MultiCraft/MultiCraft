@@ -357,7 +357,7 @@ local function on_change(type, old_tab, new_tab)
 
 		local game = current_game()
 
-		if game then
+		if game and game.id ~= "default" then
 			menudata.worldlist:set_filtercriteria(game.id)
 			mm_texture.update("singleplayer",game)
 		end
