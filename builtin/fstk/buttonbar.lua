@@ -25,7 +25,7 @@ local function buttonbar_formspec(self)
 	end
 
 	local formspec = string.format("background9[%f,%f;%f,%f;%sside_menu_left.png;false;30]",
-			self.pos.x - 0.05, self.pos.y - 0.1, self.size.x + 0.25, self.size.y + 0.35, defaulttexturedir)
+			self.pos.x, self.pos.y - 0.1, self.size.x + 0.025, self.size.y + 0.35, defaulttexturedir)
 
 	for i=self.startbutton,#self.buttons,1 do
 		local btn_name = self.buttons[i].name
@@ -36,7 +36,7 @@ local function buttonbar_formspec(self)
 			(i - self.startbutton) * self.btn_size +       --button offset
 			self.btn_initial_offset
 		else
-			btn_pos.x = self.pos.x + (self.btn_size * 0.1)
+			btn_pos.x = self.pos.x + (self.btn_size * 0.05)
 		end
 
 		if self.orientation == "vertical" then
@@ -99,9 +99,9 @@ local function buttonbar_formspec(self)
 		else
 			btn_size.x = self.btn_size
 			btn_size.y = self.btn_size * 0.5
-			btn_dec_pos.x = self.pos.x + (self.btn_size * 0.1)
+			btn_dec_pos.x = self.pos.x + (self.btn_size * 0.05)
 			btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
-			btn_inc_pos.x = self.pos.x + (self.btn_size * 0.1)
+			btn_inc_pos.x = self.pos.x + (self.btn_size * 0.05)
 			btn_inc_pos.y = self.pos.y + self.size.y - (self.btn_size * 0.45)
 		end
 
