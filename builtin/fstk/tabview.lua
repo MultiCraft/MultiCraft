@@ -26,6 +26,8 @@
 -- element.getFormspec() returns formspec of tabview                          --
 --------------------------------------------------------------------------------
 
+local defaulttexturedir = core.formspec_escape(defaulttexturedir)
+
 --------------------------------------------------------------------------------
 local function add_tab(self,tab)
 	assert(tab.size == nil or (type(tab.size) == table and
@@ -49,6 +51,7 @@ local function add_tab(self,tab)
 	-- Hidden tabs have a negative index
 	local i
 	if tab.hidden then
+		newtab.tabdata.hidden = true
 		i = -1
 		while self.tablist[i] do
 			i = i - 1
@@ -67,6 +70,21 @@ local function add_tab(self,tab)
 end
 
 --------------------------------------------------------------------------------
+local function make_side_pane_tab(y, tab_name, tooltip, selected)
+	local formspec = "style[" .. tab_name .. "_tab;bgimg=" ..
+			defaulttexturedir .. tab_name
+	if selected then
+		formspec = formspec .. "_menu_selected.png]"
+	else
+		formspec = formspec .. "_menu.png;bgimg_hovered=" ..
+				defaulttexturedir .. tab_name .. "_menu_hover.png]"
+	end
+
+	return formspec ..
+			"image_button[12.1," .. y .. ";1,1.5;;" .. tab_name .. "_tab;;true;false]" ..
+			"tooltip[" .. tab_name .. "_tab;" .. tooltip .. "]"
+end
+
 local function get_formspec(self)
 	local formspec = ""
 
@@ -76,7 +94,6 @@ local function get_formspec(self)
 		if self.parent == nil then
 			local tsize = self.tablist[self.last_tab_index].tabsize or
 					{width=self.width, height=self.height}
-			local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 			formspec = formspec ..
 					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height + 1,
 						dump(self.fixed_size)) ..
@@ -85,19 +102,15 @@ local function get_formspec(self)
 					"background9[-0.2,-1.26;" .. tsize.width + 0.4 .. "," ..
 						tsize.height + 1.75 .. ";" .. defaulttexturedir ..
 						"bg_common.png;false;40]" ..
-					"style[settings_tab;content_offset=0]" ..
-					"image_button[12.02,1.3;1,1.55;" ..
-						defaulttexturedir .. "settings_menu.png;settings_tab;;true;false;" ..
-						defaulttexturedir .. "settings_menu_pressed.png]" ..
-					"style[authors_tab;content_offset=0]" ..
-					"image_button[12.02,2.7;1,1.55;" ..
-						defaulttexturedir .. "authors_menu.png;authors_tab;;true;false;" ..
-						defaulttexturedir .. "authors_menu_pressed.png]"
+
+					"background9[12.13,1.05;0.9,2.6;" .. defaulttexturedir .. "side_menu.png;false;30]" ..
+					make_side_pane_tab(0.9, "settings", fgettext("Settings"), name == "settings") ..
+					"image[12.15,2.26;0.9,0.06;" .. defaulttexturedir .. "side_menu_divider.png]" ..
+					make_side_pane_tab(2.3, "authors", fgettext("Credits"), name == "credits")
 		end
 
 	--	formspec = formspec .. self:tab_header()
-		formspec = formspec .. self:button_header()
-		formspec = formspec ..
+		formspec = formspec .. self:button_header() ..
 				self.tablist[self.last_tab_index].get_formspec(
 					self,
 					name,
@@ -269,17 +282,18 @@ end
 --------------------------------------------------------------------------------
 local function handle_tab_buttons(self,fields)
 	--save tab selection to config file
-	if fields[self.name] then
+	--[[if fields[self.name] then
 		local index = tonumber(fields[self.name])
 		switch_to_tab(self, index)
 		return true
-	end
+	end]]
 
 	local name_prefix = self.name .. "_"
 	local name_prefix_len = #name_prefix
 	for field in pairs(fields) do
 		if field:sub(1, name_prefix_len) == name_prefix then
 			local index = tonumber(field:sub(name_prefix_len + 1))
+			if self.last_tab_index == index then return false end
 			switch_to_tab(self, index)
 			return true
 		end

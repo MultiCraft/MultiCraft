@@ -71,7 +71,7 @@ local function singleplayer_refresh_gamebar()
 
 	local btnbar = buttonbar_create("game_button_bar",
 		game_buttonbar_button_handler,
-		{x=-0.35, y=-0.32}, "vertical", {x=1, y=7.14})
+		{x=-0.15, y=0.18}, "vertical", {x=1, y=6.14})
 
 	for i=1, #pkgmgr.games do
 		if pkgmgr.games[i].id ~= "default" then
@@ -103,7 +103,7 @@ local function singleplayer_refresh_gamebar()
 	btnbar:add_button("game_open_cdb", "", "", fgettext("Install games from ContentDB"), true)
 end
 
-local function get_formspec()
+local function get_formspec(_, _, tab_data)
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 
@@ -141,16 +141,19 @@ local function get_formspec()
 
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
-			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
+			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
+	if tab_data.hidden then
+		retval = retval ..
 			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
 				defaulttexturedir .. "switch_local_default_hover.png]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
+	end
 
 	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
 		retval = retval ..
-			"style[world_configure;padding=-10;bgimg=" .. defaulttexturedir ..
-				"select_btn.png;bgimg_middle=20]" ..
+			"style[world_configure;padding=-5;bgimg=" .. defaulttexturedir ..
+				"select_btn.png;bgimg_middle=10]" ..
 			"image_button[9.3,4.84;2.7,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
 	end
 
@@ -239,7 +242,7 @@ local function main_button_handler(this, fields, name)
 		local world = menudata.worldlist:get_raw_element(gamedata.selected_world)
 		if world then
 			local game = pkgmgr.find_by_gameid(world.gameid)
-			core.settings:set("menu_last_game", game.id)
+			core.settings:set("menu_last_game", (game and game.id or ""))
 		end
 
 		if core.settings:get_bool("enable_server") then
@@ -321,7 +324,14 @@ local function main_button_handler(this, fields, name)
 	end
 
 	if fields["game_open_cdb"] then
-		this:set_tab("content")
+		if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
+			this:set_tab("content")
+		else
+			local dlg = create_store_dlg()
+			dlg:set_parent(this)
+			this:hide()
+			dlg:show()
+		end
 
 		return true
 	end
@@ -347,7 +357,7 @@ local function on_change(type, old_tab, new_tab)
 
 		local game = current_game()
 
-		if game then
+		if game and game.id ~= "default" then
 			menudata.worldlist:set_filtercriteria(game.id)
 			mm_texture.update("singleplayer",game)
 		end
@@ -371,7 +381,6 @@ end
 return {
 	name = "local",
 	caption = fgettext("Singleplayer"),
-	hidden = true,
 	cbf_formspec = get_formspec,
 	cbf_button_handler = main_button_handler,
 	on_change = on_change

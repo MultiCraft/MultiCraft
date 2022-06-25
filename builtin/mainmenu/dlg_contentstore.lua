@@ -1004,6 +1004,11 @@ function create_store_dlg(type)
 	search_string = ""
 	cur_page = 1
 
+	-- ToDo: delete me when MultiCraft ContentDB is ready
+	if type and type ~= "game" then
+		type = "game"
+	end
+
 	if type then
 		-- table.indexof does not work on tables that contain `nil`
 		for i, v in pairs(filter_types_type) do

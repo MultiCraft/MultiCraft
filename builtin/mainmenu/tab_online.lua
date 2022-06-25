@@ -371,7 +371,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		gamedata.playername = fields.te_name
 		gamedata.password   = fields.te_pwd
 		gamedata.address    = fields.te_address
-		gamedata.port       = tonumber(fields.te_port)
+		gamedata.port       = tonumber(fields.te_port) or 30000
 		gamedata.selected_world = 0
 		local fav_idx = core.get_table_index("favorites")
 		local fav = serverlist[fav_idx]

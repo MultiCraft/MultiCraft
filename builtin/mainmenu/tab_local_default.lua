@@ -118,7 +118,7 @@ local function get_formspec(this)
 				defaulttexturedir .. "gift_btn_pressed.png]"
 	end
 
-	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
+	if PLATFORM ~= "iOS" then
 		retval = retval ..
 			"style[switch_local;fgimg=" .. defaulttexturedir .. "switch_local.png;fgimg_hovered=" ..
 				defaulttexturedir .. "switch_local_hover.png]" ..

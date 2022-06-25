@@ -109,6 +109,7 @@ function menudata.init_tabs()
 	for i = 1, #pkgmgr.games do
 		if pkgmgr.games[i].id == "default" then
 			tv_main:add(tabs.local_default_game)
+			tabs.local_game.hidden = true
 			break
 		end
 	end

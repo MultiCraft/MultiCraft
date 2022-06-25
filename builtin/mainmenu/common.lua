@@ -59,6 +59,10 @@ end
 
 --------------------------------------------------------------------------------
 function render_serverlist_row(spec, is_favorite)
+	if not spec then
+		spec = {}
+	end
+
 	-- Get information from non_mobile_servers.
 	if is_favorite and not spec.proto_min and spec.address and spec.port and
 			serverlistmgr.non_mobile_servers then

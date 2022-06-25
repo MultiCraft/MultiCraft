@@ -388,6 +388,12 @@ local function create_world_buttonhandler(this, fields)
 				gameindex = gameindex + 1
 			end
 
+			if not pkgmgr.games[gameindex] then
+				gamedata.errormessage = fgettext("No game selected")
+				this:delete()
+				return true
+			end
+
 			-- For unnamed worlds use the generated name 'World <number>',
 			-- where the number increments: it is set to 1 larger than the largest
 			-- generated name number found.
@@ -457,7 +463,9 @@ local function create_world_buttonhandler(this, fields)
 		if gameindex >= pkgmgr.default_game_idx then
 			gameindex = gameindex + 1
 		end
-		core.settings:set("menu_last_game", pkgmgr.games[gameindex].id)
+		local game = pkgmgr.games[gameindex]
+		if not game then return end
+		core.settings:set("menu_last_game", game.id)
 		return true
 	end
 
