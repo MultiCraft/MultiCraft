@@ -1205,6 +1205,6 @@ core.register_chatcommand("setspawn", {
 
 		core.set_world_spawnpoint(pos)
 
-		return true, "The spawn point has been set to " .. core.pos_to_string(pos, 1)
+		return true, "The spawn point has been set to " .. core.pos_to_string(pos)
 	end
 })
