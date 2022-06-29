@@ -9,7 +9,7 @@ if static_spawnpoint_string and
 end
 
 local function put_player_in_spawn(player_obj)
-	local static_spawnpoint = core.setting_get_pos("static_spawnpoint")
+	local static_spawnpoint = core.setting_get_pos("static_spawnpoint") or core.get_world_spawnpoint()
 	if not static_spawnpoint then
 		return false
 	end
