@@ -3816,7 +3816,8 @@ v3f Server::findSpawnPos()
 {
 	ServerMap &map = m_env->getServerMap();
 	v3f nodeposf;
-	if (g_settings->getV3FNoEx("static_spawnpoint", nodeposf))
+	if (g_settings->getV3FNoEx("static_spawnpoint", nodeposf) ||
+			m_env->getWorldSpawnpoint(nodeposf))
 		return nodeposf * BS;
 
 	bool is_good = false;
