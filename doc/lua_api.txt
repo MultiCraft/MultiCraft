@@ -5283,8 +5283,8 @@ Environment access
       full-node biome 'dust' nodes.
  * `minetest.set_world_spawnpoint([pos])`
     * Sets the world-specific spawnpoint to pos (or `nil` to reset).
-    * If `static_spawnpoint` is specified in minetest.conf, the world-specific
-      spawnpoint will be ignored.
+    * If `static_spawnpoint` is specified in multicraft.conf, the
+      world-specific spawnpoint will be ignored.
  * `minetest.get_world_spawnpoint()`
     * Returns the world-specific spawnpoint.
 
