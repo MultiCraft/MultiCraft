@@ -2970,7 +2970,11 @@ void Server::RespawnPlayer(session_t peer_id)
 	bool repositioned = m_script->on_respawnplayer(playersao);
 	if (!repositioned) {
 		// setPos will send the new position to client
-		playersao->setPos(findSpawnPos());
+		const v3f pos = findSpawnPos();
+		actionstream << "Moving " << playersao->getPlayer()->getName() <<
+				" to spawnpoint at (" << pos.X << ", " << pos.Y << ", " <<
+				pos.Z << ")" << std::endl;
+		playersao->setPos(pos);
 	}
 
 	SendPlayerHP(peer_id);
