@@ -76,6 +76,7 @@ Particle::Particle(
 	m_material.setFlag(video::EMF_BACK_FACE_CULLING, false);
 	m_material.setFlag(video::EMF_BILINEAR_FILTER, false);
 	m_material.setFlag(video::EMF_FOG_ENABLE, true);
+	m_material.setFlag(video::EMF_ZWRITE_ENABLE, false);
 	m_material.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 	m_material.setTexture(0, texture);
 	m_texpos = texpos;
