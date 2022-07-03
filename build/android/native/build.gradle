@@ -3,7 +3,7 @@ apply plugin: 'de.undercouch.download'
 
 android {
 	compileSdkVersion 32
-	buildToolsVersion '32.0.0'
+	buildToolsVersion '33.0.0'
 	ndkVersion '23.2.8568313'
 	defaultConfig {
 		minSdkVersion 21

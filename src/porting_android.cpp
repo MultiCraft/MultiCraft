@@ -44,8 +44,6 @@ extern "C" void external_pause_game();
 
 static std::atomic<bool> ran = {false};
 
-jmethodID notifyExit;
-
 void android_main(android_app *app)
 {
 	if (ran.exchange(true)) {
@@ -105,6 +103,12 @@ jclass findClass(const std::string &classname)
 		return nullptr;
 
 	jclass nativeactivity = jnienv->FindClass("android/app/NativeActivity");
+
+	if (jnienv->ExceptionCheck()) {
+		jnienv->ExceptionClear();
+		return nullptr;
+	}
+
 	jmethodID getClassLoader = jnienv->GetMethodID(
 			nativeactivity, "getClassLoader", "()Ljava/lang/ClassLoader;");
 	jobject cls = jnienv->CallObjectMethod(activityObj, getClassLoader);
@@ -112,7 +116,14 @@ jclass findClass(const std::string &classname)
 	jmethodID findClass = jnienv->GetMethodID(classLoader, "loadClass",
 					"(Ljava/lang/String;)Ljava/lang/Class;");
 	jstring strClassName = jnienv->NewStringUTF(classname.c_str());
-	return (jclass) jnienv->CallObjectMethod(cls, findClass, strClassName);
+	jclass result = (jclass) jnienv->CallObjectMethod(cls, findClass, strClassName);
+
+	if (jnienv->ExceptionCheck()) {
+		jnienv->ExceptionClear();
+		return nullptr;
+	}
+
+	return result;
 }
 
 void initAndroid()
@@ -135,10 +146,6 @@ void initAndroid()
 		errorstream <<
 			"porting::initAndroid unable to find java native activity class" <<
 			std::endl;
-
-	notifyExit = jnienv->GetMethodID(nativeActivity, "notifyExitGame", "()V");
-	FATAL_ERROR_IF(notifyExit == nullptr,
-		"porting::initAndroid unable to find java notifyExit method");
 
 #ifdef GPROF
 	// in the start-up code
@@ -317,8 +324,16 @@ void notifyServerConnect(bool is_multiplayer)
 
 void notifyExitGame()
 {
-	if (jnienv == nullptr || activityObj == nullptr || notifyExit == nullptr)
+	if (jnienv == nullptr || activityObj == nullptr)
 		return;
+
+	jclass _nativeActivity = findClass("com/multicraft/game/GameActivity");
+	FATAL_ERROR_IF(_nativeActivity == nullptr,
+	               "porting::notifyExitGame unable to find java native activity class");
+
+	jmethodID notifyExit = jnienv->GetMethodID(_nativeActivity, "notifyExitGame", "()V");
+	FATAL_ERROR_IF(notifyExit == nullptr,
+	               "porting::notifyExitGame unable to find java notifyExit method");
 
 	jnienv->CallVoidMethod(activityObj, notifyExit);
 
