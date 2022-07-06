@@ -207,10 +207,6 @@ function string:trim()
 	return (self:gsub("^%s*(.-)%s*$", "%1"))
 end
 
-function string:trim8()
-	return utf8.gsub(self, "^%s*(.-)%s*$", "%1")
-end
-
 --------------------------------------------------------------------------------
 function math.hypot(x, y)
 	local t
