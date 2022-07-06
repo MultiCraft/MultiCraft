@@ -374,6 +374,21 @@ public:
 	 */
 	void loadDefaultMeta();
 
+	bool getWorldSpawnpoint(v3f &spawnpoint) {
+		if (m_has_world_spawnpoint)
+			spawnpoint = m_world_spawnpoint;
+		return m_has_world_spawnpoint;
+	}
+
+	void setWorldSpawnpoint(const v3f &spawnpoint) {
+		m_world_spawnpoint = spawnpoint;
+		m_has_world_spawnpoint = true;
+	}
+
+	void resetWorldSpawnpoint() {
+		m_has_world_spawnpoint = false;
+	}
+
 private:
 	static PlayerDatabase *openPlayerDatabase(const std::string &name,
 			const std::string &savedir, const Settings &conf);
@@ -484,6 +499,9 @@ private:
 
 	std::vector<std::string> m_compat_player_models;
 	bool m_compat_send_original_model;
+
+	v3f m_world_spawnpoint = v3f(0.f, 0.f, 0.f);
+	bool m_has_world_spawnpoint = false;
 
 	ServerActiveObject* createSAO(ActiveObjectType type, v3f pos, const std::string &data);
 };

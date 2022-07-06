@@ -114,7 +114,7 @@ private:
 
 	// get_objects_inside_radius(pos, radius)
 	static int l_get_objects_inside_radius(lua_State *L);
-	
+
 	// get_objects_in_area(pos, minp, maxp)
 	static int l_get_objects_in_area(lua_State *L);
 
@@ -197,6 +197,12 @@ private:
 
 	// Get a string translated server side
 	static int l_get_translated_string(lua_State * L);
+
+	// Get the world-specific spawnpoint
+	static int l_get_world_spawnpoint(lua_State *L);
+
+	// Set the world-specific spawnpoint
+	static int l_set_world_spawnpoint(lua_State *L);
 
 	/* Helpers */
 

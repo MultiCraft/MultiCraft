@@ -748,7 +748,7 @@ int ModApiEnvMod::l_get_objects_in_area(lua_State *L)
 {
 	GET_ENV_PTR;
 	ScriptApiBase *script = getScriptApiBase(L);
-	
+
 	v3f minp = read_v3f(L, 1) * BS;
 	v3f maxp = read_v3f(L, 2) * BS;
 	aabb3f box(minp, maxp);
@@ -1416,6 +1416,34 @@ int ModApiEnvMod::l_get_translated_string(lua_State * L)
 	return 1;
 }
 
+// get_world_spawnpoint()
+int ModApiEnvMod::l_get_world_spawnpoint(lua_State * L)
+{
+	GET_ENV_PTR;
+
+	v3f spawnpoint;
+	if (!env->getWorldSpawnpoint(spawnpoint))
+		return 0;
+
+	push_v3f(L, spawnpoint);
+	return 1;
+}
+
+// set_world_spawnpoint(spawnpoint)
+int ModApiEnvMod::l_set_world_spawnpoint(lua_State * L)
+{
+	GET_ENV_PTR;
+
+	if (lua_isnil(L, 1)) {
+		env->resetWorldSpawnpoint();
+	} else {
+		const v3f spawnpoint = read_v3f(L, 1);
+		env->setWorldSpawnpoint(spawnpoint);
+	}
+
+	return 0;
+}
+
 void ModApiEnvMod::Initialize(lua_State *L, int top)
 {
 	API_FCT(set_node);
@@ -1466,6 +1494,8 @@ void ModApiEnvMod::Initialize(lua_State *L, int top)
 	API_FCT(forceload_block);
 	API_FCT(forceload_free_block);
 	API_FCT(get_translated_string);
+	API_FCT(get_world_spawnpoint);
+	API_FCT(set_world_spawnpoint);
 }
 
 void ModApiEnvMod::InitializeClient(lua_State *L, int top)

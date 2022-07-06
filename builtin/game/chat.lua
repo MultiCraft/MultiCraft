@@ -1172,7 +1172,8 @@ core.register_chatcommand("spawn", {
 		if not player then
 			return false
 		end
-		local spawnpoint = core.setting_get_pos("static_spawnpoint")
+		local spawnpoint = core.setting_get_pos("static_spawnpoint") or
+			core.get_world_spawnpoint()
 		if spawnpoint then
 			player:set_pos(spawnpoint)
 			return true, "Teleporting to spawn..."
@@ -1190,9 +1191,20 @@ core.register_chatcommand("setspawn", {
 		if not player then
 			return false
 		end
-		local pos = core.pos_to_string(player:get_pos(), 1)
-		core.settings:set("static_spawnpoint", pos)
-		core.settings:write()
-		return true, "The spawn point are set to " .. pos
+
+		-- Round the player's position to one decimal place
+		local pos = vector.apply(player:get_pos(), function(dir)
+			return math.floor(dir * 10 + 0.5) / 10
+		end)
+
+		-- Remove the static_spawnpoint setting if it exists
+		if core.settings:get("static_spawnpoint") then
+			core.settings:remove("static_spawnpoint")
+			core.settings:write()
+		end
+
+		core.set_world_spawnpoint(pos)
+
+		return true, "The spawn point has been set to " .. core.pos_to_string(pos)
 	end
 })
