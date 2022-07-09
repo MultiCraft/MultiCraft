@@ -59,15 +59,19 @@ local function get_formspec(tabview, name, tabdata)
 				"refresh.png;btn_mp_refresh;;true;false]"
 	end
 
+	local address = core.settings:get("address")
+	local port = tonumber(core.settings:get("remote_port"))
+	if port and port ~= 30000 then
+		address = address .. ":" .. port
+	end
+
 	local retval =
 		-- Search
 		search_panel ..
 
 		-- Address / Port
-		"field[7.4,0.6;3.2,0.5;te_address;" .. fgettext("Address") .. ":" .. ";" ..
-			esc(core.settings:get("address")) .. "]" ..
-		"field[10.45,0.6;1.95,0.5;te_port;" .. fgettext("Port") .. ":" .. ";" ..
-			esc(core.settings:get("remote_port")) .. "]" ..
+		"field[7.4,0.6;5,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
+			esc(address) .. "]" ..
 
 		-- Name
 		"field[7.4,1.75;3.2,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
@@ -367,11 +371,16 @@ local function main_button_handler(tabview, fields, name, tabdata)
 	end
 
 	if (fields.btn_mp_connect or fields.key_enter)
-			and fields.te_address ~= "" and fields.te_port then
+			and fields.te_address ~= "" then
 		gamedata.playername = fields.te_name
 		gamedata.password   = fields.te_pwd
-		gamedata.address    = fields.te_address
-		gamedata.port       = tonumber(fields.te_port) or 30000
+
+		-- Allow entering "address:port"
+		local address, port = fields.te_address:match("^(.+):([0-9]+)$")
+		gamedata.address    = address or fields.te_address
+		gamedata.port       = port and tonumber(port) or 30000
+		print('Connecting to', gamedata.address, gamedata.port)
+
 		gamedata.selected_world = 0
 		local fav_idx = core.get_table_index("favorites")
 		local fav = serverlist[fav_idx]
