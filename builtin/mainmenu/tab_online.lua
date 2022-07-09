@@ -379,7 +379,6 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		local address, port = fields.te_address:match("^(.+):([0-9]+)$")
 		gamedata.address    = address or fields.te_address
 		gamedata.port       = port and tonumber(port) or 30000
-		print('Connecting to', gamedata.address, gamedata.port)
 
 		gamedata.selected_world = 0
 		local fav_idx = core.get_table_index("favorites")
