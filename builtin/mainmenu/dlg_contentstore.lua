@@ -703,8 +703,8 @@ function store.get_formspec(dlgdata)
 			"formspec_version[3]",
 			"size[15.75,9.5;false]",
 			"bgcolor[#0000]" ..
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]",
+			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
+				"bg_common.png"), ";true;40]",
 
 			"style[status,downloading,queued;border=false]",
 
@@ -718,7 +718,8 @@ function store.get_formspec(dlgdata)
 
 			-- Page nav buttons
 			"container[0,", H - 0.8 - 0.375, "]",
-			"button[0.375,0;5,0.8;back;", "< " .. fgettext("Back to Main Menu"), "]",
+			"style[back;padding=-5;bgimg=", core.formspec_escape(defaulttexturedir .. "select_btn.png"), ";bgimg_middle=10]",
+			"image_button[0.375,0;5,0.8;;back;", "< ", fgettext("Back to Main Menu"), ";true;false]",
 
 			"container[", W - 0.375 - 0.8*4 - 2,  ",0]",
 			"image_button[0,0;0.8,0.8;", core.formspec_escape(defaulttexturedir), "start_icon.png;pstart;]",
@@ -768,13 +769,14 @@ function store.get_formspec(dlgdata)
 		end
 	else
 		formspec = {
-			"size[12,7;false]",
+			"size[12,6.4;false]",
 			"bgcolor[#0000]" ..
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]",
+			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
+				"bg_common.png"), ";true;40]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
 			"container[0,", H - 0.8 - 0.375 - 2, "]",
-			"button[0,0;4,0.8;back;", "< " .. fgettext("Back to Main Menu"), "]",
+			"style[back;padding=-5;bgimg=", core.formspec_escape(defaulttexturedir .. "select_btn.png"), ";bgimg_middle=10]",
+			"image_button[0,0;4,0.8;;back;", "< ", fgettext("Back to Main Menu"), ";true;false]",
 			"container_end[]",
 		}
 	end

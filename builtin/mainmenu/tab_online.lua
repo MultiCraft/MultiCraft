@@ -42,20 +42,26 @@ local function get_formspec(tabview, name, tabdata)
 	local search_panel
 	if mobile then
 		search_panel =
-			"field[0.2,0.1;5.1,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"image_button[4.87,-0.13;0.83,0.83;" .. defaulttexturedir ..
+			"formspec_version[3]" ..
+			"image[-0.1,4.9;6.05,0.89;" .. defaulttexturedir .. "desc_bg.png;32]" ..
+			"style[Dte_search;border=false;bgcolor=transparent]" ..
+			"field[0.25,5.2;4.97,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+			"image_button[4.85,4.93;0.83,0.83;" .. defaulttexturedir ..
 				"search.png;btn_mp_search;;true;false]" ..
-			"image_button[5.62,-0.13;0.83,0.83;" .. defaulttexturedir ..
+			"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
 				"refresh.png;btn_mp_refresh;;true;false]" ..
-			"image_button[6.37,-0.13;0.83,0.83;" .. defaulttexturedir ..
+			"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir ..
 				(serverlistmgr.mobile_only and "online_mobile" or "online_pc") .. ".png" ..
 				";btn_mp_mobile;;true;false]"
 	else
 		search_panel =
-			"field[0.2,0.1;5.8,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"image_button[5.62,-0.13;0.83,0.83;" .. defaulttexturedir ..
+			"formspec_version[3]" ..
+			"image[-0.1,4.9;7,0.89;" .. defaulttexturedir .. "desc_bg.png;32]" ..
+			"style[Dte_search;border=false;bgcolor=transparent]" ..
+			"field[0.25,5.2;5.75,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+			"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
 				"search.png;btn_mp_search;;true;false]" ..
-			"image_button[6.37,-0.13;0.83,0.83;" .. defaulttexturedir ..
+			"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir ..
 				"refresh.png;btn_mp_refresh;;true;false]"
 	end
 
@@ -70,25 +76,25 @@ local function get_formspec(tabview, name, tabdata)
 		search_panel ..
 
 		-- Address / Port
-		"field[7.4,0.6;5,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
+		"field[7.4,0.55;5,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
 			esc(address) .. "]" ..
 
 		-- Name
-		"field[7.4,1.75;3.2,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
+		"field[7.4,1.7;3.2,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
 			esc(core.settings:get("name")) .. "]" ..
 
 		-- Description Background
-		"box[7.1,2.1;4.8,2.65;#33314B99]" ..
+		"background9[7.2,2.2;4.8,2.65;" .. defaulttexturedir .. "desc_bg.png" .. ";false;32]" ..
 
 		-- Connect
 		"style[btn_mp_connect;fgimg=" .. defaulttexturedir ..
 			"btn_play.png;fgimg_hovered=" .. defaulttexturedir .. "btn_play_hover.png]" ..
-		"image_button[8.8,4.88;3.3,0.9;;btn_mp_connect;;true;false]" ..
+		"image_button[8.8,4.9;3.3,0.9;;btn_mp_connect;;true;false]" ..
 		"tooltip[btn_mp_connect;".. fgettext("Connect") .. "]"
 
 		local pwd = password_save and core.settings:get("password") or password_tmp
 		-- Password
-		retval = retval .. "pwdfield[10.45,1.8;1.95,0.39;te_pwd;" ..
+		retval = retval .. "pwdfield[10.45,1.7;1.95,0.5;te_pwd;" ..
 			fgettext("Password") .. ":" .. ";" .. esc(pwd) .. "]"
 
 	if tabdata.selected and selected then
@@ -96,7 +102,7 @@ local function get_formspec(tabview, name, tabdata)
 			retval = retval ..
 				"style[btn_delete_favorite;fgimg=" .. defaulttexturedir ..
 					"trash.png;fgimg_hovered=" .. defaulttexturedir .. "trash_hover.png]" ..
-				"image_button[7.1,4.91;0.83,0.83;;btn_delete_favorite;;true;false]"
+				"image_button[7.1,4.93;0.83,0.83;;btn_delete_favorite;;true;false]"
 		end
 		if selected.description then
 			retval = retval .. "textarea[7.5,2.2;4.8,3;;" ..
@@ -106,7 +112,7 @@ local function get_formspec(tabview, name, tabdata)
 
 	--favorites
 	retval = retval ..
-		"background9[-0.07,0.7;7.19,5.08;" ..
+		"background9[0,-0.1;7.1,5;" ..
 			defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 		"tableoptions[background=#0000;border=false]" ..
 		"tablecolumns[" ..
@@ -119,7 +125,7 @@ local function get_formspec(tabview, name, tabdata)
 		image_column(fgettext("Server mode")) .. ",padding=0.5;" ..
 		"color,span=1;" ..
 		"text,padding=0.5]" ..
-		"table[-0.1,0.7;7,4.94;favorites;"
+		"table[-0.02,-0.1;6.91,4.87;favorites;"
 
 	if menudata.search_result then
 		local favs = serverlistmgr.get_favorites()
