@@ -773,8 +773,8 @@ function store.get_formspec(dlgdata)
 			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
 				"bg_common.png") .. ";true;40]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
-			"container[0,", H - 0.8 - 0.375, "]",
-			"button[0,0;4,0.8;back;", fgettext("Back to Main Menu"), "]",
+			"container[0,", H - 0.8 - 0.375 - 2, "]",
+			"button[0,0;4,0.8;back;", "< " .. fgettext("Back to Main Menu"), "]",
 			"container_end[]",
 		}
 	end
