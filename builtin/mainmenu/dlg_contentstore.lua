@@ -31,7 +31,9 @@ local http = core.get_http_api()
 
 -- Screenshot
 local screenshot_dir = core.get_cache_path() .. DIR_DELIM .. "cdb"
-assert(core.create_dir(screenshot_dir))
+if not core.create_dir(screenshot_dir) then
+	core.log("warning", "Failed to create ContentDB screenshot cache dir")
+end
 local screenshot_downloading = {}
 local screenshot_downloaded = {}
 
