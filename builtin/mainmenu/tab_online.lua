@@ -315,7 +315,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 	if (fields.Dte_search or fields.btn_mp_search) and not
 			(fields.btn_mp_connect or fields.key_enter) then
 		tabdata.selected = 1
-		local input = lower(fields.Dte_search)
+		local input = lower(fields.Dte_search or "")
 		tabdata.search_for = fields.Dte_search
 
 		if #serverlistmgr.servers < 2 then
