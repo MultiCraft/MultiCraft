@@ -178,7 +178,8 @@ local env = Env:new_empty()
 -- Clone everything
 env:add_globals("assert", "dump", "dump2", "error", "ipairs", "math",
 	"next", "pairs", "pcall", "select", "setmetatable", "string", "table",
-	"tonumber", "tostring", "type", "vector", "xpcall", "_VERSION", "utf8")
+	"tonumber", "tostring", "type", "vector", "xpcall", "_VERSION", "utf8",
+	"PLATFORM")
 
 env:set_copy("os", {clock = os.clock, difftime = os.difftime, time = os.time})
 
