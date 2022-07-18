@@ -31,7 +31,9 @@ local http = core.get_http_api()
 
 -- Screenshot
 local screenshot_dir = core.get_cache_path() .. DIR_DELIM .. "cdb"
-assert(core.create_dir(screenshot_dir))
+if not core.create_dir(screenshot_dir) then
+	core.log("warning", "Failed to create ContentDB screenshot cache dir")
+end
 local screenshot_downloading = {}
 local screenshot_downloaded = {}
 
@@ -169,10 +171,10 @@ local function get_raw_dependencies(package)
 		return package.raw_deps
 	end
 
-	local url_fmt = "/api/packages/%s/dependencies/?only_hard=1&protocol_version=%s&engine_version=%s"
+	local url_fmt = "/api/packages/%s/dependencies/?only_hard=1&protocol_version=%s&engine_version=%s&platform=%s"
 	local version = core.get_version()
 	local base_url = core.settings:get("contentdb_url")
-	local url = base_url .. url_fmt:format(package.id, core.get_max_supp_proto(), version.string)
+	local url = base_url .. url_fmt:format(package.id, core.get_max_supp_proto(), version.string, PLATFORM)
 
 	local response = http.fetch_sync({ url = url })
 	if not response.succeeded then
@@ -547,7 +549,7 @@ function store.load()
 	local base_url = core.settings:get("contentdb_url")
 	local url = base_url ..
 		"/api/packages/?type=mod&type=game&type=txp&protocol_version=" ..
-		core.get_max_supp_proto() .. "&engine_version=" .. version.string
+		core.get_max_supp_proto() .. "&engine_version=" .. version.string .. "&platform=" .. PLATFORM
 
 	for _, item in pairs(core.settings:get("contentdb_flag_blacklist"):split(",")) do
 		item = item:trim()
@@ -703,8 +705,8 @@ function store.get_formspec(dlgdata)
 			"formspec_version[3]",
 			"size[15.75,9.5;false]",
 			"bgcolor[#0000]" ..
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]",
+			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
+				"bg_common.png"), ";true;40]",
 
 			"style[status,downloading,queued;border=false]",
 
@@ -718,7 +720,8 @@ function store.get_formspec(dlgdata)
 
 			-- Page nav buttons
 			"container[0,", H - 0.8 - 0.375, "]",
-			"button[0.375,0;5,0.8;back;", "< " .. fgettext("Back to Main Menu"), "]",
+			"style[back;padding=-5;bgimg=", core.formspec_escape(defaulttexturedir .. "select_btn.png"), ";bgimg_middle=10]",
+			"image_button[0.375,0;5,0.8;;back;", "< ", fgettext("Back to Main Menu"), ";true;false]",
 
 			"container[", W - 0.375 - 0.8*4 - 2,  ",0]",
 			"image_button[0,0;0.8,0.8;", core.formspec_escape(defaulttexturedir), "start_icon.png;pstart;]",
@@ -768,13 +771,14 @@ function store.get_formspec(dlgdata)
 		end
 	else
 		formspec = {
-			"size[12,7;false]",
+			"size[12,6.4;false]",
 			"bgcolor[#0000]" ..
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]",
+			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
+				"bg_common.png"), ";true;40]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
-			"container[0,", H - 0.8 - 0.375, "]",
-			"button[0,0;4,0.8;back;", fgettext("Back to Main Menu"), "]",
+			"container[0,", H - 0.8 - 0.375 - 2, "]",
+			"style[back;padding=-5;bgimg=", core.formspec_escape(defaulttexturedir .. "select_btn.png"), ";bgimg_middle=10]",
+			"image_button[0,0;4,0.8;;back;", "< ", fgettext("Back to Main Menu"), ";true;false]",
 			"container_end[]",
 		}
 	end
@@ -982,9 +986,9 @@ function store.handle_submit(this, fields)
 		end
 
 		if fields["view_" .. i] then
-			local url = ("%s/packages/%s/%s?protocol_version=%d"):format(
+			local url = ("%s/packages/%s/%s?protocol_version=%d&platform=%s"):format(
 					core.settings:get("contentdb_url"),
-					package.author, package.name, core.get_max_supp_proto())
+					package.author, package.name, core.get_max_supp_proto(), PLATFORM)
 			core.open_url(url)
 			return true
 		end
