@@ -109,20 +109,17 @@ local function get_formspec(this)
 
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
-			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
+			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
+
+			"style[switch_local;fgimg=" .. defaulttexturedir .. "switch_local.png;fgimg_hovered=" ..
+				defaulttexturedir .. "switch_local_hover.png]" ..
+			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
 
 	if PLATFORM == "Android" then
 		retval = retval ..
 			"image_button[6.6,-0.1;1.5,1.5;" ..
 				defaulttexturedir .. "gift_btn.png;upgrade;;true;false;" ..
 				defaulttexturedir .. "gift_btn_pressed.png]"
-	end
-
-	if PLATFORM ~= "iOS" then
-		retval = retval ..
-			"style[switch_local;fgimg=" .. defaulttexturedir .. "switch_local.png;fgimg_hovered=" ..
-				defaulttexturedir .. "switch_local_hover.png]" ..
-			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
 	end
 
 	local enable_server = core.settings:get_bool("enable_server")
