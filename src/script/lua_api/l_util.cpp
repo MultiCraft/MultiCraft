@@ -109,8 +109,12 @@ int ModApiUtil::l_parse_json(lua_State *L)
 			size_t jlen = strlen(jsonstr);
 			if (jlen > 100) {
 				errorstream << "Data (" << jlen
+#ifdef NDEBUG
+					<< " bytes) not printed." << std::endl;
+#else
 					<< " bytes) printed to warningstream." << std::endl;
 				warningstream << "data: \"" << jsonstr << "\"" << std::endl;
+#endif
 			} else {
 				errorstream << "data: \"" << jsonstr << "\"" << std::endl;
 			}
