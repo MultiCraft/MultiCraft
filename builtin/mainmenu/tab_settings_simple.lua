@@ -43,6 +43,9 @@ local getSettingIndex = {
 	end
 }
 
+-- TODO
+local languages = {"auto", "de", "en", "es", "ru", "uk"}
+
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
 	local range = tonumber(core.settings:get("viewing_range"))
@@ -136,6 +139,11 @@ local function formspec(tabview, name, tabdata)
 			"label[8.38,2.55;" .. core.colorize("#888888",
 					fgettext("Waving Plants")) .. "]"
 	end
+
+	tab_string = tab_string ..
+		"label[8.25,4;" .. fgettext("Language:") .. "]" ..
+		"dropdown[8.25,4.45;3.5;dd_language;" .. table.concat(languages, ",") .. ";" ..
+			table.indexof(languages, core.settings:get("language")) .. ";true]"
 
 	return tab_string
 end
@@ -245,6 +253,25 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 			-- The formspec cannot be updated or the scrollbar movement will
 			-- break.
 			ddhandled = false
+		end
+	end
+	if fields["dd_language"] then
+		local idx = tonumber(fields["dd_language"])
+		local lang = idx > 1 and languages[idx] or ""
+
+		if core.settings:get("language") ~= lang then
+			core.log("action", "Changing language to " .. lang)
+
+			-- The language has to be set (even if it's an empty string) so
+			-- that the setting changed callback is run.
+			core.settings:set("language", lang)
+			if lang == "" then
+				core.settings:remove("language")
+			end
+			ddhandled = true
+
+			-- Reload the main menu so that everything uses the new language
+			dofile(core.get_builtin_path() .. "init.lua")
 		end
 	end
 

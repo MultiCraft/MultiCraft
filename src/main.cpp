@@ -522,7 +522,7 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 	init_gettext(porting::path_locale.c_str(),
 		g_settings->get("language"), argc, argv);
 #if !defined(_MSC_VER) && !defined(SERVER)
-	g_settings->registerChangedCallback("language", language_setting_changed, NULL);
+	g_settings->registerChangedCallback("language", language_setting_changed, nullptr);
 #endif
 
 	return true;
