@@ -34,7 +34,8 @@
 		android:requestLegacyExternalStorage="true"
 		android:resizeableActivity="false"
 		android:roundIcon="@mipmap/ic_launcher_round"
-		tools:ignore="UnusedAttribute">
+		tools:ignore="UnusedAttribute"
+		android:dataExtractionRules="@xml/data_extraction_rules">
 
 		<meta-data
 			android:name="android.max_aspect"
