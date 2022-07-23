@@ -16,6 +16,41 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+local function create_confirm_reset_dlg()
+	return dialog_create("reset_all_settings",
+		function()
+			return
+				"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir ..
+					"blank.png") .. ";;" .. fgettext("Reset all settings?") ..
+					";true;false;]" ..
+				"style[reset_confirm;bgcolor=red]" ..
+				"button[3,4.8;3,0.5;reset_confirm;" .. fgettext("Reset") .. "]" ..
+				"button[6,4.8;3,0.5;reset_cancel;" .. fgettext("Cancel") .. "]"
+		end,
+		function(this, fields)
+			if fields["reset_confirm"] then
+				-- TODO: Maybe only reset the settings that are shown in the
+				-- dialog
+				for _, setting_name in ipairs(core.settings:get_names()) do
+					if not setting_name:find(".", 1, true) and
+							setting_name ~= "maintab_LAST" then
+						core.settings:remove(setting_name)
+					end
+				end
+
+				-- Reload the entire main menu
+				dofile(core.get_builtin_path() .. "init.lua")
+				return true
+			end
+
+			if fields["reset_cancel"] then
+				this:delete()
+				return true
+			end
+		end,
+		nil, true)
+end
+
 --------------------------------------------------------------------------------
 
 local labels = {
@@ -175,9 +210,10 @@ local function formspec(tabview, name, tabdata)
 	end
 
 	tab_string = tab_string ..
-		"label[8.25,4;" .. fgettext("Language:") .. "]" ..
-		"dropdown[8.25,4.45;3.5;dd_language;" .. language_dropdown .. ";" ..
-			lang_idx .. ";true]"
+		"label[8.25,3.15;" .. fgettext("Language:") .. "]" ..
+		"dropdown[8.25,3.6;3.5;dd_language;" .. language_dropdown .. ";" ..
+			lang_idx .. ";true]" ..
+		"button[8.25,4.45;3.45,0.8;btn_reset;Reset all settings]"
 
 	return tab_string
 end
@@ -254,6 +290,14 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		core.show_keys_menu()
 		return true
 	end]]
+
+	if fields["btn_reset"] then
+		local reset_dlg = create_confirm_reset_dlg()
+		reset_dlg:set_parent(this)
+		this:hide()
+		reset_dlg:show()
+		return true
+	end
 
 	-- Note dropdowns have to be handled LAST!
 	local ddhandled = false
