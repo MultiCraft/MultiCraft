@@ -44,7 +44,8 @@ local getSettingIndex = {
 }
 
 -- TODO
-local languages = {"auto", "de", "en", "es", "ru", "uk"}
+local languages = {"de", "en", "es", "ru", "uk"}
+local language_names = {"Deutsch", "English", "Русский", "українська"}
 
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
@@ -140,10 +141,15 @@ local function formspec(tabview, name, tabdata)
 					fgettext("Waving Plants")) .. "]"
 	end
 
+	local lang_code = fgettext("LANG_CODE")
+	if lang_code == "LANG_CODE" then
+		lang_code = "en"
+	end
+
 	tab_string = tab_string ..
 		"label[8.25,4;" .. fgettext("Language:") .. "]" ..
-		"dropdown[8.25,4.45;3.5;dd_language;" .. table.concat(languages, ",") .. ";" ..
-			table.indexof(languages, core.settings:get("language")) .. ";true]"
+		"dropdown[8.25,4.45;3.5;dd_language;" .. table.concat(language_names, ",") .. ";" ..
+			table.indexof(languages, lang_code) .. ";true]"
 
 	return tab_string
 end
@@ -256,17 +262,13 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		end
 	end
 	if fields["dd_language"] then
-		local idx = tonumber(fields["dd_language"])
-		local lang = idx > 1 and languages[idx] or ""
+		local lang = languages[tonumber(fields["dd_language"])] or ""
 
 		if core.settings:get("language") ~= lang then
-			core.log("action", "Changing language to " .. lang)
-
-			-- The language has to be set (even if it's an empty string) so
-			-- that the setting changed callback is run.
-			core.settings:set("language", lang)
 			if lang == "" then
 				core.settings:remove("language")
+			else
+				core.settings:set("language", lang)
 			end
 			ddhandled = true
 
