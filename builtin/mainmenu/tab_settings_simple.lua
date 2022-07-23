@@ -75,6 +75,11 @@ for i, language in ipairs(languages) do
 end
 local language_dropdown = table.concat(language_name_list, ",")
 
+local lang_idx = table.indexof(languages, fgettext("LANG_CODE"))
+if lang_idx < 0 then
+	lang_idx = table.indexof(languages, "en")
+end
+
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
 	local range = tonumber(core.settings:get("viewing_range"))
@@ -167,11 +172,6 @@ local function formspec(tabview, name, tabdata)
 					fgettext("Waving Leaves")) .. "]" ..
 			"label[8.38,2.55;" .. core.colorize("#888888",
 					fgettext("Waving Plants")) .. "]"
-	end
-
-	local lang_idx = table.indexof(languages, fgettext("LANG_CODE"))
-	if lang_idx < 0 then
-		lang_idx = table.indexof(languages, "en")
 	end
 
 	tab_string = tab_string ..
@@ -290,10 +290,9 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		end
 	end
 	if fields["dd_language"] then
-		local lang = languages[tonumber(fields["dd_language"])] or ""
-
-		if core.settings:get("language") ~= lang then
-			core.settings:set("language", lang)
+		local new_idx = tonumber(fields["dd_language"])
+		if lang_idx ~= new_idx then
+			core.settings:set("language", languages[new_idx] or "")
 			ddhandled = true
 
 			-- Reload the main menu so that everything uses the new language
