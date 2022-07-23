@@ -43,9 +43,37 @@ local getSettingIndex = {
 	end
 }
 
--- TODO
-local languages = {"de", "en", "es", "ru", "uk"}
-local language_names = {"Deutsch", "English", "Русский", "українська"}
+-- Get a list of languages and language names
+local path_locale = core.get_builtin_path() .. ".." .. DIR_DELIM .. "locale"
+local languages = core.get_dir_list(path_locale, true)
+local language_names = {}
+for i = #languages, 1, -1 do
+	local language = languages[i]
+	local f = io.open(path_locale .. DIR_DELIM .. language .. DIR_DELIM ..
+					  "LC_MESSAGES" .. DIR_DELIM .. "minetest.mo")
+	if f then
+		-- HACK
+		local name = f:read("*a"):match("\nLanguage%-Team: ([^\\\n\"]+) <https://")
+		language_names[language] = name or language
+		f:close()
+	else
+		table.remove(languages, i)
+	end
+end
+
+languages[#languages + 1] = "en"
+language_names.en = "English"
+
+-- Sort the languages list based on their human readable name
+table.sort(languages, function(a, b)
+	return language_names[a] < language_names[b]
+end)
+
+local language_name_list = {}
+for i, language in ipairs(languages) do
+	language_name_list[i] = core.formspec_escape(language_names[language])
+end
+local language_dropdown = table.concat(language_name_list, ",")
 
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
@@ -141,15 +169,15 @@ local function formspec(tabview, name, tabdata)
 					fgettext("Waving Plants")) .. "]"
 	end
 
-	local lang_code = fgettext("LANG_CODE")
-	if lang_code == "LANG_CODE" then
-		lang_code = "en"
+	local lang_idx = table.indexof(languages, fgettext("LANG_CODE"))
+	if lang_idx < 0 then
+		lang_idx = table.indexof(languages, "en")
 	end
 
 	tab_string = tab_string ..
 		"label[8.25,4;" .. fgettext("Language:") .. "]" ..
-		"dropdown[8.25,4.45;3.5;dd_language;" .. table.concat(language_names, ",") .. ";" ..
-			table.indexof(languages, lang_code) .. ";true]"
+		"dropdown[8.25,4.45;3.5;dd_language;" .. language_dropdown .. ";" ..
+			lang_idx .. ";true]"
 
 	return tab_string
 end
