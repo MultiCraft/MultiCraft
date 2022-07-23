@@ -265,11 +265,7 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		local lang = languages[tonumber(fields["dd_language"])] or ""
 
 		if core.settings:get("language") ~= lang then
-			if lang == "" then
-				core.settings:remove("language")
-			else
-				core.settings:set("language", lang)
-			end
+			core.settings:set("language", lang)
 			ddhandled = true
 
 			-- Reload the main menu so that everything uses the new language
