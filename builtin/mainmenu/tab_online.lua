@@ -37,16 +37,6 @@ local function get_formspec(tabview, name, tabdata)
 		tabdata.search_for = ""
 	end
 
-	local search_panel =
-		"formspec_version[3]" ..
-		"image[-0.1,4.9;7,0.89;" .. defaulttexturedir .. "desc_bg.png;32]" ..
-		"style[Dte_search;border=false;bgcolor=transparent]" ..
-		"field[0.25,5.2;5.75,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-		"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
-			"search.png;btn_mp_search;;true;false]" ..
-		"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir ..
-			"refresh.png;btn_mp_refresh;;true;false]"
-
 	local address = core.settings:get("address")
 	local port = tonumber(core.settings:get("remote_port"))
 	if port and port ~= 30000 then
@@ -55,7 +45,14 @@ local function get_formspec(tabview, name, tabdata)
 
 	local retval =
 		-- Search
-		search_panel ..
+		"formspec_version[3]" ..
+		"image[-0.1,4.9;7,0.89;" .. defaulttexturedir .. "desc_bg.png;32]" ..
+		"style[Dte_search;border=false;bgcolor=transparent]" ..
+		"field[0.25,5.2;5.75,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+		"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
+			"search.png;btn_mp_search;;true;false]" ..
+		"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir ..
+			"refresh.png;btn_mp_refresh;;true;false]" ..
 
 		-- Address / Port
 		"field[7.4,0.55;5,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
