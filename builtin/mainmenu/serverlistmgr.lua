@@ -18,30 +18,24 @@
 serverlistmgr = {}
 
 --------------------------------------------------------------------------------
-serverlistmgr.mobile_only = PLATFORM == "Android" or PLATFORM == "iOS"
 local function order_server_list(list)
 	local res = {}
-	local non_mobile_servers = {}
-	local mobile = serverlistmgr.mobile_only
 
 	-- orders the multicraft list before support
 	for i = 1, #list do
 		local fav = list[i]
-		if mobile and not fav.mobile_friendly then
-			non_mobile_servers[("%s:%s"):format(fav.address, fav.port)] = fav
-		elseif fav.server_id == "multicraft" then
+		if fav.server_id == "multicraft" then
 			res[#res + 1] = fav
 		end
 	end
 	for i = 1, #list do
 		local fav = list[i]
-		if (mobile and fav.mobile_friendly or not mobile) and
-				is_server_protocol_compat(fav.proto_min, fav.proto_max) and
+		if is_server_protocol_compat(fav.proto_min, fav.proto_max) and
 				fav.server_id ~= "multicraft" then
 			res[#res + 1] = fav
 		end
 	end
-	return res, non_mobile_servers
+	return res
 end
 
 local public_downloading = false
@@ -91,10 +85,9 @@ function serverlistmgr.sync()
 		nil,
 		function(result)
 			public_downloading = nil
-			local favs, non_mobile_servers = order_server_list(result)
+			local favs = order_server_list(result)
 			if favs[1] then
 				serverlistmgr.servers = favs
-				serverlistmgr.non_mobile_servers = non_mobile_servers
 			end
 			core.event_handler("Refresh")
 		end
