@@ -1,6 +1,6 @@
 --[[
 Minetest
-Copyright (C) 2018-2020 SmallJoker
+Copyright (C) 2018-2020 SmallJoker, 2022 rubenwardy
 Copyright (C) 2022 MultiCraft Development Team
 
 This program is free software; you can redistribute it and/or modify
@@ -18,18 +18,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ]]
 
-local update_download_url -- Filled by HTTP callback
+if not core.get_http_api then
+	function check_new_version()
+	end
+	return
+end
 
 local defaulttexturedir = core.formspec_escape(defaulttexturedir)
 
 local function version_info_formspec(data)
-	local changelog = data.changelog
+	local changes = data.changes
 
 	-- Hack to work around https://github.com/minetest/minetest/issues/11727
-	if changelog:sub(2, 2) == " " then
-		local idx = changelog:find("\n", 3, true) or #changelog + 1
-		changelog = "\194\160" .. changelog:sub(1, idx - 1) .. "\194\160" ..
-			changelog:sub(idx)
+	if changes:sub(2, 2) == " " then
+		local idx = changes:find("\n", 3, true) or #changes + 1
+		changes = "\194\160" .. changes:sub(1, idx - 1) .. "\194\160" ..
+			changes:sub(idx)
 	end
 
 	return ([[
@@ -45,7 +49,7 @@ local function version_info_formspec(data)
 		defaulttexturedir .. "logo.png",
 		defaulttexturedir .. "blank.png",
 		fgettext("A new MultiCraft version is available!"),
-		core.formspec_escape(changelog),
+		core.formspec_escape(changes),
 		fgettext("Remind me later"),
 		fgettext("Update now")
 	)
@@ -53,18 +57,20 @@ end
 
 local function version_info_buttonhandler(this, fields)
 	if fields.version_check_remind then
-		-- Only wait for the check interval
-		core.settings:set("update_last_known", "")
+		-- Erase last known, user will be reminded again at next check
+		core.settings:remove("update_last_known")
 		this:delete()
 		return true
 	end
 	-- if fields.version_check_never then
-	-- 	core.settings:set("update_last_known", "disabled")
+	-- 	core.settings:set("update_last_checked", "disabled")
 	-- 	this:delete()
 	-- 	return true
 	-- end
 	if fields.version_check_visit then
-		core.open_url(update_download_url)
+		if type(this.data.url) == "string" then
+			core.open_url(this.data.url)
+		end
 		-- this:delete()
 		-- return true
 	end
@@ -72,15 +78,17 @@ local function version_info_buttonhandler(this, fields)
 	return false
 end
 
-
-function create_version_info_dlg(changelog)
-	assert(type(changelog) == "string")
+local function create_version_info_dlg(changes, url)
+	assert(type(changes) == "string")
+	assert(type(url) == "string")
 
 	local retval = dialog_create("version_info",
 		version_info_formspec,
 		version_info_buttonhandler,
 		nil, true)
-	retval.data.changelog = changelog
+
+	retval.data.changes = changes
+	retval.data.url = url
 
 	return retval
 end
@@ -91,7 +99,7 @@ local function get_version_code(version_string)
 	local ver_major, ver_minor, ver_patch = version_string:match("^(%d+).(%d+).(%d+)")
 
 	if not ver_patch then
-		core.log("error", "Failed to read version numbers (invalid tag format?)")
+		core.log("error", "Failed to parse version numbers (invalid tag format?)")
 		return
 	end
 
@@ -120,13 +128,19 @@ local function on_version_info_received(update_info)
 		return
 	end
 
---	core.settings:set("update_last_known", tostring(new_number))
+	-- core.settings:set("update_last_known", tostring(new_number))
 
+	-- Show version info dialog (once)
 	local tabs = ui.find_by_name("maintab")
+	if tabs.hidden then return end
 	tabs:hide()
 
-	update_download_url = update_info.url or "https://multicraft.world/downloads"
-	local version_info_dlg = create_version_info_dlg(update_info.changelog or "")
+	local url = update_info.url or "https://multicraft.world/downloads"
+	if not url:find("://", 1, true) then
+		url = "https://" .. url
+	end
+
+	local version_info_dlg = create_version_info_dlg(update_info.changes or "", url)
 	version_info_dlg:set_parent(tabs)
 	version_info_dlg:show()
 
@@ -135,7 +149,7 @@ end
 
 function check_new_version()
 	local url = core.settings:get("update_information_url")
-	if core.settings:get("update_last_known") == "disabled" or
+	if core.settings:get("update_last_checked") == "disabled" or
 			url == "" then
 		-- Never show any updates
 		return
