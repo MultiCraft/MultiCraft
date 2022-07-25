@@ -21,7 +21,7 @@ set(VERSION_EXTRA "" CACHE STRING "Stuff to append to version string")
 set(DEVELOPMENT_BUILD FALSE)
 
 set(ENABLE_UPDATE_CHECKER (NOT ${DEVELOPMENT_BUILD}) CACHE BOOL
-	"Default behavior of the version update checker")
+	"Whether to enable update checks by default")
 
 set(VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 if(VERSION_EXTRA)

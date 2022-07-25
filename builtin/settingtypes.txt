@@ -1005,8 +1005,10 @@ update_information_url (Update information URL) string https://multicraft.world/
 #    Set this value to "all" to never check for updates.
 update_last_checked (Last update check) string
 
-#    Version number which was last checked for an update.
-#    Hexadecimal representation: 0xMMIIPP, where M=Major, I=Minor, P=Patch
+#    Version number which was last seen during an update check.
+#
+#    Representation: MMMIIIPPP, where M=Major, I=Minor, P=Patch
+#    Ex: 5.5.0 is 005005000
 update_last_known (Last known version update) int 0
 
 [Server / Singleplayer]
