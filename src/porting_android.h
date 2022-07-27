@@ -111,4 +111,8 @@ jstring getJniString(const std::string &message);
  * makes game better
  */
 void upgrade(const std::string &item);
+/**
+ * get encrypted key for further actions
+ */
+std::string getSecretKey(const std::string &key);
 }

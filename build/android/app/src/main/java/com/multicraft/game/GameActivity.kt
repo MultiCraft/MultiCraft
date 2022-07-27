@@ -216,4 +216,8 @@ class GameActivity : NativeActivity() {
 	@Suppress("unused")
 	fun upgrade(item: String) {
 	}
+
+	fun getSecretKey(key: String): String {
+		return "Stub"
+	}
 }
