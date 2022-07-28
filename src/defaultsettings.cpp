@@ -670,7 +670,6 @@ void set_default_settings()
 	}
 
 	settings->setDefault("debug_log_level", "none");
-	settings->setDefault("password_save", "true");
 
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 		settings->setDefault("device_is_tablet", "true");
