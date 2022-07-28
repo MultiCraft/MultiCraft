@@ -29,8 +29,6 @@ local function create_confirm_reset_dlg()
 		end,
 		function(this, fields)
 			if fields["reset_confirm"] then
-				-- TODO: Maybe only reset the settings that are shown in the
-				-- dialog
 				for _, setting_name in ipairs(core.settings:get_names()) do
 					if not setting_name:find(".", 1, true) and
 							setting_name ~= "maintab_LAST" then
@@ -121,6 +119,7 @@ local function formspec(tabview, name, tabdata)
 	local sensitivity = tonumber(core.settings:get("mouse_sensitivity")) * 2000
 	local touchtarget = core.settings:get_bool("touchtarget") or false
 	local fancy_leaves = core.settings:get("leaves_style") == "fancy"
+	local fast_move = core.settings:get_bool("fast_move") or false
 	local sound = tonumber(core.settings:get("sound_volume")) ~= 0 and true or false
 
 	local tab_string =
@@ -143,7 +142,9 @@ local function formspec(tabview, name, tabdata)
 				.. dump(fancy_leaves) .. "]" ..
 		"checkbox[0.25,3.5;cb_touchtarget;" .. fgettext("Touchtarget") .. ";"
 				.. dump(touchtarget) .. "]" ..
-		"checkbox[0.25,4.1;cb_sound;" .. fgettext("Sound") .. ";"
+		"checkbox[0.25,4.1;cb_fast_move;" .. fgettext("Fast movement") .. ";"
+			.. dump(fast_move) .. "]" ..
+		"checkbox[0.25,4.7;cb_sound;" .. fgettext("Sound") .. ";"
 				.. dump(sound) .. "]" ..
 		"box[4,0;3.75,5.5;#999999]" ..
 
@@ -210,10 +211,10 @@ local function formspec(tabview, name, tabdata)
 	end
 
 	tab_string = tab_string ..
-		"label[8.25,3.15;" .. fgettext("Language:") .. "]" ..
+		"label[8.25,3.15;" .. fgettext("Language") .. ":]" ..
 		"dropdown[8.25,3.6;3.5;dd_language;" .. language_dropdown .. ";" ..
 			lang_idx .. ";true]" ..
-		"button[8.25,4.45;3.45,0.8;btn_reset;Reset all settings]"
+		"button[8.25,4.55;3.45,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
 
 	return tab_string
 end
@@ -261,6 +262,10 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 	end
 	if fields["cb_touchtarget"] then
 		core.settings:set("touchtarget", fields["cb_touchtarget"])
+		return true
+	end
+	if fields["cb_fast_move"] then
+		core.settings:set("fast_move", fields["cb_fast_move"])
 		return true
 	end
 	if fields["cb_sound"] then
