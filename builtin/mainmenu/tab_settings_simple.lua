@@ -123,29 +123,30 @@ local function formspec(tabview, name, tabdata)
 	local sound = tonumber(core.settings:get("sound_volume")) ~= 0 and true or false
 
 	local tab_string =
-		"box[0,0;3.75,5.5;#999999]" ..
-		"checkbox[0.25,-0.05;cb_smooth_lighting;" .. fgettext("Smooth Lighting") .. ";"
+		"box[-0.1,0;3.85,5.5;#999999]" ..
+		"checkbox[0.15,-0.05;cb_smooth_lighting;" .. fgettext("Smooth Lighting") .. ";"
 				.. dump(core.settings:get_bool("smooth_lighting")) .. "]" ..
-		"checkbox[0.25,0.5;cb_particles;" .. fgettext("Particles") .. ";"
+		"checkbox[0.15,0.5;cb_particles;" .. fgettext("Particles") .. ";"
 				.. dump(core.settings:get_bool("enable_particles")) .. "]" ..
-		"checkbox[0.25,1.1;cb_3d_clouds;" .. fgettext("3D Clouds") .. ";"
+		"checkbox[0.15,1.1;cb_3d_clouds;" .. fgettext("3D Clouds") .. ";"
 				.. dump(core.settings:get_bool("enable_3d_clouds")) .. "]" ..
-	--[["checkbox[0.25,1.7;cb_opaque_water;" .. fgettext("Opaque Water") .. ";"
+	--[["checkbox[0.15,1.7;cb_opaque_water;" .. fgettext("Opaque Water") .. ";"
 				.. dump(core.settings:get_bool("opaque_water")) .. "]" ..
-		"checkbox[0.25,2.0;cb_connected_glass;" .. fgettext("Connected Glass") .. ";"
+		"checkbox[0.15,2.0;cb_connected_glass;" .. fgettext("Connected Glass") .. ";"
 				.. dump(core.settings:get_bool("connected_glass")) .. "]" ..]]
-		"checkbox[0.25,1.7;cb_fog;" .. fgettext("Fog") .. ";"
+		"checkbox[0.15,1.7;cb_fog;" .. fgettext("Fog") .. ";"
 				.. dump(core.settings:get_bool("enable_fog")) .. "]" ..
-		"checkbox[0.25,2.3;cb_inventory_items_animations;" .. fgettext("Inv. animations") .. ";"
+		"checkbox[0.15,2.3;cb_inventory_items_animations;" .. fgettext("Inv. animations") .. ";"
 				.. dump(core.settings:get_bool("inventory_items_animations")) .. "]" ..
-		"checkbox[0.25,2.9;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
+		"checkbox[0.15,2.9;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
 				.. dump(fancy_leaves) .. "]" ..
-		"checkbox[0.25,3.5;cb_touchtarget;" .. fgettext("Touchtarget") .. ";"
+		"checkbox[0.15,3.5;cb_touchtarget;" .. fgettext("Touchtarget") .. ";"
 				.. dump(touchtarget) .. "]" ..
-		"checkbox[0.25,4.1;cb_fast_move;" .. fgettext("Fast movement") .. ";"
+		"checkbox[0.15,4.1;cb_fast_move;" .. fgettext("Fast movement") .. ";"
 			.. dump(fast_move) .. "]" ..
-		"checkbox[0.25,4.7;cb_sound;" .. fgettext("Sound") .. ";"
+		"checkbox[0.15,4.7;cb_sound;" .. fgettext("Sound") .. ";"
 				.. dump(sound) .. "]" ..
+
 		"box[4,0;3.75,5.5;#999999]" ..
 
 		"label[4.25,0.15;" .. fgettext("Maximum FPS") .. ":]" ..
@@ -165,8 +166,7 @@ local function formspec(tabview, name, tabdata)
 		"label[4.25,4.2;" .. fgettext("Mouse sensitivity") .. ":]" ..
 		"scrollbar[4.25,4.65;3.22,0.5;horizontal;sb_sensitivity;" .. sensitivity .. "]" ..
 
-	--	"box[8,0;3.75,4.5;#999999]"
-		"box[8,0;3.75,5.5;#999999]"
+		"box[8,0;3.85,3.25;#999999]"
 
 	local video_driver = core.settings:get("video_driver")
 	local shaders_enabled = video_driver == "opengl" or video_driver == "ogles2"
@@ -211,10 +211,10 @@ local function formspec(tabview, name, tabdata)
 	end
 
 	tab_string = tab_string ..
-		"label[8.25,3.15;" .. fgettext("Language") .. ":]" ..
-		"dropdown[8.25,3.6;3.5;dd_language;" .. language_dropdown .. ";" ..
+		"label[8.25,3.35;" .. fgettext("Language") .. ":]" ..
+		"dropdown[8.25,3.8;3.55;dd_language;" .. language_dropdown .. ";" ..
 			lang_idx .. ";true]" ..
-		"button[8.25,4.55;3.45,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
+		"button[8.25,4.8;3.5,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
 
 	return tab_string
 end
