@@ -69,10 +69,11 @@ function serverlistmgr.sync()
 			local serverlist = core.settings:get("serverlist_url")
 			local address = ("%s/list%s"):format(serverlist,
 				serverlist == minetest.decode_base64("c2VydmVycy5tdWx0aWNyYWZ0Lndvcmxk") and "_prod" or "")
-			local url = ("%s?proto_version_min=%d&proto_version_max=%d"):format(
+			local url = ("%s?proto_version_min=%d&proto_version_max=%d&platform=%s"):format(
 				address,
 				core.get_min_supp_proto(),
-				core.get_max_supp_proto())
+				core.get_max_supp_proto(),
+				PLATFORM)
 
 			local response = http.fetch_sync({ url = url })
 			if not response.succeeded then
