@@ -16,6 +16,39 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+local function create_confirm_reset_dlg()
+	return dialog_create("reset_all_settings",
+		function()
+			return
+				"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir ..
+					"blank.png") .. ";;" .. fgettext("Reset all settings?") ..
+					";true;false;]" ..
+				"style[reset_confirm;bgcolor=red]" ..
+				"button[3,4.8;3,0.5;reset_confirm;" .. fgettext("Reset") .. "]" ..
+				"button[6,4.8;3,0.5;reset_cancel;" .. fgettext("Cancel") .. "]"
+		end,
+		function(this, fields)
+			if fields["reset_confirm"] then
+				for _, setting_name in ipairs(core.settings:get_names()) do
+					if not setting_name:find(".", 1, true) and
+							setting_name ~= "maintab_LAST" then
+						core.settings:remove(setting_name)
+					end
+				end
+
+				-- Reload the entire main menu
+				dofile(core.get_builtin_path() .. "init.lua")
+				return true
+			end
+
+			if fields["reset_cancel"] then
+				this:delete()
+				return true
+			end
+		end,
+		nil, true)
+end
+
 --------------------------------------------------------------------------------
 
 local labels = {
@@ -43,36 +76,77 @@ local getSettingIndex = {
 	end
 }
 
+-- Get a list of languages and language names
+local path_locale = core.get_builtin_path() .. ".." .. DIR_DELIM .. "locale"
+local languages = core.get_dir_list(path_locale, true)
+local language_names = {}
+for i = #languages, 1, -1 do
+	local language = languages[i]
+	local f = io.open(path_locale .. DIR_DELIM .. language .. DIR_DELIM ..
+					  "LC_MESSAGES" .. DIR_DELIM .. "minetest.mo")
+	if f then
+		-- HACK
+		local name = f:read("*a"):match("\nLanguage%-Team: ([^\\\n\"]+) <https://")
+		language_names[language] = name or language
+		f:close()
+	else
+		table.remove(languages, i)
+	end
+end
+
+languages[#languages + 1] = "en"
+language_names.en = "English"
+
+-- Sort the languages list based on their human readable name
+table.sort(languages, function(a, b)
+	return language_names[a] < language_names[b]
+end)
+
+local language_name_list = {}
+for i, language in ipairs(languages) do
+	language_name_list[i] = core.formspec_escape(language_names[language])
+end
+local language_dropdown = table.concat(language_name_list, ",")
+
+local lang_idx = table.indexof(languages, fgettext("LANG_CODE"))
+if lang_idx < 0 then
+	lang_idx = table.indexof(languages, "en")
+end
+
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
 	local range = tonumber(core.settings:get("viewing_range"))
 	local sensitivity = tonumber(core.settings:get("mouse_sensitivity")) * 2000
 	local touchtarget = core.settings:get_bool("touchtarget") or false
 	local fancy_leaves = core.settings:get("leaves_style") == "fancy"
+	local fast_move = core.settings:get_bool("fast_move") or false
 	local sound = tonumber(core.settings:get("sound_volume")) ~= 0 and true or false
 
 	local tab_string =
-		"box[0,0;3.75,5.5;#999999]" ..
-		"checkbox[0.25,-0.05;cb_smooth_lighting;" .. fgettext("Smooth Lighting") .. ";"
+		"box[-0.1,0;3.85,5.5;#999999]" ..
+		"checkbox[0.15,-0.05;cb_smooth_lighting;" .. fgettext("Smooth Lighting") .. ";"
 				.. dump(core.settings:get_bool("smooth_lighting")) .. "]" ..
-		"checkbox[0.25,0.5;cb_particles;" .. fgettext("Particles") .. ";"
+		"checkbox[0.15,0.5;cb_particles;" .. fgettext("Particles") .. ";"
 				.. dump(core.settings:get_bool("enable_particles")) .. "]" ..
-		"checkbox[0.25,1.1;cb_3d_clouds;" .. fgettext("3D Clouds") .. ";"
+		"checkbox[0.15,1.1;cb_3d_clouds;" .. fgettext("3D Clouds") .. ";"
 				.. dump(core.settings:get_bool("enable_3d_clouds")) .. "]" ..
-	--[["checkbox[0.25,1.7;cb_opaque_water;" .. fgettext("Opaque Water") .. ";"
+	--[["checkbox[0.15,1.7;cb_opaque_water;" .. fgettext("Opaque Water") .. ";"
 				.. dump(core.settings:get_bool("opaque_water")) .. "]" ..
-		"checkbox[0.25,2.0;cb_connected_glass;" .. fgettext("Connected Glass") .. ";"
+		"checkbox[0.15,2.0;cb_connected_glass;" .. fgettext("Connected Glass") .. ";"
 				.. dump(core.settings:get_bool("connected_glass")) .. "]" ..]]
-		"checkbox[0.25,1.7;cb_fog;" .. fgettext("Fog") .. ";"
+		"checkbox[0.15,1.7;cb_fog;" .. fgettext("Fog") .. ";"
 				.. dump(core.settings:get_bool("enable_fog")) .. "]" ..
-		"checkbox[0.25,2.3;cb_inventory_items_animations;" .. fgettext("Inv. animations") .. ";"
+		"checkbox[0.15,2.3;cb_inventory_items_animations;" .. fgettext("Inv. animations") .. ";"
 				.. dump(core.settings:get_bool("inventory_items_animations")) .. "]" ..
-		"checkbox[0.25,2.9;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
+		"checkbox[0.15,2.9;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
 				.. dump(fancy_leaves) .. "]" ..
-		"checkbox[0.25,3.5;cb_touchtarget;" .. fgettext("Touchtarget") .. ";"
+		"checkbox[0.15,3.5;cb_touchtarget;" .. fgettext("Touchtarget") .. ";"
 				.. dump(touchtarget) .. "]" ..
-		"checkbox[0.25,4.1;cb_sound;" .. fgettext("Sound") .. ";"
+		"checkbox[0.15,4.1;cb_fast_move;" .. fgettext("Fast movement") .. ";"
+			.. dump(fast_move) .. "]" ..
+		"checkbox[0.15,4.7;cb_sound;" .. fgettext("Sound") .. ";"
 				.. dump(sound) .. "]" ..
+
 		"box[4,0;3.75,5.5;#999999]" ..
 
 		"label[4.25,0.15;" .. fgettext("Maximum FPS") .. ":]" ..
@@ -90,10 +164,9 @@ local function formspec(tabview, name, tabdata)
 				.. getSettingIndex.NodeHighlighting() .. "]" ..
 
 		"label[4.25,4.2;" .. fgettext("Mouse sensitivity") .. ":]" ..
-		"scrollbar[4.25,4.65;3.22,0.5;horizontal;sb_sensitivity;" .. sensitivity .. "]" ..
+		"scrollbar[4.25,4.65;3.23,0.5;horizontal;sb_sensitivity;" .. sensitivity .. "]" ..
 
-	--	"box[8,0;3.75,4.5;#999999]"
-		"box[8,0;3.75,5.5;#999999]"
+		"box[8,0;3.85,3.25;#999999]"
 
 	local video_driver = core.settings:get("video_driver")
 	local shaders_enabled = video_driver == "opengl" or video_driver == "ogles2"
@@ -136,6 +209,12 @@ local function formspec(tabview, name, tabdata)
 			"label[8.38,2.55;" .. core.colorize("#888888",
 					fgettext("Waving Plants")) .. "]"
 	end
+
+	tab_string = tab_string ..
+		"label[8.25,3.35;" .. fgettext("Language") .. ":]" ..
+		"dropdown[8.25,3.8;3.58;dd_language;" .. language_dropdown .. ";" ..
+			lang_idx .. ";true]" ..
+		"button[8.25,4.81;3.5,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
 
 	return tab_string
 end
@@ -185,6 +264,10 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		core.settings:set("touchtarget", fields["cb_touchtarget"])
 		return true
 	end
+	if fields["cb_fast_move"] then
+		core.settings:set("fast_move", fields["cb_fast_move"])
+		return true
+	end
 	if fields["cb_sound"] then
 		core.settings:set("sound_volume", (minetest.is_yes(fields["cb_sound"]) and "1.0") or "0.0")
 		return true
@@ -212,6 +295,14 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		core.show_keys_menu()
 		return true
 	end]]
+
+	if fields["btn_reset"] then
+		local reset_dlg = create_confirm_reset_dlg()
+		reset_dlg:set_parent(this)
+		this:hide()
+		reset_dlg:show()
+		return true
+	end
 
 	-- Note dropdowns have to be handled LAST!
 	local ddhandled = false
@@ -245,6 +336,16 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 			-- The formspec cannot be updated or the scrollbar movement will
 			-- break.
 			ddhandled = false
+		end
+	end
+	if fields["dd_language"] then
+		local new_idx = tonumber(fields["dd_language"])
+		if lang_idx ~= new_idx then
+			core.settings:set("language", languages[new_idx] or "")
+			ddhandled = true
+
+			-- Reload the main menu so that everything uses the new language
+			dofile(core.get_builtin_path() .. "init.lua")
 		end
 	end
 
