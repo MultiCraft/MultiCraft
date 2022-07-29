@@ -372,7 +372,7 @@ void set_default_settings()
 	settings->setDefault("contentdb_flag_blacklist", "nonfree, desktop_default");
 #endif
 
-	settings->setDefault("update_information_url", "https://multicraft.world/release_info.json");
+	settings->setDefault("update_information_url", "https://updates.multicraft.world/app.json");
 	#if ENABLE_UPDATE_CHECKER
 		settings->setDefault("update_last_checked", "");
 	#else
