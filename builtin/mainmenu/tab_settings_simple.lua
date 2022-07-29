@@ -164,7 +164,7 @@ local function formspec(tabview, name, tabdata)
 				.. getSettingIndex.NodeHighlighting() .. "]" ..
 
 		"label[4.25,4.2;" .. fgettext("Mouse sensitivity") .. ":]" ..
-		"scrollbar[4.25,4.65;3.22,0.5;horizontal;sb_sensitivity;" .. sensitivity .. "]" ..
+		"scrollbar[4.25,4.65;3.23,0.5;horizontal;sb_sensitivity;" .. sensitivity .. "]" ..
 
 		"box[8,0;3.85,3.25;#999999]"
 
@@ -212,9 +212,9 @@ local function formspec(tabview, name, tabdata)
 
 	tab_string = tab_string ..
 		"label[8.25,3.35;" .. fgettext("Language") .. ":]" ..
-		"dropdown[8.25,3.8;3.55;dd_language;" .. language_dropdown .. ";" ..
+		"dropdown[8.25,3.8;3.58;dd_language;" .. language_dropdown .. ";" ..
 			lang_idx .. ";true]" ..
-		"button[8.25,4.8;3.5,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
+		"button[8.25,4.81;3.5,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
 
 	return tab_string
 end
