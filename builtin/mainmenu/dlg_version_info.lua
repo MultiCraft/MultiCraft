@@ -36,6 +36,8 @@ local function version_info_formspec(data)
 			changes:sub(idx)
 	end
 
+	changes = changes:gsub("\\n", "\n")
+
 	return ([[
 		style_type[image_button;content_offset=0]
 		image[4.9,0;2.5,2.5;%s]
