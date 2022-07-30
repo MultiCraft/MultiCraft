@@ -52,9 +52,9 @@ local function version_info_formspec(data)
 		defaulttexturedir .. "blank.png",
 		fgettext("A new MultiCraft version is available!"),
 		core.formspec_escape(changes),
-		fgettext("Remind me later"),
-		fgettext("Update now")
-	)
+		fgettext("Cancel"),
+		fgettext("Update")
+	) -- "Remind me later", "Update now"
 end
 
 local function version_info_buttonhandler(this, fields)
@@ -109,6 +109,12 @@ local function get_version_code(version_string)
 end
 
 local function on_version_info_received(update_info)
+	local maintab = ui.find_by_name("maintab")
+	if maintab.hidden then
+		-- Another dialog is open, abort.
+		return
+	end
+
 	local known_update = tonumber(core.settings:get("update_last_known")) or 0
 
 	-- Parse the latest version number
@@ -133,9 +139,7 @@ local function on_version_info_received(update_info)
 	-- core.settings:set("update_last_known", tostring(new_number))
 
 	-- Show version info dialog (once)
-	local tabs = ui.find_by_name("maintab")
-	if tabs.hidden then return end
-	tabs:hide()
+	maintab:hide()
 
 	local url = update_info.url or "https://multicraft.world/downloads"
 	if not url:find("://", 1, true) then
@@ -143,7 +147,7 @@ local function on_version_info_received(update_info)
 	end
 
 	local version_info_dlg = create_version_info_dlg(update_info.changes or "", url)
-	version_info_dlg:set_parent(tabs)
+	version_info_dlg:set_parent(maintab)
 	version_info_dlg:show()
 
 	ui.update()
@@ -158,11 +162,11 @@ function check_new_version()
 	end
 
 	local time_now = os.time()
-	local time_checked = tonumber(core.settings:get("update_last_checked")) or 0
-	if time_now - time_checked < 2 * 24 * 3600 then
-		-- Check interval of 2 entire days
-		return
-	end
+--	local time_checked = tonumber(core.settings:get("update_last_checked")) or 0
+--	if time_now - time_checked < 2 * 24 * 3600 then
+--		-- Check interval of 2 entire days
+--		return
+--	end
 
 	core.settings:set("update_last_checked", tostring(time_now))
 
