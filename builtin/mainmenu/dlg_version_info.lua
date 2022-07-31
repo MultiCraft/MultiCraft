@@ -24,7 +24,12 @@ if not core.get_http_api then
 	return
 end
 
-local defaulttexturedir = core.formspec_escape(defaulttexturedir)
+local esc = core.formspec_escape
+local defaulttexturedir = esc(defaulttexturedir)
+
+local LANG = core.settings:get("language")
+if not (LANG and (LANG ~= "")) then LANG = os.getenv("LANG") end
+if not (LANG and (LANG ~= "")) then LANG = "en" end
 
 local function version_info_formspec(data)
 	local changes = data.changes
@@ -50,8 +55,8 @@ local function version_info_formspec(data)
 	]]):format(
 		defaulttexturedir .. "logo.png",
 		defaulttexturedir .. "blank.png",
-		fgettext("A new MultiCraft version is available!"),
-		core.formspec_escape(changes),
+		esc(data.header),
+		esc(changes),
 		fgettext("Cancel"),
 		fgettext("Update")
 	) -- "Remind me later", "Update now"
@@ -80,7 +85,8 @@ local function version_info_buttonhandler(this, fields)
 	return false
 end
 
-local function create_version_info_dlg(changes, url)
+local function create_version_info_dlg(header, changes, url)
+	assert(type(header) == "string")
 	assert(type(changes) == "string")
 	assert(type(url) == "string")
 
@@ -89,6 +95,7 @@ local function create_version_info_dlg(changes, url)
 		version_info_buttonhandler,
 		nil, true)
 
+	retval.data.header = header
 	retval.data.changes = changes
 	retval.data.url = url
 
@@ -146,7 +153,7 @@ local function on_version_info_received(update_info)
 		url = "https://" .. url
 	end
 
-	local version_info_dlg = create_version_info_dlg(update_info.changes or "", url)
+	local version_info_dlg = create_version_info_dlg(update_info.header or "", update_info.changes or "", url)
 	version_info_dlg:set_parent(maintab)
 	version_info_dlg:show()
 
@@ -169,6 +176,8 @@ function check_new_version()
 --	end
 
 	core.settings:set("update_last_checked", tostring(time_now))
+
+	url = ("%s?lang=%s&platform=%s"):format(url, LANG, PLATFORM)
 
 	core.handle_async(function(params)
 		local http = core.get_http_api()
