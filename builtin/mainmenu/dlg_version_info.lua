@@ -188,11 +188,11 @@ function check_new_version()
 			core.log("error", "Failed to read JSON output from " .. url ..
 					", status code = " .. result.code)
 			return
-		elseif not json[PLATFORM] or not json[PLATFORM].latest_version then
+		elseif not json.latest_version then
 			-- No platform-specific update information, don't display anything
 			return
 		end
 
-		on_version_info_received(json[PLATFORM])
+		on_version_info_received(json)
 	end)
 end
