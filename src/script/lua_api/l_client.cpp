@@ -414,6 +414,26 @@ int ModApiClient::l_get_csm_restrictions(lua_State *L)
 	return 1;
 }
 
+// setting_get(setting_name)
+// The whole LuaSettings API (which allows for setting modification) isn't
+// exposed to CSMs
+int ModApiClient::l_setting_get(lua_State *L)
+{
+	std::string key = std::string(luaL_checkstring(L, 1));
+	// Disallow reading some settings
+	// TODO: Consider blocking more settings or creating a list of allowed
+	// settings
+	if (key.find('.', 0) == std::string::npos && key != "password" &&
+			g_settings->exists(key)) {
+		std::string value = g_settings->get(key);
+		lua_pushstring(L, value.c_str());
+	} else {
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
 void ModApiClient::Initialize(lua_State *L, int top)
 {
 	API_FCT(get_current_modname);
@@ -441,4 +461,5 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(get_builtin_path);
 	API_FCT(get_language);
 	API_FCT(get_csm_restrictions);
+	API_FCT(setting_get);
 }

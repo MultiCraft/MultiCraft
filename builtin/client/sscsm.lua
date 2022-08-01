@@ -219,6 +219,19 @@ do
 		t[k] = safe_funcs[func] or func
 	end
 
+	-- Expose settings with a LuaSettings-like API
+	local setting_get = core.setting_get
+	t.settings = {
+		get = function(_, key) return setting_get(key) end,
+		get_bool = function(_, key)
+			local value = setting_get(key)
+			if value ~= nil then
+				value = core.is_yes(value)
+			end
+			return value
+		end,
+	}
+
 	env:set_copy("minetest", t)
 end
 
