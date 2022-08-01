@@ -55,7 +55,7 @@ local function version_info_formspec(data)
 	]]):format(
 		defaulttexturedir .. "logo.png",
 		defaulttexturedir .. "blank.png",
-		esc(data.header),
+		esc(data.title),
 		esc(changes),
 		fgettext("Cancel"),
 		fgettext("Update")
@@ -85,8 +85,8 @@ local function version_info_buttonhandler(this, fields)
 	return false
 end
 
-local function create_version_info_dlg(header, changes, url)
-	assert(type(header) == "string")
+local function create_version_info_dlg(title, changes, url)
+	assert(type(title) == "string")
 	assert(type(changes) == "string")
 	assert(type(url) == "string")
 
@@ -95,7 +95,7 @@ local function create_version_info_dlg(header, changes, url)
 		version_info_buttonhandler,
 		nil, true)
 
-	retval.data.header = header
+	retval.data.title = title
 	retval.data.changes = changes
 	retval.data.url = url
 
@@ -153,7 +153,7 @@ local function on_version_info_received(update_info)
 		url = "https://" .. url
 	end
 
-	local version_info_dlg = create_version_info_dlg(update_info.header or "", update_info.changes or "", url)
+	local version_info_dlg = create_version_info_dlg(update_info.title or "", update_info.changes or "", url)
 	version_info_dlg:set_parent(maintab)
 	version_info_dlg:show()
 
