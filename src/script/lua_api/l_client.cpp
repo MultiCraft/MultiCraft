@@ -423,7 +423,7 @@ int ModApiClient::l_setting_get(lua_State *L)
 	// Disallow reading some settings
 	// TODO: Consider blocking more settings or creating a list of allowed
 	// settings
-	if (key.find('.', 0) == std::string::npos && key != "password" &&
+	if (key.compare(0, 7, "secure.") != 0 && key != "password" &&
 			g_settings->exists(key)) {
 		std::string value = g_settings->get(key);
 		lua_pushstring(L, value.c_str());
