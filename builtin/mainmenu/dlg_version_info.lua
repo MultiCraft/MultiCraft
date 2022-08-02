@@ -46,8 +46,8 @@ local function version_info_formspec(data)
 	return ([[
 		style_type[image_button;content_offset=0]
 		image[4.9,0;2.5,2.5;%s]
-		image_button[1,2.2;10,0.8;%s;;%s;false;false]
-		hypertext[1.3,3;10,1.5;;<center>%s</center>]
+		image_button[1,2;10,0.8;%s;;%s;false;false]
+		hypertext[1.3,2.6;10,2;;<center>%s</center>]
 		style[version_check_remind;bgcolor=yellow]
 		button[2,4.5;4,0.8;version_check_remind;%s]
 		style[version_check_visit;bgcolor=green]
