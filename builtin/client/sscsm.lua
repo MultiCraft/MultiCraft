@@ -176,7 +176,7 @@ end
 local env = Env:new_empty()
 
 -- Clone everything
-env:add_globals("assert", "dump", "dump2", "error", "ipairs", "math",
+env:add_globals("assert", "chacha", "dump", "dump2", "error", "ipairs", "math",
 	"next", "pairs", "pcall", "select", "setmetatable", "string", "table",
 	"tonumber", "tostring", "type", "vector", "xpcall", "_VERSION", "utf8",
 	"PLATFORM")

@@ -256,6 +256,7 @@ void ScriptApiSecurity::initializeSecurityClient()
 		"_VERSION",
 		"xpcall",
 		// Completely safe libraries
+		"chacha",
 		"coroutine",
 		"string",
 		"table",
