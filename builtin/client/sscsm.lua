@@ -176,9 +176,10 @@ end
 local env = Env:new_empty()
 
 -- Clone everything
-env:add_globals("assert", "dump", "dump2", "error", "ipairs", "math",
+env:add_globals("assert", "chacha", "dump", "dump2", "error", "ipairs", "math",
 	"next", "pairs", "pcall", "select", "setmetatable", "string", "table",
-	"tonumber", "tostring", "type", "vector", "xpcall", "_VERSION", "utf8")
+	"tonumber", "tostring", "type", "vector", "xpcall", "_VERSION", "utf8",
+	"PLATFORM")
 
 env:set_copy("os", {clock = os.clock, difftime = os.difftime, time = os.time})
 
@@ -218,6 +219,26 @@ do
 		local func = core[k]
 		t[k] = safe_funcs[func] or func
 	end
+
+	local core_settings = core.settings
+	local sub = string.sub
+	local function setting_safe(key)
+		return type(key) == "string" and sub(key, 1, 7) ~= "secure." and
+			key ~= "password"
+	end
+
+	t.settings = {
+		get = function(_, key)
+			if setting_safe(key) then
+				return core_settings:get(key)
+			end
+		end,
+		get_bool = function(_, key, default)
+			if setting_safe(key) then
+				return core_settings:get_bool(key, default)
+			end
+		end,
+	}
 
 	env:set_copy("minetest", t)
 end
