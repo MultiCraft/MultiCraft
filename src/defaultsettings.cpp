@@ -718,6 +718,12 @@ void set_default_settings()
 		// iPad
 		settings->setDefault("mouse_sensitivity", "0.3");
 		settings->setDefault("selectionbox_width", "6");
+
+		if SDVersion12and9Inch {
+			std::string font_big = std::to_string(TTF_DEFAULT_FONT_SIZE + 1);
+			settings->setDefault("font_size", font_big);
+			settings->setDefault("fallback_font_size", font_big);
+		}
 	}
 
 	// Settings for the Rounded Screen and Home Bar

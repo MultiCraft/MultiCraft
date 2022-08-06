@@ -1415,7 +1415,11 @@ bool Game::createClient(const GameStartData &start_data)
 
 	/* Pre-calculated values
 	 */
+#ifndef HAVE_TOUCHSCREENGUI
 	video::ITexture *t = texture_src->getTexture("crack_anylength.png");
+#else
+	video::ITexture *t = texture_src->getTexture("crack_anylength_touch.png");
+#endif
 	if (t) {
 		v2u32 size = t->getOriginalSize();
 		crack_animation_length = size.Y / size.X;
@@ -4546,7 +4550,6 @@ extern "C" void external_statustext(const char *text)
 {
 	if (!g_game)
 		return;
-	std::wstring s = utf8_to_wide(std::string(text));
-	g_game->customStatustext(s);
+	g_game->customStatustext(utf8_to_wide_c(text));
 }
 #endif
