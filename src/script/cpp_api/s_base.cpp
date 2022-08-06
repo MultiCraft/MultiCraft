@@ -114,6 +114,16 @@ ScriptApiBase::ScriptApiBase(ScriptingType type):
 	// Pop package, package.preload, and package.preload["string.buffer"]
 	lua_pop(m_luastack, 3);
 
+	// Delete references to package on the client (as they're no longer needed)
+	if (m_type == ScriptingType::Client) {
+		lua_pushnil(m_luastack);
+		lua_setglobal(m_luastack, "module");
+		lua_pushnil(m_luastack);
+		lua_setglobal(m_luastack, "require");
+		lua_pushnil(m_luastack);
+		lua_setglobal(m_luastack, "package");
+	}
+
 	// Make the ScriptApiBase* accessible to ModApiBase
 #if INDIRECT_SCRIPTAPI_RIDX
 	*(void **)(lua_newuserdata(m_luastack, sizeof(void *))) = this;
@@ -177,6 +187,7 @@ void ScriptApiBase::clientOpenLibs(lua_State *L)
 		{ LUA_STRLIBNAME,  luaopen_string  },
 		{ LUA_MATHLIBNAME, luaopen_math    },
 		{ LUA_DBLIBNAME,   luaopen_debug   },
+		{ LUA_LOADLIBNAME, luaopen_package },
 #if USE_LUAJIT
 		{ LUA_JITLIBNAME,  luaopen_jit     },
 #endif
