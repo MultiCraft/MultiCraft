@@ -249,6 +249,7 @@ function math.factorial(x)
 end
 
 function core.formspec_escape(text)
+        text = tostring(text)
 	if text ~= nil then
 		text = text:gsub("\\", "\\\\")
 		text = text:gsub("%]", "\\]")
