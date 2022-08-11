@@ -214,6 +214,17 @@ jobs:
           NO_MINETEST_GAME: 1
           NO_PACKAGE: 1
 
+      - name: CPack
+        run: cpack -G ZIP -B "$env:GITHUB_WORKSPACE\Package"
+
+      - name: Package Clean
+        run: rm -r $env:GITHUB_WORKSPACE\Package\_CPack_Packages
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: mingw-x64-windows
+          path: .\Package\
+
   msvc:
     name: VS 2019 ${{ matrix.config.arch }}-${{ matrix.type }}
     runs-on: windows-2019
