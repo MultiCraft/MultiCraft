@@ -4362,29 +4362,34 @@ void Game::showPauseMenu()
 	os << "formspec_version[1]" << SIZE_TAG
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
-		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_continue;"
-		<< strgettext("Continue") << "]";
+
+		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=20;padding=-5]"
+		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui_button_hovered.png;bgimg_middle=20]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui_button_pressed.png;bgimg_middle=20]"
+
+		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
+		<< strgettext("Continue") << ";;false]";
 
 	if (!simple_singleplayer_mode) {
-		os << "button[3.5," << (ypos++) << ";4,0.5;btn_change_password;"
-			<< strgettext("Change Password") << "]";
+		os << "image_button[3.5," << (ypos++) << ";4,0.9;;btn_change_password;"
+			<< strgettext("Change Password") << ";;false]";
 	}
 
 #if !defined(__ANDROID__) && !defined(__IOS__)
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound")) {
-		os << "button_exit[3.5," << (ypos++) << ";4,0.5;btn_sound;"
-			<< strgettext("Sound Volume") << "]";
+		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_sound;"
+			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
-	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_key_config;"
-		<< strgettext("Change Keys")  << "]";
+	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
+		<< strgettext("Change Keys")  << ";;false]";
 #endif
-	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_exit_menu;"
-		<< strgettext("Exit to Menu") << "]";
+	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
+		<< strgettext("Exit to Menu") << ";;false]";
 #ifndef __IOS__
-	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_exit_os;"
-		<< strgettext("Exit to OS")   << "]"
+	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_os;"
+		<< strgettext("Exit to OS")   << ";;false]";
 #endif
 /*		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
 		<< "textarea[0.4,0.25;3.9,6.25;;" << PROJECT_NAME_C " " VERSION_STRING "\n"
