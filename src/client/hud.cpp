@@ -359,10 +359,12 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 		switch (e->type) {
 			case HUD_ELEM_TEXT: {
 				irr::gui::IGUIFont *textfont = font;
-				unsigned int font_size = g_fontengine->getDefaultFontSize();
+				float font_size = g_fontengine->getDefaultFontSize();
 
 				if (e->size.X > 0)
 					font_size *= e->size.X;
+				else if (e->size.Y > 0)
+					 font_size = MYMAX(font_size * (float) e->size.Y / 100, 1.0f);
 
 				if (font_size != g_fontengine->getDefaultFontSize())
 					textfont = g_fontengine->getFont(font_size);
@@ -372,12 +374,17 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 										 (e->number >> 0)  & 0xFF);
 				std::wstring text = unescape_translate(utf8_to_wide(e->text));
 				core::dimension2d<u32> textsize = textfont->getDimension(text.c_str());
+				bool below_center = ((e->scale.Y * m_scale_factor + pos.Y +
+									 (e->align.Y - 1.0) * (textsize.Height / 2) +
+									  e->offset.Y * m_scale_factor) > m_displaycenter.Y);
+
 #if defined(__ANDROID__) || defined(__IOS__)
 				// The text size on Android is not proportional with the actual scaling
-				auto small_font_size = font_size * 0.9f;
-				irr::gui::IGUIFont *font_scaled = small_font_size < 1 ?
-					textfont : g_fontengine->getFont(small_font_size);
-				textsize = font_scaled->getDimension(text.c_str());
+				if (below_center) {
+					font_size = MYMAX(font_size * 0.9f, 1.0f);
+					textfont = g_fontengine->getFont(font_size);
+					textsize = textfont->getDimension(text.c_str());
+				}
 #endif
 				v2s32 offset((e->align.X - 1.0) * (textsize.Width / 2),
 				             (e->align.Y - 1.0) * (textsize.Height / 2));
@@ -385,13 +392,9 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				                     text_height * e->scale.Y * m_scale_factor);
 				v2s32 offs(e->offset.X * m_scale_factor,
 				           e->offset.Y * m_scale_factor);
-				if (e->offset.Y < -50)
+				if (below_center)
 					pos.Y -= m_hud_move_upwards;
-#if defined(__ANDROID__) || defined(__IOS__)
-				font_scaled->draw(text.c_str(), size + pos + offset + offs, color);
-#else
 				textfont->draw(text.c_str(), size + pos + offset + offs, color);
-#endif
 				break; }
 			case HUD_ELEM_STATBAR: {
 				v2s32 offs(e->offset.X, e->offset.Y);
@@ -453,7 +456,9 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				dstsize.Y *= m_scale_factor;
 				v2s32 offset((e->align.X - 1.0) * dstsize.X / 2,
 				             (e->align.Y - 1.0) * dstsize.Y / 2);
-				offset.Y -= m_hud_move_upwards;
+
+				if ((dstsize.Y + pos.Y + offset.Y + e->offset.Y * m_scale_factor) > m_displaycenter.Y)
+					offset.Y -= m_hud_move_upwards;
 				core::rect<s32> rect(0, 0, dstsize.X, dstsize.Y);
 				rect += pos + offset + v2s32(e->offset.X * m_scale_factor,
 				                             e->offset.Y * m_scale_factor);
@@ -636,7 +641,8 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 
 	p += offset;
 
-	p.Y -= m_hud_move_upwards;
+	if ((pos.Y + offset.Y) > m_displaycenter.Y)
+		p.Y -= m_hud_move_upwards;
 
 	v2s32 steppos;
 	switch (drawdir) {
