@@ -295,16 +295,6 @@
 			name = "Embed Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8495A670289C78DC009FCF4D /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-			);
-			name = "Embed Libraries";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -1721,7 +1711,6 @@
 				845856A724B1322C0040BA4F /* Resources */,
 				E04504E72F53EA397272106E /* [CP] Embed Pods Frameworks */,
 				844205482578023D009C3008 /* Embed Libraries */,
-				8495A670289C78DC009FCF4D /* Embed Libraries */,
 			);
 			buildRules = (
 			);

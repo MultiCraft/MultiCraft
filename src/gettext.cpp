@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h"
 
 #ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
-	#include <SDL.h>
+#include <SDL.h>
 #endif
 
 #ifdef __APPLE__
