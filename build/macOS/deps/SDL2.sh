@@ -18,13 +18,17 @@ xcodebuild build \
 	 ARCHS="$OSX_ARCHES" \
 	-project Xcode/SDL/SDL.xcodeproj \
 	-configuration Release \
-	-scheme Framework
+	-scheme "Static Library"
 
-BUILD_FOLDER=$(xcodebuild -project Xcode/SDL/SDL.xcodeproj \
-		-scheme Framework -showBuildSettings -configuration Release | \
+BUILD_FOLDER=$(xcodebuild \
+		-project Xcode/SDL/SDL.xcodeproj \
+		-configuration Release \
+		-scheme "Static Library" \
+		-showBuildSettings | \
 		grep TARGET_BUILD_DIR | sed -n -e 's/^.*TARGET_BUILD_DIR = //p')
 
 mkdir -p ../SDL2
-cp -a "${BUILD_FOLDER}/SDL2.framework" ../SDL2
+cp -a "${BUILD_FOLDER}/libSDL2.a" ../SDL2
+cp -a include ../SDL2
 
 echo "SDL2 build successful"
