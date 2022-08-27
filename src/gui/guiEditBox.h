@@ -207,6 +207,8 @@ protected:
 	u32 m_scrollbar_width = 0;
 	GUIScrollBar *m_vscrollbar = nullptr;
 
+	bool m_started_text_input = false;
+
 private:
 	bool processMouse(const SEvent &event);
 
