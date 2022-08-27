@@ -22,7 +22,8 @@ local LIST_FORMSPEC_DESCRIPTION = [[
 		button_exit[5,7;3,1;quit;%s]
 	]]
 
-local formspec_escape = core.formspec_escape
+local F = core.formspec_escape
+local S = core.get_translator("__builtin")
 local check_player_privs = core.check_player_privs
 
 
@@ -53,16 +54,17 @@ core.after(0, load_mod_command_tree)
 
 local function build_chatcommands_formspec(name, sel, copy)
 	local rows = {}
-	rows[1] = "#FFF,0,Command,Parameters"
+	rows[1] = "#FFF,0,"..F(S("Command"))..","..F(S("Parameters"))
 
-	local description = "For more information, click on any entry in the list.\n" ..
-		"Double-click to copy the entry to the chat history."
+	local description = S("For more information, click on "
+		.. "any entry in the list.").. "\n" ..
+		S("Double-click to copy the entry to the chat history.")
 
 	for i, data in ipairs(mod_cmds) do
 		for _, cmds in ipairs(data[2]) do
 			local has_priv = check_player_privs(name, cmds[2].privs)
 			if has_priv then
-				rows[#rows + 1] = COLOR_BLUE .. ",0," .. formspec_escape(data[1]) .. ","
+				rows[#rows + 1] = COLOR_BLUE .. ",0," .. F(data[1]) .. ","
 				break
 			end
 		end
@@ -72,11 +74,11 @@ local function build_chatcommands_formspec(name, sel, copy)
 				rows[#rows + 1] = ("%s,1,%s,%s"):format(
 				--	has_priv and COLOR_GREEN or COLOR_GRAY,
 					COLOR_GREEN,
-					cmds[1], formspec_escape(cmds[2].params))
+					cmds[1], F(cmds[2].params))
 				if sel == #rows then
 					description = cmds[2].description
 					if copy then
-						core.chat_send_player(name, ("Command: %s %s"):format(
+						core.chat_send_player(name, S("Command: @1 @2",
 							core.colorize("#0FF", "/" .. cmds[1]), cmds[2].params))
 					end
 				end
@@ -85,9 +87,9 @@ local function build_chatcommands_formspec(name, sel, copy)
 	end
 
 	return LIST_FORMSPEC_DESCRIPTION:format(
-			"Available commands: (see also: /help <cmd>)",
+			F(S("Available commands: (see also: /help <cmd>)")),
 			table.concat(rows, ","), sel or 0,
-			description, "Close"
+			F(description), F(S("Close"))
 		)
 end
 
@@ -102,19 +104,19 @@ local function build_privs_formspec(name)
 	table.sort(privs, function(a, b) return a[1] < b[1] end)
 
 	local rows = {}
-	rows[1] = "#FFF,0,Privilege,Description"
+	rows[1] = "#FFF,0,"..F(S("Privilege"))..","..F(S("Description"))
 
 	local player_privs = core.get_player_privs(name)
 	for i, data in ipairs(privs) do
 		rows[#rows + 1] = ("%s,0,%s,%s"):format(
 			player_privs[data[1]] and COLOR_GREEN or COLOR_GRAY,
-				data[1], formspec_escape(data[2].description))
+				data[1], F(data[2].description))
 	end
 
 	return LIST_FORMSPEC:format(
-			"Available privileges:",
+			F(S("Available privileges:")),
 			table.concat(rows, ","),
-			"Close"
+			F(S("Close"))
 		)
 end
 

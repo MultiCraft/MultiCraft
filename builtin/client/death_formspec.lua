@@ -2,7 +2,7 @@
 -- handled by the engine.
 
 core.register_on_death(function()
-	core.display_chat_message(fgettext("You died"))
+	core.display_chat_message(core.gettext("You died."))
 	local formspec = "size[8,5]bgcolor[#320000b4;true]" ..
 		"background9[0,0;0,0;bg_common.png;true;40]" ..
 		"style[you_died;font_size=+4;content_offset=0]" ..
