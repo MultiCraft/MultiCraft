@@ -86,10 +86,14 @@ function hunger.get_saturation(player)
 	return tonumber(player:get_meta():get_string(attribute.saturation))
 end
 
-function hunger.set_saturation(player, level)
-	player:get_meta():set_int(attribute.saturation, level)
+function hunger.set_hud_level(player, level)
 	local hud = hunger.hud[player:get_player_name()]
 	player:hud_change(hud, "number", min(settings.visual_max, level))
+end
+
+function hunger.set_saturation(player, level)
+	player:get_meta():set_int(attribute.saturation, level)
+	hunger.set_hud_level(player, level)
 end
 
 hunger.registered_on_update_saturations = {}
@@ -149,15 +153,19 @@ function hunger.is_poisoned(player)
 	return poisoned and poisoned == "yes"
 end
 
+function hunger.set_hud_poisoned(player, poisoned)
+	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
+	local hud = hunger.hud[player:get_player_name()]
+	player:hud_change(hud, "text", texture)
+end
+
 function hunger.set_poisoned(player, poisoned)
 	if not is_player(player) then
 		return
 	end
 
-	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
+	hunger.set_hud_poisoned(player, poisoned)
 	local attr = poisoned and "yes" or "no"
-	local hud = hunger.hud[player:get_player_name()]
-	player:hud_change(hud, "text", texture)
 	player:get_meta():set_string(attribute.poisoned, attr)
 end
 
@@ -304,12 +312,11 @@ local function health_tick()
 		elseif is_starving then
 			player:set_hp(hp - settings.starve)
 			local name = player:get_player_name()
-			local hud = hunger.hud[name]
-			player:hud_change(hud, "number", 0)
+			hunger.set_hud_level(player, 0)
 			core.after(0.5, function()
-				local hud = hunger.hud[name]
-				if not hud then return end
-				player:hud_change(hud, "number", min(settings.visual_max, saturation))
+				player = minetest.get_player_by_name(name)
+				if not player then return end
+				hunger.set_hud_level(player, min(settings.visual_max, saturation))
 			end)
 		end
 	end
@@ -369,9 +376,11 @@ core.register_on_joinplayer(function(player)
 	end
 
 	-- add HUD
-	local def = tcopy(hunger.bar_definition)
-	def.number = min(settings.visual_max, level)
-	hunger.hud[player:get_player_name()] = player:hud_add(def)
+	if hunger.bar_definition then
+		local def = tcopy(hunger.bar_definition)
+		def.number = min(settings.visual_max, level)
+		hunger.hud[player:get_player_name()] = player:hud_add(def)
+	end
 
 	-- reset poisoned
 	hunger.set_poisoned(player, false)
