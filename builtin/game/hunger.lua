@@ -25,7 +25,9 @@ or not core.settings:get_bool("enable_hunger") then
 	return
 end
 
-hunger = {}
+hunger = {
+	hud = {}
+}
 
 local function get_setting(key, default)
 	local setting = core.settings:get("hunger." .. key)
@@ -57,6 +59,7 @@ local settings = hunger.settings
 
 local min, max = math.min, math.max
 local vlength = vector.length
+local tcopy = table.copy
 
 local attribute = {
 	saturation = "hunger:level",
@@ -85,7 +88,8 @@ end
 
 function hunger.set_saturation(player, level)
 	player:get_meta():set_int(attribute.saturation, level)
-	hud.change_item(player, "hunger", {number = min(settings.visual_max, level)})
+	local hud = hunger.hud[player:get_player_name()]
+	player:hud_change(hud, "number", min(settings.visual_max, level))
 end
 
 hunger.registered_on_update_saturations = {}
@@ -152,7 +156,8 @@ function hunger.set_poisoned(player, poisoned)
 
 	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
 	local attr = poisoned and "yes" or "no"
-	hud.change_item(player, "hunger", {text = texture})
+	local hud = hunger.hud[player:get_player_name()]
+	player:hud_change(hud, "text", texture)
 	player:get_meta():set_string(attribute.poisoned, attr)
 end
 
@@ -298,9 +303,13 @@ local function health_tick()
 			player:set_hp(hp + settings.heal)
 		elseif is_starving then
 			player:set_hp(hp - settings.starve)
-			hud.change_item(player, "hunger", {number = 0})
+			local name = player:get_player_name()
+			local hud = hunger.hud[name]
+			player:hud_change(hud, "number", 0)
 			core.after(0.5, function()
-				hud.change_item(player, "hunger", {number = min(settings.visual_max, saturation)})
+				local hud = hunger.hud[name]
+				if not hud then return end
+				player:hud_change(hud, "number", min(settings.visual_max, saturation))
 			end)
 		end
 	end
@@ -341,30 +350,35 @@ function hunger.item_eat(hp_change, user, poison)
 	end
 end
 
-hud.register("hunger", {
+hunger.bar_definition = {
 	hud_elem_type = "statbar",
-	position      = {x = 0.5, y = 1},
-	offset        = {x = 8,   y = -94},
-	size          = {x = 24,  y = 24},
-	text          = "hunger.png",
-	background    = "hunger_gone.png",
-	number        = settings.visual_max
-})
+	position = {x = 0.5, y = 1},
+	text = "hunger.png",
+	text2 = "hunger_gone.png",
+	number = settings.visual_max,
+	item = settings.visual_max,
+	size = {x = 24, y = 24},
+	offset = {x = -265, y = -126}
+}
 
 core.register_on_joinplayer(function(player)
-	local level = hunger.get_saturation(player) or settings.level_max
+	local level = hunger.get_saturation(player)
+	if not level then
+		level = settings.level_max
+		player:get_meta():set_int(attribute.saturation, level)
+	end
+
+	-- add HUD
+	local def = tcopy(hunger.bar_definition)
+	def.number = min(settings.visual_max, level)
+	hunger.hud[player:get_player_name()] = player:hud_add(def)
 
 	-- reset poisoned
 	hunger.set_poisoned(player, false)
-	-- set saturation
-	player:get_meta():set_int(attribute.saturation, level)
+end)
 
-	-- we must manually update the HUD
-	if level < settings.visual_max then
-		core.after(1, function()
-			hud.change_item(player, "hunger", {number = min(settings.visual_max, level)})
-		end)
-	end
+core.register_on_leaveplayer(function(player)
+	hunger.hud[player:get_player_name()] = nil
 end)
 
 local exhaust = hunger.exhaust_player
