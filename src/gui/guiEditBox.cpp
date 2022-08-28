@@ -239,7 +239,8 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 #if defined(_IRR_COMPILE_WITH_SDL2_DEVICE_)
 		case EET_SDL_TEXT_EVENT:
 			if (event.SDLTextEvent.Type == irr::ESDLET_TEXTINPUT) {
-				core::stringw text = utf8_to_stringw(event.SDLTextEvent.Text);
+				core::stringw text =
+						utf8_to_stringw(event.SDLTextEvent.Text);
 
 				for (size_t i = 0; i < text.size(); i++) {
 					inputChar(text[i]);
@@ -298,7 +299,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 	bool text_changed = false;
 	s32 new_mark_begin = m_mark_begin;
 	s32 new_mark_end = m_mark_end;
-	
+
 	// On Windows right alt simulates additional control press/release events.
 	// It causes unexpected bahavior, for example right alt + A would clear text
 	// in the edit box. At least for SDL2 we can easily check if alt key is
