@@ -88,7 +88,7 @@ end
 
 function hunger.set_hud_level(player, level)
 	local name = player:get_player_name()
-	if not name
+	if not name then
 		return
 	end
 
@@ -160,7 +160,7 @@ end
 
 function hunger.set_hud_poisoned(player, poisoned)
 	local name = player:get_player_name()
-	if not name
+	if not name then
 		return
 	end
 
