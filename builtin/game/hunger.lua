@@ -87,7 +87,12 @@ function hunger.get_saturation(player)
 end
 
 function hunger.set_hud_level(player, level)
-	local hud = hunger.hud[player:get_player_name()]
+	local name = player:get_player_name()
+	if not name
+		return
+	end
+
+	local hud = hunger.hud[name]
 	player:hud_change(hud, "number", min(settings.visual_max, level))
 end
 
@@ -154,8 +159,13 @@ function hunger.is_poisoned(player)
 end
 
 function hunger.set_hud_poisoned(player, poisoned)
+	local name = player:get_player_name()
+	if not name
+		return
+	end
+
+	local hud = hunger.hud[name]
 	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
-	local hud = hunger.hud[player:get_player_name()]
 	player:hud_change(hud, "text", texture)
 end
 
@@ -311,11 +321,8 @@ local function health_tick()
 			player:set_hp(hp + settings.heal)
 		elseif is_starving then
 			player:set_hp(hp - settings.starve)
-			local name = player:get_player_name()
 			hunger.set_hud_level(player, 0)
 			core.after(0.5, function()
-				player = minetest.get_player_by_name(name)
-				if not player then return end
 				hunger.set_hud_level(player, min(settings.visual_max, saturation))
 			end)
 		end
