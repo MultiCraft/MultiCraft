@@ -88,10 +88,8 @@ end
 
 function hunger.set_saturation(player, level)
 	player:get_meta():set_int(attribute.saturation, level)
-	if hunger.hud then
-		local hud = hunger.hud[player:get_player_name()]
-		player:hud_change(hud, "number", min(settings.visual_max, level))
-	end
+	local hud = hunger.hud[player:get_player_name()]
+	player:hud_change(hud, "number", min(settings.visual_max, level))
 end
 
 hunger.registered_on_update_saturations = {}
@@ -158,11 +156,9 @@ function hunger.set_poisoned(player, poisoned)
 
 	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
 	local attr = poisoned and "yes" or "no"
-	if hunger.hud then
-		local hud = hunger.hud[player:get_player_name()]
-		player:hud_change(hud, "text", texture)
-		player:get_meta():set_string(attribute.poisoned, attr)
-	end
+	local hud = hunger.hud[player:get_player_name()]
+	player:hud_change(hud, "text", texture)
+	player:get_meta():set_string(attribute.poisoned, attr)
 end
 
 local function poison_tick(name, ticks, interval, elapsed)
@@ -308,15 +304,13 @@ local function health_tick()
 		elseif is_starving then
 			player:set_hp(hp - settings.starve)
 			local name = player:get_player_name()
-			if hunger.hud then
+			local hud = hunger.hud[name]
+			player:hud_change(hud, "number", 0)
+			core.after(0.5, function()
 				local hud = hunger.hud[name]
-				player:hud_change(hud, "number", 0)
-				core.after(0.5, function()
-					local hud = hunger.hud[name]
-					if not hud then return end
-					player:hud_change(hud, "number", min(settings.visual_max, saturation))
-				end)
-			end
+				if not hud then return end
+				player:hud_change(hud, "number", min(settings.visual_max, saturation))
+			end)
 		end
 	end
 end
@@ -375,20 +369,16 @@ core.register_on_joinplayer(function(player)
 	end
 
 	-- add HUD
-	if hunger.hud then
-		local def = tcopy(hunger.bar_definition)
-		def.number = min(settings.visual_max, level)
-		hunger.hud[player:get_player_name()] = player:hud_add(def)
-	end
+	local def = tcopy(hunger.bar_definition)
+	def.number = min(settings.visual_max, level)
+	hunger.hud[player:get_player_name()] = player:hud_add(def)
 
 	-- reset poisoned
 	hunger.set_poisoned(player, false)
 end)
 
 core.register_on_leaveplayer(function(player)
-	if hunger.hud then
-		hunger.hud[player:get_player_name()] = nil
-	end
+	hunger.hud[player:get_player_name()] = nil
 end)
 
 local exhaust = hunger.exhaust_player
