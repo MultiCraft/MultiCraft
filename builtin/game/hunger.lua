@@ -87,12 +87,11 @@ function hunger.get_saturation(player)
 end
 
 function hunger.set_hud_level(player, level)
-	local name = player:get_player_name()
-	if not name then
+	if not is_player(player) then
 		return
 	end
 
-	local hud = hunger.hud[name]
+	local hud = hunger.hud[player:get_player_name()]
 	player:hud_change(hud, "number", min(settings.visual_max, level))
 end
 
@@ -159,12 +158,11 @@ function hunger.is_poisoned(player)
 end
 
 function hunger.set_hud_poisoned(player, poisoned)
-	local name = player:get_player_name()
-	if not name then
+	if not is_player(player) then
 		return
 	end
 
-	local hud = hunger.hud[name]
+	local hud = hunger.hud[player:get_player_name()]
 	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
 	player:hud_change(hud, "text", texture)
 end
