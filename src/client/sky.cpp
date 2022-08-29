@@ -41,10 +41,11 @@ static video::SMaterial baseMaterial()
 	mat.Lighting = false;
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR > 8
 	mat.ZBuffer = video::ECFN_DISABLED;
+	mat.ZWriteEnable = video::EZW_OFF;
 #else
+	mat.ZWriteEnable = false;
 	mat.ZBuffer = video::ECFN_NEVER;
 #endif
-	mat.setFlag(video::EMF_ZWRITE_ENABLE, false); // ZWriteEnable is bool on early 1.9 but E_ZWRITE on later 1.9
 	mat.AntiAliasing = 0;
 	mat.TextureLayer[0].TextureWrapU = video::ETC_CLAMP_TO_EDGE;
 	mat.TextureLayer[0].TextureWrapV = video::ETC_CLAMP_TO_EDGE;
