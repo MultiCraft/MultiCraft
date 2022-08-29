@@ -222,10 +222,9 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 				m_space_count = (client->getRoundScreen() + spwidth - 1) / spwidth;
 			}
 
-
 			EnrichedString padded_chat_text;
 			for (int i = 0; i < m_space_count; i++)
-				padded_chat_text.addCharNoColor(L' ');
+				padded_chat_text.addCharNoColor(L" ");
 
 			padded_chat_text += m_chat_text;
 			setStaticText(m_guitext_chat, padded_chat_text);
