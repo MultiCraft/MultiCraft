@@ -214,14 +214,17 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		m_chat_text_needs_update = false;
 		if ((!m_flags.show_hud || (!m_flags.show_debug && !m_flags.show_minimap)) &&
 				client->getRoundScreen() > 0) {
-			// Use spaces to shift the text
-			const core::dimension2d<u32> spsize = g_fontengine->getFont()->getDimension(L" ");
+			// Cache the space count
+			if (!m_space_count) {
+				// Use spaces to shift the text
+				const u32 spwidth = g_fontengine->getFont()->getDimension(L" ").Width;
+				// Divide and round up
+				m_space_count = (client->getRoundScreen() + spwidth - 1) / spwidth;
+			}
 
-			// Divide and round up
-			const int spaces = (client->getRoundScreen() + spsize.Width - 1) / spsize.Width;
 
 			EnrichedString padded_chat_text;
-			for (int i = 0; i < spaces; i++)
+			for (int i = 0; i < m_space_count; i++)
 				padded_chat_text.addCharNoColor(L' ');
 
 			padded_chat_text += m_chat_text;
