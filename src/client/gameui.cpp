@@ -243,10 +243,12 @@ void GameUI::updateChatSize()
 	// Update gui element size and position
 	s32 chat_y = 5;
 
-	if (m_flags.show_debug)
-		chat_y += g_fontengine->getLineHeight() * 2;
-	else if (m_flags.show_minimap)
-		chat_y += g_fontengine->getLineHeight();
+	if (m_flags.show_hud) {
+		if (m_flags.show_debug)
+			chat_y += g_fontengine->getLineHeight() * 2;
+		else if (m_flags.show_minimap)
+			chat_y += g_fontengine->getLineHeight();
+	}
 
 	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
 
