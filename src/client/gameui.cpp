@@ -124,20 +124,20 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 			<< (draw_control->range_all ? "All" : itos(draw_control->wanted_range))
 			<< std::setprecision(2)
 			<< " | RTT: " << (client->getRTT() * 1000.0f) << "ms";
-		} else {
-			os << std::setprecision(1) << std::fixed
-				<< "X: " << (player_position.X / BS)
-				<< ", Y: " << (player_position.Y / BS)
-				<< ", Z: " << (player_position.Z / BS);
-		}
-		m_guitext->setText(utf8_to_wide(os.str()).c_str());
+	} else if (m_flags.show_minimap) {
+		os << std::setprecision(1) << std::fixed
+			<< "X: " << (player_position.X / BS)
+			<< ", Y: " << (player_position.Y / BS)
+			<< ", Z: " << (player_position.Z / BS);
+	}
+	m_guitext->setText(utf8_to_wide(os.str()).c_str());
 
-		m_guitext->setRelativePosition(core::rect<s32>(
-			5 + client->getRoundScreen(), 5,
-			screensize.X, 5 + g_fontengine->getTextHeight()));
+	m_guitext->setRelativePosition(core::rect<s32>(
+		5 + client->getRoundScreen(), 5,
+		screensize.X, 5 + g_fontengine->getTextHeight()));
 
 	// Finally set the guitext visible depending on the flag
-	m_guitext->setVisible(m_flags.show_hud);
+	m_guitext->setVisible(m_flags.show_hud && (m_flags.show_debug || m_flags.show_minimap));
 
 	if (m_flags.show_debug) {
 		std::ostringstream os(std::ios_base::binary);
@@ -241,9 +241,11 @@ void GameUI::setChatText(const EnrichedString &chat_text, u32 recent_chat_count)
 void GameUI::updateChatSize()
 {
 	// Update gui element size and position
-	s32 chat_y = 5 + g_fontengine->getLineHeight();;
+	s32 chat_y = 5;
 
 	if (m_flags.show_debug)
+		chat_y += g_fontengine->getLineHeight() * 2;
+	else if (m_flags.show_minimap)
 		chat_y += g_fontengine->getLineHeight();
 
 	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
