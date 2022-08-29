@@ -209,6 +209,28 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		m_guitext_status->enableOverrideColor(true);
 	}
 
+	// Update chat text
+	if (m_chat_text_needs_update) {
+		m_chat_text_needs_update = false;
+		if ((!m_flags.show_hud || (!m_flags.show_debug && !m_flags.show_minimap)) &&
+				client->getRoundScreen() > 0) {
+			// Use spaces to shift the text
+			const core::dimension2d<u32> spsize = g_fontengine->getFont()->getDimension(L" ");
+
+			// Divide and round up
+			const int spaces = (client->getRoundScreen() + spsize.Width - 1) / spsize.Width;
+
+			EnrichedString padded_chat_text;
+			for (int i = 0; i < spaces; i++)
+				padded_chat_text.addCharNoColor(L' ');
+
+			padded_chat_text += m_chat_text;
+			setStaticText(m_guitext_chat, padded_chat_text);
+		} else {
+			setStaticText(m_guitext_chat, m_chat_text);
+		}
+	}
+
 	// Hide chat when console is visible
 	m_guitext_chat->setVisible(isChatVisible() && !chat_console->isVisible());
 }
@@ -221,6 +243,7 @@ void GameUI::initFlags()
 
 void GameUI::showMinimap(bool show)
 {
+	m_chat_text_needs_update = m_chat_text_needs_update || show != m_flags.show_minimap;
 	m_flags.show_minimap = show;
 }
 
@@ -233,8 +256,8 @@ void GameUI::showTranslatedStatusText(const char *str)
 
 void GameUI::setChatText(const EnrichedString &chat_text, u32 recent_chat_count)
 {
-	setStaticText(m_guitext_chat, chat_text);
-
+	m_chat_text = chat_text;
+	m_chat_text_needs_update = true;
 	m_recent_chat_count = recent_chat_count;
 }
 
@@ -306,6 +329,7 @@ void GameUI::toggleHud()
 		showTranslatedStatusText("HUD shown");
 	else
 		showTranslatedStatusText("HUD hidden");
+	m_chat_text_needs_update = true;
 }
 
 void GameUI::toggleProfiler()

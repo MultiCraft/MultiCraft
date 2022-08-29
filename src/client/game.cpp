@@ -2297,7 +2297,7 @@ void Game::toggleMinimap(bool shift_pressed)
 	u32 hud_flags = client->getEnv().getLocalPlayer()->hud_flags;
 
 	if (!(hud_flags & HUD_FLAG_MINIMAP_VISIBLE)) {
-		m_game_ui->m_flags.show_minimap = false;
+		m_game_ui->showMinimap(false);
 	} else {
 
 	// If radar is disabled, try to find a non radar mode or fall back to 0
@@ -2306,8 +2306,7 @@ void Game::toggleMinimap(bool shift_pressed)
 					mapper->getModeDef().type == MINIMAP_TYPE_RADAR)
 				mapper->nextMode();
 
-		m_game_ui->m_flags.show_minimap = mapper->getModeDef().type !=
-				MINIMAP_TYPE_OFF;
+		m_game_ui->showMinimap(mapper->getModeDef().type != MINIMAP_TYPE_OFF);
 	}
 	// <--
 	// End of 'not so satifying code'
@@ -2357,6 +2356,9 @@ void Game::toggleDebug()
 			m_game_ui->showTranslatedStatusText("Debug info and profiler graph hidden");
 		}
 	}
+
+	// Update the chat text as it may need changing because of rounded screens
+	m_game_ui->m_chat_text_needs_update = true;
 }
 
 
