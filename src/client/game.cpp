@@ -839,9 +839,6 @@ private:
 	void pauseAnimation();
 	void resumeAnimation();
 
-	void pauseAnimation();
-	void resumeAnimation();
-
 	// ClientEvent handlers
 	void handleClientEvent_None(ClientEvent *event, CameraOrientation *cam);
 	void handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation *cam);
