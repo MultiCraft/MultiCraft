@@ -51,7 +51,7 @@ RUN mkdir build && \
 
 FROM alpine:3.14
 
-RUN apk add --no-cache sqlite-libs curl gmp libstdc++ libgcc libpq luajit && \
+RUN apk add --no-cache sqlite-libs curl gmp libstdc++ libgcc libpq luajit jsoncpp && \
 	adduser -D multicraft --uid 30000 -h /var/lib/multicraft && \
 	chown -R multicraft:multicraft /var/lib/multicraft
 

@@ -210,8 +210,8 @@ find_package(Lua REQUIRED)
 add_subdirectory(lib/luautf8)
 add_subdirectory(lib/luachacha)
 
-# JsonCPP doesn't compile well on GCC 4.8
-if(NOT ENABLE_SYSTEM_JSONCPP)
+# JsonCpp doesn't compile well on GCC 4.8
+if(NOT USE_SYSTEM_JSONCPP)
 	set(GCC_MINIMUM_VERSION "4.9")
 endif()
 

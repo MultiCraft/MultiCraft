@@ -839,6 +839,9 @@ private:
 	void pauseAnimation();
 	void resumeAnimation();
 
+	void pauseAnimation();
+	void resumeAnimation();
+
 	// ClientEvent handlers
 	void handleClientEvent_None(ClientEvent *event, CameraOrientation *cam);
 	void handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation *cam);
@@ -2737,48 +2740,32 @@ void Game::handleClientEvent_HudAdd(ClientEvent *event, CameraOrientation *cam)
 {
 	LocalPlayer *player = client->getEnv().getLocalPlayer();
 
-	u32 server_id = event->hudadd.server_id;
+	u32 server_id = event->hudadd->server_id;
 	// ignore if we already have a HUD with that ID
 	auto i = m_hud_server_to_client.find(server_id);
 	if (i != m_hud_server_to_client.end()) {
-		delete event->hudadd.pos;
-		delete event->hudadd.name;
-		delete event->hudadd.scale;
-		delete event->hudadd.text;
-		delete event->hudadd.align;
-		delete event->hudadd.offset;
-		delete event->hudadd.world_pos;
-		delete event->hudadd.size;
-		delete event->hudadd.text2;
+		delete event->hudadd;
 		return;
 	}
 
 	HudElement *e = new HudElement;
-	e->type   = (HudElementType)event->hudadd.type;
-	e->pos    = *event->hudadd.pos;
-	e->name   = *event->hudadd.name;
-	e->scale  = *event->hudadd.scale;
-	e->text   = *event->hudadd.text;
-	e->number = event->hudadd.number;
-	e->item   = event->hudadd.item;
-	e->dir    = event->hudadd.dir;
-	e->align  = *event->hudadd.align;
-	e->offset = *event->hudadd.offset;
-	e->world_pos = *event->hudadd.world_pos;
-	e->size = *event->hudadd.size;
-	e->z_index = event->hudadd.z_index;
-	e->text2  = *event->hudadd.text2;
+	e->type   = static_cast<HudElementType>(event->hudadd->type);
+	e->pos    = event->hudadd->pos;
+	e->name   = event->hudadd->name;
+	e->scale  = event->hudadd->scale;
+	e->text   = event->hudadd->text;
+	e->number = event->hudadd->number;
+	e->item   = event->hudadd->item;
+	e->dir    = event->hudadd->dir;
+	e->align  = event->hudadd->align;
+	e->offset = event->hudadd->offset;
+	e->world_pos = event->hudadd->world_pos;
+	e->size      = event->hudadd->size;
+	e->z_index   = event->hudadd->z_index;
+	e->text2     = event->hudadd->text2;
 	m_hud_server_to_client[server_id] = player->addHud(e);
 
-	delete event->hudadd.pos;
-	delete event->hudadd.name;
-	delete event->hudadd.scale;
-	delete event->hudadd.text;
-	delete event->hudadd.align;
-	delete event->hudadd.offset;
-	delete event->hudadd.world_pos;
-	delete event->hudadd.size;
-	delete event->hudadd.text2;
+	delete event->hudadd;
 }
 
 void Game::handleClientEvent_HudRemove(ClientEvent *event, CameraOrientation *cam)
@@ -2800,77 +2787,52 @@ void Game::handleClientEvent_HudChange(ClientEvent *event, CameraOrientation *ca
 
 	HudElement *e = nullptr;
 
-	auto i = m_hud_server_to_client.find(event->hudchange.id);
+	auto i = m_hud_server_to_client.find(event->hudchange->id);
 	if (i != m_hud_server_to_client.end()) {
 		e = player->getHud(i->second);
 	}
 
 	if (e == nullptr) {
-		delete event->hudchange.v3fdata;
-		delete event->hudchange.v2fdata;
-		delete event->hudchange.sdata;
-		delete event->hudchange.v2s32data;
+		delete event->hudchange;
 		return;
 	}
 
-	switch (event->hudchange.stat) {
-		case HUD_STAT_POS:
-			e->pos = *event->hudchange.v2fdata;
-			break;
+#define CASE_SET(statval, prop, dataprop) \
+	case statval: \
+		e->prop = event->hudchange->dataprop; \
+		break
 
-		case HUD_STAT_NAME:
-			e->name = *event->hudchange.sdata;
-			break;
+	switch (event->hudchange->stat) {
+		CASE_SET(HUD_STAT_POS, pos, v2fdata);
 
-		case HUD_STAT_SCALE:
-			e->scale = *event->hudchange.v2fdata;
-			break;
+		CASE_SET(HUD_STAT_NAME, name, sdata);
 
-		case HUD_STAT_TEXT:
-			e->text = *event->hudchange.sdata;
-			break;
+		CASE_SET(HUD_STAT_SCALE, scale, v2fdata);
 
-		case HUD_STAT_NUMBER:
-			e->number = event->hudchange.data;
-			break;
+		CASE_SET(HUD_STAT_TEXT, text, sdata);
 
-		case HUD_STAT_ITEM:
-			e->item = event->hudchange.data;
-			break;
+		CASE_SET(HUD_STAT_NUMBER, number, data);
 
-		case HUD_STAT_DIR:
-			e->dir = event->hudchange.data;
-			break;
+		CASE_SET(HUD_STAT_ITEM, item, data);
 
-		case HUD_STAT_ALIGN:
-			e->align = *event->hudchange.v2fdata;
-			break;
+		CASE_SET(HUD_STAT_DIR, dir, data);
 
-		case HUD_STAT_OFFSET:
-			e->offset = *event->hudchange.v2fdata;
-			break;
+		CASE_SET(HUD_STAT_ALIGN, align, v2fdata);
 
-		case HUD_STAT_WORLD_POS:
-			e->world_pos = *event->hudchange.v3fdata;
-			break;
+		CASE_SET(HUD_STAT_OFFSET, offset, v2fdata);
 
-		case HUD_STAT_SIZE:
-			e->size = *event->hudchange.v2s32data;
-			break;
+		CASE_SET(HUD_STAT_WORLD_POS, world_pos, v3fdata);
 
-		case HUD_STAT_Z_INDEX:
-			e->z_index = event->hudchange.data;
-			break;
+		CASE_SET(HUD_STAT_SIZE, size, v2s32data);
 
-		case HUD_STAT_TEXT2:
-			e->text2 = *event->hudchange.sdata;
-			break;
+		CASE_SET(HUD_STAT_Z_INDEX, z_index, data);
+
+		CASE_SET(HUD_STAT_TEXT2, text2, sdata);
 	}
 
-	delete event->hudchange.v3fdata;
-	delete event->hudchange.v2fdata;
-	delete event->hudchange.sdata;
-	delete event->hudchange.v2s32data;
+#undef CASE_SET
+
+	delete event->hudchange;
 }
 
 void Game::handleClientEvent_SetSky(ClientEvent *event, CameraOrientation *cam)
@@ -3431,7 +3393,8 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 	const ItemStack &selected_item, const v3s16 &nodepos, const v3s16 &neighbourpos,
 	const PointedThing &pointed, const NodeMetadata *meta)
 {
-	std::string prediction = selected_def.node_placement_prediction;
+	const auto &prediction = selected_def.node_placement_prediction;
+
 	const NodeDefManager *nodedef = client->ndef();
 	ClientMap &map = client->getEnv().getClientMap();
 	MapNode node;
@@ -3501,8 +3464,7 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 
 	if (!found) {
 		errorstream << "Node placement prediction failed for "
-			<< selected_def.name << " (places "
-			<< prediction
+			<< selected_def.name << " (places " << prediction
 			<< ") - Name not known" << std::endl;
 		// Handle this as if prediction was empty
 		// Report to server
@@ -3513,9 +3475,14 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 	const ContentFeatures &predicted_f = nodedef->get(id);
 
 	// Predict param2 for facedir and wallmounted nodes
+	// Compare core.item_place_node() for what the server does
 	u8 param2 = 0;
 
-	if (predicted_f.param_type_2 == CPT2_WALLMOUNTED ||
+	const u8 place_param2 = selected_def.place_param2;
+
+	if (place_param2) {
+		param2 = place_param2;
+	} else if (predicted_f.param_type_2 == CPT2_WALLMOUNTED ||
 			predicted_f.param_type_2 == CPT2_COLORED_WALLMOUNTED) {
 		v3s16 dir = nodepos - neighbourpos;
 
@@ -3526,9 +3493,7 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 		} else {
 			param2 = dir.Z < 0 ? 5 : 4;
 		}
-	}
-
-	if (predicted_f.param_type_2 == CPT2_FACEDIR ||
+	} else if (predicted_f.param_type_2 == CPT2_FACEDIR ||
 			predicted_f.param_type_2 == CPT2_COLORED_FACEDIR) {
 		v3s16 dir = nodepos - floatToInt(client->getEnv().getLocalPlayer()->getPosition(), BS);
 
@@ -3539,11 +3504,9 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 		}
 	}
 
-	assert(param2 <= 5);
-
-	//Check attachment if node is in group attached_node
-	if (((ItemGroupList) predicted_f.groups)["attached_node"] != 0) {
-		static v3s16 wallmounted_dirs[8] = {
+	// Check attachment if node is in group attached_node
+	if (itemgroup_get(predicted_f.groups, "attached_node") != 0) {
+		const static v3s16 wallmounted_dirs[8] = {
 			v3s16(0, 1, 0),
 			v3s16(0, -1, 0),
 			v3s16(1, 0, 0),
@@ -3568,11 +3531,11 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 	}
 
 	// Apply color
-	if ((predicted_f.param_type_2 == CPT2_COLOR
+	if (!place_param2 && (predicted_f.param_type_2 == CPT2_COLOR
 			|| predicted_f.param_type_2 == CPT2_COLORED_FACEDIR
 			|| predicted_f.param_type_2 == CPT2_COLORED_WALLMOUNTED)) {
-		const std::string &indexstr = selected_item.metadata.getString(
-			"palette_index", 0);
+		const auto &indexstr = selected_item.metadata.
+			getString("palette_index", 0);
 		if (!indexstr.empty()) {
 			s32 index = mystoi(indexstr);
 			if (predicted_f.param_type_2 == CPT2_COLOR) {
@@ -3612,11 +3575,10 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 			soundmaker->m_player_rightpunch_sound = selected_def.sound_place_failed;
 			return false;
 		}
-	} catch (InvalidPositionException &e) {
+	} catch (const InvalidPositionException &e) {
 		errorstream << "Node placement prediction failed for "
 			<< selected_def.name << " (places "
-			<< prediction
-			<< ") - Position not loaded" << std::endl;
+			<< prediction << ") - Position not loaded" << std::endl;
 		soundmaker->m_player_rightpunch_sound = selected_def.sound_place_failed;
 		return false;
 	}
