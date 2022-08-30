@@ -253,13 +253,16 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 	// clang-format off
 #ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
 	// Enable text input events when edit box is focused
-	if (event.EventType == EET_GUI_EVENT &&
-			event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUS_LOST) {
-		if (event.GUIEvent.Element &&
-				event.GUIEvent.Element->getType() == irr::gui::EGUIET_EDIT_BOX) {
+	if (event.EventType == EET_GUI_EVENT) {
+		if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUSED &&
+			event.GUIEvent.Caller &&
+			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
 			if (porting::hasRealKeyboard())
 				SDL_StartTextInput();
-		} else {
+		}
+		else if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUS_LOST &&
+			event.GUIEvent.Caller &&
+			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
 			if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
 				SDL_StopTextInput();
 		}

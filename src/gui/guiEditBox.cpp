@@ -40,15 +40,6 @@ GUIEditBox::~GUIEditBox()
 
 	if (m_vscrollbar)
 		m_vscrollbar->drop();
-
-#if defined(_IRR_COMPILE_WITH_SDL2_DEVICE_)
-	if (porting::hasRealKeyboard()) {
-		if (m_started_text_input) {
-			if (SDL_IsTextInputActive())
-				SDL_StopTextInput();
-		}
-	}
-#endif
 }
 
 void GUIEditBox::setOverrideFont(IGUIFont *font)
@@ -220,20 +211,6 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 					m_mouse_marking = false;
 					setTextMarkers(0, 0);
 				}
-#if defined(_IRR_COMPILE_WITH_SDL2_DEVICE_)
-				if (porting::hasRealKeyboard()) {
-					m_started_text_input = false;
-					if (SDL_IsTextInputActive())
-						SDL_StopTextInput();
-				}
-#endif
-			} else if (event.GUIEvent.EventType == EGET_ELEMENT_FOCUSED) {
-#if defined(_IRR_COMPILE_WITH_SDL2_DEVICE_)
-				if (porting::hasRealKeyboard()) {
-					m_started_text_input = true;
-					SDL_StartTextInput();
-				}
-#endif
 			}
 			break;
 #if defined(_IRR_COMPILE_WITH_SDL2_DEVICE_)
