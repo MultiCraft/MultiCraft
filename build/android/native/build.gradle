@@ -49,14 +49,14 @@ android {
 
 // get precompiled deps
 task downloadDeps(type: Download) {
-	src 'https://github.com/MultiCraft/deps/archive/master.zip'
+	src 'https://github.com/deveee/deps/archive/SDL2.zip'
 	dest new File(buildDir, 'deps.zip')
 	overwrite false
 }
 
 task getDeps(dependsOn: downloadDeps, type: Copy) {
 	def deps = file('deps')
-	def f = file("$buildDir/deps-master")
+	def f = file("$buildDir/deps-SDL2")
 
 	if (!f.exists()) {
 		from zipTree(downloadDeps.dest)
@@ -68,31 +68,7 @@ task getDeps(dependsOn: downloadDeps, type: Copy) {
 	}
 }
 
-// get libiconv
-task downloadIconv(dependsOn: getDeps, type: Download) {
-	src 'https://github.com/MoNTE48/ndk_iconv/archive/mc.zip'
-	dest new File(buildDir, 'iconv.zip')
-	overwrite false
-}
-
-task getIconv(dependsOn: downloadIconv, type: Copy) {
-	def iconv = file('deps/Android/ndk_iconv')
-	def f = file("$buildDir/ndk_iconv-mc")
-
-	if (!iconv.exists() && !f.exists()) {
-		from zipTree(downloadIconv.dest)
-		into buildDir
-	}
-
-	doLast {
-		if (!iconv.exists()) {
-			file(f).renameTo(file(iconv))
-		}
-	}
-}
-
 preBuild.dependsOn getDeps
-preBuild.dependsOn getIconv
 
 android.defaultConfig.externalNativeBuild.ndkBuild {
 	arguments 'prebuilt=$(if $(strip $(wildcard $(prebuilt_path))),$(prebuilt_path),.)'

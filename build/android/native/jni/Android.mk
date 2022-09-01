@@ -14,7 +14,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := Irrlicht
-LOCAL_SRC_FILES := deps/Android/Irrlicht/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libIrrlicht.a
+LOCAL_SRC_FILES := deps/Android/Irrlicht/${NDK_TOOLCHAIN_VERSION}-SDL2/$(APP_ABI)/libIrrlicht.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -70,24 +70,32 @@ LOCAL_SRC_FILES := deps/Android/Vorbis/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libvo
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := SDL2
+LOCAL_SRC_FILES := deps/Android/SDL2/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libSDL2.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := MultiCraft
 
 LOCAL_CFLAGS += \
-	-DJSONCPP_NO_LOCALE_SUPPORT     \
-	-DHAVE_TOUCHSCREENGUI           \
-	-DENABLE_GLES=1                 \
-	-DUSE_CURL=1                    \
-	-DUSE_SOUND=1                   \
-	-DUSE_FREETYPE=1                \
-	-DUSE_LEVELDB=1                 \
-	-DUSE_SQLITE=0                  \
-	-DUSE_LUAJIT=1                  \
-	-DUSE_GETTEXT=1                 \
-	-DVERSION_MAJOR=${versionMajor} \
-	-DVERSION_MINOR=${versionMinor} \
-	-DVERSION_PATCH=${versionPatch} \
-	-DVERSION_EXTRA=${versionExtra} \
-	-DDEVELOPMENT_BUILD=${developmentBuild} \
+	-DJSONCPP_NO_LOCALE_SUPPORT              \
+	-DHAVE_TOUCHSCREENGUI                    \
+	-DENABLE_GLES=1                          \
+	-DUSE_CURL=1                             \
+	-DUSE_SOUND=1                            \
+	-DUSE_FREETYPE=1                         \
+	-DUSE_LEVELDB=1                          \
+	-DUSE_SQLITE=0                           \
+	-DUSE_LUAJIT=1                           \
+	-DUSE_GETTEXT=1                          \
+	-DVERSION_MAJOR=${versionMajor}          \
+	-DVERSION_MINOR=${versionMinor}          \
+	-DVERSION_PATCH=${versionPatch}          \
+	-DVERSION_EXTRA=${versionExtra}          \
+	-DDEVELOPMENT_BUILD=${developmentBuild}  \
+	-D_IRR_COMPILE_WITH_SDL_DEVICE_          \
+	-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_     \
+	-DNO_IRR_COMPILE_WITH_SDL_MOUSE_EVENTS_  \
 	$(GPROF_DEF)
 
 ifdef NDEBUG
@@ -110,10 +118,10 @@ LOCAL_C_INCLUDES := \
 	deps/Android/Irrlicht/include                   \
 	deps/Android/LevelDB/include                    \
 	deps/Android/Gettext/include                    \
-	deps/Android/ndk_iconv                          \
 	deps/Android/LuaJIT/src                         \
 	deps/Android/OpenAL-Soft/include                \
-	deps/Android/Vorbis/include
+	deps/Android/Vorbis/include                     \
+	deps/Android/SDL2/include
 
 LOCAL_SRC_FILES := \
 	$(wildcard ../../../src/client/*.cpp)           \
@@ -238,13 +246,12 @@ LOCAL_SRC_FILES += ../../../lib/luautf8/lutf8lib.c
 # Lua ChaCha Lib
 LOCAL_SRC_FILES += $(wildcard ../../../lib/luachacha/*.c)
 
-LOCAL_STATIC_LIBRARIES += Curl Gettext Freetype Irrlicht LevelDB OpenAL mbedTLS mbedx509 mbedcrypto Vorbis LuaJIT android_native_app_glue $(PROFILER_LIBS)
+LOCAL_STATIC_LIBRARIES += Curl Gettext Freetype Irrlicht SDL2 LevelDB OpenAL mbedTLS mbedx509 mbedcrypto Vorbis LuaJIT $(PROFILER_LIBS)
 
-LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES -lz
+LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES -lz -llog
 
 include $(BUILD_SHARED_LIBRARY)
 
 ifdef GPROF
 $(call import-module,android-ndk-profiler)
 endif
-$(call import-module,android/native_app_glue)
