@@ -88,17 +88,12 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 		Calculate new sizes and positions
 	*/
 #ifdef HAVE_TOUCHSCREENGUI
-	float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
+	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
 #else
-	float s = m_gui_scale;
+	const float s = m_gui_scale;
 #endif
-
-	// Change the dialog size if the font size is larger/smaller than the
-	// expected one
-	s *= g_fontengine->getDefaultFontSize() / 16.f;
-
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 380 * s / 2,
 		screensize.Y / 2 - 200 * s / 2,
