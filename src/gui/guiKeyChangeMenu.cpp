@@ -164,7 +164,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	removeChildren();
 
 	float s = MYMIN(screensize.X / 835.f, screensize.Y / 430.f);
-#if defined(__ANDROID__) || defined(__IOS__)
+#if HAVE_TOUCHSCREENGUI
 	s *= g_settings->getBool("device_is_tablet") ? 0.75f : 0.9f;
 #else
 	s *= 0.75f;
@@ -241,7 +241,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	{
 		s32 option_x = offset.X;
-		s32 option_y = offset.Y + 3 * s;
+		s32 option_y = offset.Y + 5 * s;
 		u32 option_w = 180 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
@@ -256,7 +256,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	{
 		s32 option_x = offset.X;
-		s32 option_y = offset.Y + 3 * s;
+		s32 option_y = offset.Y + 5 * s;
 		u32 option_w = 280 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
@@ -271,7 +271,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	{
 		s32 option_x = offset.X;
-		s32 option_y = offset.Y + 3 * s;
+		s32 option_y = offset.Y + 5 * s;
 		u32 option_w = 280;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
@@ -286,7 +286,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	const std::array<StyleSpec, StyleSpec::NUM_STATES> styles = getButtonStyle();
 	{
-		core::rect<s32> rect(0, 0, 150 * s, 40 * s);
+		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
 		rect += topleft + v2s32(size.X / 2 - 165 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Save");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON, text);
@@ -294,7 +294,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		delete[] text;
 	}
 	{
-		core::rect<s32> rect(0, 0, 150 * s, 40 * s);
+		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
 		rect += topleft + v2s32(size.X / 2 + 15 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Cancel");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
