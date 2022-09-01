@@ -219,9 +219,8 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 				core::stringw text =
 						utf8_to_stringw(event.SDLTextEvent.Text);
 
-				for (size_t i = 0; i < text.size(); i++) {
+				for (size_t i = 0; i < text.size(); i++)
 					inputChar(text[i]);
-				}
 
 				return true;
 			}
