@@ -131,7 +131,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	float s = MYMIN(screensize.X / 835.f, screensize.Y / 430.f);
 #if defined(__ANDROID__) || defined(__IOS__)
-	s *= 0.9f;
+	s *= g_settings->getBool("device_is_tablet") ? 0.75f : 0.9f;
 #else
 	s *= 0.75f;
 #endif
