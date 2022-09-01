@@ -1,5 +1,6 @@
 #!/bin/bash -e
 
+sh SDL2.sh
 sh irrlicht.sh
 sh gettext.sh
 sh freetype.sh

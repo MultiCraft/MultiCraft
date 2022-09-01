@@ -2022,7 +2022,7 @@ void Game::processKeyInput()
 		toggleDebug();
 	} else if (wasKeyDown(KeyType::TOGGLE_PROFILER)) {
 		m_game_ui->toggleProfiler();
-	} else if (wasKeyDown(KeyType::INCREASE_VIEWING_RANGE) || wasKeyDown(KeyType::INCREASE_VIEWING_RANGE2)) {
+	} else if (wasKeyDown(KeyType::INCREASE_VIEWING_RANGE)) {
 		increaseViewRange();
 	} else if (wasKeyDown(KeyType::DECREASE_VIEWING_RANGE)) {
 		decreaseViewRange();

@@ -74,9 +74,6 @@ void KeyCache::populate()
 	key[KeyType::CAMERA_MODE] = getKeySetting("keymap_camera_mode");
 	key[KeyType::INCREASE_VIEWING_RANGE] =
 			getKeySetting("keymap_increase_viewing_range_min");
-#if defined(__MACH__) && defined(__APPLE__)
-	key[KeyType::INCREASE_VIEWING_RANGE2] = "=";
-#endif
 	key[KeyType::DECREASE_VIEWING_RANGE] =
 			getKeySetting("keymap_decrease_viewing_range_min");
 	key[KeyType::RANGESELECT] = getKeySetting("keymap_rangeselect");

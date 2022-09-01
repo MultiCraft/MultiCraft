@@ -94,6 +94,10 @@ void GUIEditBoxWithScrollBar::draw()
 	default_bg_color = m_writable ? skin->getColor(EGDC_WINDOW) : video::SColor(0);
 	bg_color = m_bg_color_used ? m_bg_color : default_bg_color;
 
+	if (IsEnabled && m_writable) {
+		bg_color = focus ? skin->getColor(EGDC_FOCUSED_EDITABLE) : skin->getColor(EGDC_EDITABLE);
+	}
+
 	if (!m_border && m_background) {
 		skin->draw2DRectangle(this, bg_color, AbsoluteRect, &AbsoluteClippingRect);
 	}

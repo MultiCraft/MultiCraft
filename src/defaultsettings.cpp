@@ -508,7 +508,6 @@ void set_default_settings()
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	settings->setDefault("screen_w", "0");
 	settings->setDefault("screen_h", "0");
-	settings->setDefault("keymap_sneak", "KEY_SHIFT");
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 	settings->setDefault("vsync", "true");
 

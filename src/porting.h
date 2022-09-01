@@ -40,6 +40,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "constants.h"
 #include "gettime.h"
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include <SDL.h>
+#endif
+
 #ifdef _MSC_VER
 	#define SWPRINTF_CHARSTRING L"%S"
 #else
@@ -95,7 +99,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	defined(__APPLE__)   ||                           \
 	defined(__sun)       || defined(sun)           || \
 	defined(__QNX__)     || defined(__QNXNTO__)
-	#define HAVE_STRLCPY
+	#ifndef HAVE_STRLCPY
+		#define HAVE_STRLCPY
+	#endif
 #endif
 
 // So we need to define our own.

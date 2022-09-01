@@ -124,6 +124,13 @@
 		847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4A25D6F483008F5FC8 /* lutf8lib.c */; };
 		848ADEF427BD68AE001C60F3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 848ADEF627BD68AE001C60F3 /* Localizable.strings */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
+		8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL2.a */; };
+		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
+		8495BD2028B80F21009FCF4D /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1F28B80F21009FCF4D /* Metal.framework */; };
+		8495BD2228B80F4D009FCF4D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */; };
+		8495BD2628B80FD1009FCF4D /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2528B80FD1009FCF4D /* CoreAudio.framework */; };
+		8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2728B810AD009FCF4D /* CoreVideo.framework */; };
+		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
 		849D0848278AC1B200471354 /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0846278AC1B200471354 /* chacha.c */; };
 		84A1F9B2252E616B00000717 /* semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9AC252E616B00000717 /* semaphore.cpp */; };
@@ -565,6 +572,13 @@
 		848ADF0927BD69C8001C60F3 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADF0A27BD69CB001C60F3 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		8495BD1528B80B00009FCF4D /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../deps/SDL2/libSDL2.a; sourceTree = "<group>"; };
+		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
+		8495BD1F28B80F21009FCF4D /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		8495BD2528B80FD1009FCF4D /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		8495BD2728B810AD009FCF4D /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		849D0841278AC1B200471354 /* ecrypt-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-config.h"; path = "../../../../lib/luachacha/ecrypt-config.h"; sourceTree = "<group>"; };
 		849D0842278AC1B200471354 /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../../lib/luachacha/ecrypt-sync.h"; sourceTree = "<group>"; };
 		849D0843278AC1B200471354 /* ecrypt-portable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-portable.h"; path = "../../../../lib/luachacha/ecrypt-portable.h"; sourceTree = "<group>"; };
@@ -896,6 +910,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8495BD2628B80FD1009FCF4D /* CoreAudio.framework in Frameworks */,
+				8495BD2228B80F4D009FCF4D /* AudioToolbox.framework in Frameworks */,
 				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
 				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
 				84EEE5E72782729B00F61929 /* libintl.a in Frameworks */,
@@ -906,9 +922,14 @@
 				8458616924B1B7DC0040BA4F /* libfreetype.a in Frameworks */,
 				84C8E20B257804A200C1E5D0 /* libopenal.1.dylib in Frameworks */,
 				84463B9924B258B50099DFBD /* OpenGL.framework in Frameworks */,
+				8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */,
+				8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */,
 				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
 				84463B9324B258B00099DFBD /* IOKit.framework in Frameworks */,
+				8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */,
 				846F883B27A59704007B6210 /* libluajit.a in Frameworks */,
+				8495BD2028B80F21009FCF4D /* Metal.framework in Frameworks */,
+				8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1100,6 +1121,13 @@
 		84585BFF24B1347B0040BA4F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8495BD2928B81170009FCF4D /* Carbon.framework */,
+				8495BD2728B810AD009FCF4D /* CoreVideo.framework */,
+				8495BD2528B80FD1009FCF4D /* CoreAudio.framework */,
+				8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */,
+				8495BD1F28B80F21009FCF4D /* Metal.framework */,
+				8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */,
+				8495BD1528B80B00009FCF4D /* libSDL2.a */,
 				846F883A27A596F9007B6210 /* libluajit.a */,
 				84EEE5E62782728E00F61929 /* libintl.a */,
 				848CE6E427778E30001D3E0F /* libz.tbd */,
@@ -2243,6 +2271,7 @@
 					"${SRCROOT}/../deps/freetype/include/freetype2",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
+					"${SRCROOT}/../deps/SDL2/include",
 					"${SRCROOT}/../deps/luajit/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
@@ -2252,6 +2281,10 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.1;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-D_IRR_COMPILE_WITH_SDL_DEVICE_",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype/lib",
@@ -2259,6 +2292,7 @@
 					"-L${SRCROOT}/../deps/irrlicht",
 					"-L${SRCROOT}/../deps/luajit/lib",
 					"-L${SRCROOT}/../deps/openal",
+					"-L${SRCROOT}/../deps/SDL2",
 					"-Wl,-dead_strip",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
@@ -2307,6 +2341,7 @@
 					"${SRCROOT}/../deps/freetype/include/freetype2",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
+					"${SRCROOT}/../deps/SDL2/include",
 					"${SRCROOT}/../deps/luajit/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
@@ -2316,6 +2351,10 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.1;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-D_IRR_COMPILE_WITH_SDL_DEVICE_",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype/lib",
@@ -2323,6 +2362,7 @@
 					"-L${SRCROOT}/../deps/irrlicht",
 					"-L${SRCROOT}/../deps/luajit/lib",
 					"-L${SRCROOT}/../deps/openal",
+					"-L${SRCROOT}/../deps/SDL2",
 					"-Wl,-dead_strip",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
