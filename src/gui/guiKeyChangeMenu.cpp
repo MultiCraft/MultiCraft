@@ -130,12 +130,21 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	removeChildren();
 
 #ifdef HAVE_TOUCHSCREENGUI
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
+	float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+	float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
 #else
-	const float s = m_gui_scale;
+	float s = m_gui_scale;
 #endif
+
+	// Make sure the GUI will fit on the screen
+	if (835 * s > screensize.X)
+		s = screensize.X / 835.f;
+	if (430 * s > screensize.Y)
+		s = screensize.Y / 430.f;
+
+	std::cout << "Scaling: " << s << std::endl;
+
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 835 * s / 2,
 		screensize.Y / 2 - 430 * s / 2,
