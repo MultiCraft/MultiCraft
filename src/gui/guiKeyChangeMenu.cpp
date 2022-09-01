@@ -143,8 +143,6 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	if (430 * s > screensize.Y)
 		s = screensize.Y / 430.f;
 
-	std::cout << "Scaling: " << s << std::endl;
-
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 835 * s / 2,
 		screensize.Y / 2 - 430 * s / 2,
