@@ -646,9 +646,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		{
 			std::wstring text = utf8_to_wide(event.SDLTextEvent.Text);
 
-			for (unsigned int i = 0; i < text.size(); i++) {
+			for (u32 i = 0; i < text.size(); i++)
 				prompt.input(text[i]);
-			}
 
 			return true;
 		}
