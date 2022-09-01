@@ -249,7 +249,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	{
 		s32 option_x = offset.X;
-		s32 option_y = offset.Y + 5 * s;
+		s32 option_y = offset.Y + 3 * s;
 		u32 option_w = 180 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
@@ -264,7 +264,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	{
 		s32 option_x = offset.X;
-		s32 option_y = offset.Y + 5 * s;
+		s32 option_y = offset.Y + 3 * s;
 		u32 option_w = 280 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
@@ -279,7 +279,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	{
 		s32 option_x = offset.X;
-		s32 option_y = offset.Y + 5 * s;
+		s32 option_y = offset.Y + 3 * s;
 		u32 option_w = 280;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
@@ -295,7 +295,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	const std::array<StyleSpec, StyleSpec::NUM_STATES> styles = getButtonStyle();
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 40 * s);
-		rect += topleft + v2s32(size.X / 2 - 155 * s, size.Y - 50 * s);
+		rect += topleft + v2s32(size.X / 2 - 165 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Save");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON, text);
 		e->setStyles(styles);
@@ -303,7 +303,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	}
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 40 * s);
-		rect += topleft + v2s32(size.X / 2 + 5 * s, size.Y - 50 * s);
+		rect += topleft + v2s32(size.X / 2 + 15 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Cancel");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
 		e->setStyles(styles);
