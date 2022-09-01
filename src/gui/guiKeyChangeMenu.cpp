@@ -129,12 +129,11 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 {
 	removeChildren();
 
-#ifdef HAVE_TOUCHSCREENGUI
-	float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
-#elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+	float s = MYMIN(screensize.X / 835.f, screensize.Y / 430.f);
+#if defined(__ANDROID__) || defined(__IOS__)
+	s *= 0.9f;
 #else
-	float s = m_gui_scale;
+	s *= 0.75f;
 #endif
 
 	// Make sure the GUI will fit on the screen
