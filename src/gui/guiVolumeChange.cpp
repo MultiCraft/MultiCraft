@@ -134,7 +134,7 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 	}
 	{
 		core::rect<s32> rect(0, 0, 80 * s, 30 * s);
-		rect = rect + v2s32(size.X / 2 - 80 * s / 2, size.Y / 2 + 55 * s);
+		rect = rect + v2s32(size.X / 2 - 80 * s / 2, size.Y / 2 + 50 * s);
 		const wchar_t *text = wgettext("Exit");
 		GUIButton::addButton(Environment, rect, m_tsrc, this, ID_soundExitButton, text);
 		delete[] text;
