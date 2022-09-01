@@ -33,6 +33,7 @@
 #include "filesys.h"
 #include "porting.h"
 #include "settings.h"
+#include "StyleSpec.h"
 #include <algorithm>
 
 #include "mainmenumanager.h"  // for g_gamecallback
@@ -128,6 +129,34 @@ void GUIKeyChangeMenu::removeChildren()
 		i->remove();
 	}
 	key_used_text = nullptr;
+}
+
+std::array<StyleSpec, StyleSpec::NUM_STATES> GUIKeyChangeMenu::getButtonStyle()
+{
+	std::string texture_path = "";
+	if (m_main_menu)
+		texture_path = porting::path_share + DIR_DELIM "textures" DIR_DELIM
+			"base" DIR_DELIM "pack" DIR_DELIM;
+
+	std::array<StyleSpec, StyleSpec::NUM_STATES> ret;
+
+	StyleSpec btn_spec;
+	btn_spec.set(StyleSpec::BGIMG, texture_path + "gui_button.png");
+	btn_spec.set(StyleSpec::BGIMG_MIDDLE, "20");
+	btn_spec.set(StyleSpec::BORDER, "false");
+	btn_spec.set(StyleSpec::PADDING, "-15");
+
+	ret[StyleSpec::STATE_DEFAULT] = btn_spec;
+
+	StyleSpec hovered_spec;
+	hovered_spec.set(StyleSpec::BGIMG, texture_path + "gui_button_hovered.png");
+	ret[StyleSpec::STATE_HOVERED] = hovered_spec;
+
+	StyleSpec pressed_spec;
+	pressed_spec.set(StyleSpec::BGIMG, texture_path + "gui_button_pressed.png");
+	ret[StyleSpec::STATE_PRESSED] = pressed_spec;
+
+	return ret;
 }
 
 void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
@@ -263,18 +292,21 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		offset += v2s32(0, 25);
 	}
 
+	auto styles = getButtonStyle();
 	{
 		core::rect<s32> rect(0, 0, 100 * s, 30 * s);
 		rect += topleft + v2s32(size.X / 2 - 105 * s, size.Y - 40 * s);
-		const wchar_t *text =  wgettext("Save");
-		GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON, text);
+		const wchar_t *text = wgettext("Save");
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON, text);
+		e->setStyles(styles);
 		delete[] text;
 	}
 	{
 		core::rect<s32> rect(0, 0, 100 * s, 30 * s);
 		rect += topleft + v2s32(size.X / 2 + 5 * s, size.Y - 40 * s);
 		const wchar_t *text = wgettext("Cancel");
-		GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
+		e->setStyles(styles);
 		delete[] text;
 	}
 }
