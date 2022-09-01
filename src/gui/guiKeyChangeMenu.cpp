@@ -30,6 +30,8 @@
 #include <IGUIButton.h>
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
+#include "filesys.h"
+#include "porting.h"
 #include "settings.h"
 #include <algorithm>
 
@@ -86,11 +88,14 @@ enum
 
 GUIKeyChangeMenu::GUIKeyChangeMenu(gui::IGUIEnvironment* env,
 		gui::IGUIElement* parent, s32 id, IMenuManager *menumgr,
-		ISimpleTextureSource *tsrc) :
+		ISimpleTextureSource *tsrc, bool main_menu) :
 		GUIModalMenu(env, parent, id, menumgr),
-		m_tsrc(tsrc)
+		m_tsrc(tsrc),
+		m_main_menu(main_menu)
 {
 	init_keys();
+
+	if (m_main_menu) return;
 	v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
 	m_fullscreen_bgcolor = video::SColor(
 		(u8) MYMIN(MYMAX(g_settings->getS32("formspec_fullscreen_bg_opacity"), 0), 255),
@@ -164,7 +169,10 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	// Background image
 	{
-		const std::string texture = "bg_common.png";
+		std::string texture = "bg_common.png";
+		if (m_main_menu)
+			texture = porting::path_share + DIR_DELIM "textures" DIR_DELIM
+				"base" DIR_DELIM "pack" DIR_DELIM + texture;
 		const core::rect<s32> rect(0, 0, 0, 0);
 		const core::rect<s32> middle(40, 40, -40, -40);
 		new GUIBackgroundImage(Environment, this, GUI_ID_BACKGROUND_IMG, rect,
@@ -276,11 +284,13 @@ void GUIKeyChangeMenu::drawMenu()
 	gui::IGUISkin* skin = Environment->getSkin();
 	if (!skin)
 		return;
-	video::IVideoDriver* driver = Environment->getVideoDriver();
 
-	v2u32 screenSize = driver->getScreenSize();
-	core::rect<s32> allbg(0, 0, screenSize.X, screenSize.Y);
-	driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
+	if (!m_main_menu) {
+		video::IVideoDriver* driver = Environment->getVideoDriver();
+		v2u32 screenSize = driver->getScreenSize();
+		core::rect<s32> allbg(0, 0, screenSize.X, screenSize.Y);
+		driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
+	}
 
 	gui::IGUIElement::draw();
 }
