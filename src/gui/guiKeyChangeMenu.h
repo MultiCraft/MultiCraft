@@ -43,7 +43,8 @@ class GUIKeyChangeMenu : public GUIModalMenu
 {
 public:
 	GUIKeyChangeMenu(gui::IGUIEnvironment *env, gui::IGUIElement *parent, s32 id,
-			IMenuManager *menumgr, ISimpleTextureSource *tsrc, bool main_menu = false);
+			IMenuManager *menumgr, ISimpleTextureSource *tsrc,
+			bool main_menu = false);
 	~GUIKeyChangeMenu();
 
 	void removeChildren();
