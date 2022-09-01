@@ -4471,7 +4471,7 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
 	if (new_pw != confirm_pw)
-		os << "label[1,7.2;\x1b(c@red)" << strgettext("Passwords do not match!") << "]";
+		os << "label[1,7.1;\x1b(c@red)" << strgettext("Passwords do not match!") << "]";
 
 	/* Create menu */
 	/* Note: FormspecFormSource and LocalFormspecHandler  *
