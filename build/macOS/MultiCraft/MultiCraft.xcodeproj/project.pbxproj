@@ -2283,7 +2283,7 @@
 				MARKETING_VERSION = 2.0.1;
 				OTHER_CFLAGS = (
 					"$(inherited)",
-					"-D_IRR_COMPILE_WITH_SDL2_DEVICE_",
+					"-D_IRR_COMPILE_WITH_SDL_DEVICE_",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2353,7 +2353,7 @@
 				MARKETING_VERSION = 2.0.1;
 				OTHER_CFLAGS = (
 					"$(inherited)",
-					"-D_IRR_COMPILE_WITH_SDL2_DEVICE_",
+					"-D_IRR_COMPILE_WITH_SDL_DEVICE_",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",

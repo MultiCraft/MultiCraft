@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "log.h"
 #include "porting.h"
 
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #include <SDL.h>
 #endif
 
@@ -220,7 +220,7 @@ void init_gettext(const char *path, const std::string &configured_language,
 	}
 	else {
 		 /* set current system default locale */
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 		SDL_Locale* locale = SDL_GetPreferredLocales();
 
 		if (locale) {

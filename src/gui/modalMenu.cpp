@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/renderingengine.h"
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #include <SDL.h>
 #endif
 
@@ -63,7 +63,7 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 
 GUIModalMenu::~GUIModalMenu()
 {
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
 		SDL_StopTextInput();
 #endif
@@ -251,7 +251,7 @@ void GUIModalMenu::leave()
 bool GUIModalMenu::preprocessEvent(const SEvent &event)
 {
 	// clang-format off
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	// Enable text input events when edit box is focused
 	if (event.EventType == EET_GUI_EVENT) {
 		if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUSED &&

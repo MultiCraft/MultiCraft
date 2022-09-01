@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <iomanip>
 #include <map>
 
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	#include <SDL.h>
 #elif !defined(_WIN32)
 	#include <iconv.h>
@@ -57,7 +57,7 @@ const char *DEFAULT_ENCODING = "UTF-32LE";
 const char *DEFAULT_ENCODING = "WCHAR_T";
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
 std::wstring utf8_to_wide(const std::string &input)
 {

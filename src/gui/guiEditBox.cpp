@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h"
 #include "util/string.h"
 
-#if defined(_IRR_COMPILE_WITH_SDL2_DEVICE_)
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 #include <SDL.h>
 #endif
 
@@ -213,7 +213,7 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 				}
 			}
 			break;
-#if defined(_IRR_COMPILE_WITH_SDL2_DEVICE_)
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 		case EET_SDL_TEXT_EVENT:
 			if (event.SDLTextEvent.Type == irr::ESDLET_TEXTINPUT) {
 				core::stringw text =
@@ -279,10 +279,10 @@ bool GUIEditBox::processKey(const SEvent &event)
 
 	// On Windows right alt simulates additional control press/release events.
 	// It causes unexpected bahavior, for example right alt + A would clear text
-	// in the edit box. At least for SDL2 we can easily check if alt key is
+	// in the edit box. At least for SDL we can easily check if alt key is
 	// pressed
 	bool altPressed = false;
-#if defined(_IRR_COMPILE_WITH_SDL2_DEVICE_)
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	SDL_Keymod keymod = SDL_GetModState();
 	altPressed = keymod & KMOD_ALT;
 #endif

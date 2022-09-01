@@ -36,7 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#include "irrlicht_changes/CGUITTFont.h"
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #include <SDL.h>
 #endif
 
@@ -99,7 +99,7 @@ GUIChatConsole::GUIChatConsole(
 
 GUIChatConsole::~GUIChatConsole()
 {
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
 		SDL_StopTextInput();
 #endif
@@ -121,7 +121,7 @@ void GUIChatConsole::openConsole(f32 scale)
 	Environment->setFocus(this);
 	m_menumgr->createdMenu(this);
 
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (porting::hasRealKeyboard())
 		SDL_StartTextInput();
 #endif
@@ -143,7 +143,7 @@ void GUIChatConsole::closeConsole()
 	Environment->removeFocus(this);
 	m_menumgr->deletingMenu(this);
 
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
 		SDL_StopTextInput();
 #endif
@@ -639,7 +639,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			return true;
 		}
 	}
-#ifdef _IRR_COMPILE_WITH_SDL2_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	else if(event.EventType == EET_SDL_TEXT_EVENT)
 	{
 		if (event.SDLTextEvent.Type == ESDLET_TEXTINPUT)
