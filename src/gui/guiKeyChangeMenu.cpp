@@ -170,14 +170,6 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	s *= 0.75f;
 #endif
 
-#ifdef HAVE_TOUCHSCREENGUI
-	s = MYMIN(s, m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5);
-#elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	s = MYMIN(s, m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5);
-#else
-	s = MYMIN(s, m_gui_scale);
-#endif
-
 	// Make sure the GUI will fit on the screen
 	// The change keys GUI is 835x430 pixels (with a scaling of 1)
 	if (835 * s > screensize.X)
