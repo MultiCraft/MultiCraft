@@ -24,7 +24,6 @@
 #include "irrlichttypes_extrabloated.h"
 #include "modalMenu.h"
 #include "gettext.h"
-#include "StyleSpec.h"
 #include "client/keycode.h"
 #include <string>
 #include <vector>
@@ -72,8 +71,6 @@ private:
 	bool resetMenu();
 
 	void add_key(int id, const wchar_t *button_name, const std::string &setting_name);
-
-	std::array<StyleSpec, StyleSpec::NUM_STATES> getButtonStyle();
 
 	bool shift_down = false;
 

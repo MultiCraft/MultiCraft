@@ -29,6 +29,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
 #include "settings.h"
+#include "StyleSpec.h"
 
 #include "gettext.h"
 #include "client/renderingengine.h"
@@ -88,12 +89,16 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 		Calculate new sizes and positions
 	*/
 #ifdef HAVE_TOUCHSCREENGUI
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
+	float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+	float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
 #else
-	const float s = m_gui_scale;
+	float s = m_gui_scale;
 #endif
+
+	// Make the GUI slightly larger
+	s *= 1.125;
+
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 380 * s / 2,
 		screensize.Y / 2 - 200 * s / 2,
@@ -131,8 +136,11 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 		core::rect<s32> rect(0, 0, 80 * s, 30 * s);
 		rect = rect + v2s32(size.X / 2 - 80 * s / 2, size.Y / 2 + 50 * s);
 		const wchar_t *text = wgettext("Exit");
-		GUIButton::addButton(Environment, rect, m_tsrc, this, ID_soundExitButton, text);
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this,
+				ID_soundExitButton, text);
 		delete[] text;
+
+		e->setStyles(StyleSpec::getButtonStyle());
 	}
 	{
 		core::rect<s32> rect(0, 0, 300 * s, 20 * s);

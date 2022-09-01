@@ -131,34 +131,6 @@ void GUIKeyChangeMenu::removeChildren()
 	key_used_text = nullptr;
 }
 
-std::array<StyleSpec, StyleSpec::NUM_STATES> GUIKeyChangeMenu::getButtonStyle()
-{
-	std::string texture_path = "";
-	if (m_main_menu)
-		texture_path = porting::path_share + DIR_DELIM "textures" DIR_DELIM
-			"base" DIR_DELIM "pack" DIR_DELIM;
-
-	std::array<StyleSpec, StyleSpec::NUM_STATES> ret;
-
-	StyleSpec btn_spec;
-	btn_spec.set(StyleSpec::BGIMG, texture_path + "gui_button.png");
-	btn_spec.set(StyleSpec::BGIMG_MIDDLE, "20");
-	btn_spec.set(StyleSpec::BORDER, "false");
-	btn_spec.set(StyleSpec::PADDING, "-15");
-
-	ret[StyleSpec::STATE_DEFAULT] = btn_spec;
-
-	StyleSpec hovered_spec;
-	hovered_spec.set(StyleSpec::BGIMG, texture_path + "gui_button_hovered.png");
-	ret[StyleSpec::STATE_HOVERED] = hovered_spec;
-
-	StyleSpec pressed_spec;
-	pressed_spec.set(StyleSpec::BGIMG, texture_path + "gui_button_pressed.png");
-	ret[StyleSpec::STATE_PRESSED] = pressed_spec;
-
-	return ret;
-}
-
 void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 {
 	removeChildren();
@@ -188,12 +160,14 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	v2s32 size = DesiredRect.getSize();
 	v2s32 topleft(0, 0);
 
+	std::string texture_path = "";
+	if (m_main_menu)
+		texture_path = porting::path_share + DIR_DELIM "textures" DIR_DELIM
+			"base" DIR_DELIM "pack" DIR_DELIM;
+
 	// Background image
 	{
-		std::string texture = "bg_common.png";
-		if (m_main_menu)
-			texture = porting::path_share + DIR_DELIM "textures" DIR_DELIM
-				"base" DIR_DELIM "pack" DIR_DELIM + texture;
+		const std::string texture = texture_path + "bg_common.png";
 		const core::rect<s32> rect(0, 0, 0, 0);
 		const core::rect<s32> middle(40, 40, -40, -40);
 		new GUIBackgroundImage(Environment, this, GUI_ID_BACKGROUND_IMG, rect,
@@ -284,7 +258,9 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		offset += v2s32(0, 25);
 	}
 
-	const std::array<StyleSpec, StyleSpec::NUM_STATES> styles = getButtonStyle();
+	const std::array<StyleSpec, StyleSpec::NUM_STATES> styles =
+			StyleSpec::getButtonStyle(texture_path);
+
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
 		rect += topleft + v2s32(size.X / 2 - 165 * s, size.Y - 50 * s);
