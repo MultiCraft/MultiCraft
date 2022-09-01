@@ -137,6 +137,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 #endif
 
 	// Make sure the GUI will fit on the screen
+	// The password GUI is 835x430 pixels (with a scaling of 1)
 	if (835 * s > screensize.X)
 		s = screensize.X / 835.f;
 	if (430 * s > screensize.Y)
