@@ -77,4 +77,6 @@ private:
 	gui::IGUIStaticText *key_used_text = nullptr;
 	std::vector<key_setting *> key_settings;
 	ISimpleTextureSource *m_tsrc;
+
+	video::SColor m_fullscreen_bgcolor;
 };

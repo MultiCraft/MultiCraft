@@ -19,6 +19,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "guiVolumeChange.h"
 #include "debug.h"
+#include "guiBackgroundImage.h"
 #include "guiButton.h"
 #include "serialization.h"
 #include <string>
@@ -32,6 +33,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "gettext.h"
 #include "client/renderingengine.h"
 
+const int ID_backgroundImage = 262;
 const int ID_soundText = 263;
 const int ID_soundExitButton = 264;
 const int ID_soundSlider = 265;
@@ -44,6 +46,13 @@ GUIVolumeChange::GUIVolumeChange(gui::IGUIEnvironment* env,
 	GUIModalMenu(env, parent, id, menumgr),
 	m_tsrc(tsrc)
 {
+	v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
+	m_fullscreen_bgcolor = video::SColor(
+		(u8) MYMIN(MYMAX(g_settings->getS32("formspec_fullscreen_bg_opacity"), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.X), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Y), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Z), 0), 255)
+	);
 }
 
 GUIVolumeChange::~GUIVolumeChange()
@@ -53,6 +62,9 @@ GUIVolumeChange::~GUIVolumeChange()
 
 void GUIVolumeChange::removeChildren()
 {
+	if (gui::IGUIElement *e = getElementFromId(ID_backgroundImage))
+		e->remove();
+
 	if (gui::IGUIElement *e = getElementFromId(ID_soundText))
 		e->remove();
 
@@ -97,6 +109,13 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 		Add stuff
 	*/
 	{
+		const std::string texture = "bg_common.png";
+		const core::rect<s32> rect(0, 0, 0, 0);
+		const core::rect<s32> middle(40, 40, -40, -40);
+		new GUIBackgroundImage(Environment, this, ID_backgroundImage, rect,
+				texture, middle, m_tsrc, true);
+	}
+	{
 		core::rect<s32> rect(0, 0, 160 * s, 20 * s);
 		rect = rect + v2s32(size.X / 2 - 80 * s, size.Y / 2 - 70 * s);
 
@@ -139,8 +158,11 @@ void GUIVolumeChange::drawMenu()
 	if (!skin)
 		return;
 	video::IVideoDriver* driver = Environment->getVideoDriver();
-	video::SColor bgcolor(140, 0, 0, 0);
-	driver->draw2DRectangle(bgcolor, AbsoluteRect, &AbsoluteClippingRect);
+
+	v2u32 screenSize = driver->getScreenSize();
+	core::rect<s32> allbg(0, 0, screenSize.X, screenSize.Y);
+	driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
+
 	gui::IGUIElement::draw();
 }
 

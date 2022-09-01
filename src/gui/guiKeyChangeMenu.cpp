@@ -21,6 +21,7 @@
 
 #include "guiKeyChangeMenu.h"
 #include "debug.h"
+#include "guiBackgroundImage.h"
 #include "guiButton.h"
 #include "serialization.h"
 #include <string>
@@ -42,6 +43,7 @@ extern MainGameCallback *g_gamecallback;
 enum
 {
 	GUI_ID_BACK_BUTTON = 101, GUI_ID_ABORT_BUTTON, GUI_ID_SCROLL_BAR,
+	GUI_ID_BACKGROUND_IMG,
 	// buttons
 	GUI_ID_KEY_FORWARD_BUTTON,
 	GUI_ID_KEY_BACKWARD_BUTTON,
@@ -89,6 +91,13 @@ GUIKeyChangeMenu::GUIKeyChangeMenu(gui::IGUIEnvironment* env,
 		m_tsrc(tsrc)
 {
 	init_keys();
+	v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
+	m_fullscreen_bgcolor = video::SColor(
+		(u8) MYMIN(MYMAX(g_settings->getS32("formspec_fullscreen_bg_opacity"), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.X), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Y), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Z), 0), 255)
+	);
 }
 
 GUIKeyChangeMenu::~GUIKeyChangeMenu()
@@ -137,6 +146,15 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	v2s32 size = DesiredRect.getSize();
 	v2s32 topleft(0, 0);
+
+	// Background image
+	{
+		const std::string texture = "bg_common.png";
+		const core::rect<s32> rect(0, 0, 0, 0);
+		const core::rect<s32> middle(40, 40, -40, -40);
+		new GUIBackgroundImage(Environment, this, GUI_ID_BACKGROUND_IMG, rect,
+				texture, middle, m_tsrc, true);
+	}
 
 	{
 		core::rect<s32> rect(0, 0, 600 * s, 40 * s);
@@ -245,8 +263,9 @@ void GUIKeyChangeMenu::drawMenu()
 		return;
 	video::IVideoDriver* driver = Environment->getVideoDriver();
 
-	video::SColor bgcolor(140, 0, 0, 0);
-	driver->draw2DRectangle(bgcolor, AbsoluteRect, &AbsoluteClippingRect);
+	v2u32 screenSize = driver->getScreenSize();
+	core::rect<s32> allbg(0, 0, screenSize.X, screenSize.Y);
+	driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
 
 	gui::IGUIElement::draw();
 }
