@@ -175,7 +175,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	}
 
 	{
-		core::rect<s32> rect(0, 0, 600 * s, 40 * s);
+		core::rect<s32> rect(0, 0, 795 * s, 50 * s);
 		rect += topleft + v2s32(25 * s, 10 * s);
 		//gui::IGUIStaticText *t =
 		const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
