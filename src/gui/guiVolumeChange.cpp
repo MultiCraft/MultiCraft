@@ -88,22 +88,18 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 	/*
 		Calculate new sizes and positions
 	*/
-#ifdef HAVE_TOUCHSCREENGUI
-	float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
-#elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+	float s = MYMIN(screensize.X / 380, screensize.Y / 180);
+#if HAVE_TOUCHSCREENGUI
+	s *= g_settings->getBool("device_is_tablet") ? 0.3f : 0.5f;
 #else
-	float s = m_gui_scale;
+	s *= 0.3f;
 #endif
-
-	// Make the GUI slightly larger
-	s *= 1.125;
 
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 380 * s / 2,
-		screensize.Y / 2 - 200 * s / 2,
+		screensize.Y / 2 - 180 * s / 2,
 		screensize.X / 2 + 380 * s / 2,
-		screensize.Y / 2 + 200 * s / 2
+		screensize.Y / 2 + 180 * s / 2 // 200
 	);
 	recalculateAbsolutePosition(false);
 
@@ -121,8 +117,8 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 				texture, middle, m_tsrc, true);
 	}
 	{
-		core::rect<s32> rect(0, 0, 160 * s, 20 * s);
-		rect = rect + v2s32(size.X / 2 - 80 * s, size.Y / 2 - 70 * s);
+		core::rect<s32> rect(0, 0, 320 * s, 25 * s);
+		rect = rect + v2s32(30 * s, size.Y / 2 - 35 * s); // 55
 
 		const wchar_t *text = wgettext("Sound Volume: ");
 		core::stringw volume_text = text;
@@ -133,8 +129,8 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 				true, this, ID_soundText);
 	}
 	{
-		core::rect<s32> rect(0, 0, 80 * s, 30 * s);
-		rect = rect + v2s32(size.X / 2 - 80 * s / 2, size.Y / 2 + 50 * s);
+		core::rect<s32> rect(0, 0, 80 * s, 35 * s);
+		rect = rect + v2s32(size.X / 2 - 40 * s, size.Y / 2 + 35 * s); // 45
 		const wchar_t *text = wgettext("Exit");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this,
 				ID_soundExitButton, text);
@@ -143,21 +139,21 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 		e->setStyles(StyleSpec::getButtonStyle());
 	}
 	{
-		core::rect<s32> rect(0, 0, 300 * s, 20 * s);
-		rect = rect + v2s32(size.X / 2 - 150 * s, size.Y / 2);
+		core::rect<s32> rect(0, 0, 320 * s, 25 * s);
+		rect = rect + v2s32(size.X / 2 - 160 * s, size.Y / 2 - 12 * s); // 30
 		gui::IGUIScrollBar *e = Environment->addScrollBar(true,
 			rect, this, ID_soundSlider);
 		e->setMax(100);
 		e->setPos(volume);
 	}
-	{
-		core::rect<s32> rect(0, 0, 80 * s, 20 * s);
-		rect = rect + v2s32(size.X / 2 - 80 * s / 2, size.Y / 2 - 35 * s);
+	/*{
+		core::rect<s32> rect(0, 0, 150 * s, 25 * s);
+		rect = rect + v2s32(30 * s, size.Y / 2 + 5 * s);
 		const wchar_t *text = wgettext("Muted");
 		Environment->addCheckBox(g_settings->getBool("mute_sound"), rect, this,
 				ID_soundMuteButton, text);
 		delete[] text;
-	}
+	}*/
 }
 
 void GUIVolumeChange::drawMenu()
@@ -187,7 +183,7 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 			return true;
 		}
 	} else if (event.EventType == EET_GUI_EVENT) {
-		if (event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED) {
+		/*if (event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED) {
 			gui::IGUIElement *e = getElementFromId(ID_soundMuteButton);
 			if (e != NULL && e->getType() == gui::EGUIET_CHECK_BOX) {
 				g_settings->setBool("mute_sound", ((gui::IGUICheckBox*)e)->isChecked());
@@ -195,7 +191,7 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 
 			Environment->setFocus(this);
 			return true;
-		}
+		}*/
 
 		if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
 			if (event.GUIEvent.Caller->getID() == ID_soundExitButton) {
@@ -218,6 +214,10 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 			if (event.GUIEvent.Caller->getID() == ID_soundSlider) {
 				s32 pos = ((gui::IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
 				g_settings->setFloat("sound_volume", (float) pos / 100);
+
+				// unmute sound when changing the volume
+				if (g_settings->getBool("mute_sound"))
+					g_settings->setBool("mute_sound", false);
 
 				gui::IGUIElement *e = getElementFromId(ID_soundText);
 				const wchar_t *text = wgettext("Sound Volume: ");
