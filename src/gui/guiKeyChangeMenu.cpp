@@ -178,7 +178,11 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		core::rect<s32> rect(0, 0, 795 * s, 50 * s);
 		rect += topleft + v2s32(25 * s, 10 * s);
 		//gui::IGUIStaticText *t =
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
+#else
+		const wchar_t *text = wgettext("Change Keys");
+#endif
 		Environment->addStaticText(text,
 								   rect, false, true, this, -1);
 		delete[] text;
@@ -216,7 +220,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
-		u32 option_w = 180 * s;
+		u32 option_w = 300 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
 			rect += topleft + v2s32(option_x, option_y);
@@ -231,7 +235,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
-		u32 option_w = 280 * s;
+		u32 option_w = 300 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
 			rect += topleft + v2s32(option_x, option_y);
@@ -246,7 +250,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
-		u32 option_w = 280;
+		u32 option_w = 300 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
 			rect += topleft + v2s32(option_x, option_y);
