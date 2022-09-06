@@ -1926,7 +1926,7 @@ msgstr "Tangent används redan"
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Tangentbindningar. (Om den här menyn strular, radera saker från minetest."
+"Tangentbindningar. (Om den här menyn strular, radera saker från multicraft."
 "conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
