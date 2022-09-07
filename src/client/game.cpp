@@ -4375,13 +4375,13 @@ void Game::showPauseMenu()
 			<< strgettext("Change Password") << ";;false]";
 	}
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound")) {
 		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_sound;"
 			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
 		<< strgettext("Change Keys")  << ";;false]";
 #endif
