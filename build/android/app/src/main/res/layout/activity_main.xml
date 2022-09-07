@@ -5,14 +5,14 @@
 	<ProgressBar
 		android:id="@+id/progress_bar"
 		style="@style/Widget.MaterialComponents.LinearProgressIndicator"
-		android:layout_width="400dp"
-		android:layout_height="45dp"
+		android:layout_width="512dp"
+		android:layout_height="64dp"
 		android:layout_centerInParent="true"
 		android:layout_marginLeft="120dp"
 		android:layout_marginRight="120dp"
 		android:indeterminate="false"
 		android:max="100"
-		android:progressDrawable="@drawable/custom_progress_bar"
+		android:progressDrawable="@drawable/progress"
 		android:visibility="gone" />
 
 	<ProgressBar
