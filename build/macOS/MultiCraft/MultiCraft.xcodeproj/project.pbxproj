@@ -126,9 +126,6 @@
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
 		8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL2.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
-		8495BD2028B80F21009FCF4D /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1F28B80F21009FCF4D /* Metal.framework */; };
-		8495BD2228B80F4D009FCF4D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */; };
-		8495BD2628B80FD1009FCF4D /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2528B80FD1009FCF4D /* CoreAudio.framework */; };
 		8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2728B810AD009FCF4D /* CoreVideo.framework */; };
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
@@ -139,6 +136,8 @@
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
 		84A1FA4D252E635900000717 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84A1FA4C252E635900000717 /* locale */; };
+		84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974228CA1291004E8CEC /* GameController.framework */; };
+		84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974428CA129C004E8CEC /* CoreHaptics.framework */; };
 		84C8E20B257804A200C1E5D0 /* libopenal.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */; };
 		84C8E20C257804A200C1E5D0 /* libopenal.1.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
@@ -574,9 +573,6 @@
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		8495BD1528B80B00009FCF4D /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../deps/SDL2/libSDL2.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
-		8495BD1F28B80F21009FCF4D /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
-		8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		8495BD2528B80FD1009FCF4D /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		8495BD2728B810AD009FCF4D /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		849D0841278AC1B200471354 /* ecrypt-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-config.h"; path = "../../../../lib/luachacha/ecrypt-config.h"; sourceTree = "<group>"; };
@@ -602,6 +598,8 @@
 		84A636C327C67F01005B4503 /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84AABAF72822C3F000A89340 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84AABAF82822C3FC00A89340 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
+		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
+		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopenal.1.dylib; path = ../deps/openal/libopenal.1.dylib; sourceTree = "<group>"; };
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/lib/libintl.a; sourceTree = "<group>"; };
 		84F20D5425D52790009562A9 /* irrUString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrUString.h; path = ../../../../src/irrlicht_changes/irrUString.h; sourceTree = "<group>"; };
@@ -910,8 +908,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8495BD2628B80FD1009FCF4D /* CoreAudio.framework in Frameworks */,
-				8495BD2228B80F4D009FCF4D /* AudioToolbox.framework in Frameworks */,
 				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
 				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
 				84EEE5E72782729B00F61929 /* libintl.a in Frameworks */,
@@ -919,7 +915,9 @@
 				84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */,
 				84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */,
 				84463B9724B258B20099DFBD /* Pods_MultiCraft.framework in Frameworks */,
+				84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */,
 				8458616924B1B7DC0040BA4F /* libfreetype.a in Frameworks */,
+				84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */,
 				84C8E20B257804A200C1E5D0 /* libopenal.1.dylib in Frameworks */,
 				84463B9924B258B50099DFBD /* OpenGL.framework in Frameworks */,
 				8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */,
@@ -928,7 +926,6 @@
 				84463B9324B258B00099DFBD /* IOKit.framework in Frameworks */,
 				8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */,
 				846F883B27A59704007B6210 /* libluajit.a in Frameworks */,
-				8495BD2028B80F21009FCF4D /* Metal.framework in Frameworks */,
 				8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1121,11 +1118,10 @@
 		84585BFF24B1347B0040BA4F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				84BE974428CA129C004E8CEC /* CoreHaptics.framework */,
+				84BE974228CA1291004E8CEC /* GameController.framework */,
 				8495BD2928B81170009FCF4D /* Carbon.framework */,
 				8495BD2728B810AD009FCF4D /* CoreVideo.framework */,
-				8495BD2528B80FD1009FCF4D /* CoreAudio.framework */,
-				8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */,
-				8495BD1F28B80F21009FCF4D /* Metal.framework */,
 				8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */,
 				8495BD1528B80B00009FCF4D /* libSDL2.a */,
 				846F883A27A596F9007B6210 /* libluajit.a */,
