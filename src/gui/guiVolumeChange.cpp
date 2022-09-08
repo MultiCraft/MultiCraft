@@ -88,9 +88,9 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 	/*
 		Calculate new sizes and positions
 	*/
-	float s = MYMIN(screensize.X / 380, screensize.Y / 180);
+	float s = MYMIN(screensize.X / 380.f, screensize.Y / 180.f);
 #if HAVE_TOUCHSCREENGUI
-	s *= g_settings->getBool("device_is_tablet") ? 0.35f : 0.5f;
+	s *= g_settings->getBool("device_is_tablet") ? 0.4f : 0.5f;
 #else
 	s *= 0.35f;
 #endif

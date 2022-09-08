@@ -135,9 +135,9 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 {
 	removeChildren();
 
-	float s = MYMIN(screensize.X / 835, screensize.Y / 430);
+	float s = MYMIN(screensize.X / 835.f, screensize.Y / 430.f);
 #if HAVE_TOUCHSCREENGUI
-	s *= g_settings->getBool("device_is_tablet") ? 0.75f : 0.9f;
+	s *= g_settings->getBool("device_is_tablet") ? 0.8f : 0.9f;
 #else
 	s *= 0.75f;
 #endif
