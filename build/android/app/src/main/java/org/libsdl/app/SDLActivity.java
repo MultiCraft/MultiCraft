@@ -533,7 +533,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
            nativeFocusChanged(true);
 
         } else {
-           nativeFocusChanged(false);
+           //nativeFocusChanged(false); // CHANGED!
            if (!mHasMultiWindow) {
                mNextNativeState = NativeState.PAUSED;
                SDLActivity.handleNativeState();
