@@ -119,8 +119,9 @@ class MainActivity : AppCompatActivity() {
 			binding.tvProgress.text = String.format(getString(progressMessage), progress)
 			binding.progressBar.progress = progress
 			// colorize the progress bar
-			val progressDrawable =
-				(binding.progressBar.progressDrawable as LayerDrawable).getDrawable(1)
+			val progressBarDrawable =
+				(binding.progressBar.progressDrawable as LayerDrawable).getDrawable(0)
+			val progressDrawable = (progressBarDrawable as LayerDrawable).getDrawable(1)
 			val color = Color.rgb(255 - progress * 2, progress * 2, 25)
 			progressDrawable.colorFilter =
 				BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
