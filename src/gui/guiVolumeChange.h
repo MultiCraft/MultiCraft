@@ -51,4 +51,5 @@ protected:
 
 private:
 	ISimpleTextureSource *m_tsrc;
+	video::SColor m_fullscreen_bgcolor;
 };

@@ -4363,9 +4363,9 @@ void Game::showPauseMenu()
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
 
-		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=20;padding=-5]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui_button_hovered.png;bgimg_middle=20]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui_button_pressed.png;bgimg_middle=20]"
+		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=20;padding=-10]"
+		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui_button_hovered.png]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui_button_pressed.png]"
 
 		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
 		<< strgettext("Continue") << ";;false]";
@@ -4375,13 +4375,13 @@ void Game::showPauseMenu()
 			<< strgettext("Change Password") << ";;false]";
 	}
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound")) {
 		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_sound;"
 			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
 		<< strgettext("Change Keys")  << ";;false]";
 #endif
@@ -4457,18 +4457,21 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 
 	std::ostringstream os;
 	os << "formspec_version[5]"
-		<< "size[10.5,7.9]"
+		<< "size[10.5,7.5]"
 		<< "no_prepend[]"
 		<< "bgcolor[#320000b4;true]"
 		<< "background9[0,0;0,0;bg_common.png;true;40]"
-		<< "pwdfield[1,1.4;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
-		<< "pwdfield[1,3;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
-		<< "pwdfield[1,4.6;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
-		<< "button[1,5.9;4.1,0.8;btn_change_pw;" << strgettext("Change") << "]"
-		<< "button_exit[5.4,5.9;4.1,0.8;btn_cancel;" << strgettext("Cancel") << "]";
+		<< "pwdfield[1,1.2;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
+		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
+		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
+		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=20;padding=-10]"
+		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui_button_hovered.png]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui_button_pressed.png]"
+		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
+		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
 	if (new_pw != confirm_pw)
-		os << "label[1,7.2;\x1b(c@red)" << strgettext("Passwords do not match!") << "]";
+		os << "label[1,7.1;\x1b(c@red)" << strgettext("Passwords do not match!") << "]";
 
 	/* Create menu */
 	/* Note: FormspecFormSource and LocalFormspecHandler  *

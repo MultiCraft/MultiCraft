@@ -19,6 +19,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "guiVolumeChange.h"
 #include "debug.h"
+#include "guiBackgroundImage.h"
 #include "guiButton.h"
 #include "serialization.h"
 #include <string>
@@ -28,10 +29,12 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
 #include "settings.h"
+#include "StyleSpec.h"
 
 #include "gettext.h"
 #include "client/renderingengine.h"
 
+const int ID_backgroundImage = 262;
 const int ID_soundText = 263;
 const int ID_soundExitButton = 264;
 const int ID_soundSlider = 265;
@@ -44,6 +47,13 @@ GUIVolumeChange::GUIVolumeChange(gui::IGUIEnvironment* env,
 	GUIModalMenu(env, parent, id, menumgr),
 	m_tsrc(tsrc)
 {
+	v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
+	m_fullscreen_bgcolor = video::SColor(
+		(u8) MYMIN(MYMAX(g_settings->getS32("formspec_fullscreen_bg_opacity"), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.X), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Y), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Z), 0), 255)
+	);
 }
 
 GUIVolumeChange::~GUIVolumeChange()
@@ -53,6 +63,9 @@ GUIVolumeChange::~GUIVolumeChange()
 
 void GUIVolumeChange::removeChildren()
 {
+	if (gui::IGUIElement *e = getElementFromId(ID_backgroundImage))
+		e->remove();
+
 	if (gui::IGUIElement *e = getElementFromId(ID_soundText))
 		e->remove();
 
@@ -75,18 +88,18 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 	/*
 		Calculate new sizes and positions
 	*/
-#ifdef HAVE_TOUCHSCREENGUI
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
-#elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+	float s = MYMIN(screensize.X / 380.f, screensize.Y / 180.f);
+#if HAVE_TOUCHSCREENGUI
+	s *= g_settings->getBool("device_is_tablet") ? 0.4f : 0.5f;
 #else
-	const float s = m_gui_scale;
+	s *= 0.35f;
 #endif
+
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 380 * s / 2,
-		screensize.Y / 2 - 200 * s / 2,
+		screensize.Y / 2 - 180 * s / 2,
 		screensize.X / 2 + 380 * s / 2,
-		screensize.Y / 2 + 200 * s / 2
+		screensize.Y / 2 + 180 * s / 2 // 200
 	);
 	recalculateAbsolutePosition(false);
 
@@ -97,8 +110,15 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 		Add stuff
 	*/
 	{
-		core::rect<s32> rect(0, 0, 160 * s, 20 * s);
-		rect = rect + v2s32(size.X / 2 - 80 * s, size.Y / 2 - 70 * s);
+		const std::string texture = "bg_common.png";
+		const core::rect<s32> rect(0, 0, 0, 0);
+		const core::rect<s32> middle(40, 40, -40, -40);
+		new GUIBackgroundImage(Environment, this, ID_backgroundImage, rect,
+				texture, middle, m_tsrc, true);
+	}
+	{
+		core::rect<s32> rect(0, 0, 320 * s, 25 * s);
+		rect = rect + v2s32(30 * s, size.Y / 2 - 35 * s); // 55
 
 		const wchar_t *text = wgettext("Sound Volume: ");
 		core::stringw volume_text = text;
@@ -109,28 +129,31 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 				true, this, ID_soundText);
 	}
 	{
-		core::rect<s32> rect(0, 0, 80 * s, 30 * s);
-		rect = rect + v2s32(size.X / 2 - 80 * s / 2, size.Y / 2 + 55 * s);
+		core::rect<s32> rect(0, 0, 80 * s, 35 * s);
+		rect = rect + v2s32(size.X / 2 - 40 * s, size.Y / 2 + 35 * s); // 45
 		const wchar_t *text = wgettext("Exit");
-		GUIButton::addButton(Environment, rect, m_tsrc, this, ID_soundExitButton, text);
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this,
+				ID_soundExitButton, text);
 		delete[] text;
+
+		e->setStyles(StyleSpec::getButtonStyle());
 	}
 	{
-		core::rect<s32> rect(0, 0, 300 * s, 20 * s);
-		rect = rect + v2s32(size.X / 2 - 150 * s, size.Y / 2);
+		core::rect<s32> rect(0, 0, 320 * s, 25 * s);
+		rect = rect + v2s32(size.X / 2 - 160 * s, size.Y / 2 - 12 * s); // 30
 		gui::IGUIScrollBar *e = Environment->addScrollBar(true,
 			rect, this, ID_soundSlider);
 		e->setMax(100);
 		e->setPos(volume);
 	}
-	{
-		core::rect<s32> rect(0, 0, 160 * s, 20 * s);
-		rect = rect + v2s32(size.X / 2 - 80 * s, size.Y / 2 - 35 * s);
+	/*{
+		core::rect<s32> rect(0, 0, 150 * s, 25 * s);
+		rect = rect + v2s32(30 * s, size.Y / 2 + 5 * s);
 		const wchar_t *text = wgettext("Muted");
 		Environment->addCheckBox(g_settings->getBool("mute_sound"), rect, this,
 				ID_soundMuteButton, text);
 		delete[] text;
-	}
+	}*/
 }
 
 void GUIVolumeChange::drawMenu()
@@ -139,8 +162,11 @@ void GUIVolumeChange::drawMenu()
 	if (!skin)
 		return;
 	video::IVideoDriver* driver = Environment->getVideoDriver();
-	video::SColor bgcolor(140, 0, 0, 0);
-	driver->draw2DRectangle(bgcolor, AbsoluteRect, &AbsoluteClippingRect);
+
+	v2u32 screenSize = driver->getScreenSize();
+	core::rect<s32> allbg(0, 0, screenSize.X, screenSize.Y);
+	driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
+
 	gui::IGUIElement::draw();
 }
 
@@ -157,7 +183,7 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 			return true;
 		}
 	} else if (event.EventType == EET_GUI_EVENT) {
-		if (event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED) {
+		/*if (event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED) {
 			gui::IGUIElement *e = getElementFromId(ID_soundMuteButton);
 			if (e != NULL && e->getType() == gui::EGUIET_CHECK_BOX) {
 				g_settings->setBool("mute_sound", ((gui::IGUICheckBox*)e)->isChecked());
@@ -165,7 +191,7 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 
 			Environment->setFocus(this);
 			return true;
-		}
+		}*/
 
 		if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
 			if (event.GUIEvent.Caller->getID() == ID_soundExitButton) {
@@ -188,6 +214,10 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 			if (event.GUIEvent.Caller->getID() == ID_soundSlider) {
 				s32 pos = ((gui::IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
 				g_settings->setFloat("sound_volume", (float) pos / 100);
+
+				// unmute sound when changing the volume
+				if (g_settings->getBool("mute_sound"))
+					g_settings->setBool("mute_sound", false);
 
 				gui::IGUIElement *e = getElementFromId(ID_soundText);
 				const wchar_t *text = wgettext("Sound Volume: ");

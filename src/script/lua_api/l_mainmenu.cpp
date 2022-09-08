@@ -409,7 +409,8 @@ int ModApiMainMenu::l_show_keys_menu(lua_State *L)
 			engine->m_parent,
 			-1,
 			engine->m_menumanager,
-			engine->m_texture_source);
+			engine->m_texture_source,
+			true);
 	kmenu->drop();
 	return 0;
 }
