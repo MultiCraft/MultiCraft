@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity() {
 
 	private fun startUnzipWorker(file: List<String>) {
 		val viewModelFactory = WorkerViewModelFactory(application, file.toTypedArray())
-		val viewModel = ViewModelProvider(this, viewModelFactory).get(WorkerViewModel::class.java)
+		val viewModel = ViewModelProvider(this, viewModelFactory)[WorkerViewModel::class.java]
 		viewModel.unzippingWorkObserver
 			.observe(this, Observer { workInfo ->
 				if (workInfo == null)

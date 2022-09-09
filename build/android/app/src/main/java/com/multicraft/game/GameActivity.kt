@@ -217,4 +217,9 @@ class GameActivity : NativeActivity() {
 	@Suppress("unused")
 	fun upgrade(item: String) {
 	}
+
+	@Suppress("unused")
+	fun getRoundScreen(): Int {
+		return 0
+	}
 }
