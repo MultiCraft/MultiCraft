@@ -73,6 +73,7 @@ class GameActivity : NativeActivity() {
 		if (hasFocus) makeFullScreen(window)
 	}
 
+	@Deprecated("Deprecated in Java")
 	override fun onBackPressed() {
 		// Ignore the back press so MultiCraft can handle it
 	}

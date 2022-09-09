@@ -35,8 +35,6 @@ import androidx.core.graphics.BlendModeCompat
 import androidx.lifecycle.*
 import androidx.work.WorkInfo
 import com.multicraft.game.databinding.ActivityMainBinding
-import com.multicraft.game.helpers.Constants.NO_SPACE_LEFT
-import com.multicraft.game.helpers.Constants.REQUEST_CONNECTION
 import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.TAG_LAUNCH_TIMES
@@ -64,6 +62,7 @@ class MainActivity : AppCompatActivity() {
 	private val sep = File.separator
 	private lateinit var prefs: SharedPreferences
 	private val versionName = BuildConfig.VERSION_NAME
+	private val requestConnection = 104
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -77,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 				throw IOException("Bad disk space state")
 			lateInit()
 		} catch (e: IOException) {
-			showRestartDialog(this, !e.message!!.contains(NO_SPACE_LEFT))
+			showRestartDialog(this, !e.message!!.contains("ENOSPC"))
 		}
 	}
 
@@ -85,10 +84,11 @@ class MainActivity : AppCompatActivity() {
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 		@Suppress("DEPRECATION")
 		super.onActivityResult(requestCode, resultCode, data)
-		if (requestCode == REQUEST_CONNECTION)
+		if (requestCode == requestConnection)
 			checkAppVersion()
 	}
 
+	@Deprecated("Deprecated in Java")
 	override fun onBackPressed() {
 		// Prevent abrupt interruption when copy game files from assets
 	}
@@ -177,7 +177,7 @@ class MainActivity : AppCompatActivity() {
 					runOnUiThread {
 						showRestartDialog(
 							this@MainActivity,
-							!e.message!!.contains(NO_SPACE_LEFT)
+							!e.message!!.contains("ENOSPC")
 						)
 					}
 					return@forEach
@@ -240,11 +240,11 @@ class MainActivity : AppCompatActivity() {
 			.setMessage(R.string.conn_message)
 			.setPositiveButton(R.string.conn_wifi) { _, _ ->
 				@Suppress("DEPRECATION")
-				startActivityForResult(Intent(ACTION_WIFI_SETTINGS), REQUEST_CONNECTION)
+				startActivityForResult(Intent(ACTION_WIFI_SETTINGS), requestConnection)
 			}
 			.setNegativeButton(R.string.conn_mobile) { _, _ ->
 				@Suppress("DEPRECATION")
-				startActivityForResult(Intent(ACTION_WIRELESS_SETTINGS), REQUEST_CONNECTION)
+				startActivityForResult(Intent(ACTION_WIRELESS_SETTINGS), requestConnection)
 			}
 			.setNeutralButton(R.string.ignore) { _, _ -> checkAppVersion() }
 			.setCancelable(false)
