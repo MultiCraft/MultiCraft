@@ -26,8 +26,7 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.provider.Settings.ACTION_WIFI_SETTINGS
 import android.provider.Settings.ACTION_WIRELESS_SETTINGS
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.BlendModeColorFilterCompat
@@ -35,6 +34,7 @@ import androidx.core.graphics.BlendModeCompat
 import androidx.lifecycle.*
 import androidx.work.WorkInfo
 import com.multicraft.game.databinding.ActivityMainBinding
+import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.TAG_LAUNCH_TIMES
@@ -63,6 +63,10 @@ class MainActivity : AppCompatActivity() {
 	private lateinit var prefs: SharedPreferences
 	private val versionName = BuildConfig.VERSION_NAME
 	private val requestConnection = 104
+
+	companion object {
+		var radius = 0
+	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -101,6 +105,17 @@ class MainActivity : AppCompatActivity() {
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
 		super.onWindowFocusChanged(hasFocus)
 		if (hasFocus) makeFullScreen(window)
+	}
+
+	override fun onAttachedToWindow() {
+		super.onAttachedToWindow()
+		if (isAndroid12()) {
+			val insets = window.decorView.rootWindowInsets
+			if (insets != null) {
+				val tl = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)
+				radius = tl?.radius ?: 0
+			}
+		}
 	}
 
 	private fun addLaunchTimes() {
