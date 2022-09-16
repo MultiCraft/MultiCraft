@@ -3601,10 +3601,10 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 		} else {
 			param2 = dir.Z < 0 ? 5 : 4;
 		}
-	}
-
-	if (predicted_f.param_type_2 == CPT2_FACEDIR ||
-			predicted_f.param_type_2 == CPT2_COLORED_FACEDIR) {
+	} else if (predicted_f.param_type_2 == CPT2_FACEDIR ||
+			predicted_f.param_type_2 == CPT2_COLORED_FACEDIR ||
+			predicted_f.param_type_2 == CPT2_4DIR ||
+			predicted_f.param_type_2 == CPT2_COLORED_4DIR) {
 		v3s16 dir = nodepos - floatToInt(client->getEnv().getLocalPlayer()->getPosition(), BS);
 
 		if (abs(dir.X) > abs(dir.Z)) {
@@ -3645,6 +3645,7 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 	// Apply color
 	if ((predicted_f.param_type_2 == CPT2_COLOR
 			|| predicted_f.param_type_2 == CPT2_COLORED_FACEDIR
+			|| predicted_f.param_type_2 == CPT2_COLORED_4DIR
 			|| predicted_f.param_type_2 == CPT2_COLORED_WALLMOUNTED)) {
 		const std::string &indexstr = selected_item.metadata.getString(
 			"palette_index", 0);
@@ -3658,6 +3659,9 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 			} else if (predicted_f.param_type_2 == CPT2_COLORED_FACEDIR) {
 				// param2 = pure palette index + other
 				param2 = (index & 0xe0) | (param2 & 0x1f);
+			} else if (predicted_f.param_type_2 == CPT2_COLORED_4DIR) {
+				// param2 = pure palette index + other
+				param2 = (index & 0xfc) | (param2 & 0x03);
 			}
 		}
 	}

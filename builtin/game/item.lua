@@ -121,6 +121,26 @@ function core.facedir_to_dir(facedir)
 	return facedir_to_dir[facedir_to_dir_map[facedir % 32]]
 end
 
+function core.dir_to_fourdir(dir)
+	if math.abs(dir.x) > math.abs(dir.z) then
+		if dir.x < 0 then
+			return 3
+		else
+			return 1
+		end
+	else
+		if dir.z < 0 then
+			return 2
+		else
+			return 0
+		end
+	end
+end
+
+function core.fourdir_to_dir(fourdir)
+	return facedir_to_dir[facedir_to_dir_map[fourdir % 4]]
+end
+
 function core.dir_to_wallmounted(dir)
 	if abs(dir.y) > max(abs(dir.x), abs(dir.z)) then
 		if dir.y < 0 then
@@ -332,7 +352,9 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 		newnode.param2 = core.dir_to_wallmounted(dir)
 	-- Calculate the direction for furnaces and chests and stuff
 	elseif (def.paramtype2 == "facedir" or
-			def.paramtype2 == "colorfacedir") and not param2 then
+			def.paramtype2 == "colorfacedir" or
+			def.paramtype2 == "4dir" or
+			def.paramtype2 == "color4dir") and not param2 then
 		local placer_pos = placer and placer:get_pos()
 		if placer_pos then
 			local dir = {
@@ -356,6 +378,8 @@ function core.item_place_node(itemstack, placer, pointed_thing, param2,
 			color_divisor = 8
 		elseif def.paramtype2 == "colorfacedir" then
 			color_divisor = 32
+		elseif def.paramtype2 == "color4dir" then
+			color_divisor = 4
 		elseif def.paramtype2 == "colordegrotate" then
 			color_divisor = 32
 		end
