@@ -104,10 +104,8 @@ jclass findClass(const std::string &classname)
 
 	jclass nativeactivity = jnienv->FindClass("android/app/NativeActivity");
 
-	if (jnienv->ExceptionCheck()) {
-		jnienv->ExceptionClear();
-		return nullptr;
-	}
+	if (nativeactivity == nullptr)
+		finishGame("findClass");
 
 	jmethodID getClassLoader = jnienv->GetMethodID(
 			nativeactivity, "getClassLoader", "()Ljava/lang/ClassLoader;");
