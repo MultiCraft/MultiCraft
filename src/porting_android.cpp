@@ -104,10 +104,8 @@ jclass findClass(const std::string &classname)
 
 	jclass nativeactivity = jnienv->FindClass("android/app/NativeActivity");
 
-	if (jnienv->ExceptionCheck()) {
-		jnienv->ExceptionClear();
-		return nullptr;
-	}
+	if (nativeactivity == nullptr)
+		finishGame("findClass");
 
 	jmethodID getClassLoader = jnienv->GetMethodID(
 			nativeactivity, "getClassLoader", "()Ljava/lang/ClassLoader;");
@@ -344,10 +342,10 @@ void notifyExitGame()
 #ifndef SERVER
 float getDisplayDensity()
 {
-	static bool firstrun = true;
+	static bool firstRun = true;
 	static float value = 0;
 
-	if (firstrun) {
+	if (firstRun) {
 		jmethodID getDensity = jnienv->GetMethodID(nativeActivity,
 				"getDensity", "()F");
 
@@ -355,7 +353,7 @@ float getDisplayDensity()
 			"porting::getDisplayDensity unable to find java getDensity method");
 
 		value = jnienv->CallFloatMethod(activityObj, getDensity);
-		firstrun = false;
+		firstRun = false;
 	}
 	return value;
 }
@@ -415,5 +413,23 @@ void upgrade(const std::string &item)
 
 	jstring jitem = jnienv->NewStringUTF(item.c_str());
 	jnienv->CallVoidMethod(activityObj, upgradeGame, jitem);
+}
+
+int getRoundScreen()
+{
+	static bool firstRun = true;
+	static int radius = 0;
+
+	if (firstRun) {
+		jmethodID getRadius = jnienv->GetMethodID(nativeActivity,
+				"getRoundScreen", "()I");
+
+		FATAL_ERROR_IF(getRadius == nullptr,
+			"porting::getRadius unable to find java getRoundScreen method");
+
+		radius = jnienv->CallIntMethod(activityObj, getRadius);
+		firstRun = false;
+	}
+	return radius;
 }
 }
