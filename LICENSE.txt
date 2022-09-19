@@ -37,8 +37,6 @@ MultiCraft Development Team:
   textures/base/pack/down_btn.png
   textures/base/pack/drop_btn.png
   textures/base/pack/escape_btn.png
-  textures/base/pack/heart.png
-  textures/base/pack/heart_gone.png
   textures/base/pack/hunger_*.png
   textures/base/pack/inventory_btn.png
   textures/base/pack/joystick_*.png
@@ -104,6 +102,10 @@ Zughy:
   textures/base/pack/cdb_queued.png
   textures/base/pack/cdb_update.png
   textures/base/pack/cdb_viewonline.png
+
+KevDoy, An0n3m0us:
+  textures/base/pack/heart.png
+  textures/base/pack/heart_gone.png
 
 License of Minetest source code
 -------------------------------

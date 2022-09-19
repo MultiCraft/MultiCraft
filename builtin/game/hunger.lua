@@ -75,6 +75,14 @@ local function is_player(player)
 	)
 end
 
+local function get_hud_id(player)
+	return hunger.hud[player:get_player_name()]
+end
+
+local function set_hud_id(player, hud_id)
+	hunger.hud[player:get_player_name()] = hud_id
+end
+
 --- SATURATION API ---
 function hunger.get_saturation(player)
 	if not is_player(player) then
@@ -91,8 +99,7 @@ function hunger.set_hud_level(player, level)
 		return
 	end
 
-	local hud = hunger.hud[player:get_player_name()]
-	player:hud_change(hud, "number", min(settings.visual_max, level))
+	player:hud_change(get_hud_id(player), "number", min(settings.visual_max, level))
 end
 
 function hunger.set_saturation(player, level)
@@ -103,7 +110,7 @@ end
 hunger.registered_on_update_saturations = {}
 function hunger.register_on_update_saturation(fun)
 	local saturations = hunger.registered_on_update_saturations
-	saturations[#saturations+1] = fun
+	saturations[#saturations + 1] = fun
 end
 
 function hunger.update_saturation(player, level)
@@ -137,7 +144,13 @@ function hunger.change_saturation(player, change)
 		return false
 	end
 
-	local level = hunger.get_saturation(player) + change or 0
+	local old = hunger.get_saturation(player)
+
+	if not old then
+		return false
+	end
+
+	local level = old + change
 	level = max(level, 0)
 	level = min(level, settings.level_max)
 	hunger.update_saturation(player, level)
@@ -162,9 +175,8 @@ function hunger.set_hud_poisoned(player, poisoned)
 		return
 	end
 
-	local hud = hunger.hud[player:get_player_name()]
 	local texture = poisoned and "hunger_poisen.png" or "hunger.png"
-	player:hud_change(hud, "text", texture)
+	player:hud_change(get_hud_id(player), "text", texture)
 end
 
 function hunger.set_poisoned(player, poisoned)
@@ -195,7 +207,7 @@ end
 hunger.registered_on_poisons = {}
 function hunger.register_on_poison(fun)
 	local poison = hunger.registered_on_poisons
-	poison[#poison+1] = fun
+	poison[#poison + 1] = fun
 end
 
 function hunger.poison(player, ticks, interval)
@@ -236,7 +248,7 @@ end
 hunger.registered_on_exhaust_players = {}
 function hunger.register_on_exhaust_player(fun)
 	local exhaust = hunger.registered_on_exhaust_players
-	exhaust[#exhaust+1] = fun
+	exhaust[#exhaust + 1] = fun
 end
 
 function hunger.exhaust_player(player, change, cause)
@@ -384,7 +396,8 @@ core.register_on_joinplayer(function(player)
 	if hunger.bar_definition then
 		local def = tcopy(hunger.bar_definition)
 		def.number = min(settings.visual_max, level)
-		hunger.hud[player:get_player_name()] = player:hud_add(def)
+		local id = player:hud_add(def)
+		set_hud_id(player, id)
 	end
 
 	-- reset poisoned
@@ -392,7 +405,7 @@ core.register_on_joinplayer(function(player)
 end)
 
 core.register_on_leaveplayer(function(player)
-	hunger.hud[player:get_player_name()] = nil
+	set_hud_id(player, nil)
 end)
 
 local exhaust = hunger.exhaust_player
@@ -409,7 +422,7 @@ core.register_on_punchplayer(function(_, hitter)
 	exhaust(hitter, settings.exhaust_punch, hunger.exhaustion_reasons.punch)
 end)
 core.register_on_respawnplayer(function(player)
-	hunger.set_saturation(player, settings.level_max)
+	hunger.update_saturation(player, settings.level_max)
 	hunger.set_exhaustion(player, 0)
 	hunger.set_poisoned(player, false)
 end)
