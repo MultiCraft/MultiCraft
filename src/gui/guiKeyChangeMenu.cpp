@@ -331,6 +331,9 @@ bool GUIKeyChangeMenu::acceptInput()
 
 	g_gamecallback->signalKeyConfigChange();
 
+	if (!g_settings_path.empty())
+		g_settings->updateConfigFile(g_settings_path.c_str());
+
 	return true;
 }
 

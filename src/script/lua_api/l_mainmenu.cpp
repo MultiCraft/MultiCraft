@@ -146,8 +146,8 @@ int ModApiMainMenu::l_start(lua_State *L)
 	data->servername        = getTextData(L,"servername");
 
 #ifdef __IOS__
-	std::string conf_path = porting::path_user + DIR_DELIM + "multicraft.conf";
-	g_settings->updateConfigFile(conf_path.c_str());
+	if (!g_settings_path.empty())
+		g_settings->updateConfigFile(g_settings_path.c_str());
 #endif
 
 	//close menu next time

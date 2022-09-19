@@ -170,16 +170,23 @@ void GUIVolumeChange::drawMenu()
 	gui::IGUIElement::draw();
 }
 
+void GUIVolumeChange::saveSettingsAndQuit()
+{
+	if (!g_settings_path.empty())
+		g_settings->updateConfigFile(g_settings_path.c_str());
+	quitMenu();
+}
+
 bool GUIVolumeChange::OnEvent(const SEvent& event)
 {
 	if (event.EventType == EET_KEY_INPUT_EVENT) {
 		if (event.KeyInput.Key == KEY_ESCAPE && event.KeyInput.PressedDown) {
-			quitMenu();
+			saveSettingsAndQuit();
 			return true;
 		}
 
 		if (event.KeyInput.Key == KEY_RETURN && event.KeyInput.PressedDown) {
-			quitMenu();
+			saveSettingsAndQuit();
 			return true;
 		}
 	} else if (event.EventType == EET_GUI_EVENT) {
@@ -195,7 +202,7 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 
 		if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
 			if (event.GUIEvent.Caller->getID() == ID_soundExitButton) {
-				quitMenu();
+				saveSettingsAndQuit();
 				return true;
 			}
 			Environment->setFocus(this);
