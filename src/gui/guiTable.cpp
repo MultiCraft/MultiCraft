@@ -764,7 +764,7 @@ void GUITable::drawCell(const Cell *cell, video::SColor color,
 			else
 				source_rect.LowerRightCorner.Y = rowh;
 
-			video::SColor colors[] = {color,color,color,color};
+			video::SColor colors[] = {color, color, color, color};
 
 			core::rect<s32> image_pos(dest_pos.X, dest_pos.Y,
 						dest_pos.X + (image->getOriginalSize().Width * scale),

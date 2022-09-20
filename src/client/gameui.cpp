@@ -277,9 +277,10 @@ void GameUI::updateChatSize()
 
 	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
 
-	core::rect<s32> chat_size(10, chat_y, window_size.X - 20, 0);
+	core::rect<s32> chat_size(10, chat_y,
+		window_size.X - 20, 0);
 	chat_size.LowerRightCorner.Y = std::min((s32)window_size.Y,
-			m_guitext_chat->getTextHeight() + chat_y);
+		m_guitext_chat->getTextHeight() + chat_y);
 
 	if (chat_size == m_current_chat_size)
 		return;

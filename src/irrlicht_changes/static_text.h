@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include "IrrCompileConfig.h"
+#ifdef _IRR_COMPILE_WITH_GUI_
+
 #include "IGUIStaticText.h"
 #include "irrArray.h"
 
@@ -273,3 +276,5 @@ inline void setStaticText(irr::gui::IGUIStaticText *static_text, const wchar_t *
 {
 	setStaticText(static_text, EnrichedString(text, static_text->getOverrideColor()));
 }
+
+#endif // _IRR_COMPILE_WITH_GUI_
