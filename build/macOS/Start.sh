@@ -22,10 +22,5 @@ echo "Skipping..."
 #sh appicon.sh
 
 echo
-echo "Install CocoaPods:"
-
-pod install
-
-echo
 echo "All done! You can continue in Xcode!"
-open MultiCraft.xcworkspace
+open MultiCraft/MultiCraft.xcodeproj

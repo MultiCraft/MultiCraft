@@ -5,7 +5,7 @@ index ad7d9e2af..f8666352a 100644
 @@ -783,6 +783,11 @@ - (void)windowDidResize:(NSNotification *)aNotification
          return;
      }
- 
+
 +    if (focusClickPending) {
 +        focusClickPending = 0;
 +        [self onMovingOrFocusClickPendingStateCleared];

@@ -17,6 +17,8 @@ if [ ! -d SDL2-src ]; then
 	sed -i '' 's/#define SDL_PLATFORM_SUPPORTS_METAL    1/#define SDL_PLATFORM_SUPPORTS_METAL    0/g' SDL2-src/include/SDL_config_macosx.h
 fi
 
+rm -rf SDL2
+
 cd SDL2-src
 
 xcodebuild build \
