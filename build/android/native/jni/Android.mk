@@ -18,6 +18,16 @@ LOCAL_SRC_FILES := deps/Android/Irrlicht/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/lib
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := libpng
+LOCAL_SRC_FILES := deps/Android/libpng/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libpng.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := libjpeg
+LOCAL_SRC_FILES := deps/Android/libjpeg/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libjpeg.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := LevelDB
 LOCAL_SRC_FILES := deps/Android/LevelDB/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libleveldb.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -46,18 +56,6 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := OpenAL
 LOCAL_SRC_FILES := deps/Android/OpenAL-Soft/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libopenal.a
 include $(PREBUILT_STATIC_LIBRARY)
-
-# You can use `OpenSSL and Crypto` instead `mbedTLS mbedx509 mbedcrypto`,
-#but it increase APK size on ~0.7MB
-#include $(CLEAR_VARS)
-#LOCAL_MODULE := OpenSSL
-#LOCAL_SRC_FILES := deps/Android/OpenSSL/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libssl.a
-#include $(PREBUILT_STATIC_LIBRARY)
-
-#include $(CLEAR_VARS)
-#LOCAL_MODULE := Crypto
-#LOCAL_SRC_FILES := deps/Android/OpenSSL/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libcrypto.a
-#include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := Gettext
@@ -108,6 +106,8 @@ LOCAL_C_INCLUDES := \
 	deps/Android/Curl/include                       \
 	deps/Android/Freetype/include                   \
 	deps/Android/Irrlicht/include                   \
+	deps/Android/libpng/include                     \
+	deps/Android/libjpeg/include                    \
 	deps/Android/LevelDB/include                    \
 	deps/Android/Gettext/include                    \
 	deps/Android/ndk_iconv                          \
@@ -238,7 +238,17 @@ LOCAL_SRC_FILES += ../../../lib/luautf8/lutf8lib.c
 # Lua ChaCha Lib
 LOCAL_SRC_FILES += $(wildcard ../../../lib/luachacha/*.c)
 
-LOCAL_STATIC_LIBRARIES += Curl Gettext Freetype Irrlicht LevelDB OpenAL mbedTLS mbedx509 mbedcrypto Vorbis LuaJIT android_native_app_glue $(PROFILER_LIBS)
+LOCAL_STATIC_LIBRARIES += \
+	Curl mbedTLS mbedx509 mbedcrypto \
+	Freetype \
+	OpenAL \
+	Gettext \
+	Irrlicht libpng libjpeg \
+	LevelDB \
+	Vorbis \
+	LuaJIT
+
+LOCAL_STATIC_LIBRARIES += android_native_app_glue $(PROFILER_LIBS)
 
 LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES -lz
 
