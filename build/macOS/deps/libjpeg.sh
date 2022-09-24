@@ -10,7 +10,7 @@ if [ ! -d libjpeg-src ]; then
 	rm libjpeg-turbo-$JPEG_VERSION.tar.gz
 fi
 
-rm -rf ../../libjpeg
+rm -rf libjpeg
 
 cd libjpeg-src
 
