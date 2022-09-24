@@ -15,7 +15,6 @@ rm -rf freetype
 
 cd freetype-src/build
 
-
 cmake .. \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DBUILD_SHARED_LIBS=FALSE \
