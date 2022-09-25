@@ -146,8 +146,8 @@ int ModApiMainMenu::l_start(lua_State *L)
 	data->servername        = getTextData(L,"servername");
 
 #ifdef __IOS__
-	std::string conf_path = porting::path_user + DIR_DELIM + "multicraft.conf";
-	g_settings->updateConfigFile(conf_path.c_str());
+	if (!g_settings_path.empty())
+		g_settings->updateConfigFile(g_settings_path.c_str());
 #endif
 
 	//close menu next time
@@ -409,7 +409,8 @@ int ModApiMainMenu::l_show_keys_menu(lua_State *L)
 			engine->m_parent,
 			-1,
 			engine->m_menumanager,
-			engine->m_texture_source);
+			engine->m_texture_source,
+			true);
 	kmenu->drop();
 	return 0;
 }

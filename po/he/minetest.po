@@ -1857,7 +1857,7 @@ msgstr "מקש כבר בשימוש"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
-msgstr "קישור מקשים (אם התפריט מתקלקל, הסר דברים מminetest.conf)"
+msgstr "קישור מקשים (אם התפריט מתקלקל, הסר דברים מmulticraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

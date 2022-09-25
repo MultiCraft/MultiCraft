@@ -53,7 +53,6 @@ import kotlin.system.exitProcess
 
 object Utilities {
 
-	@JvmStatic
 	fun makeFullScreen(window: Window) {
 		WindowCompat.setDecorFitsSystemWindows(window, false)
 		WindowInsetsControllerCompat(window, window.decorView).let {
@@ -89,7 +88,6 @@ object Utilities {
 		PreferenceHelper.init(activity)[TAG_SHORTCUT_EXIST] = true
 	}
 
-	@JvmStatic
 	fun finishApp(restart: Boolean, activity: Activity) {
 		if (restart) {
 			val intent = Intent(activity, activity::class.java)

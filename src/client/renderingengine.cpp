@@ -544,80 +544,47 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		video::ITexture *progress_img = tsrc->getTexture("progress_bar.png");
 		video::ITexture *progress_img_bg =
 				tsrc->getTexture("progress_bar_bg.png");
+		video::ITexture *progress_img_fg =
+				tsrc->getTexture("progress_bar_fg.png");
 
-		if (progress_img && progress_img_bg) {
+		if (progress_img && progress_img_bg && progress_img_fg) {
 			const core::dimension2d<u32> &img_size =
 					progress_img_bg->getSize();
 #if !defined(__ANDROID__) && !defined(__IOS__)
-			float scale = RenderingEngine::getDisplayDensity();
-			scale = scale >= 1 ? scale : 1;
+			float density = RenderingEngine::getDisplayDensity();
+			float gui_scaling = g_settings->getFloat("gui_scaling");
+			float scale = density * gui_scaling;
 			u32 imgW = rangelim(img_size.Width, 256, 1024) * scale;
 			u32 imgH = rangelim(img_size.Height, 32, 128) * scale;
-			float imgR = scale;
 #else
 			float imgRatio = (float) img_size.Height / img_size.Width;
 			u32 imgW = npot2(screensize.X / 2);
 			if (imgW > (screensize.X * 0.7) && imgW >= 1024)
 				imgW /= 2;
 			u32 imgH = imgW * imgRatio;
-			float imgR = (float) (imgW) / img_size.Width;
 #endif
 			v2s32 img_pos((screensize.X - imgW) / 2,
 					(screensize.Y - imgH) / 2);
 
-			draw2DImageFilterScaled(
-				driver, progress_img_bg,
-				core::rect<s32>(img_pos.X, img_pos.Y, img_pos.X + imgW, img_pos.Y + imgH),
-				core::rect<s32>(0, 0, img_size.Width, img_size.Height),
-				0, 0, true);
+			draw2DImageFilterScaled(driver, progress_img_bg,
+					core::rect<s32>(img_pos.X, img_pos.Y,
+							img_pos.X + imgW,
+							img_pos.Y + imgH),
+					core::rect<s32>(0, 0, img_size.Width,
+							img_size.Height),
+					0, 0, true);
 
-			// rects for drawing a color progress bar
-			const static core::rect<s32> rects[] = {
-				core::rect<s32>(  4, 24,   5, 40),
-				core::rect<s32>(  5, 21,   6, 43),
-				core::rect<s32>(  6, 19,   7, 45),
-				core::rect<s32>(  7, 17,   8, 47),
-				core::rect<s32>(  8, 15,   9, 49),
-				core::rect<s32>(  9, 14,  10, 50),
-				core::rect<s32>( 10, 13,  11, 51),
-				core::rect<s32>( 11, 12,  12, 52),
-				core::rect<s32>( 12, 11,  13, 53),
-				core::rect<s32>( 13, 10,  14, 54),
-				core::rect<s32>( 14,  9,  15, 55),
-				core::rect<s32>( 15,  8,  17, 56),
-				core::rect<s32>( 17,  7,  19, 57),
-				core::rect<s32>( 19,  6,  21, 58),
-				core::rect<s32>( 21,  5,  24, 59),
-				core::rect<s32>( 24,  4, 488, 60),
-				core::rect<s32>(488,  5, 491, 59),
-				core::rect<s32>(491,  6, 493, 58),
-				core::rect<s32>(493,  7, 495, 57),
-				core::rect<s32>(495,  8, 497, 56),
-				core::rect<s32>(497,  9, 498, 55),
-				core::rect<s32>(498, 10, 499, 54),
-				core::rect<s32>(499, 11, 500, 53),
-				core::rect<s32>(500, 12, 501, 52),
-				core::rect<s32>(501, 13, 502, 51),
-				core::rect<s32>(502, 14, 503, 50),
-				core::rect<s32>(503, 15, 504, 49),
-				core::rect<s32>(504, 17, 505, 47),
-				core::rect<s32>(505, 19, 506, 45),
-				core::rect<s32>(506, 21, 507, 43),
-				core::rect<s32>(507, 24, 508, 40)
-			};
+			const video::SColor color(255, 255 - percent * 2, percent * 2, 25);
+			const video::SColor colors[] = {color, color, color, color};
 
-			for (const auto &i : rects) {
-				const s32 clipx = (percent * imgW) / 100;
-				core::rect<s32> r(
-					MYMIN(i.UpperLeftCorner.X * imgR, clipx), i.UpperLeftCorner.Y * imgR,
-					MYMIN(i.LowerRightCorner.X * imgR, clipx), i.LowerRightCorner.Y * imgR
-				);
-				if (r.getArea() <= 0)
-					break;
-				driver->draw2DRectangle(
-					video::SColor(255, 255 - percent * 2, percent * 2, 25),
-					r + img_pos, nullptr);
-			}
+			draw2DImageFilterScaled(driver, progress_img_fg,
+					core::rect<s32>(img_pos.X, img_pos.Y,
+							img_pos.X + (percent * imgW) / 100,
+							img_pos.Y + imgH),
+					core::rect<s32>(0, 0,
+							(percent * img_size.Width) / 100,
+							img_size.Height),
+					0, colors, true);
 
 			draw2DImageFilterScaled(driver, progress_img,
 					core::rect<s32>(img_pos.X, img_pos.Y,

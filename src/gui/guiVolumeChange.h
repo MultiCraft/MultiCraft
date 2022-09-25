@@ -50,5 +50,8 @@ protected:
 	std::string getNameByID(s32 id) { return ""; }
 
 private:
+	void saveSettingsAndQuit();
+
 	ISimpleTextureSource *m_tsrc;
+	video::SColor m_fullscreen_bgcolor;
 };

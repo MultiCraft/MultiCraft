@@ -109,4 +109,8 @@ jstring getJniString(const std::string &message);
  */
 void upgrade(const std::string &item);
 
+/**
+ * get radius of rounded corners
+ */
+int getRoundScreen();
 }

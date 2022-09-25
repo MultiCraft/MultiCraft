@@ -1,8 +1,8 @@
 diff --git a/src/video/cocoa/SDL_cocoawindow.m b/src/video/cocoa/SDL_cocoawindow.m
-index bca8eb4dd..2e444947d 100644
+index ad7d9e2af..f8666352a 100644
 --- a/SDL2-src/src/video/cocoa/SDL_cocoawindow.m
 +++ b/SDL2-src/src/video/cocoa/SDL_cocoawindow.m
-@@ -764,6 +764,11 @@ - (void)windowDidResize:(NSNotification *)aNotification
+@@ -783,6 +783,11 @@ - (void)windowDidResize:(NSNotification *)aNotification
          return;
      }
 
@@ -11,6 +11,6 @@ index bca8eb4dd..2e444947d 100644
 +        [self onMovingOrFocusClickPendingStateCleared];
 +    }
 +
-     SDL_Window *window = _data->window;
-     NSWindow *nswindow = _data->nswindow;
-     int x, y, w, h;
+     window = _data.window;
+     nswindow = _data.nswindow;
+     rect = [nswindow contentRectForFrameRect:[nswindow frame]];

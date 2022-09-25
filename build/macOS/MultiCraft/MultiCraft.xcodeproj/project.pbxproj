@@ -103,18 +103,25 @@
 		84135C2C25D526D700CA4DCF /* content_cao.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135C0525D526D700CA4DCF /* content_cao.cpp */; };
 		84135C2D25D526D700CA4DCF /* wieldmesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135C0625D526D700CA4DCF /* wieldmesh.cpp */; };
 		84135C2E25D526D700CA4DCF /* minimap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135C0A25D526D700CA4DCF /* minimap.cpp */; };
+		841AD8A528D0C1870042E335 /* libleveldb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8A428D0C1810042E335 /* libleveldb.a */; };
+		841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8A928D0CE7F0042E335 /* libopenal.a */; };
+		841AD8AD28D0D6920042E335 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8AC28D0D6920042E335 /* AudioUnit.framework */; };
+		841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8AE28D0D6A40042E335 /* CoreAudio.framework */; };
+		841AD8B128D0DE430042E335 /* libogg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B028D0DE3D0042E335 /* libogg.a */; };
+		841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B428D0E2340042E335 /* libvorbis.a */; };
+		841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B828D0E2E40042E335 /* libvorbisfile.a */; };
+		841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0424B134850040BA4F /* OpenGL.framework */; };
+		841AD8BB28D12E980042E335 /* libintl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EEE5E62782728E00F61929 /* libintl.a */; };
+		844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844436EE28DA80C100662A9D /* libfreetype.a */; };
 		84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617724B1BF2D0040BA4F /* AppKit.framework */; };
 		84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0024B1347B0040BA4F /* Foundation.framework */; };
 		84463B9324B258B00099DFBD /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617524B1BF280040BA4F /* IOKit.framework */; };
-		84463B9724B258B20099DFBD /* Pods_MultiCraft.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50555C0ED3309AD5F0B15D19 /* Pods_MultiCraft.framework */; };
-		84463B9924B258B50099DFBD /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0424B134850040BA4F /* OpenGL.framework */; };
 		8453A49E24DB22F00087ECF9 /* client in Resources */ = {isa = PBXBuildFile; fileRef = 8453A49D24DB22F00087ECF9 /* client */; };
 		845856B324B1322D0040BA4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 845856B224B1322D0040BA4F /* Assets.xcassets */; };
 		84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0624B1348B0040BA4F /* libcurl.tbd */; };
 		84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0B24B134D90040BA4F /* libiconv.tbd */; };
 		8458610724B13BDF0040BA4F /* mini-gmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 8458610524B13BDF0040BA4F /* mini-gmp.c */; };
 		8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8458610924B13BF90040BA4F /* jsoncpp.cpp */; };
-		8458616924B1B7DC0040BA4F /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458616624B1B78D0040BA4F /* libfreetype.a */; };
 		8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458616724B1B7990040BA4F /* libIrrlicht.a */; };
 		8458617D24B1C3BC0040BA4F /* games in Resources */ = {isa = PBXBuildFile; fileRef = 8458617924B1C3BA0040BA4F /* games */; };
 		8458617E24B1C3BC0040BA4F /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 8458617A24B1C3BA0040BA4F /* fonts */; };
@@ -122,13 +129,11 @@
 		8458618024B1C3BC0040BA4F /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 8458617C24B1C3BB0040BA4F /* textures */; };
 		846F883B27A59704007B6210 /* libluajit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 846F883A27A596F9007B6210 /* libluajit.a */; };
 		847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4A25D6F483008F5FC8 /* lutf8lib.c */; };
+		8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8488539E28DA4851004AD90F /* libjpeg.a */; };
 		848ADEF427BD68AE001C60F3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 848ADEF627BD68AE001C60F3 /* Localizable.strings */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
 		8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL2.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
-		8495BD2028B80F21009FCF4D /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1F28B80F21009FCF4D /* Metal.framework */; };
-		8495BD2228B80F4D009FCF4D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */; };
-		8495BD2628B80FD1009FCF4D /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2528B80FD1009FCF4D /* CoreAudio.framework */; };
 		8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2728B810AD009FCF4D /* CoreVideo.framework */; };
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
@@ -139,10 +144,10 @@
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
 		84A1FA4D252E635900000717 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84A1FA4C252E635900000717 /* locale */; };
-		84C8E20B257804A200C1E5D0 /* libopenal.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */; };
-		84C8E20C257804A200C1E5D0 /* libopenal.1.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974228CA1291004E8CEC /* GameController.framework */; };
+		84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974428CA129C004E8CEC /* CoreHaptics.framework */; };
+		84C2AB5328DA7776001968EE /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C2AB5228DA7770001968EE /* libpng.a */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
-		84EEE5E72782729B00F61929 /* libintl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EEE5E62782728E00F61929 /* libintl.a */; };
 		84F20D5925D52790009562A9 /* static_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5525D52790009562A9 /* static_text.cpp */; };
 		84F20D5A25D52790009562A9 /* CGUITTFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5725D52790009562A9 /* CGUITTFont.cpp */; };
 		84F20DA225D527C5009562A9 /* serverpackethandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D9325D527C4009562A9 /* serverpackethandler.cpp */; };
@@ -287,24 +292,7 @@
 		84FD8E3426A0B04900EF2BFA /* guiScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3326A0B04900EF2BFA /* guiScene.cpp */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		844205482578023D009C3008 /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				84C8E20C257804A200C1E5D0 /* libopenal.1.dylib in Embed Libraries */,
-			);
-			name = "Embed Libraries";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		0035B2B97EE3D0121539493F /* Pods-MultiCraft.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultiCraft.debug.xcconfig"; path = "Target Support Files/Pods-MultiCraft/Pods-MultiCraft.debug.xcconfig"; sourceTree = "<group>"; };
-		3D2D21065CF2A23D5AF0C25A /* Pods-MultiCraft.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultiCraft.release.xcconfig"; path = "Target Support Files/Pods-MultiCraft/Pods-MultiCraft.release.xcconfig"; sourceTree = "<group>"; };
-		50555C0ED3309AD5F0B15D19 /* Pods_MultiCraft.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MultiCraft.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84135AC625D5261C00CA4DCF /* craftdef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = craftdef.cpp; path = ../../../../src/craftdef.cpp; sourceTree = "<group>"; };
 		84135AC725D5261C00CA4DCF /* modchannels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modchannels.cpp; path = ../../../../src/modchannels.cpp; sourceTree = "<group>"; };
 		84135AC825D5261C00CA4DCF /* nodemetadata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nodemetadata.cpp; path = ../../../../src/nodemetadata.cpp; sourceTree = "<group>"; };
@@ -524,8 +512,16 @@
 		84135C0825D526D700CA4DCF /* keycode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = keycode.h; path = ../../../../src/client/keycode.h; sourceTree = "<group>"; };
 		84135C0925D526D700CA4DCF /* shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = shader.h; path = ../../../../src/client/shader.h; sourceTree = "<group>"; };
 		84135C0A25D526D700CA4DCF /* minimap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = minimap.cpp; path = ../../../../src/client/minimap.cpp; sourceTree = "<group>"; };
+		841AD8A428D0C1810042E335 /* libleveldb.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libleveldb.a; path = ../deps/leveldb/libleveldb.a; sourceTree = "<group>"; };
+		841AD8A928D0CE7F0042E335 /* libopenal.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenal.a; path = ../deps/openal/libopenal.a; sourceTree = "<group>"; };
+		841AD8AC28D0D6920042E335 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
+		841AD8AE28D0D6A40042E335 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		841AD8B028D0DE3D0042E335 /* libogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libogg.a; path = ../deps/libogg/libogg.a; sourceTree = "<group>"; };
+		841AD8B428D0E2340042E335 /* libvorbis.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbis.a; path = ../deps/libvorbis/libvorbis.a; sourceTree = "<group>"; };
+		841AD8B828D0E2E40042E335 /* libvorbisfile.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisfile.a; path = ../deps/libvorbis/libvorbisfile.a; sourceTree = "<group>"; };
 		8425D3702837D89300753F0E /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		8425D3712837D89600753F0E /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/Localizable.strings; sourceTree = "<group>"; };
+		844436EE28DA80C100662A9D /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../deps/freetype/libfreetype.a; sourceTree = "<group>"; };
 		8453A49D24DB22F00087ECF9 /* client */ = {isa = PBXFileReference; lastKnownFileType = folder; name = client; path = ../../../../client; sourceTree = "<group>"; };
 		8457C2C52848DB7300D69304 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		845856A924B1322C0040BA4F /* MultiCraft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultiCraft.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -540,7 +536,6 @@
 		8458610624B13BDF0040BA4F /* mini-gmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "mini-gmp.h"; path = "../../../../lib/gmp/mini-gmp.h"; sourceTree = "<group>"; };
 		8458610924B13BF90040BA4F /* jsoncpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jsoncpp.cpp; path = ../../../../lib/jsoncpp/jsoncpp.cpp; sourceTree = "<group>"; };
 		8458610B24B13C090040BA4F /* json.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = json.h; path = ../../../../lib/jsoncpp/json/json.h; sourceTree = "<group>"; };
-		8458616624B1B78D0040BA4F /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../deps/freetype/lib/libfreetype.a; sourceTree = "<group>"; };
 		8458616724B1B7990040BA4F /* libIrrlicht.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIrrlicht.a; path = ../deps/irrlicht/libIrrlicht.a; sourceTree = "<group>"; };
 		8458617524B1BF280040BA4F /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		8458617724B1BF2D0040BA4F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -551,6 +546,7 @@
 		846F883A27A596F9007B6210 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = ../deps/luajit/lib/libluajit.a; sourceTree = "<group>"; };
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
 		847C6D4A25D6F483008F5FC8 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = ../../../../lib/luautf8/lutf8lib.c; sourceTree = "<group>"; };
+		8488539E28DA4851004AD90F /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../deps/libjpeg/lib/libjpeg.a; sourceTree = "<group>"; };
 		848ADEF527BD68AE001C60F3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADEF827BD6904001C60F3 /* bg */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = bg; path = bg.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADEF927BD695E001C60F3 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -574,9 +570,6 @@
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		8495BD1528B80B00009FCF4D /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../deps/SDL2/libSDL2.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
-		8495BD1F28B80F21009FCF4D /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
-		8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		8495BD2528B80FD1009FCF4D /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		8495BD2728B810AD009FCF4D /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		849D0841278AC1B200471354 /* ecrypt-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-config.h"; path = "../../../../lib/luachacha/ecrypt-config.h"; sourceTree = "<group>"; };
@@ -602,7 +595,9 @@
 		84A636C327C67F01005B4503 /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84AABAF72822C3F000A89340 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84AABAF82822C3FC00A89340 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
-		84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopenal.1.dylib; path = ../deps/openal/libopenal.1.dylib; sourceTree = "<group>"; };
+		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
+		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
+		84C2AB5228DA7770001968EE /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../deps/libpng/libpng.a; sourceTree = "<group>"; };
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/lib/libintl.a; sourceTree = "<group>"; };
 		84F20D5425D52790009562A9 /* irrUString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrUString.h; path = ../../../../src/irrlicht_changes/irrUString.h; sourceTree = "<group>"; };
 		84F20D5525D52790009562A9 /* static_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = static_text.cpp; path = ../../../../src/irrlicht_changes/static_text.cpp; sourceTree = "<group>"; };
@@ -910,26 +905,32 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8495BD2628B80FD1009FCF4D /* CoreAudio.framework in Frameworks */,
-				8495BD2228B80F4D009FCF4D /* AudioToolbox.framework in Frameworks */,
-				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
-				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
-				84EEE5E72782729B00F61929 /* libintl.a in Frameworks */,
-				84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */,
 				84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */,
-				84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */,
-				84463B9724B258B20099DFBD /* Pods_MultiCraft.framework in Frameworks */,
-				8458616924B1B7DC0040BA4F /* libfreetype.a in Frameworks */,
-				84C8E20B257804A200C1E5D0 /* libopenal.1.dylib in Frameworks */,
-				84463B9924B258B50099DFBD /* OpenGL.framework in Frameworks */,
-				8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */,
+				841AD8AD28D0D6920042E335 /* AudioUnit.framework in Frameworks */,
 				8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */,
-				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
-				84463B9324B258B00099DFBD /* IOKit.framework in Frameworks */,
+				841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */,
+				84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */,
 				8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */,
-				846F883B27A59704007B6210 /* libluajit.a in Frameworks */,
-				8495BD2028B80F21009FCF4D /* Metal.framework in Frameworks */,
 				8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */,
+				84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */,
+				84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */,
+				84463B9324B258B00099DFBD /* IOKit.framework in Frameworks */,
+				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
+				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
+				84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */,
+				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
+				841AD8BB28D12E980042E335 /* libintl.a in Frameworks */,
+				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
+				841AD8A528D0C1870042E335 /* libleveldb.a in Frameworks */,
+				846F883B27A59704007B6210 /* libluajit.a in Frameworks */,
+				841AD8B128D0DE430042E335 /* libogg.a in Frameworks */,
+				841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */,
+				84C2AB5328DA7776001968EE /* libpng.a in Frameworks */,
+				8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */,
+				841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */,
+				841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */,
+				841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */,
+				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1087,7 +1088,6 @@
 				845856AB24B1322C0040BA4F /* MultiCraft */,
 				845856AA24B1322C0040BA4F /* Products */,
 				84585BFF24B1347B0040BA4F /* Frameworks */,
-				A1F327C690856243F4402264 /* Pods */,
 			);
 			sourceTree = "<group>";
 			usesTabs = 1;
@@ -1121,26 +1121,32 @@
 		84585BFF24B1347B0040BA4F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				8495BD2928B81170009FCF4D /* Carbon.framework */,
-				8495BD2728B810AD009FCF4D /* CoreVideo.framework */,
-				8495BD2528B80FD1009FCF4D /* CoreAudio.framework */,
-				8495BD2128B80F4D009FCF4D /* AudioToolbox.framework */,
-				8495BD1F28B80F21009FCF4D /* Metal.framework */,
-				8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */,
-				8495BD1528B80B00009FCF4D /* libSDL2.a */,
-				846F883A27A596F9007B6210 /* libluajit.a */,
-				84EEE5E62782728E00F61929 /* libintl.a */,
-				848CE6E427778E30001D3E0F /* libz.tbd */,
-				84C8E20A257804A200C1E5D0 /* libopenal.1.dylib */,
 				8458617724B1BF2D0040BA4F /* AppKit.framework */,
-				8458617524B1BF280040BA4F /* IOKit.framework */,
-				8458616724B1B7990040BA4F /* libIrrlicht.a */,
-				8458616624B1B78D0040BA4F /* libfreetype.a */,
-				84585C0B24B134D90040BA4F /* libiconv.tbd */,
-				84585C0624B1348B0040BA4F /* libcurl.tbd */,
-				84585C0424B134850040BA4F /* OpenGL.framework */,
+				841AD8AC28D0D6920042E335 /* AudioUnit.framework */,
+				8495BD2928B81170009FCF4D /* Carbon.framework */,
+				841AD8AE28D0D6A40042E335 /* CoreAudio.framework */,
+				84BE974428CA129C004E8CEC /* CoreHaptics.framework */,
+				8495BD2728B810AD009FCF4D /* CoreVideo.framework */,
+				8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */,
 				84585C0024B1347B0040BA4F /* Foundation.framework */,
-				50555C0ED3309AD5F0B15D19 /* Pods_MultiCraft.framework */,
+				84BE974228CA1291004E8CEC /* GameController.framework */,
+				8458617524B1BF280040BA4F /* IOKit.framework */,
+				84585C0424B134850040BA4F /* OpenGL.framework */,
+				84585C0624B1348B0040BA4F /* libcurl.tbd */,
+				844436EE28DA80C100662A9D /* libfreetype.a */,
+				84EEE5E62782728E00F61929 /* libintl.a */,
+				84585C0B24B134D90040BA4F /* libiconv.tbd */,
+				8458616724B1B7990040BA4F /* libIrrlicht.a */,
+				8488539E28DA4851004AD90F /* libjpeg.a */,
+				841AD8A428D0C1810042E335 /* libleveldb.a */,
+				846F883A27A596F9007B6210 /* libluajit.a */,
+				841AD8B028D0DE3D0042E335 /* libogg.a */,
+				841AD8A928D0CE7F0042E335 /* libopenal.a */,
+				84C2AB5228DA7770001968EE /* libpng.a */,
+				8495BD1528B80B00009FCF4D /* libSDL2.a */,
+				841AD8B428D0E2340042E335 /* libvorbis.a */,
+				841AD8B828D0E2E40042E335 /* libvorbisfile.a */,
+				848CE6E427778E30001D3E0F /* libz.tbd */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1710,16 +1716,6 @@
 			name = mapgen;
 			sourceTree = "<group>";
 		};
-		A1F327C690856243F4402264 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				0035B2B97EE3D0121539493F /* Pods-MultiCraft.debug.xcconfig */,
-				3D2D21065CF2A23D5AF0C25A /* Pods-MultiCraft.release.xcconfig */,
-			);
-			name = Pods;
-			path = ../Pods;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1727,12 +1723,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 845856BD24B1322D0040BA4F /* Build configuration list for PBXNativeTarget "MultiCraft" */;
 			buildPhases = (
-				C513A42FE5348C1593C58EFB /* [CP] Check Pods Manifest.lock */,
 				845856A524B1322C0040BA4F /* Sources */,
 				845856A624B1322C0040BA4F /* Frameworks */,
 				845856A724B1322C0040BA4F /* Resources */,
-				E04504E72F53EA397272106E /* [CP] Embed Pods Frameworks */,
-				844205482578023D009C3008 /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -1751,7 +1744,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1250;
-				ORGANIZATIONNAME = "Maksym Hamarnyk";
+				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
 						CreatedOnToolsVersion = 11.5;
@@ -1818,48 +1811,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		C513A42FE5348C1593C58EFB /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-MultiCraft-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E04504E72F53EA397272106E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MultiCraft/Pods-MultiCraft-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-MultiCraft/Pods-MultiCraft-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MultiCraft/Pods-MultiCraft-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		845856A524B1322C0040BA4F /* Sources */ = {
@@ -2234,7 +2185,6 @@
 		};
 		845856BE24B1322D0040BA4F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0035B2B97EE3D0121539493F /* Pods-MultiCraft.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
@@ -2268,31 +2218,44 @@
 					"${SRCROOT}/../../../lib/jsoncpp",
 					"${SRCROOT}/../../../lib/gmp",
 					"${SRCROOT}/../../../lib/intl",
-					"${SRCROOT}/../deps/freetype/include/freetype2",
+					"${SRCROOT}/../deps/freetype/include",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
-					"${SRCROOT}/../deps/SDL2/include",
+					"${SRCROOT}/../deps/libjpeg/include",
+					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/luajit/include",
+					"${SRCROOT}/../deps/libogg/include",
+					"${SRCROOT}/../deps/openal/include",
+					"${SRCROOT}/../deps/libpng/include",
+					"${SRCROOT}/../deps/SDL2/include",
+					"${SRCROOT}/../deps/libvorbis/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-D_IRR_COMPILE_WITH_SDL_DEVICE_",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-L${SRCROOT}/../deps/freetype/lib",
+					"-L${SRCROOT}/../deps/freetype",
 					"-L${SRCROOT}/../deps/gettext/lib",
 					"-L${SRCROOT}/../deps/irrlicht",
+					"-L${SRCROOT}/../deps/libjpeg/lib",
+					"-L${SRCROOT}/../deps/leveldb",
 					"-L${SRCROOT}/../deps/luajit/lib",
+					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
+					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/SDL2",
+					"-L${SRCROOT}/../deps/libvorbis",
 					"-Wl,-dead_strip",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
@@ -2302,7 +2265,6 @@
 		};
 		845856BF24B1322D0040BA4F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3D2D21065CF2A23D5AF0C25A /* Pods-MultiCraft.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
@@ -2338,31 +2300,44 @@
 					"${SRCROOT}/../../../lib/jsoncpp",
 					"${SRCROOT}/../../../lib/gmp",
 					"${SRCROOT}/../../../lib/intl",
-					"${SRCROOT}/../deps/freetype/include/freetype2",
+					"${SRCROOT}/../deps/freetype/include",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
-					"${SRCROOT}/../deps/SDL2/include",
+					"${SRCROOT}/../deps/libjpeg/include",
+					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/luajit/include",
+					"${SRCROOT}/../deps/libogg/include",
+					"${SRCROOT}/../deps/openal/include",
+					"${SRCROOT}/../deps/libpng/include",
+					"${SRCROOT}/../deps/SDL2/include",
+					"${SRCROOT}/../deps/libvorbis/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.0.2;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-D_IRR_COMPILE_WITH_SDL_DEVICE_",
 				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-L${SRCROOT}/../deps/freetype/lib",
+					"-L${SRCROOT}/../deps/freetype",
 					"-L${SRCROOT}/../deps/gettext/lib",
 					"-L${SRCROOT}/../deps/irrlicht",
+					"-L${SRCROOT}/../deps/libjpeg/lib",
+					"-L${SRCROOT}/../deps/leveldb",
 					"-L${SRCROOT}/../deps/luajit/lib",
+					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
+					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/SDL2",
+					"-L${SRCROOT}/../deps/libvorbis",
 					"-Wl,-dead_strip",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;

@@ -51,7 +51,7 @@ static bool parseHexColorString(const std::string &value, video::SColor &color,
 static bool parseNamedColorString(const std::string &value, video::SColor &color);
 
 #if defined(__ANDROID__) || defined(__APPLE__)
-// Android need manual caring to support the full character set possible with wchar_t
+// On Android iconv disagrees how big a wchar_t is for whatever reason
 const char *DEFAULT_ENCODING = "UTF-32LE";
 #else
 const char *DEFAULT_ENCODING = "WCHAR_T";
@@ -143,7 +143,6 @@ std::wstring utf8_to_wide(const std::string &input)
 	out.resize(outbuf_size / sizeof(wchar_t));
 
 #if defined(__ANDROID__) || defined(__APPLE__)
-	// Android need manual caring to support the full character set possible with wchar_t
 	SANITY_CHECK(sizeof(wchar_t) == 4);
 #endif
 

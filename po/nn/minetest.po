@@ -1886,7 +1886,7 @@ msgstr "Knapp er allereie i bruk"
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Knappebindinger. (Om denne menyen går galen, ta bort tinga fra \"minetest."
+"Knappebindinger. (Om denne menyen går galen, ta bort tinga fra \"multicraft."
 "conf\")"
 
 #: src/gui/guiKeyChangeMenu.cpp
