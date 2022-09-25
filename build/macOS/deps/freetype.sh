@@ -8,18 +8,30 @@ if [ ! -d freetype-src ]; then
 	tar -xzvf freetype-$FREETYPE_VERSION.tar.gz
 	mv freetype-$FREETYPE_VERSION freetype-src
 	rm freetype-$FREETYPE_VERSION.tar.gz
+	mkdir freetype-src/build
 fi
 
-cd freetype-src
+rm -rf freetype
 
-CFLAGS="$OSX_FLAGS $OSX_ARCH" \
-PKG_CONFIG=/bin/false \
-./configure --prefix=/ \
-	--disable-shared --enable-static \
-	--with-bzip2=no --with-png=no
-make -j
+cd freetype-src/build
 
-mkdir -p ../freetype
-make DESTDIR=$PWD/../freetype install
+cmake .. \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DBUILD_SHARED_LIBS=FALSE \
+	-DFT_DISABLE_BZIP2=TRUE \
+	-DFT_DISABLE_PNG=TRUE \
+	-DFT_DISABLE_HARFBUZZ=TRUE \
+	-DFT_DISABLE_BROTLI=TRUE \
+	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
+	-DCMAKE_OSX_DEPLOYMENT_TARGET=$OSX_OSVER \
+	-DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURES
+
+cmake --build . -j
+
+mkdir -p ../../freetype
+cp -r ../include ../../freetype/include
+rm -rf ../../freetype/include/dlg
+cp -r libfreetype.a ../../freetype/libfreetype.a
+
 
 echo "FreeType build successful"
