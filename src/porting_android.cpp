@@ -443,6 +443,5 @@ int getRoundScreen()
 		firstRun = false;
 	}
 	return radius;
-
 }
 }

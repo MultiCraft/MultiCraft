@@ -221,8 +221,8 @@ class GameActivity : NativeActivity() {
 
 	fun getSecretKey(key: String): String {
 		return "Stub"
- }
-  
+	}
+
 	@Suppress("unused")
 	fun getRoundScreen(): Int {
 		return radius
