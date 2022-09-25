@@ -426,6 +426,7 @@ std::string getSecretKey(const std::string &key)
 	jstring jkey = jnienv->NewStringUTF(key.c_str());
 	auto result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
 	return javaStringToUTF8(result);
+}
 
 int getRoundScreen()
 {
