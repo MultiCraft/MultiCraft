@@ -967,7 +967,7 @@ function store.handle_submit(this, fields)
 
 			local function on_confirm()
 				local deps = get_raw_dependencies(package)
-				if deps and has_hard_deps(deps) then
+				if deps and has_hard_deps(deps) and #pkgmgr.games > 0 then
 					local dlg = install_dialog.create(package, deps)
 					dlg:set_parent(this)
 					this:hide()
