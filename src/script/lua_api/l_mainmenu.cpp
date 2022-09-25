@@ -686,8 +686,9 @@ int ModApiMainMenu::l_extract_zip(lua_State *L)
 				if (toread == nullptr) {
 					// Wrong password
 					fs->removeFileArchive(fs->getFileArchiveCount()-1);
-					lua_pushboolean(L,false);
-					return 1;
+					lua_pushboolean(L, false);
+					lua_pushstring(L, "invalid password");
+					return 2;
 				}
 
 				FILE *targetfile = fopen(fullpath.c_str(),"wb");
