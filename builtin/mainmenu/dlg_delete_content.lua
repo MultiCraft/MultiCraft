@@ -23,8 +23,9 @@ local function delete_content_formspec(dialogdata)
 		"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir) ..
 			"blank.png;;" .. fgettext("Are you sure you want to delete \"$1\"?", title) ..
 			";true;false;]" ..
-		"style[dlg_delete_content_confirm;bgcolor=red]" ..
+		btn_style("dlg_delete_content_confirm", "red") ..
 		"button[3,4.8;3,0.5;dlg_delete_content_confirm;" .. fgettext("Delete") .. "]" ..
+		btn_style("dlg_delete_content_cancel") ..
 		"button[6,4.8;3,0.5;dlg_delete_content_cancel;" .. fgettext("Cancel") .. "]"
 
 	return retval

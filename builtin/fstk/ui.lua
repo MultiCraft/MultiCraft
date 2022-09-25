@@ -77,7 +77,9 @@ function ui.update()
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
 				fgettext("The server has requested a reconnect:"), error_message),
+			btn_style("btn_reconnect_yes") ..
 			"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
+			btn_style("btn_reconnect_no") ..
 			"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]"
 		}
 		ui.overridden = true
@@ -95,11 +97,14 @@ function ui.update()
 		if (maintab == "local" or maintab == "local_default") and mod_error and
 				core.get_us_time() - connect_time > 30 then
 			restart_btn =
+				btn_style("btn_reconnect_yes") ..
 				"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..
+				btn_style("btn_reconnect_no") ..
 				"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]" ..
 				"set_focus[btn_reconnect_yes;true]"
 		else
 			restart_btn =
+				btn_style("btn_reconnect_no") ..
 				"button[5,6.6;4,1;btn_reconnect_no;" .. fgettext("OK") .. "]" ..
 				"set_focus[btn_reconnect_no;true]"
 		end

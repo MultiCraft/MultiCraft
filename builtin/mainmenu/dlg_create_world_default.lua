@@ -66,8 +66,9 @@ local function create_world_formspec()
 		"label[1.5,2.9;" .. fgettext("Mapgen") .. ":" .. "]"..
 		"dropdown[4.2,2.75;6.3;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
 
-		"style[world_create_confirm;bgcolor=#00d12b]" ..
+		btn_style("world_create_confirm", "green") ..
 		"button[3.5,4.4;2.5,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
+		btn_style("world_create_cancel") ..
 		"button[6,4.4;2.5,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
 end
 

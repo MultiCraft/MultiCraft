@@ -48,16 +48,18 @@ local function version_info_formspec(data)
 		image[4.9,0;2.5,2.5;%s]
 		image_button[1,2;10,0.8;%s;;%s;false;false]
 		hypertext[1.3,2.6;10,2;;<center>%s</center>]
-		style[version_check_remind;bgcolor=yellow]
+		%s
 		button[2,4.5;4,0.8;version_check_remind;%s]
-		style[version_check_visit;bgcolor=green]
+		%s
 		button[6,4.5;4,0.8;version_check_visit;%s]
 	]]):format(
 		defaulttexturedir .. "logo.png",
 		defaulttexturedir .. "blank.png",
 		esc(data.title),
 		esc(changes),
+		btn_style("version_check_remind", "yellow"),
 		fgettext("Cancel"),
+		btn_style("version_check_visit", "green"),
 		fgettext("Update")
 	) -- "Remind me later", "Update now"
 end

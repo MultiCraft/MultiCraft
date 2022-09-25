@@ -150,11 +150,10 @@ local function get_formspec(_, _, tab_data)
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
 	end
 
-	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
+	if PLATFORM ~= "iOS" then
 		retval = retval ..
-			"style[world_configure;padding=-5;bgimg=" .. defaulttexturedir ..
-				"select_btn.png;bgimg_middle=10]" ..
-			"image_button[9.3,4.84;2.7,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
+			btn_style("world_configure") ..
+			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
 	end
 
 	local enable_server = core.settings:get_bool("enable_server")
@@ -327,7 +326,7 @@ local function main_button_handler(this, fields, name)
 		if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
 			this:set_tab("content")
 		else
-			local dlg = create_store_dlg()
+			local dlg = create_store_dlg("game")
 			dlg:set_parent(this)
 			this:hide()
 			dlg:show()

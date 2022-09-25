@@ -259,3 +259,19 @@ function menu_worldmt(selected, setting, value)
 		return nil
 	end
 end
+--------------------------------------------------------------------------------
+function btn_style(field, color)
+	local defaulttexturedir = core.formspec_escape(defaulttexturedir)
+	color = (color and "_" .. color) or ""
+
+	local retval =
+		"style[" .. field .. ";border=false]" ..
+		"style[" .. field .. ";bgimg=" .. defaulttexturedir .. "gui_button" .. color ..
+			".png;bgimg_middle=20;padding=-10]" ..
+		"style[" .. field .. ":hovered;bgimg=" .. defaulttexturedir .. "gui_button" .. color .. "_hovered" ..
+			".png;bgimg_middle=20]" ..
+		"style[" .. field .. ":pressed;bgimg=" .. defaulttexturedir .. "gui_button" .. color .. "_pressed" ..
+			".png;bgimg_middle=20]"
+
+	return retval
+end

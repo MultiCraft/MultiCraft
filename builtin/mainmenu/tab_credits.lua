@@ -127,12 +127,10 @@ return {
 			"License: GNU LGPLv3.0+ and CC BY-SA 4.0\n" ..
 			"Created and Powered by Minetest Engine, ver. 5.4.1]" ..
 
-			"style[homepage;padding=-5;bgimg=" .. defaulttexturedir ..
-				"select_btn.png;bgimg_middle=10]" ..
-			"image_button[9.5,-0.2;2.6,0.8;;homepage;Home Page;true;false]" ..
-			"style[privacy;padding=-5;bgimg=" .. defaulttexturedir ..
-				"select_btn.png;bgimg_middle=10]" ..
-			"image_button[9.5,0.65;2.6,0.8;;privacy;Privacy Policy;true;false]" ..
+			btn_style("homepage") ..
+			"image_button[9.5,-0.2;2.6,0.85;;homepage;Home Page;true;false]" ..
+			btn_style("privacy") ..
+			"image_button[9.5,0.6;2.6,0.85;;privacy;Privacy Policy;true;false]" ..
 
 			"background9[0,1.5;12,4.2;" .. defaulttexturedir ..
 				"worldlist_bg.png" .. ";false;40]" ..

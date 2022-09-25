@@ -87,8 +87,9 @@ function messagebox(name, message)
 				return ([[
 					set_focus[ok;true]
 					textarea[1,1;10,4;;;%s]
+					%s
 					button[5,4.5;2,0.8;ok;%s]
-				]]):format(message, fgettext("OK"))
+				]]):format(message, btn_style("ok"), fgettext("OK"))
 			end,
 			function(this, fields)
 				if fields.ok then
