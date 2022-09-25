@@ -5,6 +5,7 @@
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "static_text.h"
+#ifdef _IRR_COMPILE_WITH_GUI_
 
 #include <IGUIFont.h>
 #include <IVideoDriver.h>
@@ -638,3 +639,6 @@ void StaticText::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWr
 #endif // USE_FREETYPE
 
 } // end namespace irr
+
+
+#endif // _IRR_COMPILE_WITH_GUI_

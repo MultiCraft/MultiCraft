@@ -58,11 +58,12 @@ void TileAnimationParams::deSerialize(std::istream &is, u8 tiledef_version)
 	if (type == TAT_VERTICAL_FRAMES || tiledef_version <= 2) {
 		vertical_frames.aspect_w = readU16(is);
 		vertical_frames.aspect_h = readU16(is);
-		vertical_frames.length = readF(is, protocol_version);
+		// Don't hang if a negative length is sent
+		vertical_frames.length = fabs(readF(is, protocol_version));
 	} else if (type == TAT_SHEET_2D) {
 		sheet_2d.frames_w = readU8(is);
 		sheet_2d.frames_h = readU8(is);
-		sheet_2d.frame_length = readF(is, protocol_version);
+		sheet_2d.frame_length = fabs(readF(is, protocol_version));
 	}
 }
 

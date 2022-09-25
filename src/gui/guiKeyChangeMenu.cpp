@@ -21,6 +21,7 @@
 
 #include "guiKeyChangeMenu.h"
 #include "debug.h"
+#include "guiBackgroundImage.h"
 #include "guiButton.h"
 #include "serialization.h"
 #include <string>
@@ -29,7 +30,10 @@
 #include <IGUIButton.h>
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
+#include "filesys.h"
+#include "porting.h"
 #include "settings.h"
+#include "StyleSpec.h"
 #include <algorithm>
 
 #include "mainmenumanager.h"  // for g_gamecallback
@@ -42,6 +46,7 @@ extern MainGameCallback *g_gamecallback;
 enum
 {
 	GUI_ID_BACK_BUTTON = 101, GUI_ID_ABORT_BUTTON, GUI_ID_SCROLL_BAR,
+	GUI_ID_BACKGROUND_IMG,
 	// buttons
 	GUI_ID_KEY_FORWARD_BUTTON,
 	GUI_ID_KEY_BACKWARD_BUTTON,
@@ -84,11 +89,21 @@ enum
 
 GUIKeyChangeMenu::GUIKeyChangeMenu(gui::IGUIEnvironment* env,
 		gui::IGUIElement* parent, s32 id, IMenuManager *menumgr,
-		ISimpleTextureSource *tsrc) :
+		ISimpleTextureSource *tsrc, bool main_menu) :
 		GUIModalMenu(env, parent, id, menumgr),
-		m_tsrc(tsrc)
+		m_tsrc(tsrc),
+		m_main_menu(main_menu)
 {
 	init_keys();
+
+	if (m_main_menu) return;
+	v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
+	m_fullscreen_bgcolor = video::SColor(
+		(u8) MYMIN(MYMAX(g_settings->getS32("formspec_fullscreen_bg_opacity"), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.X), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Y), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Z), 0), 255)
+	);
 }
 
 GUIKeyChangeMenu::~GUIKeyChangeMenu()
@@ -120,13 +135,20 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 {
 	removeChildren();
 
-#ifdef HAVE_TOUCHSCREENGUI
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 1.5;
-#elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() * 1.5;
+	float s = MYMIN(screensize.X / 835.f, screensize.Y / 430.f);
+#if HAVE_TOUCHSCREENGUI
+	s *= g_settings->getBool("device_is_tablet") ? 0.8f : 0.9f;
 #else
-	const float s = m_gui_scale;
+	s *= 0.75f;
 #endif
+
+	// Make sure the GUI will fit on the screen
+	// The change keys GUI is 835x430 pixels (with a scaling of 1)
+	if (835 * s > screensize.X)
+		s = screensize.X / 835.f;
+	if (430 * s > screensize.Y)
+		s = screensize.Y / 430.f;
+
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 835 * s / 2,
 		screensize.Y / 2 - 430 * s / 2,
@@ -138,11 +160,29 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	v2s32 size = DesiredRect.getSize();
 	v2s32 topleft(0, 0);
 
+	std::string texture_path = "";
+	if (m_main_menu)
+		texture_path = porting::path_share + DIR_DELIM "textures" DIR_DELIM
+			"base" DIR_DELIM "pack" DIR_DELIM;
+
+	// Background image
 	{
-		core::rect<s32> rect(0, 0, 600 * s, 40 * s);
-		rect += topleft + v2s32(25 * s, 3 * s);
+		const std::string texture = texture_path + "bg_common.png";
+		const core::rect<s32> rect(0, 0, 0, 0);
+		const core::rect<s32> middle(40, 40, -40, -40);
+		new GUIBackgroundImage(Environment, this, GUI_ID_BACKGROUND_IMG, rect,
+				texture, middle, m_tsrc, true);
+	}
+
+	{
+		core::rect<s32> rect(0, 0, 795 * s, 50 * s);
+		rect += topleft + v2s32(25 * s, 10 * s);
 		//gui::IGUIStaticText *t =
+#if !defined(__ANDROID__) && !defined(__IOS__)
 		const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
+#else
+		const wchar_t *text = wgettext("Change Keys");
+#endif
 		Environment->addStaticText(text,
 								   rect, false, true, this, -1);
 		delete[] text;
@@ -180,7 +220,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
-		u32 option_w = 180 * s;
+		u32 option_w = 300 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
 			rect += topleft + v2s32(option_x, option_y);
@@ -195,7 +235,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
-		u32 option_w = 280 * s;
+		u32 option_w = 300 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
 			rect += topleft + v2s32(option_x, option_y);
@@ -210,7 +250,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
-		u32 option_w = 280;
+		u32 option_w = 300 * s;
 		{
 			core::rect<s32> rect(0, 0, option_w, 30 * s);
 			rect += topleft + v2s32(option_x, option_y);
@@ -222,18 +262,23 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		offset += v2s32(0, 25);
 	}
 
+	const std::array<StyleSpec, StyleSpec::NUM_STATES> styles =
+			StyleSpec::getButtonStyle(texture_path);
+
 	{
-		core::rect<s32> rect(0, 0, 100 * s, 30 * s);
-		rect += topleft + v2s32(size.X / 2 - 105 * s, size.Y - 40 * s);
-		const wchar_t *text =  wgettext("Save");
-		GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON, text);
+		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
+		rect += topleft + v2s32(size.X / 2 - 165 * s, size.Y - 50 * s);
+		const wchar_t *text = wgettext("Save");
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON, text);
+		e->setStyles(styles);
 		delete[] text;
 	}
 	{
-		core::rect<s32> rect(0, 0, 100 * s, 30 * s);
-		rect += topleft + v2s32(size.X / 2 + 5 * s, size.Y - 40 * s);
+		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
+		rect += topleft + v2s32(size.X / 2 + 15 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Cancel");
-		GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
+		e->setStyles(styles);
 		delete[] text;
 	}
 }
@@ -243,10 +288,13 @@ void GUIKeyChangeMenu::drawMenu()
 	gui::IGUISkin* skin = Environment->getSkin();
 	if (!skin)
 		return;
-	video::IVideoDriver* driver = Environment->getVideoDriver();
 
-	video::SColor bgcolor(140, 0, 0, 0);
-	driver->draw2DRectangle(bgcolor, AbsoluteRect, &AbsoluteClippingRect);
+	if (!m_main_menu) {
+		video::IVideoDriver* driver = Environment->getVideoDriver();
+		v2u32 screenSize = driver->getScreenSize();
+		core::rect<s32> allbg(0, 0, screenSize.X, screenSize.Y);
+		driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
+	}
 
 	gui::IGUIElement::draw();
 }
@@ -282,6 +330,9 @@ bool GUIKeyChangeMenu::acceptInput()
 	clearKeyCache();
 
 	g_gamecallback->signalKeyConfigChange();
+
+	if (!g_settings_path.empty())
+		g_settings->updateConfigFile(g_settings_path.c_str());
 
 	return true;
 }

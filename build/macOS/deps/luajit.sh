@@ -12,6 +12,8 @@ if [ ! -d LuaJIT-src ]; then
 	rm v$LUAJIT_VERSION.zip
 fi
 
+rm -rf LuaJIT
+
 cd LuaJIT-src
 
 for ARCH in x86_64 arm64
@@ -26,7 +28,6 @@ done
 # repack into one .a
 lipo -create templib_*.a -output libluajit.a
 rm templib_*.a
-
 
 mkdir -p ../luajit/{lib,include}
 cp -v src/*.h ../luajit/include

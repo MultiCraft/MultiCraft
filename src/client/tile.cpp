@@ -1038,10 +1038,15 @@ bool hasNPotSupport()
 	return supported;
 }
 #else
-// gles3 has NPotSupport, but this is using too many resources
+// gles3 has NPotSupport and used on iOS by default
 bool hasNPotSupport()
 {
+#ifdef __IOS__
+	static const std::string &driverstring = g_settings->get("video_driver");
+	return (driverstring != "ogles1");
+#else
 	return false;
+#endif
 }
 #endif
 
@@ -1247,7 +1252,7 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 					It is an image with a number of cracking stages
 					horizontally tiled.
 				*/
-#ifndef HAVE_TOUCHSCREENGUI		
+#ifndef HAVE_TOUCHSCREENGUI
 				video::IImage *img_crack = m_sourcecache.getOrLoad(
 					"crack_anylength.png");
 #else

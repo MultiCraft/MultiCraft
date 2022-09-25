@@ -372,6 +372,12 @@ void set_default_settings()
 	settings->setDefault("contentdb_flag_blacklist", "nonfree, desktop_default");
 #endif
 
+	settings->setDefault("update_information_url", "https://updates.multicraft.world/app.json");
+	#if ENABLE_UPDATE_CHECKER
+		settings->setDefault("update_last_checked", "");
+	#else
+		settings->setDefault("update_last_checked", "disabled");
+	#endif
 
 	// Server
 	settings->setDefault("compat_player_model", "character.b3d,3d_armor_character.b3d,skinsdb_3d_armor_character_5.b3d");
@@ -502,7 +508,6 @@ void set_default_settings()
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	settings->setDefault("screen_w", "0");
 	settings->setDefault("screen_h", "0");
-	settings->setDefault("keymap_sneak", "KEY_SHIFT");
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 	settings->setDefault("vsync", "true");
 
@@ -670,7 +675,6 @@ void set_default_settings()
 	}
 
 	settings->setDefault("debug_log_level", "none");
-	settings->setDefault("password_save", "true");
 
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 		settings->setDefault("device_is_tablet", "true");
@@ -713,6 +717,12 @@ void set_default_settings()
 		// iPad
 		settings->setDefault("mouse_sensitivity", "0.3");
 		settings->setDefault("selectionbox_width", "6");
+
+		if SDVersion12and9Inch {
+			std::string font_big = std::to_string(TTF_DEFAULT_FONT_SIZE + 1);
+			settings->setDefault("font_size", font_big);
+			settings->setDefault("fallback_font_size", font_big);
+		}
 	}
 
 	// Settings for the Rounded Screen and Home Bar

@@ -10,6 +10,8 @@ if [ ! -d gettext-src ]; then
 	rm gettext-$GETTEXT_VERSION.tar.gz
 fi
 
+rm -rf gettext
+
 cd gettext-src/gettext-runtime
 
 CFLAGS="$OSX_FLAGS $OSX_ARCH -Dlocale_charset=intl_locale_charset" \

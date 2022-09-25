@@ -451,7 +451,8 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 		}
 	}
 
-	/*if (player_backend_name == "files") {
+#ifdef SERVER
+	if (player_backend_name == "files") {
 		warningstream << "/!\\ You are using old player file backend. "
 				<< "This backend is deprecated and will be removed in a future release /!\\"
 				<< std::endl << "Switching to SQLite3 or PostgreSQL is advised, "
@@ -463,7 +464,8 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 				<< "This backend is deprecated and will be removed in a future release /!\\"
 				<< std::endl << "Switching to LevelDB or SQLite3 is advised, "
 				<< "please read http://wiki.minetest.net/Database_backends." << std::endl;
-	}*/
+	}
+#endif
 
 	m_player_database = openPlayerDatabase(player_backend_name, path_world, conf);
 	m_auth_database = openAuthDatabase(auth_backend_name, path_world, conf);

@@ -329,26 +329,19 @@ void GUIEngine::run()
 
 		driver->endScene();
 
-#if defined(__ANDROID__) || defined(__IOS__)
-		bool keyboardActive;
-		if (!porting::hasRealKeyboard())
-			keyboardActive = m_menu->getAndroidUIInput();
-#endif
-
-		u32 frametime_min = 1000 / g_settings->getFloat("fps_max_unfocused")
-			/ 2;
-
-#ifdef __IOS__
-		if (keyboardActive)
-			frametime_min = 1000 / g_settings->getFloat("fps_max");
-#endif
-
+		u32 frametime_min = 1000 / (device->isWindowFocused()
+			? g_settings->getFloat("fps_max")
+			: g_settings->getFloat("fps_max_unfocused"));
 		if (m_clouds_enabled)
 			cloudPostProcess(frametime_min, device);
 		else
 			sleep_ms(frametime_min);
 
 		m_script->step();
+
+#if defined(__ANDROID__) || defined(__IOS__)
+		m_menu->getAndroidUIInput();
+#endif
 	}
 }
 

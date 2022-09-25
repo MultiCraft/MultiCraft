@@ -623,11 +623,11 @@ void initializePaths()
 #endif  // USE_GETTEXT
 }
 
-#ifndef __ANDROID__
-// Dummy for other OS with a touchscreen
+#if !defined(__ANDROID__) && !defined(__IOS__)
+// Dummy for other OS
 bool hasRealKeyboard()
 {
-	return false;
+	return true;
 }
 #endif
 

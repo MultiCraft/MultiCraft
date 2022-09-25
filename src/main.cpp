@@ -46,6 +46,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/clientlauncher.h"
 #include "gui/guiEngine.h"
 #include "gui/mainmenumanager.h"
+#include "translation.h"
 #endif
 #ifdef HAVE_TOUCHSCREENGUI
 	#include "gui/touchscreengui.h"
@@ -485,6 +486,15 @@ static bool create_userdata_path()
 	return success;
 }
 
+#if !defined(_MSC_VER) && !defined(SERVER)
+static void language_setting_changed(const std::string &name, void *userdata)
+{
+	init_gettext(porting::path_locale.c_str(),
+		g_settings->get("language"), 0, nullptr);
+	g_client_translations->clear();
+}
+#endif
+
 static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 {
 	startup_message();
@@ -511,6 +521,9 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 
 	init_gettext(porting::path_locale.c_str(),
 		g_settings->get("language"), argc, argv);
+#if !defined(_MSC_VER) && !defined(SERVER)
+	g_settings->registerChangedCallback("language", language_setting_changed, nullptr);
+#endif
 
 	return true;
 }

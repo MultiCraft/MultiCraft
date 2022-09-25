@@ -32,7 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <iomanip>
 #include <map>
 
-#ifndef _WIN32
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	#include <SDL.h>
+#elif !defined(_WIN32)
 	#include <iconv.h>
 #else
 	#define _WIN32_WINNT 0x0501
@@ -48,7 +50,56 @@ static bool parseHexColorString(const std::string &value, video::SColor &color,
 		unsigned char default_alpha = 0xff);
 static bool parseNamedColorString(const std::string &value, video::SColor &color);
 
-#ifndef _WIN32
+#if defined(__ANDROID__) || defined(__APPLE__)
+// On Android iconv disagrees how big a wchar_t is for whatever reason
+const char *DEFAULT_ENCODING = "UTF-32LE";
+#else
+const char *DEFAULT_ENCODING = "WCHAR_T";
+#endif
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+
+std::wstring utf8_to_wide(const std::string &input)
+{
+#if defined(__ANDROID__) || defined(__APPLE__)
+	SANITY_CHECK(sizeof(wchar_t) == 4);
+#endif
+
+	const char *inbuf = input.c_str();
+	size_t inbuf_size = input.size() + 1;
+
+	char *outbuf = SDL_iconv_string(DEFAULT_ENCODING, "UTF-8", inbuf, inbuf_size);
+
+	if (!outbuf)
+		return L"";
+
+	std::wstring out((wchar_t*)outbuf);
+	SDL_free(outbuf);
+
+	return out;
+}
+
+std::string wide_to_utf8(const std::wstring &input)
+{
+#if defined(__ANDROID__) || defined(__APPLE__)
+	SANITY_CHECK(sizeof(wchar_t) == 4);
+#endif
+
+	const char *inbuf = (const char*)(input.c_str());
+	size_t inbuf_size = (input.size() + 1) * sizeof(wchar_t);
+
+	char *outbuf = SDL_iconv_string("UTF-8", DEFAULT_ENCODING, inbuf, inbuf_size);
+
+	if (!outbuf)
+		return "";
+
+	std::string out(outbuf);
+	SDL_free(outbuf);
+
+	return out;
+}
+
+#elif !defined(_WIN32)
 
 static bool convert(const char *to, const char *from, char *outbuf,
 		size_t *outbuf_size, char *inbuf, size_t inbuf_size)
@@ -80,13 +131,6 @@ static bool convert(const char *to, const char *from, char *outbuf,
 	return true;
 }
 
-#if defined(__ANDROID__) || defined(__APPLE__)
-// Android need manual caring to support the full character set possible with wchar_t
-const char *DEFAULT_ENCODING = "UTF-32LE";
-#else
-const char *DEFAULT_ENCODING = "WCHAR_T";
-#endif
-
 std::wstring utf8_to_wide(const std::string &input)
 {
 	const size_t inbuf_size = input.length();
@@ -99,7 +143,6 @@ std::wstring utf8_to_wide(const std::string &input)
 	out.resize(outbuf_size / sizeof(wchar_t));
 
 #if defined(__ANDROID__) || defined(__APPLE__)
-	// Android need manual caring to support the full character set possible with wchar_t
 	SANITY_CHECK(sizeof(wchar_t) == 4);
 #endif
 

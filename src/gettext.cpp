@@ -26,6 +26,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "log.h"
 #include "porting.h"
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include <SDL.h>
+#endif
+
 #ifdef __APPLE__
 #ifdef __IOS__
 #import <UIKit/UIKit.h>
@@ -216,12 +220,23 @@ void init_gettext(const char *path, const std::string &configured_language,
 	}
 	else {
 		 /* set current system default locale */
-#ifdef __ANDROID__
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+		SDL_Locale* locale = SDL_GetPreferredLocales();
+
+		if (locale) {
+			if (locale[0].language) {
+				char lang[3] = {0};
+				strncpy(lang, locale[0].language, 2);
+				setenv("LANG", lang, 1);
+			}
+
+			SDL_free(locale);
+		}
+#elif defined(__ANDROID__)
 		char lang[3] = {0};
 		AConfiguration_getLanguage(porting::app_global->config, lang);
 		setenv("LANG", lang, 1);
-#endif
-#ifdef __APPLE__	
+#elif defined(__IOS__)
 		char lang[3] = {0};
 		NSString *syslang = [[NSLocale preferredLanguages] firstObject];
 		[syslang getBytes:lang maxLength:2 usedLength:nil encoding:NSASCIIStringEncoding options:0 range:NSMakeRange(0, 2) remainingRange:nil];

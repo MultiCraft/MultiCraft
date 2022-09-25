@@ -16,13 +16,11 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 --------------------------------------------------------------------------------
-local password_save = core.settings:get_bool("password_save")
 local password_tmp = ""
 
 local esc = core.formspec_escape
 local defaulttexturedir = esc(defaulttexturedir)
 local lower = utf8.lower
-local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 
 local function get_formspec(tabview, name, tabdata)
 	-- Update the cached supported proto info,
@@ -39,32 +37,6 @@ local function get_formspec(tabview, name, tabdata)
 		tabdata.search_for = ""
 	end
 
-	local search_panel
-	if mobile then
-		search_panel =
-			"formspec_version[3]" ..
-			"image[-0.1,4.9;6.05,0.89;" .. defaulttexturedir .. "desc_bg.png;32]" ..
-			"style[Dte_search;border=false;bgcolor=transparent]" ..
-			"field[0.25,5.2;4.97,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"image_button[4.85,4.93;0.83,0.83;" .. defaulttexturedir ..
-				"search.png;btn_mp_search;;true;false]" ..
-			"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
-				"refresh.png;btn_mp_refresh;;true;false]" ..
-			"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir ..
-				(serverlistmgr.mobile_only and "online_mobile" or "online_pc") .. ".png" ..
-				";btn_mp_mobile;;true;false]"
-	else
-		search_panel =
-			"formspec_version[3]" ..
-			"image[-0.1,4.9;7,0.89;" .. defaulttexturedir .. "desc_bg.png;32]" ..
-			"style[Dte_search;border=false;bgcolor=transparent]" ..
-			"field[0.25,5.2;5.75,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-			"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
-				"search.png;btn_mp_search;;true;false]" ..
-			"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir ..
-				"refresh.png;btn_mp_refresh;;true;false]"
-	end
-
 	local address = core.settings:get("address")
 	local port = tonumber(core.settings:get("remote_port"))
 	if port and port ~= 30000 then
@@ -73,7 +45,14 @@ local function get_formspec(tabview, name, tabdata)
 
 	local retval =
 		-- Search
-		search_panel ..
+		"formspec_version[3]" ..
+		"image[-0.1,4.9;7,0.89;" .. defaulttexturedir .. "desc_bg.png;32]" ..
+		"style[Dte_search;border=false;bgcolor=transparent]" ..
+		"field[0.25,5.2;5.75,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+		"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
+			"search.png;btn_mp_search;;true;false]" ..
+		"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir ..
+			"refresh.png;btn_mp_refresh;;true;false]" ..
 
 		-- Address / Port
 		"field[7.4,0.55;5,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
@@ -92,10 +71,9 @@ local function get_formspec(tabview, name, tabdata)
 		"image_button[8.8,4.9;3.3,0.9;;btn_mp_connect;;true;false]" ..
 		"tooltip[btn_mp_connect;".. fgettext("Connect") .. "]"
 
-		local pwd = password_save and core.settings:get("password") or password_tmp
 		-- Password
 		retval = retval .. "pwdfield[10.45,1.7;1.95,0.5;te_pwd;" ..
-			fgettext("Password") .. ":" .. ";" .. esc(pwd) .. "]"
+			fgettext("Password") .. ":" .. ";" .. esc(password_tmp) .. "]"
 
 	if tabdata.selected and selected then
 		if gamedata.fav then
@@ -196,11 +174,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 	end
 
 	if fields.te_pwd then
-		if password_save then
-			core.settings:set("password", fields.te_pwd)
-		else
-			password_tmp = fields.te_pwd
-		end
+		password_tmp = fields.te_pwd
 	end
 
 	if fields.favorites then
@@ -304,10 +278,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		return true
 	end
 
-	if fields.btn_mp_refresh or fields.btn_mp_mobile then
-		if fields.btn_mp_mobile then
-			serverlistmgr.mobile_only = not serverlistmgr.mobile_only
-		end
+	if fields.btn_mp_refresh then
 		serverlistmgr.sync()
 		return true
 	end

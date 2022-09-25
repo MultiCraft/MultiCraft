@@ -5,12 +5,12 @@ if [ ! -d MultiCraft/MultiCraft.xcodeproj ]; then
 	exit 1
 fi
 
-DEST=$(pwd)
+DEST=$(pwd)/locale
 
 pushd ../../po
 for lang in *; do
 	[ ${#lang} -ne 2 ] && continue
-	mopath=$DEST/locale/$lang/LC_MESSAGES
+	mopath=$DEST/$lang/LC_MESSAGES
 	mkdir -p $mopath
 	pushd $lang
 	for fn in *.po; do
@@ -21,10 +21,9 @@ for lang in *; do
 done
 popd
 
-find $DEST -type d -name '.git' -print0 | xargs -0 -- rm -rf
-find $DEST -type f -name '.*' -delete
+find $DEST -type d,f -name '.*' -print0 | xargs -0 -- rm -rf
 
 # remove broken languages
 for broken_lang in ar he hi ky ms_Arab th; do
-	find $DEST -type d -name $broken_lang -print0 | xargs -0 -- rm -rf
+	rm -rf $DEST/$broken_lang
 done

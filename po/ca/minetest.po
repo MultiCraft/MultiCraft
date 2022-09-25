@@ -1957,7 +1957,7 @@ msgstr "La tecla s'està utilitzant"
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Combinacions de tecles. (Si aquest menú espatlla, esborrar coses de minetest."
+"Combinacions de tecles. (Si aquest menú espatlla, esborrar coses de multicraft."
 "conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp

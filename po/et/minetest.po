@@ -1859,7 +1859,7 @@ msgstr "Nupp juba kasutuses"
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Nupusätted. (Kui see menüü sassi läheb, siis kustuta asju failist minetest."
+"Nupusätted. (Kui see menüü sassi läheb, siis kustuta asju failist multicraft."
 "conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp

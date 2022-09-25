@@ -15,6 +15,7 @@
 	#define PROJECT_NAME "multicraft"
 	#define PROJECT_NAME_C "MultiCraft"
 	#define STATIC_SHAREDIR ""
+	#define ENABLE_UPDATE_CHECKER 1
 	#define VERSION_STRING STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_PATCH) STR(VERSION_EXTRA)
 #ifdef NDEBUG
 		#define BUILD_TYPE "Release"

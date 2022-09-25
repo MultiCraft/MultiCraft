@@ -914,7 +914,6 @@ private:
 	scene::ISceneManager *smgr;
 	bool *kill;
 	std::string *error_message;
-	std::string wield_name;
 	bool *reconnect_requested;
 	scene::ISceneNode *skybox;
 	PausedNodesList paused_animated_nodes;
@@ -1415,7 +1414,11 @@ bool Game::createClient(const GameStartData &start_data)
 
 	/* Pre-calculated values
 	 */
+#ifndef HAVE_TOUCHSCREENGUI
 	video::ITexture *t = texture_src->getTexture("crack_anylength.png");
+#else
+	video::ITexture *t = texture_src->getTexture("crack_anylength_touch.png");
+#endif
 	if (t) {
 		v2u32 size = t->getOriginalSize();
 		crack_animation_length = size.Y / size.X;
@@ -2019,7 +2022,7 @@ void Game::processKeyInput()
 		toggleDebug();
 	} else if (wasKeyDown(KeyType::TOGGLE_PROFILER)) {
 		m_game_ui->toggleProfiler();
-	} else if (wasKeyDown(KeyType::INCREASE_VIEWING_RANGE) || wasKeyDown(KeyType::INCREASE_VIEWING_RANGE2)) {
+	} else if (wasKeyDown(KeyType::INCREASE_VIEWING_RANGE)) {
 		increaseViewRange();
 	} else if (wasKeyDown(KeyType::DECREASE_VIEWING_RANGE)) {
 		decreaseViewRange();
@@ -2294,7 +2297,7 @@ void Game::toggleMinimap(bool shift_pressed)
 	u32 hud_flags = client->getEnv().getLocalPlayer()->hud_flags;
 
 	if (!(hud_flags & HUD_FLAG_MINIMAP_VISIBLE)) {
-		m_game_ui->m_flags.show_minimap = false;
+		m_game_ui->showMinimap(false);
 	} else {
 
 	// If radar is disabled, try to find a non radar mode or fall back to 0
@@ -2303,8 +2306,7 @@ void Game::toggleMinimap(bool shift_pressed)
 					mapper->getModeDef().type == MINIMAP_TYPE_RADAR)
 				mapper->nextMode();
 
-		m_game_ui->m_flags.show_minimap = mapper->getModeDef().type !=
-				MINIMAP_TYPE_OFF;
+		m_game_ui->showMinimap(mapper->getModeDef().type != MINIMAP_TYPE_OFF);
 	}
 	// <--
 	// End of 'not so satifying code'
@@ -2354,6 +2356,9 @@ void Game::toggleDebug()
 			m_game_ui->showTranslatedStatusText("Debug info and profiler graph hidden");
 		}
 	}
+
+	// Update the chat text as it may need changing because of rounded screens
+	m_game_ui->m_chat_text_needs_update = true;
 }
 
 
@@ -3947,12 +3952,6 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		ItemStack selected_item, hand_item;
 		ItemStack &tool_item = player->getWieldedItem(&selected_item, &hand_item);
 		camera->wield(tool_item);
-
-		std::string item_desc = selected_item.getDefinition(itemdef_manager).description;
-			if (wield_name != item_desc) {
-				m_game_ui->showStatusText(utf8_to_wide(item_desc));
-				wield_name = item_desc;
-			}
 	}
 
 	/*
@@ -4365,29 +4364,34 @@ void Game::showPauseMenu()
 	os << "formspec_version[1]" << SIZE_TAG
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
-		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_continue;"
-		<< strgettext("Continue") << "]";
+
+		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=20;padding=-10]"
+		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui_button_hovered.png]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui_button_pressed.png]"
+
+		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
+		<< strgettext("Continue") << ";;false]";
 
 	if (!simple_singleplayer_mode) {
-		os << "button[3.5," << (ypos++) << ";4,0.5;btn_change_password;"
-			<< strgettext("Change Password") << "]";
+		os << "image_button[3.5," << (ypos++) << ";4,0.9;;btn_change_password;"
+			<< strgettext("Change Password") << ";;false]";
 	}
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound")) {
-		os << "button_exit[3.5," << (ypos++) << ";4,0.5;btn_sound;"
-			<< strgettext("Sound Volume") << "]";
+		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_sound;"
+			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
-	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_key_config;"
-		<< strgettext("Change Keys")  << "]";
+#if !defined(__ANDROID__) && !defined(__IOS__)
+	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
+		<< strgettext("Change Keys")  << ";;false]";
 #endif
-	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_exit_menu;"
-		<< strgettext("Exit to Menu") << "]";
+	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
+		<< strgettext("Exit to Menu") << ";;false]";
 #ifndef __IOS__
-	os		<< "button_exit[3.5," << (ypos++) << ";4,0.5;btn_exit_os;"
-		<< strgettext("Exit to OS")   << "]"
+	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_os;"
+		<< strgettext("Exit to OS")   << ";;false]";
 #endif
 /*		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
 		<< "textarea[0.4,0.25;3.9,6.25;;" << PROJECT_NAME_C " " VERSION_STRING "\n"
@@ -4455,18 +4459,21 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 
 	std::ostringstream os;
 	os << "formspec_version[5]"
-		<< "size[10.5,7.9]"
+		<< "size[10.5,7.5]"
 		<< "no_prepend[]"
 		<< "bgcolor[#320000b4;true]"
 		<< "background9[0,0;0,0;bg_common.png;true;40]"
-		<< "pwdfield[1,1.4;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
-		<< "pwdfield[1,3;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
-		<< "pwdfield[1,4.6;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
-		<< "button[1,5.9;4.1,0.8;btn_change_pw;" << strgettext("Change") << "]"
-		<< "button_exit[5.4,5.9;4.1,0.8;btn_cancel;" << strgettext("Cancel") << "]";
+		<< "pwdfield[1,1.2;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
+		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
+		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
+		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=20;padding=-10]"
+		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui_button_hovered.png]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui_button_pressed.png]"
+		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
+		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
 	if (new_pw != confirm_pw)
-		os << "label[1,7.2;\x1b(c@red)" << strgettext("Passwords do not match!") << "]";
+		os << "label[1,7.1;\x1b(c@red)" << strgettext("Passwords do not match!") << "]";
 
 	/* Create menu */
 	/* Note: FormspecFormSource and LocalFormspecHandler  *
@@ -4546,7 +4553,6 @@ extern "C" void external_statustext(const char *text)
 {
 	if (!g_game)
 		return;
-	std::wstring s = utf8_to_wide(std::string(text));
-	g_game->customStatustext(s);
+	g_game->customStatustext(utf8_to_wide_c(text));
 }
 #endif

@@ -1006,11 +1006,10 @@ void GUISkin::drawColoredIcon(IGUIElement* element, EGUI_DEFAULT_ICON icon,
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
 	if (icon == EGDI_CHECK_BOX_CHECKED) {
 		// Scale checkbox check specifically
-		// TODO other icons
 		int radius = getSize(EGDS_CHECK_BOX_WIDTH) * .38;
 		core::recti rect{position.X - radius, position.Y - radius, position.X + radius, position.Y + radius};
 		SpriteBank->draw2DSprite(Icons[icon], rect, 0,
-				&colors[gray? EGDC_GRAY_WINDOW_SYMBOL : EGDC_WINDOW_SYMBOL], currenttime - starttime, loop);
+				&colors[gray ? EGDC_GRAY_WINDOW_SYMBOL : EGDC_WINDOW_SYMBOL], currenttime - starttime, loop);
 		return;
 	}
 #endif

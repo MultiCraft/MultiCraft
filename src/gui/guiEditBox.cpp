@@ -4,7 +4,7 @@ Copyright (C) 2021 Minetest
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation; either version 2.1 of the License, or
+the Free Software Foundation; either version 3.0 of the License, or
 (at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
@@ -25,6 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "porting.h"
 #include "util/string.h"
+
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+#include <SDL.h>
+#endif
 
 GUIEditBox::~GUIEditBox()
 {
@@ -209,6 +213,19 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 				}
 			}
 			break;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		case EET_SDL_TEXT_EVENT:
+			if (event.SDLTextEvent.Type == irr::ESDLET_TEXTINPUT) {
+				core::stringw text =
+						utf8_to_stringw(event.SDLTextEvent.Text);
+
+				for (size_t i = 0; i < text.size(); i++)
+					inputChar(text[i]);
+
+				return true;
+			}
+			break;
+#endif
 		case EET_KEY_INPUT_EVENT: {
 #if (defined(__linux__) || defined(__FreeBSD__)) || defined(__DragonFly__)
 			// ################################################################
@@ -259,8 +276,18 @@ bool GUIEditBox::processKey(const SEvent &event)
 	s32 new_mark_begin = m_mark_begin;
 	s32 new_mark_end = m_mark_end;
 
+	// On Windows right alt simulates additional control press/release events.
+	// It causes unexpected bahavior, for example right alt + A would clear text
+	// in the edit box. At least for SDL we can easily check if alt key is
+	// pressed
+	bool altPressed = false;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	SDL_Keymod keymod = SDL_GetModState();
+	altPressed = keymod & KMOD_ALT;
+#endif
+
 	// control shortcut handling
-	if (event.KeyInput.Control) {
+	if (event.KeyInput.Control && !altPressed) {
 
 		// german backlash '\' entered with control + '?'
 		if (event.KeyInput.Char == '\\') {

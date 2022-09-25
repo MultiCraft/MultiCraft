@@ -36,6 +36,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#include "irrlicht_changes/CGUITTFont.h"
 #endif
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include <SDL.h>
+#endif
+
 inline u32 clamp_u8(s32 value)
 {
 	return (u32) MYMIN(MYMAX(value, 0), 255);
@@ -95,6 +99,11 @@ GUIChatConsole::GUIChatConsole(
 
 GUIChatConsole::~GUIChatConsole()
 {
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
+		SDL_StopTextInput();
+#endif
+
 	if (m_font)
 		m_font->drop();
 }
@@ -111,6 +120,11 @@ void GUIChatConsole::openConsole(f32 scale)
 	IGUIElement::setVisible(true);
 	Environment->setFocus(this);
 	m_menumgr->createdMenu(this);
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	if (porting::hasRealKeyboard())
+		SDL_StartTextInput();
+#endif
 }
 
 bool GUIChatConsole::isOpen() const
@@ -128,6 +142,11 @@ void GUIChatConsole::closeConsole()
 	m_open = false;
 	Environment->removeFocus(this);
 	m_menumgr->deletingMenu(this);
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
+		SDL_StopTextInput();
+#endif
 }
 
 void GUIChatConsole::closeConsoleAtOnce()
@@ -620,6 +639,20 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			return true;
 		}
 	}
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	else if(event.EventType == EET_SDL_TEXT_EVENT)
+	{
+		if (event.SDLTextEvent.Type == ESDLET_TEXTINPUT)
+		{
+			std::wstring text = utf8_to_wide(event.SDLTextEvent.Text);
+
+			for (u32 i = 0; i < text.size(); i++)
+				prompt.input(text[i]);
+
+			return true;
+		}
+	}
+#endif
 	else if(event.EventType == EET_MOUSE_INPUT_EVENT)
 	{
 		if(event.MouseInput.Event == EMIE_MOUSE_WHEEL)

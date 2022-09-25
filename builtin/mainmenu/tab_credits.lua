@@ -23,11 +23,12 @@ local defaulttexturedir = esc(defaulttexturedir)
 local multicraft_developers = {
 	"Maksim Gamarnik (MoNTE48) <Maksym48@pm.me>",
 	"Bektur Mambetov (ubulem) <berkut87@gmail.com>",
-	"Alexander Zavrin (Ransom.00)",
-	"luk3yx",
+	"Alexander Zavrin (Ransom.00) <alexanderzavrin@gmail.com>",
+	"Luke (luk3yx) <luk3yx@proton.me>",
 	"Nathan Salapat (NathanS21) <nathan@nathansalapat.com>",
 	"Vitaliy Lobachevskiy (numberZero) <numzer0@yandex.ru>",
-	"An0n3m0us",
+	"Abdullaah Iqbal (An0n3m0us) <an0n3m0us@hotmail.com>",
+	"ElCeejo",
 	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
 	"sfan5 <sfan5@live.de>",
 	"Stuart Jones (stujones11) <stujones111@gmail.com>",
@@ -119,8 +120,8 @@ return {
 	cbf_formspec = function(tabview, name, tabdata)
 		local version = core.get_version()
 		local logofile = defaulttexturedir .. "logo.png"
-		local fs = "image[-0.1,-0.3;2,2;" .. logofile .. "]" ..
-			"label[1.4,-0.25;" ..
+		local fs = "image[-0.25,-0.3;2,2;" .. logofile .. "]" ..
+			"label[1.3,-0.25;" ..
 			"MultiCraft Open Source, ver. " .. version.string .. "\n" ..
 			"Copyright (C) 2014-2022 MultiCraft Development Team\n" ..
 			"License: GNU LGPLv3.0+ and CC BY-SA 4.0\n" ..
@@ -128,16 +129,16 @@ return {
 
 			"style[homepage;padding=-5;bgimg=" .. defaulttexturedir ..
 				"select_btn.png;bgimg_middle=10]" ..
-			"image_button[9.5,-0.25;2.5,0.9;;homepage;Home Page;true;false]" ..
+			"image_button[9.5,-0.2;2.6,0.8;;homepage;Home Page;true;false]" ..
 			"style[privacy;padding=-5;bgimg=" .. defaulttexturedir ..
 				"select_btn.png;bgimg_middle=10]" ..
-			"image_button[9.5,0.6;2.5,0.9;;privacy;Privacy Policy;true;false]" ..
+			"image_button[9.5,0.65;2.6,0.8;;privacy;Privacy Policy;true;false]" ..
 
-			"background9[0.1,1.5;11.85,4.15;" .. defaulttexturedir ..
+			"background9[0,1.5;12,4.2;" .. defaulttexturedir ..
 				"worldlist_bg.png" .. ";false;40]" ..
 			"tablecolumns[color;text]" ..
 			"tableoptions[background=#0000;highlight=#00000000;border=false]" ..
-			"table[0.1,1.5;11.65,4;list_credits;" ..
+			"table[0,1.5;11.75,4.05;list_credits;" ..
 			"#FFFF00," .. fgettext("Core Developers") .. " (MultiCraft)" .. ",," ..
 			buildCreditList(multicraft_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Core Developers") .. " (Minetest Engine)" .. ",," ..

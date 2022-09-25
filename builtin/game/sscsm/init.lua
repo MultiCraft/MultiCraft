@@ -143,24 +143,21 @@ core.register_on_mods_loaded(recalc_csm_order)
 -- Handle players joining
 local has_sscsms = {}
 local mod_channel = core.mod_channel_join("sscsm:exec_pipe")
-if not core.is_singleplayer() then
-	core.register_on_modchannel_message(function(channel_name, sender, message)
-		if channel_name ~= "sscsm:exec_pipe" or not sender or
-				not mod_channel:is_writeable() or message ~= "0" or
-				sender:find("\n") or has_sscsms[sender] then
-			return
+core.register_on_modchannel_message(function(channel_name, sender, message)
+	if channel_name ~= "sscsm:exec_pipe" or not sender or
+			not mod_channel:is_writeable() or message ~= "0" or
+			sender:find("\n") or has_sscsms[sender] then
+		return
+	end
+	core.log("info", "[SSCSM] Sending CSMs on request for " .. sender .. "...")
+	for _, name in ipairs(csm_order) do
+		local def = sscsm.registered_csms[name]
+		if not def.is_enabled_for or def.is_enabled_for(sender) then
+			mod_channel:send_all("0" .. sender .. "\n" .. name
+				.. "\n" .. sscsm.registered_csms[name].code)
 		end
-		core.log("action", "[SSCSM] Sending CSMs on request for " .. sender
-			.. "...")
-		for _, name in ipairs(csm_order) do
-			local def = sscsm.registered_csms[name]
-			if not def.is_enabled_for or def.is_enabled_for(sender) then
-				mod_channel:send_all("0" .. sender .. "\n" .. name
-					.. "\n" .. sscsm.registered_csms[name].code)
-			end
-		end
-	end)
-end
+	end
+end)
 
 -- Register the SSCSM "builtins"
 sscsm.register({

@@ -203,8 +203,7 @@ Minimap::Minimap(Client *client)
 	addMode(MINIMAP_TYPE_RADAR,   256);
 	addMode(MINIMAP_TYPE_RADAR,   128);
 #else
-	// Replicate old behaviour
-	addMode(MINIMAP_TYPE_RADAR,   32);
+	addMode(MINIMAP_TYPE_RADAR,   64);
 #endif
 
 	// Initialize minimap data

@@ -121,6 +121,9 @@ private:
 	video::SColor m_statustext_initial_color;
 
 	gui::IGUIStaticText *m_guitext_chat = nullptr; // Chat text
+	EnrichedString m_chat_text;
+	bool m_chat_text_needs_update = false;
+	int m_space_count = 0;
 	u32 m_recent_chat_count = 0;
 	core::rect<s32> m_current_chat_size{0, 0, 0, 0};
 

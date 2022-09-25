@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "cpp_api/s_security.h"
-
+#include "lua_api/l_base.h"
 #include "filesys.h"
 #include "porting.h"
 #include "server.h"
@@ -256,6 +256,7 @@ void ScriptApiSecurity::initializeSecurityClient()
 		"_VERSION",
 		"xpcall",
 		// Completely safe libraries
+		"chacha",
 		"coroutine",
 		"string",
 		"table",
@@ -372,6 +373,12 @@ void ScriptApiSecurity::setLuaEnv(lua_State *L, int thread)
 
 bool ScriptApiSecurity::isSecure(lua_State *L)
 {
+#ifndef SERVER
+	auto script = ModApiBase::getScriptApiBase(L);
+	// CSM keeps no globals backup but is always secure
+	if (script->getType() == ScriptingType::Client)
+		return true;
+#endif
 	lua_rawgeti(L, LUA_REGISTRYINDEX, CUSTOM_RIDX_GLOBALS_BACKUP);
 	bool secure = !lua_isnil(L, -1);
 	lua_pop(L, 1);

@@ -32,6 +32,7 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.InputTextBinding
 import com.multicraft.game.helpers.Utilities.finishApp
 import com.multicraft.game.helpers.Utilities.makeFullScreen
@@ -73,6 +74,7 @@ class GameActivity : NativeActivity() {
 		if (hasFocus) makeFullScreen(window)
 	}
 
+	@Deprecated("Deprecated in Java")
 	override fun onBackPressed() {
 		// Ignore the back press so MultiCraft can handle it
 	}
@@ -219,5 +221,10 @@ class GameActivity : NativeActivity() {
 
 	fun getSecretKey(key: String): String {
 		return "Stub"
+ }
+  
+	@Suppress("unused")
+	fun getRoundScreen(): Int {
+		return radius
 	}
 }

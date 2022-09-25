@@ -1872,7 +1872,7 @@ msgstr "Клавіша вже використовується"
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Комбінації клавіш. (Якщо це меню зламалося, видаліть налаштування з minetest."
+"Комбінації клавіш. (Якщо це меню зламалося, видаліть налаштування з multicraft."
 "conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp

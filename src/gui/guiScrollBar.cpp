@@ -424,7 +424,6 @@ void GUIScrollBar::refreshControls()
 		border_size = h < w * 4 ? 0 : w;
 
 		up_button = Environment->addButton(core::rect<s32>(0, 0, w, w), this);
-
 		if (m_textures.size() >= 3) {
 			up_button->setImage(m_textures[2]);
 			up_button->setScaleImage(true);
@@ -434,15 +433,15 @@ void GUIScrollBar::refreshControls()
 			up_button->setSubElement(true);
 			up_button->setTabStop(false);
 		}
-
 		if (sprites && m_textures.size() < 3) {
 			up_button->setSpriteBank(sprites);
 			up_button->setSprite(EGBS_BUTTON_UP,
-					s32(skin->getIcon(EGDI_CURSOR_UP)), current_icon_color);
+					s32(skin->getIcon(EGDI_CURSOR_UP)),
+					current_icon_color);
 			up_button->setSprite(EGBS_BUTTON_DOWN,
-					s32(skin->getIcon(EGDI_CURSOR_UP)), current_icon_color);
+					s32(skin->getIcon(EGDI_CURSOR_UP)),
+					current_icon_color);
 		}
-
 		up_button->setRelativePosition(core::rect<s32>(0, 0, w, w));
 		up_button->setAlignment(EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT,
 				EGUIA_UPPERLEFT, EGUIA_UPPERLEFT);
@@ -455,20 +454,19 @@ void GUIScrollBar::refreshControls()
 		}
 
 		if (!down_button) {
-			if (!down_button) {
-				down_button->setSubElement(true);
-				down_button->setTabStop(false);
-			}
+			down_button->setSubElement(true);
+			down_button->setTabStop(false);
 		}
 
 		if (sprites && m_textures.size() < 4) {
 			down_button->setSpriteBank(sprites);
 			down_button->setSprite(EGBS_BUTTON_UP,
-					s32(skin->getIcon(EGDI_CURSOR_DOWN)), current_icon_color);
+					s32(skin->getIcon(EGDI_CURSOR_DOWN)),
+					current_icon_color);
 			down_button->setSprite(EGBS_BUTTON_DOWN,
-					s32(skin->getIcon(EGDI_CURSOR_DOWN)), current_icon_color);
+					s32(skin->getIcon(EGDI_CURSOR_DOWN)),
+					current_icon_color);
 		}
-
 		down_button->setRelativePosition(
 				core::rect<s32>(0, RelativeRect.getHeight() - w, w,
 						RelativeRect.getHeight()));
