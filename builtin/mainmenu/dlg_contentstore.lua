@@ -729,7 +729,7 @@ function store.get_formspec(dlgdata)
 			-- Page nav buttons
 			"container[0,", H - 0.8 - 0.375, "]",
 			btn_style("back"),
-			"button[0.375,0;5,0.8;back;<", fgettext("Back to Main Menu"), "]",
+			"button[0.375,0;5,0.8;back;< ", fgettext("Back to Main Menu"), "]",
 
 			"container[", W - 0.375 - 0.8*4 - 2,  ",0]",
 			btn_style("pstart"),
@@ -791,7 +791,7 @@ function store.get_formspec(dlgdata)
 			"background9[0,0;0,0;", defaulttexturedir, "bg_common.png;true;40]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
 			btn_style("back"),
-			"button[0-0.11,5.8;5.5,0.9;back;<", fgettext("Back to Main Menu"), "]",
+			"button[0-0.11,5.8;5.5,0.9;back;< ", fgettext("Back to Main Menu"), "]",
 		}
 	end
 
