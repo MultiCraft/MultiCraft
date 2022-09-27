@@ -293,7 +293,7 @@ local function handle_tab_buttons(self,fields)
 	for field in pairs(fields) do
 		if field:sub(1, name_prefix_len) == name_prefix then
 			local index = tonumber(field:sub(name_prefix_len + 1))
-			if self.last_tab_index == index then return false end
+			if math.abs(self.last_tab_index) == index then return false end
 			switch_to_tab(self, index)
 			return true
 		end
