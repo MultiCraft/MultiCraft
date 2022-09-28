@@ -4548,6 +4548,8 @@ Utilities
           degrotate_240_steps = true,
           -- ABM supports min_y and max_y fields in definition (5.5.0)
           abm_min_max_y = true,
+          -- "zstd" method for compress/decompress (5.7.0)
+          compress_zstd = true,
       }
 
 * `minetest.has_feature(arg)`: returns `boolean, missing_features`
@@ -5872,11 +5874,15 @@ Misc.
     * `method` is a string identifying the compression method to be used.
     * Supported compression methods:
         * Deflate (zlib): `"deflate"`
+        * Zstandard: `"zstd"`
     * `...` indicates method-specific arguments. Currently defined arguments
       are:
         * Deflate: `level` - Compression level, `0`-`9` or `nil`.
+        * Zstandard: `level` - Compression level. Integer or `nil`. Default `3`.
+        Note any supported Zstandard compression level could be used here,
+        but these are subject to change between Zstandard versions.
 * `minetest.decompress(compressed_data, method, ...)`: returns data
-    * Decompress a string of data (using ZLib).
+    * Decompress a string of data using the algorithm specified by `method`.
     * See documentation on `minetest.compress()` for supported compression
       methods.
     * `...` indicates method-specific arguments. Currently, no methods use this
