@@ -104,8 +104,10 @@ jclass findClass(const std::string &classname)
 
 	jclass activity = jnienv->FindClass("android/app/Activity");
 
-	if (nativeactivity == nullptr)
-		finishGame("findClass");
+	if (jnienv->ExceptionCheck()) {
+		jnienv->ExceptionClear();
+		return nullptr;
+	}
 
 	jmethodID getClassLoader = jnienv->GetMethodID(
 			activity, "getClassLoader", "()Ljava/lang/ClassLoader;");
@@ -283,7 +285,7 @@ bool hasRealKeyboard()
 void handleError(const std::string &errType, const std::string &err)
 {
 	jmethodID report_err = jnienv->GetMethodID(activityClass,
-		"handleError","(Ljava/lang/String;)V");
+		"handleError", "(Ljava/lang/String;)V");
 
 	FATAL_ERROR_IF(report_err == nullptr,
 		"porting::handleError unable to find java handleError method");
@@ -311,13 +313,11 @@ void notifyExitGame()
 	if (jnienv == nullptr || activityObj == nullptr)
 		return;
 
-	jclass _nativeActivity = findClass("com/multicraft/game/GameActivity");
-	FATAL_ERROR_IF(_nativeActivity == nullptr,
-	               "porting::notifyExitGame unable to find java native activity class");
+	jmethodID notifyExit = jnienv->GetMethodID(activityClass,
+			"notifyExitGame", "()V");
 
-	jmethodID notifyExit = jnienv->GetMethodID(_nativeActivity, "notifyExitGame", "()V");
 	FATAL_ERROR_IF(notifyExit == nullptr,
-	               "porting::notifyExitGame unable to find java notifyExit method");
+		"porting::notifyExitGame unable to find java notifyExitGame method");
 
 	jnienv->CallVoidMethod(activityObj, notifyExit);
 
@@ -331,7 +331,7 @@ float getDisplayDensity()
 	static bool firstRun = true;
 	static float value = 0;
 
-	if (firstrun) {
+	if (firstRun) {
 		jmethodID getDensity = jnienv->GetMethodID(activityClass,
 				"getDensity", "()F");
 
@@ -407,7 +407,7 @@ int getRoundScreen()
 	static int radius = 0;
 
 	if (firstRun) {
-		jmethodID getRadius = jnienv->GetMethodID(nativeActivity,
+		jmethodID getRadius = jnienv->GetMethodID(activityClass,
 				"getRoundScreen", "()I");
 
 		FATAL_ERROR_IF(getRadius == nullptr,
