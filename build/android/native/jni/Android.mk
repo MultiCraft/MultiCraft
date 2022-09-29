@@ -14,7 +14,7 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := Irrlicht
-LOCAL_SRC_FILES := deps/Android/Irrlicht/${NDK_TOOLCHAIN_VERSION}-SDL2/$(APP_ABI)/libIrrlicht.a
+LOCAL_SRC_FILES := deps/Android/Irrlicht/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libIrrlicht.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -252,12 +252,12 @@ LOCAL_STATIC_LIBRARIES += \
 	OpenAL \
 	Gettext \
 	Irrlicht libpng libjpeg \
-  SDL2 \
+	SDL2 \
 	LevelDB \
 	Vorbis \
 	LuaJIT
 
-LOCAL_STATIC_LIBRARIES += android_native_app_glue $(PROFILER_LIBS)
+LOCAL_STATIC_LIBRARIES += $(PROFILER_LIBS)
 
 LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES -lz -llog
 

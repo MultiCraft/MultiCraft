@@ -49,14 +49,14 @@ android {
 
 // get precompiled deps
 task downloadDeps(type: Download) {
-	src 'https://github.com/deveee/deps/archive/SDL2.zip'
+	src 'https://github.com/MultiCraft/deps/archive/master.zip'
 	dest new File(buildDir, 'deps.zip')
 	overwrite false
 }
 
 task getDeps(dependsOn: downloadDeps, type: Copy) {
 	def deps = file('deps')
-	def f = file("$buildDir/deps-SDL2")
+	def f = file("$buildDir/deps-master")
 
 	if (!f.exists()) {
 		from zipTree(downloadDeps.dest)
