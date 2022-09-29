@@ -129,6 +129,9 @@ local function get_formspec(_, _, tab_data)
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]" ..
 
+			btn_style("world_configure") ..
+			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]" ..
+
 			"style[play;fgimg=" .. defaulttexturedir .. "btn_play.png;fgimg_hovered=" ..
 				defaulttexturedir .. "btn_play_hover.png]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
@@ -148,12 +151,6 @@ local function get_formspec(_, _, tab_data)
 			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
 				defaulttexturedir .. "switch_local_default_hover.png]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
-	end
-
-	if PLATFORM ~= "iOS" then
-		retval = retval ..
-			btn_style("world_configure") ..
-			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
 	end
 
 	local enable_server = core.settings:get_bool("enable_server")
