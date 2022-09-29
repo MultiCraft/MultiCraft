@@ -25,13 +25,10 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import androidx.core.app.NotificationCompat
-import androidx.work.CoroutineWorker
-import androidx.work.ForegroundInfo
-import androidx.work.WorkerParameters
-import androidx.work.workDataOf
+import androidx.work.*
 import com.multicraft.game.R
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
-import com.multicraft.game.helpers.Utilities.copyInputStreamToFile
+import com.multicraft.game.helpers.copyInputStreamToFile
 import java.io.File
 import java.io.IOException
 import java.util.zip.ZipFile
@@ -86,7 +83,11 @@ class UnzipWorker(private val appContext: Context, workerParams: WorkerParameter
 			}
 			Result.success()
 		} catch (e: IOException) {
-			Result.failure()
+			val isNotEnoughSpace = e.localizedMessage!!.contains("ENOSPC")
+			val out = Data.Builder()
+				.putBoolean("restart", !isNotEnoughSpace)
+				.build()
+			Result.failure(out)
 		} finally {
 			zips.forEach { File(appContext.cacheDir, it).delete() }
 		}
