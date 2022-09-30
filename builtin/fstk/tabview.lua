@@ -207,27 +207,28 @@ end]]
 --------------------------------------------------------------------------------
 local function button_header(self)
 	local visible_tabs = {}
-	local btn_widths = {}
-	local total_width = 0
+	-- local btn_widths = {}
+	-- local total_width = 0
 	for i, tab in ipairs(self.tablist) do
 		if not tab.hidden and tab.caption ~= "" then
 			visible_tabs[#visible_tabs + 1] = tab
 
-			local w = math.max(utf8.len(core.get_translated_string(tab.caption)), 10)
-			btn_widths[#visible_tabs] = w
-			total_width = total_width + w
+			-- local w = math.max(utf8.len(core.get_translated_string(tab.caption)), 10)
+			-- btn_widths[#visible_tabs] = w
+			-- total_width = total_width + w
 		end
 	end
 
 	local toadd = ""
-	local coords_per_char = 12 / total_width
+	-- local coords_per_char = 12 / total_width
 
 	-- The formspec is 15.4875 "real" coordinates wide
 	-- local x = (12.39 - total_width) / 2 - 0.3
 	local x = -0.1
+	local w = 12 / #visible_tabs
 	for i = 1, #visible_tabs do
 		local caption = visible_tabs[i].caption
-		local w = btn_widths[i] * coords_per_char
+		-- local w = btn_widths[i] * coords_per_char
 		local texture = "upper_buttons_middle"
 		if i == 1 then
 			texture = "upper_buttons_left"
