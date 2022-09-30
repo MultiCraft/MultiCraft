@@ -28,6 +28,11 @@ LOCAL_SRC_FILES := deps/Android/libjpeg/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libj
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := SDL2
+LOCAL_SRC_FILES := deps/Android/SDL2/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libSDL2.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := LevelDB
 LOCAL_SRC_FILES := deps/Android/LevelDB/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libleveldb.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -81,6 +86,7 @@ LOCAL_CFLAGS += \
 	-DUSE_SQLITE=0                  \
 	-DUSE_LUAJIT=1                  \
 	-DUSE_GETTEXT=1                 \
+	-D_IRR_COMPILE_WITH_SDL_DEVICE_ \
 	-DVERSION_MAJOR=${versionMajor} \
 	-DVERSION_MINOR=${versionMinor} \
 	-DVERSION_PATCH=${versionPatch} \
@@ -108,9 +114,9 @@ LOCAL_C_INCLUDES := \
 	deps/Android/Irrlicht/include                   \
 	deps/Android/libpng/include                     \
 	deps/Android/libjpeg/include                    \
+	deps/Android/SDL2/include                    \
 	deps/Android/LevelDB/include                    \
 	deps/Android/Gettext/include                    \
-	deps/Android/ndk_iconv                          \
 	deps/Android/LuaJIT/src                         \
 	deps/Android/OpenAL-Soft/include                \
 	deps/Android/Vorbis/include
@@ -243,18 +249,17 @@ LOCAL_STATIC_LIBRARIES += \
 	Freetype \
 	OpenAL \
 	Gettext \
-	Irrlicht libpng libjpeg \
+	Irrlicht libpng libjpeg SDL2 \
 	LevelDB \
 	Vorbis \
 	LuaJIT
 
-LOCAL_STATIC_LIBRARIES += android_native_app_glue $(PROFILER_LIBS)
+LOCAL_STATIC_LIBRARIES += $(PROFILER_LIBS)
 
-LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES -lz
+LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES -lz -llog
 
 include $(BUILD_SHARED_LIBRARY)
 
 ifdef GPROF
 $(call import-module,android-ndk-profiler)
 endif
-$(call import-module,android/native_app_glue)

@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game
 
-import android.app.NativeActivity
 import android.content.Intent
 import android.content.res.Configuration
 import android.content.res.Configuration.HARDKEYBOARDHIDDEN_NO
@@ -36,11 +35,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.InputTextBinding
-import com.multicraft.game.databinding.MultilineInputBinding
-import com.multicraft.game.helpers.*
-import kotlin.system.exitProcess
+import com.multicraft.game.helpers.Utilities.finishApp
+import com.multicraft.game.helpers.Utilities.makeFullScreen
+import org.libsdl.app.SDLActivity
 
-class GameActivity : NativeActivity() {
+class GameActivity : SDLActivity() {
 	companion object {
 		var isMultiPlayer = false
 		var isInputActive = false
@@ -50,19 +49,21 @@ class GameActivity : NativeActivity() {
 
 		@JvmStatic
 		external fun keyboardEvent(keyboard: Boolean)
-
-		init {
-			try {
-				System.loadLibrary("MultiCraft")
-			} catch (e: UnsatisfiedLinkError) {
-				exitProcess(0)
-			}
-		}
 	}
 
 	private var messageReturnCode = -1
 	private var messageReturnValue = ""
 	private var hasKeyboard = false
+
+	override fun getLibraries(): Array<String> {
+		return arrayOf(
+			"MultiCraft"
+		)
+	}
+
+	override fun getMainSharedObject(): String {
+		return getContext().applicationInfo.nativeLibraryDir + "/libMultiCraft.so"
+	}
 
 	public override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)

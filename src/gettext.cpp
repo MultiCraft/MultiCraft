@@ -232,10 +232,6 @@ void init_gettext(const char *path, const std::string &configured_language,
 
 			SDL_free(locale);
 		}
-#elif defined(__ANDROID__)
-		char lang[3] = {0};
-		AConfiguration_getLanguage(porting::app_global->config, lang);
-		setenv("LANG", lang, 1);
 #elif defined(__IOS__)
 		char lang[3] = {0};
 		NSString *syslang = [[NSLocale preferredLanguages] firstObject];
