@@ -181,7 +181,12 @@ public:
 		return res;
 	}
 
-	double getPitch() { return m_camera_pitch; }
+	double getPitchChange()
+	{
+		double res = m_camera_pitch;
+		m_camera_pitch = 0;
+		return res;
+	}
 
 	/*
 	 * Returns a line which describes what the player is pointing at.

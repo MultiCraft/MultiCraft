@@ -2450,7 +2450,7 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 	if ((device->isWindowActive() && device->isWindowFocused()
 			&& !isMenuActive()) || input->isRandom()) {
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#ifndef __IOS__
 		if (!input->isRandom()) {
 			// Mac OSX gets upset if this is set every frame
 			if (device->getCursorControl()->isVisible())
@@ -2469,7 +2469,7 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 
 	} else {
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#ifndef __IOS__
 		// Mac OSX gets upset if this is set every frame
 		if (!device->getCursorControl()->isVisible())
 			device->getCursorControl()->setVisible(true);
@@ -2484,10 +2484,11 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 {
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui) {
-		cam->camera_yaw   += g_touchscreengui->getYawChange();
-		cam->camera_pitch  = g_touchscreengui->getPitch();
-	} else {
+		cam->camera_yaw += g_touchscreengui->getYawChange();
+		cam->camera_pitch += g_touchscreengui->getPitchChange();
+	}
 #endif
+	{
 		v2s32 center(driver->getScreenSize().Width / 2, driver->getScreenSize().Height / 2);
 		v2s32 dist = input->getMousePos() - center;
 
@@ -2500,9 +2501,7 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 
 		if (dist.X != 0 || dist.Y != 0)
 			input->setMousePos(center.X, center.Y);
-#ifdef HAVE_TOUCHSCREENGUI
 	}
-#endif
 
 	if (m_cache_enable_joysticks) {
 		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime;
@@ -4239,7 +4238,9 @@ void Game::pauseGame()
 {
 	if (g_menumgr.pausesGame() || !hud)
 		return;
+#ifdef HAVE_TOUCHSCREENGUI
 	g_touchscreengui->handleReleaseAll();
+#endif
 	showPauseMenu();
 	runData.pause_game_timer = 0;
 }
