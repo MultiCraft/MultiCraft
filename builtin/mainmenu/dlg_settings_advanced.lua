@@ -518,9 +518,6 @@ local settings = full_settings
 local selected_setting = 1
 local languages, language_dropdown, lang_idx, language_name_list = get_language_list()
 
--- Preserve the original language across main menu reloads
-original_lang = rawget(_G, "original_lang") or os.getenv("LANG")
-
 local function get_current_value(setting)
 	local value = core.settings:get(setting.name)
 	if value == nil then
@@ -863,11 +860,6 @@ local function handle_change_setting_buttons(this, fields)
 				if languages[new_idx] then
 					core.settings:set("language", languages[new_idx])
 				else
-					-- Reset the language setting
-					-- It has to be set to the original language before
-					-- removing it to make sure the language is changed without
-					-- needing a restart
-					core.settings:set("language", original_lang or "")
 					core.settings:remove("language")
 				end
 
@@ -1150,12 +1142,6 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 	if fields["btn_restore"] then
 		local setting = settings[selected_setting]
 		if setting and setting.type ~= "category" then
-			if setting.name == "language" then
-				-- Revert the current language to the original one before
-				-- removing the setting
-				core.settings:set("language", original_lang or "")
-			end
-
 			core.settings:remove(setting.name)
 			core.settings:write()
 
