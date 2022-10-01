@@ -35,8 +35,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.InputTextBinding
-import com.multicraft.game.helpers.Utilities.finishApp
-import com.multicraft.game.helpers.Utilities.makeFullScreen
+import com.multicraft.game.databinding.MultilineInputBinding
+import com.multicraft.game.helpers.*
 import org.libsdl.app.SDLActivity
 
 class GameActivity : SDLActivity() {
