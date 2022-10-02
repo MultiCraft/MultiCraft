@@ -147,9 +147,6 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	params.EventReceiver = receiver;
 	params.HighPrecisionFPU = g_settings->getBool("high_precision_fpu");
 	params.ZBufferBits = 24;
-#ifdef __ANDROID__
-	params.PrivateData = porting::app_global;
-#endif
 #if ENABLE_GLES
 	// there is no standardized path for these on desktop
 	std::string rel_path = std::string("client") + DIR_DELIM

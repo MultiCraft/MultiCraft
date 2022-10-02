@@ -82,42 +82,7 @@ local getSettingIndex = {
 	end
 }
 
--- Get a list of languages and language names
-local path_locale = core.get_builtin_path() .. ".." .. DIR_DELIM .. "locale"
-local languages = core.get_dir_list(path_locale, true)
-local language_names = {}
-for i = #languages, 1, -1 do
-	local language = languages[i]
-	local f = io.open(path_locale .. DIR_DELIM .. language .. DIR_DELIM ..
-					  "LC_MESSAGES" .. DIR_DELIM .. "minetest.mo")
-	if f then
-		-- HACK
-		local name = f:read("*a"):match("\nLanguage%-Team: ([^\\\n\"]+) <https://")
-		language_names[language] = name or language
-		f:close()
-	else
-		table.remove(languages, i)
-	end
-end
-
-languages[#languages + 1] = "en"
-language_names.en = "English"
-
--- Sort the languages list based on their human readable name
-table.sort(languages, function(a, b)
-	return language_names[a] < language_names[b]
-end)
-
-local language_name_list = {}
-for i, language in ipairs(languages) do
-	language_name_list[i] = core.formspec_escape(language_names[language])
-end
-local language_dropdown = table.concat(language_name_list, ",")
-
-local lang_idx = table.indexof(languages, fgettext("LANG_CODE"))
-if lang_idx < 0 then
-	lang_idx = table.indexof(languages, "en")
-end
+local languages, language_dropdown, lang_idx = get_language_list()
 
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))

@@ -228,19 +228,17 @@ void init_gettext(const char *path, const std::string &configured_language,
 				char lang[3] = {0};
 				strncpy(lang, locale[0].language, 2);
 				setenv("LANG", lang, 1);
+				setenv("LANGUAGE", lang, 1);
 			}
 
 			SDL_free(locale);
 		}
-#elif defined(__ANDROID__)
-		char lang[3] = {0};
-		AConfiguration_getLanguage(porting::app_global->config, lang);
-		setenv("LANG", lang, 1);
 #elif defined(__IOS__)
 		char lang[3] = {0};
 		NSString *syslang = [[NSLocale preferredLanguages] firstObject];
 		[syslang getBytes:lang maxLength:2 usedLength:nil encoding:NSASCIIStringEncoding options:0 range:NSMakeRange(0, 2) remainingRange:nil];
 		setenv("LANG", lang, 1);
+		setenv("LANGUAGE", lang, 1);
 #endif
 		setlocale(LC_ALL, "");
 	}

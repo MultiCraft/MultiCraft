@@ -68,31 +68,7 @@ task getDeps(dependsOn: downloadDeps, type: Copy) {
 	}
 }
 
-// get libiconv
-task downloadIconv(dependsOn: getDeps, type: Download) {
-	src 'https://github.com/MoNTE48/ndk_iconv/archive/mc.zip'
-	dest new File(buildDir, 'iconv.zip')
-	overwrite false
-}
-
-task getIconv(dependsOn: downloadIconv, type: Copy) {
-	def iconv = file('deps/Android/ndk_iconv')
-	def f = file("$buildDir/ndk_iconv-mc")
-
-	if (!iconv.exists() && !f.exists()) {
-		from zipTree(downloadIconv.dest)
-		into buildDir
-	}
-
-	doLast {
-		if (!iconv.exists()) {
-			file(f).renameTo(file(iconv))
-		}
-	}
-}
-
 preBuild.dependsOn getDeps
-preBuild.dependsOn getIconv
 
 android.defaultConfig.externalNativeBuild.ndkBuild {
 	arguments 'prebuilt=$(if $(strip $(wildcard $(prebuilt_path))),$(prebuilt_path),.)'
