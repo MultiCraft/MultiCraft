@@ -525,7 +525,7 @@ void set_default_settings()
 #endif
 
 #ifdef HAVE_TOUCHSCREENGUI
-	settings->setDefault("touchtarget", "false"); // TEMPORARY
+	settings->setDefault("touchtarget", "true");
 	settings->setDefault("touchscreen_threshold", "20");
 	settings->setDefault("fixed_virtual_joystick", "true");
 	settings->setDefault("virtual_joystick_triggers_aux", "false");

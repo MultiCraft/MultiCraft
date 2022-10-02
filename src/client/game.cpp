@@ -954,6 +954,10 @@ private:
 
 	int m_reset_HW_buffer_counter = 0;
 
+#ifdef HAVE_TOUCHSCREENGUI
+	bool m_cache_touchtarget;
+#endif
+
 #if defined(__ANDROID__) || defined(__IOS__)
 	bool m_android_chat_open;
 #endif
@@ -1359,7 +1363,6 @@ bool Game::createClient(const GameStartData &start_data)
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui) {
 		g_touchscreengui->init(texture_src);
-		g_touchscreengui->hide();
 	}
 #endif
 	if (!connectToServer(start_data, &could_connect, &connect_aborted))
@@ -1883,7 +1886,6 @@ void Game::processUserInput(f32 dtime)
 	else if (g_touchscreengui) {
 		/* on touchscreengui step may generate own input events which ain't
 		 * what we want in case we just did clear them */
-		g_touchscreengui->show();
 		g_touchscreengui->step(dtime);
 	}
 #endif
@@ -2484,7 +2486,7 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 {
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui) {
-		cam->camera_yaw += g_touchscreengui->getYawChange();
+		cam->camera_yaw   += g_touchscreengui->getYawChange();
 		cam->camera_pitch += g_touchscreengui->getPitchChange();
 	}
 #endif
@@ -3155,7 +3157,7 @@ void Game::processPlayerInteraction(f32 dtime, bool show_hud, bool show_debug)
 
 #ifdef HAVE_TOUCHSCREENGUI
 
-	if ((g_settings->getBool("touchtarget")) && (g_touchscreengui)) {
+	if (g_touchscreengui && g_touchscreengui->is_visible && m_cache_touchtarget) {
 		shootline = g_touchscreengui->getShootline();
 		// Scale shootline to the acual distance the player can reach
 		shootline.end = shootline.start
@@ -4013,10 +4015,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 			(player->hud_flags & HUD_FLAG_CROSSHAIR_VISIBLE) &&
 			(camera->getCameraMode() != CAMERA_MODE_THIRD_FRONT));
 #ifdef HAVE_TOUCHSCREENGUI
-	try {
-		draw_crosshair = !g_settings->getBool("touchtarget");
-	} catch (SettingNotFoundException) {
-	}
+	draw_crosshair = !m_cache_touchtarget || !g_touchscreengui->is_visible;
 #endif
 
 	video::SOverrideMaterial &mat = driver->getOverrideMaterial();
@@ -4219,6 +4218,10 @@ void Game::readSettings()
 	m_cache_enable_free_move             = g_settings->getBool("free_move");
 
 	m_cache_fog_start                    = g_settings->getFloat("fog_start");
+
+#ifdef HAVE_TOUCHSCREENGUI
+	m_cache_touchtarget                  = g_settings->getBool("touchtarget");
+#endif
 
 	m_cache_cam_smoothing = 0;
 	if (g_settings->getBool("cinematic"))
