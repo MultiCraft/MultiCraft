@@ -34,13 +34,10 @@ local function create_confirm_reset_dlg()
 			if fields["reset_confirm"] then
 				for _, setting_name in ipairs(core.settings:get_names()) do
 					if not setting_name:find(".", 1, true) and
-							setting_name ~= "language" and
 							setting_name ~= "maintab_LAST" then
 						core.settings:remove(setting_name)
 					end
 				end
-
-				core.settings:set("language", os.getenv("LANG"))
 
 				-- Reload the entire main menu
 				dofile(core.get_builtin_path() .. "init.lua")
