@@ -59,6 +59,7 @@ android {
 	buildFeatures {
 		viewBinding true
 	}
+	namespace = "com.multicraft.game"
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os

@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2021 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
-Copyright (C) 2014-2021 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
+Copyright (C) 2014-2022 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -147,15 +147,12 @@ class MainActivity : AppCompatActivity() {
 		binding.progressCircle.visibility = View.VISIBLE
 		binding.progressBar.visibility = View.GONE
 		val filesList = listOf(
-			File(externalStorage, "builtin"),
-			File(externalStorage, "games${sep}default"),
-			File(externalStorage, "textures${sep}base"),
 			File(externalStorage, "debug.txt"),
 			File(filesDir, "builtin"),
-			File(filesDir, "client${sep}shaders"),
+			File(filesDir, "client"),
 			File(filesDir, "fonts"),
-			File(filesDir, "games${sep}default"),
-			File(filesDir, "textures${sep}base")
+			File(filesDir, "games"),
+			File(filesDir, "textures")
 		)
 		val zips = assets.list("data")!!.toList()
 		lifecycleScope.launch {
