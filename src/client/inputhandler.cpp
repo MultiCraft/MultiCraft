@@ -114,6 +114,17 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		return g_menumgr.preprocessEvent(event);
 	}
 
+#ifdef HAVE_TOUCHSCREENGUI
+	if (m_touchscreengui) {
+		if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
+			m_touchscreengui->show();
+		} else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
+				event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) {
+			m_touchscreengui->hide();
+		}
+	}
+#endif
+
 	// Remember whether each key is down or up
 	if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
 		const KeyPress &keyCode = event.KeyInput;
