@@ -529,6 +529,7 @@ void set_default_settings()
 	settings->setDefault("touchscreen_threshold", "20");
 	settings->setDefault("fixed_virtual_joystick", "true");
 	settings->setDefault("virtual_joystick_triggers_aux", "false");
+	settings->setDefault("fast_move", "true");
 #endif
 
 	// Mobile Platform

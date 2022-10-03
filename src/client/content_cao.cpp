@@ -1021,17 +1021,13 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 			bool allow_update = false;
 
 			// increase speed if using fast or flying fast
-			if (g_settings->getBool("fast_move") &&
-				 m_client->checkLocalPrivilege("fast")) {
-#ifndef HAVE_TOUCHSCREENGUI
-				// do not require pressing AUX1 for Fast if HAVE_TOUCHSCREENGUI.
-				if ((controls.aux1 ||
+			if((g_settings->getBool("fast_move") &&
+					m_client->checkLocalPrivilege("fast")) &&
+					(controls.aux1 ||
 					(!player->touching_ground &&
 					g_settings->getBool("free_move") &&
 					m_client->checkLocalPrivilege("fly"))))
-#endif
-				new_speed *= 1.5;
-			}
+					new_speed *= 1.5;
 			// slowdown speed if sneeking
 			if (controls.sneak && walking)
 				new_speed /= 2;

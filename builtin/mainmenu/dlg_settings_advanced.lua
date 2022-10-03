@@ -516,6 +516,7 @@ local full_settings = parse_config_file(false, true)
 local search_string = ""
 local settings = full_settings
 local selected_setting = 1
+local languages, language_dropdown, lang_idx, language_name_list = get_language_list()
 
 local function get_current_value(setting)
 	local value = core.settings:get(setting.name)
@@ -579,7 +580,14 @@ local function create_change_setting_formspec(dialogdata)
 	local formspec = ""
 
 	-- Setting-specific formspec elements
-	if setting.type == "bool" then
+	if setting.name == "language" then
+		-- Special case for the change language setting
+		-- The first option is empty (so lang_idx is offset by 1)
+		formspec = "dropdown[3," .. height .. ";4,1;dd_language;,"
+				.. language_dropdown .. ";" .. lang_idx + 1 .. ";true]"
+		height = height + 1.25
+
+	elseif setting.type == "bool" then
 		local selected_index = 1
 		if core.is_yes(get_current_value(setting)) then
 			selected_index = 2
@@ -830,10 +838,36 @@ local function create_change_setting_formspec(dialogdata)
 	)
 end
 
+-- Reload the main menu so that everything uses the new language
+local function reload_main_menu()
+	dofile(core.get_builtin_path() .. "init.lua")
+
+	-- Open a new advanced settings dialog
+	local maintab = ui.find_by_name("maintab")
+	local adv_settings_dlg = create_adv_settings_dlg(search_string,
+		settings, selected_setting)
+	adv_settings_dlg:set_parent(maintab)
+	maintab:hide()
+	adv_settings_dlg:show()
+end
+
 local function handle_change_setting_buttons(this, fields)
 	local setting = settings[selected_setting]
 	if fields["btn_done"] or fields["key_enter"] then
-		if setting.type == "bool" then
+		if setting.name == "language" then
+			local new_idx = tonumber(fields["dd_language"]) - 1
+			if lang_idx ~= new_idx then
+				if languages[new_idx] then
+					core.settings:set("language", languages[new_idx])
+				else
+					core.settings:remove("language")
+				end
+
+				reload_main_menu()
+				return true
+			end
+
+		elseif setting.type == "bool" then
 			local new_value = fields["dd_setting_value"]
 			-- Note: new_value is the actual (translated) value shown in the dropdown
 			core.settings:set_bool(setting.name, new_value == fgettext("Enabled"))
@@ -1020,6 +1054,10 @@ local function create_settings_formspec(tabview, _, tabdata)
 			formspec = formspec .. "," .. (current_level + 1) .. "," .. core.formspec_escape(name) .. ","
 					.. core.formspec_escape(get_current_np_group_as_string(entry)) .. ","
 
+		elseif entry.name == "language" then
+			formspec = formspec .. "," .. (current_level + 1) .. "," .. core.formspec_escape(name) .. ","
+					.. (language_name_list[lang_idx] or "") .. ","
+
 		else
 			formspec = formspec .. "," .. (current_level + 1) .. "," .. core.formspec_escape(name) .. ","
 					.. core.formspec_escape(get_current_value(entry)) .. ","
@@ -1106,7 +1144,10 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		if setting and setting.type ~= "category" then
 			core.settings:remove(setting.name)
 			core.settings:write()
-			core.update_formspec(this:get_formspec())
+
+			if setting.name == "language" then
+				reload_main_menu()
+			end
 		end
 		return true
 	end
@@ -1126,13 +1167,17 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 	return false
 end
 
-function create_adv_settings_dlg()
+function create_adv_settings_dlg(new_search_string, new_settings, new_selected_setting)
+	search_string = new_search_string or search_string
+	settings = new_settings or settings
+	selected_setting = new_selected_setting or selected_setting
+
 	local dlg = dialog_create("settings_advanced",
 				create_settings_formspec,
 				handle_settings_buttons,
 				nil, true)
 
-				return dlg
+	return dlg
 end
 
 -- Uncomment to generate 'multicraft.conf.example' and 'settings_translation_file.cpp'.

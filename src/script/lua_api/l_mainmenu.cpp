@@ -556,6 +556,13 @@ int ModApiMainMenu::l_get_texturepath_share(lua_State *L)
 }
 
 /******************************************************************************/
+int ModApiMainMenu::l_get_locale_path(lua_State *L)
+{
+	lua_pushstring(L, fs::RemoveRelativePathComponents(porting::path_locale).c_str());
+	return 1;
+}
+
+/******************************************************************************/
 int ModApiMainMenu::l_get_cache_path(lua_State *L)
 {
 	lua_pushstring(L, fs::RemoveRelativePathComponents(porting::path_cache).c_str());
@@ -1000,6 +1007,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(get_serverlistpath);
 	API_FCT(get_texturepath);
 	API_FCT(get_texturepath_share);
+	API_FCT(get_locale_path);
 	API_FCT(get_cache_path);
 	API_FCT(get_temp_path);
 	API_FCT(create_dir);
