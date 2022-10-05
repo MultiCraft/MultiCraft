@@ -20,6 +20,7 @@ if not lang or lang == "" then lang = os.getenv("LANG") end
 
 local esc = core.formspec_escape
 local defaulttexturedir = esc(defaulttexturedir)
+local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
 local function current_game()
 	local last_game_id = core.settings:get("menu_last_game")
@@ -118,6 +119,7 @@ local function get_formspec(_, _, tab_data)
 		creative_bg = "creative_bg_" .. lang .. ".png"
 	end
 
+	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
 			"style[world_delete;fgimg=" .. defaulttexturedir ..
 				"world_delete.png;fgimg_hovered=" .. defaulttexturedir .. "world_delete_hover.png]" ..
@@ -132,9 +134,11 @@ local function get_formspec(_, _, tab_data)
 			btn_style("world_configure") ..
 			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]" ..
 
-			"style[play;fgimg=" .. defaulttexturedir .. "btn_play.png;fgimg_hovered=" ..
-				defaulttexturedir .. "btn_play_hover.png]" ..
-			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
+			btn_style("play") ..
+			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..
+			"image_button[6.72,1.43;4.96,1.41;;play;" .. space .. " " ..
+				fgettext("Play") .. space .. ";true;false]" ..
+			"image[7,1.63;1,1;" .. defaulttexturedir .. "btn_play_icon.png]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
 			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_bg .. ";;;true;false]" ..
