@@ -129,11 +129,17 @@ local function get_formspec(_, _, tab_data)
 			"style[world_create;fgimg=" .. defaulttexturedir ..
 				"world_new.png;fgimg_hovered=" .. defaulttexturedir .. "world_new_hover.png]" ..
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
-			"tooltip[world_create;".. fgettext("New") .. "]" ..
+			"tooltip[world_create;".. fgettext("New") .. "]"
 
+	local world = menudata.worldlist:get_list()[index]
+	local game = world and pkgmgr.find_by_gameid(world.gameid)
+	if not game or game.moddable then
+		retval = retval ..
 			btn_style("world_configure") ..
-			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]" ..
+			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
+	end
 
+	retval = retval ..
 			btn_style("play") ..
 			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;" .. space .. " " ..
