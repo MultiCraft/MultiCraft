@@ -214,7 +214,7 @@ public:
 	bool isActive() {return m_active;}
 
 	// set device active state
-	void setActive(bool active) {m_active = active;}
+	static void setActive(bool active) {m_active = active;}
 
 private:
 	IrrlichtDevice *m_device;
@@ -332,7 +332,7 @@ private:
 	AutoHideButtonBar m_rarecontrolsbar;
 
 	// device active state
-	bool m_active = true;
+	static bool m_active;
 };
 
 extern TouchScreenGUI *g_touchscreengui;

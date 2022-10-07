@@ -421,6 +421,8 @@ void AutoHideButtonBar::show()
 	}
 }
 
+bool TouchScreenGUI::m_active = true;
+
 TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device, IEventReceiver *receiver):
 	m_device(device),
 	m_guienv(device->getGUIEnvironment()),

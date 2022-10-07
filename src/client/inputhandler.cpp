@@ -103,17 +103,15 @@ void KeyCache::populate()
 bool MyEventReceiver::OnEvent(const SEvent &event)
 {
 #ifdef HAVE_TOUCHSCREENGUI
-	if (m_touchscreengui) {
-		if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
-			m_touchscreengui->setActive(true);
-			if (!isMenuActive())
-				m_touchscreengui->show();
-		} else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
-				event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) {
-			m_touchscreengui->setActive(false);
-			if (!isMenuActive())
-				m_touchscreengui->hide();
-		}
+	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
+		TouchScreenGUI::setActive(true);
+		if (m_touchscreengui && !isMenuActive())
+			m_touchscreengui->show();
+	} else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
+			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) {
+		TouchScreenGUI::setActive(false);
+		if (m_touchscreengui && !isMenuActive())
+			m_touchscreengui->hide();
 	}
 #endif
 
