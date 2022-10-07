@@ -213,6 +213,12 @@ public:
 	// is the gui visible
 	bool is_visible = false;
 
+	// returns true if device is active
+	bool isActive() {return m_active;}
+
+	// set device active state
+	void setActive(bool active) {m_active = active;}
+
 private:
 	IrrlichtDevice *m_device;
 	IGUIEnvironment *m_guienv;
@@ -326,6 +332,9 @@ private:
 
 	// rare controls bar
 	AutoHideButtonBar m_rarecontrolsbar;
+
+	// device active state
+	bool m_active = true;
 };
 
 extern TouchScreenGUI *g_touchscreengui;

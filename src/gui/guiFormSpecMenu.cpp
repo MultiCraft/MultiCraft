@@ -68,6 +68,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "intlGUIEditBox.h"
 #include "guiHyperText.h"
 #include "guiScene.h"
+#include "touchscreengui.h"
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #include <SDL.h>
@@ -3743,9 +3744,10 @@ void GUIFormSpecMenu::drawMenu()
 	}
 
 /* TODO find way to show tooltips on touchscreen */
-#ifndef HAVE_TOUCHSCREENGUI
-	m_pointer = RenderingEngine::get_raw_device()->getCursorControl()->getPosition();
+#ifdef HAVE_TOUCHSCREENGUI
+	if (!g_touchscreengui || !g_touchscreengui->isActive())
 #endif
+		m_pointer = RenderingEngine::get_raw_device()->getCursorControl()->getPosition();
 
 	/*
 		Draw fields/buttons tooltips and update the mouse cursor

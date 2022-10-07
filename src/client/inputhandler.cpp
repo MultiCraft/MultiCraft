@@ -102,6 +102,17 @@ void KeyCache::populate()
 
 bool MyEventReceiver::OnEvent(const SEvent &event)
 {
+#ifdef HAVE_TOUCHSCREENGUI
+	if (m_touchscreengui) {
+		if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
+			m_touchscreengui->setActive(true);
+		} else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
+				event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) {
+			m_touchscreengui->setActive(false);
+		}
+	}
+#endif
+
 	/*
 		React to nothing here if a menu is active
 	*/
