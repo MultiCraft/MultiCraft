@@ -249,6 +249,22 @@ local function main_button_handler(this, fields, name)
 		if world then
 			local game = pkgmgr.find_by_gameid(world.gameid)
 			core.settings:set("menu_last_game", (game and game.id or ""))
+
+			-- Disable all mods on games that aren't moddable
+			if game and not game.moddable then
+				local conf = Settings(world.path .. DIR_DELIM .. "world.mt")
+				local needs_update = false
+				for _, key in pairs(conf:get_names()) do
+					if key:sub(1, 9) == "load_mod_" and conf:get_bool(key) then
+						conf:set_bool(key, false)
+						needs_update = true
+					end
+				end
+
+				if needs_update then
+					conf:write()
+				end
+			end
 		end
 
 		if core.settings:get_bool("enable_server") then
