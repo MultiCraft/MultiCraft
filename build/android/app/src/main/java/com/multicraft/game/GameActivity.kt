@@ -300,4 +300,9 @@ class GameActivity : SDLActivity() {
 	fun getRoundScreen(): Int {
 		return radius
 	}
+
+	@Suppress("unused")
+	fun getSecretKey(key: String): String {
+		return "Stub"
+	}
 }
