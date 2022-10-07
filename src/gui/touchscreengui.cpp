@@ -373,7 +373,7 @@ void AutoHideButtonBar::step(float dtime)
 
 void AutoHideButtonBar::deactivate()
 {
-	if (is_visible) {
+	if (m_visible) {
 		m_starter.guibutton->setVisible(true);
 		m_starter.guibutton->setEnabled(true);
 	}
@@ -390,7 +390,7 @@ void AutoHideButtonBar::deactivate()
 
 void AutoHideButtonBar::hide()
 {
-	is_visible = false;
+	m_visible = false;
 	m_starter.guibutton->setVisible(false);
 	m_starter.guibutton->setEnabled(false);
 
@@ -405,7 +405,7 @@ void AutoHideButtonBar::hide()
 
 void AutoHideButtonBar::show()
 {
-	is_visible = true;
+	m_visible = true;
 
 	if (m_active) {
 		auto iter = m_buttons.begin();
@@ -449,7 +449,7 @@ void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_
 {
 	button_info *btn       = &m_buttons[id];
 	btn->guibutton         = m_guienv->addButton(button_rect, nullptr, id, caption.c_str());
-	btn->guibutton->setVisible(is_visible);
+	btn->guibutton->setVisible(m_visible);
 	btn->guibutton->grab();
 	btn->repeatcounter     = -1;
 	btn->repeatdelay       = repeat_delay;
@@ -466,7 +466,7 @@ button_info *TouchScreenGUI::initJoystickButton(touch_gui_button_id id,
 {
 	auto *btn = new button_info();
 	btn->guibutton = m_guienv->addButton(button_rect, nullptr, id, L"O");
-	btn->guibutton->setVisible(visible && is_visible);
+	btn->guibutton->setVisible(visible && m_visible);
 	btn->guibutton->grab();
 	btn->ids.clear();
 
@@ -782,7 +782,7 @@ void TouchScreenGUI::handleReleaseEvent(size_t evt_id)
 			m_joystick_status[i] = false;
 		applyJoystickStatus();
 
-		if (is_visible)
+		if (m_visible)
 			m_joystick_btn_off->guibutton->setVisible(true);
 		m_joystick_btn_bg->guibutton->setVisible(false);
 		m_joystick_btn_center->guibutton->setVisible(false);
@@ -863,7 +863,7 @@ void TouchScreenGUI::moveJoystick(const SEvent &event, float dx, float dy) {
 
 void TouchScreenGUI::translateEvent(const SEvent &event)
 {
-	if (!is_visible) {
+	if (!m_visible) {
 		infostream
 			<< "TouchScreenGUI::translateEvent got event but not visible!"
 			<< std::endl;
@@ -1239,7 +1239,7 @@ void TouchScreenGUI::registerHudItem(s32 index, const rect<s32> &rect)
 
 void TouchScreenGUI::Toggle(bool visible)
 {
-	is_visible = visible;
+	m_visible = visible;
 	for (auto &button : m_buttons) {
 		if (button.guibutton)
 			button.guibutton->setVisible(visible);
@@ -1263,7 +1263,7 @@ void TouchScreenGUI::Toggle(bool visible)
 
 void TouchScreenGUI::hide()
 {
-	if (!is_visible)
+	if (!m_visible)
 		return;
 
 	Toggle(false);
@@ -1271,7 +1271,7 @@ void TouchScreenGUI::hide()
 
 void TouchScreenGUI::show()
 {
-	if (is_visible)
+	if (m_visible)
 		return;
 
 	Toggle(true);

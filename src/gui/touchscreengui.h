@@ -141,9 +141,6 @@ public:
 	// unhide the buttonbar
 	void show();
 
-	// is the gui visible
-	bool is_visible = false;
-
 private:
 	ISimpleTextureSource *m_texturesource = nullptr;
 	irr::video::IVideoDriver *m_driver;
@@ -157,6 +154,9 @@ private:
 
 	// show settings bar
 	bool m_active = false;
+
+	// is the gui visible
+	bool m_visible = true;
 
 	// settings bar timeout
 	float m_timeout = 0.0f;
@@ -210,9 +210,6 @@ public:
 	// handle all buttons
 	void handleReleaseAll();
 
-	// is the gui visible
-	bool is_visible = false;
-
 	// returns true if device is active
 	bool isActive() {return m_active;}
 
@@ -230,6 +227,7 @@ private:
 	double m_mouse_sensitivity;
 	std::map<int, rect<s32>> m_hud_rects;
 	std::map<size_t, irr::EKEY_CODE> m_hud_ids;
+	bool m_visible; // is the gui visible
 	bool m_buttons_initialized = false;
 
 	// value in degree

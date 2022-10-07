@@ -3152,7 +3152,7 @@ void Game::processPlayerInteraction(f32 dtime, bool show_hud, bool show_debug)
 
 #ifdef HAVE_TOUCHSCREENGUI
 
-	if (g_touchscreengui && g_touchscreengui->is_visible && m_cache_touchtarget) {
+	if (g_touchscreengui && g_touchscreengui->isActive() && m_cache_touchtarget) {
 		shootline = g_touchscreengui->getShootline();
 		// Scale shootline to the acual distance the player can reach
 		shootline.end = shootline.start
@@ -4010,7 +4010,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 			(player->hud_flags & HUD_FLAG_CROSSHAIR_VISIBLE) &&
 			(camera->getCameraMode() != CAMERA_MODE_THIRD_FRONT));
 #ifdef HAVE_TOUCHSCREENGUI
-	draw_crosshair = !m_cache_touchtarget || !g_touchscreengui->is_visible;
+	draw_crosshair = !m_cache_touchtarget || !g_touchscreengui->isActive();
 #endif
 
 	video::SOverrideMaterial &mat = driver->getOverrideMaterial();
