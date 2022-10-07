@@ -254,7 +254,7 @@ local function main_button_handler(this, fields, name)
 			if game and not game.moddable then
 				local conf = Settings(world.path .. DIR_DELIM .. "world.mt")
 				local needs_update = false
-				for _, key in pairs(conf:get_names()) do
+				for _, key in ipairs(conf:get_names()) do
 					if key:sub(1, 9) == "load_mod_" and conf:get_bool(key) then
 						conf:set_bool(key, false)
 						needs_update = true
