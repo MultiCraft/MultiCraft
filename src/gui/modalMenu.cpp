@@ -111,7 +111,7 @@ void GUIModalMenu::quitMenu()
 	m_menumgr->deletingMenu(this);
 	this->remove();
 #ifdef HAVE_TOUCHSCREENGUI
-	if (g_touchscreengui && m_touchscreen_visible)
+	if (g_touchscreengui && g_touchscreengui->isActive() && m_touchscreen_visible)
 		g_touchscreengui->show();
 #endif
 }

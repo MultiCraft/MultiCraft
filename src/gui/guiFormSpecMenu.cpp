@@ -3839,10 +3839,12 @@ void GUIFormSpecMenu::showTooltip(const std::wstring &text,
 	int tooltip_offset_x = m_btn_height;
 	int tooltip_offset_y = m_btn_height;
 #ifdef HAVE_TOUCHSCREENGUI
-	tooltip_offset_x *= 3;
-	tooltip_offset_y  = 0;
-	if (m_pointer.X > (s32)screenSize.X / 2)
-		tooltip_offset_x = -(tooltip_offset_x + tooltip_width);
+	if (g_touchscreengui && g_touchscreengui->isActive()) {
+		tooltip_offset_x *= 3;
+		tooltip_offset_y  = 0;
+		if (m_pointer.X > (s32)screenSize.X / 2)
+			tooltip_offset_x = -(tooltip_offset_x + tooltip_width);
+	}
 #endif
 
 	// Calculate and set the tooltip position
@@ -4409,7 +4411,7 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 						move_amount = MYMIN(m_selected_amount, 10);
 					else if (button == BET_LEFT) {
 #ifdef HAVE_TOUCHSCREENGUI
-						if (s.listname == "craft")
+						if (g_touchscreengui && g_touchscreengui->isActive() && s.listname == "craft")
 							move_amount = 1;
 						else
 #endif
