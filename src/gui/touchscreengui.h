@@ -211,10 +211,10 @@ public:
 	void handleReleaseAll();
 
 	// returns true if device is active
-	bool isActive() {return m_active;}
+	bool isActive() { return m_active; }
 
 	// set device active state
-	static void setActive(bool active) {m_active = active;}
+	static void setActive(bool active) { m_active = active; }
 
 private:
 	IrrlichtDevice *m_device;
