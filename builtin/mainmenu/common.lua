@@ -305,16 +305,16 @@ local high_dpi = (PLATFORM == "OSX" and tonumber(core.settings:get("screen_dpi")
 		core.get_screen_info().density >= 3
 local btn_size = high_dpi and ".x2" or ""
 function btn_style(field, color)
-	local defaulttexturedir = core.formspec_escape(defaulttexturedir)
+	local button_path = core.formspec_escape(defaulttexturedir) .. DIR_DELIM .. "gui" .. DIR_DELIM
 	color = (color and "_" .. color) or ""
 
 	local retval =
 		"style[" .. field .. ";border=false]" ..
-		"style[" .. field .. ";bgimg=" .. defaulttexturedir .. "gui_button" .. color .. btn_size ..
+		"style[" .. field .. ";bgimg=" .. button_path .. "gui_button" .. color .. btn_size ..
 			".png;bgimg_middle=" .. (high_dpi and 48 or 16) .. ";padding=" .. (high_dpi and -30 or -10) .. "]" ..
-		"style[" .. field .. ":hovered;bgimg=" .. defaulttexturedir .. "gui_button" .. color .. "_hovered" .. btn_size ..
+		"style[" .. field .. ":hovered;bgimg=" .. button_path .. "gui_button" .. color .. "_hovered" .. btn_size ..
 			".png]" ..
-		"style[" .. field .. ":pressed;bgimg=" .. defaulttexturedir .. "gui_button" .. color .. "_pressed" .. btn_size ..
+		"style[" .. field .. ":pressed;bgimg=" .. button_path .. "gui_button" .. color .. "_pressed" .. btn_size ..
 			".png]"
 
 	return retval
