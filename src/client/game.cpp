@@ -831,6 +831,7 @@ private:
 		bool disable_camera_update = false;
 	};
 
+	bool isHighDpi();
 	void showDeathFormspec();
 	void showPauseMenu();
 	void showChangePasswordDialog(std::string old_pw, std::string new_pw,
@@ -4279,6 +4280,15 @@ void Game::extendedResourceCleanup()
 		       << " (note: irrlicht doesn't support removing renderers)" << std::endl;
 }
 
+bool Game::isHighDpi()
+{
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	return g_settings->getFloat("screen_dpi") / 72.0f >= 2;
+#else
+	return RenderingEngine::getDisplayDensity() >= 3;
+#endif
+}
+
 void Game::showDeathFormspec()
 {
 	static std::string formspec_str =
@@ -4359,15 +4369,16 @@ void Game::showPauseMenu()
 #if __IOS__
 	ypos += 0.5f;
 #endif
-	std::ostringstream os; // ToDo: ".x2" for buttons
+	const std::string x2 = isHighDpi() ? ".x2" : "";
+	std::ostringstream os;
 
 	os << "formspec_version[1]" << SIZE_TAG
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
 
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button.png;bgimg_middle=16;padding=-10]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered.png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed.png]"
+		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2 << ".png;bgimg_middle=16;padding=-10]"
+		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
 
 		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
 		<< strgettext("Continue") << ";;false]";
@@ -4457,7 +4468,8 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 	str_formspec_escape(new_pw);
 	str_formspec_escape(confirm_pw);
 
-	std::ostringstream os; // ToDo: ".x2" for buttons
+	const std::string x2 = isHighDpi() ? ".x2" : "";
+	std::ostringstream os;
 	os << "formspec_version[5]"
 		<< "size[10.5,7.5]"
 		<< "no_prepend[]"
@@ -4466,9 +4478,9 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "pwdfield[1,1.2;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
 		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
 		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
-		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=16;padding=-10]"
-		<< "style_type[image_button_exit,image_button:hovered;gui_bgimg=button_hovered.png]"
-		<< "style_type[image_button_exit,image_button:pressed;gui_bgimg=button_pressed.png]"
+		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2 << ".png;bgimg_middle=16;padding=-10]"
+		<< "style_type[image_button_exit,image_button:hovered;gui_bgimg=gui/button_hovered" << x2 << ".png]"
+		<< "style_type[image_button_exit,image_button:pressed;gui_bgimg=gui/button_pressed" << x2 << ".png]"
 		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
 		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
