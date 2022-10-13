@@ -75,20 +75,20 @@ public:
 	static std::array<StyleSpec, NUM_STATES> getButtonStyle(const std::string texture_path = "") {
 		std::array<StyleSpec, NUM_STATES> ret;
 
-		StyleSpec btn_spec;
-		btn_spec.set(BGIMG, texture_path + "gui_button.png");
-		btn_spec.set(BGIMG_MIDDLE, "20");
+		StyleSpec btn_spec; // ToDo: ".x2" for buttons
+		btn_spec.set(BGIMG, texture_path + "gui/gui_button.png");
+		btn_spec.set(BGIMG_MIDDLE, "16");
 		btn_spec.set(BORDER, "false");
 		btn_spec.set(PADDING, "-10");
 
 		ret[STATE_DEFAULT] = btn_spec;
 
 		StyleSpec hovered_spec;
-		hovered_spec.set(BGIMG, texture_path + "gui_button_hovered.png");
+		hovered_spec.set(BGIMG, texture_path + "gui/gui_button_hovered.png");
 		ret[STATE_HOVERED] = hovered_spec;
 
 		StyleSpec pressed_spec;
-		pressed_spec.set(BGIMG, texture_path + "gui_button_pressed.png");
+		pressed_spec.set(BGIMG, texture_path + "gui/gui_button_pressed.png");
 		ret[STATE_PRESSED] = pressed_spec;
 
 		return ret;

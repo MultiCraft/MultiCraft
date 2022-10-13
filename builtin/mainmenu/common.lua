@@ -305,7 +305,7 @@ local high_dpi = (PLATFORM == "OSX" and tonumber(core.settings:get("screen_dpi")
 		core.get_screen_info().density >= 3
 local btn_size = high_dpi and ".x2" or ""
 function btn_style(field, color)
-	local button_path = core.formspec_escape(defaulttexturedir) .. DIR_DELIM .. "gui" .. DIR_DELIM
+	local button_path = core.formspec_escape(defaulttexturedir) .. "gui" .. DIR_DELIM
 	color = (color and "_" .. color) or ""
 
 	local retval =
