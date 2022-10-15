@@ -311,11 +311,15 @@ function btn_style(field, color)
 	local retval =
 		"style[" .. field .. ";border=false]" ..
 		"style[" .. field .. ";bgimg=" .. button_path .. "gui_button" .. color .. btn_size ..
-			".png;bgimg_middle=" .. (high_dpi and 48 or 16) .. ";padding=" .. (high_dpi and -30 or -10) .. "]" ..
-		"style[" .. field .. ":hovered;bgimg=" .. button_path .. "gui_button" .. color .. "_hovered" .. btn_size ..
-			".png]" ..
-		"style[" .. field .. ":pressed;bgimg=" .. button_path .. "gui_button" .. color .. "_pressed" .. btn_size ..
-			".png]"
+			".png;bgimg_middle=" .. (high_dpi and 48 or 16) .. ";padding=" .. (high_dpi and -30 or -10) .. "]"
+
+	if color ~= "_gray" then
+		retval = retval ..
+			"style[" .. field .. ":hovered;bgimg=" .. button_path .. "gui_button" .. color .. "_hovered" .. btn_size ..
+				".png]" ..
+			"style[" .. field .. ":pressed;bgimg=" .. button_path .. "gui_button" .. color .. "_pressed" .. btn_size ..
+				".png]"
+	end
 
 	return retval
 end
