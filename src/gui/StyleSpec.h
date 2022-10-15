@@ -19,8 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client/tile.h" // ITextureSource
 #include "client/fontengine.h"
+#include "client/renderingengine.h"
 #include "debug.h"
 #include "irrlichttypes_extrabloated.h"
+#include "settings.h"
 #include "util/string.h"
 #include <algorithm>
 #include <array>
@@ -73,10 +75,17 @@ public:
 	// Used in guiKeyChangeMenu.cpp and guiVolumeChange.h
 	// Is this the best place to put this function?
 	static std::array<StyleSpec, NUM_STATES> getButtonStyle(const std::string texture_path = "") {
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+		const bool high_dpi = g_settings->getFloat("screen_dpi") / 72.0f >= 2;
+#else
+		const bool high_dpi = RenderingEngine::getDisplayDensity() >= 3;
+#endif
+
 		std::array<StyleSpec, NUM_STATES> ret;
 
+		const std::string x2 = high_dpi ? ".x2" : "";
 		StyleSpec btn_spec; // ToDo: ".x2" for buttons
-		btn_spec.set(BGIMG, texture_path + "gui/gui_button.png");
+		btn_spec.set(BGIMG, texture_path + "gui/gui_button" + x2 + ".png");
 		btn_spec.set(BGIMG_MIDDLE, "16");
 		btn_spec.set(BORDER, "false");
 		btn_spec.set(PADDING, "-10");
@@ -84,11 +93,11 @@ public:
 		ret[STATE_DEFAULT] = btn_spec;
 
 		StyleSpec hovered_spec;
-		hovered_spec.set(BGIMG, texture_path + "gui/gui_button_hovered.png");
+		hovered_spec.set(BGIMG, texture_path + "gui/gui_button_hovered" + x2 + ".png");
 		ret[STATE_HOVERED] = hovered_spec;
 
 		StyleSpec pressed_spec;
-		pressed_spec.set(BGIMG, texture_path + "gui/gui_button_pressed.png");
+		pressed_spec.set(BGIMG, texture_path + "gui/gui_button_pressed" + x2 + ".png");
 		ret[STATE_PRESSED] = pressed_spec;
 
 		return ret;
