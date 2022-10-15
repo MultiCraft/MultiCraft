@@ -32,11 +32,8 @@ local function delete_world_formspec(dialogdata)
 			"attention.png"), "]",
 
 		"style[msg,wait;content_offset=0]",
-		"image_button[1,3.1;13.5,0.8;", b, ";msg;",
+		"image_button[1,3.5;13.5,0.8;", b, ";msg;",
 			fgettext("Delete World \"$1\"?", delete_name), ";false;false]",
-		"image_button[1,3.9;13.5,1.4;", b, ";msg;",
-			fgettext("This action cannot be undone!"), "\n",
-			fgettext("You will permanently lose your World."), ";false;false]",
 
 		btn_style("world_delete_cancel"),
 		"image_button[7.9,5.8;3.5,0.8;;world_delete_cancel;",
