@@ -17,7 +17,6 @@
 
 
 local b = core.formspec_escape(defaulttexturedir .. "blank.png")
-local button_gray = core.formspec_escape(defaulttexturedir .. "blank.png")
 
 
 local function delete_world_formspec(dialogdata)
