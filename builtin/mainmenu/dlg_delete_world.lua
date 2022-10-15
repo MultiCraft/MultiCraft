@@ -43,7 +43,7 @@ local function delete_world_formspec(dialogdata)
 	if dialogdata.cooldown > 0 then
 		formspec[#formspec + 1] = btn_style("wait", "gray")
 		formspec[#formspec + 1] = "image_button[4.1,5.8;3.5,0.8;;wait;" ..
-			fgettext("Wait $1 sec.", dialogdata.cooldown) .. ";true;false]"
+			fgettext("Delete") .. " (" .. dialogdata.cooldown .. ");true;false]"
 	else
 		formspec[#formspec + 1] = btn_style("world_delete_confirm", "red")
 		formspec[#formspec + 1] = "image_button[4.1,5.8;3.5,0.8;;world_delete_confirm;" ..
