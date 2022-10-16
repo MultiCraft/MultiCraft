@@ -84,11 +84,11 @@ public:
 		std::array<StyleSpec, NUM_STATES> ret;
 
 		const std::string x2 = high_dpi ? ".x2" : "";
-		StyleSpec btn_spec; // ToDo: ".x2" for buttons
+		StyleSpec btn_spec;
 		btn_spec.set(BGIMG, texture_path + "gui/gui_button" + x2 + ".png");
-		btn_spec.set(BGIMG_MIDDLE, "16");
+		btn_spec.set(BGIMG_MIDDLE, high_dpi ? "48" : "16");
 		btn_spec.set(BORDER, "false");
-		btn_spec.set(PADDING, "-10");
+		btn_spec.set(PADDING, high_dpi ? "-30" : "-10");
 
 		ret[STATE_DEFAULT] = btn_spec;
 
