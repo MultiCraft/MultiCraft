@@ -773,6 +773,7 @@ function store.get_formspec(dlgdata)
 				formspec[#formspec + 1] = "]"
 			else
 				formspec[#formspec + 1] = "style[update_all;content_offset=0]"
+				formspec[#formspec + 1] = btn_style("update_all")
 				formspec[#formspec + 1] = "button[12.4,0.375;3.1,0.8;update_all;"
 				formspec[#formspec + 1] = fgettext("Update All [$1]", num_avail_updates)
 				formspec[#formspec + 1] = "]"
