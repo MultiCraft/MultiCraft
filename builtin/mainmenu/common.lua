@@ -302,6 +302,7 @@ function get_language_list()
 end
 --------------------------------------------------------------------------------
 local high_dpi = (PLATFORM == "OSX" and tonumber(core.settings:get("screen_dpi")) / 72 >= 2) or
+		(PLATFORM == "iOS" and core.get_screen_info().density >= 2) or
 		core.get_screen_info().density >= 3
 local btn_size = high_dpi and ".x2" or ""
 function btn_style(field, color)
