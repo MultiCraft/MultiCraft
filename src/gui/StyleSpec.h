@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/renderingengine.h"
 #include "debug.h"
 #include "irrlichttypes_extrabloated.h"
-#include "settings.h"
 #include "util/string.h"
 #include <algorithm>
 #include <array>
@@ -75,14 +74,9 @@ public:
 	// Used in guiKeyChangeMenu.cpp and guiVolumeChange.h
 	// Is this the best place to put this function?
 	static std::array<StyleSpec, NUM_STATES> getButtonStyle(const std::string texture_path = "") {
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-		const bool high_dpi = g_settings->getFloat("screen_dpi") / 72.0f >= 2;
-#else
-		const bool high_dpi = RenderingEngine::getDisplayDensity() >= 3;
-#endif
-
 		std::array<StyleSpec, NUM_STATES> ret;
 
+		const bool high_dpi = RenderingEngine::isHighDpi();
 		const std::string x2 = high_dpi ? ".x2" : "";
 		StyleSpec btn_spec;
 		btn_spec.set(BGIMG, texture_path + "gui/gui_button" + x2 + ".png");
