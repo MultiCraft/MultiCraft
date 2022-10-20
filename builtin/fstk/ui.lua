@@ -79,9 +79,9 @@ function ui.update()
 				"worldlist_bg.png"), ";false;40]",
 			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
 			btn_style("btn_reconnect_yes") ..
-			"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
+			"button[2,6.725;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
 			btn_style("btn_reconnect_no") ..
-			"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]"
+			"button[8,6.725;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]"
 		}
 		ui.overridden = true
 	elseif gamedata ~= nil and gamedata.errormessage ~= nil then
@@ -99,14 +99,14 @@ function ui.update()
 				core.get_us_time() - connect_time > 30 then
 			restart_btn =
 				btn_style("btn_reconnect_yes") ..
-				"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..
+				"button[2,6.725;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..
 				btn_style("btn_reconnect_no") ..
-				"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]" ..
+				"button[8,6.725;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]" ..
 				"set_focus[btn_reconnect_yes;true]"
 		else
 			restart_btn =
 				btn_style("btn_reconnect_no") ..
-				"button[5,6.6;4,1;btn_reconnect_no;" .. fgettext("OK") .. "]" ..
+				"button[5,6.725;4,1;btn_reconnect_no;" .. fgettext("OK") .. "]" ..
 				"set_focus[btn_reconnect_no;true]"
 		end
 		formspec = {
