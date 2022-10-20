@@ -301,18 +301,27 @@ function get_language_list()
 	return languages, language_dropdown, lang_idx, language_name_list
 end
 --------------------------------------------------------------------------------
-local high_dpi = (PLATFORM == "OSX" and tonumber(core.settings:get("screen_dpi")) / 72 >= 2) or
-		(PLATFORM == "iOS" and core.get_screen_info().density >= 2) or
-		core.get_screen_info().density >= 3
-local btn_size = high_dpi and ".x2" or ""
+local device_is_tablet = core.settings:get_bool("device_is_tablet", false)
+local screen_density = core.get_screen_info().density
+function is_high_dpi()
+	if PLATFORM == "OSX" then
+		return tonumber(core.settings:get("screen_dpi")) / 72 >= 2
+	elseif PLATFORM == "iOS" and device_is_tablet then
+		return screen_density >= 2
+	else
+		return screen_density >= 3
+	end
+end
+--------------------------------------------------------------------------------
 function btn_style(field, color)
 	local button_path = core.formspec_escape(defaulttexturedir) .. "gui" .. DIR_DELIM
+	local btn_size = is_high_dpi() and ".x2" or ""
 	color = (color and "_" .. color) or ""
 
 	local retval =
 		"style[" .. field .. ";border=false]" ..
 		"style[" .. field .. ";bgimg=" .. button_path .. "gui_button" .. color .. btn_size ..
-			".png;bgimg_middle=" .. (high_dpi and 48 or 16) .. ";padding=" .. (high_dpi and -30 or -10) .. "]"
+			".png;bgimg_middle=" .. (is_high_dpi() and 48 or 16) .. ";padding=" .. (is_high_dpi() and -30 or -10) .. "]"
 
 	if color ~= "_gray" then
 		retval = retval ..
