@@ -72,7 +72,7 @@ local function get_formspec(data)
 	local mod = data.list:get_list()[data.selected_mod] or {name = ""}
 
 	local retval =
-		"size[11.5,7.5,false]" ..
+		"size[11.5,7.5]" ..
 		"bgcolor[#0000]" ..
 		"background9[0,0;0,0;" .. defaulttexturedir .. "bg_common.png;true;40]" ..
 		"background9[0.05,0.05;5.3,6.8;" .. defaulttexturedir .. "desc_bg.png;false;32]" ..

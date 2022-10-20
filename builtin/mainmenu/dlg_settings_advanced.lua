@@ -826,7 +826,7 @@ local function create_change_setting_formspec(dialogdata)
 	end
 
 	return (
-		"size[" .. width .. "," .. height + 0.25 .. ",false]" ..
+		"size[" .. width .. "," .. height + 0.25 .. "]" ..
 		"bgcolor[#0000]" ..
 		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
 			"bg_common.png") .. ";true;40]" ..

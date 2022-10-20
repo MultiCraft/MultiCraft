@@ -97,7 +97,7 @@ local function create_world_formspec(dialogdata)
 
 	-- Error out when no games found
 	if #pkgmgr.games == 0 then
-		return "size[12.25,3,false]" ..
+		return "size[12.25,3]" ..
 			"bgcolor[#0000]" ..
 			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
 				"bg_common.png") .. ";true;40]" ..
@@ -335,7 +335,7 @@ local function create_world_formspec(dialogdata)
 	end
 
 	local retval =
-		"size[12.25,7,false]" ..
+		"size[12.25,7]" ..
 		"bgcolor[#0000]" ..
 		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
 			"bg_common.png") .. ";true;40]" ..

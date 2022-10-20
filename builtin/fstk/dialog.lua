@@ -62,7 +62,7 @@ function dialog_create(name, get_formspec, buttonhandler, eventhandler, add_back
 	if add_background then
 		function self.formspec(data)
 			return ([[
-				size[12,5.4,false]
+				size[12,5.4]
 				bgcolor[#0000]
 				background9[0,0;0,0;%s;true;40]
 				%s

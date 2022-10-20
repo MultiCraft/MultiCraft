@@ -370,7 +370,7 @@ function install_dialog.get_formspec()
 
 	local formspec = {
 		"formspec_version[3]",
-		"size[7,7.85;false]",
+		"size[7,7.85]",
 		"bgcolor[#0000]",
 		"background9[0,0;0,0;", defaulttexturedir, "bg_common.png", ";true;40]",
 		"style[title;border=false]",
@@ -459,7 +459,7 @@ local confirm_overwrite = {}
 function confirm_overwrite.get_formspec()
 	local package = confirm_overwrite.package
 
-	return "size[11.5,4.5,false]" ..
+	return "size[11.5,4.5]" ..
 			"label[2,2;" ..
 			fgettext("\"$1\" already exists. Would you like to overwrite it?", package.name) .. "]"..
 			btn_style("install", "red") ..
@@ -708,7 +708,7 @@ function store.get_formspec(dlgdata)
 	if #store.packages_full > 0 then
 		formspec = {
 			"formspec_version[3]",
-			"size[15.75,9.5;false]",
+			"size[15.75,9.5]",
 			"bgcolor[#0000]",
 			"background9[0,0;0,0;", defaulttexturedir, "bg_common.png;true;40]",
 
@@ -787,7 +787,7 @@ function store.get_formspec(dlgdata)
 		end
 	else
 		formspec = {
-			"size[12,6.4;false]",
+			"size[12,6.4]",
 			"bgcolor[#0000]",
 			"background9[0,0;0,0;", defaulttexturedir, "bg_common.png;true;40]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",

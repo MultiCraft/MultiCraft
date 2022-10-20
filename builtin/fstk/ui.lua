@@ -71,8 +71,8 @@ function ui.update()
 			"formspec_version[3]",
 			"size[14,8.25]",
 			"bgcolor[#0000]",
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]",
+			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
+				"bg_common.png"), ";true;40]",
 			"set_focus[btn_reconnect_yes;true]",
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
@@ -112,8 +112,8 @@ function ui.update()
 			"formspec_version[3]",
 			"size[14,8.25]",
 			"bgcolor[#0000]",
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]",
+			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
+				"bg_common.png"), ";true;40]",
 			"box[0.5,1.2;13,5;#000]",
 			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
 				error_title, error_message),
