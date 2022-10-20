@@ -74,9 +74,10 @@ function ui.update()
 			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
 				"bg_common.png"), ";true;40]",
 			"set_focus[btn_reconnect_yes;true]",
-			"box[0.5,1.2;13,5;#000]",
-			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
-				fgettext("The server has requested a reconnect:"), error_message),
+			"textarea[0.6,0.5;12.8,0.6;;;", fgettext("The server has requested a reconnect:"), "]",
+			"background9[0.4,1.1;13.2,5.2;", core.formspec_escape(defaulttexturedir ..
+				"worldlist_bg.png"), ";false;40]",
+			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
 			btn_style("btn_reconnect_yes") ..
 			"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
 			btn_style("btn_reconnect_no") ..
@@ -114,9 +115,10 @@ function ui.update()
 			"bgcolor[#0000]",
 			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
 				"bg_common.png"), ";true;40]",
-			"box[0.5,1.2;13,5;#000]",
-			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
-				error_title, error_message),
+			"textarea[0.6,0.5;12.8,0.6;;;", error_title, "]",
+			"background9[0.4,1.1;13.2,5.2;", core.formspec_escape(defaulttexturedir ..
+				"worldlist_bg.png"), ";false;40]",
+			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
 			restart_btn
 		}
 		ui.overridden = true
