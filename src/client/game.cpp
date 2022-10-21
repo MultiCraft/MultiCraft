@@ -2188,24 +2188,10 @@ void Game::toggleFreeMove()
 
 void Game::toggleFreeMoveAlt()
 {
-	bool free_move = !g_settings->getBool("free_move");
-	bool creative = !g_settings->getBool("creative_mode");
+	if (m_cache_doubletap_jump && runData.jump_timer < 0.15f &&
+			(!simple_singleplayer_mode || client->checkPrivilege("fly")))
+		toggleFreeMove();
 
-	if (simple_singleplayer_mode) {
-		if (m_cache_doubletap_jump && runData.jump_timer < 0.15f) {
-			if (!free_move || !creative)
-				toggleFreeMove();
-		}
-	} else {
-		if (client->checkPrivilege("fly") && runData.jump_timer < 0.15f) {
-#if defined(__ANDROID__) || defined(__IOS__)
-			toggleFreeMove();
-#else
-		if (m_cache_doubletap_jump)
-			toggleFreeMove();
-#endif
-		}
-	}
 	runData.reset_jump_timer = true;
 }
 
