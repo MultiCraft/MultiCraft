@@ -211,7 +211,7 @@ public:
 	void handleReleaseAll();
 
 	// returns true if device is active
-	bool isActive() { return m_active; }
+	static bool isActive() { return m_active; }
 
 	// set device active state
 	static void setActive(bool active) { m_active = active; }

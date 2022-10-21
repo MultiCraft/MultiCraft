@@ -3745,7 +3745,7 @@ void GUIFormSpecMenu::drawMenu()
 
 /* TODO find way to show tooltips on touchscreen */
 #ifdef HAVE_TOUCHSCREENGUI
-	if (!g_touchscreengui || !g_touchscreengui->isActive())
+	if (!TouchScreenGUI::isActive())
 #endif
 	{
 #ifndef __IOS__
