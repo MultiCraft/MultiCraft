@@ -21,6 +21,7 @@ local password_tmp = ""
 local esc = core.formspec_escape
 local defaulttexturedir = esc(defaulttexturedir)
 local lower = utf8.lower
+local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
 local function get_formspec(tabview, name, tabdata)
 	-- Update the cached supported proto info,
@@ -61,21 +62,23 @@ local function get_formspec(tabview, name, tabdata)
 			esc(address) .. "]" ..
 
 		-- Name
-		"field[7.4,1.7;3.2,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
+		"field[7.4,1.7;2.55,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
 			esc(core.settings:get("name")) .. "]" ..
+
+		-- Password
+		"pwdfield[9.85,1.7;2.55,0.5;te_pwd;" .. fgettext("Password") .. ":" .. ";" ..
+			esc(password_tmp) .. "]" ..
 
 		-- Description Background
 		"background9[7.2,2.2;4.8,2.65;" .. defaulttexturedir .. "desc_bg.png" .. ";false;32]" ..
 
 		-- Connect
-		"style[btn_mp_connect;fgimg=" .. defaulttexturedir ..
-			"btn_play.png;fgimg_hovered=" .. defaulttexturedir .. "btn_play_hover.png]" ..
-		"image_button[8.8,4.9;3.3,0.9;;btn_mp_connect;;true;false]" ..
-		"tooltip[btn_mp_connect;".. fgettext("Connect") .. "]"
-
-		-- Password
-		retval = retval .. "pwdfield[10.45,1.7;1.95,0.5;te_pwd;" ..
-			fgettext("Password") .. ":" .. ";" .. esc(password_tmp) .. "]"
+		btn_style("join_server") ..
+		"style[join_server;font_size=*" .. (small_screen and 1.5 or 2) .. "]" ..
+		"image_button[8.8,4.88;3.3,0.9;;join_server;" ..
+			("\n"):rep(3) .. " " .. fgettext("Play") .. ("\n"):rep(3) .. ";true;false]" .. -- Connect
+		"image[9,5;0.6,0.6;" .. defaulttexturedir .. "btn_play_icon.png]" ..
+		"tooltip[join_server;" .. fgettext("Connect") .. "]"
 
 	if tabdata.selected and selected then
 		if gamedata.fav then

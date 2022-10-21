@@ -18,7 +18,6 @@
 
 local b = core.formspec_escape(defaulttexturedir .. "blank.png")
 
-
 local function delete_world_formspec(dialogdata)
 	local game_name = dialogdata.delete_game
 	local delete_name = dialogdata.delete_name

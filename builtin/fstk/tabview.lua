@@ -98,6 +98,7 @@ local function get_formspec(self)
 					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height + 1,
 						dump(self.fixed_size)) ..
 					"bgcolor[#0000]" ..
+					"listcolors[#000;#000;#000;#dff6f5;#302c2e]" ..
 					"container[1,1]" ..
 					"background9[-0.2,-1.26;" .. tsize.width + 0.4 .. "," ..
 						tsize.height + 1.75 .. ";" .. defaulttexturedir ..

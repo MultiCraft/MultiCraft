@@ -321,7 +321,7 @@ function btn_style(field, color)
 	local retval =
 		"style[" .. field .. ";border=false]" ..
 		"style[" .. field .. ";bgimg=" .. button_path .. "gui_button" .. color .. btn_size ..
-			".png;bgimg_middle=" .. (is_high_dpi() and 48 or 16) .. ";padding=" .. (is_high_dpi() and -30 or -10) .. "]"
+			".png;bgimg_middle=" .. (is_high_dpi() and 48 or 32) .. ";padding=" .. (is_high_dpi() and -30 or -20) .. "]"
 
 	if color ~= "_gray" then
 		retval = retval ..
