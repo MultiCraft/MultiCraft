@@ -324,7 +324,7 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN || event.TouchInput.Event == ETIE_MOVED)
 				m_pointer = v2s32(event.TouchInput.X, event.TouchInput.Y);
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
-				m_down_pos = m_pointer;
+				m_old_pointer = m_pointer;
 			gui::IGUIElement *hovered = Environment->getRootGUIElement()->getElementFromPoint(core::position2d<s32>(m_pointer));
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
 				Environment->setFocus(hovered);

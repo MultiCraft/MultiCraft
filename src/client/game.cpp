@@ -4355,10 +4355,19 @@ void Game::showPauseMenu()
 	str_formspec_escape(control_text);
 #endif
 
+#ifndef __ANDROID__
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
-#if __IOS__
+#ifdef __IOS__
 	ypos += 0.5f;
 #endif
+#else
+	bool hasRealKeyboard = porting::hasRealKeyboard();
+
+	float ypos = 0.1f;
+	if (simple_singleplayer_mode && !hasRealKeyboard)
+		ypos += 0.6f;
+#endif
+
 	std::ostringstream os;
 
 	os << "formspec_version[1]" << SIZE_TAG
@@ -4383,9 +4392,11 @@ void Game::showPauseMenu()
 			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
-#if !defined(__ANDROID__) && !defined(__IOS__)
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
-		<< strgettext("Change Keys")  << ";;false]";
+#ifndef __IOS__
+	if (hasRealKeyboard) {
+		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
+		   << strgettext("Change Keys") << ";;false]";
+	}
 #endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << ";;false]";
