@@ -128,7 +128,7 @@ static irr::EKEY_CODE id2keycode(touch_gui_button_id id)
 	return keyname_to_keycode(g_settings->get("keymap_" + key).c_str());
 }
 
-TouchScreenGUI *g_touchscreengui = nullptr;
+TouchScreenGUI *g_touchscreengui;
 
 static void load_button_texture(button_info *btn, const char *path,
 		const rect<s32> &button_rect, ISimpleTextureSource *tsrc, video::IVideoDriver *driver)
