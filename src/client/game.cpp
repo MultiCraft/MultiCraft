@@ -4355,14 +4355,14 @@ void Game::showPauseMenu()
 	str_formspec_escape(control_text);
 #endif
 
+	bool hasRealKeyboard = porting::hasRealKeyboard();
+
 #ifndef __ANDROID__
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
 #ifdef __IOS__
 	ypos += 0.5f;
 #endif
 #else
-	bool hasRealKeyboard = porting::hasRealKeyboard();
-
 	float ypos = 0.1f;
 	if (simple_singleplayer_mode && !hasRealKeyboard)
 		ypos += 0.6f;
