@@ -40,9 +40,9 @@ typedef enum
 	jump_id = 0,
 	drop_id,
 	crunch_id,
-	inventory_id,
 	// zoom_id,
-	// special1_id,
+	special1_id,
+	inventory_id,
 	escape_id,
 	minimap_id,
 	range_id,
@@ -90,8 +90,8 @@ typedef enum
 // Very slow button repeat frequency
 #define SLOW_BUTTON_REPEAT 1.0f
 
-extern const char **button_imagenames;
-extern const char **joystick_imagenames;
+extern const char *button_imagenames[];
+extern const char *joystick_imagenames[];
 
 struct button_info
 {
@@ -123,8 +123,8 @@ public:
 			const char *btn_image);
 
 	// add toggle button to be shown
-	void addToggleButton(touch_gui_button_id id, const wchar_t *caption,
-			const char *btn_image_1, const char *btn_image_2);
+	/*void addToggleButton(touch_gui_button_id id, const wchar_t *caption,
+			const char *btn_image_1, const char *btn_image_2);*/
 
 	// detect settings bar button events
 	bool isButton(const SEvent &event);
@@ -155,6 +155,7 @@ private:
 	// show settings bar
 	bool m_active = false;
 
+	// is the gui visible
 	bool m_visible = true;
 
 	// settings bar timeout
@@ -181,7 +182,12 @@ public:
 		return res;
 	}
 
-	double getPitch() { return m_camera_pitch; }
+	double getPitchChange()
+	{
+		double res = m_camera_pitch;
+		m_camera_pitch = 0;
+		return res;
+	}
 
 	/*
 	 * Returns a line which describes what the player is pointing at.
@@ -203,6 +209,12 @@ public:
 
 	// handle all buttons
 	void handleReleaseAll();
+
+	// returns true if device is active
+	static bool isActive() { return m_active; }
+
+	// set device active state
+	static void setActive(bool active) { m_active = active; }
 
 private:
 	IrrlichtDevice *m_device;
@@ -318,6 +330,9 @@ private:
 
 	// rare controls bar
 	AutoHideButtonBar m_rarecontrolsbar;
+
+	// device active state
+	static bool m_active;
 };
 
 extern TouchScreenGUI *g_touchscreengui;

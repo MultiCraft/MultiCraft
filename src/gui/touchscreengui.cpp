@@ -38,12 +38,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 using namespace irr::core;
 
-const char **button_imagenames = (const char *[]) {
+const char *button_imagenames[] = {
 	"jump_btn.png",
 	"drop_btn.png",
 	"down_btn.png",
 	//"zoom.png",
-	//"aux_btn.png",
+	"aux_btn.png",
 	"inventory_btn.png",
 	"escape_btn.png",
 	"minimap_btn.png",
@@ -52,7 +52,7 @@ const char **button_imagenames = (const char *[]) {
 	"chat_btn.png"
 };
 
-const char **joystick_imagenames = (const char *[]) {
+const char *joystick_imagenames[] = {
 	"joystick_off.png",
 	"joystick_bg.png",
 	"joystick_center.png"
@@ -88,10 +88,10 @@ static irr::EKEY_CODE id2keycode(touch_gui_button_id id)
 			break;
 		/*case zoom_id:
 			key = "zoom";
-			break;
+			break;*/
 		case special1_id:
 			key = "special1";
-			break;*/
+			break;
 		case fly_id:
 			key = "freemove";
 			break;
@@ -269,7 +269,7 @@ void AutoHideButtonBar::addButton(touch_gui_button_id button_id,
 	m_buttons.push_back(btn);
 }
 
-void AutoHideButtonBar::addToggleButton(touch_gui_button_id button_id,
+/*void AutoHideButtonBar::addToggleButton(touch_gui_button_id button_id,
 		const wchar_t *caption, const char *btn_image_1,
 		const char *btn_image_2)
 {
@@ -278,7 +278,7 @@ void AutoHideButtonBar::addToggleButton(touch_gui_button_id button_id,
 	btn->togglable = 1;
 	btn->textures.push_back(btn_image_1);
 	btn->textures.push_back(btn_image_2);
-}
+}*/
 
 bool AutoHideButtonBar::isButton(const SEvent &event)
 {
@@ -421,6 +421,8 @@ void AutoHideButtonBar::show()
 	}
 }
 
+bool TouchScreenGUI::m_active = true;
+
 TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device, IEventReceiver *receiver):
 	m_device(device),
 	m_guienv(device->getGUIEnvironment()),
@@ -449,6 +451,7 @@ void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_
 {
 	button_info *btn       = &m_buttons[id];
 	btn->guibutton         = m_guienv->addButton(button_rect, nullptr, id, caption.c_str());
+	btn->guibutton->setVisible(m_visible);
 	btn->guibutton->grab();
 	btn->repeatcounter     = -1;
 	btn->repeatdelay       = repeat_delay;
@@ -465,7 +468,7 @@ button_info *TouchScreenGUI::initJoystickButton(touch_gui_button_id id,
 {
 	auto *btn = new button_info();
 	btn->guibutton = m_guienv->addButton(button_rect, nullptr, id, L"O");
-	btn->guibutton->setVisible(visible);
+	btn->guibutton->setVisible(visible && m_visible);
 	btn->guibutton->grab();
 	btn->ids.clear();
 
@@ -479,7 +482,6 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 {
 	assert(tsrc);
 
-	m_visible       = true;
 	m_texturesource = tsrc;
 
 	/* Init joystick display "button"
@@ -488,22 +490,22 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 	if (m_fixed_joystick) {
 		m_joystick_btn_off = initJoystickButton(joystick_off_id,
 				rect<s32>(button_size / 2,
-						m_screensize.Y - button_size * 4.5,
-						button_size * 4.5,
-						m_screensize.Y - button_size / 2), 0);
+						  m_screensize.Y - button_size * 4.5,
+						  button_size * 4.5,
+						  m_screensize.Y - button_size / 2), 0);
 	} else {
 		m_joystick_btn_off = initJoystickButton(joystick_off_id,
 				rect<s32>(button_size / 2,
-						m_screensize.Y - button_size * 3.5,
-						button_size * 3.5,
-						m_screensize.Y - button_size / 2), 0);
+						  m_screensize.Y - button_size * 3.5,
+						  button_size * 3.5,
+						  m_screensize.Y - button_size / 2), 0);
 	}
 
 	m_joystick_btn_bg = initJoystickButton(joystick_bg_id,
 			rect<s32>(button_size / 2,
-					m_screensize.Y - button_size * 4.5,
-					button_size * 4.5,
-					m_screensize.Y - button_size / 2),
+					  m_screensize.Y - button_size * 4.5,
+					  button_size * 4.5,
+					  m_screensize.Y - button_size / 2),
 			1, false);
 
 	m_joystick_btn_center = initJoystickButton(joystick_center_id,
@@ -511,10 +513,10 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 
 	// init jump button
 	initButton(jump_id,
-			rect<s32>(m_screensize.X - button_size * 3,
-					  m_screensize.Y - button_size * 3,
-					  m_screensize.X - button_size * 1.5,
-					  m_screensize.Y - button_size * 1.5),
+			rect<s32>(m_screensize.X - button_size * 3.37,
+					  m_screensize.Y - button_size * 2.75,
+					  m_screensize.X - button_size * 1.87,
+					  m_screensize.Y - button_size * 1.25),
 			L"x", false);
 
 	// init drop button
@@ -527,15 +529,15 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 
 	// init crunch button
 	initButton(crunch_id,
-			rect<s32>(m_screensize.X - button_size * 3,
-					  m_screensize.Y - button_size / 1.5,
-					  m_screensize.X - button_size * 1.5,
+			rect<s32>(m_screensize.X - button_size * 3.38,
+					  m_screensize.Y - button_size * 0.75,
+					  m_screensize.X - button_size * 1.7,
 					  m_screensize.Y),
 			L"H", false);
 
 	// init inventory button
 	initButton(inventory_id,
-			rect<s32>(m_screensize.X - button_size * 1.5,
+			rect<s32>(m_screensize.X - button_size * 1.7,
 					  m_screensize.Y - button_size * 1.5,
 					  m_screensize.X,
 					  m_screensize.Y),
@@ -547,18 +549,18 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 					m_screensize.Y - (4 * button_size),
 					m_screensize.X - (0.25 * button_size),
 					m_screensize.Y - (3 * button_size)),
-			L"z", false);
+			L"z", false);*/
 
 	// init special1/aux button
 	if (!m_joystick_triggers_special1)
 		initButton(special1_id,
-				rect<s32>(m_screensize.X - (1.25 * button_size),
-						m_screensize.Y - (2.5 * button_size),
-						m_screensize.X - (0.25 * button_size),
-						m_screensize.Y - (1.5 * button_size)),
+				rect<s32>(m_screensize.X - button_size * 1.8,
+						m_screensize.Y - button_size * 4,
+						m_screensize.X - button_size * 0.3,
+						m_screensize.Y - button_size * 2.5),
 				L"spc1", false);
 
-	m_settingsbar.init(m_texturesource, "gear_icon.png", settings_starter_id,
+/*	m_settingsbar.init(m_texturesource, "gear_icon.png", settings_starter_id,
 		v2s32(m_screensize.X - (1.25 * button_size),
 			m_screensize.Y - ((SETTINGS_BAR_Y_OFFSET + 1.0) * button_size)
 				+ (0.5 * button_size)),
@@ -590,15 +592,11 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 	m_rarecontrolsbar.addButton(inventory_id, L"inv",  "inventory_btn.png");
 	m_rarecontrolsbar.addButton(drop_id,      L"drop", "drop_btn.png");*/
 
-	double button_075 = 1;
-	s32 button_05 = 1;
-	double button_05b = 0;
-
 	// init pause button [1]
 	initButton(escape_id,
-			rect<s32>(m_screensize.X / 2 - button_size * 2 * button_075,
+			rect<s32>(m_screensize.X / 2 - button_size * 2,
 					  0,
-					  m_screensize.X / 2 - button_size / button_05,
+					  m_screensize.X / 2 - button_size,
 					  button_size),
 			L"Exit", false);
 
@@ -612,17 +610,17 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 
 	// init rangeselect button [3]
 	initButton(range_id,
-			rect<s32>(m_screensize.X / 2 - button_05b,
+			rect<s32>(m_screensize.X / 2,
 					  0,
-					  m_screensize.X / 2 + button_size / button_05,
+					  m_screensize.X / 2 + button_size,
 					  button_size),
 			L"rangeview", false);
 
 	// init camera button [4]
 	initButton(camera_id,
-			rect<s32>(m_screensize.X / 2 + button_size / button_05,
+			rect<s32>(m_screensize.X / 2 + button_size,
 					  0,
-					  m_screensize.X / 2 + button_size * 2 * button_075,
+					  m_screensize.X / 2 + button_size * 2,
 					  button_size),
 			L"camera", false);
 
