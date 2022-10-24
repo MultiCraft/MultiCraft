@@ -155,6 +155,7 @@ private:
 	// show settings bar
 	bool m_active = false;
 
+	// is the gui visible
 	bool m_visible = true;
 
 	// settings bar timeout
@@ -181,7 +182,12 @@ public:
 		return res;
 	}
 
-	double getPitch() { return m_camera_pitch; }
+	double getPitchChange()
+	{
+		double res = m_camera_pitch;
+		m_camera_pitch = 0;
+		return res;
+	}
 
 	/*
 	 * Returns a line which describes what the player is pointing at.
@@ -203,6 +209,12 @@ public:
 
 	// handle all buttons
 	void handleReleaseAll();
+
+	// returns true if device is active
+	static bool isActive() { return m_active; }
+
+	// set device active state
+	static void setActive(bool active) { m_active = active; }
 
 private:
 	IrrlichtDevice *m_device;
@@ -318,6 +330,9 @@ private:
 
 	// rare controls bar
 	AutoHideButtonBar m_rarecontrolsbar;
+
+	// device active state
+	static bool m_active;
 };
 
 extern TouchScreenGUI *g_touchscreengui;

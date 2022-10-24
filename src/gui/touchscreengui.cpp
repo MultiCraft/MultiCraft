@@ -421,6 +421,8 @@ void AutoHideButtonBar::show()
 	}
 }
 
+bool TouchScreenGUI::m_active = true;
+
 TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device, IEventReceiver *receiver):
 	m_device(device),
 	m_guienv(device->getGUIEnvironment()),
@@ -449,6 +451,7 @@ void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_
 {
 	button_info *btn       = &m_buttons[id];
 	btn->guibutton         = m_guienv->addButton(button_rect, nullptr, id, caption.c_str());
+	btn->guibutton->setVisible(m_visible);
 	btn->guibutton->grab();
 	btn->repeatcounter     = -1;
 	btn->repeatdelay       = repeat_delay;
@@ -465,7 +468,7 @@ button_info *TouchScreenGUI::initJoystickButton(touch_gui_button_id id,
 {
 	auto *btn = new button_info();
 	btn->guibutton = m_guienv->addButton(button_rect, nullptr, id, L"O");
-	btn->guibutton->setVisible(visible);
+	btn->guibutton->setVisible(visible && m_visible);
 	btn->guibutton->grab();
 	btn->ids.clear();
 
@@ -479,7 +482,6 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 {
 	assert(tsrc);
 
-	m_visible       = true;
 	m_texturesource = tsrc;
 
 	/* Init joystick display "button"

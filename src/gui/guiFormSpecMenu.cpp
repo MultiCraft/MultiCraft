@@ -68,6 +68,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "intlGUIEditBox.h"
 #include "guiHyperText.h"
 #include "guiScene.h"
+#include "touchscreengui.h"
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #include <SDL.h>
@@ -3743,9 +3744,14 @@ void GUIFormSpecMenu::drawMenu()
 	}
 
 /* TODO find way to show tooltips on touchscreen */
-#ifndef HAVE_TOUCHSCREENGUI
-	m_pointer = RenderingEngine::get_raw_device()->getCursorControl()->getPosition();
+#ifdef HAVE_TOUCHSCREENGUI
+	if (!TouchScreenGUI::isActive())
 #endif
+	{
+#ifndef __IOS__
+		m_pointer = RenderingEngine::get_raw_device()->getCursorControl()->getPosition();
+#endif
+	}
 
 	/*
 		Draw fields/buttons tooltips and update the mouse cursor
@@ -3753,7 +3759,7 @@ void GUIFormSpecMenu::drawMenu()
 	gui::IGUIElement *hovered =
 			Environment->getRootGUIElement()->getElementFromPoint(m_pointer);
 
-#ifndef HAVE_TOUCHSCREENGUI
+#ifndef __IOS__
 	gui::ICursorControl *cursor_control = RenderingEngine::get_raw_device()->
 			getCursorControl();
 	gui::ECURSOR_ICON current_cursor_icon = cursor_control->getActiveIcon();
@@ -3793,7 +3799,7 @@ void GUIFormSpecMenu::drawMenu()
 							m_tooltips[field.fname].bgcolor);
 				}
 
-#ifndef HAVE_TOUCHSCREENGUI
+#ifndef __IOS__
 				if (field.ftype != f_HyperText && // Handled directly in guiHyperText
 						current_cursor_icon != field.fcursor_icon)
 					cursor_control->setActiveIcon(field.fcursor_icon);
@@ -3808,7 +3814,7 @@ void GUIFormSpecMenu::drawMenu()
 
 	if (!hovered_element_found) {
 		// no element is hovered
-#ifndef HAVE_TOUCHSCREENGUI
+#ifndef __IOS__
 		if (current_cursor_icon != ECI_NORMAL)
 			cursor_control->setActiveIcon(ECI_NORMAL);
 #endif
@@ -3843,10 +3849,12 @@ void GUIFormSpecMenu::showTooltip(const std::wstring &text,
 	int tooltip_offset_x = m_btn_height;
 	int tooltip_offset_y = m_btn_height;
 #ifdef HAVE_TOUCHSCREENGUI
-	tooltip_offset_x *= 3;
-	tooltip_offset_y  = 0;
-	if (m_pointer.X > (s32)screenSize.X / 2)
-		tooltip_offset_x = -(tooltip_offset_x + tooltip_width);
+	if (TouchScreenGUI::isActive()) {
+		tooltip_offset_x *= 3;
+		tooltip_offset_y  = 0;
+		if (m_pointer.X > (s32)screenSize.X / 2)
+			tooltip_offset_x = -(tooltip_offset_x + tooltip_width);
+	}
 #endif
 
 	// Calculate and set the tooltip position
@@ -4413,7 +4421,7 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 						move_amount = MYMIN(m_selected_amount, 10);
 					else if (button == BET_LEFT) {
 #ifdef HAVE_TOUCHSCREENGUI
-						if (s.listname == "craft")
+						if (g_touchscreengui && g_touchscreengui->isActive() && s.listname == "craft")
 							move_amount = 1;
 						else
 #endif
