@@ -139,5 +139,5 @@ dependencies {
 	implementation 'androidx.appcompat:appcompat-resources:1.5.1'
 	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
 	implementation 'androidx.work:work-runtime-ktx:2.7.1'
-	implementation 'com.google.android.material:material:1.6.1'
+	implementation 'com.google.android.material:material:1.7.0'
 }
