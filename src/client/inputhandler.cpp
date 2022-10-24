@@ -28,6 +28,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern "C" void external_pause_game();
 #endif
 
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+#include <SDL.h>
+#endif
+
 void KeyCache::populate_nonchanging()
 {
 	key[KeyType::ESC] = EscapeKey;
@@ -100,8 +104,214 @@ void KeyCache::populate()
 	}
 }
 
+#define GAME_CONTROLLER_DEADZONE 5000
+
+void MyEventReceiver::handleControllerMouseMovementX(s16 value)
+{
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	static u32 MouseTimeX = device->getTimer()->getRealTime();
+
+	bool changed = false;
+
+	u32 currentTime = device->getTimer()->getRealTime();
+	v2s32 mouse_pos = device->getCursorControl()->getPosition();
+
+	if (value > GAME_CONTROLLER_DEADZONE || value < -GAME_CONTROLLER_DEADZONE)
+	{
+		s32 dt = currentTime - MouseTimeX;
+
+		mouse_pos.X += (value * dt / 30000);
+		if (mouse_pos.X < 0)
+			mouse_pos.X = 0;
+		if (mouse_pos.X > device->getVideoDriver()->getScreenSize().Width)
+			mouse_pos.X = device->getVideoDriver()->getScreenSize().Width;
+
+		changed = true;
+	}
+
+	if (changed)
+	{
+		SEvent irrevent;
+		irrevent.EventType = irr::EET_MOUSE_INPUT_EVENT;
+		irrevent.MouseInput.Event = irr::EMIE_MOUSE_MOVED;
+		irrevent.MouseInput.X = mouse_pos.X;
+		irrevent.MouseInput.Y = mouse_pos.Y;
+		irrevent.MouseInput.Control = false;
+		irrevent.MouseInput.Shift = false;
+		irrevent.MouseInput.ButtonStates = 0;
+		OnEvent(irrevent);
+
+		device->getCursorControl()->setPosition(mouse_pos.X, mouse_pos.Y);
+	}
+
+	MouseTimeX = currentTime;
+}
+
+void MyEventReceiver::handleControllerMouseMovementY(s16 value)
+{
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	static u32 MouseTimeY = device->getTimer()->getRealTime();
+
+	bool changed = false;
+
+	u32 currentTime = device->getTimer()->getRealTime();
+	v2s32 mouse_pos = device->getCursorControl()->getPosition();
+
+	if (value > GAME_CONTROLLER_DEADZONE || value < -GAME_CONTROLLER_DEADZONE)
+	{
+		s32 dt = currentTime - MouseTimeY;
+
+		mouse_pos.Y += (value * dt / 30000);
+		if (mouse_pos.Y < 0)
+			mouse_pos.Y = 0;
+		if (mouse_pos.Y > device->getVideoDriver()->getScreenSize().Height)
+			mouse_pos.Y = device->getVideoDriver()->getScreenSize().Height;
+
+		changed = true;
+	}
+
+	if (changed)
+	{
+		SEvent irrevent;
+		irrevent.EventType = irr::EET_MOUSE_INPUT_EVENT;
+		irrevent.MouseInput.Event = irr::EMIE_MOUSE_MOVED;
+		irrevent.MouseInput.X = mouse_pos.X;
+		irrevent.MouseInput.Y = mouse_pos.Y;
+		irrevent.MouseInput.Control = false;
+		irrevent.MouseInput.Shift = false;
+		irrevent.MouseInput.ButtonStates = 0;
+		OnEvent(irrevent);
+
+		device->getCursorControl()->setPosition(mouse_pos.X, mouse_pos.Y);
+	}
+
+	MouseTimeY = currentTime;
+}
+
+void MyEventReceiver::translateGameControllerEvent(const SEvent &event)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT)
+	{
+		//errorstream << "EET_SDL_CONTROLLER_BUTTON_EVENT" << std::endl;
+
+		irr::EKEY_CODE key = KEY_UNKNOWN;
+
+		switch (event.SDLControllerButtonEvent.Button)
+		{
+		case SDL_CONTROLLER_BUTTON_A:
+			key = getKeySetting("keymap_jump").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_B:
+			key = getKeySetting("keymap_sneak").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_X:
+			key = getKeySetting("keymap_special1").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_Y:
+			key = getKeySetting("keymap_minimap").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_BACK:
+			key = getKeySetting("keymap_chat").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_GUIDE:
+			break;
+		case SDL_CONTROLLER_BUTTON_START:
+			key = KEY_ESCAPE;
+			break;
+		case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+			key = getKeySetting("keymap_camera_mode").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+			key = KEY_LBUTTON;
+			break;
+		case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+			key = KEY_LBUTTON;
+			break;
+		case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+			key = KEY_RBUTTON;
+			break;
+		case SDL_CONTROLLER_BUTTON_DPAD_UP:
+			key = getKeySetting("keymap_rangeselect").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+			key = getKeySetting("keymap_drop").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+			key = KEY_ESCAPE;
+			break;
+		case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+			key = getKeySetting("keymap_inventory").getKeyCode();
+			break;
+		case SDL_CONTROLLER_BUTTON_MISC1:
+		case SDL_CONTROLLER_BUTTON_PADDLE1:
+		case SDL_CONTROLLER_BUTTON_PADDLE2:
+		case SDL_CONTROLLER_BUTTON_PADDLE3:
+		case SDL_CONTROLLER_BUTTON_PADDLE4:
+		case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+			break;
+		}
+
+		SEvent translated_event;
+		translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+		translated_event.KeyInput.Char = 0;
+		translated_event.KeyInput.Key = key;
+		translated_event.KeyInput.PressedDown = event.SDLControllerButtonEvent.Pressed;
+		translated_event.KeyInput.Shift = false;
+		translated_event.KeyInput.Control = false;
+		OnEvent(translated_event);
+	}
+	else if (event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT)
+	{
+		switch (event.SDLControllerAxisEvent.Axis)
+		{
+		case SDL_CONTROLLER_AXIS_LEFTX:
+			if (isMenuActive())
+				handleControllerMouseMovementX(event.SDLControllerAxisEvent.Value);
+			break;
+
+		case SDL_CONTROLLER_AXIS_LEFTY:
+			if (isMenuActive())
+				handleControllerMouseMovementY(event.SDLControllerAxisEvent.Value);
+			break;
+
+		case SDL_CONTROLLER_AXIS_RIGHTX:
+			if (!isMenuActive())
+				handleControllerMouseMovementX(event.SDLControllerAxisEvent.Value);
+			break;
+
+		case SDL_CONTROLLER_AXIS_RIGHTY:
+			if (!isMenuActive())
+				handleControllerMouseMovementY(event.SDLControllerAxisEvent.Value);
+			break;
+
+		case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+			{
+
+			}
+			break;
+
+		case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+			{
+
+			}
+			break;
+		}
+	}
+#endif
+}
+
 bool MyEventReceiver::OnEvent(const SEvent &event)
 {
+	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT ||
+		event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT)
+	{
+		translateGameControllerEvent(event);
+		return true;
+	}
+
 #ifdef HAVE_TOUCHSCREENGUI
 	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
 		TouchScreenGUI::setActive(true);

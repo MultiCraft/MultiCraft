@@ -198,6 +198,10 @@ public:
 #endif
 
 private:
+	void handleControllerMouseMovementX(s16 value);
+	void handleControllerMouseMovementY(s16 value);
+	void translateGameControllerEvent(const SEvent &event);
+
 	// The current state of keys
 	KeyList keyIsDown;
 

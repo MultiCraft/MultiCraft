@@ -44,6 +44,8 @@ public:
 	const char *sym() const;
 	const char *name() const;
 
+	irr::EKEY_CODE getKeyCode() { return Key; }
+
 protected:
 	static bool valid_kcode(irr::EKEY_CODE k)
 	{
