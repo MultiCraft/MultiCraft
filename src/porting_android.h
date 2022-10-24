@@ -1,7 +1,8 @@
 /*
 Minetest
 Copyright (C) 2014 celeron55, Perttu Ahola <celeron55@gmail.com>
-Copyright (C) 2014-2022 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2014-2022 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
+Copyright (C) 2022 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -25,15 +26,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include <jni.h>
-#include <android_native_app_glue.h>
 #include <android/log.h>
 
 #include <string>
 
 namespace porting {
-// java app
-extern android_app *app_global;
-
 // java <-> c++ interaction interface
 extern JNIEnv *jnienv;
 

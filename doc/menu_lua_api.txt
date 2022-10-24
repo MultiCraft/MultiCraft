@@ -69,7 +69,7 @@ core.copy_dir(source,destination,keep_soure) (possible in async calls)
 ^ returns true/false
 core.is_dir(path) (possible in async calls)
 ^ returns true if path is a valid dir
-core.extract_zip(zipfile,destination) [unzip within path required]
+core.extract_zip(zipfile, destination[, password]) [unzip within path required]
 ^ zipfile to extract
 ^ destination folder to extract to
 ^ returns true/false

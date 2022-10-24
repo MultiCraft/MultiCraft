@@ -215,7 +215,7 @@ void GUIScrollBar::draw()
 		core::rect<s32> rect{0, w, w, h - w};
 
 		if (is_horizontal)
-			rect = {w, 0, h, w - h};
+			rect = {h, 0, w - h, h};
 
 		gui::IGUIImage *e = Environment->addImage(rect, this);
 		e->setImage(m_textures[0]);
@@ -245,7 +245,7 @@ void GUIScrollBar::draw()
 			core::rect<s32> rect{0, draw_center - (h / 2), w, draw_center + h - (h / 2)};
 
 			if (is_horizontal)
-				rect = {draw_center - (w / 2), 0, h, draw_center + w - (w / 2)};
+				rect = {draw_center - (w / 2), 0, draw_center + w - (w / 2), h};
 
 			gui::IGUIImage *e = Environment->addImage(core::rect<s32>(rect), this);
 			e->setImage(m_textures[1]);
@@ -378,13 +378,21 @@ void GUIScrollBar::refreshControls()
 	if (is_horizontal) {
 		s32 h = RelativeRect.getHeight();
 		border_size = RelativeRect.getWidth() < h * 4 ? 0 : h;
+
 		if (!up_button) {
 			up_button = Environment->addButton(
 					core::rect<s32>(0, 0, h, h), this);
 			up_button->setSubElement(true);
 			up_button->setTabStop(false);
 		}
-		if (sprites) {
+
+		if (m_textures.size() >= 3) {
+			up_button->setImage(m_textures[2]);
+			up_button->setScaleImage(true);
+			up_button->setDrawBorder(false);
+			up_button->setUseAlphaChannel(true);
+			up_button->setSpriteBank(nullptr);
+		} else if (sprites) {
 			up_button->setSpriteBank(sprites);
 			up_button->setSprite(EGBS_BUTTON_UP,
 					s32(skin->getIcon(EGDI_CURSOR_LEFT)),
@@ -396,6 +404,7 @@ void GUIScrollBar::refreshControls()
 		up_button->setRelativePosition(core::rect<s32>(0, 0, h, h));
 		up_button->setAlignment(EGUIA_UPPERLEFT, EGUIA_UPPERLEFT, EGUIA_UPPERLEFT,
 				EGUIA_LOWERRIGHT);
+
 		if (!down_button) {
 			down_button = Environment->addButton(
 					core::rect<s32>(RelativeRect.getWidth() - h, 0,
@@ -404,7 +413,14 @@ void GUIScrollBar::refreshControls()
 			down_button->setSubElement(true);
 			down_button->setTabStop(false);
 		}
-		if (sprites) {
+
+		if (m_textures.size() >= 4) {
+			down_button->setImage(m_textures[3]);
+			down_button->setScaleImage(true);
+			down_button->setDrawBorder(false);
+			down_button->setUseAlphaChannel(true);
+			down_button->setSpriteBank(nullptr);
+		} else if (sprites) {
 			down_button->setSpriteBank(sprites);
 			down_button->setSprite(EGBS_BUTTON_UP,
 					s32(skin->getIcon(EGDI_CURSOR_RIGHT)),
@@ -413,6 +429,7 @@ void GUIScrollBar::refreshControls()
 					s32(skin->getIcon(EGDI_CURSOR_RIGHT)),
 					current_icon_color);
 		}
+
 		down_button->setRelativePosition(
 				core::rect<s32>(RelativeRect.getWidth() - h, 0,
 						RelativeRect.getWidth(), h));
@@ -423,17 +440,20 @@ void GUIScrollBar::refreshControls()
 		s32 h = RelativeRect.getHeight();
 		border_size = h < w * 4 ? 0 : w;
 
-		up_button = Environment->addButton(core::rect<s32>(0, 0, w, w), this);
-		if (m_textures.size() >= 3) {
-			up_button->setImage(m_textures[2]);
-			up_button->setScaleImage(true);
-		}
-
 		if (!up_button) {
+			up_button = Environment->addButton(
+					core::rect<s32>(0, 0, w, w), this);
 			up_button->setSubElement(true);
 			up_button->setTabStop(false);
 		}
-		if (sprites && m_textures.size() < 3) {
+
+		if (m_textures.size() >= 3) {
+			up_button->setImage(m_textures[2]);
+			up_button->setScaleImage(true);
+			up_button->setDrawBorder(false);
+			up_button->setUseAlphaChannel(true);
+			up_button->setSpriteBank(nullptr);
+		} else if (sprites) {
 			up_button->setSpriteBank(sprites);
 			up_button->setSprite(EGBS_BUTTON_UP,
 					s32(skin->getIcon(EGDI_CURSOR_UP)),
@@ -446,19 +466,20 @@ void GUIScrollBar::refreshControls()
 		up_button->setAlignment(EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT,
 				EGUIA_UPPERLEFT, EGUIA_UPPERLEFT);
 
-		down_button = Environment->addButton(core::rect<s32>(0, 0, w, w), this);
-
-		if (m_textures.size() >= 4) {
-			down_button->setImage(m_textures[3]);
-			down_button->setScaleImage(true);
-		}
-
 		if (!down_button) {
+			down_button = Environment->addButton(
+					core::rect<s32>(0, 0, w, w), this);
 			down_button->setSubElement(true);
 			down_button->setTabStop(false);
 		}
 
-		if (sprites && m_textures.size() < 4) {
+		if (m_textures.size() >= 4) {
+			down_button->setImage(m_textures[3]);
+			down_button->setScaleImage(true);
+			down_button->setDrawBorder(false);
+			down_button->setUseAlphaChannel(true);
+			down_button->setSpriteBank(nullptr);
+		} else if (sprites) {
 			down_button->setSpriteBank(sprites);
 			down_button->setSprite(EGBS_BUTTON_UP,
 					s32(skin->getIcon(EGDI_CURSOR_DOWN)),

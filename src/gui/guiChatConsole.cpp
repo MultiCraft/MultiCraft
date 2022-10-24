@@ -155,7 +155,7 @@ void GUIChatConsole::closeConsoleAtOnce()
 	m_height = 0;
 	recalculateConsolePosition();
 #ifdef HAVE_TOUCHSCREENGUI
-	if (g_touchscreengui)
+	if (g_touchscreengui && g_touchscreengui->isActive())
 		g_touchscreengui->show();
 #endif
 }
