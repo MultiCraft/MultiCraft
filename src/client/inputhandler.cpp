@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "inputhandler.h"
 #include "gui/mainmenumanager.h"
 #include "hud.h"
+#include "settings.h"
 
 #ifdef __IOS__
 #include "porting_ios.h"
@@ -104,24 +105,22 @@ void KeyCache::populate()
 	}
 }
 
-#define GAME_CONTROLLER_DEADZONE 5000
-
-void MyEventReceiver::handleControllerMouseMovementX(s16 value)
+void MyEventReceiver::handleControllerMouseMovement(int x, int y)
 {
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	IrrlichtDevice* device = RenderingEngine::get_raw_device();
-
-	static u32 MouseTimeX = device->getTimer()->getRealTime();
 
 	bool changed = false;
 
-	u32 currentTime = device->getTimer()->getRealTime();
+	u32 current_time = device->getTimer()->getRealTime();
 	v2s32 mouse_pos = device->getCursorControl()->getPosition();
+	int deadzone = g_settings->getU16("joystick_deadzone");
 
-	if (value > GAME_CONTROLLER_DEADZONE || value < -GAME_CONTROLLER_DEADZONE)
+	if (x > deadzone || x < -deadzone)
 	{
-		s32 dt = currentTime - MouseTimeX;
+		s32 dt = current_time - m_mouse_time;
 
-		mouse_pos.X += (value * dt / 30000);
+		mouse_pos.X += (x * dt / 30000);
 		if (mouse_pos.X < 0)
 			mouse_pos.X = 0;
 		if (mouse_pos.X > device->getVideoDriver()->getScreenSize().Width)
@@ -130,40 +129,11 @@ void MyEventReceiver::handleControllerMouseMovementX(s16 value)
 		changed = true;
 	}
 
-	if (changed)
+	if (y > deadzone || y < -deadzone)
 	{
-		SEvent irrevent;
-		irrevent.EventType = irr::EET_MOUSE_INPUT_EVENT;
-		irrevent.MouseInput.Event = irr::EMIE_MOUSE_MOVED;
-		irrevent.MouseInput.X = mouse_pos.X;
-		irrevent.MouseInput.Y = mouse_pos.Y;
-		irrevent.MouseInput.Control = false;
-		irrevent.MouseInput.Shift = false;
-		irrevent.MouseInput.ButtonStates = 0;
-		OnEvent(irrevent);
+		s32 dt = current_time - m_mouse_time;
 
-		device->getCursorControl()->setPosition(mouse_pos.X, mouse_pos.Y);
-	}
-
-	MouseTimeX = currentTime;
-}
-
-void MyEventReceiver::handleControllerMouseMovementY(s16 value)
-{
-	IrrlichtDevice* device = RenderingEngine::get_raw_device();
-
-	static u32 MouseTimeY = device->getTimer()->getRealTime();
-
-	bool changed = false;
-
-	u32 currentTime = device->getTimer()->getRealTime();
-	v2s32 mouse_pos = device->getCursorControl()->getPosition();
-
-	if (value > GAME_CONTROLLER_DEADZONE || value < -GAME_CONTROLLER_DEADZONE)
-	{
-		s32 dt = currentTime - MouseTimeY;
-
-		mouse_pos.Y += (value * dt / 30000);
+		mouse_pos.Y += (y * dt / 30000);
 		if (mouse_pos.Y < 0)
 			mouse_pos.Y = 0;
 		if (mouse_pos.Y > device->getVideoDriver()->getScreenSize().Height)
@@ -174,86 +144,193 @@ void MyEventReceiver::handleControllerMouseMovementY(s16 value)
 
 	if (changed)
 	{
-		SEvent irrevent;
-		irrevent.EventType = irr::EET_MOUSE_INPUT_EVENT;
-		irrevent.MouseInput.Event = irr::EMIE_MOUSE_MOVED;
-		irrevent.MouseInput.X = mouse_pos.X;
-		irrevent.MouseInput.Y = mouse_pos.Y;
-		irrevent.MouseInput.Control = false;
-		irrevent.MouseInput.Shift = false;
-		irrevent.MouseInput.ButtonStates = 0;
-		OnEvent(irrevent);
+		SEvent translated_event;
+		translated_event.EventType = irr::EET_MOUSE_INPUT_EVENT;
+		translated_event.MouseInput.Event = irr::EMIE_MOUSE_MOVED;
+		translated_event.MouseInput.X = mouse_pos.X;
+		translated_event.MouseInput.Y = mouse_pos.Y;
+		translated_event.MouseInput.Control = false;
+		translated_event.MouseInput.Shift = false;
+		translated_event.MouseInput.ButtonStates = m_button_states;
 
+		device->postEventFromUser(translated_event);
 		device->getCursorControl()->setPosition(mouse_pos.X, mouse_pos.Y);
 	}
 
-	MouseTimeY = currentTime;
+	m_mouse_time = current_time;
+#endif
 }
 
-void MyEventReceiver::translateGameControllerEvent(const SEvent &event)
+void MyEventReceiver::handleControllerTriggerLeft(s16 value)
 {
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT)
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	int deadzone = g_settings->getU16("joystick_deadzone");
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+	translated_event.KeyInput.Char = 0;
+	translated_event.KeyInput.Key = getKeySetting("keymap_hotbar_previous").getKeyCode();
+	translated_event.KeyInput.Shift = false;
+	translated_event.KeyInput.Control = false;
+
+	if (value <= deadzone && m_trigger_left_value > deadzone)
 	{
-		//errorstream << "EET_SDL_CONTROLLER_BUTTON_EVENT" << std::endl;
+		translated_event.KeyInput.PressedDown = false;
+		device->postEventFromUser(translated_event);
+	}
+	else if (value > deadzone && m_trigger_left_value <= deadzone)
+	{
+		translated_event.KeyInput.PressedDown = true;
+		device->postEventFromUser(translated_event);
+	}
 
-		irr::EKEY_CODE key = KEY_UNKNOWN;
+	m_trigger_left_value = value;
+#endif
+}
 
-		switch (event.SDLControllerButtonEvent.Button)
-		{
-		case SDL_CONTROLLER_BUTTON_A:
-			key = getKeySetting("keymap_jump").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_B:
-			key = getKeySetting("keymap_sneak").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_X:
-			key = getKeySetting("keymap_special1").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_Y:
-			key = getKeySetting("keymap_minimap").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_BACK:
-			key = getKeySetting("keymap_chat").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_GUIDE:
-			break;
-		case SDL_CONTROLLER_BUTTON_START:
-			key = KEY_ESCAPE;
-			break;
-		case SDL_CONTROLLER_BUTTON_LEFTSTICK:
-			key = getKeySetting("keymap_camera_mode").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
-			key = KEY_LBUTTON;
-			break;
-		case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-			key = KEY_LBUTTON;
-			break;
-		case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-			key = KEY_RBUTTON;
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_UP:
-			key = getKeySetting("keymap_rangeselect").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-			key = getKeySetting("keymap_drop").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-			key = KEY_ESCAPE;
-			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-			key = getKeySetting("keymap_inventory").getKeyCode();
-			break;
-		case SDL_CONTROLLER_BUTTON_MISC1:
-		case SDL_CONTROLLER_BUTTON_PADDLE1:
-		case SDL_CONTROLLER_BUTTON_PADDLE2:
-		case SDL_CONTROLLER_BUTTON_PADDLE3:
-		case SDL_CONTROLLER_BUTTON_PADDLE4:
-		case SDL_CONTROLLER_BUTTON_TOUCHPAD:
-			break;
-		}
+void MyEventReceiver::handleControllerTriggerRight(s16 value)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
 
+	int deadzone = g_settings->getU16("joystick_deadzone");
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+	translated_event.KeyInput.Char = 0;
+	translated_event.KeyInput.Key = getKeySetting("keymap_hotbar_next").getKeyCode();
+	translated_event.KeyInput.Shift = false;
+	translated_event.KeyInput.Control = false;
+
+	if (value <= deadzone && m_trigger_right_value > deadzone)
+	{
+		translated_event.KeyInput.PressedDown = false;
+		device->postEventFromUser(translated_event);
+	}
+	else if (value > deadzone && m_trigger_right_value <= deadzone)
+	{
+		translated_event.KeyInput.PressedDown = true;
+		device->postEventFromUser(translated_event);
+	}
+
+	m_trigger_right_value = value;
+#endif
+}
+
+void MyEventReceiver::handleControllerMouseClickLeft(bool pressed)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	v2s32 mouse_pos = device->getCursorControl()->getPosition();
+
+	if (pressed)
+		m_button_states |= irr::EMBSM_LEFT;
+	else
+		m_button_states &= ~irr::EMBSM_LEFT;
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_MOUSE_INPUT_EVENT;
+	translated_event.MouseInput.Event = pressed ? irr::EMIE_LMOUSE_PRESSED_DOWN : irr::EMIE_LMOUSE_LEFT_UP;
+	translated_event.MouseInput.X = mouse_pos.X;
+	translated_event.MouseInput.Y = mouse_pos.Y;
+	translated_event.MouseInput.Control = false;
+	translated_event.MouseInput.Shift = false;
+	translated_event.MouseInput.ButtonStates = m_button_states;
+
+	device->postEventFromUser(translated_event);
+#endif
+}
+
+void MyEventReceiver::handleControllerMouseClickRight(bool pressed)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	v2s32 mouse_pos = device->getCursorControl()->getPosition();
+
+	if (pressed)
+		m_button_states |= irr::EMBSM_RIGHT;
+	else
+		m_button_states &= ~irr::EMBSM_RIGHT;
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_MOUSE_INPUT_EVENT;
+	translated_event.MouseInput.Event = pressed ? irr::EMIE_RMOUSE_PRESSED_DOWN : irr::EMIE_RMOUSE_LEFT_UP;
+	translated_event.MouseInput.X = mouse_pos.X;
+	translated_event.MouseInput.Y = mouse_pos.Y;
+	translated_event.MouseInput.Control = false;
+	translated_event.MouseInput.Shift = false;
+	translated_event.MouseInput.ButtonStates = m_button_states;
+
+	device->postEventFromUser(translated_event);
+#endif
+}
+
+void MyEventReceiver::handleControllerButton(const SEvent &event)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	irr::EKEY_CODE key = KEY_UNKNOWN;
+
+	switch (event.SDLControllerButtonEvent.Button)
+	{
+	case SDL_CONTROLLER_BUTTON_A:
+		key = getKeySetting("keymap_jump").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_B:
+		key = getKeySetting("keymap_sneak").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_X:
+		key = getKeySetting("keymap_special1").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_Y:
+		key = getKeySetting("keymap_minimap").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_BACK:
+		key = getKeySetting("keymap_chat").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_GUIDE:
+		break;
+	case SDL_CONTROLLER_BUTTON_START:
+		key = KEY_ESCAPE;
+		break;
+	case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+		key = getKeySetting("keymap_camera_mode").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+		key = KEY_LBUTTON;
+		break;
+	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+		key = KEY_LBUTTON;
+		break;
+	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+		key = KEY_RBUTTON;
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_UP:
+		key = getKeySetting("keymap_rangeselect").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+		key = getKeySetting("keymap_drop").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+		key = KEY_ESCAPE;
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+		key = getKeySetting("keymap_inventory").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_MISC1:
+	case SDL_CONTROLLER_BUTTON_PADDLE1:
+	case SDL_CONTROLLER_BUTTON_PADDLE2:
+	case SDL_CONTROLLER_BUTTON_PADDLE3:
+	case SDL_CONTROLLER_BUTTON_PADDLE4:
+	case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+		break;
+	}
+
+	if (key != KEY_UNKNOWN)
+	{
 		SEvent translated_event;
 		translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
 		translated_event.KeyInput.Char = 0;
@@ -261,43 +338,117 @@ void MyEventReceiver::translateGameControllerEvent(const SEvent &event)
 		translated_event.KeyInput.PressedDown = event.SDLControllerButtonEvent.Pressed;
 		translated_event.KeyInput.Shift = false;
 		translated_event.KeyInput.Control = false;
-		OnEvent(translated_event);
+
+		IrrlichtDevice* device = RenderingEngine::get_raw_device();
+		device->postEventFromUser(translated_event);
+	}
+#endif
+}
+
+void MyEventReceiver::handleControllerButtonInMenu(const SEvent &event)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	irr::EKEY_CODE key = KEY_UNKNOWN;
+
+	// Just used game mapping for escape key for now
+	switch (event.SDLControllerButtonEvent.Button)
+	{
+	case SDL_CONTROLLER_BUTTON_A:
+	case SDL_CONTROLLER_BUTTON_B:
+	case SDL_CONTROLLER_BUTTON_X:
+	case SDL_CONTROLLER_BUTTON_Y:
+	case SDL_CONTROLLER_BUTTON_BACK:
+	case SDL_CONTROLLER_BUTTON_GUIDE:
+		break;
+	case SDL_CONTROLLER_BUTTON_START:
+		key = KEY_ESCAPE;
+		break;
+	case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+	case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+	case SDL_CONTROLLER_BUTTON_DPAD_UP:
+	case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+	case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+		key = KEY_ESCAPE;
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+	case SDL_CONTROLLER_BUTTON_MISC1:
+	case SDL_CONTROLLER_BUTTON_PADDLE1:
+	case SDL_CONTROLLER_BUTTON_PADDLE2:
+	case SDL_CONTROLLER_BUTTON_PADDLE3:
+	case SDL_CONTROLLER_BUTTON_PADDLE4:
+	case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+		break;
+	}
+
+	if (key != KEY_UNKNOWN)
+	{
+		SEvent translated_event;
+		translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+		translated_event.KeyInput.Char = 0;
+		translated_event.KeyInput.Key = key;
+		translated_event.KeyInput.PressedDown = event.SDLControllerButtonEvent.Pressed;
+		translated_event.KeyInput.Shift = false;
+		translated_event.KeyInput.Control = false;
+
+		IrrlichtDevice* device = RenderingEngine::get_raw_device();
+		device->postEventFromUser(translated_event);
+	}
+#endif
+}
+
+void MyEventReceiver::translateGameControllerEvent(const SEvent &event)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT)
+	{
+		if (isMenuActive())
+		{
+			if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSTICK ||
+				event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+			{
+				handleControllerMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
+			}
+			else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+			{
+				handleControllerMouseClickRight(event.SDLControllerButtonEvent.Pressed);
+			}
+			else
+			{
+				handleControllerButtonInMenu(event);
+			}
+		}
+		else
+		{
+			if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ||
+				event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+			{
+				handleControllerMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
+			}
+			else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+			{
+				handleControllerMouseClickRight(event.SDLControllerButtonEvent.Pressed);
+			}
+			else
+			{
+				handleControllerButton(event);
+			}
+		}
 	}
 	else if (event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT)
 	{
-		switch (event.SDLControllerAxisEvent.Axis)
+		const s16* value = event.SDLControllerAxisEvent.Value;
+
+		if (isMenuActive())
 		{
-		case SDL_CONTROLLER_AXIS_LEFTX:
-			if (isMenuActive())
-				handleControllerMouseMovementX(event.SDLControllerAxisEvent.Value);
-			break;
-
-		case SDL_CONTROLLER_AXIS_LEFTY:
-			if (isMenuActive())
-				handleControllerMouseMovementY(event.SDLControllerAxisEvent.Value);
-			break;
-
-		case SDL_CONTROLLER_AXIS_RIGHTX:
-			if (!isMenuActive())
-				handleControllerMouseMovementX(event.SDLControllerAxisEvent.Value);
-			break;
-
-		case SDL_CONTROLLER_AXIS_RIGHTY:
-			if (!isMenuActive())
-				handleControllerMouseMovementY(event.SDLControllerAxisEvent.Value);
-			break;
-
-		case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
-			{
-
-			}
-			break;
-
-		case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
-			{
-
-			}
-			break;
+			handleControllerMouseMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
+		}
+		else
+		{
+			handleControllerMouseMovement(value[SDL_CONTROLLER_AXIS_RIGHTX], value[SDL_CONTROLLER_AXIS_RIGHTY]);
+			handleControllerTriggerLeft(value[SDL_CONTROLLER_AXIS_TRIGGERLEFT]);
+			handleControllerTriggerRight(value[SDL_CONTROLLER_AXIS_TRIGGERRIGHT]);
 		}
 	}
 #endif

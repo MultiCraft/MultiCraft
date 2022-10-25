@@ -198,8 +198,18 @@ public:
 #endif
 
 private:
-	void handleControllerMouseMovementX(s16 value);
-	void handleControllerMouseMovementY(s16 value);
+	int m_button_states = 0;
+	u32 m_mouse_time = 0;
+	s16 m_trigger_left_value = 0;
+	s16 m_trigger_right_value = 0;
+
+	void handleControllerMouseMovement(int x, int y);
+	void handleControllerTriggerLeft(s16 value);
+	void handleControllerTriggerRight(s16 value);
+	void handleControllerMouseClickLeft(bool pressed);
+	void handleControllerMouseClickRight(bool pressed);
+	void handleControllerButton(const SEvent &event);
+	void handleControllerButtonInMenu(const SEvent &event);
 	void translateGameControllerEvent(const SEvent &event);
 
 	// The current state of keys
