@@ -27,7 +27,7 @@ local function delete_world_formspec(dialogdata)
 
 	local formspec = {
 		"real_coordinates[true]",
-		"image[6.5,0.72;2.5,2.5;", core.formspec_escape(defaulttexturedir ..
+		"image[6.5,0.8;2.5,2.5;", core.formspec_escape(defaulttexturedir ..
 			"attention.png"), "]",
 
 		"style[msg,wait;content_offset=0]",
@@ -35,17 +35,17 @@ local function delete_world_formspec(dialogdata)
 			fgettext("Delete World \"$1\"?", delete_name), ";false;false]",
 
 		btn_style("world_delete_cancel"),
-		"image_button[7.9,5.8;3.5,0.8;;world_delete_cancel;",
+		"image_button[7.9,5.3;3.5,0.8;;world_delete_cancel;",
 			fgettext("Cancel"), ";true;false]",
 	}
 
 	if dialogdata.cooldown > 0 then
 		formspec[#formspec + 1] = btn_style("wait", "gray")
-		formspec[#formspec + 1] = "image_button[4.1,5.8;3.5,0.8;;wait;" ..
+		formspec[#formspec + 1] = "image_button[4.1,5.3;3.5,0.8;;wait;" ..
 			fgettext("Delete") .. " (" .. dialogdata.cooldown .. ");true;false]"
 	else
 		formspec[#formspec + 1] = btn_style("world_delete_confirm", "red")
-		formspec[#formspec + 1] = "image_button[4.1,5.8;3.5,0.8;;world_delete_confirm;" ..
+		formspec[#formspec + 1] = "image_button[4.1,5.3;3.5,0.8;;world_delete_confirm;" ..
 			fgettext("Delete") .. ";true;false]"
 	end
 
