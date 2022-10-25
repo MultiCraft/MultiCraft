@@ -56,20 +56,20 @@ local function create_world_formspec()
 	end
 	mglist = mglist:sub(1, -2)
 
-	return
-		"label[1.5,0.9;" .. fgettext("World name") .. ":" .. "]"..
-		"field[4.5,1.2;6,0.5;te_world_name;;]" ..
+	return "real_coordinates[true]" ..
+		"label[2.25,1.6;" .. fgettext("World name") .. ":" .. "]"..
+		"field[5.5,1.2;7.5,0.8;te_world_name;;]" ..
 
-		"label[1.5,1.9;" .. fgettext("Seed") .. ":" .. "]"..
-		"field[4.5,2.2;6,0.5;te_seed;;".. current_seed .. "]" ..
+		"label[2.25,2.75;" .. fgettext("Seed") .. ":" .. "]"..
+		"field[5.5,2.35;7.5,0.8;te_seed;;".. current_seed .. "]" ..
 
-		"label[1.5,2.9;" .. fgettext("Mapgen") .. ":" .. "]"..
-		"dropdown[4.2,2.75;6.3;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
+		"label[2.25,3.9;" .. fgettext("Mapgen") .. ":" .. "]"..
+		"dropdown[5.5,3.5;7.5,0.8;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
 
 		btn_style("world_create_confirm", "green") ..
-		"button[3.5,4.4;2.5,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
+		"button[4.1,5.3;3.5,0.8;world_create_confirm;" .. fgettext("Create") .. "]" ..
 		btn_style("world_create_cancel") ..
-		"button[6,4.4;2.5,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
+		"button[7.9,5.3;3.5,0.8;world_create_cancel;" .. fgettext("Cancel") .. "]"
 end
 
 local function create_world_buttonhandler(this, fields)
