@@ -398,6 +398,21 @@ void MyEventReceiver::handleControllerButtonInMenu(const SEvent &event)
 #endif
 }
 
+void MyEventReceiver::handleControllerPlayerMovement(int x, int y)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	int deadzone = g_settings->getU16("joystick_deadzone");
+
+	m_move_sideward = x;
+	if (m_move_sideward < deadzone && m_move_sideward > -deadzone)
+		m_move_sideward = 0;
+
+	m_move_forward = y;
+	if (m_move_forward < deadzone && m_move_forward > -deadzone)
+		m_move_forward = 0;
+#endif
+}
+
 void MyEventReceiver::translateGameControllerEvent(const SEvent &event)
 {
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
@@ -449,6 +464,7 @@ void MyEventReceiver::translateGameControllerEvent(const SEvent &event)
 			handleControllerMouseMovement(value[SDL_CONTROLLER_AXIS_RIGHTX], value[SDL_CONTROLLER_AXIS_RIGHTY]);
 			handleControllerTriggerLeft(value[SDL_CONTROLLER_AXIS_TRIGGERLEFT]);
 			handleControllerTriggerRight(value[SDL_CONTROLLER_AXIS_TRIGGERRIGHT]);
+			handleControllerPlayerMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
 		}
 	}
 #endif

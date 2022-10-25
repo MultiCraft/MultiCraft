@@ -197,11 +197,16 @@ public:
 	TouchScreenGUI *m_touchscreengui;
 #endif
 
+	s16 getControllerMoveSideward() { return m_move_sideward; }
+	s16 getControllerMoveForward() { return m_move_forward; }
+
 private:
 	int m_button_states = 0;
 	u32 m_mouse_time = 0;
 	s16 m_trigger_left_value = 0;
 	s16 m_trigger_right_value = 0;
+	s16 m_move_sideward = 0;
+	s16 m_move_forward = 0;
 
 	void handleControllerMouseMovement(int x, int y);
 	void handleControllerTriggerLeft(s16 value);
@@ -210,6 +215,7 @@ private:
 	void handleControllerMouseClickRight(bool pressed);
 	void handleControllerButton(const SEvent &event);
 	void handleControllerButtonInMenu(const SEvent &event);
+	void handleControllerPlayerMovement(int x, int y);
 	void translateGameControllerEvent(const SEvent &event);
 
 	// The current state of keys
@@ -268,6 +274,9 @@ public:
 	virtual void step(float dtime) {}
 
 	virtual void clear() {}
+
+	virtual s16 getControllerMoveSideward() {};
+	virtual s16 getControllerMoveForward() {};
 
 	JoystickController joystick;
 	KeyCache keycache;
@@ -345,6 +354,9 @@ public:
 		joystick.clear();
 		m_receiver->clearInput();
 	}
+
+	s16 getControllerMoveSideward() { return m_receiver->getControllerMoveSideward(); }
+	s16 getControllerMoveForward() { return m_receiver->getControllerMoveForward(); }
 
 private:
 	MyEventReceiver *m_receiver = nullptr;

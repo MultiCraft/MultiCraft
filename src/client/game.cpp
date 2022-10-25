@@ -2532,8 +2532,13 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		isKeyDown(KeyType::PLACE),
 		cam.camera_pitch,
 		cam.camera_yaw,
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		input->getControllerMoveSideward(),
+		input->getControllerMoveForward()
+#else
 		input->joystick.getAxisWithoutDead(JA_SIDEWARD_MOVE),
 		input->joystick.getAxisWithoutDead(JA_FORWARD_MOVE)
+#endif
 	);
 
 	u32 keypress_bits = (
