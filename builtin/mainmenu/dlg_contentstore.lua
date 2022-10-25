@@ -830,7 +830,7 @@ function store.get_formspec(dlgdata)
 		if package.downloading then
 			formspec[#formspec + 1] = "animated_image[-1.7,-0.15;1,1;downloading;"
 			formspec[#formspec + 1] = defaulttexturedir
-			formspec[#formspec + 1] = "cdb_downloading.png;3;400;]"
+			formspec[#formspec + 1] = "cdb_downloading.png;4;300;]"
 		elseif package.queued then
 			formspec[#formspec + 1] = left_base
 			formspec[#formspec + 1] = defaulttexturedir
