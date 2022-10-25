@@ -89,7 +89,7 @@ local function get_formspec(data)
 			end
 		end
 		retval = retval ..
-			"textarea[0.4,0.8;5.7,3.2;;" ..
+			"textarea[0.4,0.8;5.2,6.8;;" ..
 				fgettext("Information:") .. ";" .. info .. "]"
 	else
 		local hard_deps, soft_deps = pkgmgr.get_dependencies(mod.path)
