@@ -30,7 +30,17 @@ local default_worlds = {
 	{name = "World 5 Flat", mg_name = "flat", seed = "2"}
 }
 
+local function current_game()
+	local last_game_id = core.settings:get("menu_last_game")
+	local game = pkgmgr.find_by_gameid(last_game_id)
+
+	return game
+end
+
 local function create_default_worlds()
+	if current_game().id ~= "default" then return end
+	if #menudata.worldlist:get_list() ~= 0 then return end
+
 	local _, gameindex = pkgmgr.find_by_gameid("default")
 	if not gameindex or gameindex == 0 then return end
 
@@ -58,13 +68,6 @@ local function create_default_worlds()
 	end
 
 	menudata.worldlist:refresh()
-end
-
-local function current_game()
-	local last_game_id = core.settings:get("menu_last_game")
-	local game = pkgmgr.find_by_gameid(last_game_id)
-
-	return game
 end
 
 local function singleplayer_refresh_gamebar()
@@ -145,7 +148,7 @@ end
 local checked_worlds = false
 local function get_formspec(_, _, tab_data)
 	-- Only check the worlds once (on restart)
-	if not checked_worlds and #menudata.worldlist:get_list() == 0 then
+	if not checked_worlds then
 		create_default_worlds()
 	end
 	checked_worlds = true
@@ -383,11 +386,12 @@ local function main_button_handler(this, fields, name, tab_data)
 	end
 
 	if fields["world_create"] ~= nil then
-		local create_world_dlg = create_create_world_dlg(true)
+		local game = current_game()
+		local create_world_dlg = (game.id == "default") and create_create_world_default_dlg(true) or create_create_world_dlg(true)
 		create_world_dlg:set_parent(this)
 		this:hide()
 		create_world_dlg:show()
-		mm_texture.update("singleplayer", current_game())
+		mm_texture.update("singleplayer", game)
 		return true
 	end
 
