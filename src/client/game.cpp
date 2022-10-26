@@ -2501,11 +2501,17 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 			input->setMousePos(center.X, center.Y);
 	}
 
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime;
+	cam->camera_yaw -= input->sdl_game_controller.getCameraYaw() * c;
+	cam->camera_pitch += input->sdl_game_controller.getCameraPitch() * c;
+#else
 	if (m_cache_enable_joysticks) {
 		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime;
 		cam->camera_yaw -= input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL) * c;
 		cam->camera_pitch += input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL) * c;
 	}
+#endif
 
 	cam->camera_pitch = rangelim(cam->camera_pitch, -89.5, 89.5);
 }

@@ -556,6 +556,19 @@ void SDLGameController::handlePlayerMovement(int x, int y)
 		m_move_forward = 0;
 }
 
+void SDLGameController::handleCameraOrientation(int x, int y)
+{
+	int deadzone = g_settings->getU16("joystick_deadzone");
+
+	m_camera_yaw = x;
+	if (m_camera_yaw < deadzone && m_camera_yaw > -deadzone)
+		m_camera_yaw = 0;
+
+	m_camera_pitch = y;
+	if (m_camera_pitch < deadzone && m_camera_pitch > -deadzone)
+		m_camera_pitch = 0;
+}
+
 void SDLGameController::translateEvent(const SEvent &event)
 {
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT)
@@ -603,10 +616,10 @@ void SDLGameController::translateEvent(const SEvent &event)
 		}
 		else
 		{
-			handleMouseMovement(value[SDL_CONTROLLER_AXIS_RIGHTX], value[SDL_CONTROLLER_AXIS_RIGHTY]);
 			handleTriggerLeft(value[SDL_CONTROLLER_AXIS_TRIGGERLEFT]);
 			handleTriggerRight(value[SDL_CONTROLLER_AXIS_TRIGGERRIGHT]);
 			handlePlayerMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
+			handleCameraOrientation(value[SDL_CONTROLLER_AXIS_RIGHTX], value[SDL_CONTROLLER_AXIS_RIGHTY]);
 		}
 	}
 }

@@ -180,6 +180,7 @@ private:
 	void handleButton(const SEvent &event);
 	void handleButtonInMenu(const SEvent &event);
 	void handlePlayerMovement(int x, int y);
+	void handleCameraOrientation(int x, int y);
 
 	int m_button_states = 0;
 	u32 m_mouse_time = 0;
@@ -187,11 +188,15 @@ private:
 	s16 m_trigger_right_value = 0;
 	s16 m_move_sideward = 0;
 	s16 m_move_forward = 0;
+	s16 m_camera_yaw = 0;
+	s16 m_camera_pitch = 0;
 
 public:
 	void translateEvent(const SEvent &event);
 
 	s16 getMoveSideward() { return m_move_sideward; }
 	s16 getMoveForward() { return m_move_forward; }
+	s16 getCameraYaw() { return m_camera_yaw; }
+	s16 getCameraPitch() { return m_camera_pitch; }
 };
 #endif
