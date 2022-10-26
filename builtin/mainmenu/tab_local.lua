@@ -22,6 +22,44 @@ local esc = core.formspec_escape
 local defaulttexturedir = esc(defaulttexturedir)
 local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
+local default_worlds = {
+	{name = "World 1", mg_name = "v7p", seed = "15823438331521897617"},
+	{name = "World 2", mg_name = "v7p", seed = "1841722166046826822"},
+	{name = "World 3", mg_name = "v7p", seed = "CC"},
+	{name = "World 4", mg_name = "valleys", seed = "8572"},
+	{name = "World 5 Flat", mg_name = "flat", seed = "2"}
+}
+
+local function create_default_worlds()
+	local _, gameindex = pkgmgr.find_by_gameid("default")
+	if not gameindex or gameindex == 0 then return end
+
+	-- Preserve the old map seed and mapgen values
+	local old_map_seed = core.settings:get("fixed_map_seed")
+	local old_mapgen = core.settings:get("mg_name")
+
+	-- Create the worlds
+	for _, world in ipairs(default_worlds) do
+		core.settings:set("fixed_map_seed", world.seed)
+		core.settings:set("mg_name", world.mg_name)
+		core.create_world(world.name, gameindex)
+	end
+
+	-- Restore the old values
+	if old_map_seed then
+		core.settings:set("fixed_map_seed", old_map_seed)
+	else
+		core.settings:remove("fixed_map_seed")
+	end
+	if old_mapgen then
+		core.settings:set("mg_name", old_mapgen)
+	else
+		core.settings:remove("mg_name")
+	end
+
+	menudata.worldlist:refresh()
+end
+
 local function current_game()
 	local last_game_id = core.settings:get("menu_last_game")
 	local game = pkgmgr.find_by_gameid(last_game_id)
@@ -104,7 +142,14 @@ local function singleplayer_refresh_gamebar()
 	btnbar:add_button("game_open_cdb", "", "", fgettext("Install games from ContentDB"), true)
 end
 
+local checked_worlds = false
 local function get_formspec(_, _, tab_data)
+	-- Only check the worlds once (on restart)
+	if not checked_worlds and #menudata.worldlist:get_list() == 0 then
+		create_default_worlds()
+	end
+	checked_worlds = true
+
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 
@@ -132,8 +177,8 @@ local function get_formspec(_, _, tab_data)
 			"tooltip[world_create;".. fgettext("New") .. "]"
 
 	local world = menudata.worldlist:get_list()[index]
-	local game = world and pkgmgr.find_by_gameid(world.gameid)
-	if not game or game.moddable then
+	local game = world and world.gameid ~= "default" and pkgmgr.find_by_gameid(world.gameid)
+	if game and game.moddable then
 		retval = retval ..
 			btn_style("world_configure") ..
 			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
@@ -156,7 +201,19 @@ local function get_formspec(_, _, tab_data)
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
-	if tab_data.hidden then
+	if core.settings:get("menu_last_game") == "default" and not tab_data.hidden then
+		retval = retval ..
+			"style[switch_local;fgimg=" .. defaulttexturedir .. "switch_local.png;fgimg_hovered=" ..
+				defaulttexturedir .. "switch_local_hover.png]" ..
+			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
+
+		if PLATFORM == "Android" then
+			retval = retval ..
+				"image_button[6.6,-0.1;1.5,1.5;" ..
+					defaulttexturedir .. "gift_btn.png;upgrade;;true;false;" ..
+					defaulttexturedir .. "gift_btn_pressed.png]"
+		end
+	elseif tab_data.hidden or pkgmgr.find_by_gameid("default") then
 		retval = retval ..
 			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
 				defaulttexturedir .. "switch_local_default_hover.png]" ..
@@ -168,9 +225,7 @@ local function get_formspec(_, _, tab_data)
 		retval = retval ..
 			"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
 				dump(enable_server) .. "]"
-	end
 
-	if enable_server then
 		if core.settings:get_bool("server_announce") then
 			retval = retval ..
 				"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"
@@ -186,7 +241,43 @@ local function get_formspec(_, _, tab_data)
 	return retval
 end
 
-local function main_button_handler(this, fields, name)
+local function refresh_worldlist()
+	local gameid = core.settings:get("menu_last_game")
+	if not gameid or gameid == "" or
+			(gameid == "default" and not pkgmgr.find_by_gameid("default")) then
+		local game_set
+		for _, game in ipairs(pkgmgr.games) do
+			local name = game.id
+			if name and name ~= "default" then
+				core.settings:set("menu_last_game", name)
+				game_set = true
+				break
+			end
+		end
+		if not game_set then
+			menudata.worldlist:set_filtercriteria("empty")
+		end
+	end
+
+	local game = current_game()
+	if game then
+		menudata.worldlist:set_filtercriteria(game.id)
+		mm_texture.update("singleplayer", game)
+		core.set_topleft_text(game.id == "default" and "" or "Powered by Minetest Engine")
+
+		if game.id == "default" then
+			local gamebar = ui.find_by_name("game_button_bar")
+			if gamebar then
+				gamebar:hide()
+			end
+		else
+			singleplayer_refresh_gamebar()
+			ui.find_by_name("game_button_bar"):show()
+		end
+	end
+end
+
+local function main_button_handler(this, fields, name, tab_data)
 	assert(name == "local")
 
 	local world_doubleclick = false
@@ -338,9 +429,19 @@ local function main_button_handler(this, fields, name)
 		return true
 	end
 
+	if fields["switch_local"] then
+		core.settings:remove("menu_last_game")
+		refresh_worldlist()
+		return true
+	end
+
 	if fields["switch_local_default"] then
 		core.settings:set("menu_last_game", "default")
-		this:set_tab("local_default")
+		if tab_data.hidden then
+			this:set_tab("local_default")
+		else
+			refresh_worldlist()
+		end
 
 		return true
 	end
@@ -360,34 +461,8 @@ local function main_button_handler(this, fields, name)
 end
 
 local function on_change(type, old_tab, new_tab)
-	if (type == "ENTER") then
-		local gameid = core.settings:get("menu_last_game")
-		if not gameid or gameid == "" or gameid == "default" then
-			local game_set
-			for _, game in ipairs(pkgmgr.games) do
-				local name = game.id
-				if name and name ~= "default" then
-					core.settings:set("menu_last_game", name)
-					game_set = true
-					break
-				end
-			end
-			if not game_set then
-				menudata.worldlist:set_filtercriteria("empty")
-			end
-		end
-
-		local game = current_game()
-
-		if game and game.id ~= "default" then
-			menudata.worldlist:set_filtercriteria(game.id)
-			mm_texture.update("singleplayer",game)
-		end
-
-		core.set_topleft_text("Powered by Minetest Engine")
-
-		singleplayer_refresh_gamebar()
-		ui.find_by_name("game_button_bar"):show()
+	if type == "ENTER" then
+		refresh_worldlist()
 	else
 		menudata.worldlist:set_filtercriteria(nil)
 		local gamebar = ui.find_by_name("game_button_bar")
