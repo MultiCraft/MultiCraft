@@ -387,7 +387,8 @@ local function main_button_handler(this, fields, name, tab_data)
 
 	if fields["world_create"] ~= nil then
 		local game = current_game()
-		local create_world_dlg = (game.id == "default") and create_create_world_default_dlg(true) or create_create_world_dlg(true)
+		local create_world_dlg = (game.id ~= "default") and create_create_world_dlg(true) or
+			create_create_world_default_dlg(true)
 		create_world_dlg:set_parent(this)
 		this:hide()
 		create_world_dlg:show()
