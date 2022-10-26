@@ -20,9 +20,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "joystick_controller.h"
 #include "irrlichttypes_extrabloated.h"
 #include "keys.h"
+#include "keycode.h"
+#include "mainmenumanager.h"
 #include "settings.h"
 #include "gettime.h"
 #include "porting.h"
+#include "renderingengine.h"
 #include "util/string.h"
 
 bool JoystickButtonCmb::isTriggered(const irr::SEvent::SJoystickEvent &ev) const
@@ -258,3 +261,353 @@ s16 JoystickController::getAxisWithoutDead(JoystickAxis axis)
 		return 0;
 	return v;
 }
+
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+void SDLGameController::handleMouseMovement(int x, int y)
+{
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	bool changed = false;
+
+	u32 current_time = device->getTimer()->getRealTime();
+	v2s32 mouse_pos = device->getCursorControl()->getPosition();
+	int deadzone = g_settings->getU16("joystick_deadzone");
+
+	if (x > deadzone || x < -deadzone)
+	{
+		s32 dt = current_time - m_mouse_time;
+
+		mouse_pos.X += (x * dt / 30000);
+		if (mouse_pos.X < 0)
+			mouse_pos.X = 0;
+		if (mouse_pos.X > device->getVideoDriver()->getScreenSize().Width)
+			mouse_pos.X = device->getVideoDriver()->getScreenSize().Width;
+
+		changed = true;
+	}
+
+	if (y > deadzone || y < -deadzone)
+	{
+		s32 dt = current_time - m_mouse_time;
+
+		mouse_pos.Y += (y * dt / 30000);
+		if (mouse_pos.Y < 0)
+			mouse_pos.Y = 0;
+		if (mouse_pos.Y > device->getVideoDriver()->getScreenSize().Height)
+			mouse_pos.Y = device->getVideoDriver()->getScreenSize().Height;
+
+		changed = true;
+	}
+
+	if (changed)
+	{
+		SEvent translated_event;
+		translated_event.EventType = irr::EET_MOUSE_INPUT_EVENT;
+		translated_event.MouseInput.Event = irr::EMIE_MOUSE_MOVED;
+		translated_event.MouseInput.X = mouse_pos.X;
+		translated_event.MouseInput.Y = mouse_pos.Y;
+		translated_event.MouseInput.Control = false;
+		translated_event.MouseInput.Shift = false;
+		translated_event.MouseInput.ButtonStates = m_button_states;
+
+		device->postEventFromUser(translated_event);
+		device->getCursorControl()->setPosition(mouse_pos.X, mouse_pos.Y);
+	}
+
+	m_mouse_time = current_time;
+}
+
+void SDLGameController::handleTriggerLeft(s16 value)
+{
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	int deadzone = g_settings->getU16("joystick_deadzone");
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+	translated_event.KeyInput.Char = 0;
+	translated_event.KeyInput.Key = getKeySetting("keymap_hotbar_previous").getKeyCode();
+	translated_event.KeyInput.Shift = false;
+	translated_event.KeyInput.Control = false;
+
+	if (value <= deadzone && m_trigger_left_value > deadzone)
+	{
+		translated_event.KeyInput.PressedDown = false;
+		device->postEventFromUser(translated_event);
+	}
+	else if (value > deadzone && m_trigger_left_value <= deadzone)
+	{
+		translated_event.KeyInput.PressedDown = true;
+		device->postEventFromUser(translated_event);
+	}
+
+	m_trigger_left_value = value;
+}
+
+void SDLGameController::handleTriggerRight(s16 value)
+{
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	int deadzone = g_settings->getU16("joystick_deadzone");
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+	translated_event.KeyInput.Char = 0;
+	translated_event.KeyInput.Key = getKeySetting("keymap_hotbar_next").getKeyCode();
+	translated_event.KeyInput.Shift = false;
+	translated_event.KeyInput.Control = false;
+
+	if (value <= deadzone && m_trigger_right_value > deadzone)
+	{
+		translated_event.KeyInput.PressedDown = false;
+		device->postEventFromUser(translated_event);
+	}
+	else if (value > deadzone && m_trigger_right_value <= deadzone)
+	{
+		translated_event.KeyInput.PressedDown = true;
+		device->postEventFromUser(translated_event);
+	}
+
+	m_trigger_right_value = value;
+}
+
+void SDLGameController::handleMouseClickLeft(bool pressed)
+{
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	v2s32 mouse_pos = device->getCursorControl()->getPosition();
+
+	if (pressed)
+		m_button_states |= irr::EMBSM_LEFT;
+	else
+		m_button_states &= ~irr::EMBSM_LEFT;
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_MOUSE_INPUT_EVENT;
+	translated_event.MouseInput.Event = pressed ? irr::EMIE_LMOUSE_PRESSED_DOWN : irr::EMIE_LMOUSE_LEFT_UP;
+	translated_event.MouseInput.X = mouse_pos.X;
+	translated_event.MouseInput.Y = mouse_pos.Y;
+	translated_event.MouseInput.Control = false;
+	translated_event.MouseInput.Shift = false;
+	translated_event.MouseInput.ButtonStates = m_button_states;
+
+	device->postEventFromUser(translated_event);
+}
+
+void SDLGameController::handleMouseClickRight(bool pressed)
+{
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+
+	v2s32 mouse_pos = device->getCursorControl()->getPosition();
+
+	if (pressed)
+		m_button_states |= irr::EMBSM_RIGHT;
+	else
+		m_button_states &= ~irr::EMBSM_RIGHT;
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_MOUSE_INPUT_EVENT;
+	translated_event.MouseInput.Event = pressed ? irr::EMIE_RMOUSE_PRESSED_DOWN : irr::EMIE_RMOUSE_LEFT_UP;
+	translated_event.MouseInput.X = mouse_pos.X;
+	translated_event.MouseInput.Y = mouse_pos.Y;
+	translated_event.MouseInput.Control = false;
+	translated_event.MouseInput.Shift = false;
+	translated_event.MouseInput.ButtonStates = m_button_states;
+
+	device->postEventFromUser(translated_event);
+}
+
+void SDLGameController::handleButton(const SEvent &event)
+{
+	irr::EKEY_CODE key = KEY_UNKNOWN;
+
+	switch (event.SDLControllerButtonEvent.Button)
+	{
+	case SDL_CONTROLLER_BUTTON_A:
+		key = getKeySetting("keymap_jump").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_B:
+		key = getKeySetting("keymap_sneak").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_X:
+		key = getKeySetting("keymap_special1").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_Y:
+		key = getKeySetting("keymap_minimap").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_BACK:
+		key = getKeySetting("keymap_chat").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_GUIDE:
+		break;
+	case SDL_CONTROLLER_BUTTON_START:
+		key = KEY_ESCAPE;
+		break;
+	case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+		key = getKeySetting("keymap_camera_mode").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+		key = KEY_LBUTTON;
+		break;
+	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+		key = KEY_LBUTTON;
+		break;
+	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+		key = KEY_RBUTTON;
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_UP:
+		key = getKeySetting("keymap_rangeselect").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+		key = getKeySetting("keymap_drop").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+		key = KEY_ESCAPE;
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+		key = getKeySetting("keymap_inventory").getKeyCode();
+		break;
+	case SDL_CONTROLLER_BUTTON_MISC1:
+	case SDL_CONTROLLER_BUTTON_PADDLE1:
+	case SDL_CONTROLLER_BUTTON_PADDLE2:
+	case SDL_CONTROLLER_BUTTON_PADDLE3:
+	case SDL_CONTROLLER_BUTTON_PADDLE4:
+	case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+		break;
+	}
+
+	if (key != KEY_UNKNOWN)
+	{
+		SEvent translated_event;
+		translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+		translated_event.KeyInput.Char = 0;
+		translated_event.KeyInput.Key = key;
+		translated_event.KeyInput.PressedDown = event.SDLControllerButtonEvent.Pressed;
+		translated_event.KeyInput.Shift = false;
+		translated_event.KeyInput.Control = false;
+
+		IrrlichtDevice* device = RenderingEngine::get_raw_device();
+		device->postEventFromUser(translated_event);
+	}
+}
+
+void SDLGameController::handleButtonInMenu(const SEvent &event)
+{
+	irr::EKEY_CODE key = KEY_UNKNOWN;
+
+	// Just used game mapping for escape key for now
+	switch (event.SDLControllerButtonEvent.Button)
+	{
+	case SDL_CONTROLLER_BUTTON_A:
+	case SDL_CONTROLLER_BUTTON_B:
+	case SDL_CONTROLLER_BUTTON_X:
+	case SDL_CONTROLLER_BUTTON_Y:
+	case SDL_CONTROLLER_BUTTON_BACK:
+	case SDL_CONTROLLER_BUTTON_GUIDE:
+		break;
+	case SDL_CONTROLLER_BUTTON_START:
+		key = KEY_ESCAPE;
+		break;
+	case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+	case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+	case SDL_CONTROLLER_BUTTON_DPAD_UP:
+	case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+		key = KEY_ESCAPE;
+		break;
+	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+	case SDL_CONTROLLER_BUTTON_MISC1:
+	case SDL_CONTROLLER_BUTTON_PADDLE1:
+	case SDL_CONTROLLER_BUTTON_PADDLE2:
+	case SDL_CONTROLLER_BUTTON_PADDLE3:
+	case SDL_CONTROLLER_BUTTON_PADDLE4:
+	case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+		break;
+	}
+
+	if (key != KEY_UNKNOWN)
+	{
+		SEvent translated_event;
+		translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+		translated_event.KeyInput.Char = 0;
+		translated_event.KeyInput.Key = key;
+		translated_event.KeyInput.PressedDown = event.SDLControllerButtonEvent.Pressed;
+		translated_event.KeyInput.Shift = false;
+		translated_event.KeyInput.Control = false;
+
+		IrrlichtDevice* device = RenderingEngine::get_raw_device();
+		device->postEventFromUser(translated_event);
+	}
+}
+
+void SDLGameController::handlePlayerMovement(int x, int y)
+{
+	int deadzone = g_settings->getU16("joystick_deadzone");
+
+	m_move_sideward = x;
+	if (m_move_sideward < deadzone && m_move_sideward > -deadzone)
+		m_move_sideward = 0;
+
+	m_move_forward = y;
+	if (m_move_forward < deadzone && m_move_forward > -deadzone)
+		m_move_forward = 0;
+}
+
+void SDLGameController::translateEvent(const SEvent &event)
+{
+	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT)
+	{
+		if (isMenuActive())
+		{
+			if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSTICK ||
+				event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+			{
+				handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
+			}
+			else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+			{
+				handleMouseClickRight(event.SDLControllerButtonEvent.Pressed);
+			}
+			else
+			{
+				handleButtonInMenu(event);
+			}
+		}
+		else
+		{
+			if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ||
+				event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+			{
+				handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
+			}
+			else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
+			{
+				handleMouseClickRight(event.SDLControllerButtonEvent.Pressed);
+			}
+			else
+			{
+				handleButton(event);
+			}
+		}
+	}
+	else if (event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT)
+	{
+		const s16* value = event.SDLControllerAxisEvent.Value;
+
+		if (isMenuActive())
+		{
+			handleMouseMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
+		}
+		else
+		{
+			handleMouseMovement(value[SDL_CONTROLLER_AXIS_RIGHTX], value[SDL_CONTROLLER_AXIS_RIGHTY]);
+			handleTriggerLeft(value[SDL_CONTROLLER_AXIS_TRIGGERLEFT]);
+			handleTriggerRight(value[SDL_CONTROLLER_AXIS_TRIGGERRIGHT]);
+			handlePlayerMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
+		}
+	}
+}
+#endif

@@ -193,31 +193,15 @@ public:
 
 	JoystickController *joystick = nullptr;
 
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	SDLGameController* sdl_game_controller = nullptr;
+#endif
+
 #ifdef HAVE_TOUCHSCREENGUI
 	TouchScreenGUI *m_touchscreengui;
 #endif
 
-	s16 getControllerMoveSideward() { return m_move_sideward; }
-	s16 getControllerMoveForward() { return m_move_forward; }
-
 private:
-	int m_button_states = 0;
-	u32 m_mouse_time = 0;
-	s16 m_trigger_left_value = 0;
-	s16 m_trigger_right_value = 0;
-	s16 m_move_sideward = 0;
-	s16 m_move_forward = 0;
-
-	void handleControllerMouseMovement(int x, int y);
-	void handleControllerTriggerLeft(s16 value);
-	void handleControllerTriggerRight(s16 value);
-	void handleControllerMouseClickLeft(bool pressed);
-	void handleControllerMouseClickRight(bool pressed);
-	void handleControllerButton(const SEvent &event);
-	void handleControllerButtonInMenu(const SEvent &event);
-	void handleControllerPlayerMovement(int x, int y);
-	void translateGameControllerEvent(const SEvent &event);
-
 	// The current state of keys
 	KeyList keyIsDown;
 
@@ -275,11 +259,11 @@ public:
 
 	virtual void clear() {}
 
-	virtual s16 getControllerMoveSideward() {};
-	virtual s16 getControllerMoveForward() {};
-
 	JoystickController joystick;
 	KeyCache keycache;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	SDLGameController sdl_game_controller;
+#endif
 };
 /*
 	Separated input handler
@@ -291,6 +275,9 @@ public:
 	RealInputHandler(MyEventReceiver *receiver) : m_receiver(receiver)
 	{
 		m_receiver->joystick = &joystick;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		m_receiver->sdl_game_controller = &sdl_game_controller;
+#endif
 	}
 	virtual bool isKeyDown(GameKeyType k)
 	{
@@ -354,9 +341,6 @@ public:
 		joystick.clear();
 		m_receiver->clearInput();
 	}
-
-	s16 getControllerMoveSideward() { return m_receiver->getControllerMoveSideward(); }
-	s16 getControllerMoveForward() { return m_receiver->getControllerMoveForward(); }
 
 private:
 	MyEventReceiver *m_receiver = nullptr;

@@ -2533,8 +2533,8 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		cam.camera_pitch,
 		cam.camera_yaw,
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		input->getControllerMoveSideward(),
-		input->getControllerMoveForward()
+		input->sdl_game_controller.getMoveSideward(),
+		input->sdl_game_controller.getMoveForward()
 #else
 		input->joystick.getAxisWithoutDead(JA_SIDEWARD_MOVE),
 		input->joystick.getAxisWithoutDead(JA_FORWARD_MOVE)

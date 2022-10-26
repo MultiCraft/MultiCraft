@@ -167,3 +167,31 @@ private:
 	std::bitset<KeyType::INTERNAL_ENUM_COUNT> m_past_keys_pressed;
 	std::bitset<KeyType::INTERNAL_ENUM_COUNT> m_keys_released;
 };
+
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+class SDLGameController
+{
+private:
+	void handleMouseMovement(int x, int y);
+	void handleTriggerLeft(s16 value);
+	void handleTriggerRight(s16 value);
+	void handleMouseClickLeft(bool pressed);
+	void handleMouseClickRight(bool pressed);
+	void handleButton(const SEvent &event);
+	void handleButtonInMenu(const SEvent &event);
+	void handlePlayerMovement(int x, int y);
+
+	int m_button_states = 0;
+	u32 m_mouse_time = 0;
+	s16 m_trigger_left_value = 0;
+	s16 m_trigger_right_value = 0;
+	s16 m_move_sideward = 0;
+	s16 m_move_forward = 0;
+
+public:
+	void translateEvent(const SEvent &event);
+
+	s16 getMoveSideward() { return m_move_sideward; }
+	s16 getMoveForward() { return m_move_forward; }
+};
+#endif
