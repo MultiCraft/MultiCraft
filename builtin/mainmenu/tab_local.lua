@@ -404,7 +404,8 @@ local function main_button_handler(this, fields, name, tab_data)
 				world.name ~= nil and
 				world.name ~= "" then
 				local index = menudata.worldlist:get_raw_index(selected)
-				local delete_world_dlg = create_delete_world_dlg(world.name, index, world.gameid)
+				local delete_world_dlg = create_delete_world_dlg(world.name, index,
+					world.gameid ~= "default" and world.gameid)
 				delete_world_dlg:set_parent(this)
 				this:hide()
 				delete_world_dlg:show()
