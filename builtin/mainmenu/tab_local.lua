@@ -38,8 +38,7 @@ local function current_game()
 end
 
 local function create_default_worlds()
-	if current_game().id ~= "default" then return end
-	if #menudata.worldlist:get_list() ~= 0 then return end
+	if #menudata.worldlist:get_list() > 0 then return end
 
 	local _, gameindex = pkgmgr.find_by_gameid("default")
 	if not gameindex or gameindex == 0 then return end
@@ -145,14 +144,7 @@ local function singleplayer_refresh_gamebar()
 	btnbar:add_button("game_open_cdb", "", "", fgettext("Install games from ContentDB"), true)
 end
 
-local checked_worlds = false
 local function get_formspec(_, _, tab_data)
-	-- Only check the worlds once (on restart)
-	if not checked_worlds then
-		create_default_worlds()
-	end
-	checked_worlds = true
-
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 
@@ -244,6 +236,7 @@ local function get_formspec(_, _, tab_data)
 	return retval
 end
 
+local checked_worlds = false
 local function refresh_worldlist()
 	local gameid = core.settings:get("menu_last_game")
 	if not gameid or gameid == "" or
@@ -273,6 +266,12 @@ local function refresh_worldlist()
 			if gamebar then
 				gamebar:hide()
 			end
+
+			-- Create default worlds
+			if not checked_worlds then
+				create_default_worlds()
+			end
+			checked_worlds = true
 		else
 			singleplayer_refresh_gamebar()
 			ui.find_by_name("game_button_bar"):show()
