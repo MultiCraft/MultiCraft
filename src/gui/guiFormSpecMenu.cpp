@@ -3878,7 +3878,7 @@ void GUIFormSpecMenu::drawMenu()
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (RenderingEngine::get_raw_device()->getCursorControl()->isVisible() &&
-		SDLGameController::shouldDrawCursor())
+		SDLGameController::isActive())
 		drawCursor();
 #endif
 #endif

@@ -192,7 +192,7 @@ private:
 	s16 m_camera_yaw = 0;
 	s16 m_camera_pitch = 0;
 
-	static bool m_draw_cursor;
+	static bool m_active;
 	bool m_is_fake_event = false;
 
 public:
@@ -203,8 +203,8 @@ public:
 	s16 getCameraYaw() { return m_camera_yaw; }
 	s16 getCameraPitch() { return m_camera_pitch; }
 
-	void setDrawCursor(bool value) { m_draw_cursor = value; }
-	static bool shouldDrawCursor() { return m_draw_cursor; }
+	void setActive(bool value) { m_active = value; }
+	static bool isActive() { return m_active; }
 	bool isFakeEvent() { return m_is_fake_event; }
 };
 #endif

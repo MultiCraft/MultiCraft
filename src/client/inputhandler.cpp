@@ -113,11 +113,12 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		sdl_game_controller->translateEvent(event);
 		return true;
 	}
-	else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
-			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED)
+	else if ((event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
+			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
+			event.EventType == irr::EET_TOUCH_INPUT_EVENT)
 	{
 		if (!sdl_game_controller->isFakeEvent())
-			sdl_game_controller->setDrawCursor(false);
+			sdl_game_controller->setActive(false);
 	}
 #endif
 
@@ -126,8 +127,9 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		TouchScreenGUI::setActive(true);
 		if (m_touchscreengui && !isMenuActive())
 			m_touchscreengui->show();
-	} else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
-			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) {
+	} else if ((event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
+			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
+			sdl_game_controller->isActive()) {
 		TouchScreenGUI::setActive(false);
 		if (m_touchscreengui && !isMenuActive())
 			m_touchscreengui->hide();

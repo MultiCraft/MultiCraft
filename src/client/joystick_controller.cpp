@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include "keys.h"
 #include "keycode.h"
-#include "mainmenumanager.h"
+#include "gui/mainmenumanager.h"
 #include "settings.h"
 #include "gettime.h"
 #include "porting.h"
@@ -263,7 +263,7 @@ s16 JoystickController::getAxisWithoutDead(JoystickAxis axis)
 }
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-bool SDLGameController::m_draw_cursor = false;
+bool SDLGameController::m_active = false;
 
 void SDLGameController::handleMouseMovement(int x, int y)
 {
@@ -286,7 +286,7 @@ void SDLGameController::handleMouseMovement(int x, int y)
 			mouse_pos.X = device->getVideoDriver()->getScreenSize().Width;
 
 		changed = true;
-		m_draw_cursor = true;
+		m_active = true;
 	}
 
 	if (y > deadzone || y < -deadzone)
@@ -300,7 +300,7 @@ void SDLGameController::handleMouseMovement(int x, int y)
 			mouse_pos.Y = device->getVideoDriver()->getScreenSize().Height;
 
 		changed = true;
-		m_draw_cursor = true;
+		m_active = true;
 	}
 
 	if (changed)
@@ -552,10 +552,14 @@ void SDLGameController::handlePlayerMovement(int x, int y)
 	m_move_sideward = x;
 	if (m_move_sideward < deadzone && m_move_sideward > -deadzone)
 		m_move_sideward = 0;
+	else
+		m_active = true;
 
 	m_move_forward = y;
 	if (m_move_forward < deadzone && m_move_forward > -deadzone)
 		m_move_forward = 0;
+	else
+		m_active = true;
 }
 
 void SDLGameController::handleCameraOrientation(int x, int y)
@@ -565,10 +569,14 @@ void SDLGameController::handleCameraOrientation(int x, int y)
 	m_camera_yaw = x;
 	if (m_camera_yaw < deadzone && m_camera_yaw > -deadzone)
 		m_camera_yaw = 0;
+	else
+		m_active = true;
 
 	m_camera_pitch = y;
 	if (m_camera_pitch < deadzone && m_camera_pitch > -deadzone)
 		m_camera_pitch = 0;
+	else
+		m_active = true;
 }
 
 void SDLGameController::sendEvent(const SEvent &event)
