@@ -181,6 +181,7 @@ private:
 	void handleButtonInMenu(const SEvent &event);
 	void handlePlayerMovement(int x, int y);
 	void handleCameraOrientation(int x, int y);
+	void sendEvent(const SEvent &event);
 
 	int m_button_states = 0;
 	u32 m_mouse_time = 0;
@@ -191,6 +192,9 @@ private:
 	s16 m_camera_yaw = 0;
 	s16 m_camera_pitch = 0;
 
+	static bool m_draw_cursor;
+	bool m_is_fake_event = false;
+
 public:
 	void translateEvent(const SEvent &event);
 
@@ -198,5 +202,9 @@ public:
 	s16 getMoveForward() { return m_move_forward; }
 	s16 getCameraYaw() { return m_camera_yaw; }
 	s16 getCameraPitch() { return m_camera_pitch; }
+
+	void setDrawCursor(bool value) { m_draw_cursor = value; }
+	static bool shouldDrawCursor() { return m_draw_cursor; }
+	bool isFakeEvent() { return m_is_fake_event; }
 };
 #endif

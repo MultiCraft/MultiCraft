@@ -113,6 +113,12 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		sdl_game_controller->translateEvent(event);
 		return true;
 	}
+	else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
+			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED)
+	{
+		if (!sdl_game_controller->isFakeEvent())
+			sdl_game_controller->setDrawCursor(false);
+	}
 #endif
 
 #ifdef HAVE_TOUCHSCREENGUI

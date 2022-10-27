@@ -263,6 +263,8 @@ s16 JoystickController::getAxisWithoutDead(JoystickAxis axis)
 }
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+bool SDLGameController::m_draw_cursor = false;
+
 void SDLGameController::handleMouseMovement(int x, int y)
 {
 	IrrlichtDevice* device = RenderingEngine::get_raw_device();
@@ -284,6 +286,7 @@ void SDLGameController::handleMouseMovement(int x, int y)
 			mouse_pos.X = device->getVideoDriver()->getScreenSize().Width;
 
 		changed = true;
+		m_draw_cursor = true;
 	}
 
 	if (y > deadzone || y < -deadzone)
@@ -297,6 +300,7 @@ void SDLGameController::handleMouseMovement(int x, int y)
 			mouse_pos.Y = device->getVideoDriver()->getScreenSize().Height;
 
 		changed = true;
+		m_draw_cursor = true;
 	}
 
 	if (changed)
@@ -310,7 +314,7 @@ void SDLGameController::handleMouseMovement(int x, int y)
 		translated_event.MouseInput.Shift = false;
 		translated_event.MouseInput.ButtonStates = m_button_states;
 
-		device->postEventFromUser(translated_event);
+		sendEvent(translated_event);
 		device->getCursorControl()->setPosition(mouse_pos.X, mouse_pos.Y);
 	}
 
@@ -333,12 +337,12 @@ void SDLGameController::handleTriggerLeft(s16 value)
 	if (value <= deadzone && m_trigger_left_value > deadzone)
 	{
 		translated_event.KeyInput.PressedDown = false;
-		device->postEventFromUser(translated_event);
+		sendEvent(translated_event);
 	}
 	else if (value > deadzone && m_trigger_left_value <= deadzone)
 	{
 		translated_event.KeyInput.PressedDown = true;
-		device->postEventFromUser(translated_event);
+		sendEvent(translated_event);
 	}
 
 	m_trigger_left_value = value;
@@ -360,12 +364,12 @@ void SDLGameController::handleTriggerRight(s16 value)
 	if (value <= deadzone && m_trigger_right_value > deadzone)
 	{
 		translated_event.KeyInput.PressedDown = false;
-		device->postEventFromUser(translated_event);
+		sendEvent(translated_event);
 	}
 	else if (value > deadzone && m_trigger_right_value <= deadzone)
 	{
 		translated_event.KeyInput.PressedDown = true;
-		device->postEventFromUser(translated_event);
+		sendEvent(translated_event);
 	}
 
 	m_trigger_right_value = value;
@@ -391,7 +395,7 @@ void SDLGameController::handleMouseClickLeft(bool pressed)
 	translated_event.MouseInput.Shift = false;
 	translated_event.MouseInput.ButtonStates = m_button_states;
 
-	device->postEventFromUser(translated_event);
+	sendEvent(translated_event);
 }
 
 void SDLGameController::handleMouseClickRight(bool pressed)
@@ -414,7 +418,7 @@ void SDLGameController::handleMouseClickRight(bool pressed)
 	translated_event.MouseInput.Shift = false;
 	translated_event.MouseInput.ButtonStates = m_button_states;
 
-	device->postEventFromUser(translated_event);
+	sendEvent(translated_event);
 }
 
 void SDLGameController::handleButton(const SEvent &event)
@@ -486,8 +490,7 @@ void SDLGameController::handleButton(const SEvent &event)
 		translated_event.KeyInput.Shift = false;
 		translated_event.KeyInput.Control = false;
 
-		IrrlichtDevice* device = RenderingEngine::get_raw_device();
-		device->postEventFromUser(translated_event);
+		sendEvent(translated_event);
 	}
 }
 
@@ -538,8 +541,7 @@ void SDLGameController::handleButtonInMenu(const SEvent &event)
 		translated_event.KeyInput.Shift = false;
 		translated_event.KeyInput.Control = false;
 
-		IrrlichtDevice* device = RenderingEngine::get_raw_device();
-		device->postEventFromUser(translated_event);
+		sendEvent(translated_event);
 	}
 }
 
@@ -567,6 +569,14 @@ void SDLGameController::handleCameraOrientation(int x, int y)
 	m_camera_pitch = y;
 	if (m_camera_pitch < deadzone && m_camera_pitch > -deadzone)
 		m_camera_pitch = 0;
+}
+
+void SDLGameController::sendEvent(const SEvent &event)
+{
+	m_is_fake_event = true;
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+	device->postEventFromUser(event);
+	m_is_fake_event = false;
 }
 
 void SDLGameController::translateEvent(const SEvent &event)

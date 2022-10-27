@@ -251,6 +251,7 @@ public:
 
 	GUIInventoryList::ItemSpec getItemAtPos(v2s32 p) const;
 	void drawSelectedItem();
+	void drawCursor();
 	void drawMenu();
 	void updateSelectedItem();
 	ItemStack verifySelectedItem();
