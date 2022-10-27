@@ -19,9 +19,9 @@ local function outdated_server_formspec(this)
 	return ([[
 		style_type[image_button;content_offset=0]
 		image[4.9,0.3;2.5,2.5;%s]
-		style[msg1,msg2;content_offset=0]
-		image_button[1,2.5;10,0.8;;msg1;%s;false;false]
-		image_button[1,3.2;10,0.8;;msg2;%s;false;false]
+		style[msg;content_offset=0]
+		image_button[1,2.5;10,0.8;;msg;%s;false;false]
+		image_button[1,3.2;10,0.8;;msg;%s;false;false]
 		%s
 		button[2,4.5;4,0.8;cancel;%s]
 		%s
