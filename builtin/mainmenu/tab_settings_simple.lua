@@ -22,9 +22,9 @@ local function create_confirm_reset_dlg()
 			return
 				"image[4.9,0.3;2.5,2.5;" .. core.formspec_escape(defaulttexturedir ..
 					"attention.png") .. "]" ..
-				"image_button[1,2.85;10,0.8;" .. core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";;" .. fgettext("Reset all settings?") ..
-					";true;false;]" ..
+				"style[msg;content_offset=0]" ..
+				"image_button[1,2.85;10,0.8;;msg;" ..
+					fgettext("Reset all settings?") .. ";true;false;]" ..
 				btn_style("reset_confirm", "red") ..
 				"button[3,4.8;3,0.5;reset_confirm;" .. fgettext("Reset") .. "]" ..
 				btn_style("reset_cancel") ..

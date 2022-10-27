@@ -25,7 +25,6 @@ if not core.get_http_api then
 end
 
 local esc = core.formspec_escape
-local defaulttexturedir = esc(defaulttexturedir)
 
 local LANG = core.settings:get("language")
 if not (LANG and (LANG ~= "")) then LANG = os.getenv("LANG") end
@@ -46,15 +45,15 @@ local function version_info_formspec(data)
 	return ([[
 		style_type[image_button;content_offset=0]
 		image[4.9,0;2.5,2.5;%s]
-		image_button[1,2;10,0.8;%s;;%s;false;false]
+		style[msg;content_offset=0]
+		image_button[1,2;10,0.8;;msg;%s;false;false]
 		hypertext[1.3,2.6;10,2;;<center>%s</center>]
 		%s
 		button[2,4.5;4,0.8;version_check_remind;%s]
 		%s
 		button[6,4.5;4,0.8;version_check_visit;%s]
 	]]):format(
-		defaulttexturedir .. "logo.png",
-		defaulttexturedir .. "blank.png",
+		esc(defaulttexturedir) .. "logo.png",
 		esc(data.title),
 		esc(changes),
 		btn_style("version_check_remind", "yellow"),

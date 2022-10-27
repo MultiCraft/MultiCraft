@@ -73,12 +73,12 @@ local function get_formspec(tabview, name, tabdata)
 		"background9[7.2,2.2;4.8,2.65;" .. defaulttexturedir .. "desc_bg.png" .. ";false;32]" ..
 
 		-- Connect
-		btn_style("join_server") ..
-		"style[join_server;font_size=*" .. (small_screen and 1.5 or 2) .. "]" ..
-		"image_button[8.8,4.88;3.3,0.9;;join_server;" ..
+		btn_style("btn_mp_connect") ..
+		"style[btn_mp_connect;font_size=*" .. (small_screen and 1.5 or 2) .. "]" ..
+		"image_button[8.8,4.88;3.3,0.9;;btn_mp_connect;" ..
 			("\n"):rep(3) .. " " .. fgettext("Play") .. ("\n"):rep(3) .. ";true;false]" .. -- Connect
 		"image[9,5;0.6,0.6;" .. defaulttexturedir .. "btn_play_icon.png]" ..
-		"tooltip[join_server;" .. fgettext("Connect") .. "]"
+		"tooltip[btn_mp_connect;" .. fgettext("Connect") .. "]"
 
 	if tabdata.selected and selected then
 		if gamedata.fav then

@@ -20,9 +20,9 @@
 local function delete_content_formspec(dialogdata)
 	local title = dialogdata.content.title or dialogdata.content.name
 	local retval =
-		"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir) ..
-			"blank.png;;" .. fgettext("Are you sure you want to delete \"$1\"?", title) ..
-			";true;false;]" ..
+		"style[msg;content_offset=0]" ..
+		"image_button[2,1;8,3;;msg;" ..
+			fgettext("Are you sure you want to delete \"$1\"?", title) .. ";true;false;]" ..
 		btn_style("dlg_delete_content_confirm", "red") ..
 		"button[3,4.8;3,0.5;dlg_delete_content_confirm;" .. fgettext("Delete") .. "]" ..
 		btn_style("dlg_delete_content_cancel") ..
@@ -46,9 +46,6 @@ local function delete_content_buttonhandler(this, fields)
 
 			if this.data.content.type == "game" then
 				pkgmgr.update_gamelist()
-
-				ui.childlist = {}
-				menudata.init_tabs()
 			else
 				pkgmgr.refresh_globals()
 			end

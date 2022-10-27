@@ -259,9 +259,10 @@ local function refresh_worldlist()
 	if game then
 		menudata.worldlist:set_filtercriteria(game.id)
 		mm_texture.update("singleplayer", game)
-		core.set_topleft_text(game.id == "default" and "" or "Powered by Minetest Engine")
+		local default_game = game.id == "default"
+		core.set_topleft_text(default_game and "" or "Powered by Minetest Engine")
 
-		if game.id == "default" then
+		if default_game then
 			local gamebar = ui.find_by_name("game_button_bar")
 			if gamebar then
 				gamebar:hide()
@@ -272,11 +273,13 @@ local function refresh_worldlist()
 				create_default_worlds()
 			end
 			checked_worlds = true
-		else
-			singleplayer_refresh_gamebar()
-			ui.find_by_name("game_button_bar"):show()
+
+			return
 		end
 	end
+
+	singleplayer_refresh_gamebar()
+	ui.find_by_name("game_button_bar"):show()
 end
 
 local function main_button_handler(this, fields, name, tab_data)

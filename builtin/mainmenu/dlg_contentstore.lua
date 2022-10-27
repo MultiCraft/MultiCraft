@@ -107,9 +107,6 @@ local function start_install(package)
 				elseif package.type == "game" then
 					conf_path = path .. DIR_DELIM .. "game.conf"
 					name_is_title = true
-
-					ui.childlist = {}
-					menudata.init_tabs()
 				elseif package.type == "txp" then
 					conf_path = path .. DIR_DELIM .. "texture_pack.conf"
 				end

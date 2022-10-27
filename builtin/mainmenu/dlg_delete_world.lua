@@ -16,8 +16,6 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-local b = core.formspec_escape(defaulttexturedir .. "blank.png")
-
 local function delete_world_formspec(dialogdata)
 	local game_name = dialogdata.delete_game
 	local delete_name = dialogdata.delete_name
@@ -31,7 +29,7 @@ local function delete_world_formspec(dialogdata)
 			"attention.png"), "]",
 
 		"style[msg,wait;content_offset=0]",
-		"image_button[1,3.5;13.5,0.8;", b, ";msg;",
+		"image_button[1,3.5;13.5,0.8;;msg;",
 			fgettext("Delete World \"$1\"?", delete_name), ";false;false]",
 
 		btn_style("world_delete_cancel"),
