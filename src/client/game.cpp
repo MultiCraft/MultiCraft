@@ -2186,24 +2186,10 @@ void Game::toggleFreeMove()
 
 void Game::toggleFreeMoveAlt()
 {
-	bool free_move = !g_settings->getBool("free_move");
-	bool creative = !g_settings->getBool("creative_mode");
+	if (m_cache_doubletap_jump && runData.jump_timer < 0.15f &&
+			(!simple_singleplayer_mode || client->checkPrivilege("fly")))
+		toggleFreeMove();
 
-	if (simple_singleplayer_mode) {
-		if (m_cache_doubletap_jump && runData.jump_timer < 0.15f) {
-			if (!free_move || !creative)
-				toggleFreeMove();
-		}
-	} else {
-		if (client->checkPrivilege("fly") && runData.jump_timer < 0.15f) {
-#if defined(__ANDROID__) || defined(__IOS__)
-			toggleFreeMove();
-#else
-		if (m_cache_doubletap_jump)
-			toggleFreeMove();
-#endif
-		}
-	}
 	runData.reset_jump_timer = true;
 }
 
@@ -4366,19 +4352,15 @@ void Game::showPauseMenu()
 	str_formspec_escape(control_text);
 #endif
 
-	bool hasRealKeyboard = porting::hasRealKeyboard();
-
-#ifndef __ANDROID__
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
+#ifdef __ANDROID__
+	bool hasRealKeyboard = porting::hasRealKeyboard();
+	if (simple_singleplayer_mode && hasRealKeyboard)
+		ypos -= 0.6f;
+#endif
 #ifdef __IOS__
 	ypos += 0.5f;
 #endif
-#else
-	float ypos = 0.1f;
-	if (simple_singleplayer_mode && !hasRealKeyboard)
-		ypos += 0.6f;
-#endif
-
 	std::ostringstream os;
 
 	os << "formspec_version[1]" << SIZE_TAG
@@ -4404,10 +4386,11 @@ void Game::showPauseMenu()
 	}
 #endif
 #ifndef __IOS__
-	if (hasRealKeyboard) {
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
-		   << strgettext("Change Keys") << ";;false]";
-	}
+#ifdef __ANDROID__
+	if (hasRealKeyboard)
+#endif
+	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
+		<< strgettext("Change Keys")  << ";;false]";
 #endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << ";;false]";
