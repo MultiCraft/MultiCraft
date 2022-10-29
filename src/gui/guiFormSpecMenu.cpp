@@ -1562,6 +1562,9 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
 		e->setDrawBorder(style.getBool(StyleSpec::BORDER, true));
 		e->setOverrideColor(style.getColor(StyleSpec::TEXTCOLOR, video::SColor(0xFFFFFFFF)));
+		if (style.get(StyleSpec::BGCOLOR, "") == "transparent") {
+			e->setDrawBackground(false);
+		}
 		e->setOverrideFont(style.getFont());
 
 		irr::SEvent evt;
