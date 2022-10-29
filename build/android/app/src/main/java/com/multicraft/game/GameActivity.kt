@@ -297,12 +297,12 @@ class GameActivity : SDLActivity() {
 	}
 
 	@Suppress("unused")
-	fun getRoundScreen(): Int {
-		return radius
+	fun getSecretKey(key: String): String {
+		return "Stub"
 	}
 
 	@Suppress("unused")
-	fun getSecretKey(key: String): String {
-		return "Stub"
+	fun getRoundScreen(): Int {
+		return radius
 	}
 }
