@@ -113,4 +113,9 @@ void upgrade(const std::string &item);
  * get radius of rounded corners
  */
 int getRoundScreen();
+
+/**
+ * get encrypted key for further actions
+ */
+std::string getSecretKey(const std::string &key);
 }

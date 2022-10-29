@@ -220,6 +220,10 @@ class GameActivity : SDLActivity() {
 	fun upgrade(item: String) {
 	}
 
+	fun getSecretKey(key: String): String {
+		return "Stub"
+	}
+
 	@Suppress("unused")
 	fun getRoundScreen(): Int {
 		return radius
