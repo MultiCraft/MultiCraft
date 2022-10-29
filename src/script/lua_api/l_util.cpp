@@ -504,12 +504,12 @@ int ModApiUtil::l_upgrade(lua_State *L)
 int ModApiUtil::l_get_secret_key(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	const std::string secret_name = luaL_checkstring(L, 1);
 	const std::string res = porting::getSecretKey(secret_name);
 	lua_pushlstring(L, res.c_str(), res.size());
 #else
-	// Not implemented on non-Android platforms
+	// Not implemented on desktop platforms
 	lua_pushstring(L, "");
 #endif
 

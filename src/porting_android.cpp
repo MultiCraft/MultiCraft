@@ -422,13 +422,14 @@ int getRoundScreen()
 std::string getSecretKey(const std::string &key)
 {
 	jmethodID getKey = jnienv->GetMethodID(activityClass,
-				"getSecretKey", "(Ljava/lang/String;)Ljava/lang/String;");
+			"getSecretKey", "(Ljava/lang/String;)Ljava/lang/String;");
 
 	FATAL_ERROR_IF(getKey == nullptr,
 		"porting::getSecretKey unable to find java getSecretKey method");
 
 	jstring jkey = jnienv->NewStringUTF(key.c_str());
 	auto result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
+
 	return javaStringToUTF8(result);
 }
 }
