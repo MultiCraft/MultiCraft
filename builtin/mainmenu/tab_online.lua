@@ -58,15 +58,21 @@ local function get_formspec(tabview, name, tabdata)
 			"refresh.png;btn_mp_refresh;;true;false]" ..
 
 		-- Address / Port
-		"field[7.4,0.55;5,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
+		"image[7.1,0.09;6,0.8;" .. defaulttexturedir .. "desc_bg.png;32]" ..
+		"style[te_address;border=false;bgcolor=transparent]" ..
+		"field[7.45,0.55;4.9,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
 			esc(address) .. "]" ..
 
 		-- Name
-		"field[7.4,1.7;2.55,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
+		"image[7.1,1.25;2.95,0.8;" .. defaulttexturedir .. "desc_bg.png;32]" ..
+		"style[te_name;border=false;bgcolor=transparent]" ..
+		"field[7.45,1.7;2.45,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
 			esc(core.settings:get("name")) .. "]" ..
 
 		-- Password
-		"pwdfield[9.85,1.7;2.55,0.5;te_pwd;" .. fgettext("Password") .. ":" .. ";" ..
+		"image[9.55,1.25;2.95,0.8;" .. defaulttexturedir .. "desc_bg.png;32]" ..
+		"style[te_pwd;border=false;bgcolor=transparent]" ..
+		"pwdfield[9.9,1.7;2.45,0.5;te_pwd;" .. fgettext("Password") .. ":" .. ";" ..
 			esc(password_tmp) .. "]" ..
 
 		-- Description Background
