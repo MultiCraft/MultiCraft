@@ -49,7 +49,7 @@ local function get_formspec(tabview, name, tabdata)
 		"formspec_version[3]" ..
 		"image[-0.1,4.93;7,0.81;" .. defaulttexturedir .. "desc_bg.png;32]" ..
 		"style[Dte_search;border=false;bgcolor=transparent]" ..
-		"field[0.3,5.25;5.7,0.83;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+		"field[0.25,5.25;5.7,0.83;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
 		btn_style("btn_mp_search") ..
 		"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
 			"search.png;btn_mp_search;;true;false]" ..
