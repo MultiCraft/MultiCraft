@@ -151,7 +151,6 @@ class MainActivity : AppCompatActivity() {
 			File(filesDir, "builtin"),
 			File(filesDir, "client"),
 			File(filesDir, "fonts"),
-			File(filesDir, "games"),
 			File(filesDir, "textures")
 		)
 		val zips = assets.list("data")!!.toList()
