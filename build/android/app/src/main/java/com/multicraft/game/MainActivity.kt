@@ -173,11 +173,9 @@ class MainActivity : AppCompatActivity() {
 		val filesList = listOf(
 			File(externalStorage, "builtin"),
 			File(externalStorage, "cache"), // ToDo: remove me!
-			File(externalStorage, "games${sep}default"),
 			File(externalStorage, "textures${sep}base"),
 			File(externalStorage, "debug.txt"),
 			File(filesDir, "builtin"),
-			File(filesDir, "games"),
 			File(filesDir, "textures${sep}base")
 		)
 		val zips = assets.list("data")!!.toList()
