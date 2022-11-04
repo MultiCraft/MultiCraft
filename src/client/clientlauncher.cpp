@@ -80,7 +80,7 @@ ClientLauncher::~ClientLauncher()
 	delete RenderingEngine::get_instance();
 
 #if USE_SOUND
-	g_sound_manager_singleton.reset();
+	deleteSoundManagerSingleton(g_sound_manager_singleton);
 #endif
 }
 
@@ -102,7 +102,11 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound"))
-		g_sound_manager_singleton = createSoundManagerSingleton();
+	{
+		// Check if it's already created just in case
+		if (!g_sound_manager_singleton)
+			g_sound_manager_singleton = createSoundManagerSingleton();
+	}
 #endif
 
 	if (!init_engine()) {

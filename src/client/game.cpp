@@ -1292,9 +1292,9 @@ bool Game::init(
 bool Game::initSound()
 {
 #if USE_SOUND
-	if (g_settings->getBool("enable_sound") && g_sound_manager_singleton.get()) {
+	if (g_settings->getBool("enable_sound") && g_sound_manager_singleton) {
 		infostream << "Attempting to use OpenAL audio" << std::endl;
-		sound = createOpenALSoundManager(g_sound_manager_singleton.get(), &soundfetcher);
+		sound = createOpenALSoundManager(g_sound_manager_singleton, &soundfetcher);
 		if (!sound)
 			infostream << "Failed to initialize OpenAL audio" << std::endl;
 	} else
