@@ -16,8 +16,6 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 
-local defaulttexturedir = core.formspec_escape(defaulttexturedir)
-
 local function buttonbar_formspec(self)
 
 	if self.hidden then
@@ -25,7 +23,7 @@ local function buttonbar_formspec(self)
 	end
 
 	local formspec = string.format("background9[%f,%f;%f,%f;%sside_menu_left.png;false;30]",
-			self.pos.x, self.pos.y - 0.1, self.size.x + 0.025, self.size.y + 0.35, defaulttexturedir)
+			self.pos.x, self.pos.y - 0.1, self.size.x + 0.025, self.size.y + 0.35, defaulttexturedir_esc)
 
 	for i=self.startbutton,#self.buttons,1 do
 		local btn_name = self.buttons[i].name
@@ -62,8 +60,8 @@ local function buttonbar_formspec(self)
 
 			if button.cdb then
 				formspec = formspec ..
-					"style[" .. btn_name .. ";bgimg=" .. defaulttexturedir ..
-						"btn_download.png;bgimg_hovered=" .. defaulttexturedir .. "btn_download_hover.png]" ..
+					"style[" .. btn_name .. ";bgimg=" .. defaulttexturedir_esc ..
+						"btn_download.png;bgimg_hovered=" .. defaulttexturedir_esc .. "btn_download_hover.png]" ..
 
 					("image_button[%f,%f;%f,%f;;%s;%s;true;%s]tooltip[%s;%s]"):format(
 						btn_pos.x, btn_pos.y, self.btn_size, self.btn_size,
@@ -120,15 +118,15 @@ local function buttonbar_formspec(self)
 					self.name, text_inc)
 		else
 			formspec = formspec ..
-				"style[btnbar_dec_" .. self.name .. ";bgimg=" .. defaulttexturedir ..
-					"btn_up.png;bgimg_hovered=" .. defaulttexturedir .. "btn_up_hover.png]" ..
+				"style[btnbar_dec_" .. self.name .. ";bgimg=" .. defaulttexturedir_esc ..
+					"btn_up.png;bgimg_hovered=" .. defaulttexturedir_esc .. "btn_up_hover.png]" ..
 				("image_button[%f,%f;%f,%f;;btnbar_dec_%s;;true;false]"):format(
 					btn_dec_pos.x, btn_dec_pos.y, btn_size.x, btn_size.y,
 					self.name)
 
 			formspec = formspec ..
-				"style[btnbar_inc_" .. self.name .. ";bgimg=" .. defaulttexturedir ..
-					"btn_down.png;bgimg_hovered=" .. defaulttexturedir .. "btn_down_hover.png]" ..
+				"style[btnbar_inc_" .. self.name .. ";bgimg=" .. defaulttexturedir_esc ..
+					"btn_down.png;bgimg_hovered=" .. defaulttexturedir_esc .. "btn_down_hover.png]" ..
 				("image_button[%f,%f;%f,%f;;btnbar_inc_%s;;true;false]"):format(
 					btn_inc_pos.x, btn_inc_pos.y, btn_size.x, btn_size.y,
 					self.name)

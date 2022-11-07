@@ -71,12 +71,11 @@ function ui.update()
 			"formspec_version[3]",
 			"size[14,8.25]",
 			"bgcolor[#0000]",
-			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
-				"bg_common.png"), ";true;40]",
+			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 			"set_focus[btn_reconnect_yes;true]",
 			"textarea[0.6,0.5;12.8,0.6;;;", fgettext("The server has requested a reconnect:"), "]",
-			"background9[0.4,1.1;13.2,5.2;", core.formspec_escape(defaulttexturedir ..
-				"worldlist_bg.png"), ";false;40]",
+			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc,
+				"worldlist_bg.png;false;40]",
 			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
 			btn_style("btn_reconnect_yes") ..
 			"button[2,6.725;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
@@ -113,11 +112,10 @@ function ui.update()
 			"formspec_version[3]",
 			"size[14,8.25]",
 			"bgcolor[#0000]",
-			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
-				"bg_common.png"), ";true;40]",
+			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 			"textarea[0.6,0.5;12.8,0.6;;;", error_title, "]",
-			"background9[0.4,1.1;13.2,5.2;", core.formspec_escape(defaulttexturedir ..
-				"worldlist_bg.png"), ";false;40]",
+			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc,
+				"worldlist_bg.png;false;40]",
 			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
 			restart_btn
 		}

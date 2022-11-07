@@ -44,7 +44,7 @@ local function version_info_formspec(data)
 
 	return ([[
 		style_type[image_button;content_offset=0]
-		image[4.9,0;2.5,2.5;%s]
+		image[4.9,0;2.5,2.5;%slogo.png]
 		style[msg;content_offset=0]
 		image_button[1,2;10,0.8;;msg;%s;false;false]
 		hypertext[1.3,2.6;10,2;;<center>%s</center>]
@@ -53,7 +53,7 @@ local function version_info_formspec(data)
 		%s
 		button[6,4.5;4,0.8;version_check_visit;%s]
 	]]):format(
-		esc(defaulttexturedir) .. "logo.png",
+		defaulttexturedir_esc,
 		esc(data.title),
 		esc(changes),
 		btn_style("version_check_remind", "yellow"),

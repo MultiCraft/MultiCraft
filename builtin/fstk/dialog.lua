@@ -50,7 +50,7 @@ local dialog_metatable = {
 }
 dialog_metatable.__index = dialog_metatable
 
-local bg = core.formspec_escape(defaulttexturedir .. "bg_common.png")
+local bg = defaulttexturedir_esc .. "bg_common.png"
 function dialog_create(name, get_formspec, buttonhandler, eventhandler, add_background)
 	local self = {}
 

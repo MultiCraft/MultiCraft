@@ -19,7 +19,6 @@ local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
 
 local esc = core.formspec_escape
-local defaulttexturedir = esc(defaulttexturedir)
 local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
 local default_worlds = {
@@ -161,13 +160,13 @@ local function get_formspec(_, _, tab_data)
 
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
-			"style[world_delete;fgimg=" .. defaulttexturedir ..
-				"world_delete.png;fgimg_hovered=" .. defaulttexturedir .. "world_delete_hover.png]" ..
+			"style[world_delete;fgimg=" .. defaulttexturedir_esc ..
+				"world_delete.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_delete_hover.png]" ..
 			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
 			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
 
-			"style[world_create;fgimg=" .. defaulttexturedir ..
-				"world_new.png;fgimg_hovered=" .. defaulttexturedir .. "world_new_hover.png]" ..
+			"style[world_create;fgimg=" .. defaulttexturedir_esc ..
+				"world_new.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_new_hover.png]" ..
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
 			"tooltip[world_create;".. fgettext("New") .. "]"
 
@@ -184,34 +183,34 @@ local function get_formspec(_, _, tab_data)
 			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;" .. space .. " " ..
 				fgettext("Play") .. space .. ";true;false]" ..
-			"image[7,1.63;1,1;" .. defaulttexturedir .. "btn_play_icon.png]" ..
+			"image[7,1.63;1,1;" .. defaulttexturedir_esc .. "btn_play_icon.png]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
-			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_bg .. ";;;true;false]" ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_bg .. ";;;true;false]" ..
 			"style[cb_creative_mode;content_offset=0]" ..
-			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_checkbox ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_checkbox ..
 				";cb_creative_mode;;true;false]" ..
 
-			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
+			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
 	if core.settings:get("menu_last_game") == "default" and not tab_data.hidden then
 		retval = retval ..
-			"style[switch_local;fgimg=" .. defaulttexturedir .. "switch_local.png;fgimg_hovered=" ..
-				defaulttexturedir .. "switch_local_hover.png]" ..
+			"style[switch_local;fgimg=" .. defaulttexturedir_esc .. "switch_local.png;fgimg_hovered=" ..
+				defaulttexturedir_esc .. "switch_local_hover.png]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
 
 		if PLATFORM == "Android" then
 			retval = retval ..
 				"image_button[6.6,-0.1;1.5,1.5;" ..
-					defaulttexturedir .. "gift_btn.png;upgrade;;true;false;" ..
-					defaulttexturedir .. "gift_btn_pressed.png]"
+					defaulttexturedir_esc .. "gift_btn.png;upgrade;;true;false;" ..
+					defaulttexturedir_esc .. "gift_btn_pressed.png]"
 		end
 	elseif tab_data.hidden or pkgmgr.find_by_gameid("default") then
 		retval = retval ..
-			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
-				defaulttexturedir .. "switch_local_default_hover.png]" ..
+			"style[switch_local_default;fgimg=" .. defaulttexturedir_esc .. "switch_local_default.png;fgimg_hovered=" ..
+				defaulttexturedir_esc .. "switch_local_default_hover.png]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
 	end
 

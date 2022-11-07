@@ -26,8 +26,6 @@
 -- element.getFormspec() returns formspec of tabview                          --
 --------------------------------------------------------------------------------
 
-local defaulttexturedir = core.formspec_escape(defaulttexturedir)
-
 --------------------------------------------------------------------------------
 local function add_tab(self,tab)
 	assert(tab.size == nil or (type(tab.size) == table and
@@ -72,12 +70,12 @@ end
 --------------------------------------------------------------------------------
 local function make_side_pane_tab(y, tab_name, tooltip, selected)
 	local formspec = "style[" .. tab_name .. "_tab;bgimg=" ..
-			defaulttexturedir .. tab_name
+			defaulttexturedir_esc .. tab_name
 	if selected then
 		formspec = formspec .. "_menu_selected.png]"
 	else
 		formspec = formspec .. "_menu.png;bgimg_hovered=" ..
-				defaulttexturedir .. tab_name .. "_menu_hover.png]"
+				defaulttexturedir_esc .. tab_name .. "_menu_hover.png]"
 	end
 
 	return formspec ..
@@ -101,12 +99,12 @@ local function get_formspec(self)
 					"listcolors[#000;#000;#000;#dff6f5;#302c2e]" ..
 					"container[1,1]" ..
 					"background9[-0.2,-1.26;" .. tsize.width + 0.4 .. "," ..
-						tsize.height + 1.75 .. ";" .. defaulttexturedir ..
+						tsize.height + 1.75 .. ";" .. defaulttexturedir_esc ..
 						"bg_common.png;false;40]" ..
 
-					"background9[12.13,1.05;0.9,2.6;" .. defaulttexturedir .. "side_menu.png;false;30]" ..
+					"background9[12.13,1.05;0.9,2.6;" .. defaulttexturedir_esc .. "side_menu.png;false;30]" ..
 					make_side_pane_tab(0.9, "settings", fgettext("Settings"), name == "settings") ..
-					"image[12.15,2.26;0.9,0.06;" .. defaulttexturedir .. "side_menu_divider.png]" ..
+					"image[12.15,2.26;0.9,0.06;" .. defaulttexturedir_esc .. "side_menu_divider.png]" ..
 					make_side_pane_tab(2.3, "authors", fgettext("Credits"), name == "credits")
 		end
 
@@ -238,13 +236,13 @@ local function button_header(self)
 		end
 		local btn_name = self.name .. "_" .. i
 		toadd = toadd ..
-			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir ..
+			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir_esc ..
 				texture
 
 		if i == math.abs(self.last_tab_index) then
 			toadd = toadd .. "_selected.png;"
 		else
-			toadd = toadd .. ".png;bgimg_hovered=" .. defaulttexturedir ..
+			toadd = toadd .. ".png;bgimg_hovered=" .. defaulttexturedir_esc ..
 				texture .. "_hover.png;"
 		end
 

@@ -314,7 +314,7 @@ function is_high_dpi()
 end
 --------------------------------------------------------------------------------
 function btn_style(field, color)
-	local button_path = core.formspec_escape(defaulttexturedir) .. "gui" .. DIR_DELIM
+	local button_path = defaulttexturedir_esc .. "gui" .. DIR_DELIM
 	local btn_size = is_high_dpi() and ".x2" or ""
 	color = (color and "_" .. color) or ""
 

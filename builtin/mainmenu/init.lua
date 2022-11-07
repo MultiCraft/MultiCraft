@@ -26,6 +26,7 @@ local basepath = core.get_builtin_path()
 local mobile = PLATFORM == "Android" or PLATFORM == "iOS"
 defaulttexturedir = core.get_texturepath_share() .. DIR_DELIM .. "base" ..
 					DIR_DELIM .. "pack" .. DIR_DELIM
+defaulttexturedir_esc = core.formspec_escape(defaulttexturedir)
 
 dofile(basepath .. "common" .. DIR_DELIM .. "filterlist.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "buttonbar.lua")

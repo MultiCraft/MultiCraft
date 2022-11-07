@@ -16,7 +16,6 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 local esc = core.formspec_escape
-local defaulttexturedir = esc(defaulttexturedir)
 
 if not core.get_http_api then
 	function create_store_dlg()
@@ -369,7 +368,7 @@ function install_dialog.get_formspec()
 		"formspec_version[3]",
 		"size[7,7.85]",
 		"bgcolor[#0000]",
-		"background9[0,0;0,0;", defaulttexturedir, "bg_common.png", ";true;40]",
+		"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png", ";true;40]",
 		"style[title;border=false]",
 		"button[0,0;7,0.5;title;", fgettext("Install $1", package.title) , "]",
 
@@ -500,9 +499,9 @@ end
 
 local function get_screenshot(package)
 	if not package.thumbnail then
-		return defaulttexturedir .. "no_screenshot.png"
+		return defaulttexturedir_esc .. "no_screenshot.png"
 	elseif screenshot_downloading[package.thumbnail] then
-		return defaulttexturedir .. "loading_screenshot.png"
+		return defaulttexturedir_esc .. "loading_screenshot.png"
 	end
 
 	-- Get tmp screenshot path
@@ -519,7 +518,7 @@ local function get_screenshot(package)
 
 	-- Show error if we've failed to download before
 	if screenshot_downloaded[package.thumbnail] then
-		return defaulttexturedir .. "error_screenshot.png"
+		return defaulttexturedir_esc .. "error_screenshot.png"
 	end
 
 	-- Download
@@ -540,10 +539,10 @@ local function get_screenshot(package)
 		screenshot_downloading[package.thumbnail] = true
 	else
 		core.log("error", "ERROR: async event failed")
-		return defaulttexturedir .. "error_screenshot.png"
+		return defaulttexturedir_esc .. "error_screenshot.png"
 	end
 
-	return defaulttexturedir .. "loading_screenshot.png"
+	return defaulttexturedir_esc .. "loading_screenshot.png"
 end
 
 function store.load()
@@ -707,19 +706,19 @@ function store.get_formspec(dlgdata)
 			"formspec_version[3]",
 			"size[15.75,9.5]",
 			"bgcolor[#0000]",
-			"background9[0,0;0,0;", defaulttexturedir, "bg_common.png;true;40]",
+			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 
 			"style[status,downloading,queued;border=false]",
 
 			"container[0.375,0.375]",
-			"image[0,0;7.25,0.8;", defaulttexturedir, "desc_bg.png;32]",
+			"image[0,0;7.25,0.8;", defaulttexturedir_esc, "field_bg.png;32]",
 			"style[search_string;border=false;bgcolor=transparent]",
 			"field[0.1,0;7.15,0.8;search_string;;", esc(search_string), "]",
 			"field_close_on_enter[search_string;false]",
 			"set_focus[search_string;true]",
 			btn_style("search"),
-			"image_button[7.4,0;0.8,0.8;", defaulttexturedir, "search.png;search;;true;false]",
-		--	"image_button[8.125,0;0.8,0.8;", defaulttexturedir, "clear.png;clear;;true;false]",
+			"image_button[7.4,0;0.8,0.8;", defaulttexturedir_esc, "search.png;search;;true;false]",
+		--	"image_button[8.125,0;0.8,0.8;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
 			"dropdown[8.35,0;3.5,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
 			"container_end[]",
 
@@ -730,15 +729,15 @@ function store.get_formspec(dlgdata)
 
 			"container[", W - 0.375 - 0.8*4 - 2,  ",0]",
 			btn_style("pstart"),
-			"image_button[-0.1,0;0.8,0.8;", defaulttexturedir, "start_icon.png;pstart;;true;false]",
+			"image_button[-0.1,0;0.8,0.8;", defaulttexturedir_esc, "start_icon.png;pstart;;true;false]",
 			btn_style("pback"),
-			"image_button[0.8,0;0.8,0.8;", defaulttexturedir, "prev_icon.png;pback;;true;false]",
+			"image_button[0.8,0;0.8,0.8;", defaulttexturedir_esc, "prev_icon.png;pback;;true;false]",
 			"style[pagenum;border=false]",
 			"button[1.5,0;2,0.8;pagenum;", tonumber(cur_page), " / ", tonumber(dlgdata.pagemax), "]",
 			btn_style("pnext"),
-			"image_button[3.5,0;0.8,0.8;", defaulttexturedir, "next_icon.png;pnext;;true;false]",
+			"image_button[3.5,0;0.8,0.8;", defaulttexturedir_esc, "next_icon.png;pnext;;true;false]",
 			btn_style("pend"),
-			"image_button[4.4,0;0.8,0.8;", defaulttexturedir, "end_icon.png;pend;;true;false]",
+			"image_button[4.4,0;0.8,0.8;", defaulttexturedir_esc, "end_icon.png;pend;;true;false]",
 			"container_end[]",
 
 			"container_end[]",
@@ -786,7 +785,7 @@ function store.get_formspec(dlgdata)
 		formspec = {
 			"size[12,6.4]",
 			"bgcolor[#0000]",
-			"background9[0,0;0,0;", defaulttexturedir, "bg_common.png;true;40]",
+			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
 			btn_style("back"),
 			"button[0-0.11,5.8;5.5,0.9;back;< ", fgettext("Back to Main Menu"), "]",
@@ -819,18 +818,18 @@ function store.get_formspec(dlgdata)
 		formspec[#formspec + 1] = "]"
 
 		-- buttons
-		local left_base = "image_button[-1.55,0;0.7,0.7;" .. defaulttexturedir
+		local left_base = "image_button[-1.55,0;0.7,0.7;" .. defaulttexturedir_esc
 		formspec[#formspec + 1] = "container["
 		formspec[#formspec + 1] = W - 0.375*2
 		formspec[#formspec + 1] = ",0.1]"
 
 		if package.downloading then
 			formspec[#formspec + 1] = "animated_image[-1.7,-0.15;1,1;downloading;"
-			formspec[#formspec + 1] = defaulttexturedir
+			formspec[#formspec + 1] = defaulttexturedir_esc
 			formspec[#formspec + 1] = "cdb_downloading.png;4;300;]"
 		elseif package.queued then
 			formspec[#formspec + 1] = left_base
-			formspec[#formspec + 1] = defaulttexturedir
+			formspec[#formspec + 1] = defaulttexturedir_esc
 			formspec[#formspec + 1] = "cdb_queued.png;queued]"
 		elseif not package.path then
 			local elem_name = "install_" .. i .. ";"
@@ -856,7 +855,7 @@ function store.get_formspec(dlgdata)
 
 		local web_elem_name = "view_" .. i .. ";"
 		formspec[#formspec + 1] = "image_button[-0.7,0;0.7,0.7;" ..
-			defaulttexturedir .. "cdb_viewonline.png;" .. web_elem_name .. "]"
+			defaulttexturedir_esc .. "cdb_viewonline.png;" .. web_elem_name .. "]"
 		formspec[#formspec + 1] = "tooltip[" .. web_elem_name ..
 			fgettext("View more information in a web browser") .. tooltip_colors
 		formspec[#formspec + 1] = "container_end[]"

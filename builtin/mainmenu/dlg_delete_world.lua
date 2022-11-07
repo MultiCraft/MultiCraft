@@ -25,8 +25,7 @@ local function delete_world_formspec(dialogdata)
 
 	local formspec = {
 		"real_coordinates[true]",
-		"image[6.5,0.8;2.5,2.5;", core.formspec_escape(defaulttexturedir ..
-			"attention.png"), "]",
+		"image[6.5,0.8;2.5,2.5;", defaulttexturedir_esc, "attention.png]",
 
 		"style[msg,wait;content_offset=0]",
 		"image_button[1,3.5;13.5,0.8;;msg;",

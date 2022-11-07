@@ -20,8 +20,7 @@ local function create_confirm_reset_dlg()
 	return dialog_create("reset_all_settings",
 		function()
 			return
-				"image[4.9,0.3;2.5,2.5;" .. core.formspec_escape(defaulttexturedir ..
-					"attention.png") .. "]" ..
+				"image[4.9,0.3;2.5,2.5;" .. defaulttexturedir_esc .. "attention.png]" ..
 				"style[msg;content_offset=0]" ..
 				"image_button[1,2.85;10,0.8;;msg;" ..
 					fgettext("Reset all settings?") .. ";true;false;]" ..

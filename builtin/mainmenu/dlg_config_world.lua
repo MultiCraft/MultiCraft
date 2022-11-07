@@ -17,9 +17,6 @@
 
 --------------------------------------------------------------------------------
 
-local esc = core.formspec_escape
-local defaulttexturedir = esc(defaulttexturedir)
-
 local enabled_all = false
 
 local function modname_valid(name)
@@ -74,12 +71,12 @@ local function get_formspec(data)
 	local retval =
 		"size[11.5,7.5]" ..
 		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. defaulttexturedir .. "bg_common.png;true;40]" ..
-		"background9[0.05,0.05;5.3,6.8;" .. defaulttexturedir .. "desc_bg.png;false;32]" ..
+		"background9[0,0;0,0;" .. defaulttexturedir_esc .. "bg_common.png;true;40]" ..
+		"background9[0.05,0.05;5.3,6.8;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
 		"label[0.1,0;" .. fgettext("World:") .. " " .. data.worldspec.name .. "]"
 
 	if mod.is_modpack or mod.type == "game" then
-		local info = esc(
+		local info = core.formspec_escape(
 			core.get_content_info(mod.path).description)
 		if info == "" then
 			if mod.is_modpack then

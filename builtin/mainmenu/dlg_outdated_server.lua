@@ -18,7 +18,7 @@
 local function outdated_server_formspec(this)
 	return ([[
 		style_type[image_button;content_offset=0]
-		image[4.9,0.3;2.5,2.5;%s]
+		image[4.9,0.3;2.5,2.5;%sattention.png]
 		style[msg;content_offset=0]
 		image_button[1,2.5;10,0.8;;msg;%s;false;false]
 		image_button[1,3.2;10,0.8;;msg;%s;false;false]
@@ -27,7 +27,7 @@ local function outdated_server_formspec(this)
 		%s
 		button[6,4.5;4,0.8;continue;%s]
 	]]):format(
-		core.formspec_escape(defaulttexturedir .. "attention.png"),
+		defaulttexturedir_esc,
 		fgettext("The server you are trying to connect to is outdated!"),
 		fgettext("Support for older servers may be removed at any time."),
 		btn_style("cancel"),
