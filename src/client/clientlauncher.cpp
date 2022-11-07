@@ -101,8 +101,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		return RenderingEngine::print_video_modes();
 
 #if USE_SOUND
-	if (g_settings->getBool("enable_sound"))
-	{
+	if (g_settings->getBool("enable_sound")) {
 		// Check if it's already created just in case
 		if (!g_sound_manager_singleton)
 			g_sound_manager_singleton = createSoundManagerSingleton();
