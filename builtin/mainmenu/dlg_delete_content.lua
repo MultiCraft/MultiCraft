@@ -19,16 +19,24 @@
 
 local function delete_content_formspec(dialogdata)
 	local title = dialogdata.content.title or dialogdata.content.name
-	local retval =
-		"style[msg;content_offset=0]" ..
-		"image_button[2,1;8,3;;msg;" ..
-			fgettext("Are you sure you want to delete \"$1\"?", title) .. ";true;false;]" ..
-		btn_style("dlg_delete_content_confirm", "red") ..
-		"button[3,4.8;3,0.5;dlg_delete_content_confirm;" .. fgettext("Delete") .. "]" ..
-		btn_style("dlg_delete_content_cancel") ..
-		"button[6,4.8;3,0.5;dlg_delete_content_cancel;" .. fgettext("Cancel") .. "]"
+	local retval = {
+		"real_coordinates[true]",
+		"image[6.5,0.8;2.5,2.5;", defaulttexturedir_esc, "attention.png]",
 
-	return retval
+		"style[msg;content_offset=0]",
+		"image_button[1,3.5;13.5,0.8;;msg;",
+			fgettext("Are you sure you want to delete \"$1\"?", title), ";false;false]",
+
+		btn_style("dlg_delete_content_confirm", "red"),
+		"image_button[4.1,5.3;3.5,0.8;;dlg_delete_content_confirm;",
+			fgettext("Delete") .. ";true;false]",
+
+		btn_style("world_delete_cancel"),
+		"image_button[7.9,5.3;3.5,0.8;;world_delete_cancel;",
+			fgettext("Cancel"), ";true;false]",
+	}
+
+	return table.concat(retval)
 end
 
 --------------------------------------------------------------------------------
