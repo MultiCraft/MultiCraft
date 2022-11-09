@@ -29,7 +29,7 @@ local function delete_content_formspec(dialogdata)
 
 		btn_style("dlg_delete_content_confirm", "red"),
 		"image_button[4.1,5.3;3.5,0.8;;dlg_delete_content_confirm;",
-			fgettext("Delete") .. ";true;false]",
+			fgettext("Delete"), ";true;false]",
 
 		btn_style("dlg_delete_content_cancel"),
 		"image_button[7.9,5.3;3.5,0.8;;dlg_delete_content_cancel;",
