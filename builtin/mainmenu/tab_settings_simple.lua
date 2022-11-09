@@ -19,15 +19,22 @@
 local function create_confirm_reset_dlg()
 	return dialog_create("reset_all_settings",
 		function()
-			return
-				"image[4.9,0.3;2.5,2.5;" .. defaulttexturedir_esc .. "attention.png]" ..
-				"style[msg;content_offset=0]" ..
-				"image_button[1,2.85;10,0.8;;msg;" ..
-					fgettext("Reset all settings?") .. ";true;false;]" ..
-				btn_style("reset_confirm", "red") ..
-				"button[3,4.8;3,0.5;reset_confirm;" .. fgettext("Reset") .. "]" ..
-				btn_style("reset_cancel") ..
-				"button[6,4.8;3,0.5;reset_cancel;" .. fgettext("Cancel") .. "]"
+			return table.concat({
+				"real_coordinates[true]",
+				"image[6.5,0.8;2.5,2.5;", defaulttexturedir_esc, "attention.png]",
+
+				"style[msg;content_offset=0]",
+				"image_button[1,3.5;13.5,0.8;;msg;",
+					fgettext("Reset all settings?"), ";false;false]",
+
+				btn_style("reset_confirm", "red"),
+				"image_button[4.1,5.3;3.5,0.8;;reset_confirm;",
+					fgettext("Reset"), ";true;false]",
+
+				btn_style("reset_cancel"),
+				"image_button[7.9,5.3;3.5,0.8;;reset_cancel;",
+					fgettext("Cancel"), ";true;false]",
+			})
 		end,
 		function(this, fields)
 			if fields["reset_confirm"] then
