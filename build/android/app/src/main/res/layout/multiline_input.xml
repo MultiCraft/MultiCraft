@@ -1,11 +1,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:id="@+id/rl"
+	android:id="@+id/multiRl"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
 	<com.google.android.material.textfield.TextInputLayout
-		android:id="@+id/input"
+		android:id="@+id/multiInput"
 		style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
@@ -18,8 +18,10 @@
 		app:endIconTint="@null">
 
 		<com.multicraft.game.CustomEditText
-			android:id="@+id/editText"
+			android:id="@+id/multiEditText"
 			android:layout_width="match_parent"
-			android:layout_height="60dp" />
+			android:layout_height="wrap_content"
+			android:inputType="textMultiLine"
+			android:maxLines="8" />
 	</com.google.android.material.textfield.TextInputLayout>
 </RelativeLayout>

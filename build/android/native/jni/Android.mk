@@ -4,72 +4,72 @@ LOCAL_PATH := $(call my-dir)/..
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := Curl
-LOCAL_SRC_FILES := deps/Android/Curl/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libcurl.a
+LOCAL_SRC_FILES := deps/Android/Curl/clang/$(APP_ABI)/libcurl.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := Freetype
-LOCAL_SRC_FILES := deps/Android/Freetype/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libfreetype.a
+LOCAL_SRC_FILES := deps/Android/Freetype/clang/$(APP_ABI)/libfreetype.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := Irrlicht
-LOCAL_SRC_FILES := deps/Android/Irrlicht/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libIrrlicht.a
+LOCAL_SRC_FILES := deps/Android/Irrlicht/clang/$(APP_ABI)/libIrrlicht.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libpng
-LOCAL_SRC_FILES := deps/Android/libpng/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libpng.a
+LOCAL_SRC_FILES := deps/Android/libpng/clang/$(APP_ABI)/libpng.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libjpeg
-LOCAL_SRC_FILES := deps/Android/libjpeg/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libjpeg.a
+LOCAL_SRC_FILES := deps/Android/libjpeg/clang/$(APP_ABI)/libjpeg.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := SDL2
-LOCAL_SRC_FILES := deps/Android/SDL2/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libSDL2.a
+LOCAL_SRC_FILES := deps/Android/SDL2/clang/$(APP_ABI)/libSDL2.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := LevelDB
-LOCAL_SRC_FILES := deps/Android/LevelDB/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libleveldb.a
+LOCAL_SRC_FILES := deps/Android/LevelDB/clang/$(APP_ABI)/libleveldb.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := LuaJIT
-LOCAL_SRC_FILES := deps/Android/LuaJIT/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libluajit.a
+LOCAL_SRC_FILES := deps/Android/LuaJIT/clang/$(APP_ABI)/libluajit.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := mbedTLS
-LOCAL_SRC_FILES := deps/Android/mbedTLS/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libmbedtls.a
+LOCAL_SRC_FILES := deps/Android/mbedTLS/clang/$(APP_ABI)/libmbedtls.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := mbedx509
-LOCAL_SRC_FILES := deps/Android/mbedTLS/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libmbedx509.a
+LOCAL_SRC_FILES := deps/Android/mbedTLS/clang/$(APP_ABI)/libmbedx509.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := mbedcrypto
-LOCAL_SRC_FILES := deps/Android/mbedTLS/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libmbedcrypto.a
+LOCAL_SRC_FILES := deps/Android/mbedTLS/clang/$(APP_ABI)/libmbedcrypto.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := OpenAL
-LOCAL_SRC_FILES := deps/Android/OpenAL-Soft/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libopenal.a
+LOCAL_SRC_FILES := deps/Android/OpenAL-Soft/clang/$(APP_ABI)/libopenal.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := Gettext
-LOCAL_SRC_FILES := deps/Android/Gettext/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libintl.a
+LOCAL_SRC_FILES := deps/Android/Gettext/clang/$(APP_ABI)/libintl.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := Vorbis
-LOCAL_SRC_FILES := deps/Android/Vorbis/${NDK_TOOLCHAIN_VERSION}/$(APP_ABI)/libvorbis.a
+LOCAL_SRC_FILES := deps/Android/Vorbis/clang/$(APP_ABI)/libvorbis.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)

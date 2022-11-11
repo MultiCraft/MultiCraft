@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<!-- подготовка к запуску -->
 	<string name="preparing">Подготовка к запуску&#8230;</string>
 	<string name="loading">Загрузка&#8230;</string>
-	<string name="loadingp">Загрузка&#8230; %d%%</string>
 	<string name="notification_title">Загрузка MultiCraft</string>
 	<string name="notification_description">Осталось меньше минуты&#8230;</string>
-
-	<string name="input_text">Введите Текст</string>
-	<string name="input_password">Пароль</string>
-	<string name="done">Готово</string>
+	<string name="input_text">Введите текст</string>
+	<string name="input_password">Введите пароль</string>
 
 	<!-- диалог отсутствия подключения -->
 	<string name="conn_title">Нет Интернет Подключения!</string>

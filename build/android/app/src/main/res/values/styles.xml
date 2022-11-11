@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-
 	<style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 		<item name="windowActionBar">false</item>
 		<item name="android:windowBackground">@drawable/bg</item>
 		<item name="android:windowFullscreen">true</item>
 		<item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
 		<item name="fontFamily">@font/multicraftfont</item>
-		<item name="colorControlActivated">@color/green</item>
 		<item name="colorPrimary">@color/green</item>
+	</style>
+
+	<style name="LightTheme" parent="Theme.MaterialComponents.Light.Dialog">
+		<item name="android:windowBackground">@drawable/bg_common</item>
+		<item name="android:background">@android:color/transparent</item>
+		<item name="windowMinWidthMajor">0%</item>
+		<item name="windowMinWidthMinor">0%</item>
+	</style>
+
+	<style name="CustomDialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+		<item name="android:windowBackground">@drawable/bg_common</item>
+		<item name="android:background">@android:color/transparent</item>
+	</style>
+
+	<style name="FullScreenDialogStyle" parent="Theme.MaterialComponents.DayNight.Dialog">
+		<item name="android:windowFullscreen">true</item>
+		<item name="android:windowIsFloating">false</item>
+		<item name="android:backgroundDimEnabled">false</item>
+		<item name="android:windowBackground">@android:color/transparent</item>
+		<item name="android:windowEnterAnimation">@null</item>
 	</style>
 
 </resources>
