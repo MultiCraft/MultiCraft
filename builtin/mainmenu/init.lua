@@ -64,6 +64,7 @@ end
 
 tabs.content  = dofile(menupath .. DIR_DELIM .. "tab_content.lua")
 tabs.credits  = dofile(menupath .. DIR_DELIM .. "tab_credits.lua")
+tabs.local_default_game = dofile(menupath .. DIR_DELIM .. "tab_local_default.lua")
 tabs.local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua")
 tabs.play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua")
 
@@ -107,6 +108,14 @@ function menudata.init_tabs()
 
 	-- Create main tabview
 	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0.1, y = 0})
+
+	for i = 1, #pkgmgr.games do
+		if pkgmgr.games[i].id == "default" then
+			tv_main:add(tabs.local_default_game)
+			tabs.local_game.hidden = true
+			break
+		end
+	end
 
 	tv_main:add(tabs.local_game)
 	if func then
