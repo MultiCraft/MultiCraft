@@ -61,6 +61,10 @@
 #    type: float
 # mouse_sensitivity = 0.2
 
+#    Touch sensitivity multiplier.
+#    type: float
+# touch_sensitivity = 0.2
+
 #    If enabled, "special" key instead of "sneak" key is used for climbing down and
 #    descending.
 #    type: bool

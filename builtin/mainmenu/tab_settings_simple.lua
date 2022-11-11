@@ -81,7 +81,7 @@ local languages, language_dropdown, lang_idx = get_language_list()
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
 	local range = tonumber(core.settings:get("viewing_range"))
-	local sensitivity = tonumber(core.settings:get("mouse_sensitivity")) * 2000
+	local sensitivity = tonumber(core.settings:get("touch_sensitivity")) * 2000
 	local touchtarget = core.settings:get_bool("touchtarget") or false
 	local fancy_leaves = core.settings:get("leaves_style") == "fancy"
 	local fast_move = core.settings:get_bool("fast_move") or false
@@ -296,7 +296,7 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 
 		local event = core.explode_scrollbar_event(fields["sb_sensitivity"])
 		if event.type == "CHG" then
-			core.settings:set("mouse_sensitivity", event.value / 2000)
+			core.settings:set("touch_sensitivity", event.value / 2000)
 
 			-- The formspec cannot be updated or the scrollbar movement will
 			-- break.

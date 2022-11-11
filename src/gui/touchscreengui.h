@@ -224,7 +224,7 @@ private:
 	v2u32 m_screensize;
 	s32 button_size;
 	double m_touchscreen_threshold;
-	double m_mouse_sensitivity;
+	double m_touch_sensitivity;
 	std::map<int, rect<s32>> m_hud_rects;
 	std::map<size_t, irr::EKEY_CODE> m_hud_ids;
 	bool m_visible; // is the gui visible
