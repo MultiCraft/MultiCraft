@@ -777,9 +777,10 @@ function store.get_formspec(dlgdata)
 		end
 
 		if #store.packages == 0 then
-			formspec[#formspec + 1] = "label[4,3;"
+			formspec[#formspec + 1] = "style[msg;content_offset=0]"
+			formspec[#formspec + 1] = "image_button[1,4.25;13.75,1;;msg;"
 			formspec[#formspec + 1] = fgettext("No results")
-			formspec[#formspec + 1] = "]"
+			formspec[#formspec + 1] = ";false;false]"
 		end
 	else
 		formspec = {
