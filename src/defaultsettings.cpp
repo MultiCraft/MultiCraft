@@ -349,7 +349,7 @@ void set_default_settings()
 
 	std::string font_size_str = std::to_string(TTF_DEFAULT_FONT_SIZE);
 
-	settings->setDefault("fallback_font_size", font_size_str);
+	settings->setDefault("font_size", font_size_str); // fallback_font_size
 #else
 	settings->setDefault("freetype", "false");
 	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "mono_dejavu_sans"));
@@ -382,6 +382,7 @@ void set_default_settings()
 	// Server
 	settings->setDefault("compat_player_model", "character.b3d,3d_armor_character.b3d,skinsdb_3d_armor_character_5.b3d");
 	settings->setDefault("compat_send_original_model", "true");
+	settings->setDefault("disable_texture_packs", "false");
 	settings->setDefault("disable_escape_sequences", "false");
 	settings->setDefault("strip_color_codes", "false");
 	settings->setDefault("announce_mt", "true");
@@ -527,6 +528,7 @@ void set_default_settings()
 #ifdef HAVE_TOUCHSCREENGUI
 	settings->setDefault("touchtarget", "true");
 	settings->setDefault("touchscreen_threshold", "20");
+	settings->setDefault("touch_sensitivity", "0.2");
 	settings->setDefault("fixed_virtual_joystick", "true");
 	settings->setDefault("virtual_joystick_triggers_aux", "false");
 	settings->setDefault("fast_move", "true");
@@ -622,8 +624,6 @@ void set_default_settings()
 #endif
 	}
 
-	std::string font_small = std::to_string(TTF_DEFAULT_FONT_SIZE - 1);
-
 	// Android Settings
 #ifdef __ANDROID__
 	// Switch to olges2 with shaders on powerful Android devices
@@ -641,17 +641,14 @@ void set_default_settings()
 		if (x_inches <= 3.7) {
 			// small 4" phones
 			g_settings->setDefault("hud_scaling", "0.55");
-			g_settings->setDefault("font_size", font_small);
-			g_settings->setDefault("mouse_sensitivity", "0.3");
+			g_settings->setDefault("touch_sensitivity", "0.3");
 		} else if (x_inches > 3.7 && x_inches <= 4.5) {
 			// medium phones
 			g_settings->setDefault("hud_scaling", "0.6");
-			g_settings->setDefault("font_size", font_small);
 			g_settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 4.5 && x_inches <= 5.5) {
 			// large 6" phones
 			g_settings->setDefault("hud_scaling", "0.7");
-			g_settings->setDefault("mouse_sensitivity", "0.15");
 			g_settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 5.5 && x_inches <= 6.5) {
 			// 7" tablets
@@ -661,6 +658,12 @@ void set_default_settings()
 
 		if (x_inches >= 7.0)
 			settings->setDefault("device_is_tablet", "true");
+
+		if (x_inches <= 4.5) {
+			settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 1));
+		} else if (x_inches >= 7.0) {
+			settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE + 1));
+		}
 	}
 #endif // Android
 
@@ -684,46 +687,45 @@ void set_default_settings()
 	if SDVersion4Inch {
 		// 4" iPhone and iPod Touch
 		settings->setDefault("hud_scaling", "0.55");
-		settings->setDefault("mouse_sensitivity", "0.33");
-		settings->setDefault("font_size", font_small);
-		settings->setDefault("fallback_font_size", font_small);
+		settings->setDefault("touch_sensitivity", "0.33");
 	} else if SDVersion4and7Inch {
 		// 4.7" iPhone
 		settings->setDefault("hud_scaling", "0.6");
-		settings->setDefault("mouse_sensitivity", "0.27");
-		settings->setDefault("font_size", font_small);
-		settings->setDefault("fallback_font_size", font_small);
+		settings->setDefault("touch_sensitivity", "0.27");
 	} else if SDVersion5and5Inch {
 		// 5.5" iPhone Plus
 		settings->setDefault("hud_scaling", "0.65");
-		settings->setDefault("mouse_sensitivity", "0.3");
-		settings->setDefault("font_size", font_small);
-		settings->setDefault("fallback_font_size", font_small);
+		settings->setDefault("touch_sensitivity", "0.3");
 	} else if (SDVersion5and8Inch || SDVersion6and1Inch) {
 		// 5.8" and 6.1" iPhones
 		settings->setDefault("hud_scaling", "0.8");
-		settings->setDefault("mouse_sensitivity", "0.35");
+		settings->setDefault("touch_sensitivity", "0.35");
 		settings->setDefault("selectionbox_width", "6");
 	} else if SDVersion6and5Inch {
 		// 6.5" iPhone
 		settings->setDefault("hud_scaling", "0.85");
-		settings->setDefault("mouse_sensitivity", "0.35");
+		settings->setDefault("touch_sensitivity", "0.35");
 		settings->setDefault("selectionbox_width", "6");
 	} else if SDVersion7and9Inch {
 		// iPad mini
 		settings->setDefault("hud_scaling", "0.9");
-		settings->setDefault("mouse_sensitivity", "0.25");
+		settings->setDefault("touch_sensitivity", "0.25");
+		settings->setDefault("selectionbox_width", "6");
+	} else if SDVersion8and3Inch {
+		settings->setDefault("touch_sensitivity", "0.25");
 		settings->setDefault("selectionbox_width", "6");
 	} else {
 		// iPad
-		settings->setDefault("mouse_sensitivity", "0.3");
+		settings->setDefault("touch_sensitivity", "0.3");
 		settings->setDefault("selectionbox_width", "6");
+	}
 
-		if SDVersion12and9Inch {
-			std::string font_big = std::to_string(TTF_DEFAULT_FONT_SIZE + 1);
-			settings->setDefault("font_size", font_big);
-			settings->setDefault("fallback_font_size", font_big);
-		}
+	if SDVersion4Inch {
+		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
+	} else if (SDVersion4and7Inch || SDVersion5and5Inch) {
+		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 1));
+	} else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad && !SDVersion7and9Inch) {
+		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE + 1));
 	}
 
 	// Settings for the Rounded Screen and Home Bar

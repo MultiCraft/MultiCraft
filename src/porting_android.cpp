@@ -392,7 +392,7 @@ jstring getJniString(const std::string &message)
 void upgrade(const std::string &item)
 {
 	jmethodID upgradeGame = jnienv->GetMethodID(activityClass,
-			"upgrade","(Ljava/lang/String;)V");
+			"upgrade", "(Ljava/lang/String;)V");
 
 	FATAL_ERROR_IF(upgradeGame == nullptr,
 		"porting::upgradeGame unable to find java upgrade method");
@@ -417,5 +417,19 @@ int getRoundScreen()
 		firstRun = false;
 	}
 	return radius;
+}
+
+std::string getSecretKey(const std::string &key)
+{
+	jmethodID getKey = jnienv->GetMethodID(activityClass,
+			"getSecretKey", "(Ljava/lang/String;)Ljava/lang/String;");
+
+	FATAL_ERROR_IF(getKey == nullptr,
+		"porting::getSecretKey unable to find java getSecretKey method");
+
+	jstring jkey = jnienv->NewStringUTF(key.c_str());
+	auto result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
+
+	return javaStringToUTF8(result);
 }
 }

@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2021 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
-Copyright (C) 2014-2021 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2022 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -24,9 +24,7 @@ import android.content.Context
 import android.content.SharedPreferences
 
 object PreferenceHelper {
-	const val TAG_SHORTCUT_EXIST = "createShortcut"
 	const val TAG_BUILD_VER = "buildVer"
-	const val TAG_LAUNCH_TIMES = "launchTimes"
 
 	fun init(context: Context): SharedPreferences =
 		context.getSharedPreferences("MultiCraftSettings", Context.MODE_PRIVATE)
@@ -43,16 +41,6 @@ object PreferenceHelper {
 		is Boolean -> edit { it.putBoolean(key, value) }
 		is Float -> edit { it.putFloat(key, value) }
 		is Long -> edit { it.putLong(key, value) }
-		else -> throw UnsupportedOperationException("Not yet implemented")
-	}
-
-	fun SharedPreferences.getBoolValue(key: String): Boolean = when (key) {
-		TAG_SHORTCUT_EXIST -> getBoolean(key, false)
-		else -> throw UnsupportedOperationException("Not yet implemented")
-	}
-
-	fun SharedPreferences.getIntValue(key: String) = when (key) {
-		TAG_LAUNCH_TIMES -> getInt(key, 0)
 		else -> throw UnsupportedOperationException("Not yet implemented")
 	}
 

@@ -501,6 +501,21 @@ int ModApiUtil::l_upgrade(lua_State *L)
 	return 1;
 }
 
+int ModApiUtil::l_get_secret_key(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+#if defined(__ANDROID__) || defined(__IOS__)
+	const std::string secret_name = luaL_checkstring(L, 1);
+	const std::string res = porting::getSecretKey(secret_name);
+	lua_pushlstring(L, res.c_str(), res.size());
+#else
+	// Not implemented on desktop platforms
+	lua_pushstring(L, "");
+#endif
+
+	return 1;
+}
+
 void ModApiUtil::Initialize(lua_State *L, int top)
 {
 	API_FCT(log);
@@ -597,4 +612,5 @@ void ModApiUtil::InitializeAsync(lua_State *L, int top)
 void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	Initialize(L, top);
 	API_FCT(upgrade);
+	API_FCT(get_secret_key);
 }

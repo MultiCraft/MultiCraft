@@ -653,6 +653,7 @@ int ModApiMainMenu::l_extract_zip(lua_State *L)
 {
 	const char *zipfile	= luaL_checkstring(L, 1);
 	const char *destination	= luaL_checkstring(L, 2);
+	const char *password = lua_isstring(L, 3) ? lua_tostring(L, 3) : "";
 
 	std::string absolute_destination = fs::RemoveRelativePathComponents(destination);
 
@@ -661,7 +662,7 @@ int ModApiMainMenu::l_extract_zip(lua_State *L)
 
 		io::IFileSystem *fs = RenderingEngine::get_filesystem();
 
-		if (!fs->addFileArchive(zipfile, false, false, io::EFAT_ZIP)) {
+		if (!fs->addFileArchive(zipfile, false, false, io::EFAT_ZIP, password)) {
 			lua_pushboolean(L,false);
 			return 1;
 		}
@@ -692,6 +693,14 @@ int ModApiMainMenu::l_extract_zip(lua_State *L)
 				}
 
 				io::IReadFile* toread = opened_zip->createAndOpenFile(i);
+
+				if (toread == nullptr) {
+					// Wrong password
+					fs->removeFileArchive(fs->getFileArchiveCount()-1);
+					lua_pushboolean(L, false);
+					lua_pushstring(L, "invalid password");
+					return 2;
+				}
 
 				FILE *targetfile = fopen(fullpath.c_str(),"wb");
 

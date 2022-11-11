@@ -68,7 +68,7 @@ FontEngine::FontEngine(gui::IGUIEnvironment* env) :
 		g_settings->registerChangedCallback("font_shadow_alpha", font_setting_changed, NULL);
 	}
 	else if (m_currentMode == FM_Fallback) {
-		g_settings->registerChangedCallback("fallback_font_size", font_setting_changed, NULL);
+		g_settings->registerChangedCallback("font_size", font_setting_changed, NULL); // fallback_font_size
 		g_settings->registerChangedCallback("fallback_font_path", font_setting_changed, NULL);
 		g_settings->registerChangedCallback("fallback_font_shadow", font_setting_changed, NULL);
 		g_settings->registerChangedCallback("fallback_font_shadow_alpha", font_setting_changed, NULL);
@@ -205,7 +205,7 @@ void FontEngine::readSettings()
 {
 	if (USE_FREETYPE && g_settings->getBool("freetype")) {
 		m_default_size[FM_Standard] = g_settings->getU16("font_size");
-		m_default_size[FM_Fallback] = g_settings->getU16("fallback_font_size");
+		m_default_size[FM_Fallback] = g_settings->getU16("font_size"); // fallback_font_size
 		m_default_size[FM_Mono]     = g_settings->getU16("mono_font_size");
 
 		/*~ DO NOT TRANSLATE THIS LITERALLY!

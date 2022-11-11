@@ -2724,6 +2724,9 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 	}
 
 	pkt << g_settings->get("remote_media");
+	if (g_settings->getBool("disable_texture_packs"))
+		pkt << true;
+
 	Send(&pkt);
 
 	verbosestream << "Server: Announcing files to id(" << peer_id

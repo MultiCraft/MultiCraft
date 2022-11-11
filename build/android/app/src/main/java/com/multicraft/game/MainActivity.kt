@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2021 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
-Copyright (C) 2014-2021 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2022 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -20,35 +20,23 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game
 
-import android.content.*
+import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
-import android.provider.Settings.ACTION_WIFI_SETTINGS
-import android.provider.Settings.ACTION_WIRELESS_SETTINGS
 import android.view.*
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.BlendModeColorFilterCompat
 import androidx.core.graphics.BlendModeCompat
 import androidx.lifecycle.*
 import androidx.work.WorkInfo
 import com.multicraft.game.databinding.ActivityMainBinding
+import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
-import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
-import com.multicraft.game.helpers.PreferenceHelper.TAG_LAUNCH_TIMES
-import com.multicraft.game.helpers.PreferenceHelper.TAG_SHORTCUT_EXIST
-import com.multicraft.game.helpers.PreferenceHelper.getBoolValue
-import com.multicraft.game.helpers.PreferenceHelper.getIntValue
 import com.multicraft.game.helpers.PreferenceHelper.getStringValue
 import com.multicraft.game.helpers.PreferenceHelper.set
-import com.multicraft.game.helpers.Utilities.addShortcut
-import com.multicraft.game.helpers.Utilities.copyInputStreamToFile
-import com.multicraft.game.helpers.Utilities.getIcon
-import com.multicraft.game.helpers.Utilities.isConnected
-import com.multicraft.game.helpers.Utilities.makeFullScreen
-import com.multicraft.game.helpers.Utilities.showRestartDialog
 import com.multicraft.game.workmanager.UnzipWorker.Companion.PROGRESS
 import com.multicraft.game.workmanager.WorkerViewModel
 import com.multicraft.game.workmanager.WorkerViewModelFactory
@@ -61,8 +49,8 @@ class MainActivity : AppCompatActivity() {
 	private var externalStorage: File? = null
 	private val sep = File.separator
 	private lateinit var prefs: SharedPreferences
-	private val versionName = BuildConfig.VERSION_NAME
-	private val requestConnection = 104
+	private val versionCode = BuildConfig.VERSION_CODE
+	private val versionName = "${BuildConfig.VERSION_NAME}+$versionCode"
 
 	companion object {
 		var radius = 0
@@ -73,14 +61,14 @@ class MainActivity : AppCompatActivity() {
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.root)
-		prefs = PreferenceHelper.init(this)
 		try {
+			prefs = PreferenceHelper.init(this)
 			externalStorage = getExternalFilesDir(null)
 			if (filesDir == null || cacheDir == null || externalStorage == null)
 				throw IOException("Bad disk space state")
-			lateInit()
-		} catch (e: IOException) {
-			showRestartDialog(this, !e.message!!.contains("ENOSPC"))
+			checkConnection()
+		} catch (e: Exception) { // Storage -> IOException, Prefs -> GeneralSecurityException
+			showRestartDialog(!e.message!!.contains("ENOPSC"))
 		}
 	}
 
@@ -88,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 		@Suppress("DEPRECATION")
 		super.onActivityResult(requestCode, resultCode, data)
-		if (requestCode == requestConnection)
+		if (requestCode == 104)
 			checkAppVersion()
 	}
 
@@ -99,12 +87,12 @@ class MainActivity : AppCompatActivity() {
 
 	override fun onResume() {
 		super.onResume()
-		makeFullScreen(window)
+		window.makeFullScreen()
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
 		super.onWindowFocusChanged(hasFocus)
-		if (hasFocus) makeFullScreen(window)
+		if (hasFocus) window.makeFullScreen()
 	}
 
 	override fun onAttachedToWindow() {
@@ -118,20 +106,17 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	private fun addLaunchTimes() {
-		val launchTimes = prefs.getIntValue(TAG_LAUNCH_TIMES) + 1
-		prefs[TAG_LAUNCH_TIMES] = launchTimes
-	}
 
 	// interface
-	private fun showProgress(textMessage: Int, progressMessage: Int, progress: Int) {
+	private fun showProgress(textMessage: Int, progress: Int) {
 		if (binding.progressBar.visibility == View.GONE) {
 			binding.tvProgress.setText(textMessage)
 			binding.progressCircle.visibility = View.GONE
 			binding.progressBar.visibility = View.VISIBLE
 			binding.progressBar.progress = 0
 		} else if (progress > 0) {
-			binding.tvProgress.text = String.format(getString(progressMessage), progress)
+			val progressMessage = "${getString(textMessage)} $progress%"
+			binding.tvProgress.text = progressMessage
 			binding.progressBar.progress = progress
 			// colorize the progress bar
 			val progressBarDrawable =
@@ -145,15 +130,6 @@ class MainActivity : AppCompatActivity() {
 		}
 	}
 
-	private fun lateInit() {
-		addLaunchTimes()
-		if (!prefs.getBoolValue(TAG_SHORTCUT_EXIST)) try {
-			addShortcut(this)
-		} catch (ignored: Exception) {
-		}
-		checkConnection()
-	}
-
 	private fun startNative() {
 		val initLua = File(filesDir, "builtin${sep}mainmenu${sep}init.lua")
 		if (initLua.exists() && initLua.canRead()) {
@@ -162,7 +138,7 @@ class MainActivity : AppCompatActivity() {
 			startActivity(intent)
 		} else {
 			prefs[TAG_BUILD_VER] = "0"
-			showRestartDialog(this)
+			showRestartDialog()
 		}
 	}
 
@@ -171,14 +147,11 @@ class MainActivity : AppCompatActivity() {
 		binding.progressCircle.visibility = View.VISIBLE
 		binding.progressBar.visibility = View.GONE
 		val filesList = listOf(
-			File(externalStorage, "builtin"),
-			File(externalStorage, "cache"), // ToDo: remove me!
-			File(externalStorage, "games${sep}default"),
-			File(externalStorage, "textures${sep}base"),
 			File(externalStorage, "debug.txt"),
 			File(filesDir, "builtin"),
-			File(filesDir, "games"),
-			File(filesDir, "textures${sep}base")
+			File(filesDir, "client"),
+			File(filesDir, "fonts"),
+			File(filesDir, "textures")
 		)
 		val zips = assets.list("data")!!.toList()
 		lifecycleScope.launch {
@@ -189,19 +162,14 @@ class MainActivity : AppCompatActivity() {
 						File(cacheDir, it).copyInputStreamToFile(input)
 					}
 				} catch (e: IOException) {
-					runOnUiThread {
-						showRestartDialog(
-							this@MainActivity,
-							!e.message!!.contains("ENOSPC")
-						)
-					}
+					runOnUiThread { showRestartDialog(!e.message!!.contains("ENOSPC")) }
 					return@forEach
 				}
 			}
 			try {
 				startUnzipWorker(zips)
 			} catch (e: Exception) {
-				runOnUiThread { showRestartDialog(this@MainActivity) }
+				runOnUiThread { showRestartDialog() }
 			}
 		}
 	}
@@ -216,10 +184,10 @@ class MainActivity : AppCompatActivity() {
 
 	// check connection available
 	private fun checkConnection() = lifecycleScope.launch {
-		val result = isConnected(this@MainActivity)
+		val result = isConnected()
 		if (result) checkAppVersion()
 		else try {
-			showConnectionDialog()
+			showConnectionDialog { checkAppVersion() }
 		} catch (e: Exception) {
 			checkAppVersion()
 		}
@@ -233,11 +201,12 @@ class MainActivity : AppCompatActivity() {
 				if (workInfo == null)
 					return@Observer
 				val progress = workInfo.progress.getInt(PROGRESS, 0)
-				showProgress(R.string.loading, R.string.loadingp, progress)
+				showProgress(R.string.loading, progress)
 
 				if (workInfo.state.isFinished) {
 					if (workInfo.state == WorkInfo.State.FAILED) {
-						showRestartDialog(this)
+						val isRestart = workInfo.outputData.getBoolean("restart", true)
+						showRestartDialog(isRestart)
 					} else if (workInfo.state == WorkInfo.State.SUCCEEDED) {
 						prefs[TAG_BUILD_VER] = versionName
 						startNative()
@@ -245,29 +214,5 @@ class MainActivity : AppCompatActivity() {
 				}
 			})
 		viewModel.startOneTimeWorkRequest()
-	}
-
-	// connection dialog
-	private fun showConnectionDialog() {
-		val builder = AlertDialog.Builder(this)
-		builder.setIcon(getIcon(this))
-			.setTitle(R.string.conn_title)
-			.setMessage(R.string.conn_message)
-			.setPositiveButton(R.string.conn_wifi) { _, _ ->
-				@Suppress("DEPRECATION")
-				startActivityForResult(Intent(ACTION_WIFI_SETTINGS), requestConnection)
-			}
-			.setNegativeButton(R.string.conn_mobile) { _, _ ->
-				@Suppress("DEPRECATION")
-				startActivityForResult(Intent(ACTION_WIRELESS_SETTINGS), requestConnection)
-			}
-			.setNeutralButton(R.string.ignore) { _, _ -> checkAppVersion() }
-			.setCancelable(false)
-		val dialog = builder.create()
-		makeFullScreen(dialog.window!!)
-		if (!isFinishing) {
-			dialog.show()
-			dialog.getButton(DialogInterface.BUTTON_NEUTRAL)?.setTextColor(Color.RED)
-		}
 	}
 }

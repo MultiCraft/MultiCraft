@@ -80,7 +80,7 @@ ClientLauncher::~ClientLauncher()
 	delete RenderingEngine::get_instance();
 
 #if USE_SOUND
-	g_sound_manager_singleton.reset();
+	deleteSoundManagerSingleton(g_sound_manager_singleton);
 #endif
 }
 
@@ -101,8 +101,11 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		return RenderingEngine::print_video_modes();
 
 #if USE_SOUND
-	if (g_settings->getBool("enable_sound"))
-		g_sound_manager_singleton = createSoundManagerSingleton();
+	if (g_settings->getBool("enable_sound")) {
+		// Check if it's already created just in case
+		if (!g_sound_manager_singleton)
+			g_sound_manager_singleton = createSoundManagerSingleton();
+	}
 #endif
 
 	if (!init_engine()) {
@@ -555,7 +558,7 @@ void ClientLauncher::main_menu(MainMenuData *menudata)
 	infostream << "Waited for other menus" << std::endl;
 
 	// Cursor can be non-visible when coming from the game
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#ifndef __IOS__
 	RenderingEngine::get_raw_device()->getCursorControl()->setVisible(true);
 #endif
 
