@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/strfnd.h"
 #include "client/clientevent.h"
 #include "client/sound.h"
+#include "client/tile.h"
 #include "network/clientopcodes.h"
 #include "network/connection.h"
 #include "script/scripting_client.h"
@@ -704,6 +705,7 @@ void Client::handleCommand_AnnounceMedia(NetworkPacket* pkt)
 		m_media_downloader->addFile(name, sha1_raw);
 	}
 
+	bool disable_texture_packs = false;
 	try {
 		std::string str;
 
@@ -715,10 +717,15 @@ void Client::handleCommand_AnnounceMedia(NetworkPacket* pkt)
 			if (!baseurl.empty())
 				m_media_downloader->addRemoteServer(baseurl);
 		}
+
+		if (pkt->getRemainingBytes() >= 1)
+			*pkt >> disable_texture_packs;
 	}
 	catch(SerializationError& e) {
 		// not supported by server or turned off
 	}
+
+	setDisableTexturePacks(disable_texture_packs);
 
 	m_media_downloader->step(this);
 }

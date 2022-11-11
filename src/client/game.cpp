@@ -1023,6 +1023,7 @@ Game::~Game()
 	delete draw_control;
 
 	extendedResourceCleanup();
+	setDisableTexturePacks(false);
 
 	g_settings->deregisterChangedCallback("doubletap_jump",
 		&settingChangedCallback, this);
