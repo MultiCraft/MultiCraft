@@ -12,6 +12,8 @@ fi
 
 rm -rf libjpeg
 
+mkdir -p libjpeg/include
+
 cd libjpeg-src
 
 for ARCH in x86_64 arm64
@@ -20,26 +22,27 @@ do
 	mkdir -p build; cd build
 	cmake .. \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DENABLE_SHARED=OFF \
 		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
-		-DCMAKE_OSX_DEPLOYMENT_TARGET=$OSX_OSVER \
-		-DCMAKE_OSX_ARCHITECTURES=$ARCH
+		-DCMAKE_INSTALL_PREFIX="." \
+		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
+		-DENABLE_SHARED=OFF
+
 	cmake --build . -j
+	make install -s
+
 	if [ $ARCH = "x86_64" ]; then
-		make DESTDIR=$PWD/../../libjpeg install
-		mv ../../libjpeg/opt/libjpeg-turbo/* ../../libjpeg
-		rm -rf ../../libjpeg/opt
-		mv ../../libjpeg/lib/libjpeg.a ../../libjpeg/lib/templib_$ARCH.a
+		cp -rv include ../../libjpeg
+		cp -v lib/libjpeg.a ../../libjpeg/templib_$ARCH.a
 	else
-		mv libjpeg.a ../../libjpeg/lib/templib_$ARCH.a
+		cp -v lib/libjpeg.a ../../libjpeg/templib_$ARCH.a
 	fi
+
 	cd ..; rm -rf build
 done
 
 # repack into one .a
-cd ../libjpeg/lib
+cd ../libjpeg
 lipo -create templib_*.a -output libjpeg.a
 rm templib_*.a
-rm libturbojpeg.a
 
 echo "libjpeg build successful"

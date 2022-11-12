@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . sdk.sh
-SDL2_VERSION=2.24.0
+SDL2_VERSION=2.24.2
 
 if [ ! -d SDL2-src ]; then
 	wget https://github.com/libsdl-org/SDL/archive/release-$SDL2_VERSION.tar.gz
@@ -10,6 +10,7 @@ if [ ! -d SDL2-src ]; then
 	rm release-$SDL2_VERSION.tar.gz
 	# patch SDL2
 	patch -p1 < SDL2.diff
+	patch -p1 < SDL2-command-modifier.diff
 	# Disable some features that are not needed
 	sed -i '' 's/#define SDL_AUDIO_DRIVER_COREAUDIO  1/#define SDL_AUDIO_DRIVER_COREAUDIO  0/g' SDL2-src/include/SDL_config_macosx.h
 	sed -i '' 's/#define SDL_AUDIO_DRIVER_DISK   1/#define SDL_AUDIO_DRIVER_DISK   0/g' SDL2-src/include/SDL_config_macosx.h
@@ -35,7 +36,7 @@ BUILD_FOLDER=$(xcodebuild \
 		grep TARGET_BUILD_DIR | sed -n -e 's/^.*TARGET_BUILD_DIR = //p')
 
 mkdir -p ../SDL2
-cp -a "${BUILD_FOLDER}/libSDL2.a" ../SDL2
-cp -a include ../SDL2
+cp -v "${BUILD_FOLDER}/libSDL2.a" ../SDL2
+cp -rv include ../SDL2
 
 echo "SDL2 build successful"

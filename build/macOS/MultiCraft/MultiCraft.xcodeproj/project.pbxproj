@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -112,6 +112,8 @@
 		841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B828D0E2E40042E335 /* libvorbisfile.a */; };
 		841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0424B134850040BA4F /* OpenGL.framework */; };
 		841AD8BB28D12E980042E335 /* libintl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EEE5E62782728E00F61929 /* libintl.a */; };
+		84287CA6291ED0F000E30F96 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA4291ED0F000E30F96 /* locale */; };
+		84287CA7291ED0F000E30F96 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA5291ED0F000E30F96 /* fonts */; };
 		844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844436EE28DA80C100662A9D /* libfreetype.a */; };
 		84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617724B1BF2D0040BA4F /* AppKit.framework */; };
 		84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0024B1347B0040BA4F /* Foundation.framework */; };
@@ -123,8 +125,6 @@
 		8458610724B13BDF0040BA4F /* mini-gmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 8458610524B13BDF0040BA4F /* mini-gmp.c */; };
 		8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8458610924B13BF90040BA4F /* jsoncpp.cpp */; };
 		8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458616724B1B7990040BA4F /* libIrrlicht.a */; };
-		8458617D24B1C3BC0040BA4F /* games in Resources */ = {isa = PBXBuildFile; fileRef = 8458617924B1C3BA0040BA4F /* games */; };
-		8458617E24B1C3BC0040BA4F /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 8458617A24B1C3BA0040BA4F /* fonts */; };
 		8458617F24B1C3BC0040BA4F /* builtin in Resources */ = {isa = PBXBuildFile; fileRef = 8458617B24B1C3BB0040BA4F /* builtin */; };
 		8458618024B1C3BC0040BA4F /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 8458617C24B1C3BB0040BA4F /* textures */; };
 		846F883B27A59704007B6210 /* libluajit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 846F883A27A596F9007B6210 /* libluajit.a */; };
@@ -143,7 +143,6 @@
 		84A1F9BB252E617D00000717 /* scripting_mainmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */; };
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
-		84A1FA4D252E635900000717 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84A1FA4C252E635900000717 /* locale */; };
 		84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974228CA1291004E8CEC /* GameController.framework */; };
 		84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974428CA129C004E8CEC /* CoreHaptics.framework */; };
 		84C2AB5328DA7776001968EE /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C2AB5228DA7770001968EE /* libpng.a */; };
@@ -521,6 +520,8 @@
 		841AD8B828D0E2E40042E335 /* libvorbisfile.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisfile.a; path = ../deps/libvorbis/libvorbisfile.a; sourceTree = "<group>"; };
 		8425D3702837D89300753F0E /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		8425D3712837D89600753F0E /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/Localizable.strings; sourceTree = "<group>"; };
+		84287CA4291ED0F000E30F96 /* locale */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locale; path = ../../assets/locale; sourceTree = "<group>"; };
+		84287CA5291ED0F000E30F96 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../assets/fonts; sourceTree = "<group>"; };
 		844436EE28DA80C100662A9D /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../deps/freetype/libfreetype.a; sourceTree = "<group>"; };
 		8453A49D24DB22F00087ECF9 /* client */ = {isa = PBXFileReference; lastKnownFileType = folder; name = client; path = ../../../../client; sourceTree = "<group>"; };
 		8457C2C52848DB7300D69304 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -539,14 +540,12 @@
 		8458616724B1B7990040BA4F /* libIrrlicht.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIrrlicht.a; path = ../deps/irrlicht/libIrrlicht.a; sourceTree = "<group>"; };
 		8458617524B1BF280040BA4F /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		8458617724B1BF2D0040BA4F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		8458617924B1C3BA0040BA4F /* games */ = {isa = PBXFileReference; lastKnownFileType = folder; name = games; path = ../../../../games; sourceTree = "<group>"; };
-		8458617A24B1C3BA0040BA4F /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../../../fonts; sourceTree = "<group>"; };
 		8458617B24B1C3BB0040BA4F /* builtin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = builtin; path = ../../../../builtin; sourceTree = "<group>"; };
 		8458617C24B1C3BB0040BA4F /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../../../../textures; sourceTree = "<group>"; };
-		846F883A27A596F9007B6210 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = ../deps/luajit/lib/libluajit.a; sourceTree = "<group>"; };
+		846F883A27A596F9007B6210 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = ../deps/luajit/libluajit.a; sourceTree = "<group>"; };
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
 		847C6D4A25D6F483008F5FC8 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = ../../../../lib/luautf8/lutf8lib.c; sourceTree = "<group>"; };
-		8488539E28DA4851004AD90F /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../deps/libjpeg/lib/libjpeg.a; sourceTree = "<group>"; };
+		8488539E28DA4851004AD90F /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../deps/libjpeg/libjpeg.a; sourceTree = "<group>"; };
 		848ADEF527BD68AE001C60F3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADEF827BD6904001C60F3 /* bg */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = bg; path = bg.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADEF927BD695E001C60F3 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -591,14 +590,13 @@
 		84A1F9B8252E617D00000717 /* scripting_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_client.cpp; path = ../../../../src/script/scripting_client.cpp; sourceTree = "<group>"; };
 		84A1F9B9252E617D00000717 /* scripting_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_server.cpp; path = ../../../../src/script/scripting_server.cpp; sourceTree = "<group>"; };
 		84A1F9BA252E617D00000717 /* scripting_server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_server.h; path = ../../../../src/script/scripting_server.h; sourceTree = "<group>"; };
-		84A1FA4C252E635900000717 /* locale */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locale; path = ../../locale; sourceTree = "<group>"; };
 		84A636C327C67F01005B4503 /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84AABAF72822C3F000A89340 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84AABAF82822C3FC00A89340 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		84C2AB5228DA7770001968EE /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../deps/libpng/libpng.a; sourceTree = "<group>"; };
-		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/lib/libintl.a; sourceTree = "<group>"; };
+		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/libintl.a; sourceTree = "<group>"; };
 		84F20D5425D52790009562A9 /* irrUString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrUString.h; path = ../../../../src/irrlicht_changes/irrUString.h; sourceTree = "<group>"; };
 		84F20D5525D52790009562A9 /* static_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = static_text.cpp; path = ../../../../src/irrlicht_changes/static_text.cpp; sourceTree = "<group>"; };
 		84F20D5625D52790009562A9 /* static_text.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = static_text.h; path = ../../../../src/irrlicht_changes/static_text.h; sourceTree = "<group>"; };
@@ -1105,9 +1103,8 @@
 			children = (
 				8458617B24B1C3BB0040BA4F /* builtin */,
 				8453A49D24DB22F00087ECF9 /* client */,
-				8458617A24B1C3BA0040BA4F /* fonts */,
-				84A1FA4C252E635900000717 /* locale */,
-				8458617924B1C3BA0040BA4F /* games */,
+				84287CA5291ED0F000E30F96 /* fonts */,
+				84287CA4291ED0F000E30F96 /* locale */,
 				8458617C24B1C3BB0040BA4F /* textures */,
 				845856B224B1322D0040BA4F /* Assets.xcassets */,
 				845856B724B1322D0040BA4F /* Info.plist */,
@@ -1752,7 +1749,7 @@
 				};
 			};
 			buildConfigurationList = 845856A424B1322C0040BA4F /* Build configuration list for PBXProject "MultiCraft" */;
-			compatibilityVersion = "Xcode 13.0";
+			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1799,14 +1796,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8458617D24B1C3BC0040BA4F /* games in Resources */,
 				8458617F24B1C3BC0040BA4F /* builtin in Resources */,
+				8453A49E24DB22F00087ECF9 /* client in Resources */,
 				8458618024B1C3BC0040BA4F /* textures in Resources */,
 				845856B324B1322D0040BA4F /* Assets.xcassets in Resources */,
-				8453A49E24DB22F00087ECF9 /* client in Resources */,
+				84287CA7291ED0F000E30F96 /* fonts in Resources */,
+				84287CA6291ED0F000E30F96 /* locale in Resources */,
 				848ADEF427BD68AE001C60F3 /* Localizable.strings in Resources */,
-				84A1FA4D252E635900000717 /* locale in Resources */,
-				8458617E24B1C3BC0040BA4F /* fonts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2191,7 +2187,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2204,10 +2200,11 @@
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"USE_SYSTEM_GMP=0",
+					"_IRR_COMPILE_WITH_SDL_DEVICE_=1",
 					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=2",
+					"VERSION_PATCH=4",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=1",
 				);
@@ -2215,9 +2212,8 @@
 					"$(inherited)",
 					"${SRCROOT}/../../../src",
 					"${SRCROOT}/../../../src/script",
-					"${SRCROOT}/../../../lib/jsoncpp",
 					"${SRCROOT}/../../../lib/gmp",
-					"${SRCROOT}/../../../lib/intl",
+					"${SRCROOT}/../../../lib/jsoncpp",
 					"${SRCROOT}/../deps/freetype/include",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
@@ -2239,18 +2235,15 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.2;
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-D_IRR_COMPILE_WITH_SDL_DEVICE_",
-				);
+				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
-					"-L${SRCROOT}/../deps/gettext/lib",
+					"-L${SRCROOT}/../deps/gettext",
 					"-L${SRCROOT}/../deps/irrlicht",
-					"-L${SRCROOT}/../deps/libjpeg/lib",
+					"-L${SRCROOT}/../deps/libjpeg",
 					"-L${SRCROOT}/../deps/leveldb",
-					"-L${SRCROOT}/../deps/luajit/lib",
+					"-L${SRCROOT}/../deps/luajit",
 					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
@@ -2271,7 +2264,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 20;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2286,10 +2279,11 @@
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"USE_SYSTEM_GMP=0",
+					"_IRR_COMPILE_WITH_SDL_DEVICE_=1",
 					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=2",
+					"VERSION_PATCH=4",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=0",
 				);
@@ -2297,9 +2291,8 @@
 					"$(inherited)",
 					"${SRCROOT}/../../../src",
 					"${SRCROOT}/../../../src/script",
-					"${SRCROOT}/../../../lib/jsoncpp",
 					"${SRCROOT}/../../../lib/gmp",
-					"${SRCROOT}/../../../lib/intl",
+					"${SRCROOT}/../../../lib/jsoncpp",
 					"${SRCROOT}/../deps/freetype/include",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
@@ -2321,18 +2314,15 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.2;
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-D_IRR_COMPILE_WITH_SDL_DEVICE_",
-				);
+				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
-					"-L${SRCROOT}/../deps/gettext/lib",
+					"-L${SRCROOT}/../deps/gettext",
 					"-L${SRCROOT}/../deps/irrlicht",
-					"-L${SRCROOT}/../deps/libjpeg/lib",
+					"-L${SRCROOT}/../deps/libjpeg",
 					"-L${SRCROOT}/../deps/leveldb",
-					"-L${SRCROOT}/../deps/luajit/lib",
+					"-L${SRCROOT}/../deps/luajit",
 					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",

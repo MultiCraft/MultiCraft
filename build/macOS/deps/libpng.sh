@@ -12,6 +12,8 @@ fi
 
 rm -rf libpng
 
+mkdir -p libpng/include
+
 cd libpng-src
 
 for ARCH in x86_64 arm64
@@ -20,21 +22,24 @@ do
 	mkdir -p build; cd build
 	cmake .. \
 		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
+		-DCMAKE_ASM_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
+		-DCMAKE_INSTALL_PREFIX="." \
+		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
 		-DPNG_SHARED=OFF \
 		-DPNG_TESTS=OFF \
-		-DPNG_EXECUTABLES=OFF \
-		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
-		-DCMAKE_OSX_DEPLOYMENT_TARGET=$OSX_OSVER \
-		-DCMAKE_OSX_ARCHITECTURES=$ARCH
+		-DPNG_EXECUTABLES=OFF
+
 	cmake --build . -j
+	make install -s
+
 	if [ $ARCH = "x86_64" ]; then
-		make DESTDIR=$PWD/../../libpng install
-		mv ../../libpng/usr/local/include ../../libpng/include
-		mv ../../libpng/usr/local/lib/libpng16.a ../../libpng/templib_$ARCH.a
-		rm -rf ../../libpng/usr
+		cp -rv include ../../libpng
+		cp -v lib/libpng16.a ../../libpng/templib_$ARCH.a
 	else
-		mv libpng16.a ../../libpng/templib_$ARCH.a
+		cp -v lib/libpng16.a ../../libpng/templib_$ARCH.a
 	fi
+
 	cd ..; rm -rf build
 done
 

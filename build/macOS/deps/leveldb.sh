@@ -1,9 +1,10 @@
 #!/bin/bash -e
 
 . sdk.sh
+LEVELDB_VERSION=1.23
 
 if [ ! -d leveldb-src ]; then
-	git clone --depth 1 https://github.com/google/leveldb leveldb-src
+	git clone -b $LEVELDB_VERSION --depth 1 https://github.com/google/leveldb leveldb-src
 	mkdir leveldb-src/build
 fi
 
@@ -18,10 +19,11 @@ cmake .. \
 	-DLEVELDB_BUILD_TESTS=FALSE \
 	-DLEVELDB_BUILD_BENCHMARKS=FALSE \
 	-DLEVELDB_INSTALL=FALSE
+
 cmake --build . -j
 
 mkdir -p ../../leveldb
-cp -r libleveldb.a ../../leveldb/libleveldb.a
-cp -r ../include ../../leveldb/include
+cp -v libleveldb.a ../../leveldb
+cp -rv ../include ../../leveldb/include
 
 echo "LevelDB build successful"
