@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <IrrlichtDevice.h>
 #include <irrlicht.h>
+#include "filesys.h"
 #include "fontengine.h"
 #include "client.h"
 #include "clouds.h"
@@ -50,10 +51,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef _WIN32
 #include <windows.h>
 #include <winuser.h>
-#endif
-
-#if ENABLE_GLES
-#include "filesys.h"
 #endif
 
 #ifdef __ANDROID__
@@ -540,11 +537,14 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 
 	// draw progress bar
 	if ((percent >= 0) && (percent <= 100)) {
-		video::ITexture *progress_img = tsrc->getTexture("progress_bar.png");
+		std::string texture_path = porting::path_share + DIR_DELIM + "textures"
+				+ DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM;
+		video::ITexture *progress_img =
+				driver->getTexture((texture_path + "progress_bar.png").c_str());
 		video::ITexture *progress_img_bg =
-				tsrc->getTexture("progress_bar_bg.png");
+				driver->getTexture((texture_path + "progress_bar_bg.png").c_str());
 		video::ITexture *progress_img_fg =
-				tsrc->getTexture("progress_bar_fg.png");
+				driver->getTexture((texture_path + "progress_bar_fg.png").c_str());
 
 		if (progress_img && progress_img_bg && progress_img_fg) {
 			const core::dimension2d<u32> &img_size =

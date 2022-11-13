@@ -1214,7 +1214,7 @@ void Game::shutdown()
 	g_touchscreengui->hide();
 #endif
 
-	showOverlayMessage(N_("Shutting down..."), 0, 0);
+	showOverlayMessage(N_("Shutting down..."), 0, 100);
 
 	if (clouds)
 		clouds->drop();
