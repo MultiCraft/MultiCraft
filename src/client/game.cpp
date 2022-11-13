@@ -3627,11 +3627,17 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 		tool_item.getDefinition(itemdef_manager);
 	bool nohit_enabled = ((ItemGroupList) playeritem_def.groups)["nohit"] != 0;
 
+	bool should_punch = isKeyDown(KeyType::DIG) && !nohit_enabled;
+	bool should_interact = wasKeyPressed(KeyType::PLACE) || ((wasKeyPressed(KeyType::DIG) && nohit_enabled));
+
 #ifdef HAVE_TOUCHSCREENGUI
-	if (wasKeyPressed(KeyType::PLACE) && !nohit_enabled) {
-#else
-	if (isKeyDown(KeyType::DIG) && !nohit_enabled) {
+	if (g_touchscreengui->isActive()) {
+		should_punch = wasKeyPressed(KeyType::PLACE) && !nohit_enabled;
+		should_interact = wasKeyPressed(KeyType::DIG) || ((wasKeyPressed(KeyType::PLACE) && nohit_enabled));
+	}
 #endif
+
+	if (should_punch) {
 		bool do_punch = false;
 		bool do_punch_damage = false;
 
@@ -3661,11 +3667,7 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 			if (!disable_send)
 				client->interact(INTERACT_START_DIGGING, pointed);
 		}
-#ifdef HAVE_TOUCHSCREENGUI
-	} else if (wasKeyPressed(KeyType::DIG) || (wasKeyPressed(KeyType::PLACE) && nohit_enabled)) {
-#else
-	} else if (wasKeyPressed(KeyType::PLACE) || (wasKeyPressed(KeyType::DIG) && nohit_enabled)) {
-#endif
+	} else if (should_interact) {
 		infostream << "Right-clicked object" << std::endl;
 		client->interact(INTERACT_PLACE, pointed);  // place
 	}
