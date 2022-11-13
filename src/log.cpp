@@ -35,10 +35,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cerrno>
 #include <cstring>
 
-#ifdef __IOS__
-#import <Foundation/Foundation.h>
-#endif
-
 const int BUFFER_LENGTH = 256;
 
 class StringBuffer : public std::streambuf {
@@ -144,31 +140,6 @@ class AndroidSystemLogOutput : public ICombinedLogOutput {
 };
 
 AndroidSystemLogOutput g_android_log_output;
-
-#endif
-
-// iOS
-#ifdef __IOS__
-
-class IosSystemLogOutput : public ICombinedLogOutput {
-public:
-	IosSystemLogOutput()
-	{
-		g_logger.addOutput(this);
-	}
-	~IosSystemLogOutput()
-	{
-		g_logger.removeOutput(this);
-	}
-	void logRaw(LogLevel lev, const std::string &line)
-	{
-#if !NDEBUG
-		NSLog(@"%s", line.c_str());
-#endif
-	}
-};
-
-IosSystemLogOutput g_ios_log_output;
 
 #endif
 
@@ -363,6 +334,33 @@ void StreamLogOutput::logRaw(LogLevel lev, const std::string &line)
 {
 	bool colored_message = (Logger::color_mode == LOG_COLOR_ALWAYS) ||
 		(Logger::color_mode == LOG_COLOR_AUTO && is_tty);
+#if defined(__MACH__) && defined(__APPLE__)
+	if (colored_message) {
+		switch (lev) {
+		case LL_ERROR:
+			// error is red
+			m_stream << "📕 ";
+			break;
+		case LL_WARNING:
+			// warning is yellow
+			m_stream << "📙 ";
+			break;
+		case LL_INFO:
+			// info is a green
+			m_stream << "📗 ";
+			break;
+		case LL_VERBOSE:
+			// verbose is blue
+			m_stream << "📘 ";
+			break;
+		default:
+			// action is white
+			m_stream << "📔 ";
+		}
+	}
+
+	m_stream << line << std::endl;
+#else
 	if (colored_message) {
 		switch (lev) {
 		case LL_ERROR:
@@ -393,6 +391,7 @@ void StreamLogOutput::logRaw(LogLevel lev, const std::string &line)
 		// reset to white color
 		m_stream << "\033[0m";
 	}
+#endif
 }
 
 void LogOutputBuffer::updateLogLevel()
