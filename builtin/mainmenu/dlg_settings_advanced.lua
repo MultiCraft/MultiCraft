@@ -621,7 +621,8 @@ local function create_change_setting_formspec(dialogdata)
 		end
 		formspec = "field[0.28," .. height + 0.15 .. ";8,1;te_setting_value;;"
 				.. core.formspec_escape(current_value) .. "]"
-				.. "button[8," .. height - 0.15 .. ";2,1;btn_browser_"
+				.. btn_style("btn_browser_" .. setting.type)
+				.. "button[8," .. height - 0.2 .. ";2,1;btn_browser_"
 				.. setting.type .. ";" .. fgettext("Browse") .. "]"
 		height = height + 1.15
 
@@ -825,14 +826,15 @@ local function create_change_setting_formspec(dialogdata)
 	end
 
 	return (
-		"size[" .. width .. "," .. height + 0.25 .. ",false]" ..
+		"size[" .. width .. "," .. height + 0.25 .. "]" ..
 		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;40]" ..
+		"background9[0,0;0,0;" .. defaulttexturedir_esc .. "bg_common.png;true;40]" ..
 		create_textfield(description_box, setting_name, comment_text) ..
 		formspec ..
+		btn_style("btn_done") ..
 		"button[" .. width / 2 - 2.5 .. "," .. height - 0.4 .. ";2.5,1;btn_done;" ..
 			fgettext("Save") .. "]" ..
+		btn_style("btn_cancel") ..
 		"button[" .. width / 2 .. "," .. height - 0.4 .. ";2.5,1;btn_cancel;" ..
 			fgettext("Cancel") .. "]"
 	)
@@ -1019,8 +1021,12 @@ local function create_settings_formspec(tabview, _, tabdata)
 	local formspec =
 			"tablecolumns[color;tree;text,width=28;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..
-			"field[0.3,0.1;10.2,1;search_string;;" .. core.formspec_escape(search_string) .. "]" ..
+			"formspec_version[3]" ..
+			"image[-0.05,-0.13;12.55,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+			"style[search_string;border=false;bgcolor=transparent]" ..
+			"field[0.3,0.15;10.15,0.9;search_string;;" .. core.formspec_escape(search_string) .. "]" ..
 			"field_close_on_enter[search_string;false]" ..
+			btn_style("search") ..
 			"button[10.1,-0.22;2,1;search;" .. fgettext("Search") .. "]" ..
 			"table[0,0.8;12,3.5;list_settings;"
 
@@ -1068,9 +1074,12 @@ local function create_settings_formspec(tabview, _, tabdata)
 		formspec = formspec:sub(1, -2) -- remove trailing comma
 	end
 	formspec = formspec .. ";" .. selected_setting .. "]" ..
+			btn_style("btn_back") ..
 			"button[0,4.9;4,1;btn_back;".. fgettext("< Back to Settings page") .. "]" ..
-			"button[10,4.9;2,1;btn_edit;" .. fgettext("Edit") .. "]" ..
-			"button[7,4.9;3,1;btn_restore;" .. fgettext("Restore Default") .. "]" ..
+			btn_style("btn_restore") ..
+			"button[5.5,4.9;4,1;btn_restore;" .. fgettext("Restore Default") .. "]" ..
+			btn_style("btn_edit") ..
+			"button[9.5,4.9;2.5,1;btn_edit;" .. fgettext("Edit") .. "]" ..
 			"checkbox[0,4.3;cb_tech_settings;" .. fgettext("Show technical names") .. ";"
 					.. dump(core.settings:get_bool("main_menu_technical_settings")) .. "]"
 

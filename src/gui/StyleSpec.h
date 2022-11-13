@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client/tile.h" // ITextureSource
 #include "client/fontengine.h"
+#include "client/renderingengine.h"
 #include "debug.h"
 #include "irrlichttypes_extrabloated.h"
 #include "util/string.h"
@@ -75,20 +76,22 @@ public:
 	static std::array<StyleSpec, NUM_STATES> getButtonStyle(const std::string texture_path = "") {
 		std::array<StyleSpec, NUM_STATES> ret;
 
+		const bool high_dpi = RenderingEngine::isHighDpi();
+		const std::string x2 = high_dpi ? ".x2" : "";
 		StyleSpec btn_spec;
-		btn_spec.set(BGIMG, texture_path + "gui_button.png");
-		btn_spec.set(BGIMG_MIDDLE, "20");
+		btn_spec.set(BGIMG, texture_path + "gui/gui_button" + x2 + ".png");
+		btn_spec.set(BGIMG_MIDDLE, high_dpi ? "48" : "32");
 		btn_spec.set(BORDER, "false");
-		btn_spec.set(PADDING, "-10");
+		btn_spec.set(PADDING, high_dpi ? "-30" : "-20");
 
 		ret[STATE_DEFAULT] = btn_spec;
 
 		StyleSpec hovered_spec;
-		hovered_spec.set(BGIMG, texture_path + "gui_button_hovered.png");
+		hovered_spec.set(BGIMG, texture_path + "gui/gui_button_hovered" + x2 + ".png");
 		ret[STATE_HOVERED] = hovered_spec;
 
 		StyleSpec pressed_spec;
-		pressed_spec.set(BGIMG, texture_path + "gui_button_pressed.png");
+		pressed_spec.set(BGIMG, texture_path + "gui/gui_button_pressed" + x2 + ".png");
 		ret[STATE_PRESSED] = pressed_spec;
 
 		return ret;

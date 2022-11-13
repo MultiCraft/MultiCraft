@@ -97,14 +97,14 @@ local function create_world_formspec(dialogdata)
 
 	-- Error out when no games found
 	if #pkgmgr.games == 0 then
-		return "size[12.25,3,false]" ..
+		return "size[12.25,3]" ..
 			"bgcolor[#0000]" ..
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]" ..
+			"background9[0,0;0,0;" .. defaulttexturedir_esc .. "bg_common.png;true;40]" ..
 			"box[0,0;12,2;#ff8800]" ..
 			"textarea[0.3,0;11.7,2;;;"..
 			fgettext("You have no games installed.") .. "\n" ..
 			fgettext("Download one from minetest.net") .. "]" ..
+			btn_style("world_create_cancel") ..
 			"button[4.75,2.5;3,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
 	end
 
@@ -334,10 +334,9 @@ local function create_world_formspec(dialogdata)
 	end
 
 	local retval =
-		"size[12.25,7,false]" ..
+		"size[12.25,7]" ..
 		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-			"bg_common.png") .. ";true;40]" ..
+		"background9[0,0;0,0;" .. defaulttexturedir_esc .. "bg_common.png;true;40]" ..
 
 		-- Left side
 		"container[0,0]"..
@@ -367,8 +366,9 @@ local function create_world_formspec(dialogdata)
 		"container_end[]"..
 
 		-- Menu buttons
-		"style[world_create_confirm;bgcolor=#00d12b]" ..
+		btn_style("world_create_confirm", "green") ..
 		"button[3.25,6.5;3,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
+		btn_style("world_create_cancel") ..
 		"button[6.25,6.5;3,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
 
 	return retval

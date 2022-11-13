@@ -801,3 +801,15 @@ v2u32 RenderingEngine::getDisplaySize()
 	return engine->getWindowSize();
 }
 #endif // __ANDROID__/__IOS__
+
+bool RenderingEngine::isHighDpi()
+{
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	return g_settings->getFloat("screen_dpi") / 72.0f >= 2;
+#elif defined(__IOS__)
+	float density = RenderingEngine::getDisplayDensity();
+	return g_settings->getBool("device_is_tablet") ? (density >= 2) : (density >= 3);
+#else
+	return RenderingEngine::getDisplayDensity() >= 3;
+#endif
+}

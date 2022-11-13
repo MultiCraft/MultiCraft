@@ -19,13 +19,22 @@
 local function create_confirm_reset_dlg()
 	return dialog_create("reset_all_settings",
 		function()
-			return
-				"image_button[2,1;8,3;" .. core.formspec_escape(defaulttexturedir ..
-					"blank.png") .. ";;" .. fgettext("Reset all settings?") ..
-					";true;false;]" ..
-				"style[reset_confirm;bgcolor=red]" ..
-				"button[3,4.8;3,0.5;reset_confirm;" .. fgettext("Reset") .. "]" ..
-				"button[6,4.8;3,0.5;reset_cancel;" .. fgettext("Cancel") .. "]"
+			return table.concat({
+				"real_coordinates[true]",
+				"image[6.5,0.8;2.5,2.5;", defaulttexturedir_esc, "attention.png]",
+
+				"style[msg;content_offset=0]",
+				"image_button[1,3.5;13.5,0.8;;msg;",
+					fgettext("Reset all settings?"), ";false;false]",
+
+				btn_style("reset_confirm", "red"),
+				"image_button[4.1,5.3;3.5,0.8;;reset_confirm;",
+					fgettext("Reset"), ";true;false]",
+
+				btn_style("reset_cancel"),
+				"image_button[7.9,5.3;3.5,0.8;;reset_cancel;",
+					fgettext("Cancel"), ";true;false]",
+			})
 		end,
 		function(this, fields)
 			if fields["reset_confirm"] then
@@ -84,7 +93,7 @@ local function formspec(tabview, name, tabdata)
 	local sensitivity = tonumber(core.settings:get("touch_sensitivity")) * 2000
 	local touchtarget = core.settings:get_bool("touchtarget") or false
 	local fancy_leaves = core.settings:get("leaves_style") == "fancy"
-	local fast_move = core.settings:get_bool("fast_move") or false
+	local arm_inertia = core.settings:get_bool("arm_inertia") or false
 	local sound = tonumber(core.settings:get("sound_volume")) ~= 0 and true or false
 
 	local tab_string =
@@ -107,8 +116,8 @@ local function formspec(tabview, name, tabdata)
 				.. dump(fancy_leaves) .. "]" ..
 		"checkbox[0.15,3.5;cb_touchtarget;" .. fgettext("Touchtarget") .. ";"
 				.. dump(touchtarget) .. "]" ..
-		"checkbox[0.15,4.1;cb_fast_move;" .. fgettext("Fast movement") .. ";"
-			.. dump(fast_move) .. "]" ..
+		"checkbox[0.15,4.1;cb_arm_inertia;" .. fgettext("Arm inertia") .. ";"
+			.. dump(arm_inertia) .. "]" ..
 		"checkbox[0.15,4.7;cb_sound;" .. fgettext("Sound") .. ";"
 				.. dump(sound) .. "]" ..
 
@@ -146,10 +155,12 @@ local function formspec(tabview, name, tabdata)
 	end
 
 --[[tab_string = tab_string ..
+		btn_style("btn_change_keys") ..
 		"button[8,3.22;3.95,1;btn_change_keys;"
 		.. fgettext("Change Keys") .. "]"
 
 	tab_string = tab_string ..
+		btn_style("btn_advanced_settings") ..
 		"button[8,4.57;3.95,1;btn_advanced_settings;"
 		.. fgettext("All Settings") .. "]"]]
 
@@ -179,6 +190,7 @@ local function formspec(tabview, name, tabdata)
 		"label[8.25,3.35;" .. fgettext("Language") .. ":]" ..
 		"dropdown[8.25,3.8;3.58;dd_language;" .. language_dropdown .. ";" ..
 			lang_idx .. ";true]" ..
+		btn_style("btn_reset") ..
 		"button[8.25,4.81;3.5,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
 
 	return tab_string
@@ -229,8 +241,8 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		core.settings:set("touchtarget", fields["cb_touchtarget"])
 		return true
 	end
-	if fields["cb_fast_move"] then
-		core.settings:set("fast_move", fields["cb_fast_move"])
+	if fields["cb_arm_inertia"] then
+		core.settings:set("arm_inertia", fields["cb_arm_inertia"])
 		return true
 	end
 	if fields["cb_sound"] then

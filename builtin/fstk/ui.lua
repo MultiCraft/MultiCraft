@@ -71,14 +71,16 @@ function ui.update()
 			"formspec_version[3]",
 			"size[14,8.25]",
 			"bgcolor[#0000]",
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]",
+			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 			"set_focus[btn_reconnect_yes;true]",
-			"box[0.5,1.2;13,5;#000]",
-			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
-				fgettext("The server has requested a reconnect:"), error_message),
-			"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
-			"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]"
+			"textarea[0.6,0.5;12.8,0.6;;;", fgettext("The server has requested a reconnect:"), "]",
+			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc,
+				"worldlist_bg.png;false;40]",
+			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
+			btn_style("btn_reconnect_yes") ..
+			"button[2,6.725;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
+			btn_style("btn_reconnect_no") ..
+			"button[8,6.725;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]"
 		}
 		ui.overridden = true
 	elseif gamedata ~= nil and gamedata.errormessage ~= nil then
@@ -95,23 +97,26 @@ function ui.update()
 		if (maintab == "local" or maintab == "local_default") and mod_error and
 				core.get_us_time() - connect_time > 30 then
 			restart_btn =
-				"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..
-				"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]" ..
+				btn_style("btn_reconnect_yes") ..
+				"button[2,6.725;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..
+				btn_style("btn_reconnect_no") ..
+				"button[8,6.725;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]" ..
 				"set_focus[btn_reconnect_yes;true]"
 		else
 			restart_btn =
-				"button[5,6.6;4,1;btn_reconnect_no;" .. fgettext("OK") .. "]" ..
+				btn_style("btn_reconnect_no") ..
+				"button[5,6.725;4,1;btn_reconnect_no;" .. fgettext("OK") .. "]" ..
 				"set_focus[btn_reconnect_no;true]"
 		end
 		formspec = {
 			"formspec_version[3]",
 			"size[14,8.25]",
 			"bgcolor[#0000]",
-			"background9[0,0;0,0;" .. core.formspec_escape(defaulttexturedir ..
-				"bg_common.png") .. ";true;40]",
-			"box[0.5,1.2;13,5;#000]",
-			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
-				error_title, error_message),
+			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
+			"textarea[0.6,0.5;12.8,0.6;;;", error_title, "]",
+			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc,
+				"worldlist_bg.png;false;40]",
+			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
 			restart_btn
 		}
 		ui.overridden = true

@@ -20,18 +20,10 @@ serverlistmgr = {}
 --------------------------------------------------------------------------------
 local function order_server_list(list)
 	local res = {}
-
-	-- orders the multicraft list before support
+	--orders the favorite list after support
 	for i = 1, #list do
 		local fav = list[i]
-		if fav.server_id == "multicraft" then
-			res[#res + 1] = fav
-		end
-	end
-	for i = 1, #list do
-		local fav = list[i]
-		if is_server_protocol_compat(fav.proto_min, fav.proto_max) and
-				fav.server_id ~= "multicraft" then
+		if is_server_protocol_compat(fav.proto_min, fav.proto_max) then
 			res[#res + 1] = fav
 		end
 	end
@@ -66,11 +58,8 @@ function serverlistmgr.sync()
 	core.handle_async(
 		function(param)
 			local http = core.get_http_api()
-			local serverlist = core.settings:get("serverlist_url")
-			local address = ("%s/list%s"):format(serverlist,
-				serverlist == minetest.decode_base64("c2VydmVycy5tdWx0aWNyYWZ0Lndvcmxk") and "_prod" or "")
-			local url = ("%s?proto_version_min=%d&proto_version_max=%d&platform=%s"):format(
-				address,
+			local url = ("%s/list?proto_version_min=%d&proto_version_max=%d&platform=%s"):format(
+				core.settings:get("serverlist_url"),
 				core.get_min_supp_proto(),
 				core.get_max_supp_proto(),
 				PLATFORM)

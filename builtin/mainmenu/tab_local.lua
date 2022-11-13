@@ -19,7 +19,7 @@ local lang = core.settings:get("language")
 if not lang or lang == "" then lang = os.getenv("LANG") end
 
 local esc = core.formspec_escape
-local defaulttexturedir = esc(defaulttexturedir)
+local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
 local function current_game()
 	local last_game_id = core.settings:get("menu_last_game")
@@ -118,43 +118,48 @@ local function get_formspec(_, _, tab_data)
 		creative_bg = "creative_bg_" .. lang .. ".png"
 	end
 
+	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
-			"style[world_delete;fgimg=" .. defaulttexturedir ..
-				"world_delete.png;fgimg_hovered=" .. defaulttexturedir .. "world_delete_hover.png]" ..
+			"style[world_delete;fgimg=" .. defaulttexturedir_esc ..
+				"world_delete.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_delete_hover.png]" ..
 			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
 			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
 
-			"style[world_create;fgimg=" .. defaulttexturedir ..
-				"world_new.png;fgimg_hovered=" .. defaulttexturedir .. "world_new_hover.png]" ..
+			"style[world_create;fgimg=" .. defaulttexturedir_esc ..
+				"world_new.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_new_hover.png]" ..
 			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
-			"tooltip[world_create;".. fgettext("New") .. "]" ..
+			"tooltip[world_create;".. fgettext("New") .. "]"
 
-			"style[play;fgimg=" .. defaulttexturedir .. "btn_play.png;fgimg_hovered=" ..
-				defaulttexturedir .. "btn_play_hover.png]" ..
-			"image_button[6.72,1.43;4.96,1.41;;play;;true;false]" ..
+	local world = menudata.worldlist:get_list()[index]
+	local game = world and pkgmgr.find_by_gameid(world.gameid)
+	if game and game.moddable then
+		retval = retval ..
+			btn_style("world_configure") ..
+			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
+	end
+
+	retval = retval ..
+			btn_style("play") ..
+			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..
+			"image_button[6.72,1.43;4.96,1.41;;play;" .. space .. " " ..
+				fgettext("Play") .. space .. ";true;false]" ..
+			"image[7,1.63;1,1;" .. defaulttexturedir_esc .. "btn_play_icon.png]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
-			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_bg .. ";;;true;false]" ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_bg .. ";;;true;false]" ..
 			"style[cb_creative_mode;content_offset=0]" ..
-			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir .. creative_checkbox ..
+			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_checkbox ..
 				";cb_creative_mode;;true;false]" ..
 
-			"background9[0,0;6.5,4.8;" .. defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
+			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
 	if tab_data.hidden then
 		retval = retval ..
-			"style[switch_local_default;fgimg=" .. defaulttexturedir .. "switch_local_default.png;fgimg_hovered=" ..
-				defaulttexturedir .. "switch_local_default_hover.png]" ..
+			"style[switch_local_default;fgimg=" .. defaulttexturedir_esc .. "switch_local_default.png;fgimg_hovered=" ..
+				defaulttexturedir_esc .. "switch_local_default_hover.png]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
-	end
-
-	if PLATFORM ~= "Android" and PLATFORM ~= "iOS" then
-		retval = retval ..
-			"style[world_configure;padding=-5;bgimg=" .. defaulttexturedir ..
-				"select_btn.png;bgimg_middle=10]" ..
-			"image_button[9.3,4.84;2.7,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
 	end
 
 	local enable_server = core.settings:get_bool("enable_server")
@@ -162,9 +167,7 @@ local function get_formspec(_, _, tab_data)
 		retval = retval ..
 			"checkbox[6.6,5;cb_server;".. fgettext("Create Server") ..";" ..
 				dump(enable_server) .. "]"
-	end
 
-	if enable_server then
 		if core.settings:get_bool("server_announce") then
 			retval = retval ..
 				"checkbox[9.3,5;cb_server_announce;" .. fgettext("Announce Server") .. ";true]"
@@ -180,7 +183,7 @@ local function get_formspec(_, _, tab_data)
 	return retval
 end
 
-local function main_button_handler(this, fields, name)
+local function main_button_handler(this, fields, name, tab_data)
 	assert(name == "local")
 
 	local world_doubleclick = false
@@ -243,6 +246,22 @@ local function main_button_handler(this, fields, name)
 		if world then
 			local game = pkgmgr.find_by_gameid(world.gameid)
 			core.settings:set("menu_last_game", (game and game.id or ""))
+
+			-- Disable all mods on games that aren't moddable
+			if game and not game.moddable then
+				local conf = Settings(world.path .. DIR_DELIM .. "world.mt")
+				local needs_update = false
+				for _, key in ipairs(conf:get_names()) do
+					if key:sub(1, 9) == "load_mod_" and conf:get_bool(key) then
+						conf:set_bool(key, false)
+						needs_update = true
+					end
+				end
+
+				if needs_update then
+					conf:write()
+				end
+			end
 		end
 
 		if core.settings:get_bool("enable_server") then
@@ -327,7 +346,7 @@ local function main_button_handler(this, fields, name)
 		if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
 			this:set_tab("content")
 		else
-			local dlg = create_store_dlg()
+			local dlg = create_store_dlg("game")
 			dlg:set_parent(this)
 			this:hide()
 			dlg:show()

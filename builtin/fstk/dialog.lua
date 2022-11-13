@@ -50,7 +50,7 @@ local dialog_metatable = {
 }
 dialog_metatable.__index = dialog_metatable
 
-local bg = core.formspec_escape(defaulttexturedir .. "bg_common.png")
+local bg = defaulttexturedir_esc .. "bg_common.png"
 function dialog_create(name, get_formspec, buttonhandler, eventhandler, add_background)
 	local self = {}
 
@@ -62,7 +62,7 @@ function dialog_create(name, get_formspec, buttonhandler, eventhandler, add_back
 	if add_background then
 		function self.formspec(data)
 			return ([[
-				size[12,5.4,false]
+				size[12,5.4]
 				bgcolor[#0000]
 				background9[0,0;0,0;%s;true;40]
 				%s
@@ -87,8 +87,9 @@ function messagebox(name, message)
 				return ([[
 					set_focus[ok;true]
 					textarea[1,1;10,4;;;%s]
+					%s
 					button[5,4.5;2,0.8;ok;%s]
-				]]):format(message, fgettext("OK"))
+				]]):format(message, btn_style("ok"), fgettext("OK"))
 			end,
 			function(this, fields)
 				if fields.ok then

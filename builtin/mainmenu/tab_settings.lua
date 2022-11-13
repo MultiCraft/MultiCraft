@@ -172,10 +172,12 @@ local function formspec(tabview, name, tabdata)
 	end
 
 	tab_string = tab_string ..
+		btn_style("btn_change_keys") ..
 		"button[8,4.75;3.95,1;btn_change_keys;"
 		.. fgettext("Change Keys") .. "]"
 
 	tab_string = tab_string ..
+		btn_style("btn_advanced_settings") ..
 		"button[0,4.75;3.95,1;btn_advanced_settings;"
 		.. fgettext("All Settings") .. "]"
 
