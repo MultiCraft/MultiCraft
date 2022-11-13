@@ -3,25 +3,25 @@
 . sdk.sh
 OGG_VERSION=1.3.5
 
-if [ ! -d ogg-src ]; then
-	wget https://github.com/xiph/ogg/releases/download/v$OGG_VERSION/libogg-$OGG_VERSION.tar.gz
-	tar -xzvf libogg-$OGG_VERSION.tar.gz
-	mv libogg-$OGG_VERSION libogg-src
-	rm libogg-$OGG_VERSION.tar.gz
+if [ ! -d libogg-src ]; then
+	git clone -b v$OGG_VERSION --depth 1 https://github.com/xiph/ogg libogg-src
 	mkdir libogg-src/build
 fi
+
+rm -rf libogg
 
 cd libogg-src/build
 
 cmake .. \
 	-DCMAKE_BUILD_TYPE=Release \
-	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" -DCMAKE_CXX_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
-	-DCMAKE_OSX_DEPLOYMENT_TARGET=$OSX_OSVER \
+	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
+	-DCMAKE_CXX_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
 	-DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURES
+
 cmake --build . -j
 
 mkdir -p ../../libogg
-cp -r libogg.a ../../libogg/libogg.a
-cp -r ../include ../../libogg/include
+cp -v libogg.a ../../libogg
+cp -rv ../include ../../libogg/include
 
 echo "Ogg build successful"

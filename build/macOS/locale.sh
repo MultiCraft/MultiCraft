@@ -5,7 +5,7 @@ if [ ! -d MultiCraft/MultiCraft.xcodeproj ]; then
 	exit 1
 fi
 
-DEST=$(pwd)/locale
+DEST=$(pwd)/assets/locale
 
 pushd ../../po
 for lang in *; do
