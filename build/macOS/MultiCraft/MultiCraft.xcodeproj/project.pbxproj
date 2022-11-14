@@ -2204,7 +2204,7 @@
 					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=2",
+					"VERSION_PATCH=3",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=1",
 				);
@@ -2234,7 +2234,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 2.0.2;
+				MARKETING_VERSION = 2.0.3;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2283,7 +2283,7 @@
 					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=2",
+					"VERSION_PATCH=3",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=0",
 				);
@@ -2313,7 +2313,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 2.0.2;
+				MARKETING_VERSION = 2.0.3;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
