@@ -60,12 +60,7 @@ void sanity_check_fn(const char *assertion, const char *file,
 	std::string capture = "An engine assumption failed: \"" + std::string(assertion) +
 		"\" in file: " + std::string(file) + ":" + std::to_string(line) +
 		" (" + std::string(function) + ")";
-
-#ifdef __ANDROID__
 	porting::finishGame(capture);
-#elif defined(__IOS__)
-	ioswrap_finish_game(capture.c_str());
-#endif
 #else
 	abort();
 #endif
@@ -87,12 +82,7 @@ void fatal_error_fn(const char *msg, const char *file,
 	std::string capture = "A fatal error occurred: \"" + std::string(msg) +
 		"\" in file: " + std::string(file) + ":" + std::to_string(line) +
 		" (" + std::string(function) + ")";
-
-#ifdef __ANDROID__
 	porting::finishGame(capture);
-#elif defined(__IOS__)
-	ioswrap_finish_game(capture.c_str());
-#endif
 #else
 	abort();
 #endif

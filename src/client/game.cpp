@@ -959,7 +959,7 @@ private:
 #endif
 
 #if defined(__ANDROID__) || defined(__IOS__)
-	bool m_android_chat_open;
+	bool m_android_chat_open = false;
 #endif
 };
 
@@ -1950,7 +1950,7 @@ void Game::processKeyInput()
 	} else if (wasKeyDown(KeyType::FREEMOVE)) {
 		toggleFreeMove();
 	} else if (wasKeyDown(KeyType::JUMP)) {
-#if defined(__ANDROID__) || defined(__IOS__)
+#ifdef HAVE_TOUCHSCREENGUI
 		if (isKeyDown(KeyType::SNEAK) && client->checkPrivilege("fly"))
 			toggleFast();
 		else
@@ -2435,13 +2435,11 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 	if ((device->isWindowActive() && device->isWindowFocused()
 			&& !isMenuActive()) || input->isRandom()) {
 
-#ifndef __IOS__
 		if (!input->isRandom()) {
 			// Mac OSX gets upset if this is set every frame
 			if (device->getCursorControl()->isVisible())
 				device->getCursorControl()->setVisible(false);
 		}
-#endif
 
 		if (m_first_loop_after_window_activation) {
 			m_first_loop_after_window_activation = false;
@@ -2454,11 +2452,9 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 
 	} else {
 
-#ifndef __IOS__
 		// Mac OSX gets upset if this is set every frame
 		if (!device->getCursorControl()->isVisible())
 			device->getCursorControl()->setVisible(true);
-#endif
 
 		m_first_loop_after_window_activation = true;
 
@@ -4345,7 +4341,7 @@ void Game::showPauseMenu()
 #endif
 
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	bool hasRealKeyboard = porting::hasRealKeyboard();
 	if (simple_singleplayer_mode && hasRealKeyboard)
 		ypos -= 0.6f;
@@ -4380,13 +4376,11 @@ void Game::showPauseMenu()
 			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
-#ifndef __IOS__
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	if (hasRealKeyboard)
 #endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
 		<< strgettext("Change Keys")  << ";;false]";
-#endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << ";;false]";
 #ifndef __IOS__

@@ -30,14 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <SDL.h>
 #endif
 
-#ifdef __APPLE__
-#ifdef __IOS__
-#import <UIKit/UIKit.h>
-#else
-#import <AppKit/AppKit.h>
-#endif
-#endif
-
 #if USE_GETTEXT && defined(_MSC_VER)
 #include <windows.h>
 #include <map>
@@ -233,12 +225,6 @@ void init_gettext(const char *path, const std::string &configured_language,
 
 			SDL_free(locale);
 		}
-#elif defined(__IOS__)
-		char lang[3] = {0};
-		NSString *syslang = [[NSLocale preferredLanguages] firstObject];
-		[syslang getBytes:lang maxLength:2 usedLength:nil encoding:NSASCIIStringEncoding options:0 range:NSMakeRange(0, 2) remainingRange:nil];
-		setenv("LANG", lang, 1);
-		setenv("LANGUAGE", lang, 1);
 #endif
 		setlocale(LC_ALL, "");
 	}

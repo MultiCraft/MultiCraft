@@ -57,15 +57,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "defaultsettings.h"
 #endif
 
-#ifdef __IOS__
-namespace irr {
-	class CIrrDeviceiOS : public IrrlichtDevice {
-	public:
-		void *getViewController();
-	};
-}
-#endif
-
 RenderingEngine *RenderingEngine::s_singleton = nullptr;
 
 
@@ -166,13 +157,6 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	// We can get real screen size only after device initialization finished
 	if (m_device)
 		set_default_settings();
-#endif
-
-#ifdef __IOS__
-	if (m_device) {
-		CIrrDeviceiOS* dev = (CIrrDeviceiOS*) m_device;
-		porting::setViewController(dev->getViewController());
-	}
 #endif
 }
 
