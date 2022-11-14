@@ -2141,7 +2141,7 @@ void Game::openConsole(float scale, const wchar_t *line)
 
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (!porting::hasRealKeyboard()) {
-		porting::showInputDialog(gettext("OK"), "", "", 2);
+		porting::showInputDialog("", "", 2);
 		m_android_chat_open = true;
 	} else {
 #endif

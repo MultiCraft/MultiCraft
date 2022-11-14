@@ -37,6 +37,7 @@ import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.InputTextBinding
 import com.multicraft.game.databinding.MultilineInputBinding
 import com.multicraft.game.helpers.*
+import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import org.libsdl.app.SDLActivity
 
 class GameActivity : SDLActivity() {
@@ -65,7 +66,7 @@ class GameActivity : SDLActivity() {
 		return getContext().applicationInfo.nativeLibraryDir + "/libMultiCraft.so"
 	}
 
-	public override fun onCreate(savedInstanceState: Bundle?) {
+	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		hasKeyboard = resources.configuration.hardKeyboardHidden == HARDKEYBOARDHIDDEN_NO
@@ -103,10 +104,9 @@ class GameActivity : SDLActivity() {
 	}
 
 	@Suppress("unused")
-	fun showDialog(
-		@Suppress("UNUSED_PARAMETER") s: String?,
-		hint: String?, current: String?, editType: Int
-	) {
+	fun showDialog(hint: String?, current: String?, editType: Int) {
+		messageReturnValue = ""
+		messageReturnCode = -1
 		if (editType == 1)
 			runOnUiThread { showMultiLineDialog(hint, current) }
 		else
@@ -117,9 +117,10 @@ class GameActivity : SDLActivity() {
 		isInputActive = true
 		val builder = AlertDialog.Builder(this, R.style.FullScreenDialogStyle)
 		val binding = InputTextBinding.inflate(layoutInflater)
-		val hintText = hint?.ifEmpty {
+		var hintText: String = hint?.ifEmpty {
 			resources.getString(if (editType == 3) R.string.input_password else R.string.input_text)
-		}
+		}.toString()
+		hintText = hintText.replace(":$".toRegex(), "")
 		binding.input.hint = hintText
 		builder.setView(binding.root)
 		val alertDialog = builder.create()
@@ -129,16 +130,19 @@ class GameActivity : SDLActivity() {
 		editText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
 		val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 		var inputType = InputType.TYPE_CLASS_TEXT
-		if (editType == 3)
+		if (editType == 3) {
 			inputType = inputType or InputType.TYPE_TEXT_VARIATION_PASSWORD
+			if (isOreo())
+				editText.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
+		}
 		editText.inputType = inputType
 		editText.setSelection(editText.text?.length ?: 0)
 		// for Android OS
 		editText.setOnEditorActionListener { _: TextView?, KeyCode: Int, _: KeyEvent? ->
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
-				messageReturnCode = 0
 				messageReturnValue = editText.text.toString()
+				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnEditorActionListener true
@@ -149,8 +153,8 @@ class GameActivity : SDLActivity() {
 		editText.setOnKeyListener { _: View?, KeyCode: Int, _: KeyEvent? ->
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
-				messageReturnCode = 0
 				messageReturnValue = editText.text.toString()
+				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnKeyListener true
@@ -159,15 +163,15 @@ class GameActivity : SDLActivity() {
 		}
 		binding.input.setEndIconOnClickListener {
 			imm.hideSoftInputFromWindow(editText.windowToken, 0)
-			messageReturnCode = 0
 			messageReturnValue = editText.text.toString()
+			messageReturnCode = 0
 			alertDialog.dismiss()
 			isInputActive = false
 		}
 		binding.rl.setOnClickListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
-			messageReturnCode = -1
+			messageReturnCode = 0
 			alertDialog.dismiss()
 			isInputActive = false
 		}
@@ -180,7 +184,7 @@ class GameActivity : SDLActivity() {
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
-			messageReturnCode = -1
+			messageReturnCode = 0
 			isInputActive = false
 		}
 	}
@@ -189,9 +193,10 @@ class GameActivity : SDLActivity() {
 		isInputActive = true
 		val builder = AlertDialog.Builder(this, R.style.FullScreenDialogStyle)
 		val binding = MultilineInputBinding.inflate(layoutInflater)
-		val hintText = hint?.ifEmpty {
+		var hintText: String = hint?.ifEmpty {
 			resources.getString(R.string.input_text)
-		}
+		}.toString()
+		hintText = hintText.replace(":$".toRegex(), "")
 		binding.multiInput.hint = hintText
 		builder.setView(binding.root)
 		val alertDialog = builder.create()
@@ -205,8 +210,8 @@ class GameActivity : SDLActivity() {
 		editText.setOnEditorActionListener { _: TextView?, KeyCode: Int, _: KeyEvent? ->
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
-				messageReturnCode = 0
 				messageReturnValue = editText.text.toString()
+				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnEditorActionListener true
@@ -217,8 +222,8 @@ class GameActivity : SDLActivity() {
 		editText.setOnKeyListener { _: View?, KeyCode: Int, _: KeyEvent? ->
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
-				messageReturnCode = 0
 				messageReturnValue = editText.text.toString()
+				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnKeyListener true
@@ -227,8 +232,8 @@ class GameActivity : SDLActivity() {
 		}
 		binding.multiInput.setEndIconOnClickListener {
 			imm.hideSoftInputFromWindow(editText.windowToken, 0)
-			messageReturnCode = 0
 			messageReturnValue = editText.text.toString()
+			messageReturnCode = 0
 			alertDialog.dismiss()
 			isInputActive = false
 		}

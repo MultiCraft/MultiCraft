@@ -261,7 +261,7 @@ bool GUIConfirmRegistration::OnEvent(const SEvent &event)
 #if defined(__ANDROID__) || defined(__IOS__)
 bool GUIConfirmRegistration::getAndroidUIInput()
 {
-	if (!hasAndroidUIInput() || m_jni_field_name != "password")
+	if (m_jni_field_name.empty() || m_jni_field_name != "password")
 		return false;
 
 	// still waiting

@@ -3595,7 +3595,7 @@ void GUIFormSpecMenu::legacySortElements(core::list<IGUIElement *>::Iterator fro
 #if defined(__ANDROID__) || defined(__IOS__)
 bool GUIFormSpecMenu::getAndroidUIInput()
 {
-	if (!hasAndroidUIInput())
+	if (m_jni_field_name.empty())
 		return false;
 
 	// still waiting
@@ -3616,6 +3616,17 @@ bool GUIFormSpecMenu::getAndroidUIInput()
 
 		std::string text = porting::getInputDialogValue();
 		((gui::IGUIEditBox *)element)->setText(utf8_to_wide(text).c_str());
+
+		// Create event
+		gui::IGUIElement *focus = Environment->getFocus();
+		if (focus) {
+			SEvent e;
+			e.EventType = EET_GUI_EVENT;
+			e.GUIEvent.Caller = focus;
+			e.GUIEvent.Element = 0;
+			e.GUIEvent.EventType = gui::EGET_EDITBOX_CHANGED;
+			element->OnEvent(e);
+		}
 	}
 	return false;
 }

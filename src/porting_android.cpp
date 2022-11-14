@@ -211,22 +211,19 @@ void initializePathsAndroid()
 			activityObj, mt_getAbsPath, "getCacheDir");
 }
 
-void showInputDialog(const std::string &acceptButton, const std::string &hint,
-		const std::string &current, int editType)
+void showInputDialog(const std::string &hint, const std::string &current, int editType)
 {
 	jmethodID showdialog = jnienv->GetMethodID(activityClass, "showDialog",
-		"(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V");
+		"(Ljava/lang/String;Ljava/lang/String;I)V");
 
 	FATAL_ERROR_IF(showdialog == nullptr,
 		"porting::showInputDialog unable to find java show dialog method");
 
-	jstring jacceptButton = jnienv->NewStringUTF(acceptButton.c_str());
 	jstring jhint         = jnienv->NewStringUTF(hint.c_str());
 	jstring jcurrent      = jnienv->NewStringUTF(current.c_str());
 	jint    jeditType     = editType;
 
-	jnienv->CallVoidMethod(activityObj, showdialog,
-			jacceptButton, jhint, jcurrent, jeditType);
+	jnienv->CallVoidMethod(activityObj, showdialog, jhint, jcurrent, jeditType);
 }
 
 void openURIAndroid(const std::string &url)

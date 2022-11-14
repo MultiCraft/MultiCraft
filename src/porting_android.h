@@ -41,20 +41,17 @@ void cleanupAndroid();
 
 /**
  * Initializes path_* variables for Android
- * @param env Android JNI environment
  */
 void initializePathsAndroid();
 
 /**
  * show text input dialog in java
- * @param acceptButton text to display on accept button
  * @param hint hint to show
  * @param current initial value to display
  * @param editType type of texfield
- * (1==multiline text input; 2==single line text input; 3=password field)
+ * (1 == multiline text input; 2 == single line text input; 3 == password field)
  */
-void showInputDialog(const std::string &acceptButton,
-					const std::string &hint, const std::string &current, int editType);
+void showInputDialog(const std::string &hint, const std::string &current, int editType);
 
 void openURIAndroid(const std::string &url);
 
