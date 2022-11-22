@@ -69,13 +69,14 @@ end
 
 --------------------------------------------------------------------------------
 local function make_side_pane_tab(y, tab_name, tooltip, selected)
+	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 	local formspec = "style[" .. tab_name .. "_tab;bgimg=" ..
-			defaulttexturedir_esc .. tab_name
+			tpath .. tab_name
 	if selected then
 		formspec = formspec .. "_menu_selected.png]"
 	else
 		formspec = formspec .. "_menu.png;bgimg_hovered=" ..
-				defaulttexturedir_esc .. tab_name .. "_menu_hover.png]"
+				tpath .. tab_name .. "_menu_hover.png]"
 	end
 
 	return formspec ..
@@ -92,6 +93,7 @@ local function get_formspec(self)
 		if self.parent == nil then
 			local tsize = self.tablist[self.last_tab_index].tabsize or
 					{width=self.width, height=self.height}
+			local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 			formspec = formspec ..
 					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height + 1,
 						dump(self.fixed_size)) ..
@@ -102,9 +104,9 @@ local function get_formspec(self)
 						tsize.height + 1.75 .. ";" .. defaulttexturedir_esc ..
 						"bg_common.png;false;40]" ..
 
-					"background9[12.13,1.05;0.9,2.6;" .. defaulttexturedir_esc .. "side_menu.png;false;30]" ..
+					"background9[12.13,1.05;0.9,2.6;" .. tpath .. "side_menu.png;false;30]" ..
 					make_side_pane_tab(0.9, "settings", fgettext("Settings"), name == "settings") ..
-					"image[12.15,2.26;0.9,0.06;" .. defaulttexturedir_esc .. "side_menu_divider.png]" ..
+					"image[12.15,2.26;0.9,0.06;" .. tpath .. "side_menu_divider.png]" ..
 					make_side_pane_tab(2.3, "authors", fgettext("Credits"), name == "credits")
 		end
 
@@ -237,13 +239,13 @@ local function button_header(self)
 		local btn_name = self.name .. "_" .. i
 		toadd = toadd ..
 			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir_esc ..
-				texture
+				DIR_DELIM_esc .. "gui" .. DIR_DELIM_esc .. texture
 
 		if i == math.abs(self.last_tab_index) then
 			toadd = toadd .. "_selected.png;"
 		else
 			toadd = toadd .. ".png;bgimg_hovered=" .. defaulttexturedir_esc ..
-				texture .. "_hover.png;"
+				DIR_DELIM_esc .. "gui" .. DIR_DELIM_esc .. texture .. "_hover.png;"
 		end
 
 		toadd = toadd .. "bgimg_middle=20;content_offset=0]" ..
