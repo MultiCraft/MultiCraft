@@ -7,6 +7,7 @@ core.register_on_death(function()
 		"background9[0,0;0,0;bg_common.png;true;40]" ..
 		"style[you_died;font_size=+4;content_offset=0]" ..
 		"image_button[0.5,1.5;7,0.8;blank.png;you_died;" .. fgettext("You died") .. ";false;false]" ..
+		btn_style("btn_respawn") ..
 		"button_exit[2,3;4,0.5;btn_respawn;".. fgettext("Respawn") .."]"
 	core.show_formspec("bultin:death", formspec)
 end)

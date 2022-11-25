@@ -30,6 +30,7 @@ defaulttexturedir_esc = core.formspec_escape(defaulttexturedir)
 DIR_DELIM_esc = core.formspec_escape(DIR_DELIM) -- for use in formspecs only
 
 dofile(basepath .. "common" .. DIR_DELIM .. "filterlist.lua")
+dofile(basepath .. "common" .. DIR_DELIM .. "btn_style.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "buttonbar.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "dialog.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "tabview.lua")

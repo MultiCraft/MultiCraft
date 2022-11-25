@@ -41,6 +41,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/sha1.h"
 #include <algorithm>
 
+#ifndef SERVER
+#include "client/renderingengine.h"
+#endif
+
 
 // log([level,] text)
 // Writes a line to the logger.
@@ -486,6 +490,7 @@ int ModApiUtil::l_sha1(lua_State *L)
 	return 1;
 }
 
+#ifndef SERVER
 int ModApiUtil::l_upgrade(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
@@ -515,6 +520,35 @@ int ModApiUtil::l_get_secret_key(lua_State *L)
 
 	return 1;
 }
+
+int ModApiUtil::l_get_screen_info(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+	lua_newtable(L);
+	int top = lua_gettop(L);
+	lua_pushstring(L,"density");
+	lua_pushnumber(L,RenderingEngine::getDisplayDensity());
+	lua_settable(L, top);
+
+	lua_pushstring(L,"display_width");
+	lua_pushnumber(L,RenderingEngine::getDisplaySize().X);
+	lua_settable(L, top);
+
+	lua_pushstring(L,"display_height");
+	lua_pushnumber(L,RenderingEngine::getDisplaySize().Y);
+	lua_settable(L, top);
+
+	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
+	lua_pushstring(L,"window_width");
+	lua_pushnumber(L, window_size.X);
+	lua_settable(L, top);
+
+	lua_pushstring(L,"window_height");
+	lua_pushnumber(L, window_size.Y);
+	lua_settable(L, top);
+	return 1;
+}
+#endif
 
 void ModApiUtil::Initialize(lua_State *L, int top)
 {
@@ -557,6 +591,7 @@ void ModApiUtil::Initialize(lua_State *L, int top)
 
 void ModApiUtil::InitializeClient(lua_State *L, int top)
 {
+#ifndef SERVER
 	API_FCT(log);
 
 	API_FCT(get_us_time);
@@ -575,8 +610,13 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(get_version);
 	API_FCT(sha1);
 
+	API_FCT(get_screen_info);
+
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
+#else
+	FATAL_ERROR("InitializeClient called from server");
+#endif
 }
 
 void ModApiUtil::InitializeAsync(lua_State *L, int top)
@@ -611,6 +651,11 @@ void ModApiUtil::InitializeAsync(lua_State *L, int top)
 
 void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	Initialize(L, top);
+#ifndef SERVER
 	API_FCT(upgrade);
 	API_FCT(get_secret_key);
+	API_FCT(get_screen_info);
+#else
+	FATAL_ERROR("InitializeMainMenu called from server");
+#endif
 }
