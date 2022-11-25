@@ -1,4 +1,5 @@
 -- MultiCraft: builtin/common/btn_style.lua
+-- luacheck: read_globals PLATFORM
 
 local device_is_tablet = core.settings:get_bool("device_is_tablet", false)
 local screen_density = core.get_screen_info().density

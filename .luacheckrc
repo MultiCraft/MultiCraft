@@ -63,12 +63,6 @@ files["builtin/common/filterlist.lua"] = {
 	},
 }
 
-files["builtin/common/btn_style.lua"] = {
-	read_globals = {
-		"PLATFORM",
-	},
-}
-
 files["builtin/mainmenu"] = {
 	globals = {
 		"gamedata",
