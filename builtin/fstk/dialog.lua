@@ -86,7 +86,8 @@ function messagebox(name, message)
 			function()
 				return ([[
 					set_focus[ok;true]
-					textarea[1,1;10,4;;;%s]
+					style[msg;font_size=+1;content_offset=0]
+					image_button[1,0;10,4;;msg;%s;false;false]
 					%s
 					button[5,4.5;2,0.8;ok;%s]
 				]]):format(message, btn_style("ok"), fgettext("OK"))

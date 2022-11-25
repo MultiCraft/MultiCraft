@@ -90,67 +90,68 @@ local languages, language_dropdown, lang_idx = get_language_list()
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
 	local range = tonumber(core.settings:get("viewing_range"))
-	local sensitivity = tonumber(core.settings:get("touch_sensitivity")) * 2000
-	local touchtarget = core.settings:get_bool("touchtarget") or false
+	local sensitivity = tonumber(core.settings:get("touch_sensitivity") or 0) * 2000
+	local touchtarget = core.settings:get_bool("touchtarget", false)
 	local fancy_leaves = core.settings:get("leaves_style") == "fancy"
-	local arm_inertia = core.settings:get_bool("arm_inertia") or false
+core.log('warning', 'leaves_style = ' .. core.settings:get("leaves_style"))
+	local arm_inertia = core.settings:get_bool("arm_inertia", false)
 	local sound = tonumber(core.settings:get("sound_volume")) ~= 0 and true or false
 
 	local tab_string =
-		"box[-0.1,0;3.85,5.5;#999999]" ..
-		"checkbox[0.15,-0.05;cb_smooth_lighting;" .. fgettext("Smooth Lighting") .. ";"
+		"background9[0,0.05;3.85,5.5;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
+		"checkbox[0.15,-0.1;cb_smooth_lighting;" .. fgettext("Smooth Lighting") .. ";"
 				.. dump(core.settings:get_bool("smooth_lighting")) .. "]" ..
-		"checkbox[0.15,0.5;cb_particles;" .. fgettext("Particles") .. ";"
+		"checkbox[0.15,0.45;cb_particles;" .. fgettext("Particles") .. ";"
 				.. dump(core.settings:get_bool("enable_particles")) .. "]" ..
-		"checkbox[0.15,1.1;cb_3d_clouds;" .. fgettext("3D Clouds") .. ";"
+		"checkbox[0.15,1.05;cb_3d_clouds;" .. fgettext("3D Clouds") .. ";"
 				.. dump(core.settings:get_bool("enable_3d_clouds")) .. "]" ..
-	--[["checkbox[0.15,1.7;cb_opaque_water;" .. fgettext("Opaque Water") .. ";"
+	--[["checkbox[0.15,1.65;cb_opaque_water;" .. fgettext("Opaque Water") .. ";"
 				.. dump(core.settings:get_bool("opaque_water")) .. "]" ..
-		"checkbox[0.15,2.0;cb_connected_glass;" .. fgettext("Connected Glass") .. ";"
+		"checkbox[0.15,1.95;cb_connected_glass;" .. fgettext("Connected Glass") .. ";"
 				.. dump(core.settings:get_bool("connected_glass")) .. "]" ..]]
-		"checkbox[0.15,1.7;cb_fog;" .. fgettext("Fog") .. ";"
+		"checkbox[0.15,1.65;cb_fog;" .. fgettext("Fog") .. ";"
 				.. dump(core.settings:get_bool("enable_fog")) .. "]" ..
-		"checkbox[0.15,2.3;cb_inventory_items_animations;" .. fgettext("Inv. animations") .. ";"
+		"checkbox[0.15,2.25;cb_inventory_items_animations;" .. fgettext("Inv. animations") .. ";"
 				.. dump(core.settings:get_bool("inventory_items_animations")) .. "]" ..
-		"checkbox[0.15,2.9;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
+		"checkbox[0.15,2.85;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
 				.. dump(fancy_leaves) .. "]" ..
-		"checkbox[0.15,3.5;cb_touchtarget;" .. fgettext("Touchtarget") .. ";"
-				.. dump(touchtarget) .. "]" ..
-		"checkbox[0.15,4.1;cb_arm_inertia;" .. fgettext("Arm inertia") .. ";"
+		"checkbox[0.15,3.45;cb_touchtarget;" .. fgettext("Crosshair") .. ";"
+				.. dump(not touchtarget) .. "]" ..
+		"checkbox[0.15,4.05;cb_arm_inertia;" .. fgettext("Arm inertia") .. ";"
 			.. dump(arm_inertia) .. "]" ..
-		"checkbox[0.15,4.7;cb_sound;" .. fgettext("Sound") .. ";"
+		"checkbox[0.15,4.65;cb_sound;" .. fgettext("Sound") .. ";"
 				.. dump(sound) .. "]" ..
 
-		"box[4,0;3.75,5.5;#999999]" ..
+		"background9[4.1,0.05;3.75,5.5;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
 
-		"label[4.25,0.15;" .. fgettext("Maximum FPS") .. ":]" ..
-		"dropdown[4.25,0.6;3.5;dd_fps_max;30,35,45,60;" ..
-			tonumber(fps <= 30 and 1 or fps == 35 and 2 or fps == 45 and 3 or 4) .. "]" ..
+		"label[4.25,0.1;" .. fgettext("Maximum FPS") .. ":]" ..
+		"dropdown[4.25,0.55;3.5;dd_fps_max;30,35,45,60,90;" ..
+			(fps <= 30 and 1 or fps == 35 and 2 or fps == 45 and 3 or fps == 60 and 4 or 5) .. "]" ..
 
 		"label[4.25,1.5;" .. fgettext("Viewing range") .. ":]" ..
 		"dropdown[4.25,1.95;3.5;dd_viewing_range;30,40,60,80,100,125,150,175,200;" ..
-			tonumber(range <= 30 and 1 or range == 40 and 2 or range == 60 and 3 or
+			(range <= 30 and 1 or range == 40 and 2 or range == 60 and 3 or
 			range == 80 and 4 or range == 100 and 5 or range == 125 and 6 or
 			range == 150 and 7 or range == 175 and 8 or 9) .. "]" ..
 
-		"label[4.25,2.85;" .. fgettext("Node highlighting") .. ":]" ..
-		"dropdown[4.25,3.3;3.5;dd_node_highlighting;" .. dd_options.node_highlighting[1] .. ";"
+		"label[4.25,2.9;" .. fgettext("Node highlighting") .. ":]" ..
+		"dropdown[4.25,3.35;3.5;dd_node_highlighting;" .. dd_options.node_highlighting[1] .. ";"
 				.. getSettingIndex.NodeHighlighting() .. "]" ..
 
-		"label[4.25,4.2;" .. fgettext("Mouse sensitivity") .. ":]" ..
-		"scrollbar[4.25,4.65;3.23,0.5;horizontal;sb_sensitivity;" .. sensitivity .. "]" ..
+		"label[4.25,4.3;" .. fgettext("Mouse sensitivity") .. ":]" ..
+		"scrollbar[4.25,4.75;3.23,0.5;horizontal;sb_sensitivity;" .. sensitivity .. "]" ..
 
-		"box[8,0;3.85,3.25;#999999]"
+		"background9[8.1,0.05;3.85,3.15;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]"
 
 	local video_driver = core.settings:get("video_driver")
 	local shaders_enabled = video_driver == "opengl" or video_driver == "ogles2"
 	core.settings:set_bool("enable_shaders", shaders_enabled)
 	if shaders_enabled then
 		tab_string = tab_string ..
-			"label[8.25,0.15;" .. fgettext("Shaders") .. "]"
+			"label[8.25,0.1;" .. fgettext("Shaders") .. "]"
 	else
 		tab_string = tab_string ..
-			"label[8.25,0.15;" .. core.colorize("#888888",
+			"label[8.25,0.1;" .. core.colorize("#888888",
 					fgettext("Shaders (unavailable)")) .. "]"
 	end
 
@@ -166,32 +167,33 @@ local function formspec(tabview, name, tabdata)
 
 	if shaders_enabled then
 		tab_string = tab_string ..
-			"checkbox[8.25,0.55;cb_tonemapping;" .. fgettext("Tone Mapping") .. ";"
+			"checkbox[8.25,0.45;cb_tonemapping;" .. fgettext("Tone Mapping") .. ";"
 					.. dump(core.settings:get_bool("tone_mapping")) .. "]" ..
-			"checkbox[8.25,1.15;cb_waving_water;" .. fgettext("Waving liquids") .. ";"
+			"checkbox[8.25,1.05;cb_waving_water;" .. fgettext("Waving liquids") .. ";"
 					.. dump(core.settings:get_bool("enable_waving_water")) .. "]" ..
-			"checkbox[8.25,1.75;cb_waving_leaves;" .. fgettext("Waving leaves") .. ";"
+			"checkbox[8.25,1.65;cb_waving_leaves;" .. fgettext("Waving leaves") .. ";"
 					.. dump(core.settings:get_bool("enable_waving_leaves")) .. "]" ..
-			"checkbox[8.25,2.35;cb_waving_plants;" .. fgettext("Waving plants") .. ";"
+			"checkbox[8.25,2.25;cb_waving_plants;" .. fgettext("Waving plants") .. ";"
 					.. dump(core.settings:get_bool("enable_waving_plants")) .. "]"
 	else
 		tab_string = tab_string ..
-			"label[8.38,0.75;" .. core.colorize("#888888",
+			"label[8.38,0.65;" .. core.colorize("#888888",
 					fgettext("Tone Mapping")) .. "]" ..
-			"label[8.38,1.35;" .. core.colorize("#888888",
+			"label[8.38,1.25;" .. core.colorize("#888888",
 					fgettext("Waving Liquids")) .. "]" ..
-			"label[8.38,1.95;" .. core.colorize("#888888",
+			"label[8.38,1.85;" .. core.colorize("#888888",
 					fgettext("Waving Leaves")) .. "]" ..
-			"label[8.38,2.55;" .. core.colorize("#888888",
+			"label[8.38,2.45;" .. core.colorize("#888888",
 					fgettext("Waving Plants")) .. "]"
 	end
 
 	tab_string = tab_string ..
-		"label[8.25,3.35;" .. fgettext("Language") .. ":]" ..
-		"dropdown[8.25,3.8;3.58;dd_language;" .. language_dropdown .. ";" ..
+		"background9[8.1,3.35;3.85,2.2;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
+		"label[8.25,3.3;" .. fgettext("Language") .. ":]" ..
+		"dropdown[8.25,3.75;3.58;dd_language;" .. language_dropdown .. ";" ..
 			lang_idx .. ";true]" ..
 		btn_style("btn_reset") ..
-		"button[8.25,4.81;3.5,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
+		"button[8.25,4.6;3.5,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
 
 	return tab_string
 end
@@ -234,11 +236,11 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		return true
 	end
 	if fields["cb_fancy_leaves"] then
-		core.settings:set("leaves_style", fields["cb_fancy_leaves"] and "fancy" or "opaque")
+		core.settings:set("leaves_style", (minetest.is_yes(fields["cb_fancy_leaves"]) and "fancy" or "opaque"))
 		return true
 	end
 	if fields["cb_touchtarget"] then
-		core.settings:set("touchtarget", fields["cb_touchtarget"])
+		core.settings:set("touchtarget", (minetest.is_yes(fields["cb_touchtarget"]) and "false" or "true"))
 		return true
 	end
 	if fields["cb_arm_inertia"] then
@@ -247,10 +249,6 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 	end
 	if fields["cb_sound"] then
 		core.settings:set("sound_volume", (minetest.is_yes(fields["cb_sound"]) and "1.0") or "0.0")
-		return true
-	end
-	if fields["cb_shaders"] then
-		core.settings:set("enable_shaders", fields["cb_shaders"])
 		return true
 	end
 	if fields["cb_tonemapping"] then

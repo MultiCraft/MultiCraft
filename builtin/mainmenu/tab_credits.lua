@@ -131,13 +131,13 @@ return {
 			"image_button[9.5,0.6;2.6,0.85;;privacy;Privacy Policy;true;false]" ..
 
 			"background9[0,1.5;12,4.2;" .. defaulttexturedir_esc ..
-				"worldlist_bg.png" .. ";false;40]" ..
+				"worldlist_bg.png;false;40]" ..
 			"tablecolumns[color;text]" ..
 			"tableoptions[background=#0000;highlight=#00000000;border=false]" ..
 			"table[0,1.5;11.75,4.05;list_credits;" ..
-			"#FFFF00," .. fgettext("Core Developers") .. " (MultiCraft)" .. ",," ..
+			"#FFFF00," .. fgettext("Core Developers") .. " (MultiCraft),," ..
 			buildCreditList(multicraft_developers) .. ",,," ..
-			"#FFFF00," .. fgettext("Core Developers") .. " (Minetest Engine)" .. ",," ..
+			"#FFFF00," .. fgettext("Core Developers") .. " (Minetest Engine),," ..
 			buildCreditList(core_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Active Contributors") .. ",," ..
 			buildCreditList(active_contributors) .. ",,," ..

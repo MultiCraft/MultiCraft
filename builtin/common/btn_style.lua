@@ -11,7 +11,7 @@ function is_high_dpi()
 		return screen_density >= 3
 	end
 end
---------------------------------------------------------------------------------
+
 local DIR_DELIM_esc = DIR_DELIM_esc or core.formspec_escape(DIR_DELIM)
 local button_path = (INIT == "mainmenu" and defaulttexturedir_esc or "") .. "gui" .. DIR_DELIM_esc
 
@@ -22,7 +22,7 @@ function btn_style(field, color)
 	local retval =
 		"style[" .. field .. ";border=false]" ..
 		"style[" .. field .. ";bgimg=" .. button_path .. "gui_button" .. color .. btn_size ..
-			".png;bgimg_middle=" .. (is_high_dpi() and 48 or 32) .. ";padding=" .. (is_high_dpi() and -30 or -20) .. "]"
+			".png;bgimg_middle=" .. (is_high_dpi() and 48 or 32) .. ";padding=" .. (is_high_dpi() and -36 or -24) .. "]"
 
 	if color ~= "_gray" then
 		retval = retval ..

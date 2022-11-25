@@ -151,7 +151,7 @@ local function get_formspec(_, _, tab_data)
 			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_checkbox ..
 				";cb_creative_mode;;true;false]" ..
 
-			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
+			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
@@ -306,7 +306,8 @@ local function main_button_handler(this, fields, name, tab_data)
 				world.name ~= nil and
 				world.name ~= "" then
 				local index = menudata.worldlist:get_raw_index(selected)
-				local delete_world_dlg = create_delete_world_dlg(world.name, index, world.gameid)
+				local game = pkgmgr.find_by_gameid(world.gameid)
+				local delete_world_dlg = create_delete_world_dlg(world.name, index, game.name)
 				delete_world_dlg:set_parent(this)
 				this:hide()
 				delete_world_dlg:show()
@@ -379,6 +380,8 @@ local function on_change(type, old_tab, new_tab)
 		if game and game.id ~= "default" then
 			menudata.worldlist:set_filtercriteria(game.id)
 			mm_texture.update("singleplayer",game)
+		else
+			mm_texture.reset()
 		end
 
 		core.set_topleft_text("Powered by Minetest Engine")

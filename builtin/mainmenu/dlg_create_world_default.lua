@@ -15,58 +15,26 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-local function create_world_formspec()
-	local mapgens = core.get_mapgen_names()
+local mapgens = {"v7p", "flat", "valleys", "superflat"}
 
+local function create_world_formspec()
 	local current_seed = core.settings:get("fixed_map_seed") or ""
 	local current_mg   = core.settings:get("mg_name")
-	local gameid       = core.settings:get("menu_last_game")
 
-	local gameidx = 0
-	if gameid ~= nil then
-		local _
-		_, gameidx = pkgmgr.find_by_gameid(gameid)
+	local selindex = math.max(table.indexof(mapgens, current_mg), 1)
+	local mglist = table.concat(mapgens, ",")
 
-		if gameidx == nil then
-			gameidx = 0
-		end
-	end
-
-	local game_by_gameidx = core.get_game(gameidx)
-	if game_by_gameidx ~= nil then
-		local allowed_mapgens = {"v7p", "flat", "valleys"}
-		for i = #mapgens, 1, -1 do
-			if table.indexof(allowed_mapgens, mapgens[i]) == -1 then
-				table.remove(mapgens, i)
-			end
-		end
-
-		mapgens[#mapgens + 1] = "superflat"
-	end
-
-	local mglist = ""
-	local selindex = 1
-	local i = 1
-	for _, v in pairs(mapgens) do
-		if current_mg == v then
-			selindex = i
-		end
-		i = i + 1
-		mglist = mglist .. v .. ","
-	end
-	mglist = mglist:sub(1, -2)
-
-	return "real_coordinates[true]" .. "formspec_version[3]" ..
+	return "real_coordinates[true]formspec_version[3]" ..
 
 		"image[3.5,1.1;8.5,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
 		"style[te_world_name;border=false;bgcolor=transparent]" ..
-		"field[3.55,1.1;8.4,0.8;te_world_name;" .. fgettext("World name") .. ":" .. ";]" ..
+		"field[3.55,1.1;8.4,0.8;te_world_name;" .. fgettext("World name") .. ":;]" ..
 
 		"image[3.5,2.5;8.5,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
 		"style[te_seed;border=false;bgcolor=transparent]" ..
-		"field[3.55,2.5;8.4,0.8;te_seed;" .. fgettext("Seed") .. ":" .. ";".. current_seed .. "]" ..
+		"field[3.55,2.5;8.4,0.8;te_seed;" .. fgettext("Seed") .. ":;".. current_seed .. "]" ..
 
-		"label[3.5,3.7;" .. fgettext("Mapgen") .. ":" .. "]"..
+		"label[3.5,3.7;" .. fgettext("Mapgen") .. ":]"..
 		"dropdown[3.5,3.9;8.5,0.8;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
 
 		btn_style("world_create_confirm", "green") ..
@@ -141,7 +109,6 @@ local function create_world_buttonhandler(this, fields)
 			else
 				if this.data.update_worldlist_filter then
 					menudata.worldlist:set_filtercriteria(pkgmgr.games[gameindex].id)
-					mm_texture.update("singleplayer", pkgmgr.games[gameindex].id)
 				end
 				menudata.worldlist:refresh()
 				core.settings:set("mainmenu_last_selected_world",

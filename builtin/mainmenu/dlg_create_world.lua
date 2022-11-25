@@ -340,18 +340,26 @@ local function create_world_formspec(dialogdata)
 
 		-- Left side
 		"container[0,0]"..
-		"field[0.3,0.6;6,0.5;te_world_name;" ..
+
+		"real_coordinates[true]" ..
+		"formspec_version[3]" ..
+		"image[0.37,0.6;7.28,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+		"style[te_world_name;border=false;bgcolor=transparent]" ..
+		"field[0.42,0.6;7.18,0.8;te_world_name;" ..
 		fgettext("World name") ..
 		":;" .. core.formspec_escape(worldname) .. "]" ..
 
-		"field[0.3,1.7;6,0.5;te_seed;" ..
+		"image[0.37,1.9;7.28,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+		"style[te_seed;border=false;bgcolor=transparent]" ..
+		"field[0.42,1.9;7.18,0.8;te_seed;" ..
 		fgettext("Seed") ..
 		":;".. current_seed .. "]" ..
+		"real_coordinates[false]" ..
 
-		"label[0,2;" .. fgettext("Mapgen") .. ":]"..
-		"dropdown[0,2.5;6.3;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
+		"label[0,2.1;" .. fgettext("Mapgen") .. ":]"..
+		"dropdown[0,2.5;6.27;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
 
-		"label[0,3.35;" .. fgettext("Game") .. ":]"..
+		"label[0,3.45;" .. fgettext("Game") .. ":]"..
 		"textlist[0,3.85;5.8,"..gamelist_height..";games;" ..
 		pkgmgr.gamelist() .. ";" .. _gameidx .. ";false]" ..
 		"container[0,4.5]" ..

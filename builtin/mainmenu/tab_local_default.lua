@@ -111,7 +111,7 @@ local function get_formspec(this)
 			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_checkbox ..
 				";cb_creative_mode;;true;false]" ..
 
-			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
+			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
 

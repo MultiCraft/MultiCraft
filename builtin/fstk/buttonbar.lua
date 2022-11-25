@@ -60,13 +60,11 @@ local function buttonbar_formspec(self)
 			end
 
 			if button.cdb then
-				local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 				formspec = formspec ..
-					"style[" .. btn_name .. ";bgimg=" .. tpath ..
-						"btn_download.png;bgimg_hovered=" .. tpath .. "btn_download_hover.png]" ..
-
-					("image_button[%f,%f;%f,%f;;%s;%s;true;%s]tooltip[%s;%s]"):format(
-						btn_pos.x, btn_pos.y, self.btn_size, self.btn_size,
+					btn_style(btn_name) ..
+					("image_button[%f,%f;%f,%f;%s;%s;%s;true;%s]tooltip[%s;%s]"):format(
+						btn_pos.x + 0.1, btn_pos.y + 0.1, self.btn_size - 0.2, self.btn_size - 0.2,
+						defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "btn_download.png",
 						btn_name, button.caption,
 						borders, btn_name, button.tooltip)
 			else
