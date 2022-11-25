@@ -24,7 +24,7 @@ cd ../..
 
 [ -d ../irrlicht ] && rm -r ../irrlicht
 mkdir -p ../irrlicht
-cp "${BUILD_FOLDER}/libIrrlicht.a" ../irrlicht
-cp -r include ../irrlicht/include
+cp -v "${BUILD_FOLDER}/libIrrlicht.a" ../irrlicht
+cp -rv include ../irrlicht/include
 
 echo "Irrlicht build successful"

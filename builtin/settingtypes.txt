@@ -99,6 +99,9 @@ invert_mouse (Invert mouse) bool false
 #    Mouse sensitivity multiplier.
 mouse_sensitivity (Mouse sensitivity) float 0.2
 
+#    Touch sensitivity multiplier.
+touch_sensitivity (Touch sensitivity) float 0.2
+
 #    If enabled, "special" key instead of "sneak" key is used for climbing down and
 #    descending.
 aux1_descends (Special key for climbing/descending) bool false

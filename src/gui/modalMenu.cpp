@@ -39,7 +39,7 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 		IGUIElement(gui::EGUIET_ELEMENT, env, parent, id,
 				core::rect<s32>(0, 0, 100, 100)),
 #if defined(__ANDROID__) || defined(__IOS__)
-		m_jni_field_name(""),
+		m_jni_field_name(),
 #endif
 		m_menumgr(menumgr),
 		m_remap_dbl_click(remap_dbl_click)
@@ -287,14 +287,6 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 				return retval;
 
 			m_jni_field_name = field_name;
-			/*~ Imperative, as in "Enter/type in text".
-			Don't forget the space. */
-			std::string message = gettext("Enter ");
-			std::string label = wide_to_utf8(getLabelByID(hovered->getID()));
-			if (label.empty())
-				label = "text";
-			message += gettext(label.c_str());
-			message += ":";
 
 			// single line text input
 			int type = 2;
@@ -307,7 +299,7 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 			if (((gui::IGUIEditBox *)hovered)->isPasswordBox())
 				type = 3;
 
-			porting::showInputDialog(gettext("OK"), "",
+			porting::showInputDialog(wide_to_utf8(getLabelByID(hovered->getID())),
 				wide_to_utf8(((gui::IGUIEditBox *)hovered)->getText()), type);
 			return retval;
 		}
@@ -385,24 +377,3 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 	}
 	return false;
 }
-
-#if defined(__ANDROID__) || defined(__IOS__)
-bool GUIModalMenu::hasAndroidUIInput()
-{
-	// no dialog shown
-	if (m_jni_field_name.empty())
-		return false;
-
-	// still waiting
-	if (porting::getInputDialogState() == -1)
-		return true;
-
-	// no value abort dialog processing
-	if (porting::getInputDialogState() != 0) {
-		m_jni_field_name.clear();
-		return false;
-	}
-
-	return true;
-}
-#endif

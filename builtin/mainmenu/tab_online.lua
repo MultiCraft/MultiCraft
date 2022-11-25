@@ -19,8 +19,8 @@
 local password_tmp = ""
 
 local esc = core.formspec_escape
-local defaulttexturedir = esc(defaulttexturedir)
 local lower = utf8.lower
+local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
 local function get_formspec(tabview, name, tabdata)
 	-- Update the cached supported proto info,
@@ -46,41 +46,52 @@ local function get_formspec(tabview, name, tabdata)
 	local retval =
 		-- Search
 		"formspec_version[3]" ..
-		"image[-0.1,4.9;7,0.89;" .. defaulttexturedir .. "desc_bg.png;32]" ..
+		"image[-0.1,4.93;7,0.81;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
 		"style[Dte_search;border=false;bgcolor=transparent]" ..
-		"field[0.25,5.2;5.75,1;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-		"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir ..
+		"field[0.25,5.25;5.7,0.83;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+		btn_style("btn_mp_search") ..
+		"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir_esc ..
 			"search.png;btn_mp_search;;true;false]" ..
-		"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir ..
+		btn_style("btn_mp_refresh") ..
+		"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir_esc ..
 			"refresh.png;btn_mp_refresh;;true;false]" ..
 
 		-- Address / Port
-		"field[7.4,0.55;5,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
+		"image[7.1,0.09;6,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+		"style[te_address;border=false;bgcolor=transparent]" ..
+		"field[7.45,0.55;4.9,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
 			esc(address) .. "]" ..
 
 		-- Name
-		"field[7.4,1.7;3.2,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
+		"image[7.1,1.25;2.95,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+		"style[te_name;border=false;bgcolor=transparent]" ..
+		"field[7.45,1.7;2.45,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
 			esc(core.settings:get("name")) .. "]" ..
 
+		-- Password
+		"image[9.55,1.25;2.95,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+		"style[te_pwd;border=false;bgcolor=transparent]" ..
+		"pwdfield[9.9,1.7;2.45,0.5;te_pwd;" .. fgettext("Password") .. ":" .. ";" ..
+			esc(password_tmp) .. "]" ..
+
 		-- Description Background
-		"background9[7.2,2.2;4.8,2.65;" .. defaulttexturedir .. "desc_bg.png" .. ";false;32]" ..
+		"background9[7.2,2.2;4.8,2.65;" .. defaulttexturedir_esc .. "desc_bg.png" .. ";false;32]" ..
 
 		-- Connect
-		"style[btn_mp_connect;fgimg=" .. defaulttexturedir ..
-			"btn_play.png;fgimg_hovered=" .. defaulttexturedir .. "btn_play_hover.png]" ..
-		"image_button[8.8,4.9;3.3,0.9;;btn_mp_connect;;true;false]" ..
-		"tooltip[btn_mp_connect;".. fgettext("Connect") .. "]"
-
-		-- Password
-		retval = retval .. "pwdfield[10.45,1.7;1.95,0.5;te_pwd;" ..
-			fgettext("Password") .. ":" .. ";" .. esc(password_tmp) .. "]"
+		btn_style("btn_mp_connect") ..
+		"style[btn_mp_connect;font_size=*" .. (small_screen and 1.5 or 2) .. "]" ..
+		"image_button[8.8,4.88;3.3,0.9;;btn_mp_connect;" ..
+			("\n"):rep(3) .. " " .. fgettext("Play") .. ("\n"):rep(3) .. ";true;false]" .. -- Connect
+		"image[9,5;0.6,0.6;" .. defaulttexturedir_esc .. "btn_play_icon.png]" ..
+		"tooltip[btn_mp_connect;" .. fgettext("Connect") .. "]"
 
 	if tabdata.selected and selected then
 		if gamedata.fav then
 			retval = retval ..
-				"style[btn_delete_favorite;fgimg=" .. defaulttexturedir ..
-					"trash.png;fgimg_hovered=" .. defaulttexturedir .. "trash_hover.png]" ..
-				"image_button[7.1,4.93;0.83,0.83;;btn_delete_favorite;;true;false]"
+				btn_style("btn_delete_favorite", "red") ..
+				"image_button[7.1,4.93;0.83,0.83;" .. defaulttexturedir_esc ..
+					"trash.png;btn_delete_favorite;;true;false;" .. defaulttexturedir_esc .. "trash_pressed.png]" ..
+					"tooltip[btn_delete_favorite;" .. fgettext("Del. Favorite") .. "]"
 		end
 		if selected.description then
 			retval = retval .. "textarea[7.5,2.2;4.8,3;;" ..
@@ -91,7 +102,7 @@ local function get_formspec(tabview, name, tabdata)
 	--favorites
 	retval = retval ..
 		"background9[0,-0.1;7.1,5;" ..
-			defaulttexturedir .. "worldlist_bg.png" .. ";false;40]" ..
+			defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
 		"tableoptions[background=#0000;border=false]" ..
 		"tablecolumns[" ..
 		image_column(fgettext("Favorite")) .. ",align=center;" ..

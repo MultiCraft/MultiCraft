@@ -11,6 +11,11 @@ sh libraries.sh
 cd ..
 
 echo
+echo "Preparing Assets:"
+
+sh assets.sh
+
+echo
 echo "Preparing Locales:"
 
 sh locale.sh

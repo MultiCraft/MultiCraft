@@ -322,3 +322,5 @@ struct TileSpec
 };
 
 std::vector<std::string> getTextureDirs();
+
+void setDisableTexturePacks(const bool disable_texture_packs);

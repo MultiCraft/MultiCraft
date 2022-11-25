@@ -23,15 +23,14 @@ cmake .. \
 	-DFT_DISABLE_HARFBUZZ=TRUE \
 	-DFT_DISABLE_BROTLI=TRUE \
 	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
-	-DCMAKE_OSX_DEPLOYMENT_TARGET=$OSX_OSVER \
 	-DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURES
 
 cmake --build . -j
 
 mkdir -p ../../freetype
-cp -r ../include ../../freetype/include
+cp -v libfreetype.a ../../freetype
+cp -rv ../include ../../freetype/include
 rm -rf ../../freetype/include/dlg
-cp -r libfreetype.a ../../freetype/libfreetype.a
 
 
 echo "FreeType build successful"

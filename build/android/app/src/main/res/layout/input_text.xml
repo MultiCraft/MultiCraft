@@ -1,13 +1,25 @@
-<com.google.android.material.textfield.TextInputLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/inputLayout"
-	style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:id="@+id/rl"
 	android:layout_width="match_parent"
-	android:layout_height="wrap_content"
-	android:padding="12dp">
+	android:layout_height="match_parent">
 
-	<com.multicraft.game.CustomEditText
-		android:id="@+id/editText"
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/input"
+		style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:hint="@string/input_text" />
-</com.google.android.material.textfield.TextInputLayout>
+		android:layout_alignParentBottom="true"
+		android:background="@drawable/bg_input"
+		android:hint="@string/input_text"
+		android:padding="5dp"
+		app:endIconDrawable="@drawable/ic_baseline_send"
+		app:endIconMode="custom"
+		app:endIconTint="@null">
+
+		<com.multicraft.game.CustomEditText
+			android:id="@+id/editText"
+			android:layout_width="match_parent"
+			android:layout_height="60dp" />
+	</com.google.android.material.textfield.TextInputLayout>
+</RelativeLayout>

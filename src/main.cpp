@@ -129,7 +129,11 @@ int main(int argc, char *argv[])
 	debug_set_exception_handler();
 
 	g_logger.registerThread("Main");
+#ifdef NDEBUG
 	g_logger.addOutputMaxLevel(&stderr_output, LL_ACTION);
+#else
+	g_logger.addOutputMaxLevel(&stderr_output, LL_INFO);
+#endif
 
 	Settings cmd_args;
 	bool cmd_args_ok = get_cmdline_opts(argc, argv, &cmd_args);

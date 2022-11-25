@@ -47,6 +47,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	A cache from texture name to texture path
 */
 MutexedMap<std::string, std::string> g_texturename_to_path_cache;
+bool g_disable_texture_packs = false;
 
 /*
 	Replaces the filename extension.
@@ -2300,5 +2301,13 @@ video::ITexture *TextureSource::getShaderFlagsTexture(bool normalmap_present)
 
 std::vector<std::string> getTextureDirs()
 {
+	if (g_disable_texture_packs)
+		return {};
 	return fs::GetRecursiveDirs(g_settings->get("texture_path"));
+}
+
+
+void setDisableTexturePacks(const bool disable_texture_packs)
+{
+	g_disable_texture_packs = disable_texture_packs;
 }

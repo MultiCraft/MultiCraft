@@ -959,7 +959,7 @@ private:
 #endif
 
 #if defined(__ANDROID__) || defined(__IOS__)
-	bool m_android_chat_open;
+	bool m_android_chat_open = false;
 #endif
 };
 
@@ -1023,6 +1023,7 @@ Game::~Game()
 	delete draw_control;
 
 	extendedResourceCleanup();
+	setDisableTexturePacks(false);
 
 	g_settings->deregisterChangedCallback("doubletap_jump",
 		&settingChangedCallback, this);
@@ -1213,7 +1214,7 @@ void Game::shutdown()
 	g_touchscreengui->hide();
 #endif
 
-	showOverlayMessage(N_("Shutting down..."), 0, 0);
+	showOverlayMessage(N_("Shutting down..."), 0, 100);
 
 	if (clouds)
 		clouds->drop();
@@ -1292,9 +1293,9 @@ bool Game::init(
 bool Game::initSound()
 {
 #if USE_SOUND
-	if (g_settings->getBool("enable_sound") && g_sound_manager_singleton.get()) {
+	if (g_settings->getBool("enable_sound") && g_sound_manager_singleton) {
 		infostream << "Attempting to use OpenAL audio" << std::endl;
-		sound = createOpenALSoundManager(g_sound_manager_singleton.get(), &soundfetcher);
+		sound = createOpenALSoundManager(g_sound_manager_singleton, &soundfetcher);
 		if (!sound)
 			infostream << "Failed to initialize OpenAL audio" << std::endl;
 	} else
@@ -1949,7 +1950,7 @@ void Game::processKeyInput()
 	} else if (wasKeyDown(KeyType::FREEMOVE)) {
 		toggleFreeMove();
 	} else if (wasKeyDown(KeyType::JUMP)) {
-#if defined(__ANDROID__) || defined(__IOS__)
+#ifdef HAVE_TOUCHSCREENGUI
 		if (isKeyDown(KeyType::SNEAK) && client->checkPrivilege("fly"))
 			toggleFast();
 		else
@@ -2140,7 +2141,7 @@ void Game::openConsole(float scale, const wchar_t *line)
 
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (!porting::hasRealKeyboard()) {
-		porting::showInputDialog(gettext("OK"), "", "", 2);
+		porting::showInputDialog("", "", 2);
 		m_android_chat_open = true;
 	} else {
 #endif
@@ -2434,13 +2435,11 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 	if ((device->isWindowActive() && device->isWindowFocused()
 			&& !isMenuActive()) || input->isRandom()) {
 
-#ifndef __IOS__
 		if (!input->isRandom()) {
 			// Mac OSX gets upset if this is set every frame
 			if (device->getCursorControl()->isVisible())
 				device->getCursorControl()->setVisible(false);
 		}
-#endif
 
 		if (m_first_loop_after_window_activation) {
 			m_first_loop_after_window_activation = false;
@@ -2453,11 +2452,9 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 
 	} else {
 
-#ifndef __IOS__
 		// Mac OSX gets upset if this is set every frame
 		if (!device->getCursorControl()->isVisible())
 			device->getCursorControl()->setVisible(true);
-#endif
 
 		m_first_loop_after_window_activation = true;
 
@@ -3637,11 +3634,17 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 		tool_item.getDefinition(itemdef_manager);
 	bool nohit_enabled = ((ItemGroupList) playeritem_def.groups)["nohit"] != 0;
 
+	bool should_punch = isKeyDown(KeyType::DIG) && !nohit_enabled;
+	bool should_interact = wasKeyPressed(KeyType::PLACE) || ((wasKeyPressed(KeyType::DIG) && nohit_enabled));
+
 #ifdef HAVE_TOUCHSCREENGUI
-	if (wasKeyPressed(KeyType::PLACE) && !nohit_enabled) {
-#else
-	if (isKeyDown(KeyType::DIG) && !nohit_enabled) {
+	if (g_touchscreengui->isActive()) {
+		should_punch = wasKeyPressed(KeyType::PLACE) && !nohit_enabled;
+		should_interact = wasKeyPressed(KeyType::DIG) || ((wasKeyPressed(KeyType::PLACE) && nohit_enabled));
+	}
 #endif
+
+	if (should_punch) {
 		bool do_punch = false;
 		bool do_punch_damage = false;
 
@@ -3671,11 +3674,7 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 			if (!disable_send)
 				client->interact(INTERACT_START_DIGGING, pointed);
 		}
-#ifdef HAVE_TOUCHSCREENGUI
-	} else if (wasKeyPressed(KeyType::DIG) || (wasKeyPressed(KeyType::PLACE) && nohit_enabled)) {
-#else
-	} else if (wasKeyPressed(KeyType::PLACE) || (wasKeyPressed(KeyType::DIG) && nohit_enabled)) {
-#endif
+	} else if (should_interact) {
 		infostream << "Right-clicked object" << std::endl;
 		client->interact(INTERACT_PLACE, pointed);  // place
 	}
@@ -4353,7 +4352,7 @@ void Game::showPauseMenu()
 #endif
 
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	bool hasRealKeyboard = porting::hasRealKeyboard();
 	if (simple_singleplayer_mode && hasRealKeyboard)
 		ypos -= 0.6f;
@@ -4361,15 +4360,18 @@ void Game::showPauseMenu()
 #ifdef __IOS__
 	ypos += 0.5f;
 #endif
+	const bool high_dpi = RenderingEngine::isHighDpi();
+	const std::string x2 = high_dpi ? ".x2" : "";
 	std::ostringstream os;
 
 	os << "formspec_version[1]" << SIZE_TAG
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
 
-		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=20;padding=-10]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui_button_hovered.png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui_button_pressed.png]"
+		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2 <<
+			".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << "]"
+		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
 
 		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
 		<< strgettext("Continue") << ";;false]";
@@ -4385,13 +4387,11 @@ void Game::showPauseMenu()
 			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
-#ifndef __IOS__
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	if (hasRealKeyboard)
 #endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
 		<< strgettext("Change Keys")  << ";;false]";
-#endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << ";;false]";
 #ifndef __IOS__
@@ -4462,6 +4462,8 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 	str_formspec_escape(new_pw);
 	str_formspec_escape(confirm_pw);
 
+	const bool high_dpi = RenderingEngine::isHighDpi();
+	const std::string x2 = high_dpi ? ".x2" : "";
 	std::ostringstream os;
 	os << "formspec_version[5]"
 		<< "size[10.5,7.5]"
@@ -4471,9 +4473,10 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "pwdfield[1,1.2;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
 		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
 		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
-		<< "style_type[image_button_exit,image_button;bgimg=gui_button.png;bgimg_middle=20;padding=-10]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui_button_hovered.png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui_button_pressed.png]"
+		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2
+			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << "]"
+		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
 		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
 		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 

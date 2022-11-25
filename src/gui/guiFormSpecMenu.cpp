@@ -1563,6 +1563,9 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
 		e->setDrawBorder(style.getBool(StyleSpec::BORDER, true));
 		e->setOverrideColor(style.getColor(StyleSpec::TEXTCOLOR, video::SColor(0xFFFFFFFF)));
+		if (style.get(StyleSpec::BGCOLOR, "") == "transparent") {
+			e->setDrawBackground(false);
+		}
 		e->setOverrideFont(style.getFont());
 
 		irr::SEvent evt;
@@ -3592,7 +3595,7 @@ void GUIFormSpecMenu::legacySortElements(core::list<IGUIElement *>::Iterator fro
 #if defined(__ANDROID__) || defined(__IOS__)
 bool GUIFormSpecMenu::getAndroidUIInput()
 {
-	if (!hasAndroidUIInput())
+	if (m_jni_field_name.empty())
 		return false;
 
 	// still waiting
@@ -3613,6 +3616,17 @@ bool GUIFormSpecMenu::getAndroidUIInput()
 
 		std::string text = porting::getInputDialogValue();
 		((gui::IGUIEditBox *)element)->setText(utf8_to_wide(text).c_str());
+
+		// Create event
+		gui::IGUIElement *focus = Environment->getFocus();
+		if (focus) {
+			SEvent e;
+			e.EventType = EET_GUI_EVENT;
+			e.GUIEvent.Caller = focus;
+			e.GUIEvent.Element = 0;
+			e.GUIEvent.EventType = gui::EGET_EDITBOX_CHANGED;
+			element->OnEvent(e);
+		}
 	}
 	return false;
 }
@@ -3796,9 +3810,7 @@ void GUIFormSpecMenu::drawMenu()
 	if (!TouchScreenGUI::isActive())
 #endif
 	{
-#ifndef __IOS__
 		m_pointer = RenderingEngine::get_raw_device()->getCursorControl()->getPosition();
-#endif
 	}
 
 	/*
@@ -3807,11 +3819,9 @@ void GUIFormSpecMenu::drawMenu()
 	gui::IGUIElement *hovered =
 			Environment->getRootGUIElement()->getElementFromPoint(m_pointer);
 
-#ifndef __IOS__
 	gui::ICursorControl *cursor_control = RenderingEngine::get_raw_device()->
 			getCursorControl();
 	gui::ECURSOR_ICON current_cursor_icon = cursor_control->getActiveIcon();
-#endif
 	bool hovered_element_found = false;
 
 	if (hovered != NULL) {
@@ -3847,11 +3857,9 @@ void GUIFormSpecMenu::drawMenu()
 							m_tooltips[field.fname].bgcolor);
 				}
 
-#ifndef __IOS__
 				if (field.ftype != f_HyperText && // Handled directly in guiHyperText
 						current_cursor_icon != field.fcursor_icon)
 					cursor_control->setActiveIcon(field.fcursor_icon);
-#endif
 
 				hovered_element_found = true;
 
@@ -3862,10 +3870,8 @@ void GUIFormSpecMenu::drawMenu()
 
 	if (!hovered_element_found) {
 		// no element is hovered
-#ifndef __IOS__
 		if (current_cursor_icon != ECI_NORMAL)
 			cursor_control->setActiveIcon(ECI_NORMAL);
-#endif
 	}
 
 	m_tooltip_element->draw();

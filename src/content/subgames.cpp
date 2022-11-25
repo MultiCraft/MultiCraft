@@ -66,7 +66,11 @@ SubgameSpec findSubgame(const std::string &id)
 {
 	if (id.empty())
 		return SubgameSpec();
+#ifndef __IOS__
 	std::string share = porting::path_share;
+#else
+	std::string share = porting::path_games;
+#endif
 	std::string user = porting::path_user;
 
 	// Get games install locations
@@ -133,13 +137,17 @@ SubgameSpec findSubgame(const std::string &id)
 	if (conf.exists("release"))
 		game_release = conf.getS32("release");
 
+	bool moddable = true;
+	if (conf.exists("moddable"))
+		moddable = conf.getBool("moddable");
+
 	std::string menuicon_path;
 #ifndef SERVER
 	menuicon_path = getImagePath(
 			game_path + DIR_DELIM + "menu" + DIR_DELIM + "icon.png");
 #endif
 	return SubgameSpec(id, game_path, gamemod_path, mods_paths, game_name,
-			menuicon_path, game_author, game_release);
+			menuicon_path, game_author, game_release, moddable);
 }
 
 SubgameSpec findWorldSubgame(const std::string &world_path)
@@ -171,7 +179,11 @@ std::set<std::string> getAvailableGameIds()
 {
 	std::set<std::string> gameids;
 	std::set<std::string> gamespaths;
+#ifndef __IOS__
 	gamespaths.insert(porting::path_share + DIR_DELIM + "games");
+#else
+	gamespaths.insert(porting::path_games + DIR_DELIM + "games");
+#endif
 	gamespaths.insert(porting::path_user + DIR_DELIM + "games");
 
 	Strfnd search_paths(getSubgamePathEnv());

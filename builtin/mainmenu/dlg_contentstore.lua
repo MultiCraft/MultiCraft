@@ -15,6 +15,8 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+local esc = core.formspec_escape
+
 if not core.get_http_api then
 	function create_store_dlg()
 		return messagebox("store",
@@ -104,9 +106,6 @@ local function start_install(package)
 				elseif package.type == "game" then
 					conf_path = path .. DIR_DELIM .. "game.conf"
 					name_is_title = true
-
-					ui.childlist = {}
-					menudata.init_tabs()
 				elseif package.type == "txp" then
 					conf_path = path .. DIR_DELIM .. "texture_pack.conf"
 				end
@@ -325,7 +324,7 @@ function install_dialog.get_formspec()
 			selected_game_idx = i
 		end
 
-		games[i] = core.formspec_escape(games[i].name)
+		games[i] = esc(games[i].name)
 	end
 
 	local selected_game = pkgmgr.games[selected_game_idx]
@@ -336,7 +335,7 @@ function install_dialog.get_formspec()
 	local formatted_deps = {}
 	for _, dep in pairs(install_dialog.dependencies) do
 		formatted_deps[#formatted_deps + 1] = "#fff"
-		formatted_deps[#formatted_deps + 1] = core.formspec_escape(dep.name)
+		formatted_deps[#formatted_deps + 1] = esc(dep.name)
 		if dep.installed then
 			formatted_deps[#formatted_deps + 1] = "#ccf"
 			formatted_deps[#formatted_deps + 1] = fgettext("Already installed")
@@ -368,8 +367,9 @@ function install_dialog.get_formspec()
 	local formspec = {
 		"formspec_version[3]",
 		"size[7,7.85]",
+		"bgcolor[#0000]",
+		"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png", ";true;40]",
 		"style[title;border=false]",
-		"box[0,0;7,0.5;#3333]",
 		"button[0,0;7,0.5;title;", fgettext("Install $1", package.title) , "]",
 
 		"container[0.375,0.70]",
@@ -388,13 +388,13 @@ function install_dialog.get_formspec()
 			fgettext("Install missing dependencies"), ";",
 			will_install_deps and "true" or "false", "]",
 
-		"box[0,5.4;7,1.2;", message_bg, "]",
+		"box[0.04,5.4;6.94,1.2;", message_bg, "]",
 		"textarea[0.375,5.5;6.25,1;;;", message, "]",
 
-		"container[1.375,6.85]",
-		"button[0,0;2,0.8;install_all;", fgettext("Install"), "]",
-		"button[2.25,0;2,0.8;cancel;", fgettext("Cancel"), "]",
-		"container_end[]",
+		btn_style("install_all"),
+		"button[0.5,6.85;2.8,0.8;install_all;", fgettext("Install"), "]",
+		btn_style("cancel"),
+		"button[3.75,6.85;2.8,0.8;cancel;", fgettext("Cancel"), "]",
 	}
 
 	return table.concat(formspec, "")
@@ -455,11 +455,12 @@ local confirm_overwrite = {}
 function confirm_overwrite.get_formspec()
 	local package = confirm_overwrite.package
 
-	return "size[11.5,4.5,true]" ..
+	return "size[11.5,4.5]" ..
 			"label[2,2;" ..
 			fgettext("\"$1\" already exists. Would you like to overwrite it?", package.name) .. "]"..
-			"style[install;bgcolor=red]" ..
+			btn_style("install", "red") ..
 			"button[3.25,3.5;2.5,0.5;install;" .. fgettext("Overwrite") .. "]" ..
+			btn_style("cancel") ..
 			"button[5.75,3.5;2.5,0.5;cancel;" .. fgettext("Cancel") .. "]"
 end
 
@@ -498,9 +499,9 @@ end
 
 local function get_screenshot(package)
 	if not package.thumbnail then
-		return defaulttexturedir .. "no_screenshot.png"
+		return defaulttexturedir_esc .. "no_screenshot.png"
 	elseif screenshot_downloading[package.thumbnail] then
-		return defaulttexturedir .. "loading_screenshot.png"
+		return defaulttexturedir_esc .. "loading_screenshot.png"
 	end
 
 	-- Get tmp screenshot path
@@ -512,12 +513,12 @@ local function get_screenshot(package)
 	local file = io.open(filepath, "r")
 	if file then
 		file:close()
-		return filepath
+		return esc(filepath)
 	end
 
 	-- Show error if we've failed to download before
 	if screenshot_downloaded[package.thumbnail] then
-		return defaulttexturedir .. "error_screenshot.png"
+		return defaulttexturedir_esc .. "error_screenshot.png"
 	end
 
 	-- Download
@@ -538,10 +539,10 @@ local function get_screenshot(package)
 		screenshot_downloading[package.thumbnail] = true
 	else
 		core.log("error", "ERROR: async event failed")
-		return defaulttexturedir .. "error_screenshot.png"
+		return defaulttexturedir_esc .. "error_screenshot.png"
 	end
 
-	return defaulttexturedir .. "loading_screenshot.png"
+	return defaulttexturedir_esc .. "loading_screenshot.png"
 end
 
 function store.load()
@@ -703,40 +704,48 @@ function store.get_formspec(dlgdata)
 	if #store.packages_full > 0 then
 		formspec = {
 			"formspec_version[3]",
-			"size[15.75,9.5;false]",
-			"bgcolor[#0000]" ..
-			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
-				"bg_common.png"), ";true;40]",
+			"size[15.75,9.5]",
+			"bgcolor[#0000]",
+			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 
 			"style[status,downloading,queued;border=false]",
 
 			"container[0.375,0.375]",
-			"field[0,0;7.225,0.8;search_string;;", core.formspec_escape(search_string), "]",
+			"image[0,0;7.25,0.8;", defaulttexturedir_esc, "field_bg.png;32]",
+			"style[search_string;border=false;bgcolor=transparent]",
+			"field[0.1,0;7.15,0.8;search_string;;", esc(search_string), "]",
 			"field_close_on_enter[search_string;false]",
-			"image_button[7.3,0;0.8,0.8;", core.formspec_escape(defaulttexturedir .. "search.png"), ";search;;true;false]",
-		--	"image_button[8.125,0;0.8,0.8;", core.formspec_escape(defaulttexturedir .. "clear.png"), ";clear;;true;false]",
-		--	"dropdown[9.6,0;2.4,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
+			"set_focus[search_string;true]",
+			btn_style("search"),
+			"image_button[7.4,0;0.8,0.8;", defaulttexturedir_esc, "search.png;search;;true;false]",
+		--	"image_button[8.125,0;0.8,0.8;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
+			"dropdown[8.35,0;3.5,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
 			"container_end[]",
 
 			-- Page nav buttons
 			"container[0,", H - 0.8 - 0.375, "]",
-			"style[back;padding=-5;bgimg=", core.formspec_escape(defaulttexturedir .. "select_btn.png"), ";bgimg_middle=10]",
-			"image_button[0.375,0;5,0.8;;back;", "< ", fgettext("Back to Main Menu"), ";true;false]",
+			btn_style("back"),
+			"button[0.375,0;5,0.8;back;< ", fgettext("Back to Main Menu"), "]",
 
 			"container[", W - 0.375 - 0.8*4 - 2,  ",0]",
-			"image_button[0,0;0.8,0.8;", core.formspec_escape(defaulttexturedir), "start_icon.png;pstart;]",
-			"image_button[0.8,0;0.8,0.8;", core.formspec_escape(defaulttexturedir), "prev_icon.png;pback;]",
+			btn_style("pstart"),
+			"image_button[-0.1,0;0.8,0.8;", defaulttexturedir_esc, "start_icon.png;pstart;;true;false]",
+			btn_style("pback"),
+			"image_button[0.8,0;0.8,0.8;", defaulttexturedir_esc, "prev_icon.png;pback;;true;false]",
 			"style[pagenum;border=false]",
-			"button[1.6,0;2,0.8;pagenum;", tonumber(cur_page), " / ", tonumber(dlgdata.pagemax), "]",
-			"image_button[3.6,0;0.8,0.8;", core.formspec_escape(defaulttexturedir), "next_icon.png;pnext;]",
-			"image_button[4.4,0;0.8,0.8;", core.formspec_escape(defaulttexturedir), "end_icon.png;pend;]",
+			"button[1.5,0;2,0.8;pagenum;", tonumber(cur_page), " / ", tonumber(dlgdata.pagemax), "]",
+			btn_style("pnext"),
+			"image_button[3.5,0;0.8,0.8;", defaulttexturedir_esc, "next_icon.png;pnext;;true;false]",
+			btn_style("pend"),
+			"image_button[4.4,0;0.8,0.8;", defaulttexturedir_esc, "end_icon.png;pend;;true;false]",
 			"container_end[]",
 
 			"container_end[]",
 		}
 
 		if number_downloading > 0 then
-			formspec[#formspec + 1] = "button[12.75,0.375;2.625,0.8;downloading;"
+			formspec[#formspec + 1] = "style[downloading;content_offset=0]"
+			formspec[#formspec + 1] = "button[12.4,0.375;3.1,0.8;downloading;"
 			if #download_queue > 0 then
 				formspec[#formspec + 1] = fgettext("$1 downloading,\n$2 queued", number_downloading, #download_queue)
 			else
@@ -754,32 +763,33 @@ function store.get_formspec(dlgdata)
 			end
 
 			if num_avail_updates == 0 then
-				formspec[#formspec + 1] = "button[12.65,0.375;2.825,0.8;status;"
+				formspec[#formspec + 1] = "style[status;content_offset=0]"
+				formspec[#formspec + 1] = "button[12.4,0.375;3.1,0.8;status;"
 				formspec[#formspec + 1] = fgettext("No updates")
 				formspec[#formspec + 1] = "]"
 			else
-				formspec[#formspec + 1] = "button[12.75,0.375;2.625,0.8;update_all;"
+				formspec[#formspec + 1] = "style[update_all;content_offset=0]"
+				formspec[#formspec + 1] = btn_style("update_all")
+				formspec[#formspec + 1] = "button[12.4,0.375;3.1,0.8;update_all;"
 				formspec[#formspec + 1] = fgettext("Update All [$1]", num_avail_updates)
 				formspec[#formspec + 1] = "]"
 			end
 		end
 
 		if #store.packages == 0 then
-			formspec[#formspec + 1] = "label[4,3;"
+			formspec[#formspec + 1] = "style[msg;content_offset=0]"
+			formspec[#formspec + 1] = "image_button[1,4.25;13.75,1;;msg;"
 			formspec[#formspec + 1] = fgettext("No results")
-			formspec[#formspec + 1] = "]"
+			formspec[#formspec + 1] = ";false;false]"
 		end
 	else
 		formspec = {
-			"size[12,6.4;false]",
-			"bgcolor[#0000]" ..
-			"background9[0,0;0,0;", core.formspec_escape(defaulttexturedir ..
-				"bg_common.png"), ";true;40]",
+			"size[12,6.4]",
+			"bgcolor[#0000]",
+			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 			"label[4,3;", fgettext("No packages could be retrieved"), "]",
-			"container[0,", H - 0.8 - 0.375 - 2, "]",
-			"style[back;padding=-5;bgimg=", core.formspec_escape(defaulttexturedir .. "select_btn.png"), ";bgimg_middle=10]",
-			"image_button[0,0;4,0.8;;back;", "< ", fgettext("Back to Main Menu"), ";true;false]",
-			"container_end[]",
+			btn_style("back"),
+			"button[0-0.11,5.8;5.5,0.9;back;< ", fgettext("Back to Main Menu"), "]",
 		}
 	end
 
@@ -798,29 +808,29 @@ function store.get_formspec(dlgdata)
 
 		-- image
 		formspec[#formspec + 1] = "image[0,0;1.5,1;"
-		formspec[#formspec + 1] = core.formspec_escape(get_screenshot(package))
+		formspec[#formspec + 1] = get_screenshot(package)
 		formspec[#formspec + 1] = "]"
 
 		-- title
 		formspec[#formspec + 1] = "label[1.875,0.1;"
-		formspec[#formspec + 1] = core.formspec_escape(
+		formspec[#formspec + 1] = esc(
 				core.colorize(mt_color_green, package.title) ..
 				core.colorize("#BFBFBF", " by " .. package.author))
 		formspec[#formspec + 1] = "]"
 
 		-- buttons
-		local left_base = "image_button[-1.55,0;0.7,0.7;" .. core.formspec_escape(defaulttexturedir)
+		local left_base = "image_button[-1.55,0;0.7,0.7;" .. defaulttexturedir_esc
 		formspec[#formspec + 1] = "container["
 		formspec[#formspec + 1] = W - 0.375*2
 		formspec[#formspec + 1] = ",0.1]"
 
 		if package.downloading then
 			formspec[#formspec + 1] = "animated_image[-1.7,-0.15;1,1;downloading;"
-			formspec[#formspec + 1] = core.formspec_escape(defaulttexturedir)
-			formspec[#formspec + 1] = "cdb_downloading.png;3;400;]"
+			formspec[#formspec + 1] = defaulttexturedir_esc
+			formspec[#formspec + 1] = "cdb_downloading.png;4;300;]"
 		elseif package.queued then
 			formspec[#formspec + 1] = left_base
-			formspec[#formspec + 1] = core.formspec_escape(defaulttexturedir)
+			formspec[#formspec + 1] = defaulttexturedir_esc
 			formspec[#formspec + 1] = "cdb_queued.png;queued]"
 		elseif not package.path then
 			local elem_name = "install_" .. i .. ";"
@@ -846,7 +856,7 @@ function store.get_formspec(dlgdata)
 
 		local web_elem_name = "view_" .. i .. ";"
 		formspec[#formspec + 1] = "image_button[-0.7,0;0.7,0.7;" ..
-			core.formspec_escape(defaulttexturedir) .. "cdb_viewonline.png;" .. web_elem_name .. "]"
+			defaulttexturedir_esc .. "cdb_viewonline.png;" .. web_elem_name .. "]"
 		formspec[#formspec + 1] = "tooltip[" .. web_elem_name ..
 			fgettext("View more information in a web browser") .. tooltip_colors
 		formspec[#formspec + 1] = "container_end[]"
@@ -857,7 +867,7 @@ function store.get_formspec(dlgdata)
 		formspec[#formspec + 1] = "textarea[1.855,0.3;"
 		formspec[#formspec + 1] = tostring(description_width)
 		formspec[#formspec + 1] = ",0.8;;;"
-		formspec[#formspec + 1] = core.formspec_escape(package.short_description)
+		formspec[#formspec + 1] = esc(package.short_description)
 		formspec[#formspec + 1] = "]"
 		formspec[#formspec + 1] = "style_type[textarea;font_size=]"
 
@@ -955,7 +965,7 @@ function store.handle_submit(this, fields)
 
 			local function on_confirm()
 				local deps = get_raw_dependencies(package)
-				if deps and has_hard_deps(deps) then
+				if deps and has_hard_deps(deps) and #pkgmgr.games > 0 then
 					local dlg = install_dialog.create(package, deps)
 					dlg:set_parent(this)
 					this:hide()
@@ -1007,11 +1017,6 @@ function create_store_dlg(type)
 
 	search_string = ""
 	cur_page = 1
-
-	-- ToDo: delete me when MultiCraft ContentDB is ready
-	if type and type ~= "game" then
-		type = "game"
-	end
 
 	if type then
 		-- table.indexof does not work on tables that contain `nil`

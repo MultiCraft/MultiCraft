@@ -241,7 +241,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 				LL_NONE,    // ELL_NONE
 		};
 		assert(event.LogEvent.Level < ARRLEN(irr_loglev_conv));
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#ifndef NDEBUG
 		g_logger.log(irr_loglev_conv[event.LogEvent.Level],
 				std::string("Irrlicht: ") + event.LogEvent.Text);
 #endif

@@ -8,8 +8,6 @@
 		android:layout_width="512dp"
 		android:layout_height="64dp"
 		android:layout_centerInParent="true"
-		android:layout_marginLeft="120dp"
-		android:layout_marginRight="120dp"
 		android:indeterminate="false"
 		android:max="100"
 		android:progressDrawable="@drawable/progress"
@@ -23,14 +21,14 @@
 		android:layout_centerInParent="true"
 		android:indeterminate="true" />
 
-	<TextView
+	<androidx.appcompat.widget.AppCompatTextView
 		android:id="@+id/tv_progress"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_below="@id/progress_circle"
 		android:layout_centerInParent="true"
 		android:text="@string/loading"
-		android:textColor="@color/not_white"
+		android:textColor="@color/light"
 		android:textSize="14sp" />
 
 </RelativeLayout>

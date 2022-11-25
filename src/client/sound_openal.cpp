@@ -50,7 +50,7 @@ with this program; ifnot, write to the Free Software Foundation, Inc.,
 
 #define BUFFER_SIZE 30000
 
-std::shared_ptr<SoundManagerSingleton> g_sound_manager_singleton;
+SoundManagerSingleton* g_sound_manager_singleton = nullptr;
 
 typedef std::unique_ptr<ALCdevice, void (*)(ALCdevice *p)> unique_ptr_alcdevice;
 typedef std::unique_ptr<ALCcontext, void(*)(ALCcontext *p)> unique_ptr_alccontext;
@@ -707,13 +707,20 @@ public:
 	}
 };
 
-std::shared_ptr<SoundManagerSingleton> createSoundManagerSingleton()
+SoundManagerSingleton* createSoundManagerSingleton()
 {
-	auto smg = std::make_shared<SoundManagerSingleton>();
+	auto smg = new SoundManagerSingleton();
 	if (!smg->init()) {
-		smg.reset();
+		delete smg;
+		smg = nullptr;
 	}
 	return smg;
+}
+
+void deleteSoundManagerSingleton(SoundManagerSingleton* smg)
+{
+	delete smg;
+	smg = nullptr;
 }
 
 ISoundManager *createOpenALSoundManager(SoundManagerSingleton *smg, OnDemandSoundFetcher *fetcher)

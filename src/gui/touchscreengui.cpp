@@ -437,7 +437,7 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device, IEventReceiver *receiver)
 	}
 
 	m_touchscreen_threshold = g_settings->getU16("touchscreen_threshold");
-	m_mouse_sensitivity = rangelim(g_settings->getFloat("mouse_sensitivity"), 0.1, 1.0);
+	m_touch_sensitivity = rangelim(g_settings->getFloat("touch_sensitivity"), 0.1, 1.0);
 	m_fixed_joystick = g_settings->getBool("fixed_virtual_joystick");
 	m_joystick_triggers_special1 = g_settings->getBool("virtual_joystick_triggers_aux");
 	m_screensize = m_device->getVideoDriver()->getScreenSize();
@@ -865,6 +865,9 @@ void TouchScreenGUI::moveJoystick(const SEvent &event, float dx, float dy) {
 
 void TouchScreenGUI::translateEvent(const SEvent &event)
 {
+	if (!m_buttons_initialized)
+		return;
+
 	if (!m_visible) {
 		infostream
 			<< "TouchScreenGUI::translateEvent got event but not visible!"
@@ -991,11 +994,8 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 					s32 dx = X - m_pointerpos[event.TouchInput.ID].X;
 					s32 dy = Y - m_pointerpos[event.TouchInput.ID].Y;
 
-					// adapt to similar behaviour as pc screen
-					double d = m_mouse_sensitivity;
-
-					m_camera_yaw_change -= dx * d;
-					m_camera_pitch = MYMIN(MYMAX(m_camera_pitch + (dy * d), -180), 180);
+					m_camera_yaw_change -= dx * m_touch_sensitivity;
+					m_camera_pitch = MYMIN(MYMAX(m_camera_pitch + (dy * m_touch_sensitivity), -180), 180);
 
 					// update shootline
 					m_shootline = m_device

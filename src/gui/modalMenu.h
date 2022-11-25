@@ -56,7 +56,6 @@ public:
 	virtual bool pausesGame() { return false; } // Used for pause menu
 #if defined(__ANDROID__) || defined(__IOS__)
 	virtual bool getAndroidUIInput() { return false; }
-	bool hasAndroidUIInput();
 #endif
 
 protected:

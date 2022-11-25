@@ -1,6 +1,6 @@
 /*
 MultiCraft
-Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <MoNTE48@mail.ua>
+Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
 Copyright (C) 2014-2022 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
@@ -27,14 +27,17 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.view.*
+import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.InputTextBinding
-import com.multicraft.game.helpers.Utilities.finishApp
-import com.multicraft.game.helpers.Utilities.makeFullScreen
+import com.multicraft.game.databinding.MultilineInputBinding
+import com.multicraft.game.helpers.*
+import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import org.libsdl.app.SDLActivity
 
 class GameActivity : SDLActivity() {
@@ -63,7 +66,7 @@ class GameActivity : SDLActivity() {
 		return getContext().applicationInfo.nativeLibraryDir + "/libMultiCraft.so"
 	}
 
-	public override fun onCreate(savedInstanceState: Bundle?) {
+	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		hasKeyboard = resources.configuration.hardKeyboardHidden == HARDKEYBOARDHIDDEN_NO
@@ -72,7 +75,7 @@ class GameActivity : SDLActivity() {
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
 		super.onWindowFocusChanged(hasFocus)
-		if (hasFocus) makeFullScreen(window)
+		if (hasFocus) window.makeFullScreen()
 	}
 
 	@Deprecated("Deprecated in Java")
@@ -87,7 +90,7 @@ class GameActivity : SDLActivity() {
 
 	override fun onResume() {
 		super.onResume()
-		makeFullScreen(window)
+		window.makeFullScreen()
 	}
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
@@ -101,36 +104,36 @@ class GameActivity : SDLActivity() {
 	}
 
 	@Suppress("unused")
-	fun showDialog(
-		@Suppress("UNUSED_PARAMETER") s: String?,
-		hint: String?, current: String?, editType: Int
-	) {
-		runOnUiThread { showDialogUI(hint, current, editType) }
+	fun showDialog(hint: String?, current: String?, editType: Int) {
+		messageReturnValue = ""
+		messageReturnCode = -1
+		if (editType == 1)
+			runOnUiThread { showMultiLineDialog(hint, current) }
+		else
+			runOnUiThread { showSingleDialog(hint, current, editType) }
 	}
 
-	private fun showDialogUI(hint: String?, current: String?, editType: Int) {
+	private fun showSingleDialog(hint: String?, current: String?, editType: Int) {
 		isInputActive = true
-		val builder = AlertDialog.Builder(this)
-		if (editType == 1) builder.setPositiveButton(R.string.done, null)
+		val builder = AlertDialog.Builder(this, R.style.FullScreenDialogStyle)
 		val binding = InputTextBinding.inflate(layoutInflater)
-		val hintText = hint?.ifEmpty {
+		var hintText: String = hint?.ifEmpty {
 			resources.getString(if (editType == 3) R.string.input_password else R.string.input_text)
-		}
-		binding.inputLayout.hint = hintText
+		}.toString()
+		hintText = hintText.replace(":$".toRegex(), "")
+		binding.input.hint = hintText
 		builder.setView(binding.root)
 		val alertDialog = builder.create()
 		val editText = binding.editText
 		editText.requestFocus()
 		editText.setText(current.toString())
-		if (editType != 1) editText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
+		editText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
 		val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 		var inputType = InputType.TYPE_CLASS_TEXT
-		when (editType) {
-			1 -> {
-				inputType = inputType or InputType.TYPE_TEXT_FLAG_MULTI_LINE
-				editText.maxLines = 8
-			}
-			3 -> inputType = inputType or InputType.TYPE_TEXT_VARIATION_PASSWORD
+		if (editType == 3) {
+			inputType = inputType or InputType.TYPE_TEXT_VARIATION_PASSWORD
+			if (isOreo())
+				editText.importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO
 		}
 		editText.inputType = inputType
 		editText.setSelection(editText.text?.length ?: 0)
@@ -138,8 +141,8 @@ class GameActivity : SDLActivity() {
 		editText.setOnEditorActionListener { _: TextView?, KeyCode: Int, _: KeyEvent? ->
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
-				messageReturnCode = 0
 				messageReturnValue = editText.text.toString()
+				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnEditorActionListener true
@@ -150,27 +153,105 @@ class GameActivity : SDLActivity() {
 		editText.setOnKeyListener { _: View?, KeyCode: Int, _: KeyEvent? ->
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
-				messageReturnCode = 0
 				messageReturnValue = editText.text.toString()
+				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnKeyListener true
 			}
 			return@setOnKeyListener false
 		}
-		// should be above `show()`
-		alertDialog.window!!.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE)
-		alertDialog.show()
-		val button = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
-		button?.setOnClickListener {
+		binding.input.setEndIconOnClickListener {
 			imm.hideSoftInputFromWindow(editText.windowToken, 0)
-			messageReturnCode = 0
 			messageReturnValue = editText.text.toString()
+			messageReturnCode = 0
 			alertDialog.dismiss()
 			isInputActive = false
 		}
+		binding.rl.setOnClickListener {
+			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+			messageReturnValue = current.toString()
+			messageReturnCode = 0
+			alertDialog.dismiss()
+			isInputActive = false
+		}
+		val alertWindow = alertDialog.window!!
+		// should be above `show()`
+		alertWindow.setSoftInputMode(SOFT_INPUT_STATE_VISIBLE)
+		alertDialog.show()
+		if (!resources.getBoolean(R.bool.isTablet))
+			alertWindow.makeFullScreenAlert()
 		alertDialog.setOnCancelListener {
-			window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+			messageReturnValue = current.toString()
+			messageReturnCode = 0
+			isInputActive = false
+		}
+	}
+
+	private fun showMultiLineDialog(hint: String?, current: String?) {
+		isInputActive = true
+		val builder = AlertDialog.Builder(this, R.style.FullScreenDialogStyle)
+		val binding = MultilineInputBinding.inflate(layoutInflater)
+		var hintText: String = hint?.ifEmpty {
+			resources.getString(R.string.input_text)
+		}.toString()
+		hintText = hintText.replace(":$".toRegex(), "")
+		binding.multiInput.hint = hintText
+		builder.setView(binding.root)
+		val alertDialog = builder.create()
+		val editText = binding.multiEditText
+		editText.requestFocus()
+		editText.setText(current.toString())
+		editText.imeOptions = EditorInfo.IME_FLAG_NO_FULLSCREEN
+		editText.setSelection(editText.text?.length ?: 0)
+		val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+		// for Android OS
+		editText.setOnEditorActionListener { _: TextView?, KeyCode: Int, _: KeyEvent? ->
+			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
+				imm.hideSoftInputFromWindow(editText.windowToken, 0)
+				messageReturnValue = editText.text.toString()
+				messageReturnCode = 0
+				alertDialog.dismiss()
+				isInputActive = false
+				return@setOnEditorActionListener true
+			}
+			return@setOnEditorActionListener false
+		}
+		// for Chrome OS
+		editText.setOnKeyListener { _: View?, KeyCode: Int, _: KeyEvent? ->
+			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
+				imm.hideSoftInputFromWindow(editText.windowToken, 0)
+				messageReturnValue = editText.text.toString()
+				messageReturnCode = 0
+				alertDialog.dismiss()
+				isInputActive = false
+				return@setOnKeyListener true
+			}
+			return@setOnKeyListener false
+		}
+		binding.multiInput.setEndIconOnClickListener {
+			imm.hideSoftInputFromWindow(editText.windowToken, 0)
+			messageReturnValue = editText.text.toString()
+			messageReturnCode = 0
+			alertDialog.dismiss()
+			isInputActive = false
+		}
+		binding.multiRl.setOnClickListener {
+			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+			messageReturnValue = current.toString()
+			messageReturnCode = -1
+			alertDialog.dismiss()
+			isInputActive = false
+		}
+		// should be above `show()`
+		val alertWindow = alertDialog.window!!
+		alertWindow.setSoftInputMode(SOFT_INPUT_STATE_VISIBLE)
+		alertDialog.show()
+		if (!resources.getBoolean(R.bool.isTablet))
+			alertWindow.makeFullScreenAlert()
+		alertDialog.setOnCancelListener {
+			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			messageReturnCode = -1
 			isInputActive = false
@@ -209,7 +290,7 @@ class GameActivity : SDLActivity() {
 
 	@Suppress("unused")
 	fun finishGame(exc: String?) {
-		finishApp(true, this)
+		finishApp(true)
 	}
 
 	@Suppress("unused")
@@ -218,6 +299,11 @@ class GameActivity : SDLActivity() {
 
 	@Suppress("unused")
 	fun upgrade(item: String) {
+	}
+
+	@Suppress("unused")
+	fun getSecretKey(key: String): String {
+		return "Stub"
 	}
 
 	@Suppress("unused")

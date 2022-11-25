@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <IrrlichtDevice.h>
 #include <irrlicht.h>
+#include "filesys.h"
 #include "fontengine.h"
 #include "client.h"
 #include "clouds.h"
@@ -52,21 +53,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <winuser.h>
 #endif
 
-#if ENABLE_GLES
-#include "filesys.h"
-#endif
-
 #ifdef __ANDROID__
 #include "defaultsettings.h"
-#endif
-
-#ifdef __IOS__
-namespace irr {
-	class CIrrDeviceiOS : public IrrlichtDevice {
-	public:
-		void *getViewController();
-	};
-}
 #endif
 
 RenderingEngine *RenderingEngine::s_singleton = nullptr;
@@ -169,13 +157,6 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	// We can get real screen size only after device initialization finished
 	if (m_device)
 		set_default_settings();
-#endif
-
-#ifdef __IOS__
-	if (m_device) {
-		CIrrDeviceiOS* dev = (CIrrDeviceiOS*) m_device;
-		porting::setViewController(dev->getViewController());
-	}
 #endif
 }
 
@@ -540,11 +521,14 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 
 	// draw progress bar
 	if ((percent >= 0) && (percent <= 100)) {
-		video::ITexture *progress_img = tsrc->getTexture("progress_bar.png");
+		std::string texture_path = porting::path_share + DIR_DELIM + "textures"
+				+ DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM;
+		video::ITexture *progress_img =
+				driver->getTexture((texture_path + "progress_bar.png").c_str());
 		video::ITexture *progress_img_bg =
-				tsrc->getTexture("progress_bar_bg.png");
+				driver->getTexture((texture_path + "progress_bar_bg.png").c_str());
 		video::ITexture *progress_img_fg =
-				tsrc->getTexture("progress_bar_fg.png");
+				driver->getTexture((texture_path + "progress_bar_fg.png").c_str());
 
 		if (progress_img && progress_img_bg && progress_img_fg) {
 			const core::dimension2d<u32> &img_size =
@@ -801,3 +785,15 @@ v2u32 RenderingEngine::getDisplaySize()
 	return engine->getWindowSize();
 }
 #endif // __ANDROID__/__IOS__
+
+bool RenderingEngine::isHighDpi()
+{
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	return g_settings->getFloat("screen_dpi") / 72.0f >= 2;
+#elif defined(__IOS__)
+	float density = RenderingEngine::getDisplayDensity();
+	return g_settings->getBool("device_is_tablet") ? (density >= 2) : (density >= 3);
+#else
+	return RenderingEngine::getDisplayDensity() >= 3;
+#endif
+}

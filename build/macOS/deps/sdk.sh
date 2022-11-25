@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# This file sets the appropriate compiler and flags for compiling for macOS without XCode
+# This file sets the appropriate compiler and flags for compiling for macOS without Xcode
 sdk=macosx
 export OSX_OSVER=10.11
 
@@ -11,4 +11,4 @@ export OSX_ARCH="-arch x86_64 -arch arm64"
 export OSX_COMPILER=$(xcrun --sdk $sdk --find clang)
 export OSX_CC=$OSX_COMPILER
 export OSX_CXX=$OSX_COMPILER
-export OSX_FLAGS="-isysroot $(xcrun --sdk $sdk --show-sdk-path) -mmacosx-version-min=$OSX_OSVER -fvisibility=hidden -fdata-sections -ffunction-sections -fno-unwind-tables -fno-asynchronous-unwind-tables -Ofast"
+export OSX_FLAGS="-isysroot $(xcrun --sdk $sdk --show-sdk-path) -mmacosx-version-min=$OSX_OSVER -fdata-sections -ffunction-sections -fno-unwind-tables -fno-asynchronous-unwind-tables -Ofast"
