@@ -63,7 +63,7 @@ files["builtin/common/filterlist.lua"] = {
 	},
 }
 
-files["builtin/client"] = {
+files["builtin/common/btn_style.lua"] = {
 	read_globals = {
 		"PLATFORM",
 	},
