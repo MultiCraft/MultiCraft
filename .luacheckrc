@@ -63,6 +63,12 @@ files["builtin/common/filterlist.lua"] = {
 	},
 }
 
+files["builtin/client"] = {
+	read_globals = {
+		"PLATFORM",
+	},
+}
+
 files["builtin/mainmenu"] = {
 	globals = {
 		"gamedata",

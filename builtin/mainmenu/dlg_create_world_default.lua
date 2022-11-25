@@ -15,14 +15,15 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-local mapgens = {"v7p", "flat", "valleys", "superflat"}
+local mapgens = {"v7p", "valleys", "flat", "superflat"}
+local mapgen_names = {"Default", "Valleys", "Flat", "Superflat"}
 
 local function create_world_formspec()
 	local current_seed = core.settings:get("fixed_map_seed") or ""
 	local current_mg   = core.settings:get("mg_name")
 
 	local selindex = math.max(table.indexof(mapgens, current_mg), 1)
-	local mglist = table.concat(mapgens, ",")
+	local mglist = table.concat(mapgen_names, ",")
 
 	return "real_coordinates[true]formspec_version[3]" ..
 
@@ -35,7 +36,7 @@ local function create_world_formspec()
 		"field[3.55,2.5;8.4,0.8;te_seed;" .. fgettext("Seed") .. ":;".. current_seed .. "]" ..
 
 		"label[3.5,3.7;" .. fgettext("Mapgen") .. ":]"..
-		"dropdown[3.5,3.9;8.5,0.8;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
+		"dropdown[3.5,3.9;8.5,0.8;dd_mapgen;" .. mglist .. ";" .. selindex .. ";true]" ..
 
 		btn_style("world_create_confirm", "green") ..
 		"button[4.1,5.3;3.5,0.8;world_create_confirm;" .. fgettext("Create") .. "]" ..
@@ -82,17 +83,18 @@ local function create_world_buttonhandler(this, fields)
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then
 				local old_mg_flags
-				if fields["dd_mapgen"] == "superflat" then
+				local mapgen = mapgens[tonumber(fields["dd_mapgen"])]
+				if mapgen == "superflat" then
 					core.settings:set("mg_name", "flat")
 					old_mg_flags = core.settings:get("mg_flags")
 					core.settings:set("mg_flags", "nocaves,nodungeons,nodecorations")
 				else
-					core.settings:set("mg_name", fields["dd_mapgen"])
+					core.settings:set("mg_name", mapgen)
 				end
 				message = core.create_world(worldname,gameindex)
 
 				-- Restore the old mg_flags setting if creating a superflat world
-				if fields["dd_mapgen"] == "superflat" then
+				if mapgen == "superflat" then
 					core.settings:set("mg_name", "superflat")
 					if old_mg_flags then
 						core.settings:set("mg_flags", old_mg_flags)
