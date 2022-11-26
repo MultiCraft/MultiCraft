@@ -190,10 +190,9 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	infostream << "GUIEngine: Initializing Lua" << std::endl;
 
 	// Translate the error message before clearing g_client_translations
-	if (!m_data->script_data.errormessage.empty()) {
+	if (!m_data->script_data.errormessage.empty())
 		m_data->script_data.errormessage = wide_to_utf8(translate_string(
 				utf8_to_wide(m_data->script_data.errormessage)));
-	}
 
 	g_client_translations->clear();
 	m_script = new MainMenuScripting(this);
