@@ -7,7 +7,7 @@ fi
 
 DEST=$(pwd)/assets/locale
 
-pushd ../../po
+pushd ../po
 for lang in *; do
 	[ ${#lang} -ne 2 ] && continue
 	mopath=$DEST/$lang/LC_MESSAGES

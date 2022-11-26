@@ -1,16 +1,15 @@
 #!/bin/bash -e
 
-. sdk.sh
-SDL2_VERSION=2.24.2
+SDL2_VERSION=2.26.0
+
+. scripts/sdk.sh
+cd deps
 
 if [ ! -d SDL2-src ]; then
 	wget https://github.com/libsdl-org/SDL/archive/release-$SDL2_VERSION.tar.gz
 	tar -xzvf release-$SDL2_VERSION.tar.gz
 	mv SDL-release-$SDL2_VERSION SDL2-src
 	rm release-$SDL2_VERSION.tar.gz
-	# patch SDL2
-	patch -p1 < SDL2.diff
-	patch -p1 < SDL2-command-modifier.diff
 	# Disable some features that are not needed
 	sed -i '' 's/#define SDL_AUDIO_DRIVER_COREAUDIO  1/#define SDL_AUDIO_DRIVER_COREAUDIO  0/g' SDL2-src/include/SDL_config_macosx.h
 	sed -i '' 's/#define SDL_AUDIO_DRIVER_DISK   1/#define SDL_AUDIO_DRIVER_DISK   0/g' SDL2-src/include/SDL_config_macosx.h

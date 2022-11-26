@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
-. sdk.sh
 OPENAL_VERSION=1.22.2
+
+. scripts/sdk.sh
+cd deps
 
 if [ ! -d openal-src ]; then
 	git clone -b $OPENAL_VERSION --depth 1 https://github.com/kcat/openal-soft openal-src

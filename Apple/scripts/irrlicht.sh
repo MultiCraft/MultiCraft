@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
-. sdk.sh
+. scripts/sdk.sh
+cd deps
 
 [ ! -d irrlicht-src ] && \
 	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht-src

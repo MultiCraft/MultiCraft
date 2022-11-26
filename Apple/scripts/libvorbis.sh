@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
-. sdk.sh
 VORBIS_VERSION=1.3.7
+
+. scripts/sdk.sh
+cd deps
 
 if [ ! -d libvorbis-src ]; then
 	git clone -b v$VORBIS_VERSION --depth 1 https://github.com/xiph/vorbis libvorbis-src

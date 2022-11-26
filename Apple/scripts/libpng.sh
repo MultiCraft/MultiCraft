@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
-. sdk.sh
-PNG_VERSION=1.6.38
+PNG_VERSION=1.6.39
+
+. scripts/sdk.sh
+cd deps
 
 if [ ! -d libpng-src ]; then
 	wget https://download.sourceforge.net/libpng/libpng-$PNG_VERSION.tar.gz

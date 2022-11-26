@@ -1,9 +1,10 @@
 #!/bin/bash -e
 
-. sdk.sh
-export MACOSX_DEPLOYMENT_TARGET=10.15
-
 LUAJIT_VERSION="v2.1"
+
+. scripts/sdk.sh
+export MACOSX_DEPLOYMENT_TARGET=10.15
+cd deps
 
 if [ ! -d luajit-src ]; then
 	git clone -b $LUAJIT_VERSION --depth 1 -c core.autocrlf=false https://github.com/LuaJIT/LuaJIT luajit-src

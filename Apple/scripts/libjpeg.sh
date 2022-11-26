@@ -1,7 +1,9 @@
 #!/bin/bash -e
 
-. sdk.sh
 JPEG_VERSION=2.1.4
+
+. scripts/sdk.sh
+cd deps
 
 if [ ! -d libjpeg-src ]; then
 	wget https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-$JPEG_VERSION.tar.gz
