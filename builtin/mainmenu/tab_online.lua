@@ -300,7 +300,7 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		return true
 	end
 
-	if (fields.Dte_search or fields.btn_mp_search) and not
+	if fields.Dte_search and not
 			(fields.btn_mp_connect or fields.key_enter) then
 		tabdata.selected = 1
 		local input = lower(fields.Dte_search or "")

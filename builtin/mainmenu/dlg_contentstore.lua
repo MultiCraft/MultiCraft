@@ -717,7 +717,6 @@ function store.get_formspec(dlgdata)
 			"set_focus[Dsearch_string;true]",
 			btn_style("clear"),
 			"image_button[7.4,0;0.8,0.8;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
-		--	"image_button[8.125,0;0.8,0.8;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
 			"dropdown[8.35,0;3.5,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
 			"container_end[]",
 
@@ -996,7 +995,7 @@ function store.handle_submit(this, fields)
 		end
 	end
 
-	-- should be last
+	-- Should be last
 	if fields.Dsearch_string then
 		search_string = fields.Dsearch_string:trim()
 		cur_page = 1
