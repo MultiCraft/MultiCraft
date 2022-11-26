@@ -275,8 +275,7 @@ void SDLGameController::handleMouseMovement(int x, int y)
 	v2s32 mouse_pos = device->getCursorControl()->getPosition();
 	int deadzone = g_settings->getU16("joystick_deadzone");
 
-	if (x > deadzone || x < -deadzone)
-	{
+	if (x > deadzone || x < -deadzone) {
 		s32 dt = current_time - m_mouse_time;
 
 		mouse_pos.X += (x * dt / 30000);
@@ -289,8 +288,7 @@ void SDLGameController::handleMouseMovement(int x, int y)
 		m_active = true;
 	}
 
-	if (y > deadzone || y < -deadzone)
-	{
+	if (y > deadzone || y < -deadzone) {
 		s32 dt = current_time - m_mouse_time;
 
 		mouse_pos.Y += (y * dt / 30000);
@@ -303,8 +301,7 @@ void SDLGameController::handleMouseMovement(int x, int y)
 		m_active = true;
 	}
 
-	if (changed)
-	{
+	if (changed) {
 		SEvent translated_event;
 		translated_event.EventType = irr::EET_MOUSE_INPUT_EVENT;
 		translated_event.MouseInput.Event = irr::EMIE_MOUSE_MOVED;
@@ -334,13 +331,10 @@ void SDLGameController::handleTriggerLeft(s16 value)
 	translated_event.KeyInput.Shift = false;
 	translated_event.KeyInput.Control = false;
 
-	if (value <= deadzone && m_trigger_left_value > deadzone)
-	{
+	if (value <= deadzone && m_trigger_left_value > deadzone) {
 		translated_event.KeyInput.PressedDown = false;
 		sendEvent(translated_event);
-	}
-	else if (value > deadzone && m_trigger_left_value <= deadzone)
-	{
+	} else if (value > deadzone && m_trigger_left_value <= deadzone) {
 		translated_event.KeyInput.PressedDown = true;
 		sendEvent(translated_event);
 	}
@@ -361,13 +355,10 @@ void SDLGameController::handleTriggerRight(s16 value)
 	translated_event.KeyInput.Shift = false;
 	translated_event.KeyInput.Control = false;
 
-	if (value <= deadzone && m_trigger_right_value > deadzone)
-	{
+	if (value <= deadzone && m_trigger_right_value > deadzone) {
 		translated_event.KeyInput.PressedDown = false;
 		sendEvent(translated_event);
-	}
-	else if (value > deadzone && m_trigger_right_value <= deadzone)
-	{
+	} else if (value > deadzone && m_trigger_right_value <= deadzone) {
 		translated_event.KeyInput.PressedDown = true;
 		sendEvent(translated_event);
 	}
@@ -425,8 +416,7 @@ void SDLGameController::handleButton(const SEvent &event)
 {
 	irr::EKEY_CODE key = KEY_UNKNOWN;
 
-	switch (event.SDLControllerButtonEvent.Button)
-	{
+	switch (event.SDLControllerButtonEvent.Button) {
 	case SDL_CONTROLLER_BUTTON_A:
 		key = getKeySetting("keymap_jump").getKeyCode();
 		break;
@@ -480,8 +470,7 @@ void SDLGameController::handleButton(const SEvent &event)
 		break;
 	}
 
-	if (key != KEY_UNKNOWN)
-	{
+	if (key != KEY_UNKNOWN) {
 		SEvent translated_event;
 		translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
 		translated_event.KeyInput.Char = 0;
@@ -531,8 +520,7 @@ void SDLGameController::handleButtonInMenu(const SEvent &event)
 		break;
 	}
 
-	if (key != KEY_UNKNOWN)
-	{
+	if (key != KEY_UNKNOWN) {
 		SEvent translated_event;
 		translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
 		translated_event.KeyInput.Char = 0;
@@ -589,51 +577,32 @@ void SDLGameController::sendEvent(const SEvent &event)
 
 void SDLGameController::translateEvent(const SEvent &event)
 {
-	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT)
-	{
-		if (isMenuActive())
-		{
+	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT) {
+		if (isMenuActive()) {
 			if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSTICK ||
-				event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
-			{
+					event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
 				handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
-			}
-			else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
-			{
+			} else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
 				handleMouseClickRight(event.SDLControllerButtonEvent.Pressed);
-			}
-			else
-			{
+			} else {
 				handleButtonInMenu(event);
 			}
-		}
-		else
-		{
+		} else {
 			if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ||
-				event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
-			{
-				handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
-			}
-			else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER)
-			{
+				event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
+					handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
+			} else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
 				handleMouseClickRight(event.SDLControllerButtonEvent.Pressed);
-			}
-			else
-			{
+			} else {
 				handleButton(event);
 			}
 		}
-	}
-	else if (event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT)
-	{
+	} else if (event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
 		const s16* value = event.SDLControllerAxisEvent.Value;
 
-		if (isMenuActive())
-		{
+		if (isMenuActive()) {
 			handleMouseMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
-		}
-		else
-		{
+		} else {
 			handleTriggerLeft(value[SDL_CONTROLLER_AXIS_TRIGGERLEFT]);
 			handleTriggerRight(value[SDL_CONTROLLER_AXIS_TRIGGERRIGHT]);
 			handlePlayerMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
