@@ -152,6 +152,17 @@ function menudata.init_tabs()
 		end
 	end
 
+	tv_main:add_side_button({
+		tooltip = fgettext("Settings"),
+		tab_name = "settings",
+	})
+
+	tv_main:add_side_button({
+		tooltip = fgettext("Credits"),
+		tab_name = "credits",
+		texture_prefix = "authors"
+	})
+
 	ui.set_default("maintab")
 
 	check_new_version()

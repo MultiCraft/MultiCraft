@@ -79,6 +79,8 @@ end
 --------------------------------------------------------------------------------
 local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 local function get_side_menu(self, selected_tab)
+	if #self.side_buttons == 0 then return "" end
+
 	local side_menu_h = #self.side_buttons * 1.2 + 0.2
 	local bg_y = 2.35 - side_menu_h / 2
 	local fs = {
@@ -418,17 +420,6 @@ function tabview_create(name, size, tabheaderpos)
 	self.side_buttons   = {}
 
 	self.autosave_tab   = false
-
-	self:add_side_button({
-		tooltip = fgettext("Settings"),
-		tab_name = "settings",
-	})
-
-	self:add_side_button({
-		tooltip = fgettext("Credits"),
-		tab_name = "credits",
-		texture_prefix = "authors"
-	})
 
 	ui.add(self)
 	return self
