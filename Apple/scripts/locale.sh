@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 if [ ! -d MultiCraft/MultiCraft.xcodeproj ]; then
-	echo "Run this in build/macOS"
+	echo "Run this from Apple folder"
 	exit 1
 fi
 
