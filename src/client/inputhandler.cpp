@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "inputhandler.h"
 #include "gui/mainmenumanager.h"
 #include "hud.h"
+#include "settings.h"
 
 #ifdef __IOS__
 #include "porting_ios.h"
@@ -109,7 +110,8 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT ||
 			event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
-		sdl_game_controller->translateEvent(event);
+		if (g_settings->getBool("enable_joysticks"))
+			sdl_game_controller->translateEvent(event);
 		return true;
 	} else if ((event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
 			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
