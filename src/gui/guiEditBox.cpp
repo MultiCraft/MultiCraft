@@ -265,10 +265,6 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 
 bool GUIEditBox::processKey(const SEvent &event)
 {
-	if (!m_writable) {
-		return false;
-	}
-
 	if (!event.KeyInput.PressedDown)
 		return false;
 
@@ -290,7 +286,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 	if (event.KeyInput.Control && !altPressed) {
 
 		// german backlash '\' entered with control + '?'
-		if (event.KeyInput.Char == '\\') {
+		if (m_writable && event.KeyInput.Char == '\\') {
 			inputChar(event.KeyInput.Char);
 			return true;
 		}
@@ -305,10 +301,12 @@ bool GUIEditBox::processKey(const SEvent &event)
 			onKeyControlC(event);
 			break;
 		case KEY_KEY_X:
-			text_changed = onKeyControlX(event, new_mark_begin, new_mark_end);
+			if (m_writable)
+				text_changed = onKeyControlX(event, new_mark_begin, new_mark_end);
 			break;
 		case KEY_KEY_V:
-			text_changed = onKeyControlV(event, new_mark_begin, new_mark_end);
+			if (m_writable)
+				text_changed = onKeyControlV(event, new_mark_begin, new_mark_end);
 			break;
 		case KEY_HOME:
 			// move/highlight to start of text
@@ -382,13 +380,16 @@ bool GUIEditBox::processKey(const SEvent &event)
 			m_blink_start_time = porting::getTimeMs();
 		} break;
 		case KEY_RETURN:
-			if (m_multiline) {
-				inputChar(L'\n');
-			} else {
-				calculateScrollPos();
-				sendGuiEvent(EGET_EDITBOX_ENTER);
-			}
-			return true;
+			if (m_writable) {
+				if (m_multiline) {
+					inputChar(L'\n');
+				} else {
+					calculateScrollPos();
+					sendGuiEvent(EGET_EDITBOX_ENTER);
+				}
+				return true;
+			} 
+			break;
 		case KEY_LEFT:
 			if (event.KeyInput.Shift) {
 				if (m_cursor_pos > 0) {
@@ -434,11 +435,13 @@ bool GUIEditBox::processKey(const SEvent &event)
 			}
 			break;
 		case KEY_BACK:
-			text_changed = onKeyBack(event, new_mark_begin, new_mark_end);
+			if (m_writable)
+				text_changed = onKeyBack(event, new_mark_begin, new_mark_end);
 			break;
 
 		case KEY_DELETE:
-			text_changed = onKeyDelete(event, new_mark_begin, new_mark_end);
+			if (m_writable)
+				text_changed = onKeyDelete(event, new_mark_begin, new_mark_end);
 			break;
 
 		case KEY_ESCAPE:
@@ -472,8 +475,10 @@ bool GUIEditBox::processKey(const SEvent &event)
 			return false;
 
 		default:
-			inputChar(event.KeyInput.Char);
-			return true;
+			if (m_writable) {
+				inputChar(event.KeyInput.Char);
+				return true;
+			}
 		}
 	}
 
