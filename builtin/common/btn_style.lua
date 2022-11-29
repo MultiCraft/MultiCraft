@@ -13,7 +13,7 @@ function is_high_dpi()
 	end
 end
 
-local DIR_DELIM_esc = DIR_DELIM_esc or core.formspec_escape(DIR_DELIM)
+local DIR_DELIM_esc = core.formspec_escape(DIR_DELIM)
 local button_path = (INIT == "mainmenu" and defaulttexturedir_esc or "") .. "gui" .. DIR_DELIM_esc
 
 function btn_style(field, color)
