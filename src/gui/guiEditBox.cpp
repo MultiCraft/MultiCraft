@@ -560,17 +560,18 @@ bool GUIEditBox::onKeyDown(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 	return false;
 }
 
-void GUIEditBox::onKeyControlC(const SEvent &event)
+bool GUIEditBox::onKeyControlC(const SEvent &event)
 {
 	// copy to clipboard
 	if (m_passwordbox || !m_operator || m_mark_begin == m_mark_end)
-		return;
+		return false;
 
 	const s32 realmbgn = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
 	const s32 realmend = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
 
 	std::string s = stringw_to_utf8(Text.subString(realmbgn, realmend - realmbgn));
 	m_operator->copyToClipboard(s.c_str());
+	return true;
 }
 
 bool GUIEditBox::onKeyControlX(const SEvent &event, s32 &mark_begin, s32 &mark_end)
@@ -769,6 +770,15 @@ bool GUIEditBox::processMouse(const SEvent &event)
 					event.MouseInput.X, event.MouseInput.Y);
 			if (m_mouse_marking) {
 				setTextMarkers(m_mark_begin, m_cursor_pos);
+#if defined(__ANDROID__) || defined(__IOS__)
+				if (!porting::hasRealKeyboard()) {
+					bool success = onKeyControlC(event);
+#if defined(__ANDROID__)
+					if (success)
+						SDL_AndroidShowToast("Copied to clipboard", 2, -1, 0, 0);
+				}
+#endif
+#endif
 			}
 			m_mouse_marking = false;
 			calculateScrollPos();
