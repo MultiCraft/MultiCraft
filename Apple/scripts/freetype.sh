@@ -3,7 +3,7 @@
 FREETYPE_VERSION=2.12.1
 
 . scripts/sdk.sh
-cd deps
+mkdir -p deps; cd deps
 
 if [ ! -d freetype-src ]; then
 	wget http://download.savannah.gnu.org/releases/freetype/freetype-$FREETYPE_VERSION.tar.gz

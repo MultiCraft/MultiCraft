@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
-SDL2_VERSION=2.26.0
+SDL2_VERSION=2.26.1
 
 . scripts/sdk.sh
-cd deps
+mkdir -p deps; cd deps
 
 if [ ! -d SDL2-src ]; then
 	wget https://github.com/libsdl-org/SDL/archive/release-$SDL2_VERSION.tar.gz

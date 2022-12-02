@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# This file sets the appropriate compiler and flags for compiling for macOS without Xcode
+# This file sets the appropriate compiler and flags for compiling for macOS
 sdk=macosx
 export OSX_OSVER=10.11
 

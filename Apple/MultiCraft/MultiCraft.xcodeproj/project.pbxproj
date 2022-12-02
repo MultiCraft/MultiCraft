@@ -542,6 +542,7 @@
 		8458617724B1BF2D0040BA4F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		8458617B24B1C3BB0040BA4F /* builtin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = builtin; path = ../../../builtin; sourceTree = "<group>"; };
 		8458617C24B1C3BB0040BA4F /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../../../textures; sourceTree = "<group>"; };
+		8459C49F2932552500083C86 /* sl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sl; path = sl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		846F883A27A596F9007B6210 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = ../deps/luajit/libluajit.a; sourceTree = "<group>"; };
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
 		847C6D4A25D6F483008F5FC8 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = ../../../lib/luautf8/lutf8lib.c; sourceTree = "<group>"; };
@@ -563,7 +564,6 @@
 		848ADF0527BD69B4001C60F3 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADF0627BD69BB001C60F3 /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADF0727BD69BF001C60F3 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
-		8459C49F2932552500083C86 /* sl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sl; path = sl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADF0827BD69C3001C60F3 /* sk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sk; path = sk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADF0927BD69C8001C60F3 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADF0A27BD69CB001C60F3 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -2207,7 +2207,7 @@
 					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=4",
+					"VERSION_PATCH=3",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=1",
 				);
@@ -2237,7 +2237,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 2.0.20;
+				MARKETING_VERSION = 2.0.3;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2286,7 +2286,7 @@
 					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=4",
+					"VERSION_PATCH=3",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=0",
 				);
@@ -2316,7 +2316,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MARKETING_VERSION = 2.0.20;
+				MARKETING_VERSION = 2.0.3;
 				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",

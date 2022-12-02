@@ -4,9 +4,8 @@ echo
 echo "Starting build MultiCraft for macOS..."
 
 echo
-echo "Build Libraries:"
+echo "Build libraries:"
 
-mkdir -p deps
 sh scripts/SDL2.sh
 sh scripts/libjpeg.sh
 sh scripts/libpng.sh
@@ -23,12 +22,12 @@ echo
 echo "All libraries were built!"
 
 echo
-echo "Preparing Assets:"
+echo "Preparing assets:"
 
 sh scripts/assets.sh
 
 echo
-echo "Preparing Locales:"
+echo "Preparing locales:"
 
 sh scripts/locale.sh
 
