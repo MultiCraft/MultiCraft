@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="preparing">Подготовка к запуску&#8230;</string>
+	<string name="loading">Загрузка&#8230;</string>
+	<string name="notification_title">Загрузка MultiCraft</string>
+	<string name="notification_description">Осталось меньше минуты&#8230;</string>
+	<string name="input_text">Введите текст</string>
+	<string name="input_password">Введите пароль</string>
+
+	<!-- диалог отсутствия подключения -->
+	<string name="conn_title">Нет Интернет Подключения!</string>
+	<string name="conn_message">Для полноценной игры, MultiCraft требует подключение к Интернету.\nВ противном случае вам будет недоступно Обновление игры и режим Мультиплеера!</string>
+	<string name="conn_mobile">3G/4G</string>
+	<string name="ignore">Игнорировать</string>
+
+	<!-- Crash -->
+	<string name="sorry">Нам очень жаль!</string>
+	<string name="restart">К сожалению, произошла непредвиденная ошибка, хотите перезапустить игру?</string>
+	<string name="no_space">Недостаточно места для записи файлов игры, пожалуйста освободите место на диске</string>
+	<string name="close_game">Закрыть игру</string>
+	<string name="restart_game">Перезапустить</string>
+</resources>

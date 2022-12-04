@@ -1,0 +1,73 @@
+apply plugin: 'com.android.library'
+apply plugin: 'de.undercouch.download'
+
+android {
+	compileSdkVersion 33
+	buildToolsVersion '33.0.0'
+	ndkVersion '25.1.8937393'
+	defaultConfig {
+		minSdkVersion 21
+		targetSdkVersion 33
+		externalNativeBuild {
+			ndkBuild {
+				arguments '-j' + Runtime.getRuntime().availableProcessors(),
+						"--output-sync=none",
+						"versionMajor=${versionMajor}",
+						"versionMinor=${versionMinor}",
+						"versionPatch=${versionPatch}",
+						"versionExtra=${versionExtra}",
+						"developmentBuild=${developmentBuild}"
+			}
+		}
+	}
+
+	externalNativeBuild {
+		ndkBuild {
+			path file('jni/Android.mk')
+		}
+	}
+
+	// supported architectures
+	splits {
+		abi {
+			enable true
+			reset()
+			include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+		}
+	}
+
+	buildTypes {
+		release {
+			externalNativeBuild {
+				ndkBuild {
+					arguments 'NDEBUG=1'
+				}
+			}
+		}
+	}
+	namespace = "com.multicraft"
+}
+
+// get precompiled deps
+task downloadDeps(type: Download) {
+	def VERSION = "03122022"
+	src "https://github.com/MultiCraft/deps_android/releases/download/$VERSION/deps_android.zip"
+	dest new File(buildDir, 'deps.zip')
+	overwrite false
+}
+
+task getDeps(dependsOn: downloadDeps, type: Copy) {
+	def deps = file('deps')
+	def f = file("$buildDir/deps_android")
+
+	if (!f.exists()) {
+		from zipTree(downloadDeps.dest)
+		into deps
+	}
+}
+
+preBuild.dependsOn getDeps
+
+android.defaultConfig.externalNativeBuild.ndkBuild {
+	arguments 'prebuilt=$(if $(strip $(wildcard $(prebuilt_path))),$(prebuilt_path),.)'
+}
