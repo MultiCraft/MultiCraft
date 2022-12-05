@@ -6,8 +6,8 @@ project.ext.set("versionPatch", 4)      // Version Patch
 project.ext.set("versionExtra", "")     // Version Extra
 project.ext.set("versionCode", 100)     // Android Version Code
 project.ext.set("developmentBuild", 0)  // Whether it is a development build, or a release
-// NOTE: +2 after each release!
-// +1 for ARM and +1 for ARM64 APK's, because
+// NOTE: +3 after each release!
+// +1 for ARM, +1 for ARM64 and +1 for x86_64 APK's, because
 // each APK must have a larger `versionCode` than the previous
 
 buildscript {
@@ -19,7 +19,7 @@ buildscript {
 		classpath 'com.android.tools.build:gradle:7.3.1'
 		//noinspection GradleDependency
 		classpath 'de.undercouch:gradle-download-task:4.1.2'
-		classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20'
+		classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.21'
 		// NOTE: Do not place your application dependencies here; they belong
 		// in the individual module build.gradle files
 	}
