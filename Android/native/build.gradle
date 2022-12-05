@@ -50,7 +50,7 @@ android {
 
 // get precompiled deps
 task downloadDeps(type: Download) {
-	def VERSION = "03122022"
+	def VERSION = "05122022"
 	src "https://github.com/MultiCraft/deps_android/releases/download/$VERSION/deps_android.zip"
 	dest new File(buildDir, 'deps.zip')
 	overwrite false
