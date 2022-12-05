@@ -48,22 +48,22 @@ jobs:
 #        run: |
 #          ./bin/multicraft --run-unittests
 
-  # This is the current gcc compiler (available in bionic)
-  gcc_8:
-    runs-on: ubuntu-20.04
+  # This is the current gcc compiler (available in jammy)
+  gcc_10:
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install deps
         run: |
           source ./util/ci/common.sh
-          install_linux_deps g++-8
+          install_linux_deps g++-10
 
       - name: Build
         run: |
           ./util/ci/build.sh
         env:
-          CC: gcc-8
-          CXX: g++-8
+          CC: gcc-10
+          CXX: g++-10
 
       - name: Test
         run: |
@@ -92,30 +92,30 @@ jobs:
 #          ./bin/multicraft --run-unittests
 
   # This is the current clang version
-  clang_9:
-    runs-on: ubuntu-20.04
+  clang_11:
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install deps
         run: |
           source ./util/ci/common.sh
-          install_linux_deps clang-9 valgrind libluajit-5.1-dev
+          install_linux_deps clang-11 valgrind libluajit-5.1-dev
 
       - name: Build
         run: |
           ./util/ci/build.sh
         env:
-          CC: clang-9
-          CXX: clang++-9
+          CC: clang-11
+          CXX: clang++-11
           CMAKE_FLAGS: "-DREQUIRE_LUAJIT=1"
 
       - name: Test
         run: |
           ./bin/multicraft --run-unittests
 
-      - name: Valgrind
-        run: |
-          valgrind --leak-check=full --leak-check-heuristics=all --undef-value-errors=no --error-exitcode=9 ./bin/multicraft --run-unittests
+#     - name: Valgrind
+#       run: |
+#         valgrind --leak-check=full --leak-check-heuristics=all --undef-value-errors=no --error-exitcode=9 ./bin/multicraft --run-unittests
 
   # Build with prometheus-cpp (server-only)
 #  clang_9_prometheus:
@@ -171,18 +171,18 @@ jobs:
 
   docker:
     name: "Docker image"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build docker image
         run: |
           docker build .
 
   win32:
     name: "MinGW cross-compiler (32-bit)"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install compiler
         run: |
           sudo apt-get update -q && sudo apt-get install gettext -qyy
@@ -198,9 +198,9 @@ jobs:
 
   win64:
     name: "MinGW cross-compiler (64-bit)"
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install compiler
         run: |
           sudo apt-get update -q && sudo apt-get install gettext -qyy
@@ -218,9 +218,9 @@ jobs:
     name: VS 2019 ${{ matrix.config.arch }}-${{ matrix.type }}
     runs-on: windows-2019
     env:
-      VCPKG_VERSION: af2287382b1991dbdcb7e5112d236f3323b9dd7a
-#                    2022.03.10
-      vcpkg_packages: irrlicht zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit libiconv gettext jsoncpp
+      VCPKG_VERSION: 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
+#                    2022.11.14
+      vcpkg_packages: irrlicht zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp libiconv gettext jsoncpp
     strategy:
       fail-fast: false
       matrix:
@@ -242,7 +242,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Restore from cache and run vcpkg
         uses: lukka/run-vcpkg@v7
@@ -259,7 +259,6 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
           -DCMAKE_BUILD_TYPE=Release  `
           -DENABLE_POSTGRESQL=OFF  `
-          -DENABLE_SYSTEM_JSONCPP=ON  `
           -DRUN_IN_PLACE=${{ contains(matrix.type, 'portable') }} .
 
       - name: Build
