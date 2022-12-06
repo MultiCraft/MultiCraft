@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "IGUIFont.h"
 
 #include "porting.h"
+#include "touchscreengui.h"
 #include "util/string.h"
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
@@ -254,6 +255,18 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 		case EET_MOUSE_INPUT_EVENT:
 			if (processMouse(event))
 				return true;
+			break;
+		case EET_TOUCH_INPUT_EVENT:
+			if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
+#if defined(__ANDROID__) || defined(__IOS__)
+				bool success = onKeyControlC(event);
+#if defined(__ANDROID__)
+				if (success)
+					SDL_AndroidShowToast("Copied to clipboard", 2, -1, 0, 0);
+#endif
+#endif
+				return true;
+			}
 			break;
 		default:
 			break;
@@ -768,18 +781,6 @@ bool GUIEditBox::processMouse(const SEvent &event)
 		if (Environment->hasFocus(this)) {
 			m_cursor_pos = getCursorPos(
 					event.MouseInput.X, event.MouseInput.Y);
-			if (m_mouse_marking) {
-				setTextMarkers(m_mark_begin, m_cursor_pos);
-#if defined(__ANDROID__) || defined(__IOS__)
-				if (!porting::hasRealKeyboard()) {
-					bool success = onKeyControlC(event);
-#if defined(__ANDROID__)
-					if (success)
-						SDL_AndroidShowToast("Copied to clipboard", 2, -1, 0, 0);
-				}
-#endif
-#endif
-			}
 			m_mouse_marking = false;
 			calculateScrollPos();
 			return true;
@@ -798,10 +799,17 @@ bool GUIEditBox::processMouse(const SEvent &event)
 
 		if (!Environment->hasFocus(this)) {
 			m_blink_start_time = porting::getTimeMs();
-			m_mouse_marking = true;
 			m_cursor_pos = getCursorPos(
 					event.MouseInput.X, event.MouseInput.Y);
-			setTextMarkers(m_cursor_pos, m_cursor_pos);
+
+#ifdef HAVE_TOUCHSCREENGUI
+			if (!TouchScreenGUI::isActive() || m_cursor_pos < m_mark_begin || m_cursor_pos > m_mark_end) {
+#endif
+				m_mouse_marking = true;
+				setTextMarkers(m_cursor_pos, m_cursor_pos);
+#ifdef HAVE_TOUCHSCREENGUI
+			}
+#endif
 			calculateScrollPos();
 			return true;
 		} else {
@@ -813,12 +821,18 @@ bool GUIEditBox::processMouse(const SEvent &event)
 				m_cursor_pos = getCursorPos(
 						event.MouseInput.X, event.MouseInput.Y);
 
-				s32 newMarkBegin = m_mark_begin;
-				if (!m_mouse_marking)
-					newMarkBegin = m_cursor_pos;
+#ifdef HAVE_TOUCHSCREENGUI
+				if (!TouchScreenGUI::isActive() || m_cursor_pos < m_mark_begin || m_cursor_pos > m_mark_end) {
+#endif
+					s32 newMarkBegin = m_mark_begin;
+					if (!m_mouse_marking)
+						newMarkBegin = m_cursor_pos;
 
-				m_mouse_marking = true;
-				setTextMarkers(newMarkBegin, m_cursor_pos);
+					m_mouse_marking = true;
+					setTextMarkers(newMarkBegin, m_cursor_pos);
+#ifdef HAVE_TOUCHSCREENGUI
+				}
+#endif
 				calculateScrollPos();
 				return true;
 			}

@@ -326,9 +326,14 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 			}
 			gui::IGUIElement *focused = Environment->getFocus();
 			SEvent mouse_event;
-			if (!convertToMouseEvent(mouse_event, event.TouchInput.Event))
-				return false;
-			bool ret = preprocessEvent(mouse_event);
+			bool ret = false;
+			if (event.TouchInput.Event != ETIE_PRESSED_LONG) {
+				if (!convertToMouseEvent(mouse_event, event.TouchInput.Event))
+					return false;
+				ret = preprocessEvent(mouse_event);
+			} else {
+				mouse_event = event;
+			}
 			if (!ret && focused)
 				ret = focused->OnEvent(mouse_event);
 			if (!ret && m_hovered && m_hovered != focused)
