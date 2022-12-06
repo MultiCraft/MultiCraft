@@ -93,7 +93,6 @@ local function formspec(tabview, name, tabdata)
 	local sensitivity = tonumber(core.settings:get("touch_sensitivity") or 0) * 2000
 	local touchtarget = core.settings:get_bool("touchtarget", false)
 	local fancy_leaves = core.settings:get("leaves_style") == "fancy"
-core.log('warning', 'leaves_style = ' .. core.settings:get("leaves_style"))
 	local arm_inertia = core.settings:get_bool("arm_inertia", false)
 	local sound = tonumber(core.settings:get("sound_volume")) ~= 0 and true or false
 
@@ -115,7 +114,7 @@ core.log('warning', 'leaves_style = ' .. core.settings:get("leaves_style"))
 				.. dump(core.settings:get_bool("inventory_items_animations")) .. "]" ..
 		"checkbox[0.15,2.85;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
 				.. dump(fancy_leaves) .. "]" ..
-		"checkbox[0.15,3.45;cb_touchtarget;" .. fgettext("Crosshair") .. ";"
+		"checkbox[0.15,3.45;cb_crosshair;" .. fgettext("Crosshair") .. ";"
 				.. dump(not touchtarget) .. "]" ..
 		"checkbox[0.15,4.05;cb_arm_inertia;" .. fgettext("Arm inertia") .. ";"
 			.. dump(arm_inertia) .. "]" ..
@@ -239,8 +238,8 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		core.settings:set("leaves_style", (minetest.is_yes(fields["cb_fancy_leaves"]) and "fancy" or "opaque"))
 		return true
 	end
-	if fields["cb_touchtarget"] then
-		core.settings:set("touchtarget", (minetest.is_yes(fields["cb_touchtarget"]) and "false" or "true"))
+	if fields["cb_crosshair"] then
+		core.settings:set_bool("touchtarget", not minetest.is_yes(fields["cb_crosshair"]))
 		return true
 	end
 	if fields["cb_arm_inertia"] then
