@@ -1583,7 +1583,8 @@ bool Game::connectToServer(const GameStartData &start_data,
 			if (client->m_is_registration_confirmation_state) {
 				if (registration_confirmation_shown) {
 					// Keep drawing the GUI
-					RenderingEngine::draw_menu_scene(guienv, dtime, true);
+					ITextureSource *tsrc = client->getTextureSource();
+					RenderingEngine::draw_menu_scene(guienv, tsrc, dtime);
 				} else {
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
