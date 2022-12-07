@@ -712,13 +712,11 @@ function store.get_formspec(dlgdata)
 
 			"container[0.375,0.375]",
 			"image[0,0;7.25,0.8;", defaulttexturedir_esc, "field_bg.png;32]",
-			"style[search_string;border=false;bgcolor=transparent]",
-			"field[0.1,0;7.15,0.8;search_string;;", esc(search_string), "]",
-			"field_close_on_enter[search_string;false]",
-			"set_focus[search_string;true]",
-			btn_style("search"),
-			"image_button[7.4,0;0.8,0.8;", defaulttexturedir_esc, "search.png;search;;true;false]",
-		--	"image_button[8.125,0;0.8,0.8;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
+			"style[Dsearch_string;border=false;bgcolor=transparent]",
+			"field[0.1,0;7.15,0.8;Dsearch_string;;", esc(search_string), "]",
+			"set_focus[Dsearch_string;true]",
+			btn_style("clear"),
+			"image_button[7.4,0;0.8,0.8;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
 			"dropdown[8.35,0;3.5,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
 			"container_end[]",
 
@@ -878,13 +876,6 @@ function store.get_formspec(dlgdata)
 end
 
 function store.handle_submit(this, fields)
-	if fields.search or fields.key_enter_field == "search_string" then
-		search_string = fields.search_string:trim()
-		cur_page = 1
-		store.filter_packages(search_string)
-		return true
-	end
-
 	if fields.clear then
 		search_string = ""
 		cur_page = 1
@@ -1002,6 +993,14 @@ function store.handle_submit(this, fields)
 			core.open_url(url)
 			return true
 		end
+	end
+
+	-- Should be last
+	if fields.Dsearch_string then
+		search_string = fields.Dsearch_string:trim()
+		cur_page = 1
+		store.filter_packages(search_string)
+		return true
 	end
 
 	return false

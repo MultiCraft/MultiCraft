@@ -124,7 +124,7 @@ end
 
 local function formspec(tabview, name, tabdata)
 	local tab_string =
-		"box[0,0;3.75,4.5;#999999]" ..
+		"background9[0.1,0.1;3.75,4.5;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
 		"checkbox[0.25,0;cb_smooth_lighting;" .. fgettext("Smooth Lighting") .. ";"
 				.. dump(core.settings:get_bool("smooth_lighting")) .. "]" ..
 		"checkbox[0.25,0.5;cb_particles;" .. fgettext("Particles") .. ";"
@@ -139,7 +139,7 @@ local function formspec(tabview, name, tabdata)
 				.. getSettingIndex.NodeHighlighting() .. "]" ..
 		"dropdown[0.25,3.6;3.5;dd_leaves_style;" .. dd_options.leaves[1] .. ";"
 				.. getSettingIndex.Leaves() .. "]" ..
-		"box[4,0;3.75,4.5;#999999]" ..
+		"background9[4.1,0.1;3.75,4.5;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
 		"label[4.25,0.1;" .. fgettext("Texturing:") .. "]" ..
 		"dropdown[4.25,0.55;3.5;dd_filters;" .. dd_options.filters[1] .. ";"
 				.. getSettingIndex.Filter() .. "]" ..
@@ -151,7 +151,7 @@ local function formspec(tabview, name, tabdata)
 		"label[4.25,3.45;" .. fgettext("Screen:") .. "]" ..
 		"checkbox[4.25,3.6;cb_autosave_screensize;" .. fgettext("Autosave Screen Size") .. ";"
 				.. dump(core.settings:get_bool("autosave_screensize")) .. "]" ..
-		"box[8,0;3.75,4.5;#999999]"
+		"background9[8.1,0.1;3.75,4.5;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]"
 
 	local video_driver = core.settings:get("video_driver")
 	local shaders_enabled = core.settings:get_bool("enable_shaders")

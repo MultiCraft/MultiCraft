@@ -60,7 +60,7 @@ local function get_formspec(tabview, name, tabdata)
 
 	local retval =
 		"label[-0.05,-0.25;".. fgettext("Installed Packages:") .. "]" ..
-		"background9[0,0.23;5.3,4.46;" .. defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
+		"background9[0,0.23;5.3,4.46;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 		"tablecolumns[color;tree;text]" ..
 		"tableoptions[background=#0000;border=false]" ..
 		"table[0,0.25;5.1,4.3;pkglist;" ..
@@ -99,7 +99,7 @@ local function get_formspec(tabview, name, tabdata)
 		retval = retval ..
 				"image[5.5,0;3,2;" .. core.formspec_escape(modscreenshot) .. "]" ..
 				"label[8.25,0.6;" .. core.formspec_escape(selected_pkg.name) .. "]" ..
-				"background9[5.6,2.3;6.2,2.4;" .. defaulttexturedir_esc .. "desc_bg.png" .. ";false;32]"
+				"background9[5.6,2.3;6.2,2.4;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]"
 
 		if selected_pkg.type == "mod" then
 			if selected_pkg.is_modpack then
@@ -138,7 +138,7 @@ local function get_formspec(tabview, name, tabdata)
 						fgettext("Disable Texture Pack") .. ";true;false]"
 				else
 					retval = retval ..
-						btn_style("btn_mod_mgr_use_txp") ..
+						btn_style("btn_mod_mgr_use_txp", "green") ..
 						"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_use_txp;" ..
 						fgettext("Use Texture Pack") .. ";true;false]"
 				end
@@ -150,7 +150,7 @@ local function get_formspec(tabview, name, tabdata)
 
 		if core.may_modify_path(selected_pkg.path) then
 			retval = retval ..
-				btn_style("btn_mod_mgr_delete_mod") ..
+				btn_style("btn_mod_mgr_delete_mod", "red") ..
 				"image_button[5.5,4.8;3.25,0.9;;btn_mod_mgr_delete_mod;" ..
 				fgettext("Uninstall Package") .. ";true;false]"
 		end
