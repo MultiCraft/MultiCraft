@@ -134,7 +134,9 @@ class MainActivity : AppCompatActivity() {
 		val initLua = File(filesDir, "builtin${sep}mainmenu${sep}init.lua")
 		if (initLua.exists() && initLua.canRead()) {
 			val intent = Intent(this, GameActivity::class.java)
-			intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 			startActivity(intent)
 		} else {
 			prefs[TAG_BUILD_VER] = "0"

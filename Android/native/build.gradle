@@ -32,7 +32,7 @@ android {
 		abi {
 			enable true
 			reset()
-			include 'armeabi-v7a', 'arm64-v8a'//, 'x86'
+			include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
 		}
 	}
 
@@ -50,22 +50,19 @@ android {
 
 // get precompiled deps
 task downloadDeps(type: Download) {
-	src 'https://github.com/MultiCraft/deps/archive/master.zip'
+	def VERSION = "05122022"
+	src "https://github.com/MultiCraft/deps_android/releases/download/$VERSION/deps_android.zip"
 	dest new File(buildDir, 'deps.zip')
 	overwrite false
 }
 
 task getDeps(dependsOn: downloadDeps, type: Copy) {
 	def deps = file('deps')
-	def f = file("$buildDir/deps-master")
+	def f = file("$buildDir/deps_android")
 
 	if (!f.exists()) {
 		from zipTree(downloadDeps.dest)
-		into buildDir
-	}
-
-	doLast {
-		file(f).renameTo(file(deps))
+		into deps
 	}
 }
 

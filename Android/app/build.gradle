@@ -47,7 +47,7 @@ android {
 		abi {
 			enable true
 			reset()
-			include 'armeabi-v7a', 'arm64-v8a'
+			include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
 		}
 	}
 
@@ -66,7 +66,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 
 task prepareAssetsFiles() {
 	def assetsFolder = "build/assets/Files"
-	def projRoot = "../../.."
+	def projRoot = "../.."
 
 	copy {
 		from "${projRoot}/builtin" into "${assetsFolder}/builtin" exclude '*.txt'
@@ -75,7 +75,7 @@ task prepareAssetsFiles() {
 		from "${projRoot}/client/shaders" into "${assetsFolder}/client/shaders"
 	}
 	copy {
-		from "../native/deps/Android/Irrlicht/shaders" into "${assetsFolder}/client/shaders/Irrlicht"
+		from "../native/deps/irrlicht/shaders" into "${assetsFolder}/client/shaders/Irrlicht"
 	}
 	copy {
 		from "${projRoot}/fonts/MultiCraftFont.ttf" into "${assetsFolder}/fonts"
@@ -104,7 +104,7 @@ task prepareAssetsFiles() {
 preBuild.dependsOn zipAssetsFiles
 
 // Map for the version code that gives each ABI a value.
-def abiCodes = ['armeabi-v7a': 0, 'arm64-v8a': 1]
+def abiCodes = ['armeabi-v7a': 0, 'arm64-v8a': 1, 'x86_64': 2]
 android.applicationVariants.all { variant ->
 	variant.outputs.each {
 		output ->

@@ -70,7 +70,6 @@ class GameActivity : SDLActivity() {
 		super.onCreate(savedInstanceState)
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		hasKeyboard = resources.configuration.hardKeyboardHidden == HARDKEYBOARDHIDDEN_NO
-		keyboardEvent(hasKeyboard)
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -90,6 +89,8 @@ class GameActivity : SDLActivity() {
 
 	override fun onResume() {
 		super.onResume()
+		if (hasKeyboard)
+			keyboardEvent(hasKeyboard)
 		window.makeFullScreen()
 	}
 
