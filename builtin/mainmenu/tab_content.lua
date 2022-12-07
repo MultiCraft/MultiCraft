@@ -138,7 +138,7 @@ local function get_formspec(tabview, name, tabdata)
 						fgettext("Disable Texture Pack") .. ";true;false]"
 				else
 					retval = retval ..
-						btn_style("btn_mod_mgr_use_txp") ..
+						btn_style("btn_mod_mgr_use_txp", "green") ..
 						"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_use_txp;" ..
 						fgettext("Use Texture Pack") .. ";true;false]"
 				end
@@ -150,7 +150,7 @@ local function get_formspec(tabview, name, tabdata)
 
 		if core.may_modify_path(selected_pkg.path) then
 			retval = retval ..
-				btn_style("btn_mod_mgr_delete_mod") ..
+				btn_style("btn_mod_mgr_delete_mod", "red") ..
 				"image_button[5.5,4.8;3.25,0.9;;btn_mod_mgr_delete_mod;" ..
 				fgettext("Uninstall Package") .. ";true;false]"
 		end
