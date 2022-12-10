@@ -258,6 +258,7 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 			break;
 		case EET_TOUCH_INPUT_EVENT:
 			if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
+				m_long_press = true;
 #if defined(__ANDROID__) || defined(__IOS__)
 				bool success = onKeyControlC(event);
 #if defined(__ANDROID__)
@@ -401,7 +402,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 					sendGuiEvent(EGET_EDITBOX_ENTER);
 				}
 				return true;
-			} 
+			}
 			break;
 		case KEY_LEFT:
 			if (event.KeyInput.Shift) {
@@ -777,30 +778,54 @@ void GUIEditBox::inputChar(wchar_t c)
 bool GUIEditBox::processMouse(const SEvent &event)
 {
 	switch (event.MouseInput.Event) {
-	case irr::EMIE_LMOUSE_LEFT_UP:
+	case irr::EMIE_LMOUSE_LEFT_UP: {
+		s32 cursor_pos = getCursorPos(
+				event.MouseInput.X, event.MouseInput.Y);
+#ifdef HAVE_TOUCHSCREENGUI
+		// Remove text markers for short tap in one place
+		if (TouchScreenGUI::isActive() && !m_long_press &&
+			m_cursor_press_pos == cursor_pos &&
+			Environment->hasFocus(this)) {
+			setTextMarkers(cursor_pos, cursor_pos);
+		}
+#endif
+		m_cursor_press_pos = -1;
+		m_long_press = false;
 		if (Environment->hasFocus(this)) {
-			m_cursor_pos = getCursorPos(
-					event.MouseInput.X, event.MouseInput.Y);
+			m_cursor_pos = cursor_pos;
 			m_mouse_marking = false;
 			calculateScrollPos();
 			return true;
 		}
-		break;
+	} break;
 	case irr::EMIE_MOUSE_MOVED: {
+		s32 cursor_pos = getCursorPos(
+				event.MouseInput.X, event.MouseInput.Y);
+#ifdef HAVE_TOUCHSCREENGUI
+		// Start text marking when cursor was moved, so that user doesn't want
+		// to copy text.
+		if (TouchScreenGUI::isActive() && !m_long_press && !m_mouse_marking &&
+			m_cursor_press_pos != -1 && cursor_pos != m_cursor_press_pos &&
+			Environment->hasFocus(this)) {
+			m_mouse_marking = true;
+			setTextMarkers(m_cursor_press_pos, m_cursor_press_pos);
+		}
+#endif
 		if (m_mouse_marking) {
-			m_cursor_pos = getCursorPos(
-					event.MouseInput.X, event.MouseInput.Y);
+			m_cursor_pos = cursor_pos;
 			setTextMarkers(m_mark_begin, m_cursor_pos);
 			calculateScrollPos();
 			return true;
 		}
 	} break;
 	case EMIE_LMOUSE_PRESSED_DOWN:
+		m_long_press = false;
 
 		if (!Environment->hasFocus(this)) {
 			m_blink_start_time = porting::getTimeMs();
 			m_cursor_pos = getCursorPos(
 					event.MouseInput.X, event.MouseInput.Y);
+			m_cursor_press_pos = m_cursor_pos;
 
 #ifdef HAVE_TOUCHSCREENGUI
 			if (!TouchScreenGUI::isActive() || m_cursor_pos < m_mark_begin || m_cursor_pos > m_mark_end) {
@@ -815,11 +840,13 @@ bool GUIEditBox::processMouse(const SEvent &event)
 		} else {
 			if (!AbsoluteClippingRect.isPointInside(core::position2d<s32>(
 					    event.MouseInput.X, event.MouseInput.Y))) {
+				m_cursor_press_pos = -1;
 				return false;
 			} else {
 				// move cursor
 				m_cursor_pos = getCursorPos(
 						event.MouseInput.X, event.MouseInput.Y);
+				m_cursor_press_pos = m_cursor_pos;
 
 #ifdef HAVE_TOUCHSCREENGUI
 				if (!TouchScreenGUI::isActive() || m_cursor_pos < m_mark_begin || m_cursor_pos > m_mark_end) {

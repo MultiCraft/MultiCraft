@@ -184,6 +184,7 @@ protected:
 
 	u32 m_blink_start_time = 0;
 	s32 m_cursor_pos = 0;
+	s32 m_cursor_press_pos = 0;
 	s32 m_hscroll_pos = 0;
 	s32 m_vscroll_pos = 0; // scroll position in characters
 	u32 m_max = 0;
@@ -195,6 +196,7 @@ protected:
 	bool m_writable;
 
 	bool m_mouse_marking = false;
+	bool m_long_press = false;
 
 	s32 m_mark_begin = 0;
 	s32 m_mark_end = 0;
