@@ -818,8 +818,10 @@ bool GUIEditBox::processMouse(const SEvent &event)
 			return true;
 		}
 	} break;
-	case EMIE_LMOUSE_PRESSED_DOWN:
+	case EMIE_LMOUSE_PRESSED_DOWN: {
 		m_long_press = false;
+		const s32 real_mark_begin = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
+		const s32 real_mark_end = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
 
 		if (!Environment->hasFocus(this)) {
 			m_blink_start_time = porting::getTimeMs();
@@ -828,7 +830,7 @@ bool GUIEditBox::processMouse(const SEvent &event)
 			m_cursor_press_pos = m_cursor_pos;
 
 #ifdef HAVE_TOUCHSCREENGUI
-			if (!TouchScreenGUI::isActive() || m_cursor_pos < m_mark_begin || m_cursor_pos > m_mark_end) {
+			if (!TouchScreenGUI::isActive() || m_cursor_pos < real_mark_begin || m_cursor_pos > real_mark_end) {
 #endif
 				m_mouse_marking = true;
 				setTextMarkers(m_cursor_pos, m_cursor_pos);
@@ -849,7 +851,7 @@ bool GUIEditBox::processMouse(const SEvent &event)
 				m_cursor_press_pos = m_cursor_pos;
 
 #ifdef HAVE_TOUCHSCREENGUI
-				if (!TouchScreenGUI::isActive() || m_cursor_pos < m_mark_begin || m_cursor_pos > m_mark_end) {
+				if (!TouchScreenGUI::isActive() || m_cursor_pos < real_mark_begin || m_cursor_pos > real_mark_end) {
 #endif
 					s32 newMarkBegin = m_mark_begin;
 					if (!m_mouse_marking)
@@ -864,6 +866,7 @@ bool GUIEditBox::processMouse(const SEvent &event)
 				return true;
 			}
 		}
+	} break;
 	case EMIE_MOUSE_WHEEL:
 		if (m_vscrollbar && m_vscrollbar->isVisible()) {
 			s32 pos = m_vscrollbar->getPos();
