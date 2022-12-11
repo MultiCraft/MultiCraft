@@ -182,6 +182,8 @@ void GUIEditBox::setTextMarkers(s32 begin, s32 end)
 	if (begin != m_mark_begin || end != m_mark_end) {
 		m_mark_begin = begin;
 		m_mark_end = end;
+		m_real_mark_begin = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
+		m_real_mark_end = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
 		sendGuiEvent(EGET_EDITBOX_MARKING_CHANGED);
 	}
 }
@@ -515,8 +517,7 @@ bool GUIEditBox::onKeyUp(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 	// clang-format off
 	if (m_multiline || (m_word_wrap && m_broken_text.size() > 1)) {
 		s32 lineNo = getLineFromPos(m_cursor_pos);
-		s32 mb = (m_mark_begin == m_mark_end) ? m_cursor_pos :
-			(m_mark_begin > m_mark_end ? m_mark_begin : m_mark_end);
+		s32 mb = (m_mark_begin == m_mark_end) ? m_cursor_pos : m_real_mark_begin;
 		if (lineNo > 0) {
 			s32 cp = m_cursor_pos - m_broken_text_positions[lineNo];
 			if ((s32)m_broken_text[lineNo - 1].size() < cp) {
@@ -547,8 +548,7 @@ bool GUIEditBox::onKeyDown(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 	// clang-format off
 	if (m_multiline || (m_word_wrap && m_broken_text.size() > 1)) {
 		s32 lineNo = getLineFromPos(m_cursor_pos);
-		s32 mb = (m_mark_begin == m_mark_end) ? m_cursor_pos :
-			(m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end);
+		s32 mb = (m_mark_begin == m_mark_end) ? m_cursor_pos : m_real_mark_begin;
 		if (lineNo < (s32)m_broken_text.size() - 1) {
 			s32 cp = m_cursor_pos - m_broken_text_positions[lineNo];
 			if ((s32)m_broken_text[lineNo + 1].size() < cp) {
@@ -580,10 +580,7 @@ bool GUIEditBox::onKeyControlC(const SEvent &event)
 	if (m_passwordbox || !m_operator || m_mark_begin == m_mark_end)
 		return false;
 
-	const s32 realmbgn = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
-	const s32 realmend = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
-
-	std::string s = stringw_to_utf8(Text.subString(realmbgn, realmend - realmbgn));
+	std::string s = stringw_to_utf8(Text.subString(m_real_mark_begin, m_real_mark_end - m_real_mark_begin));
 	m_operator->copyToClipboard(s.c_str());
 	return true;
 }
@@ -596,18 +593,15 @@ bool GUIEditBox::onKeyControlX(const SEvent &event, s32 &mark_begin, s32 &mark_e
 	if (m_passwordbox || !m_operator || m_mark_begin == m_mark_end)
 		return false;
 
-	const s32 realmbgn = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
-	const s32 realmend = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
-
 	// Now remove from box if enabled
 	if (isEnabled()) {
 		// delete
 		core::stringw s;
-		s = Text.subString(0, realmbgn);
-		s.append(Text.subString(realmend, Text.size() - realmend));
+		s = Text.subString(0, m_real_mark_begin);
+		s.append(Text.subString(m_real_mark_end, Text.size() - m_real_mark_end));
 		Text = s;
 
-		m_cursor_pos = realmbgn;
+		m_cursor_pos = m_real_mark_begin;
 		mark_begin = 0;
 		mark_end = 0;
 		return true;
@@ -624,9 +618,6 @@ bool GUIEditBox::onKeyControlV(const SEvent &event, s32 &mark_begin, s32 &mark_e
 	// paste from the clipboard
 	if (!m_operator)
 		return false;
-
-	const s32 realmbgn = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
-	const s32 realmend = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
 
 	// add new character
 	if (const c8 *p = m_operator->getTextFromClipboard()) {
@@ -645,13 +636,13 @@ bool GUIEditBox::onKeyControlV(const SEvent &event, s32 &mark_begin, s32 &mark_e
 		} else {
 			// replace text
 
-			core::stringw s = Text.subString(0, realmbgn);
+			core::stringw s = Text.subString(0, m_real_mark_begin);
 			s.append(inserted_text);
-			s.append(Text.subString(realmend, Text.size() - realmend));
+			s.append(Text.subString(m_real_mark_end, Text.size() - m_real_mark_end));
 
 			if (!m_max || s.size() <= m_max) {
 				Text = s;
-				m_cursor_pos = realmbgn + inserted_text.size();
+				m_cursor_pos = m_real_mark_begin + inserted_text.size();
 			}
 		}
 	}
@@ -670,16 +661,11 @@ bool GUIEditBox::onKeyBack(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 
 	if (m_mark_begin != m_mark_end) {
 		// delete marked text
-		const s32 realmbgn =
-				m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
-		const s32 realmend =
-				m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
-
-		s = Text.subString(0, realmbgn);
-		s.append(Text.subString(realmend, Text.size() - realmend));
+		s = Text.subString(0, m_real_mark_begin);
+		s.append(Text.subString(m_real_mark_end, Text.size() - m_real_mark_end));
 		Text = s;
 
-		m_cursor_pos = realmbgn;
+		m_cursor_pos = m_real_mark_begin;
 	} else {
 		// delete text behind cursor
 		if (m_cursor_pos > 0)
@@ -708,16 +694,11 @@ bool GUIEditBox::onKeyDelete(const SEvent &event, s32 &mark_begin, s32 &mark_end
 
 	if (m_mark_begin != m_mark_end) {
 		// delete marked text
-		const s32 realmbgn =
-				m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
-		const s32 realmend =
-				m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
-
-		s = Text.subString(0, realmbgn);
-		s.append(Text.subString(realmend, Text.size() - realmend));
+		s = Text.subString(0, m_real_mark_begin);
+		s.append(Text.subString(m_real_mark_end, Text.size() - m_real_mark_end));
 		Text = s;
 
-		m_cursor_pos = realmbgn;
+		m_cursor_pos = m_real_mark_begin;
 	} else {
 		// delete text before cursor
 		s = Text.subString(0, m_cursor_pos);
@@ -747,14 +728,11 @@ void GUIEditBox::inputChar(wchar_t c)
 			if (m_mark_begin != m_mark_end) {
 				// clang-format off
 				// replace marked text
-				s32 real_begin = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
-				s32 real_end = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
-
-				s = Text.subString(0, real_begin);
+				s = Text.subString(0, m_real_mark_begin);
 				s.append(c);
-				s.append(Text.subString(real_end, Text.size() - real_end));
+				s.append(Text.subString(m_real_mark_end, Text.size() - m_real_mark_end));
 				Text = s;
-				m_cursor_pos = real_begin + 1;
+				m_cursor_pos = m_real_mark_begin + 1;
 				// clang-format on
 			} else {
 				// add new character
@@ -820,8 +798,6 @@ bool GUIEditBox::processMouse(const SEvent &event)
 	} break;
 	case EMIE_LMOUSE_PRESSED_DOWN: {
 		m_long_press = false;
-		const s32 real_mark_begin = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
-		const s32 real_mark_end = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
 
 		if (!Environment->hasFocus(this)) {
 			m_blink_start_time = porting::getTimeMs();
@@ -830,7 +806,7 @@ bool GUIEditBox::processMouse(const SEvent &event)
 			m_cursor_press_pos = m_cursor_pos;
 
 #ifdef HAVE_TOUCHSCREENGUI
-			if (!TouchScreenGUI::isActive() || m_cursor_pos < real_mark_begin || m_cursor_pos > real_mark_end) {
+			if (!TouchScreenGUI::isActive() || m_cursor_pos < m_real_mark_begin || m_cursor_pos > m_real_mark_end) {
 #endif
 				m_mouse_marking = true;
 				setTextMarkers(m_cursor_pos, m_cursor_pos);
@@ -851,7 +827,7 @@ bool GUIEditBox::processMouse(const SEvent &event)
 				m_cursor_press_pos = m_cursor_pos;
 
 #ifdef HAVE_TOUCHSCREENGUI
-				if (!TouchScreenGUI::isActive() || m_cursor_pos < real_mark_begin || m_cursor_pos > real_mark_end) {
+				if (!TouchScreenGUI::isActive() || m_cursor_pos < m_real_mark_begin || m_cursor_pos > m_real_mark_end) {
 #endif
 					s32 newMarkBegin = m_mark_begin;
 					if (!m_mouse_marking)

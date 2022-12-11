@@ -200,6 +200,8 @@ protected:
 
 	s32 m_mark_begin = 0;
 	s32 m_mark_end = 0;
+	s32 m_real_mark_begin = 0;
+	s32 m_real_mark_end = 0;
 
 	gui::IGUIFont *m_last_break_font = nullptr;
 	IOSOperator *m_operator = nullptr;
