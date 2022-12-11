@@ -119,7 +119,7 @@ void Schematic::resolveNodeNames()
 }
 
 
-void Schematic::blitToVManip(MMVManip *vm, v3s16 p, Rotation rot, bool force_place)
+void Schematic::blitToVManip(MMVManip *vm, v3s16 p, Rotation rot, bool force_place, ServerMap *map)
 {
 	assert(schemdata && slice_probs);
 	sanity_check(m_ndef != NULL);
@@ -195,6 +195,10 @@ void Schematic::blitToVManip(MMVManip *vm, v3s16 p, Rotation rot, bool force_pla
 
 				if (rot)
 					vm->m_data[vi].rotateAlongYAxis(m_ndef, rot);
+
+				// Wipe metadata if a map object was specified
+				if (map != nullptr && (force_place || force_place_node))
+					map->removeNodeMetadata(pos);
 			}
 		}
 		y_map++;
@@ -263,22 +267,11 @@ void Schematic::placeOnMap(ServerMap *map, v3s16 p, u32 flags,
 	MMVManip vm(map);
 	vm.initialEmerge(bp1, bp2);
 
-	blitToVManip(&vm, p, rot, force_place);
+	blitToVManip(&vm, p, rot, force_place, map);
 
 	voxalgo::blit_back_with_light(map, &vm, &modified_blocks);
 
 	//// Carry out post-map-modification actions
-
-	if (force_place) {
-		v3s16 npos;
-		for (npos.X = p.X; npos.X < p.X + s.X; npos.X++) {
-			for (npos.Y = p.Y; npos.Y < p.Y + s.Y; npos.Y++) {
-				for (npos.Z = p.Z; npos.Z < p.Z + s.Z; npos.Z++) {
-					map->removeNodeMetadata(npos);
-				}
-			}
-		}
-	}
 
 	//// Create & dispatch map modification events to observers
 	MapEditEvent event;

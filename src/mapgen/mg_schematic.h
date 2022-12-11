@@ -113,7 +113,7 @@ public:
 	bool serializeToLua(std::ostream *os, const std::vector<std::string> &names,
 		bool use_comments, u32 indent_spaces) const;
 
-	void blitToVManip(MMVManip *vm, v3s16 p, Rotation rot, bool force_place);
+	void blitToVManip(MMVManip *vm, v3s16 p, Rotation rot, bool force_place, ServerMap *map = nullptr);
 	bool placeOnVManip(MMVManip *vm, v3s16 p, u32 flags, Rotation rot, bool force_place);
 	void placeOnMap(ServerMap *map, v3s16 p, u32 flags, Rotation rot, bool force_place);
 
