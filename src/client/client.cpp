@@ -467,10 +467,6 @@ void Client::step(float dtime)
 			event->type = CE_PLAYER_DAMAGE;
 			event->player_damage.amount = damage;
 			m_client_event_queue.push(event);
-		} else if (envEvent.type == CEE_PLAYER_BREATH && m_proto_ver < 29) {
-			// Protocol v29 or greater obsoleted this event
-			u16 breath = envEvent.player_breath.amount;
-			sendBreath(breath);
 		}
 	}
 
@@ -854,7 +850,6 @@ void Client::ReceiveAll()
 
 inline void Client::handleCommand(NetworkPacket* pkt)
 {
-	pkt->setProtocolVersion(m_proto_ver);
 	const ToClientCommandHandler& opHandle = toClientCommandTable[pkt->getCommand()];
 	(this->*opHandle.handler)(pkt);
 }
@@ -973,7 +968,7 @@ void Client::interact(InteractAction action, const PointedThing& pointed)
 		[9 + plen] player position information
 	*/
 
-	NetworkPacket pkt(TOSERVER_INTERACT, 1 + 2 + 0, 0, m_proto_ver);
+	NetworkPacket pkt(TOSERVER_INTERACT, 1 + 2 + 0);
 
 	pkt << (u8)action;
 	pkt << myplayer->getWieldIndex();
@@ -1268,27 +1263,8 @@ void Client::sendChangePassword(const std::string &oldpassword,
 
 void Client::sendDamage(u16 damage)
 {
-	// Minetest 0.4 uses uint8s instead of uint16s in TOSERVER_DAMAGE.
-	if (m_proto_ver >= 37) {
-		NetworkPacket pkt(TOSERVER_DAMAGE, sizeof(u16));
-		pkt << damage;
-		Send(&pkt);
-	} else {
-		u8 raw_damage = damage & 0xFF;
-		NetworkPacket pkt(TOSERVER_DAMAGE, sizeof(u8));
-		pkt << raw_damage;
-		Send(&pkt);
-	}
-}
-
-void Client::sendBreath(u16 breath)
-{
-	// Protocol v29 (Minetest 0.4.16) made this obsolete
-	if (m_proto_ver >= 29)
-		return;
-
-	NetworkPacket pkt(TOSERVER_BREATH, sizeof(u16));
-	pkt << breath;
+	NetworkPacket pkt(TOSERVER_DAMAGE, sizeof(u16));
+	pkt << damage;
 	Send(&pkt);
 }
 
@@ -1352,8 +1328,7 @@ void Client::sendPlayerPos()
 	player->last_camera_fov   = camera_fov;
 	player->last_wanted_range = wanted_range;
 
-	NetworkPacket pkt(TOSERVER_PLAYERPOS, 12 + 12 + 4 + 4 + 4 + 1 + 1, 0,
-		m_proto_ver);
+	NetworkPacket pkt(TOSERVER_PLAYERPOS, 12 + 12 + 4 + 4 + 4 + 1 + 1);
 
 	writePlayerPos(player, &map, &pkt);
 
@@ -1618,24 +1593,6 @@ void Client::typeChatMessage(const std::wstring &message)
 
 	// Send to others
 	sendChatMessage(message);
-
-	// Show locally
-	if (message[0] == L'/') {
-		if (!m_mods_loaded) {
-			ChatMessage *chatMessage = new ChatMessage(L"issued command: " +
-				message);
-			m_chat_queue.push(chatMessage);
-		}
-	} else if (m_proto_ver < 29) {
-		// Backwards compatibility
-		LocalPlayer *player = m_env.getLocalPlayer();
-		if (!player)
-			return;
-		std::wstring name = utf8_to_wide(player->getName());
-		ChatMessage *chatMessage = new ChatMessage(CHATMESSAGE_TYPE_NORMAL,
-			message, name);
-		m_chat_queue.push(chatMessage);
-	}
 }
 
 void Client::addUpdateMeshTask(v3s16 p, bool ack_to_server, bool urgent)

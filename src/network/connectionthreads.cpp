@@ -405,15 +405,6 @@ void ConnectionSendThread::processReliableCommand(ConnectionCommand &c)
 			}
 			return;
 
-		case CONCMD_DISABLE_LEGACY:
-			LOG(dout_con << m_connection->getDesc()
-				<< "UDP processing reliable CONCMD_DISABLE_LEGACY" << std::endl);
-			if (!rawSendAsPacket(c.peer_id, c.channelnum, c.data, c.reliable)) {
-				/* put to queue if we couldn't send it immediately */
-				sendReliable(c);
-			}
-			return;
-
 		case CONNCMD_SERVE:
 		case CONNCMD_CONNECT:
 		case CONNCMD_DISCONNECT:
@@ -1193,17 +1184,6 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Control(Channel *chan
 				<< std::endl);
 			m_connection->SetPeerID(peer_id_new);
 		}
-
-		// Request the server disables "legacy peer mode" (0.4.X servers
-		// throttle outgoing packets if this does not happen).
-		// Minetest 5.X servers *should* ignore this.
-		ConnectionCommand cmd;
-
-		SharedBuffer<u8> reply(2);
-		writeU8(&reply[0], PACKET_TYPE_CONTROL);
-		writeU8(&reply[1], CONTROLTYPE_ENABLE_BIG_SEND_WINDOW);
-		cmd.disableLegacy(PEER_ID_SERVER, reply);
-		m_connection->putCommand(cmd);
 
 		throw ProcessedSilentlyException("Got a SET_PEER_ID");
 	} else if (controltype == CONTROLTYPE_PING) {

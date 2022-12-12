@@ -177,7 +177,6 @@ controltype and data description:
 #define CONTROLTYPE_SET_PEER_ID 1
 #define CONTROLTYPE_PING 2
 #define CONTROLTYPE_DISCO 3
-#define CONTROLTYPE_ENABLE_BIG_SEND_WINDOW 4
 
 /*
 ORIGINAL: This is a plain packet with no control and no error
@@ -314,8 +313,7 @@ enum ConnectionCommandType{
 	CONNCMD_SEND,
 	CONNCMD_SEND_TO_ALL,
 	CONCMD_ACK,
-	CONCMD_CREATE_PEER,
-	CONCMD_DISABLE_LEGACY
+	CONCMD_CREATE_PEER
 };
 
 struct ConnectionCommand
@@ -364,16 +362,6 @@ struct ConnectionCommand
 	void createPeer(session_t peer_id_, const Buffer<u8> &data_)
 	{
 		type = CONCMD_CREATE_PEER;
-		peer_id = peer_id_;
-		data = data_;
-		channelnum = 0;
-		reliable = true;
-		raw = true;
-	}
-
-	void disableLegacy(session_t peer_id_, const SharedBuffer<u8> &data_)
-	{
-		type = CONCMD_DISABLE_LEGACY;
 		peer_id = peer_id_;
 		data = data_;
 		channelnum = 0;

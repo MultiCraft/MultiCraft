@@ -357,8 +357,6 @@ void GenericCAO::initialize(const std::string &data)
 
 			m_prop.show_on_minimap = false;
 		}
-		if (m_client->getProtoVersion() < 33)
-			m_env->addPlayerName(m_name.c_str());
 	}
 
 	m_enable_shaders = g_settings->getBool("enable_shaders");
@@ -367,25 +365,21 @@ void GenericCAO::initialize(const std::string &data)
 void GenericCAO::processInitData(const std::string &data)
 {
 	std::istringstream is(data, std::ios::binary);
-
 	const u8 version = readU8(is);
-	const u16 protocol_version = m_client->getProtoVersion();
 
-	// PROTOCOL_VERSION >= 14
+	if (version < 1) {
+		errorstream << "GenericCAO: Unsupported init data version"
+				<< std::endl;
+		return;
+	}
+
+	// PROTOCOL_VERSION >= 37
 	m_name = deSerializeString16(is);
 	m_is_player = readU8(is);
-	if (protocol_version >= 37) {
-		m_id = readU16(is);
-		m_position = readV3F32(is);
-		m_rotation = readV3F32(is);
-		m_hp = readU16(is);
-	} else {
-		if (version >= 1)
-			m_id = readS16(is);
-		m_position = readV3F1000(is);
-		m_rotation = v3f(0.0, readF1000(is), 0.0);
-		m_hp = readS16(is);
-	}
+	m_id = readU16(is);
+	m_position = readV3F32(is);
+	m_rotation = readV3F32(is);
+	m_hp = readU16(is);
 
 	const u8 num_messages = readU8(is);
 
@@ -402,8 +396,6 @@ void GenericCAO::processInitData(const std::string &data)
 
 GenericCAO::~GenericCAO()
 {
-	if (m_is_player && m_client->getProtoVersion() < 33)
-		m_env->removePlayerName(m_name.c_str());
 	removeFromScene(true);
 }
 
@@ -683,9 +675,8 @@ void GenericCAO::addToScene(ITextureSource *tsrc)
 				video::S3DVertex( dx,  dy, 0, 0,0,1, c, 0,0),
 				video::S3DVertex(-dx,  dy, 0, 0,0,1, c, 1,0),
 			};
-			if (m_is_player && m_client->getProtoVersion() >= 36) {
+			if (m_is_player) {
 				// Move minimal Y position to 0 (feet position)
-				// This should not be done on Minetest 0.4 servers
 				for (video::S3DVertex &vertex : vertices)
 					vertex.Pos.Y += dy;
 			}
@@ -715,9 +706,8 @@ void GenericCAO::addToScene(ITextureSource *tsrc)
 				video::S3DVertex(-dx, dy, 0, 0,0,-1, c, 0,0),
 				video::S3DVertex( dx, dy, 0, 0,0,-1, c, 1,0),
 			};
-			if (m_is_player && m_client->getProtoVersion() >= 36) {
+			if (m_is_player) {
 				// Move minimal Y position to 0 (feet position)
-				// This should not be done on Minetest 0.4 servers
 				for (video::S3DVertex &vertex : vertices)
 					vertex.Pos.Y += dy;
 			}
@@ -786,7 +776,7 @@ void GenericCAO::addToScene(ITextureSource *tsrc)
 			setSceneNodeMaterial(m_animated_meshnode);
 
 			m_animated_meshnode->setMaterialFlag(video::EMF_BACK_FACE_CULLING,
-				!m_is_player && m_prop.backface_culling);
+				m_prop.backface_culling);
 		} else
 			errorstream<<"GenericCAO::addToScene(): Could not load mesh "<<m_prop.mesh<<std::endl;
 	} else if (m_prop.visual == "wielditem" || m_prop.visual == "item") {
@@ -997,8 +987,6 @@ void GenericCAO::step(float dtime, ClientEnvironment *env)
 	if (m_is_local_player) {
 		LocalPlayer *player = m_env->getLocalPlayer();
 		m_position = player->getPosition();
-		if (m_client->getProtoVersion() < 36)
-			m_position += v3f(0,BS,0);
 		pos_translator.val_current = m_position;
 		m_rotation.Y = wrapDegrees_0_360(player->getYaw());
 		rot_translator.val_current = m_rotation;
@@ -1638,7 +1626,6 @@ void GenericCAO::processMessage(const std::string &data)
 	std::istringstream is(data, std::ios::binary);
 	// command
 	u8 cmd = readU8(is);
-	const u16 protocol_version = m_client->getProtoVersion();
 	if (cmd == AO_CMD_SET_PROPERTIES) {
 		ObjectProperties newprops;
 		newprops.show_on_minimap = m_is_player; // default
@@ -1666,14 +1653,10 @@ void GenericCAO::processMessage(const std::string &data)
 		if (m_is_local_player) {
 			LocalPlayer *player = m_env->getLocalPlayer();
 			player->makes_footstep_sound = m_prop.makes_footstep_sound;
-			// Only set the collision box on Minetest 5.0.0+ to ensure
-			// compatibility with 0.4.
-			if (protocol_version >= 36) {
-				aabb3f collision_box = m_prop.collisionbox;
-				collision_box.MinEdge *= BS;
-				collision_box.MaxEdge *= BS;
-				player->setCollisionbox(collision_box);
-			}
+			aabb3f collision_box = m_prop.collisionbox;
+			collision_box.MinEdge *= BS;
+			collision_box.MaxEdge *= BS;
+			player->setCollisionbox(collision_box);
 			player->setEyeHeight(m_prop.eye_height);
 			player->setZoomFOV(m_prop.zoom_fov);
 		}
@@ -1699,19 +1682,15 @@ void GenericCAO::processMessage(const std::string &data)
 	} else if (cmd == AO_CMD_UPDATE_POSITION) {
 		// Not sent by the server if this object is an attachment.
 		// We might however get here if the server notices the object being detached before the client.
-		m_position = readV3F(is, protocol_version);
-		m_velocity = readV3F(is, protocol_version);
-		m_acceleration = readV3F(is, protocol_version);
-		if (protocol_version >= 37)
-			m_rotation = readV3F32(is);
-		else
-			m_rotation = v3f(0.0, readF1000(is), 0.0);
-
+		m_position = readV3F32(is);
+		m_velocity = readV3F32(is);
+		m_acceleration = readV3F32(is);
+		m_rotation = readV3F32(is);
 
 		m_rotation = wrapDegrees_0_360_v3f(m_rotation);
 		bool do_interpolate = readU8(is);
 		bool is_end_position = readU8(is);
-		float update_interval = readF(is, protocol_version);
+		float update_interval = readF32(is);
 
 		// Place us a bit higher if we're physical, to not sink into
 		// the ground due to sucky collision detection...
@@ -1742,7 +1721,7 @@ void GenericCAO::processMessage(const std::string &data)
 	} else if (cmd == AO_CMD_SET_SPRITE) {
 		v2s16 p = readV2S16(is);
 		int num_frames = readU16(is);
-		float framelength = readF(is, protocol_version);
+		float framelength = readF32(is);
 		bool select_horiz_by_yawpitch = readU8(is);
 
 		m_tx_basepos = p;
@@ -1752,9 +1731,9 @@ void GenericCAO::processMessage(const std::string &data)
 
 		updateTexturePos();
 	} else if (cmd == AO_CMD_SET_PHYSICS_OVERRIDE) {
-		float override_speed = readF(is, protocol_version);
-		float override_jump = readF(is, protocol_version);
-		float override_gravity = readF(is, protocol_version);
+		float override_speed = readF32(is);
+		float override_jump = readF32(is);
+		float override_gravity = readF32(is);
 		// these are sent inverted so we get true when the server sends nothing
 		bool sneak = !readU8(is);
 		bool sneak_glitch = !readU8(is);
@@ -1773,11 +1752,11 @@ void GenericCAO::processMessage(const std::string &data)
 		}
 	} else if (cmd == AO_CMD_SET_ANIMATION) {
 		// TODO: change frames send as v2s32 value
-		v2f range = readV2F(is, protocol_version);
+		v2f range = readV2F32(is);
 		if (!m_is_local_player) {
 			m_animation_range = v2s32((s32)range.X, (s32)range.Y);
-			m_animation_speed = readF(is, protocol_version);
-			m_animation_blend = readF(is, protocol_version);
+			m_animation_speed = readF32(is);
+			m_animation_blend = readF32(is);
 			// these are sent inverted so we get true when the server sends nothing
 			m_animation_loop = !readU8(is);
 			updateAnimation();
@@ -1786,8 +1765,8 @@ void GenericCAO::processMessage(const std::string &data)
 			if(player->last_animation == NO_ANIM)
 			{
 				m_animation_range = v2s32((s32)range.X, (s32)range.Y);
-				m_animation_speed = readF(is, protocol_version);
-				m_animation_blend = readF(is, protocol_version);
+				m_animation_speed = readF32(is);
+				m_animation_blend = readF32(is);
 				// these are sent inverted so we get true when the server sends nothing
 				m_animation_loop = !readU8(is);
 			}
@@ -1806,30 +1785,25 @@ void GenericCAO::processMessage(const std::string &data)
 			}
 		}
 	} else if (cmd == AO_CMD_SET_ANIMATION_SPEED) {
-		m_animation_speed = readF(is, protocol_version);
+		m_animation_speed = readF32(is);
 		updateAnimationSpeed();
 	} else if (cmd == AO_CMD_SET_BONE_POSITION) {
 		std::string bone = deSerializeString16(is);
-		v3f position = readV3F(is, protocol_version);
-		v3f rotation = readV3F(is, protocol_version);
+		v3f position = readV3F32(is);
+		v3f rotation = readV3F32(is);
 		m_bone_position[bone] = core::vector2d<v3f>(position, rotation);
 
 		// updateBonePosition(); now called every step
 	} else if (cmd == AO_CMD_ATTACH_TO) {
 		u16 parent_id = readS16(is);
 		std::string bone = deSerializeString16(is);
-		v3f position = readV3F(is, protocol_version);
-		v3f rotation = readV3F(is, protocol_version);
+		v3f position = readV3F32(is);
+		v3f rotation = readV3F32(is);
 		bool force_visible = readU8(is); // Returns false for EOF
 
 		setAttachment(parent_id, bone, position, rotation, force_visible);
 	} else if (cmd == AO_CMD_PUNCHED) {
 		u16 result_hp = readU16(is);
-		if (protocol_version < 37) {
-			// This is not a bug, the above readU16() is intentionally executed
-			// on older protocols as there used to be a damage value sent.
-			result_hp = readS16(is);
-		}
 
 		// Use this instead of the send damage to not interfere with prediction
 		s32 damage = (s32)m_hp - (s32)result_hp;

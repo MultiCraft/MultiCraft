@@ -2627,11 +2627,6 @@ void Game::handleClientEvent_None(ClientEvent *event, CameraOrientation *cam)
 
 void Game::handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation *cam)
 {
-	// Don't do anything if proto_ver < 36 and the player is dead.
-	// This reverts the change introduced in dcd1a15 for old servers.
-	if (client->getProtoVersion() < 36 && client->getHP() == 0)
-		return;
-
 	if (client->modsLoaded())
 		client->getScript()->on_damage_taken(event->player_damage.amount);
 
