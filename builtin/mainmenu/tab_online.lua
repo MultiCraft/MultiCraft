@@ -384,12 +384,6 @@ local function main_button_handler(tabview, fields, name, tabdata)
 			if not is_server_protocol_compat_or_error(
 						fav.proto_min, fav.proto_max) then
 				return true
-			elseif fav.proto_max and fav.proto_max < 37 and not is_favorite(fav) then
-				local dlg = create_outdated_server_dlg(fav)
-				dlg:set_parent(tabview)
-				tabview:hide()
-				dlg:show()
-				return true
 			end
 
 			serverlistmgr.add_favorite(fav)
