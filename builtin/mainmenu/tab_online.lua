@@ -164,17 +164,6 @@ local function get_formspec(tabview, name, tabdata)
 	return retval
 end
 
-local function is_favorite(server)
-	local favs = serverlistmgr.get_favorites()
-	for fav_id = 1, #favs do
-		if server.address == favs[fav_id].address and
-				server.port == favs[fav_id].port then
-			return true
-		end
-	end
-	return false
-end
-
 --------------------------------------------------------------------------------
 local function main_button_handler(tabview, fields, name, tabdata)
 	local serverlist = menudata.search_result or serverlistmgr.servers
