@@ -967,8 +967,7 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 		verbosestream
 			<< "Up event for pointerid: " << event.TouchInput.ID << std::endl;
 		handleReleaseEvent(event.TouchInput.ID);
-	} else {
-		assert(event.TouchInput.Event == ETIE_MOVED);
+	} else if (event.TouchInput.Event == ETIE_MOVED) {
 
 		if (m_pointerpos[event.TouchInput.ID] ==
 				v2s32(event.TouchInput.X, event.TouchInput.Y))
