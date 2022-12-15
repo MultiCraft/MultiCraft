@@ -43,6 +43,7 @@ namespace fs
 #define _WIN32_WINNT 0x0501
 #include <windows.h>
 #include <shlwapi.h>
+#include <io.h>
 
 std::vector<DirListNode> GetDirListing(const std::string &pathstring)
 {
