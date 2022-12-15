@@ -121,7 +121,9 @@ local function start_install(package, reason)
 			gamedata.errormessage = result.msg
 		else
 			local path, msg = pkgmgr.install_dir(package.type, result.path, package.name, package.path)
-			core.delete_dir(result.path)
+			if core.is_dir(result.path) then
+				core.delete_dir(result.path)
+			end
 			if not path then
 				gamedata.errormessage = msg
 			else
