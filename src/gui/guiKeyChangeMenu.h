@@ -55,6 +55,8 @@ public:
 
 	void drawMenu();
 
+	const std::string getMenuName() { return "GUIKeyChangeMenu"; }
+
 	bool acceptInput();
 
 	bool OnEvent(const SEvent &event);

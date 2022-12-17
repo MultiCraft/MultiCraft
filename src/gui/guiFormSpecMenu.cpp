@@ -3118,6 +3118,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	parserData mydata;
 
 	// Preserve stuff only on same form, not on a new form.
+	m_debug_state = "Preserving tables/focus";
 	if (m_text_dst->m_formname == m_last_formname) {
 		// Preserve tables/textlists
 		for (auto &m_table : m_tables) {
@@ -3145,8 +3146,10 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	}
 
 	// Remove children
+	m_debug_state = "Removing children";
 	removeChildren();
 
+	m_debug_state = "Dropping old elements";
 	for (auto &table_it : m_tables)
 		table_it.second->drop();
 	for (auto &inventorylist_it : m_inventorylists)
@@ -3198,6 +3201,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 	m_formspec_version = 1;
 
+	m_debug_state = "Getting backgrounds";
 	{
 		v3f formspec_bgcolor = g_settings->getV3F("formspec_default_bg_color");
 		m_bgcolor = video::SColor(
@@ -3238,11 +3242,13 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 		m_tooltip_element->grab();
 	}
 
+	m_debug_state = "Getting elements list";
 	std::vector<std::string> elements = split(m_formspec_string,']');
 	unsigned int i = 0;
 
 	/* try to read version from first element only */
 	if (!elements.empty()) {
+		m_debug_state = elements[0];
 		if (parseVersionDirect(elements[0])) {
 			i++;
 		}
@@ -3251,6 +3257,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	/* we need size first in order to calculate image scale */
 	mydata.explicit_size = false;
 	for (; i< elements.size(); i++) {
+		m_debug_state = elements[i];
 		if (!parseSizeDirect(&mydata, elements[i])) {
 			break;
 		}
@@ -3258,6 +3265,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 	/* "position" element is always after "size" element if it used */
 	for (; i< elements.size(); i++) {
+		m_debug_state = elements[i];
 		if (!parsePositionDirect(&mydata, elements[i])) {
 			break;
 		}
@@ -3265,6 +3273,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 	/* "anchor" element is always after "position" (or  "size" element) if it used */
 	for (; i< elements.size(); i++) {
+		m_debug_state = elements[i];
 		if (!parseAnchorDirect(&mydata, elements[i])) {
 			break;
 		}
@@ -3276,6 +3285,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 		if (elements[i].empty())
 			break;
 
+		m_debug_state = elements[i];
 		std::vector<std::string> parts = split(elements[i], '[');
 		if (trim(parts[0]) == "no_prepend")
 			enable_prepends = false;
@@ -3286,6 +3296,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	/* Copy of the "real_coordinates" element for after the form size. */
 	mydata.real_coordinates = m_formspec_version >= 2;
 	for (; i < elements.size(); i++) {
+		m_debug_state = elements[i];
 		std::vector<std::string> parts = split(elements[i], '[');
 		std::string name = trim(parts[0]);
 		if (name != "real_coordinates" || parts.size() != 2)
@@ -3294,6 +3305,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 		mydata.real_coordinates = is_yes(trim(parts[1]));
 	}
 
+	m_debug_state = "Computing size";
 	if (mydata.explicit_size) {
 		// compute scaling for specified form size
 		if (m_lock) {
@@ -3457,6 +3469,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	// used for formspec versions < 3
 	core::list<IGUIElement *>::Iterator legacy_sort_start = Children.getLast();
 
+	m_debug_state = "Adding prepend";
 	if (enable_prepends) {
 		// Backup the coordinates so that prepends can use the coordinates of choice.
 		bool rc_backup = mydata.real_coordinates;
@@ -3480,9 +3493,11 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	}
 
 	for (; i< elements.size(); i++) {
+		m_debug_state = elements[i];
 		parseElement(&mydata, elements[i]);
 	}
 
+	m_debug_state = "Sanity checks";
 	if (mydata.current_parent != this) {
 		errorstream << "Invalid formspec string: scroll_container was never closed!"
 			<< std::endl;
@@ -3492,6 +3507,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	}
 
 	// get the scrollbar elements for scroll_containers
+	m_debug_state = "Getting scroll containers";
 	for (const std::pair<std::string, GUIScrollContainer *> &c : m_scroll_containers) {
 		for (const std::pair<FieldSpec, GUIScrollBar *> &b : m_scrollbars) {
 			if (c.first == b.first.fname) {
@@ -3503,6 +3519,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 	// If there are fields without explicit size[], add a "Proceed"
 	// button and adjust size to fit all the fields.
+	m_debug_state = "Adding proceed button (if required)";
 	if (mydata.simple_field_count > 0 && !mydata.explicit_size) {
 		mydata.rect = core::rect<s32>(
 				mydata.screensize.X / 2 - 580 / 2,
@@ -3531,6 +3548,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	}
 
 	// Set initial focus if parser didn't set it
+	m_debug_state = "Setting initial focus";
 	gui::IGUIElement *focused_element = Environment->getFocus();
 	if (!focused_element
 			|| !isMyChild(focused_element)
@@ -3540,8 +3558,11 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	skin->setFont(old_font);
 
 	// legacy sorting
+	m_debug_state = "Sorting legacy elements (if required)";
 	if (m_formspec_version < 3)
 		legacySortElements(legacy_sort_start);
+
+	m_debug_state = "";
 
 	// Formname and regeneration setting
 	if (!m_is_form_regenerated) {
@@ -3694,6 +3715,7 @@ void GUIFormSpecMenu::drawMenu()
 	/*
 		Draw background color
 	*/
+	m_debug_state = "Drawing background";
 	v2u32 screenSize = driver->getScreenSize();
 	core::rect<s32> allbg(0, 0, screenSize.X, screenSize.Y);
 
@@ -3728,6 +3750,7 @@ void GUIFormSpecMenu::drawMenu()
 	}
 
 	// Some elements are only visible while being drawn
+	m_debug_state = "Making clickthrough elements visible";
 	for (gui::IGUIElement *e : m_clickthrough_elements)
 		e->setVisible(true);
 
@@ -3735,15 +3758,22 @@ void GUIFormSpecMenu::drawMenu()
 		This is where all the drawing happens.
 	*/
 	core::list<IGUIElement*>::Iterator it = Children.begin();
-	for (; it != Children.end(); ++it)
+	for (; it != Children.end(); ++it) {
+		const char* type = typeid(**it).name();
+		m_debug_state = std::string("Checking whether ") + type + " can be drawn";
 		if ((*it)->isNotClipped() ||
 				AbsoluteClippingRect.isRectCollided(
-						(*it)->getAbsolutePosition()))
+						(*it)->getAbsolutePosition())) {
+			m_debug_state = std::string("Drawing ") + type;
 			(*it)->draw();
+		}
+	}
 
+	m_debug_state = "Making clickthrough elements invisible";
 	for (gui::IGUIElement *e : m_clickthrough_elements)
 		e->setVisible(false);
 
+	m_debug_state = "Drawing tooltips";
 	// Draw hovered item tooltips
 	for (const std::string &tooltip : m_hovered_item_tooltips) {
 		showTooltip(utf8_to_wide(tooltip), m_default_tooltip_color,
@@ -3831,7 +3861,9 @@ void GUIFormSpecMenu::drawMenu()
 	/*
 		Draw dragged item stack
 	*/
+	m_debug_state = "Drawing selected item";
 	drawSelectedItem();
+	m_debug_state = "";
 
 	skin->setFont(old_font);
 }

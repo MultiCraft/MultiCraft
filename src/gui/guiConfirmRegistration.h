@@ -44,6 +44,8 @@ public:
 
 	void drawMenu();
 
+	const std::string getMenuName() { return "GUIConfirmRegistration"; }
+
 	void closeMenu(bool goNext);
 
 	void acceptInput();

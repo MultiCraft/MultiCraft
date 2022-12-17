@@ -255,6 +255,10 @@ public:
 	void updateSelectedItem();
 	ItemStack verifySelectedItem();
 
+	const std::string getMenuName() {
+		return "GUIFormSpecMenu: " + m_text_dst->m_formname + ", " + m_debug_state;
+	}
+
 	void acceptInput(FormspecQuitMode quitmode=quit_mode_no);
 	bool preprocessEvent(const SEvent& event);
 	void clearSelection();
@@ -358,6 +362,7 @@ private:
 	std::string         m_focused_element = "";
 	JoystickController *m_joystick;
 	bool m_show_debug = false;
+	std::string         m_debug_state = "";
 
 	struct parserData {
 		bool explicit_size;

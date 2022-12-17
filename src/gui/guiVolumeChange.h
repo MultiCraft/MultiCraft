@@ -41,6 +41,8 @@ public:
 
 	void drawMenu();
 
+	const std::string getMenuName() { return "GUIKeyChangeMenu"; }
+
 	bool OnEvent(const SEvent& event);
 
 	bool pausesGame() { return true; }

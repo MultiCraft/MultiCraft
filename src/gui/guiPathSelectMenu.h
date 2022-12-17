@@ -40,6 +40,8 @@ public:
 
 	void drawMenu();
 
+	const std::string getMenuName() { return "GUIFileSelectMenu"; }
+
 	bool OnEvent(const SEvent &event);
 
 	void setTextDest(TextDest *dest) { m_text_dst = dest; }
