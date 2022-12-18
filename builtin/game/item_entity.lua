@@ -21,7 +21,6 @@ local time_to_live = tonumber(core.settings:get("item_entity_ttl")) or 600
 local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
 local collection = core.settings:get_bool("item_collection", true)
 local water_flow = core.settings:get_bool("item_water_flow", true)
-local lava_destroy = core.settings:get_bool("item_lava_destroy", true)
 
 -- Water flow functions, based on QwertyMine3 (WTFPL), and TenPlus1 (MIT) mods
 local function quick_flow_logic(node, pos_testing, dir)
@@ -315,37 +314,11 @@ core.register_entity(":__builtin:item", {
 			end
 		end
 
-		local node_inside = core.get_node_or_nil(pos)
-		local def_inside = node_inside and core.registered_nodes[node_inside.name]
-
-		-- Destroy item when dropped into lava
-		if lava_destroy and def_inside
-				and def_inside.groups and def_inside.groups.lava then
-			core.sound_play("default_cool_lava", {
-				pos = pos, max_hear_distance = 10})
-			self.itemstring = ""
-			self.object:remove()
-			core.add_particlespawner({
-				amount = 3,
-				time = 0.1,
-				minpos = {x = pos.x - 0.1, y = pos.y + 0.1, z = pos.z - 0.1},
-				maxpos = {x = pos.x + 0.1, y = pos.y + 0.2, z = pos.z + 0.1},
-				minvel = {x = 0, y = 2.5, z = 0},
-				maxvel = {x = 0, y = 2.5, z = 0},
-				minacc = {x = -0.15, y = -0.02, z = -0.15},
-				maxacc = {x = 0.15, y = -0.01, z = 0.15},
-				minexptime = 4,
-				maxexptime = 6,
-				minsize = 2,
-				maxsize = 4,
-				texture = "item_smoke.png"
-			})
-			return
-		end
-
 		local vel = self.object:get_velocity()
 
 		-- Moving items in the water flow (TenPlus1, MIT)
+		local node_inside = core.get_node_or_nil(pos)
+		local def_inside = node_inside and core.registered_nodes[node_inside.name]
 		if water_flow and def_inside and def_inside.liquidtype == "flowing" then
 			local vec = quick_flow(pos, node_inside)
 			self.object:set_velocity({x = vec.x, y = vel.y, z = vec.z})
