@@ -3759,11 +3759,11 @@ void GUIFormSpecMenu::drawMenu()
 	*/
 	core::list<IGUIElement*>::Iterator it = Children.begin();
 	for (; it != Children.end(); ++it) {
-		const char* type = typeid(**it).name();
-		m_debug_state = std::string("Checking whether ") + type + " can be drawn";
+		m_debug_state = "Checking whether element can be drawn";
 		if ((*it)->isNotClipped() ||
 				AbsoluteClippingRect.isRectCollided(
 						(*it)->getAbsolutePosition())) {
+			const char* type = typeid(**it).name();
 			m_debug_state = std::string("Drawing ") + type;
 			(*it)->draw();
 		}
