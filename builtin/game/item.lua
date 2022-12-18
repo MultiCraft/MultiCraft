@@ -8,7 +8,7 @@ local vadd, vnew, vmultiply, vnormalize, vsubtract =
 	vector.add, vector.new, vector.multiply, vector.normalize, vector.subtract
 
 local creative_mode = core.settings:get_bool("creative_mode")
-local node_drop = core.settings:get_bool("node_drop", true)
+local node_drop = core.settings:get_bool("node_drop")
 
 local function copy_pointed_thing(pointed_thing)
 	return {
