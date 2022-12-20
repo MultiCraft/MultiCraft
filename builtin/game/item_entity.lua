@@ -19,8 +19,8 @@ end
 
 local time_to_live = tonumber(core.settings:get("item_entity_ttl")) or 600
 local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
-local collection = core.settings:get_bool("item_collection")
-local water_flow = core.settings:get_bool("item_water_flow")
+local collection = core.settings:get_bool("item_collection", true)
+local water_flow = core.settings:get_bool("item_water_flow", true)
 
 -- Water flow functions, based on QwertyMine3 (WTFPL), and TenPlus1 (MIT) mods
 local function quick_flow_logic(node, pos_testing, dir)
