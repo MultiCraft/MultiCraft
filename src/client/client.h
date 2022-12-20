@@ -381,7 +381,6 @@ public:
 	// Insert a media file appropriately into the appropriate manager
 	bool loadMedia(const std::string &data, const std::string &filename,
 		bool from_media_push = false);
-
 	// Send a request for conventional media transfer
 	void request_media(const std::vector<std::string> &file_requests);
 
