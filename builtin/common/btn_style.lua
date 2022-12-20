@@ -25,7 +25,7 @@ function btn_style(field, color)
 		"style[" .. field .. ";bgimg=" .. button_path .. "gui_button" .. color .. btn_size ..
 			".png;bgimg_middle=" .. (is_high_dpi() and 48 or 32) .. ";padding=" .. (is_high_dpi() and -36 or -24) .. "]"
 
-	if color ~= "_gray" then
+	if color ~= "_gray" and color:sub(-8) ~= "_pressed" then
 		retval = retval ..
 			"style[" .. field .. ":hovered;bgimg=" .. button_path .. "gui_button" .. color .. "_hovered" .. btn_size ..
 				".png]" ..

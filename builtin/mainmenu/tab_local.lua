@@ -120,23 +120,13 @@ local function get_formspec(_, _, tab_data)
 
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
-			"style[world_delete,world_create;font_size=*1.2;padding=-10;bgimg_middle=20;content_offset=0]" ..
-			"style[world_delete;bgimg=" .. defaulttexturedir_esc .. "gui" ..
-				DIR_DELIM_esc .. "upper_buttons_left.png]" ..
-			"style[world_delete;bgimg_hovered=" .. defaulttexturedir_esc ..
-				"gui" .. DIR_DELIM_esc .. "upper_buttons_left_hover.png]" ..
-			"style[world_delete;bgimg_pressed=" .. defaulttexturedir_esc ..
-				"gui" .. DIR_DELIM_esc .. "upper_buttons_left_selected.png]" ..
+			"style[world_delete,world_create;font_size=*1.2]" ..
+			btn_style("world_delete", "left") ..
 			"image_button[-0.1,4.84;3.45,0.92;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
 			"image[0.05,4.96;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
 				DIR_DELIM_esc .. "world_delete.png]" ..
 
-			"style[world_create;bgimg=" .. defaulttexturedir_esc .. "gui" ..
-				DIR_DELIM_esc .. "upper_buttons_right.png]" ..
-			"style[world_create;bgimg_hovered=" .. defaulttexturedir_esc ..
-				"gui" .. DIR_DELIM_esc .. "upper_buttons_right_hover.png]" ..
-			"style[world_create;bgimg_pressed=" .. defaulttexturedir_esc ..
-				"gui" .. DIR_DELIM_esc .. "upper_buttons_right_selected.png]" ..
+			btn_style("world_create", "right") ..
 			"image_button[3.15,4.84;3.45,0.92;;world_create;".. fgettext("New") .. ";true;false]" ..
 			"image[3.35,4.96;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
 				DIR_DELIM_esc .. "world_create.png]"
