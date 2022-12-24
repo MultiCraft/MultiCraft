@@ -120,15 +120,15 @@ local function get_formspec(_, _, tab_data)
 
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
-			"style[world_delete,world_create;font_size=*1.2]" ..
+			"style[world_delete,world_create,world_configure;font_size=*1.2]" ..
 			btn_style("world_delete", "left") ..
-			"image_button[-0.1,4.84;3.45,0.92;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
-			"image[0.05,4.96;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
+			"image_button[-0.12,4.85;3.48,0.9;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
+			"image[0.05,4.95;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
 				DIR_DELIM_esc .. "world_delete.png]" ..
 
 			btn_style("world_create", "right") ..
-			"image_button[3.15,4.84;3.45,0.92;;world_create;".. fgettext("New") .. ";true;false]" ..
-			"image[3.35,4.96;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
+			"image_button[3.16,4.85;3.48,0.9;;world_create;".. fgettext("New") .. ";true;false]" ..
+			"image[3.3,4.95;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
 				DIR_DELIM_esc .. "world_create.png]"
 
 	local world = menudata.worldlist:get_list()[index]
@@ -136,7 +136,7 @@ local function get_formspec(_, _, tab_data)
 	if game and game.moddable then
 		retval = retval ..
 			btn_style("world_configure") ..
-			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
+			"image_button[8.75,4.85;3.25,0.9;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
 	end
 
 	retval = retval ..
