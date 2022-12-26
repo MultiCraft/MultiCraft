@@ -120,13 +120,6 @@ local function get_formspec(this)
 				defaulttexturedir_esc .. "switch_local_hover.png]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
 
-	if PLATFORM == "Android" then
-		retval = retval ..
-			"image_button[6.6,-0.1;1.5,1.5;" ..
-				defaulttexturedir_esc .. "gift_btn.png;upgrade;;true;false;" ..
-				defaulttexturedir_esc .. "gift_btn_pressed.png]"
-	end
-
 	local enable_server = core.settings:get_bool("enable_server")
 	if enable_server then
 		retval = retval ..
@@ -273,10 +266,6 @@ local function main_button_handler(this, fields, name)
 	if fields["switch_local"] then
 		this:set_tab("local")
 		return true
-	end
-
-	if fields["upgrade"] then
-		core.upgrade("")
 	end
 
 --[[if fields["world_configure"] ~= nil then
