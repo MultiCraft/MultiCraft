@@ -138,7 +138,7 @@ local function get_formspec(_, _, tab_data)
 		retval = retval ..
 			btn_style("world_configure") ..
 			"image_button[8.1,4.84;4,0.9;;world_configure;" .. fgettext("Select Mods") .. ";true;false]" ..
-			"image[8.25,4.96;0.6,0.6;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "settings.png]"
+			"image[8.25,4.96;0.6,0.6;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_settings.png]"
 	end
 
 	retval = retval ..
