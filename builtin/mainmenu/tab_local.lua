@@ -121,7 +121,7 @@ local function get_formspec(_, _, tab_data)
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
 			"style[world_delete,world_create,world_configure;font_size=*" ..
-				(small_screen and 1.2 or 1.4) .. "]" ..
+				(small_screen and 1.2 or 1.5) .. "]" ..
 			btn_style("world_delete", "left") ..
 			"image_button[-0.12,4.85;3.48,0.9;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
 			"image[0.05,4.95;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
