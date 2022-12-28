@@ -293,11 +293,17 @@ local function main_button_handler(this, fields, name, tab_data)
 	end
 
 	if fields["world_create"] ~= nil then
-		local create_world_dlg = create_create_world_dlg(true)
-		create_world_dlg:set_parent(this)
+		local dlg
+		if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
+			mm_texture.update("singleplayer", current_game())
+			dlg = create_create_world_dlg(true)
+		else
+			dlg = create_store_dlg("game")
+		end
+
+		dlg:set_parent(this)
 		this:hide()
-		create_world_dlg:show()
-		mm_texture.update("singleplayer", current_game())
+		dlg:show()
 		return true
 	end
 
