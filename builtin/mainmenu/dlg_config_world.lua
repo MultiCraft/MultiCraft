@@ -131,7 +131,7 @@ local function get_formspec(data)
 	end
 
 	retval = retval ..
-		btn_style("btn_config_world_save") ..
+		btn_style("btn_config_world_save", "green") ..
 		"button[5.5,7.1;3,0.5;btn_config_world_save;" ..
 		fgettext("Save") .. "]" ..
 		btn_style("btn_config_world_cancel") ..
@@ -139,19 +139,21 @@ local function get_formspec(data)
 		fgettext("Cancel") .. "]" ..
 		btn_style("btn_config_world_cdb") ..
 		"button[-0.05,7.1;3.5,0.5;btn_config_world_cdb;" ..
-		fgettext("Find More Mods") .. "]"
+		fgettext("Find More Mods") .. "]" ..
+		"image[0.09,7.05;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
+		DIR_DELIM_esc .. "btn_download.png]"
 
 	if mod.name ~= "" and not mod.is_game_content then
 		if mod.is_modpack then
 
 			if pkgmgr.is_modpack_entirely_enabled(data, mod.name) then
 				retval = retval ..
-					btn_style("btn_mp_disable") ..
+					btn_style("btn_mp_disable", "yellow") ..
 					"button[5.5,0.025;3,0.5;btn_mp_disable;" ..
 					fgettext("Disable modpack") .. "]"
 			else
 				retval = retval ..
-					btn_style("btn_mp_enable") ..
+					btn_style("btn_mp_enable", "green") ..
 					"button[5.5,0.025;3,0.5;btn_mp_enable;" ..
 					fgettext("Enable modpack") .. "]"
 			end
@@ -163,12 +165,12 @@ local function get_formspec(data)
 	end
 	if enabled_all then
 		retval = retval ..
-			btn_style("btn_disable_all_mods") ..
+			btn_style("btn_disable_all_mods", "yellow") ..
 			"button[8.95,0.025;2.5,0.5;btn_disable_all_mods;" ..
 			fgettext("Disable all") .. "]"
 	else
 		retval = retval ..
-			btn_style("btn_enable_all_mods") ..
+			btn_style("btn_enable_all_mods", "green") ..
 			"button[8.95,0.025;2.5,0.5;btn_enable_all_mods;" ..
 			fgettext("Enable all") .. "]"
 	end
