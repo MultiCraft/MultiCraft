@@ -258,19 +258,19 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 			if (processMouse(event))
 				return true;
 			break;
+#if defined(__ANDROID__) || defined(__IOS__)
 		case EET_TOUCH_INPUT_EVENT:
 			if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
 				m_long_press = true;
-#if defined(__ANDROID__) || defined(__IOS__)
 				bool success = onKeyControlC(event);
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
 				if (success)
 					SDL_AndroidShowToast("Copied to clipboard", 2, -1, 0, 0);
-#endif
 #endif
 				return true;
 			}
 			break;
+#endif
 		default:
 			break;
 		}
