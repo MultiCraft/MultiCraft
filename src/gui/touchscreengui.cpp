@@ -92,7 +92,7 @@ static irr::EKEY_CODE id2keycode(touch_gui_button_id id)
 		case special1_id:
 			key = "special1";
 			break;
-		case fly_id:
+		/*case fly_id:
 			key = "freemove";
 			break;
 		case noclip_id:
@@ -106,7 +106,7 @@ static irr::EKEY_CODE id2keycode(touch_gui_button_id id)
 			break;
 		case toggle_chat_id:
 			key = "toggle_chat";
-			break;
+			break;*/
 		case minimap_id:
 			key = "minimap";
 			break;
@@ -433,7 +433,6 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device, IEventReceiver *receiver)
 	for (auto &button : m_buttons) {
 		button.guibutton     = nullptr;
 		button.repeatcounter = -1;
-		button.repeatdelay   = BUTTON_REPEAT_DELAY;
 	}
 
 	m_touchscreen_threshold = g_settings->getU16("touchscreen_threshold");
@@ -482,6 +481,7 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 {
 	assert(tsrc);
 
+	m_visible       = true;
 	m_texturesource = tsrc;
 
 	/* Init joystick display "button"
@@ -637,16 +637,12 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 
 touch_gui_button_id TouchScreenGUI::getButtonID(s32 x, s32 y)
 {
-	IGUIElement *rootguielement = m_guienv->getRootGUIElement();
+	for (u32 i = 0; i < after_last_element_id; i++) {
+		if (!m_buttons[i].guibutton)
+			continue;
 
-	if (rootguielement != nullptr) {
-		gui::IGUIElement *element =
-				rootguielement->getElementFromPoint(core::position2d<s32>(x, y));
-
-		if (element)
-			for (u32 i = 0; i < after_last_element_id; i++)
-				if (element == m_buttons[i].guibutton)
-					return (touch_gui_button_id) i;
+		if (m_buttons[i].guibutton->isPointInside(core::position2d<s32>(x, y)))
+			return (touch_gui_button_id) i;
 	}
 
 	return after_last_element_id;
@@ -962,13 +958,11 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 		}
 
 		m_pointerpos[event.TouchInput.ID] = v2s32(event.TouchInput.X, event.TouchInput.Y);
-	}
-	else if (event.TouchInput.Event == ETIE_LEFT_UP) {
+	} else if (event.TouchInput.Event == ETIE_LEFT_UP) {
 		verbosestream
 			<< "Up event for pointerid: " << event.TouchInput.ID << std::endl;
 		handleReleaseEvent(event.TouchInput.ID);
 	} else if (event.TouchInput.Event == ETIE_MOVED) {
-
 		if (m_pointerpos[event.TouchInput.ID] ==
 				v2s32(event.TouchInput.X, event.TouchInput.Y))
 			return;
