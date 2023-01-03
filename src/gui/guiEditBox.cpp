@@ -261,12 +261,14 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 #if defined(__ANDROID__) || defined(__IOS__)
 		case EET_TOUCH_INPUT_EVENT:
 			if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
-				m_long_press = true;
-				bool success = onKeyControlC(event);
+				if (!m_mouse_marking) {
+					m_long_press = true;
+					bool success = onKeyControlC(event);
 #ifdef __ANDROID__
-				if (success)
-					SDL_AndroidShowToast("Copied to clipboard", 2, -1, 0, 0);
+					if (success)
+						SDL_AndroidShowToast("Copied to clipboard", 2, -1, 0, 0);
 #endif
+				}
 				return true;
 			}
 			break;
@@ -786,7 +788,15 @@ bool GUIEditBox::processMouse(const SEvent &event)
 			m_cursor_press_pos != -1 && cursor_pos != m_cursor_press_pos &&
 			Environment->hasFocus(this)) {
 			m_mouse_marking = true;
-			setTextMarkers(m_cursor_press_pos, m_cursor_press_pos);
+			
+			int mark_length = m_real_mark_end - m_real_mark_begin;
+			
+			if (mark_length > 2 && std::abs(m_cursor_press_pos - m_mark_begin) < 3)
+				setTextMarkers(m_mark_end, m_cursor_press_pos);
+			else if (mark_length > 2 && std::abs(m_cursor_press_pos - m_mark_end) < 3)
+				setTextMarkers(m_mark_begin, m_cursor_press_pos);
+			else
+				setTextMarkers(m_cursor_press_pos, m_cursor_press_pos);
 		}
 #endif
 		if (m_mouse_marking) {
