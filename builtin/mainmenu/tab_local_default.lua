@@ -96,7 +96,7 @@ local function get_formspec(this)
 			"image[0.1,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_delete.png]" ..
 
 			btn_style("world_create", "right") ..
-			"image_button[3.16,4.85;3.48,0.9;;world_create;".. fgettext("New") .. ";true;false]" ..
+			"image_button[3.16,4.85;3.48,0.9;;world_create;".. fgettext("Create") .. ";true;false]" ..
 			"image[3.35,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_create.png]" ..
 
 			btn_style("play") ..
