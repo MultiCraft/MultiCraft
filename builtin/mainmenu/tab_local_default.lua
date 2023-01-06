@@ -93,13 +93,11 @@ local function get_formspec(this)
 				(small_screen and 1.2 or 1.5) .. "]" ..
 			btn_style("world_delete", "left") ..
 			"image_button[-0.12,4.85;3.48,0.9;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
-			"image[0.05,4.95;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
-				DIR_DELIM_esc .. "world_delete.png]" ..
+			"image[0.1,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_delete.png]" ..
 
 			btn_style("world_create", "right") ..
 			"image_button[3.16,4.85;3.48,0.9;;world_create;".. fgettext("New") .. ";true;false]" ..
-			"image[3.3,4.95;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
-				DIR_DELIM_esc .. "world_create.png]" ..
+			"image[3.35,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_create.png]" ..
 
 			btn_style("play") ..
 			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..

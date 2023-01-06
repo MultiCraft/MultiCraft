@@ -124,21 +124,19 @@ local function get_formspec(_, _, tab_data)
 				(small_screen and 1.2 or 1.5) .. "]" ..
 			btn_style("world_delete", "left") ..
 			"image_button[-0.12,4.85;3.48,0.9;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
-			"image[0.05,4.95;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
-				DIR_DELIM_esc .. "world_delete.png]" ..
+			"image[0.1,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_delete.png]" ..
 
 			btn_style("world_create", "right") ..
 			"image_button[3.16,4.85;3.48,0.9;;world_create;".. fgettext("New") .. ";true;false]" ..
-			"image[3.3,4.95;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
-				DIR_DELIM_esc .. "world_create.png]"
+			"image[3.35,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_create.png]"
 
 	local world = menudata.worldlist:get_list()[index]
 	local game = world and pkgmgr.find_by_gameid(world.gameid)
 	if game and game.moddable then
 		retval = retval ..
 			btn_style("world_configure") ..
-			"image_button[8.1,4.84;4,0.9;;world_configure;" .. fgettext("Select Mods") .. ";true;false]" ..
-			"image[8.25,4.96;0.6,0.6;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_settings.png]"
+			"image_button[8.1,4.85;4,0.9;;world_configure;" .. fgettext("Select Mods") .. ";true;false]" ..
+			"image[8.3,5.02;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_settings.png]"
 	end
 
 	retval = retval ..
