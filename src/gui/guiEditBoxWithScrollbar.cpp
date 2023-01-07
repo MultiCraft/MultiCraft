@@ -83,6 +83,7 @@ void GUIEditBoxWithScrollBar::draw()
 		return;
 
 	const bool focus = Environment->hasFocus(this);
+	const bool scollbar_focus = Environment->hasFocus(m_vscrollbar);
 
 	IGUISkin* skin = Environment->getSkin();
 	if (!skin)
@@ -189,7 +190,7 @@ void GUIEditBoxWithScrollBar::draw()
 					false, true, &local_clip_rect);
 
 				// draw mark and marked text
-				if (focus && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
+				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
 
 					s32 mbegin = 0, mend = 0;
 					s32 lineStartPos = 0, lineEndPos = txt_line->size();

@@ -210,10 +210,13 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 		switch (event.EventType) {
 		case EET_GUI_EVENT:
 			if (event.GUIEvent.EventType == EGET_ELEMENT_FOCUS_LOST) {
-				if (event.GUIEvent.Caller == this) {
-					m_mouse_marking = false;
-					setTextMarkers(0, 0);
-				}
+#ifdef HAVE_TOUCHSCREENGUI
+				if (!TouchScreenGUI::isActive())
+#endif
+					if (event.GUIEvent.Caller == this) {
+						m_mouse_marking = false;
+						setTextMarkers(0, 0);
+					}
 			}
 			break;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
