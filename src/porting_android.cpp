@@ -54,7 +54,7 @@ extern "C" int SDL_main(int argc, char *argv[])
 		return 0;
 	}
 
-	Thread::setName("Main");
+	//Thread::setName("Main");
 
 	try {
 		char *argv[] = {strdup(PROJECT_NAME), nullptr};
