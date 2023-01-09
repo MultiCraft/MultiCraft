@@ -381,6 +381,9 @@ Client::~Client()
 	m_mesh_update_thread.wait();
 	while (!m_mesh_update_thread.m_queue_out.empty()) {
 		MeshUpdateResult r = m_mesh_update_thread.m_queue_out.pop_frontNoEx();
+		for (auto block : r.map_blocks)
+			if (block)
+				block->refDrop();
 		delete r.mesh;
 	}
 
@@ -649,6 +652,10 @@ void Client::step(float dtime)
 
 				blocks_to_ack.emplace_back(r.p);
 			}
+
+			for (auto block : r.map_blocks)
+				if (block)
+					block->refDrop();
 		}
 		if (blocks_to_ack.size() > 0) {
 				// Acknowledge block(s)
