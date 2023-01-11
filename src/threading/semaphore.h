@@ -27,7 +27,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <semaphore.h>
 #endif
 
+#include "porting.h"
 #include "util/basic_macros.h"
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include <SDL.h>
+#endif
 
 class Semaphore
 {
@@ -42,7 +47,9 @@ public:
 	bool wait(unsigned int time_ms);
 
 private:
-#if defined(WIN32)
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	SDL_sem* semaphore;
+#elif defined(WIN32)
 	HANDLE semaphore;
 #elif defined(__MACH__) && defined(__APPLE__)
 	semaphore_t semaphore;
