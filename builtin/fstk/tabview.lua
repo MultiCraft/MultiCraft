@@ -248,25 +248,20 @@ local function button_header(self)
 	for i = 1, #visible_tabs do
 		local caption = visible_tabs[i].caption
 	--	local w = btn_widths[i] * coords_per_char
-		local texture = "upper_buttons_middle"
+		local side = "middle"
 		if i == 1 then
-			texture = "upper_buttons_left"
+			side = "left"
 		elseif i == #visible_tabs then
-			texture = "upper_buttons_right"
+			side = "right"
 		end
 		local btn_name = self.name .. "_" .. i
-		toadd = toadd ..
-			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir_esc ..
-				DIR_DELIM_esc .. "gui" .. DIR_DELIM_esc .. texture
-
 		if i == math.abs(self.last_tab_index) then
-			toadd = toadd .. "_selected.png;"
-		else
-			toadd = toadd .. ".png;bgimg_hovered=" .. defaulttexturedir_esc ..
-				DIR_DELIM_esc .. "gui" .. DIR_DELIM_esc .. texture .. "_hover.png;"
+			side = side .. "_pressed"
 		end
 
-		toadd = toadd .. "bgimg_middle=20;content_offset=0]" ..
+		toadd = toadd ..
+			btn_style(btn_name, side) ..
+			"style[" .. btn_name .. ";content_offset=0]" ..
 			"image_button[" .. x .. ",-1.1;" .. w + 0.22 .. ",0.9;;" ..
 				btn_name .. ";" .. caption .. ";true;false]"
 		x = x + w

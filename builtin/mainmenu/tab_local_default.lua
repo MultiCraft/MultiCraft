@@ -89,15 +89,15 @@ local function get_formspec(this)
 
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
-			"style[world_delete;fgimg=" .. defaulttexturedir_esc ..
-			"world_delete.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_delete_hover.png]" ..
-			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
-			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
+			"style[world_delete,world_create;font_size=*" ..
+				(small_screen and 1.2 or 1.5) .. "]" ..
+			btn_style("world_delete", "left") ..
+			"image_button[-0.12,4.85;3.48,0.9;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
+			"image[0.1,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_delete.png]" ..
 
-			"style[world_create;fgimg=" .. defaulttexturedir_esc ..
-				"world_new.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_new_hover.png]" ..
-			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
-			"tooltip[world_create;".. fgettext("New") .. "]" ..
+			btn_style("world_create", "right") ..
+			"image_button[3.14,4.85;3.48,0.9;;world_create;".. fgettext("Create") .. ";true;false]" ..
+			"image[3.35,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_create.png]" ..
 
 			btn_style("play") ..
 			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..
@@ -115,16 +115,10 @@ local function get_formspec(this)
 			"tableoptions[background=#0000;border=false]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
 
+			btn_style("switch_local") ..
 			"style[switch_local;fgimg=" .. defaulttexturedir_esc .. "switch_local.png;fgimg_hovered=" ..
-				defaulttexturedir_esc .. "switch_local_hover.png]" ..
+				defaulttexturedir_esc .. "switch_local_hover.png;padding=" .. (is_high_dpi() and -42 or -30) .. "]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
-
-	if PLATFORM == "Android" then
-		retval = retval ..
-			"image_button[6.6,-0.1;1.5,1.5;" ..
-				defaulttexturedir_esc .. "gift_btn.png;upgrade;;true;false;" ..
-				defaulttexturedir_esc .. "gift_btn_pressed.png]"
-	end
 
 	local enable_server = core.settings:get_bool("enable_server")
 	if enable_server then
@@ -272,10 +266,6 @@ local function main_button_handler(this, fields, name)
 	if fields["switch_local"] then
 		this:set_tab("local")
 		return true
-	end
-
-	if fields["upgrade"] then
-		core.upgrade("")
 	end
 
 --[[if fields["world_configure"] ~= nil then
