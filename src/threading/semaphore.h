@@ -48,7 +48,7 @@ public:
 
 private:
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	SDL_sem* semaphore;
+	SDL_sem *semaphore;
 #elif defined(WIN32)
 	HANDLE semaphore;
 #elif defined(__MACH__) && defined(__APPLE__)
