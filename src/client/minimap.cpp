@@ -338,7 +338,6 @@ void Minimap::addMode(MinimapModeDef mode)
 			case MINIMAP_TYPE_OFF:
 				mode.label = gettext("Minimap hidden");
 				break;
-#if !defined(__ANDROID__) && !defined(__IOS__)
 			case MINIMAP_TYPE_SURFACE:
 				mode.label = gettext("Minimap in surface mode, Zoom x%d");
 				if (mode.map_size > 0)
@@ -349,14 +348,6 @@ void Minimap::addMode(MinimapModeDef mode)
 				if (mode.map_size > 0)
 					zoom = 512 / mode.map_size;
 				break;
-#else
-			case MINIMAP_TYPE_SURFACE:
-				mode.label = gettext("Minimap shown");
-				break;
-			case MINIMAP_TYPE_RADAR:
-				mode.label = gettext("Minimap in radar mode");
-				break;
-#endif
 			case MINIMAP_TYPE_TEXTURE:
 				mode.label = gettext("Minimap in texture mode");
 				break;
@@ -371,6 +362,9 @@ void Minimap::addMode(MinimapModeDef mode)
 		porting::mt_snprintf(label_buf, sizeof(label_buf),
 			mode.label.c_str(), zoom);
 		mode.label = label_buf;
+#if !defined(__ANDROID__) && !defined(__IOS__)
+		mode.label = mode.label.substr(0, mode.label.find(", "));
+#endif
 	}
 
 	m_modes.push_back(mode);
@@ -598,10 +592,11 @@ void Minimap::drawMinimap()
 	// Non hud managed minimap drawing (legacy minimap)
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
 	const u32 size = 0.25 * screensize.Y;
+	const u32 padding = 10 * RenderingEngine::getDisplayDensity();
 
 	drawMinimap(core::rect<s32>(
-		screensize.X - size - 10, 10,
-		screensize.X - 10, size + 10));
+		screensize.X - size - padding, padding,
+		screensize.X - padding, size + padding));
 }
 
 void Minimap::drawMinimap(core::rect<s32> rect) {
