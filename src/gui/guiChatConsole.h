@@ -24,6 +24,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "chat.h"
 #include "config.h"
 
+struct ChatSelection
+{
+	ChatSelection() : scroll(0), row(0), character(0) {};
+
+	int scroll;
+	int row;
+	unsigned int character;
+};
+
 class Client;
 
 class GUIChatConsole : public gui::IGUIElement
@@ -81,6 +90,9 @@ private:
 	void drawBackground();
 	void drawText();
 	void drawPrompt();
+	
+	ChatSelection getCursorPos(s32 x, s32 y);
+	irr::core::stringc getSelectedText();
 
 private:
 	ChatBackend* m_chat_backend;
@@ -124,4 +136,8 @@ private:
 	// font
 	gui::IGUIFont *m_font = nullptr;
 	v2u32 m_fontsize;
+	
+	ChatSelection m_mark_begin;
+	ChatSelection m_mark_end;
+	bool m_mouse_marking = false;
 };

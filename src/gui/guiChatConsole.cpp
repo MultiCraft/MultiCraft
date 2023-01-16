@@ -423,6 +423,98 @@ void GUIChatConsole::drawPrompt()
 
 }
 
+
+ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
+{
+	ChatSelection selection;
+	
+	if (m_font == NULL)
+		return selection;
+
+	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
+	for (u32 row = 0; row < buf.getRows(); row++)
+	{
+		const ChatFormattedLine& line = buf.getFormattedLine(row);
+
+		s32 line_height = m_fontsize.Y;
+		s32 y1 = row * line_height + m_height - m_desired_height;
+		s32 y2 = y1 + line_height;
+		int character = 0;
+
+		if (y1 + line_height < 0)
+			continue;
+
+		for (unsigned int i = 0; i < line.fragments.size(); i++) 
+		{
+			const ChatFormattedFragment &fragment = line.fragments[i];
+			s32 fragment_x = (fragment.column + 1) * m_fontsize.X;
+			
+			for (unsigned int j = 0; j < fragment.text.size(); j++)
+			{
+				s32 x1 = fragment_x + j * m_fontsize.X;
+				s32 x2 = fragment_x + (j + 1) * m_fontsize.X;
+				character++;
+				
+				if (x >= x1 && x <= x2 && y >= y1 && y < y2)
+				{
+					selection.scroll = buf.getScrollPos();
+					selection.row = row;
+					selection.character = character;
+
+					return selection;
+
+				}
+			}
+		}
+	}
+	
+	return selection;
+}
+
+irr::core::stringc GUIChatConsole::getSelectedText()
+{
+	if (m_font == NULL)
+		return "";
+
+	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
+	int row_begin = m_mark_begin.row + m_mark_begin.scroll;
+	int row_end = m_mark_end.row + m_mark_end.scroll;
+	bool add_to_string = false;
+	irr::core::stringw text = "";
+	
+	for (int row = row_begin; row < row_end + 1; row++)
+	{
+		const ChatLine& line = buf.getLine(row);
+
+		for (unsigned int i = 0; i < line.text.size(); i++)
+		{
+			if (add_to_string)
+			{
+				text += line.text.c_str()[i];
+				
+				if (row == row_end && i == m_mark_end.character)
+				{
+					irr::core::stringc text_c;
+					text_c = wide_to_utf8(text.c_str()).c_str();
+					return text_c;
+				}
+			}
+			else
+			{
+				if (row == row_begin && i == m_mark_begin.character)
+				{
+					add_to_string = true;
+				}
+			}
+		}
+	}
+	
+	irr::core::stringc text_c;
+	text_c = wide_to_utf8(text.c_str()).c_str();
+	return text_c;
+}
+
+
 bool GUIChatConsole::OnEvent(const SEvent& event)
 {
 
@@ -659,6 +751,38 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		{
 			s32 rows = myround(-3.0 * event.MouseInput.Wheel);
 			m_chat_backend->scroll(rows);
+		}
+		else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
+		{
+			m_mouse_marking = true;
+			m_mark_begin = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
+		}
+		else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP)
+		{
+			if (m_mouse_marking)
+			{
+				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
+				infostream << "m_mark_begin:" << std::endl;
+				infostream << "  scroll: " << m_mark_begin.scroll << std::endl;
+				infostream << "  row: " << m_mark_begin.row << std::endl;
+				infostream << "  character: " << m_mark_begin.character << std::endl;
+				infostream << "m_mark_end:" << std::endl;
+				infostream << "  scroll: " << m_mark_end.scroll << std::endl;
+				infostream << "  row: " << m_mark_end.row << std::endl;
+				infostream << "  character: " << m_mark_end.character << std::endl;
+				
+				irr::core::stringc text = getSelectedText();
+				infostream << "text: " << text.c_str() << std::endl;
+			}
+
+			m_mouse_marking = false;
+		}
+		else if (event.MouseInput.Event == EMIE_MOUSE_MOVED)
+		{
+			if (m_mouse_marking)
+			{
+				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
+			}
 		}
 	}
 

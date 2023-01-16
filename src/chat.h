@@ -110,6 +110,8 @@ public:
 	void scrollBottom();
 	// Scroll to top of buffer (oldest)
 	void scrollTop();
+	
+	s32 getScrollPos() { return m_scroll; }
 
 	// Functions for keeping track of whether the lines were modified by any
 	// preceding operations
