@@ -338,6 +338,32 @@ void GUIChatConsole::drawText()
 		if (y + line_height < 0)
 			continue;
 
+		s32 scroll_pos = buf.getScrollPos();
+		if (row + scroll_pos >= m_mark_begin.row + m_mark_begin.scroll && 
+			row + scroll_pos <= m_mark_end.row + m_mark_end.scroll) 
+		{
+			const ChatFormattedFragment &fragment_first = line.fragments[m_mark_begin.fragment];
+			const ChatFormattedFragment &fragment_last = line.fragments[m_mark_end.fragment];
+			s32 x_begin = (fragment_first.column + 1) * m_fontsize.X;
+			s32 x_end = (fragment_last.column + fragment_last.text.size() + 1) * m_fontsize.X;
+			
+			if (row + scroll_pos == m_mark_begin.row + m_mark_begin.scroll)
+			{
+				x_begin += m_mark_begin.character_fragment * m_fontsize.X;
+			}
+			
+			if (row + scroll_pos == m_mark_end.row + m_mark_end.scroll)
+			{
+				x_end += (m_mark_end.character_fragment - fragment_last.text.size()) * m_fontsize.X;
+			}
+
+			core::rect<s32> destrect(x_begin, y, x_end, y + m_fontsize.Y);				
+			video::IVideoDriver* driver = Environment->getVideoDriver();
+			IGUISkin* skin = Environment->getSkin();
+			driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
+		}
+		
+		
 		for (const ChatFormattedFragment &fragment : line.fragments) {
 			s32 x = (fragment.column + 1) * m_fontsize.X;
 			core::rect<s32> destrect(
@@ -441,7 +467,9 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	if (y < y_min)
 	{
 		selection.row = 0;
-		selection.character = 0;
+		selection.fragment = 0;
+		selection.character_fragment = 0;
+		selection.character_absolute = 0;
 		return selection;
 	}
 	else if (y > y_max)
@@ -478,11 +506,13 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 
 	if (x < x_min)
 	{
-		selection.character = 0;
+		selection.character_fragment = 0;
+		selection.character_absolute = 0;
 	}
 	else if (x > x_max)
 	{
-		selection.character = (unsigned int)(-1);
+		selection.character_fragment = (unsigned int)(-1);
+		selection.character_absolute = (unsigned int)(-1);
 	}
 	else
 	{
@@ -500,7 +530,9 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 				
 				if (x >= x1 && x <= x2)
 				{
-					selection.character = character;
+					selection.fragment = i;
+					selection.character_fragment = j;
+					selection.character_absolute = character;
 					return selection;
 				}
 				
@@ -538,21 +570,21 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 
 		for (unsigned int i = 0; i < line.text.size(); i++)
 		{
-			if (row == row_begin && i == m_mark_begin.character)
+			if (row == row_begin && i == m_mark_begin.character_absolute)
 			{
 				add_to_string = true;
 			}
 			
 			if (add_to_string)
 			{
-				text += line.text.c_str()[i];
-				
-				if (row == row_end && i == m_mark_end.character)
+				if (row == row_end && i == m_mark_end.character_absolute)
 				{
 					irr::core::stringc text_c;
 					text_c = wide_to_utf8(text.c_str()).c_str();
 					return text_c;
 				}
+				
+				text += line.text.c_str()[i];
 			}
 		}
 		
@@ -809,6 +841,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		{
 			m_mouse_marking = true;
 			m_mark_begin = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
+			m_mark_end = m_mark_begin;
 		}
 		else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP)
 		{
@@ -818,11 +851,15 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				infostream << "m_mark_begin:" << std::endl;
 				infostream << "  scroll: " << m_mark_begin.scroll << std::endl;
 				infostream << "  row: " << m_mark_begin.row << std::endl;
-				infostream << "  character: " << m_mark_begin.character << std::endl;
+				infostream << "  fragment: " << m_mark_begin.fragment << std::endl;
+				infostream << "  character_fragment: " << m_mark_begin.character_fragment << std::endl;
+				infostream << "  character_absolute: " << m_mark_begin.character_absolute << std::endl;
 				infostream << "m_mark_end:" << std::endl;
 				infostream << "  scroll: " << m_mark_end.scroll << std::endl;
 				infostream << "  row: " << m_mark_end.row << std::endl;
-				infostream << "  character: " << m_mark_end.character << std::endl;
+				infostream << "  fragment: " << m_mark_end.fragment << std::endl;
+				infostream << "  character_fragment: " << m_mark_end.character_fragment << std::endl;
+				infostream << "  character_absolute: " << m_mark_end.character_absolute << std::endl;
 				
 				irr::core::stringc text = getSelectedText();
 				infostream << "text: " << text.c_str() << std::endl;
