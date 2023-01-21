@@ -176,8 +176,10 @@ void intlGUIEditBox::draw()
 
 		// get mark position
 		const bool ml = (!m_passwordbox && (m_word_wrap || m_multiline));
-		const s32 hlineStart = ml ? getLineFromPos(m_real_mark_begin) : 0;
-		const s32 hlineCount = ml ? getLineFromPos(m_real_mark_end) - hlineStart + 1 : 1;
+		const s32 realmbgn = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
+		const s32 realmend = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
+		const s32 hlineStart = ml ? getLineFromPos(realmbgn) : 0;
+		const s32 hlineCount = ml ? getLineFromPos(realmend) - hlineStart + 1 : 1;
 		const s32 lineCount = ml ? m_broken_text.size() : 1;
 
 		// Save the override color information.
@@ -243,20 +245,20 @@ void intlGUIEditBox::draw()
 					if (i == hlineStart)
 					{
 						// highlight start is on this line
-						s = txtLine->subString(0, m_real_mark_begin - startPos);
+						s = txtLine->subString(0, realmbgn - startPos);
 						mbegin = font->getDimension(s.c_str()).Width;
 
 						// deal with kerning
 						mbegin += font->getKerningWidth(
-							&((*txtLine)[m_real_mark_begin - startPos]),
-							m_real_mark_begin - startPos > 0 ? &((*txtLine)[m_real_mark_begin - startPos - 1]) : 0);
+							&((*txtLine)[realmbgn - startPos]),
+							realmbgn - startPos > 0 ? &((*txtLine)[realmbgn - startPos - 1]) : 0);
 
-						lineStartPos = m_real_mark_begin - startPos;
+						lineStartPos = realmbgn - startPos;
 					}
 					if (i == hlineStart + hlineCount - 1)
 					{
 						// highlight end is on this line
-						s2 = txtLine->subString(0, m_real_mark_end - startPos);
+						s2 = txtLine->subString(0, realmend - startPos);
 						mend = font->getDimension(s2.c_str()).Width;
 						lineEndPos = (s32)s2.size();
 					}
