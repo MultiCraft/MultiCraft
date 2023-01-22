@@ -26,13 +26,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct ChatSelection
 {
-	ChatSelection() : scroll(0), row(0), fragment(0), character_fragment(0), 
-			character_absolute(0) {};
+	ChatSelection() : scroll(0), row(0), row_buf(0), fragment(0),
+			character_fragment(0), character_absolute(0) {};
 
 	int scroll;
 	int row;
-	int fragment;
-	int character_fragment;
+	int row_buf;
+	unsigned int fragment;
+	unsigned int character_fragment;
 	unsigned int character_absolute;
 };
 
