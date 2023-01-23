@@ -343,43 +343,41 @@ void GUIChatConsole::drawText()
 			(s32)row + scroll_pos >= m_mark_begin.row + m_mark_begin.scroll && 
 			(s32)row + scroll_pos <= m_mark_end.row + m_mark_end.scroll) 
 		{
-			const ChatFormattedFragment &fragment_first = line.fragments[m_mark_begin.fragment];
-			const ChatFormattedFragment &fragment_last = line.fragments[m_mark_end.fragment];
+			ChatFormattedFragment fragment_first = line.fragments[m_mark_begin.fragment];
+			
+			if ((s32)row + scroll_pos != m_mark_begin.row + m_mark_begin.scroll)
+			{
+				fragment_first = line.fragments[0];
+			}
+			
+			ChatFormattedFragment fragment_last = line.fragments[m_mark_end.fragment];
+			
+			if ((s32)row + scroll_pos != m_mark_end.row + m_mark_end.scroll)
+			{
+				fragment_last = line.fragments[line.fragments.size() - 1];
+			}
+			
 			s32 x_begin = (fragment_first.column + 1) * m_fontsize.X;
 			s32 x_end = (fragment_last.column + fragment_last.text.size() + 1) * m_fontsize.X;
 			
 			if ((s32)row + scroll_pos == m_mark_begin.row + m_mark_begin.scroll)
 			{
-				if (m_mark_begin.character_fragment > fragment_last.text.size() - 1)
+				x_begin += m_mark_begin.character_fragment * m_fontsize.X;
+				
+				if (m_mark_begin.x_max)
 				{
-					x_begin = x_end;
-				}
-				else
-				{
-					x_begin += m_mark_begin.character_fragment * m_fontsize.X;
-					
-					if (m_mark_begin.x_max)
-					{
-						x_begin += m_fontsize.X;
-					}
+					x_begin += m_fontsize.X;
 				}
 			}
 			
 			if ((s32)row + scroll_pos == m_mark_end.row + m_mark_end.scroll && 
 				(m_mark_end.character_fragment < fragment_last.text.size()))
 			{
-				if (m_mark_end.character_fragment < 1)
+				x_end += (m_mark_end.character_fragment - fragment_last.text.size()) * m_fontsize.X;
+				
+				if (m_mark_end.x_max)
 				{
-					x_end = x_begin;
-				}
-				else
-				{
-					x_end += (m_mark_end.character_fragment - fragment_last.text.size()) * m_fontsize.X;
-					
-					if (m_mark_end.x_max)
-					{
-						x_end += m_fontsize.X;
-					}
+					x_end += m_fontsize.X;
 				}
 			}
 
