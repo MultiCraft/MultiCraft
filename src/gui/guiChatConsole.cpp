@@ -339,7 +339,8 @@ void GUIChatConsole::drawText()
 			continue;
 
 		s32 scroll_pos = buf.getScrollPos();
-		if ((s32)row + scroll_pos >= m_mark_begin.row + m_mark_begin.scroll && 
+		if (m_mark_begin != m_mark_end &&
+			(s32)row + scroll_pos >= m_mark_begin.row + m_mark_begin.scroll && 
 			(s32)row + scroll_pos <= m_mark_end.row + m_mark_end.scroll) 
 		{
 			const ChatFormattedFragment &fragment_first = line.fragments[m_mark_begin.fragment];
@@ -349,13 +350,18 @@ void GUIChatConsole::drawText()
 			
 			if ((s32)row + scroll_pos == m_mark_begin.row + m_mark_begin.scroll)
 			{
-				if (m_mark_begin.character_fragment >= fragment_last.text.size() - 1)
+				if (m_mark_begin.character_fragment > fragment_last.text.size() - 1)
 				{
 					x_begin = x_end;
 				}
 				else
 				{
 					x_begin += m_mark_begin.character_fragment * m_fontsize.X;
+					
+					if (m_mark_begin.x_max)
+					{
+						x_begin += m_fontsize.X;
+					}
 				}
 			}
 			
@@ -369,6 +375,11 @@ void GUIChatConsole::drawText()
 				else
 				{
 					x_end += (m_mark_end.character_fragment - fragment_last.text.size()) * m_fontsize.X;
+					
+					if (m_mark_end.x_max)
+					{
+						x_end += m_fontsize.X;
+					}
 				}
 			}
 
@@ -377,7 +388,6 @@ void GUIChatConsole::drawText()
 			IGUISkin* skin = Environment->getSkin();
 			driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
 		}
-		
 		
 		for (const ChatFormattedFragment &fragment : line.fragments) {
 			s32 x = (fragment.column + 1) * m_fontsize.X;
@@ -479,13 +489,9 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	s32 y_min = m_height - m_desired_height;
 	s32 y_max = buf.getRows() * line_height + y_min;
 
-	if (y == y_min)
+	if (y < y_min)
 	{
-		selection.row = 0;
-		selection.row_buf = 0;
-		selection.fragment = 0;
-		selection.character_fragment = 0;
-		selection.character_absolute = 0;
+		selection.reset();
 		return selection;
 	}
 	else if (y > y_max)
@@ -538,36 +544,33 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 
 	if (x < x_min)
 	{
-		selection.character_fragment = 0;
-		selection.character_absolute = 0;
+		x = x_min;
 	}
 	else if (x > x_max)
 	{
-		selection.character_fragment = (unsigned int)(-1);
-		selection.character_absolute = (unsigned int)(-1);
+		x = x_max;
+		selection.x_max = true;
 	}
-	else
+	
+	for (unsigned int i = 0; i < line.fragments.size(); i++) 
 	{
-		for (unsigned int i = 0; i < line.fragments.size(); i++) 
-		{
-			const ChatFormattedFragment &fragment = line.fragments[i];
-			s32 fragment_x = (fragment.column + 1) * m_fontsize.X;
+		const ChatFormattedFragment &fragment = line.fragments[i];
+		s32 fragment_x = (fragment.column + 1) * m_fontsize.X;
 
-			for (unsigned int j = 0; j < fragment.text.size(); j++)
+		for (unsigned int j = 0; j < fragment.text.size(); j++)
+		{
+			s32 x1 = fragment_x + j * m_fontsize.X;
+			s32 x2 = fragment_x + (j + 1) * m_fontsize.X;
+			
+			if (x >= x1 && x <= x2)
 			{
-				s32 x1 = fragment_x + j * m_fontsize.X;
-				s32 x2 = fragment_x + (j + 1) * m_fontsize.X;
-				
-				if (x >= x1 && x <= x2)
-				{
-					selection.fragment = i;
-					selection.character_fragment = j;
-					selection.character_absolute = character;
-					return selection;
-				}
-				
-				character++;
+				selection.fragment = i;
+				selection.character_fragment = j;
+				selection.character_absolute = character;
+				return selection;
 			}
+			
+			character++;
 		}
 	}
 	
@@ -589,8 +592,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 	if (row_end < 0)
 		return "";
 		
-	if (row_begin == row_end && 
-		m_mark_begin.character_absolute == m_mark_end.character_absolute)
+	if (row_begin == row_end && m_mark_begin == m_mark_end)
 		return "";
 
 	bool add_to_string = false;
@@ -604,10 +606,12 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 
 		for (unsigned int i = 0; i < line.text.size(); i++)
 		{
-			if (row == row_begin && (i == m_mark_begin.character_absolute ||
-				i == line.text.size() - 1))
+			if (row == row_begin && i == m_mark_begin.character_absolute)
 			{
 				add_to_string = true;
+				
+				if (m_mark_begin.x_max)
+					continue;
 			}
 			
 			if (add_to_string)
@@ -615,8 +619,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 				if (row == row_end && (i == m_mark_end.character_absolute ||
 					i == line.text.size() - 1))
 				{
-					if (i == line.text.size() - 1 &&
-						m_mark_end.character_absolute == (unsigned int)(-1))
+					if (i == line.text.size() - 1 && m_mark_end.x_max)
 					{
 						text += line.text.c_str()[i];
 					}
@@ -909,6 +912,12 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			}
 
 			m_mouse_marking = false;
+			
+			if (m_mark_begin == m_mark_end)
+			{
+				m_mark_begin.reset();
+				m_mark_end.reset();
+			}
 		}
 		else if (event.MouseInput.Event == EMIE_MOUSE_MOVED)
 		{
