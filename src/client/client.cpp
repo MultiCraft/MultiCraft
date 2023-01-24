@@ -1019,14 +1019,14 @@ AuthMechanism Client::choseAuthMech(const u32 mechs)
 
 void Client::sendInit(const std::string &playerName)
 {
-	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + (1 + playerName.size()));
+	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + (1 + playerName.size()) + 1);
 
 	// we don't support network compression yet
 	u16 supp_comp_modes = NETPROTO_COMPRESSION_NONE;
 
 	pkt << (u8) SER_FMT_VER_HIGHEST_READ << (u16) supp_comp_modes;
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
-	pkt << playerName;
+	pkt << playerName << (u8) 1;
 
 	Send(&pkt);
 }
