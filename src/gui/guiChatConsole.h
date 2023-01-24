@@ -26,17 +26,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct ChatSelection
 {
-	ChatSelection() : scroll(0), row(0), row_buf(0), fragment(0),
-			character_fragment(0), character_absolute(0), x_max(false) {};
+	ChatSelection() : scroll(0), row(0), row_buf(0), line(0), fragment(0),
+			character(0), x_max(false) {};
 
 	void reset()
 	{
 		scroll = 0;
 		row = 0;
 		row_buf = 0;
+		line = 0;
 		fragment = 0;
-		character_fragment = 0;
-		character_absolute = 0;
+		character = 0;
 		x_max = false;
 	}
 	
@@ -45,9 +45,9 @@ struct ChatSelection
         return (scroll == other.scroll &&
 		        row == other.row &&
 		        row_buf == other.row_buf &&
+		        line == other.line &&
 		        fragment == other.fragment &&
-		        character_fragment == other.character_fragment &&
-		        character_absolute == other.character_absolute &&
+		        character == other.character &&
 		        x_max == other.x_max);
     }
     
@@ -59,9 +59,9 @@ struct ChatSelection
 	int scroll;
 	int row;
 	int row_buf;
+	unsigned int line;
 	unsigned int fragment;
-	unsigned int character_fragment;
-	unsigned int character_absolute;
+	unsigned int character;
 	bool x_max;
 };
 

@@ -114,6 +114,7 @@ public:
 	void scrollTop();
 	
 	s32 getScrollPos() { return m_scroll; }
+	u32 getColsCount() { return m_cols; }
 
 	// Functions for keeping track of whether the lines were modified by any
 	// preceding operations

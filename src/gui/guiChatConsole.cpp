@@ -362,7 +362,7 @@ void GUIChatConsole::drawText()
 			
 			if ((s32)row + scroll_pos == m_mark_begin.row + m_mark_begin.scroll)
 			{
-				x_begin += m_mark_begin.character_fragment * m_fontsize.X;
+				x_begin += m_mark_begin.character * m_fontsize.X;
 				
 				if (m_mark_begin.x_max)
 				{
@@ -371,9 +371,9 @@ void GUIChatConsole::drawText()
 			}
 			
 			if ((s32)row + scroll_pos == m_mark_end.row + m_mark_end.scroll && 
-				(m_mark_end.character_fragment < fragment_last.text.size()))
+				(m_mark_end.character < fragment_last.text.size()))
 			{
-				x_end += (m_mark_end.character_fragment - fragment_last.text.size()) * m_fontsize.X;
+				x_end += (m_mark_end.character - fragment_last.text.size()) * m_fontsize.X;
 				
 				if (m_mark_end.x_max)
 				{
@@ -523,11 +523,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	{
 		current_row--;
 		line = buf.getFormattedLine(current_row);
-		for (unsigned int i = 0; i < line.fragments.size(); i++) 
-		{
-			const ChatFormattedFragment &fragment = line.fragments[i];
-			character += fragment.text.size();
-		}
+		selection.line++;
 	}
 	
 	line = buf.getFormattedLine(selection.row);
@@ -563,8 +559,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 			if (x >= x1 && x <= x2)
 			{
 				selection.fragment = i;
-				selection.character_fragment = j;
-				selection.character_absolute = character;
+				selection.character = j;
 				return selection;
 			}
 			
@@ -580,17 +575,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 	if (m_font == NULL)
 		return "";
 
-	int row_begin = m_mark_begin.row_buf;
-	
-	if (row_begin < 0)
-		row_begin = 0;
-	
-	int row_end = m_mark_end.row_buf;
-
-	if (row_end < 0)
-		return "";
-		
-	if (row_begin == row_end && m_mark_begin == m_mark_end)
+	if (m_mark_begin == m_mark_end)
 		return "";
 
 	bool add_to_string = false;
@@ -598,41 +583,61 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 	
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	
-	for (int row = row_begin; row < row_end + 1; row++)
+	for (int row = m_mark_begin.row_buf; row < m_mark_end.row_buf + 1; row++)
 	{
 		const ChatLine& line = buf.getLine(row);
-
-		for (unsigned int i = 0; i < line.text.size(); i++)
+		
+		std::vector<ChatFormattedLine> formatted_lines;
+		buf.formatChatLine(line, 0, buf.getColsCount(), formatted_lines);
+		
+		for (unsigned int i = 0; i < formatted_lines.size(); i++)
 		{
-			if (row == row_begin && i == m_mark_begin.character_absolute)
+			const ChatFormattedLine &line = formatted_lines[i];
+			
+			for (unsigned int j = 0; j < line.fragments.size(); j++) 
 			{
-				add_to_string = true;
-				
-				if (m_mark_begin.x_max)
-					continue;
+				const ChatFormattedFragment &fragment = line.fragments[j];
+		
+				for (unsigned int k = 0; k < fragment.text.size(); k++)
+				{
+					if (!add_to_string &&
+						row == m_mark_begin.row_buf && 
+						i == m_mark_begin.line && 
+						j == m_mark_begin.fragment && 
+						k == m_mark_begin.character)
+					{
+						add_to_string = true;
+						
+						if (m_mark_begin.x_max)
+							continue;
+					}
+					
+					if (add_to_string)
+					{
+						if (row == m_mark_end.row_buf && 
+							i == m_mark_end.line && 
+							j == m_mark_end.fragment && 
+							k == m_mark_end.character)
+						{
+							if (m_mark_end.x_max)
+							{
+								text += fragment.text.c_str()[k];
+							}
+							
+							irr::core::stringc text_c;
+							text_c = wide_to_utf8(text.c_str()).c_str();
+							return text_c;
+						}
+						
+						text += fragment.text.c_str()[k];
+					}
+				}
 			}
 			
-			if (add_to_string)
+			if (row < m_mark_end.row_buf)
 			{
-				if (row == row_end && (i == m_mark_end.character_absolute ||
-					i == line.text.size() - 1))
-				{
-					if (i == line.text.size() - 1 && m_mark_end.x_max)
-					{
-						text += line.text.c_str()[i];
-					}
-					irr::core::stringc text_c;
-					text_c = wide_to_utf8(text.c_str()).c_str();
-					return text_c;
-				}
-				
-				text += line.text.c_str()[i];
+				text += L"\n";
 			}
-		}
-		
-		if (row < row_end)
-		{
-			text += L"\n";
 		}
 	}
 	
@@ -894,16 +899,16 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				infostream << "  scroll: " << m_mark_begin.scroll << std::endl;
 				infostream << "  row: " << m_mark_begin.row << std::endl;
 				infostream << "  row_buf: " << m_mark_begin.row_buf << std::endl;
+				infostream << "  line: " << m_mark_begin.line << std::endl;
 				infostream << "  fragment: " << m_mark_begin.fragment << std::endl;
-				infostream << "  character_fragment: " << m_mark_begin.character_fragment << std::endl;
-				infostream << "  character_absolute: " << m_mark_begin.character_absolute << std::endl;
+				infostream << "  character: " << m_mark_begin.character << std::endl;
 				infostream << "m_mark_end:" << std::endl;
 				infostream << "  scroll: " << m_mark_end.scroll << std::endl;
 				infostream << "  row: " << m_mark_end.row << std::endl;
 				infostream << "  row_buf: " << m_mark_end.row_buf << std::endl;
+				infostream << "  line: " << m_mark_end.line << std::endl;
 				infostream << "  fragment: " << m_mark_end.fragment << std::endl;
-				infostream << "  character_fragment: " << m_mark_end.character_fragment << std::endl;
-				infostream << "  character_absolute: " << m_mark_end.character_absolute << std::endl;
+				infostream << "  character: " << m_mark_end.character << std::endl;
 				
 				irr::core::stringc text = getSelectedText();
 				infostream << "text: " << text.c_str() << std::endl;
