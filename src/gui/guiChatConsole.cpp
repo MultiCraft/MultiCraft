@@ -339,20 +339,22 @@ void GUIChatConsole::drawText()
 			continue;
 
 		s32 scroll_pos = buf.getScrollPos();
-		if (m_mark_begin != m_mark_end &&
-			(s32)row + scroll_pos >= m_mark_begin.row + m_mark_begin.scroll && 
-			(s32)row + scroll_pos <= m_mark_end.row + m_mark_end.scroll) 
+		ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+		ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+		if (real_mark_begin != real_mark_end &&
+			(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll && 
+			(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll) 
 		{
-			ChatFormattedFragment fragment_first = line.fragments[m_mark_begin.fragment];
+			ChatFormattedFragment fragment_first = line.fragments[real_mark_begin.fragment];
 			
-			if ((s32)row + scroll_pos != m_mark_begin.row + m_mark_begin.scroll)
+			if ((s32)row + scroll_pos != real_mark_begin.row + real_mark_begin.scroll)
 			{
 				fragment_first = line.fragments[0];
 			}
 			
-			ChatFormattedFragment fragment_last = line.fragments[m_mark_end.fragment];
+			ChatFormattedFragment fragment_last = line.fragments[real_mark_end.fragment];
 			
-			if ((s32)row + scroll_pos != m_mark_end.row + m_mark_end.scroll)
+			if ((s32)row + scroll_pos != real_mark_end.row + real_mark_end.scroll)
 			{
 				fragment_last = line.fragments[line.fragments.size() - 1];
 			}
@@ -360,22 +362,22 @@ void GUIChatConsole::drawText()
 			s32 x_begin = (fragment_first.column + 1) * m_fontsize.X;
 			s32 x_end = (fragment_last.column + fragment_last.text.size() + 1) * m_fontsize.X;
 			
-			if ((s32)row + scroll_pos == m_mark_begin.row + m_mark_begin.scroll)
+			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll)
 			{
-				x_begin += m_mark_begin.character * m_fontsize.X;
+				x_begin += real_mark_begin.character * m_fontsize.X;
 				
-				if (m_mark_begin.x_max)
+				if (real_mark_begin.x_max)
 				{
 					x_begin += m_fontsize.X;
 				}
 			}
 			
-			if ((s32)row + scroll_pos == m_mark_end.row + m_mark_end.scroll && 
-				(m_mark_end.character < fragment_last.text.size()))
+			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll && 
+				(real_mark_end.character < fragment_last.text.size()))
 			{
-				x_end += (m_mark_end.character - fragment_last.text.size()) * m_fontsize.X;
+				x_end += (real_mark_end.character - fragment_last.text.size()) * m_fontsize.X;
 				
-				if (m_mark_end.x_max)
+				if (real_mark_end.x_max)
 				{
 					x_end += m_fontsize.X;
 				}
@@ -581,9 +583,12 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 	bool add_to_string = false;
 	irr::core::stringw text = "";
 	
+	ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+	ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+		
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	
-	for (int row = m_mark_begin.row_buf; row < m_mark_end.row_buf + 1; row++)
+	for (int row = real_mark_begin.row_buf; row < real_mark_end.row_buf + 1; row++)
 	{
 		const ChatLine& line = buf.getLine(row);
 		
@@ -601,25 +606,25 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 				for (unsigned int k = 0; k < fragment.text.size(); k++)
 				{
 					if (!add_to_string &&
-						row == m_mark_begin.row_buf && 
-						i == m_mark_begin.line && 
-						j == m_mark_begin.fragment && 
-						k == m_mark_begin.character)
+						row == real_mark_begin.row_buf && 
+						i == real_mark_begin.line && 
+						j == real_mark_begin.fragment && 
+						k == real_mark_begin.character)
 					{
 						add_to_string = true;
 						
-						if (m_mark_begin.x_max)
+						if (real_mark_begin.x_max)
 							continue;
 					}
 					
 					if (add_to_string)
 					{
-						if (row == m_mark_end.row_buf && 
-							i == m_mark_end.line && 
-							j == m_mark_end.fragment && 
-							k == m_mark_end.character)
+						if (row == real_mark_end.row_buf && 
+							i == real_mark_end.line && 
+							j == real_mark_end.fragment && 
+							k == real_mark_end.character)
 						{
-							if (m_mark_end.x_max)
+							if (real_mark_end.x_max)
 							{
 								text += fragment.text.c_str()[k];
 							}
@@ -634,7 +639,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 				}
 			}
 			
-			if (row < m_mark_end.row_buf)
+			if (row < real_mark_end.row_buf)
 			{
 				text += L"\n";
 			}

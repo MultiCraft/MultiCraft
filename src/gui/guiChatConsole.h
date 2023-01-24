@@ -42,13 +42,32 @@ struct ChatSelection
 	
     bool operator== (const ChatSelection &other) const
     {
-        return (scroll == other.scroll &&
-		        row == other.row &&
+        return (row + scroll == other.row + other.scroll &&
 		        row_buf == other.row_buf &&
 		        line == other.line &&
 		        fragment == other.fragment &&
 		        character == other.character &&
 		        x_max == other.x_max);
+    }
+    
+    bool operator> (const ChatSelection &other) const
+    {
+        return (row + scroll > other.row + other.scroll ||
+		        row_buf > other.row_buf ||
+		        line > other.line ||
+		        fragment > other.fragment ||
+		        character > other.character ||
+		        x_max > other.x_max);
+    }
+    
+    bool operator< (const ChatSelection &other) const
+    {
+        return (row + scroll < other.row + other.scroll ||
+		        row_buf < other.row_buf ||
+		        line < other.line ||
+		        fragment < other.fragment ||
+		        character < other.character ||
+		        x_max < other.x_max);
     }
     
     bool operator!= (const ChatSelection &other) const
