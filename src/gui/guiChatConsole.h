@@ -39,55 +39,55 @@ struct ChatSelection
 		character = 0;
 		x_max = false;
 	}
-	
-    bool operator== (const ChatSelection &other) const
-    {
-        return (row + scroll == other.row + other.scroll &&
-		        row_buf == other.row_buf &&
-		        line == other.line &&
-		        fragment == other.fragment &&
-		        character == other.character &&
-		        x_max == other.x_max);
-    }
-    
-    bool operator< (const ChatSelection &other) const
-    {
-        if (row + scroll != other.row + other.scroll)
-            return (row + scroll < other.row + other.scroll);
-        if (row_buf != other.row_buf)
-            return (row_buf < other.row_buf);
-        if (line != other.line)
-            return (line < other.line);
-        if (fragment != other.fragment)
-            return (fragment < other.fragment);
-        if (character != other.character)
-            return (character < other.character);
-        if (x_max != other.x_max)
-            return (x_max < other.x_max);
 
-        return false;
-    }
+	bool operator== (const ChatSelection &other) const
+	{
+		return (row + scroll == other.row + other.scroll &&
+				row_buf == other.row_buf &&
+				line == other.line &&
+				fragment == other.fragment &&
+				character == other.character &&
+				x_max == other.x_max);
+	}
 
-    bool operator> (const ChatSelection &other)
-    {
-        return other < *this;
-    }
+	bool operator< (const ChatSelection &other) const
+	{
+		if (row + scroll != other.row + other.scroll)
+			return (row + scroll < other.row + other.scroll);
+		if (row_buf != other.row_buf)
+			return (row_buf < other.row_buf);
+		if (line != other.line)
+			return (line < other.line);
+		if (fragment != other.fragment)
+			return (fragment < other.fragment);
+		if (character != other.character)
+			return (character < other.character);
+		if (x_max != other.x_max)
+			return (x_max < other.x_max);
 
-    bool operator<= (const ChatSelection &other)
-    {
-        return !(*this > other);
-    }
+		return false;
+	}
 
-    bool operator>= (const ChatSelection &other)
-    {
-        return !(*this < other);
-    }
-    
-    bool operator!= (const ChatSelection &other) const
-    {
+	bool operator> (const ChatSelection &other)
+	{
+		return other < *this;
+	}
+
+	bool operator<= (const ChatSelection &other)
+	{
+		return !(*this > other);
+	}
+
+	bool operator>= (const ChatSelection &other)
+	{
+		return !(*this < other);
+	}
+
+	bool operator!= (const ChatSelection &other) const
+	{
 		return !this->operator==(other);
 	}
-	
+
 	int scroll;
 	int row;
 	int row_buf;
@@ -154,7 +154,7 @@ private:
 	void drawBackground();
 	void drawText();
 	void drawPrompt();
-	
+
 	ChatSelection getCursorPos(s32 x, s32 y);
 	irr::core::stringc getSelectedText();
 
@@ -200,7 +200,7 @@ private:
 	// font
 	gui::IGUIFont *m_font = nullptr;
 	v2u32 m_fontsize;
-	
+
 	ChatSelection m_mark_begin;
 	ChatSelection m_mark_end;
 	bool m_mouse_marking = false;

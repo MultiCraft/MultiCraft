@@ -342,53 +342,53 @@ void GUIChatConsole::drawText()
 		ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 		ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
 		if (real_mark_begin != real_mark_end &&
-			(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll && 
-			(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll) 
+			(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll &&
+			(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll)
 		{
 			ChatFormattedFragment fragment_first = line.fragments[real_mark_begin.fragment];
-			
+
 			if ((s32)row + scroll_pos != real_mark_begin.row + real_mark_begin.scroll)
 			{
 				fragment_first = line.fragments[0];
 			}
-			
+
 			ChatFormattedFragment fragment_last = line.fragments[real_mark_end.fragment];
-			
+
 			if ((s32)row + scroll_pos != real_mark_end.row + real_mark_end.scroll)
 			{
 				fragment_last = line.fragments[line.fragments.size() - 1];
 			}
-			
+
 			s32 x_begin = (fragment_first.column + 1) * m_fontsize.X;
 			s32 x_end = (fragment_last.column + fragment_last.text.size() + 1) * m_fontsize.X;
-			
+
 			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll)
 			{
 				x_begin += real_mark_begin.character * m_fontsize.X;
-				
+
 				if (real_mark_begin.x_max)
 				{
 					x_begin += m_fontsize.X;
 				}
 			}
-			
-			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll && 
+
+			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
 				(real_mark_end.character < fragment_last.text.size()))
 			{
 				x_end += (real_mark_end.character - fragment_last.text.size()) * m_fontsize.X;
-				
+
 				if (real_mark_end.x_max)
 				{
 					x_end += m_fontsize.X;
 				}
 			}
 
-			core::rect<s32> destrect(x_begin, y, x_end, y + m_fontsize.Y);				
+			core::rect<s32> destrect(x_begin, y, x_end, y + m_fontsize.Y);
 			video::IVideoDriver* driver = Environment->getVideoDriver();
 			IGUISkin* skin = Environment->getSkin();
 			driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
 		}
-		
+
 		for (const ChatFormattedFragment &fragment : line.fragments) {
 			s32 x = (fragment.column + 1) * m_fontsize.X;
 			core::rect<s32> destrect(
@@ -484,17 +484,16 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	selection.scroll = buf.getScrollPos();
-	
+
 	s32 line_height = m_fontsize.Y;
 	s32 y_min = m_height - m_desired_height;
 	s32 y_max = buf.getRows() * line_height + y_min;
 
-	if (y < y_min)
+	if (y <= y_min)
 	{
-		selection.reset();
-		return selection;
+		selection.row = 0;
 	}
-	else if (y > y_max)
+	else if (y >= y_max)
 	{
 		selection.row = buf.getRows() - 1;
 	}
@@ -504,10 +503,10 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 		{
 			s32 y1 = row * line_height + m_height - m_desired_height;
 			s32 y2 = y1 + line_height;
-			
+
 			if (y1 + line_height < 0)
 				return selection;
-				
+
 			if (y >= y1 && y <= y2)
 			{
 				selection.row = row;
@@ -515,21 +514,20 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 			}
 		}
 	}
-	
+
 	ChatFormattedLine line = buf.getFormattedLine(selection.row);
 	selection.row_buf = line.line_index;
 	int current_row = selection.row;
-	int character = 0;
-	
+
 	while (!line.first)
 	{
 		current_row--;
 		line = buf.getFormattedLine(current_row);
 		selection.line++;
 	}
-	
+
 	line = buf.getFormattedLine(selection.row);
-	
+
 	if (line.fragments.empty())
 		return selection;
 
@@ -547,8 +545,8 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 		x = x_max;
 		selection.x_max = true;
 	}
-	
-	for (unsigned int i = 0; i < line.fragments.size(); i++) 
+
+	for (unsigned int i = 0; i < line.fragments.size(); i++)
 	{
 		const ChatFormattedFragment &fragment = line.fragments[i];
 		s32 fragment_x = (fragment.column + 1) * m_fontsize.X;
@@ -557,18 +555,16 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 		{
 			s32 x1 = fragment_x + j * m_fontsize.X;
 			s32 x2 = fragment_x + (j + 1) * m_fontsize.X;
-			
+
 			if (x >= x1 && x <= x2)
 			{
 				selection.fragment = i;
 				selection.character = j;
 				return selection;
 			}
-			
-			character++;
 		}
 	}
-	
+
 	return selection;
 }
 
@@ -582,70 +578,70 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 
 	bool add_to_string = false;
 	irr::core::stringw text = "";
-	
+
 	ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 	ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
-		
+
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
-	
+
 	for (int row = real_mark_begin.row_buf; row < real_mark_end.row_buf + 1; row++)
 	{
 		const ChatLine& line = buf.getLine(row);
-		
+
 		std::vector<ChatFormattedLine> formatted_lines;
 		buf.formatChatLine(line, 0, buf.getColsCount(), formatted_lines);
-		
+
 		for (unsigned int i = 0; i < formatted_lines.size(); i++)
 		{
 			const ChatFormattedLine &line = formatted_lines[i];
-			
-			for (unsigned int j = 0; j < line.fragments.size(); j++) 
+
+			for (unsigned int j = 0; j < line.fragments.size(); j++)
 			{
 				const ChatFormattedFragment &fragment = line.fragments[j];
-		
+
 				for (unsigned int k = 0; k < fragment.text.size(); k++)
 				{
 					if (!add_to_string &&
-						row == real_mark_begin.row_buf && 
-						i == real_mark_begin.line && 
-						j == real_mark_begin.fragment && 
+						row == real_mark_begin.row_buf &&
+						i == real_mark_begin.line &&
+						j == real_mark_begin.fragment &&
 						k == real_mark_begin.character)
 					{
 						add_to_string = true;
-						
+
 						if (real_mark_begin.x_max)
 							continue;
 					}
-					
+
 					if (add_to_string)
 					{
-						if (row == real_mark_end.row_buf && 
-							i == real_mark_end.line && 
-							j == real_mark_end.fragment && 
+						if (row == real_mark_end.row_buf &&
+							i == real_mark_end.line &&
+							j == real_mark_end.fragment &&
 							k == real_mark_end.character)
 						{
 							if (real_mark_end.x_max)
 							{
 								text += fragment.text.c_str()[k];
 							}
-							
+
 							irr::core::stringc text_c;
 							text_c = wide_to_utf8(text.c_str()).c_str();
 							return text_c;
 						}
-						
+
 						text += fragment.text.c_str()[k];
 					}
 				}
 			}
-			
+
 			if (row < real_mark_end.row_buf)
 			{
 				text += L"\n";
 			}
 		}
 	}
-	
+
 	irr::core::stringc text_c;
 	text_c = wide_to_utf8(text.c_str()).c_str();
 	return text_c;
@@ -908,29 +904,12 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			{
 				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
 				m_mouse_marking = false;
-				//~ infostream << "m_mark_begin:" << std::endl;
-				//~ infostream << "  scroll: " << m_mark_begin.scroll << std::endl;
-				//~ infostream << "  row: " << m_mark_begin.row << std::endl;
-				//~ infostream << "  row_buf: " << m_mark_begin.row_buf << std::endl;
-				//~ infostream << "  line: " << m_mark_begin.line << std::endl;
-				//~ infostream << "  fragment: " << m_mark_begin.fragment << std::endl;
-				//~ infostream << "  character: " << m_mark_begin.character << std::endl;
-				//~ infostream << "m_mark_end:" << std::endl;
-				//~ infostream << "  scroll: " << m_mark_end.scroll << std::endl;
-				//~ infostream << "  row: " << m_mark_end.row << std::endl;
-				//~ infostream << "  row_buf: " << m_mark_end.row_buf << std::endl;
-				//~ infostream << "  line: " << m_mark_end.line << std::endl;
-				//~ infostream << "  fragment: " << m_mark_end.fragment << std::endl;
-				//~ infostream << "  character: " << m_mark_end.character << std::endl;
-				
-				//~ irr::core::stringc text = getSelectedText();
-				//~ infostream << "text: " << text.c_str() << std::endl;
-			}
 
-			if (m_mark_begin == m_mark_end)
-			{
-				m_mark_begin.reset();
-				m_mark_end.reset();
+				if (m_mark_begin == m_mark_end)
+				{
+					m_mark_begin.reset();
+					m_mark_end.reset();
+				}
 			}
 		}
 		else if (event.MouseInput.Event == EMIE_MOUSE_MOVED)
