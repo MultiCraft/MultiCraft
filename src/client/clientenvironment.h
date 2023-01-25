@@ -43,8 +43,7 @@ class LocalPlayer;
 enum ClientEnvEventType
 {
 	CEE_NONE,
-	CEE_PLAYER_DAMAGE,
-	CEE_PLAYER_BREATH
+	CEE_PLAYER_DAMAGE
 };
 
 struct ClientEnvEvent
@@ -57,9 +56,6 @@ struct ClientEnvEvent
 			u16 amount;
 			bool send_to_server;
 		} player_damage;
-		struct{
-			u16 amount;
-		} player_breath;
 	};
 };
 
@@ -117,7 +113,6 @@ public:
 	*/
 
 	void damageLocalPlayer(u16 damage, bool handle_hp=true);
-	void updateLocalPlayerBreath(u16 breath);
 
 	/*
 		Client likes to call these
@@ -156,9 +151,6 @@ private:
 	std::vector<ClientSimpleObject*> m_simple_objects;
 	std::queue<ClientEnvEvent> m_client_event_queue;
 	IntervalLimiter m_active_object_light_update_interval;
-	IntervalLimiter m_lava_hurt_interval;
-	IntervalLimiter m_drowning_interval;
-	IntervalLimiter m_breathing_interval;
 	std::list<std::string> m_player_names;
 	v3s16 m_camera_offset;
 };

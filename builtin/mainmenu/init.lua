@@ -48,7 +48,6 @@ dofile(menupath .. DIR_DELIM .. "dlg_create_world_default.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_content.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")
-dofile(menupath .. DIR_DELIM .. "dlg_outdated_server.lua")
 
 if not mobile then
 	dofile(menupath .. DIR_DELIM .. "dlg_settings_advanced.lua")

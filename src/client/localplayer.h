@@ -146,7 +146,7 @@ public:
 
 	const aabb3f& getCollisionbox() const { return m_collisionbox; }
 
-	float getZoomFOV() const;
+	float getZoomFOV() const { return m_zoom_fov; }
 	void setZoomFOV(float zoom_fov) { m_zoom_fov = zoom_fov; }
 
 	bool getAutojump() const { return m_autojump; }

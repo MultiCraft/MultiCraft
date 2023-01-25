@@ -741,14 +741,6 @@ ClientActiveObject *LocalPlayer::getParent() const
 	return m_cao ? m_cao->getParent() : nullptr;
 }
 
-float LocalPlayer::getZoomFOV() const
-{
-	// OH nO, The ZOOm FoV IS nOt COnFIguRABLE On oLDER ServErS.
-	if (m_client && m_client->getProtoVersion() < 36)
-		return m_client->checkPrivilege("zoom") ? 15.0f : 0.0f;
-	return m_zoom_fov;
-}
-
 bool LocalPlayer::isDead() const
 {
 	FATAL_ERROR_IF(!getCAO(), "LocalPlayer's CAO isn't initialized");
