@@ -787,6 +787,13 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_KEY_C && event.KeyInput.Control)
 		{
+			if (m_mark_begin != m_mark_end)
+			{
+				irr::core::stringc text = getSelectedText();
+				Environment->getOSOperator()->copyToClipboard(text.c_str());
+				return true;
+			}
+
 			// Ctrl-C pressed
 			// Copy text to clipboard
 			if (prompt.getCursorLength() <= 0)
@@ -900,27 +907,26 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			if (m_mouse_marking)
 			{
 				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
-				infostream << "m_mark_begin:" << std::endl;
-				infostream << "  scroll: " << m_mark_begin.scroll << std::endl;
-				infostream << "  row: " << m_mark_begin.row << std::endl;
-				infostream << "  row_buf: " << m_mark_begin.row_buf << std::endl;
-				infostream << "  line: " << m_mark_begin.line << std::endl;
-				infostream << "  fragment: " << m_mark_begin.fragment << std::endl;
-				infostream << "  character: " << m_mark_begin.character << std::endl;
-				infostream << "m_mark_end:" << std::endl;
-				infostream << "  scroll: " << m_mark_end.scroll << std::endl;
-				infostream << "  row: " << m_mark_end.row << std::endl;
-				infostream << "  row_buf: " << m_mark_end.row_buf << std::endl;
-				infostream << "  line: " << m_mark_end.line << std::endl;
-				infostream << "  fragment: " << m_mark_end.fragment << std::endl;
-				infostream << "  character: " << m_mark_end.character << std::endl;
+				m_mouse_marking = false;
+				//~ infostream << "m_mark_begin:" << std::endl;
+				//~ infostream << "  scroll: " << m_mark_begin.scroll << std::endl;
+				//~ infostream << "  row: " << m_mark_begin.row << std::endl;
+				//~ infostream << "  row_buf: " << m_mark_begin.row_buf << std::endl;
+				//~ infostream << "  line: " << m_mark_begin.line << std::endl;
+				//~ infostream << "  fragment: " << m_mark_begin.fragment << std::endl;
+				//~ infostream << "  character: " << m_mark_begin.character << std::endl;
+				//~ infostream << "m_mark_end:" << std::endl;
+				//~ infostream << "  scroll: " << m_mark_end.scroll << std::endl;
+				//~ infostream << "  row: " << m_mark_end.row << std::endl;
+				//~ infostream << "  row_buf: " << m_mark_end.row_buf << std::endl;
+				//~ infostream << "  line: " << m_mark_end.line << std::endl;
+				//~ infostream << "  fragment: " << m_mark_end.fragment << std::endl;
+				//~ infostream << "  character: " << m_mark_end.character << std::endl;
 				
-				irr::core::stringc text = getSelectedText();
-				infostream << "text: " << text.c_str() << std::endl;
+				//~ irr::core::stringc text = getSelectedText();
+				//~ infostream << "text: " << text.c_str() << std::endl;
 			}
 
-			m_mouse_marking = false;
-			
 			if (m_mark_begin == m_mark_end)
 			{
 				m_mark_begin.reset();

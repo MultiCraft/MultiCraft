@@ -50,24 +50,37 @@ struct ChatSelection
 		        x_max == other.x_max);
     }
     
-    bool operator> (const ChatSelection &other) const
-    {
-        return (row + scroll > other.row + other.scroll ||
-		        row_buf > other.row_buf ||
-		        line > other.line ||
-		        fragment > other.fragment ||
-		        character > other.character ||
-		        x_max > other.x_max);
-    }
-    
     bool operator< (const ChatSelection &other) const
     {
-        return (row + scroll < other.row + other.scroll ||
-		        row_buf < other.row_buf ||
-		        line < other.line ||
-		        fragment < other.fragment ||
-		        character < other.character ||
-		        x_max < other.x_max);
+        if (row + scroll != other.row + other.scroll)
+            return (row + scroll < other.row + other.scroll);
+        if (row_buf != other.row_buf)
+            return (row_buf < other.row_buf);
+        if (line != other.line)
+            return (line < other.line);
+        if (fragment != other.fragment)
+            return (fragment < other.fragment);
+        if (character != other.character)
+            return (character < other.character);
+        if (x_max != other.x_max)
+            return (x_max < other.x_max);
+
+        return false;
+    }
+
+    bool operator> (const ChatSelection &other)
+    {
+        return other < *this;
+    }
+
+    bool operator<= (const ChatSelection &other)
+    {
+        return !(*this > other);
+    }
+
+    bool operator>= (const ChatSelection &other)
+    {
+        return !(*this < other);
     }
     
     bool operator!= (const ChatSelection &other) const
