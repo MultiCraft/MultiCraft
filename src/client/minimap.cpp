@@ -362,7 +362,7 @@ void Minimap::addMode(MinimapModeDef mode)
 		porting::mt_snprintf(label_buf, sizeof(label_buf),
 			mode.label.c_str(), zoom);
 		mode.label = label_buf;
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#if defined(__ANDROID__) || defined(__IOS__)
 		mode.label = mode.label.substr(0, mode.label.find(", "));
 #endif
 	}

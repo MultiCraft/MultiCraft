@@ -655,7 +655,7 @@ struct GameRunData {
 	float jump_timer;
 	float damage_flash;
 	float update_draw_list_timer;
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__)
 	float item_select_timer;
 #endif
 
@@ -700,9 +700,6 @@ public:
 	void shutdown();
 #if defined(__ANDROID__) || defined(__IOS__)
 	void pauseGame();
-#endif
-#ifdef __IOS__
-	void customStatustext(const std::wstring &text);
 #endif
 
 protected:
@@ -1141,14 +1138,14 @@ void Game::run()
 		//  + Sleep time until the wanted FPS are reached
 		limitFps(&draw_times, &dtime);
 
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
 		if (!device->isWindowFocused()) {
 			if (m_does_lost_focus_pause_game && !isMenuActive())
 				showPauseMenu();
 			sleep_ms(50);
 			continue;
 		}
-#elif defined(__ANDROID__) || defined(__IOS__)
+#else
 		if (device->isWindowMinimized()) {
 			sleep_ms(50);
 			continue;
@@ -2052,7 +2049,7 @@ void Game::processKeyInput()
 
 void Game::processItemSelection(f32 dtime, GameRunData *run_data)
 {
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__)
 	if (run_data->item_select_timer)
 			run_data->item_select_timer = MYMAX(0.0f, run_data->item_select_timer - dtime);
 #endif
@@ -2075,7 +2072,7 @@ void Game::processItemSelection(f32 dtime, GameRunData *run_data)
 	if (wasKeyDown(KeyType::HOTBAR_PREV))
 		dir = 1;
 
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__)
 	if (dir && !run_data->item_select_timer) {
 		run_data->item_select_timer = 0.05f;
 #else
@@ -2410,16 +2407,13 @@ void Game::toggleFullViewRange()
 #if !defined(__ANDROID__) && !defined(__IOS__)
 	draw_control->range_all = !draw_control->range_all;
 	if (draw_control->range_all)
-		m_game_ui->showTranslatedStatusText("Enabled unlimited viewing range");
-	else
-		m_game_ui->showTranslatedStatusText("Disabled unlimited viewing range");
 #else
 	draw_control->extended_range = !draw_control->extended_range;
 	if (draw_control->extended_range)
-		m_game_ui->showTranslatedStatusText("Enabled far viewing range");
-	else
-		m_game_ui->showTranslatedStatusText("Disabled far viewing range");
 #endif
+		m_game_ui->showTranslatedStatusText("Enabled unlimited viewing range");
+	else
+		m_game_ui->showTranslatedStatusText("Disabled unlimited viewing range");
 }
 
 
@@ -4226,13 +4220,6 @@ void Game::pauseGame()
 }
 #endif
 
-#ifdef __IOS__
-void Game::customStatustext(const std::wstring &text)
-{
-	m_game_ui->showStatusText(text);
-}
-#endif
-
 /****************************************************************************/
 /****************************************************************************
  Shutdown / cleanup
@@ -4285,7 +4272,7 @@ void Game::showDeathFormspec()
 #define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
 void Game::showPauseMenu()
 {
-#ifdef HAVE_TOUCHSCREENGUI
+/*#ifdef HAVE_TOUCHSCREENGUI
 	static const std::string control_text = strgettext("Default Controls:\n"
 		"No menu visible:\n"
 		"- single tap: button activate\n"
@@ -4334,7 +4321,7 @@ void Game::showPauseMenu()
 
 	std::string control_text = std::string(control_text_buf);
 	str_formspec_escape(control_text);
-#endif
+#endif*/
 
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
 #if defined(__ANDROID__) || defined(__IOS__)
@@ -4379,7 +4366,7 @@ void Game::showPauseMenu()
 		<< strgettext("Change Keys")  << ";;false]";
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << ";;false]";
-#ifndef __IOS__
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_os;"
 		<< strgettext("Exit to OS")   << ";;false]";
 #endif
@@ -4538,14 +4525,5 @@ extern "C" void external_pause_game()
 	if (!g_game)
 		return;
 	g_game->pauseGame();
-}
-#endif
-
-#ifdef __IOS__
-extern "C" void external_statustext(const char *text)
-{
-	if (!g_game)
-		return;
-	g_game->customStatustext(utf8_to_wide_c(text));
 }
 #endif

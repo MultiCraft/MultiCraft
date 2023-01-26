@@ -145,7 +145,7 @@ int ModApiMainMenu::l_start(lua_State *L)
 	data->serverdescription = getTextData(L,"serverdescription");
 	data->servername        = getTextData(L,"servername");
 
-#ifdef __IOS__
+#if defined(__ANDROID__) || defined(__IOS__)
 	if (!g_settings_path.empty())
 		g_settings->updateConfigFile(g_settings_path.c_str());
 #endif
