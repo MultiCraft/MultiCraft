@@ -920,6 +920,61 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			}
 		}
 	}
+#if defined(__ANDROID__) || defined(__IOS__)
+	else if (event.EventType == EET_TOUCH_INPUT_EVENT)
+	{
+		if (event.TouchInput.Event == irr::ETIE_PRESSED_DOWN)
+		{
+			m_mouse_marking = true;
+			m_long_press = false;
+			m_mark_begin = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+			m_mark_end = m_mark_begin;
+		}
+		else if (event.TouchInput.Event == irr::ETIE_LEFT_UP)
+		{
+			if (m_mouse_marking && !m_long_press)
+			{
+				m_mark_end = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+				
+				if (m_mark_begin == m_mark_end)
+				{
+					m_mark_begin.reset();
+					m_mark_end.reset();
+				}
+			}
+			
+			m_mouse_marking = false;
+			m_long_press = false;
+		}
+		else if (event.TouchInput.Event == irr::ETIE_MOVED)
+		{
+			if (m_mouse_marking && !m_long_press)
+			{
+				m_mark_end = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+			}
+		}
+		else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) 
+		{
+			if (!m_mouse_marking) 
+			{
+				m_long_press = true;
+				if (m_mark_begin != m_mark_end)
+				{
+					irr::core::stringc text = getSelectedText();
+					Environment->getOSOperator()->copyToClipboard(text.c_str());
+#ifdef __ANDROID__
+					SDL_AndroidShowToast(
+							"Copied to clipboard", 2,
+							-1, 0, 0);
+#elif __IOS__
+					porting::showToast("Copied to clipboard");
+#endif
+				}
+			}
+			return true;
+		}
+	}
+#endif
 
 	return Parent ? Parent->OnEvent(event) : false;
 }

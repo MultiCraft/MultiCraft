@@ -204,4 +204,5 @@ private:
 	ChatSelection m_mark_begin;
 	ChatSelection m_mark_end;
 	bool m_mouse_marking = false;
+	bool m_long_press = false;
 };
