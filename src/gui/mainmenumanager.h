@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	All kinds of stuff that needs to be exposed from main.cpp
 */
 #include "modalMenu.h"
+#include "guiChatConsole.h"
 #include <cassert>
 #include <list>
 
@@ -79,7 +80,14 @@ public:
 		if (m_stack.empty())
 			return false;
 		GUIModalMenu *mm = dynamic_cast<GUIModalMenu*>(m_stack.back());
-		return mm && mm->preprocessEvent(event);
+		if(mm)
+			return mm->preprocessEvent(event);
+		// Temporary hack for touch events in chat
+		GUIChatConsole *chat = dynamic_cast<GUIChatConsole*>(m_stack.back());
+		if(chat)
+			return chat->OnEvent(event);
+			
+		return false;
 	}
 
 	u32 menuCount()

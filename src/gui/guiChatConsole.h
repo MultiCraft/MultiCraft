@@ -26,11 +26,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct ChatSelection
 {
-	ChatSelection() : scroll(0), row(0), row_buf(0), line(0), fragment(0),
-			character(0), x_max(false) {};
+	ChatSelection() : initialized(false), scroll(0), row(0), row_buf(0), 
+			line(0), fragment(0), character(0), x_max(false) {};
 
 	void reset()
 	{
+		initialized = false;
 		scroll = 0;
 		row = 0;
 		row_buf = 0;
@@ -88,6 +89,7 @@ struct ChatSelection
 		return !this->operator==(other);
 	}
 
+	bool initialized;
 	int scroll;
 	int row;
 	int row_buf;
@@ -205,4 +207,5 @@ private:
 	ChatSelection m_mark_end;
 	bool m_mouse_marking = false;
 	bool m_long_press = false;
+	ChatSelection m_cursor_press_pos;
 };

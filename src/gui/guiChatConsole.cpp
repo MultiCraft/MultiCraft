@@ -484,6 +484,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	selection.scroll = buf.getScrollPos();
+	selection.initialized = true;
 
 	s32 line_height = m_fontsize.Y;
 	s32 y_min = m_height - m_desired_height;
@@ -919,38 +920,47 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
 			}
 		}
+
+		return true;
 	}
 #if defined(__ANDROID__) || defined(__IOS__)
 	else if (event.EventType == EET_TOUCH_INPUT_EVENT)
 	{
 		if (event.TouchInput.Event == irr::ETIE_PRESSED_DOWN)
 		{
-			m_mouse_marking = true;
+			m_mouse_marking = false;
 			m_long_press = false;
-			m_mark_begin = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-			m_mark_end = m_mark_begin;
+			m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
 		}
 		else if (event.TouchInput.Event == irr::ETIE_LEFT_UP)
 		{
-			if (m_mouse_marking && !m_long_press)
+			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+			
+			if (!m_long_press && m_cursor_press_pos == cursor_pos)
 			{
-				m_mark_end = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-				
-				if (m_mark_begin == m_mark_end)
-				{
-					m_mark_begin.reset();
-					m_mark_end.reset();
-				}
+				m_mark_begin.reset();
+				m_mark_end.reset();
 			}
 			
+			m_cursor_press_pos.reset();
 			m_mouse_marking = false;
 			m_long_press = false;
 		}
 		else if (event.TouchInput.Event == irr::ETIE_MOVED)
 		{
-			if (m_mouse_marking && !m_long_press)
+			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+			
+			if (!m_mouse_marking && !m_long_press && m_cursor_press_pos.initialized &&
+				m_cursor_press_pos != cursor_pos)
 			{
-				m_mark_end = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+				m_mark_begin = m_cursor_press_pos;
+				m_mark_end = m_cursor_press_pos;
+				m_mouse_marking = true;
+			}
+			
+			if (m_mouse_marking)
+			{
+				m_mark_end = cursor_pos;
 			}
 		}
 		else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) 
@@ -971,8 +981,9 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 #endif
 				}
 			}
-			return true;
 		}
+
+		return true;
 	}
 #endif
 
