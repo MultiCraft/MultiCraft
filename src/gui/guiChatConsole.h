@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "modalMenu.h"
 #include "chat.h"
 #include "config.h"
+#include "guiScrollBar.h"
 
 struct ChatSelection
 {
@@ -159,6 +160,7 @@ private:
 
 	ChatSelection getCursorPos(s32 x, s32 y);
 	irr::core::stringc getSelectedText();
+	void createVScrollBar();
 
 private:
 	ChatBackend* m_chat_backend;
@@ -208,4 +210,7 @@ private:
 	bool m_mouse_marking = false;
 	bool m_long_press = false;
 	ChatSelection m_cursor_press_pos;
+	
+	u32 m_scrollbar_width = 0;
+	GUIScrollBar *m_vscrollbar = nullptr;
 };

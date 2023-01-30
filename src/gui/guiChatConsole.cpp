@@ -92,6 +92,8 @@ GUIChatConsole::GUIChatConsole(
 	}
 	m_fontsize.X = MYMAX(m_fontsize.X, 1);
 	m_fontsize.Y = MYMAX(m_fontsize.Y, 1);
+	
+	createVScrollBar();
 
 	// set default cursor options
 	setCursor(true, true, 2.0, 0.1);
@@ -118,6 +120,7 @@ void GUIChatConsole::openConsole(f32 scale)
 	reformatConsole();
 	m_animate_time_old = porting::getTimeMs();
 	IGUIElement::setVisible(true);
+	m_vscrollbar->setVisible(true);
 	Environment->setFocus(this);
 	m_menumgr->createdMenu(this);
 
@@ -242,7 +245,10 @@ void GUIChatConsole::recalculateConsolePosition()
 {
 	core::rect<s32> rect(0, 0, m_screensize.X, m_height);
 	DesiredRect = rect;
-	recalculateAbsolutePosition(false);
+	recalculateAbsolutePosition(true);
+
+	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width, 0, m_screensize.X, m_height);
+	m_vscrollbar->setRelativePosition(scrollbarrect);
 }
 
 void GUIChatConsole::animate(u32 msec)
@@ -254,7 +260,10 @@ void GUIChatConsole::animate(u32 msec)
 	// This function (animate()) is never called once its visibility becomes false so do not
 	//		actually set visible to false before the inhibited period is over
 	if (!m_open && m_height == 0 && m_open_inhibited == 0)
+	{
+		m_vscrollbar->setVisible(false);
 		IGUIElement::setVisible(false);
+	}
 
 	if (m_height != goal)
 	{
@@ -882,8 +891,9 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			for (u32 i = 0; i < text.size(); i++)
 				prompt.input(text[i]);
 
-			return true;
 		}
+		
+		return true;
 	}
 #endif
 	else if(event.EventType == EET_MOUSE_INPUT_EVENT)
@@ -994,9 +1004,28 @@ void GUIChatConsole::setVisible(bool visible)
 {
 	m_open = visible;
 	IGUIElement::setVisible(visible);
+	m_vscrollbar->setVisible(visible);
 	if (!visible) {
 		m_height = 0;
 		recalculateConsolePosition();
 	}
 }
 
+//! create a vertical scroll bar
+void GUIChatConsole::createVScrollBar()
+{
+	IGUISkin *skin = 0;
+	if (Environment)
+		skin = Environment->getSkin();
+
+	m_scrollbar_width = skin ? skin->getSize(gui::EGDS_SCROLLBAR_SIZE) : 16;
+
+
+	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width, 0, m_screensize.X, m_height);
+	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
+			scrollbarrect, false, true);
+
+	m_vscrollbar->setVisible(false);
+	m_vscrollbar->setSmallStep(1);
+	m_vscrollbar->setLargeStep(1);
+}

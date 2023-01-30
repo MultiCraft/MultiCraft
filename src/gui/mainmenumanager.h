@@ -82,10 +82,12 @@ public:
 		GUIModalMenu *mm = dynamic_cast<GUIModalMenu*>(m_stack.back());
 		if(mm)
 			return mm->preprocessEvent(event);
+#if defined(__ANDROID__) || defined(__IOS__)
 		// Temporary hack for touch events in chat
 		GUIChatConsole *chat = dynamic_cast<GUIChatConsole*>(m_stack.back());
 		if(chat)
 			return chat->OnEvent(event);
+#endif
 			
 		return false;
 	}
