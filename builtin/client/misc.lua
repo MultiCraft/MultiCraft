@@ -12,17 +12,20 @@ local function register_toggle_cmd(name, cmd, setting, no_priv)
 		func = function()
 			if core.settings:get_bool(setting) then
 				core.settings:set_bool(setting, false)
-				return true, "Disabled " .. name
-			elseif no_priv or core.get_privilege_list()[cmd] then
-				core.settings:set_bool(setting, true)
-				return true, "Enabled " .. name
+				return true, core.gettext(name .. " disabled")
 			end
-			return false, "You do not have the " .. cmd .. " privilege."
+
+			core.settings:set_bool(setting, true)
+			local msg = name .. " enabled"
+			if not no_priv and not core.get_privilege_list()[cmd] then
+				msg = ("%s (note: no '%s' privilege)"):format(msg, cmd)
+			end
+			return true, core.gettext(msg)
 		end,
 	})
 end
 
-register_toggle_cmd("fast mode", "fast", "fast_move")
-register_toggle_cmd("noclip mode", "noclip", "noclip")
-register_toggle_cmd("fly mode", "fly", "free_move")
-register_toggle_cmd("pitch move mode", "pitch", "pitch_move", true)
+register_toggle_cmd("Fast mode", "fast", "fast_move")
+register_toggle_cmd("Noclip mode", "noclip", "noclip")
+register_toggle_cmd("Fly mode", "fly", "free_move")
+register_toggle_cmd("Pitch move mode", "pitch", "pitch_move", true)
