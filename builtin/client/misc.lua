@@ -26,6 +26,6 @@ local function register_toggle_cmd(name, cmd, setting, no_priv)
 end
 
 register_toggle_cmd("Fast mode", "fast", "fast_move")
-register_toggle_cmd("Noclip mode", "noclip", "noclip")
 register_toggle_cmd("Fly mode", "fly", "free_move")
+register_toggle_cmd("Noclip mode", "noclip", "noclip")
 register_toggle_cmd("Pitch move mode", "pitch", "pitch_move", true)
