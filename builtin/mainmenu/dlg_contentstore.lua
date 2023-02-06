@@ -16,6 +16,7 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 local esc = core.formspec_escape
+local fmt = string.format
 
 if not core.get_http_api then
 	function create_store_dlg()
@@ -44,6 +45,7 @@ local search_string = ""
 local cur_page = 1
 local num_per_page = 5
 local filter_type = 1
+local dropdown_open = false
 local filter_types_titles = {
 	fgettext("All packages"),
 	fgettext("Games"),
@@ -60,6 +62,8 @@ local filter_types_type = {
 	"mod",
 	"txp",
 }
+
+local guitexturedir = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 
 
 local function download_package(param)
@@ -690,6 +694,35 @@ function store.filter_packages(query)
 	end
 end
 
+local function get_dropdown(x, y, w)
+	local fs = {}
+	fs[#fs + 1] = fmt("style[change_type;bgimg=%s%s;bgimg_middle=32;padding=-24;border=false]",
+		guitexturedir, dropdown_open and "dropdown_open.png" or "dropdown.png")
+	fs[#fs + 1] = fmt("button[%s,%s;%s,0.8;change_type;%s]", x, y, w, filter_types_titles[filter_type])
+	fs[#fs + 1] = fmt("image[%s,%s;0.3375,0.225;%sdropdown_arrow.png]",
+		x + w - 0.2 - 0.3375, y + 0.325, guitexturedir)
+
+	if dropdown_open then
+		-- Make clicking outside of the dropdown close the menu
+		fs[#fs + 1] = "image_button[-50,-50;100,100;;dropdown_close;;true;false]"
+
+		-- Add a button for each dropdown entry
+		for i, entry in ipairs(filter_types_titles) do
+			local btn_name = "dropdown_" .. i
+			local suffix = i == #filter_types_titles and "_end" or ""
+			fs[#fs + 1] = fmt("style[%s;bgimg=%sdropdown_bg%s.png;bgimg_middle=32;padding=-24;border=false]",
+				btn_name, guitexturedir, suffix)
+			fs[#fs + 1] = fmt("style[%s:hovered,%s:pressed;bgimg=%sdropdown_bg%s_hover.png]",
+				btn_name, btn_name, guitexturedir, suffix)
+
+			-- 0.79 is used to prevent any 1px gaps between entries
+			fs[#fs + 1] = fmt("button[%s,%s;%s,0.8;%s;%s]", x, y + i * 0.79, w, btn_name, entry)
+		end
+	end
+
+	return table.concat(fs)
+end
+
 function store.get_formspec(dlgdata)
 	store.update_paths()
 
@@ -711,13 +744,11 @@ function store.get_formspec(dlgdata)
 			"style[status,downloading,queued;border=false]",
 
 			"container[0.375,0.375]",
-			"image[0,0;7.25,0.8;", defaulttexturedir_esc, "field_bg.png;32]",
+			"image[0,0;7.7,0.8;", defaulttexturedir_esc, "field_bg.png;32]",
 			"style[Dsearch_string;border=false;bgcolor=transparent]",
-			"field[0.1,0;7.15,0.8;Dsearch_string;;", esc(search_string), "]",
+			"field[0.1,0;6.65,0.8;Dsearch_string;;", esc(search_string), "]",
 			"set_focus[Dsearch_string;true]",
-			btn_style("clear"),
-			"image_button[7.4,0;0.8,0.8;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
-			"dropdown[8.35,0;3.5,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
+			"image_button[6.9,0.05;0.7,0.7;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
 			"container_end[]",
 
 			-- Page nav buttons
@@ -872,6 +903,11 @@ function store.get_formspec(dlgdata)
 		formspec[#formspec + 1] = "container_end[]"
 	end
 
+	-- Add the dropdown last so that it is over top of everything else
+	if #store.packages_full > 0 then
+		formspec[#formspec + 1] = get_dropdown(8.22, 0.375, 4)
+	end
+
 	return table.concat(formspec, "")
 end
 
@@ -920,6 +956,24 @@ function store.handle_submit(this, fields)
 		if new_type ~= filter_type then
 			filter_type = new_type
 			store.filter_packages(search_string)
+			return true
+		end
+	end
+
+	if fields.change_type then
+		dropdown_open = true
+		return true
+	end
+
+	for field in pairs(fields) do
+		if field:sub(1, 9) == "dropdown_" then
+			dropdown_open = false
+			local new_type = tonumber(field:sub(10))
+			if new_type and new_type ~= filter_type then
+				filter_type = new_type
+				cur_page = 1
+				store.filter_packages(search_string)
+			end
 			return true
 		end
 	end
