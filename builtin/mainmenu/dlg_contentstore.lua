@@ -762,7 +762,8 @@ function store.get_formspec(dlgdata)
 			btn_style("pback"),
 			"image_button[0.8,0;0.8,0.8;", defaulttexturedir_esc, "prev_icon.png;pback;;true;false]",
 			"style[pagenum;border=false]",
-			"button[1.5,0;2,0.8;pagenum;", tonumber(cur_page), " / ", tonumber(dlgdata.pagemax), "]",
+			"button[1.5,0;2,0.8;pagenum;", core.colorize("#FFDF00", tostring(cur_page)),
+				" / ", core.colorize("#FFDF00", tostring(dlgdata.pagemax)), "]",
 			btn_style("pnext"),
 			"image_button[3.5,0;0.8,0.8;", defaulttexturedir_esc, "next_icon.png;pnext;;true;false]",
 			btn_style("pend"),
@@ -863,7 +864,7 @@ function store.get_formspec(dlgdata)
 			formspec[#formspec + 1] = "cdb_queued.png;queued]"
 		elseif not package.path then
 			local elem_name = "install_" .. i .. ";"
-			formspec[#formspec + 1] = "style[" .. elem_name .. "bgcolor=#71aa34]"
+				formspec[#formspec + 1] = btn_style("install_" .. i, "green", true)
 			formspec[#formspec + 1] = left_base .. "cdb_add.png;" .. elem_name .. "]"
 			formspec[#formspec + 1] = "tooltip[" .. elem_name .. fgettext("Install") .. tooltip_colors
 		else
@@ -871,19 +872,20 @@ function store.get_formspec(dlgdata)
 
 				-- The install_ action also handles updating
 				local elem_name = "install_" .. i .. ";"
-				formspec[#formspec + 1] = "style[" .. elem_name .. "bgcolor=#28ccdf]"
+				formspec[#formspec + 1] = btn_style("install_" .. i, nil, true)
 				formspec[#formspec + 1] = left_base .. "cdb_update.png;" .. elem_name .. "]"
 				formspec[#formspec + 1] = "tooltip[" .. elem_name .. fgettext("Update") .. tooltip_colors
 			else
 
 				local elem_name = "uninstall_" .. i .. ";"
-				formspec[#formspec + 1] = "style[" .. elem_name .. "bgcolor=#a93b3b]"
+				formspec[#formspec + 1] = btn_style("uninstall_" .. i, "red", true)
 				formspec[#formspec + 1] = left_base .. "cdb_clear.png;" .. elem_name .. "]"
 				formspec[#formspec + 1] = "tooltip[" .. elem_name .. fgettext("Uninstall") .. tooltip_colors
 			end
 		end
 
 		local web_elem_name = "view_" .. i .. ";"
+		formspec[#formspec + 1] = btn_style("view_" .. i, nil, true)
 		formspec[#formspec + 1] = "image_button[-0.7,0;0.7,0.7;" ..
 			defaulttexturedir_esc .. "cdb_viewonline.png;" .. web_elem_name .. "]"
 		formspec[#formspec + 1] = "tooltip[" .. web_elem_name ..

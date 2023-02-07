@@ -16,14 +16,17 @@ end
 local DIR_DELIM_esc = core.formspec_escape(DIR_DELIM)
 local button_path = (INIT == "mainmenu" and defaulttexturedir_esc or "") .. "gui" .. DIR_DELIM_esc
 
-function btn_style(field, color)
-	local btn_size = is_high_dpi() and ".x2" or ""
+function btn_style(field, color, no_padding)
+	local high_dpi = is_high_dpi()
+	local btn_size = high_dpi and ".x2" or ""
 	color = (color and "_" .. color) or ""
 
+	local bgimg_middle = high_dpi and 48 or 32
 	local retval =
 		"style[" .. field .. ";border=false]" ..
 		"style[" .. field .. ";bgimg=" .. button_path .. "gui_button" .. color .. btn_size ..
-			".png;bgimg_middle=" .. (is_high_dpi() and 48 or 32) .. ";padding=" .. (is_high_dpi() and -36 or -24) .. "]"
+			".png;bgimg_middle=" .. bgimg_middle .. ";padding=" ..
+			(no_padding and -bgimg_middle or (high_dpi and -36 or -24)) .. "]"
 
 	if color ~= "_gray" and color:sub(-8) ~= "_pressed" then
 		retval = retval ..
