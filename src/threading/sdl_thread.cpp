@@ -23,7 +23,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-
 #include "threading/sdl_thread.h"
 #include "threading/mutex_auto_lock.h"
 #include "log.h"
@@ -32,9 +31,7 @@ DEALINGS IN THE SOFTWARE.
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
 Thread::Thread(const std::string &name) :
-	m_name(name),
-	m_request_stop(false),
-	m_running(false)
+		m_name(name), m_request_stop(false), m_running(false)
 {
 }
 
@@ -61,9 +58,9 @@ bool Thread::start()
 	m_start_finished_mutex.try_lock();
 
 	m_thread_obj = SDL_CreateThread(&threadProc, m_name.c_str(), this);
-	
+
 	if (!m_thread_obj)
- 		return false;
+		return false;
 
 	// Allow spawned thread to continue
 	m_start_finished_mutex.unlock();
@@ -109,7 +106,7 @@ bool Thread::getReturnValue(void **ret)
 
 int Thread::threadProc(void *data)
 {
-	Thread* thr = (Thread*)data;
+	Thread *thr = (Thread *)data;
 
 	g_logger.registerThread(thr->m_name);
 	thr->m_running = true;
@@ -126,7 +123,7 @@ int Thread::threadProc(void *data)
 	// released. We try to unlock it from caller thread and it's refused by system.
 	thr->m_start_finished_mutex.unlock();
 	g_logger.deregisterThread();
-	
+
 	return 0;
 }
 

@@ -37,10 +37,10 @@ DEALINGS IN THE SOFTWARE.
 
 #include <SDL.h>
 
-
-class Thread {
+class Thread
+{
 public:
-	Thread(const std::string &name="");
+	Thread(const std::string &name = "");
 	virtual ~Thread();
 	DISABLE_CLASS_COPY(Thread)
 

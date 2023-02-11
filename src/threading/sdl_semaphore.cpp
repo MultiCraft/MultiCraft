@@ -23,7 +23,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <cassert>
 
-#define UNUSED(expr) do { (void)(expr); } while (0)
+#define UNUSED(expr)                                                                     \
+	do {                                                                             \
+		(void)(expr);                                                            \
+	} while (0)
 
 Semaphore::Semaphore(int val)
 {
