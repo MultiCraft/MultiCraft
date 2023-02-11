@@ -160,13 +160,8 @@ int main(int argc, char *argv[])
 
 #ifdef __ANDROID__
 	porting::initAndroid();
-	porting::initializePathsAndroid();
-#elif defined(__IOS__)
-	porting::initializePathsiOS();
-	porting::copyAssets();
-#else
-	porting::initializePaths();
 #endif
+	porting::initializePaths();
 
 	if (!create_userdata_path()) {
 		errorstream << "Cannot create user data directory" << std::endl;

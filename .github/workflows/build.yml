@@ -215,24 +215,24 @@ jobs:
           NO_PACKAGE: 1
 
   msvc:
-    name: VS 2019 ${{ matrix.config.arch }}-${{ matrix.type }}
-    runs-on: windows-2019
+    name: VS 2022 ${{ matrix.config.arch }}-${{ matrix.type }}
+    runs-on: windows-2022
     env:
-      VCPKG_VERSION: 6f7ffeb18f99796233b958aaaf14ec7bd4fb64b2
-#                    2022.11.14
-      vcpkg_packages: irrlicht zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp libiconv gettext jsoncpp
+      VCPKG_VERSION: af2287382b1991dbdcb7e5112d236f3323b9dd7a
+#                    2022.03.10
+      vcpkg_packages: irrlicht zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp
     strategy:
       fail-fast: false
       matrix:
         config:
           - {
               arch: x86,
-              generator: "-G'Visual Studio 16 2019' -A Win32",
+              generator: "-G'Visual Studio 17 2022' -A Win32",
               vcpkg_triplet: x86-windows
             }
           - {
               arch: x64,
-              generator: "-G'Visual Studio 16 2019' -A x64",
+              generator: "-G'Visual Studio 17 2022' -A x64",
               vcpkg_triplet: x64-windows
             }
         type: [portable]

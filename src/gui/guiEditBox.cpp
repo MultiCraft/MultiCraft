@@ -272,6 +272,9 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 						SDL_AndroidShowToast(
 								"Copied to clipboard", 2,
 								-1, 0, 0);
+#elif __IOS__
+					if (success)
+						porting::showToast("Copied to clipboard");
 #endif
 				}
 				return true;

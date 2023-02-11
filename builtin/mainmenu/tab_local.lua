@@ -120,22 +120,23 @@ local function get_formspec(_, _, tab_data)
 
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
-			"style[world_delete;fgimg=" .. defaulttexturedir_esc ..
-				"world_delete.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_delete_hover.png]" ..
-			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
-			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
+			"style[world_delete,world_create,world_configure;font_size=*" ..
+				(small_screen and 1.2 or 1.5) .. "]" ..
+			btn_style("world_delete", "left") ..
+			"image_button[-0.12,4.85;3.48,0.9;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
+			"image[0.1,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_delete.png]" ..
 
-			"style[world_create;fgimg=" .. defaulttexturedir_esc ..
-				"world_new.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_new_hover.png]" ..
-			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
-			"tooltip[world_create;".. fgettext("New") .. "]"
+			btn_style("world_create", "right") ..
+			"image_button[3.14,4.85;3.48,0.9;;world_create;".. fgettext("Create") .. ";true;false]" ..
+			"image[3.35,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_create.png]"
 
 	local world = menudata.worldlist:get_list()[index]
 	local game = world and pkgmgr.find_by_gameid(world.gameid)
 	if game and game.moddable then
 		retval = retval ..
 			btn_style("world_configure") ..
-			"image_button[9,4.84;3,0.92;;world_configure;" .. fgettext("Select Mods") .. ";true;false]"
+			"image_button[8.1,4.85;4,0.9;;world_configure;" .. fgettext("Select Mods") .. ";true;false]" ..
+			"image[8.3,5.02;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_settings.png]"
 	end
 
 	retval = retval ..
@@ -157,8 +158,9 @@ local function get_formspec(_, _, tab_data)
 
 	if tab_data.hidden then
 		retval = retval ..
+			btn_style("switch_local_default") ..
 			"style[switch_local_default;fgimg=" .. defaulttexturedir_esc .. "switch_local_default.png;fgimg_hovered=" ..
-				defaulttexturedir_esc .. "switch_local_default_hover.png]" ..
+				defaulttexturedir_esc .. "switch_local_default_hover.png;padding=" .. (is_high_dpi() and -42 or -30) .. "]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
 	end
 
@@ -289,11 +291,17 @@ local function main_button_handler(this, fields, name, tab_data)
 	end
 
 	if fields["world_create"] ~= nil then
-		local create_world_dlg = create_create_world_dlg(true)
-		create_world_dlg:set_parent(this)
+		local dlg
+		if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
+			mm_texture.update("singleplayer", current_game())
+			dlg = create_create_world_dlg(true)
+		else
+			dlg = create_store_dlg("game")
+		end
+
+		dlg:set_parent(this)
 		this:hide()
-		create_world_dlg:show()
-		mm_texture.update("singleplayer", current_game())
+		dlg:show()
 		return true
 	end
 

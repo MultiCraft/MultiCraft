@@ -192,7 +192,7 @@ void ItemDefinition::deSerialize(std::istream &is)
 
 	// Deserialize
 	int version = readU8(is);
-	if (version < 1 || (version > 3 && version < 6))
+	if (version < 6)
 		throw SerializationError("unsupported ItemDefinition version");
 
 	type = (enum ItemType)readU8(is);
@@ -200,10 +200,7 @@ void ItemDefinition::deSerialize(std::istream &is)
 	description = deSerializeString16(is);
 	inventory_image = deSerializeString16(is);
 	wield_image = deSerializeString16(is);
-	if (version >= 6)
-		wield_scale = readV3F32(is);
-	else
-		wield_scale = readV3F1000(is);
+	wield_scale = readV3F32(is);
 	stack_max = readS16(is);
 	usable = readU8(is);
 	liquids_pointable = readU8(is);
@@ -223,37 +220,21 @@ void ItemDefinition::deSerialize(std::istream &is)
 		groups[name] = value;
 	}
 
-	if (version < 2) {
-		// We can't be sure that node_placement_prediction is sent in version 1.
-		try {
-			node_placement_prediction = deSerializeString16(is);
-		} catch (SerializationError &e) {};
-		sound_place.name = "default_place_node";
-		sound_place.gain = 0.5;
-		return;
-	}
-
 	node_placement_prediction = deSerializeString16(is);
 
 	// Version from ContentFeatures::serialize to keep in sync
-	const u8 cf_version = version >= 6 ? CONTENTFEATURES_VERSION : 9;
-	sound_place.deSerialize(is, cf_version);
+	sound_place.deSerialize(is, CONTENTFEATURES_VERSION);
+	sound_place_failed.deSerialize(is, CONTENTFEATURES_VERSION);
+
+	range = readF32(is);
+	palette_image = deSerializeString16(is);
+	color = readARGB8(is);
+	inventory_overlay = deSerializeString16(is);
+	wield_overlay = deSerializeString16(is);
 
 	// If you add anything here, insert it primarily inside the try-catch
 	// block to not need to increase the version.
 	try {
-		if (version >= 6) {
-			sound_place_failed.deSerialize(is, cf_version);
-			range = readF32(is);
-		} else {
-			if (version >= 3)
-				range = readF1000(is);
-			sound_place_failed.deSerialize(is, cf_version);
-		}
-		palette_image = deSerializeString16(is);
-		color = readARGB8(is);
-		inventory_overlay = deSerializeString16(is);
-		wield_overlay = deSerializeString16(is);
 		short_description = deSerializeString16(is);
 	} catch(SerializationError &e) {};
 }

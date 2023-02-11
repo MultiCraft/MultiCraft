@@ -520,6 +520,7 @@ bool setSystemPaths()
 
 #endif
 
+#if !defined(__ANDROID__) && !defined(__IOS__)
 void initializePaths()
 {
 #if RUN_IN_PLACE
@@ -623,7 +624,6 @@ void initializePaths()
 #endif  // USE_GETTEXT
 }
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
 // Dummy for other OS
 bool hasRealKeyboard()
 {

@@ -77,7 +77,7 @@ void set_default_settings()
 	settings->setDefault("enable_client_modding", "true");
 	settings->setDefault("max_out_chat_queue_size", "20");
 	settings->setDefault("pause_on_lost_focus", "true");
-	settings->setDefault("enable_register_confirmation", "false");
+	settings->setDefault("enable_register_confirmation", "true");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");
@@ -512,11 +512,12 @@ void set_default_settings()
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 	settings->setDefault("vsync", "true");
 
-	float ScaleFactor = [NSScreen mainScreen].backingScaleFactor;
+	int ScaleFactor = (int) [NSScreen mainScreen].backingScaleFactor;
 	settings->setDefault("screen_dpi", std::to_string(ScaleFactor * 72));
 	if (ScaleFactor >= 2) {
 		settings->setDefault("hud_scaling", "1.5");
 	} else {
+		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
 		settings->setDefault("hud_scaling", "1.25");
 		settings->setDefault("gui_scaling", "1.5");
 	}

@@ -42,7 +42,7 @@ void cleanupAndroid();
 /**
  * Initializes path_* variables for Android
  */
-void initializePathsAndroid();
+void initializePaths();
 
 /**
  * show text input dialog in java

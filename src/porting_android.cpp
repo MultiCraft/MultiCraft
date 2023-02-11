@@ -196,7 +196,7 @@ static std::string getAndroidPath(
 	return javaStringToUTF8(js_path);
 }
 
-void initializePathsAndroid()
+void initializePaths()
 {
 	// Get Environment class
 	jclass cls_Env = jnienv->FindClass("android/os/Environment");

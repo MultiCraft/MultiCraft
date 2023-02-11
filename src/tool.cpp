@@ -92,13 +92,10 @@ void ToolCapabilities::serialize(std::ostream &os, u16 protocol_version) const
 void ToolCapabilities::deSerialize(std::istream &is)
 {
 	int version = readU8(is);
-	if (version != 1 && version != 2 && version < 4)
+	if (version < 4)
 		throw SerializationError("unsupported ToolCapabilities version");
 
-	if (version > 3)
-		full_punch_interval = readF32(is);
-	else
-		full_punch_interval = readF1000(is);
+	full_punch_interval = readF32(is);
 	max_drop_level = readS16(is);
 	groupcaps.clear();
 	u32 groupcaps_size = readU32(is);
@@ -110,11 +107,7 @@ void ToolCapabilities::deSerialize(std::istream &is)
 		u32 times_size = readU32(is);
 		for(u32 i = 0; i < times_size; i++) {
 			int level = readS16(is);
-			float time;
-			if (version > 3)
-				time = readF32(is);
-			else
-				time = readF1000(is);
+			float time = readF32(is);
 			cap.times[level] = time;
 		}
 		groupcaps[name] = cap;

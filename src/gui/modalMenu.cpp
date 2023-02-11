@@ -327,10 +327,9 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 			gui::IGUIElement *focused = Environment->getFocus();
 #if defined(__ANDROID__) || defined(__IOS__)
 			if (event.TouchInput.Event == ETIE_PRESSED_LONG) {
-				if (focused->getType() == irr::gui::EGUIET_EDIT_BOX) {
-					bool ret = focused->OnEvent(event);
-					return ret;
-				}
+				if (focused->getType() == irr::gui::EGUIET_EDIT_BOX)
+					focused->OnEvent(event);
+				return true;
 			}
 #endif
 			SEvent mouse_event;
