@@ -19,10 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include "IrrCompileConfig.h"
+
 #include "irrlichttypes.h"
 #include "exceptions.h"
 #include "threading/mutex_auto_lock.h"
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include "threading/sdl_semaphore.h"
+#else
 #include "threading/semaphore.h"
+#endif
 #include <list>
 #include <vector>
 #include <map>

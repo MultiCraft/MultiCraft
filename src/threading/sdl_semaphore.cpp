@@ -17,42 +17,51 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#pragma once
+#include "threading/sdl_semaphore.h"
 
-#include "IrrCompileConfig.h"
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
-#ifndef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include <cassert>
 
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined(__MACH__) && defined(__APPLE__)
-#include <mach/semaphore.h>
-#else
-#include <semaphore.h>
-#endif
+#define UNUSED(expr) do { (void)(expr); } while (0)
 
-#include "util/basic_macros.h"
-
-class Semaphore
+Semaphore::Semaphore(int val)
 {
-public:
-	Semaphore(int val = 0);
-	~Semaphore();
+	semaphore = SDL_CreateSemaphore(val);
+}
 
-	DISABLE_CLASS_COPY(Semaphore);
+Semaphore::~Semaphore()
+{
+	SDL_DestroySemaphore(semaphore);
+}
 
-	void post(unsigned int num = 1);
-	void wait();
-	bool wait(unsigned int time_ms);
+void Semaphore::post(unsigned int num)
+{
+	assert(num > 0);
+	for (unsigned i = 0; i < num; i++) {
+		int ret = SDL_SemPost(semaphore);
+		assert(!ret);
+		UNUSED(ret);
+	}
+}
 
-private:
-#if defined(WIN32)
-	HANDLE semaphore;
-#elif defined(__MACH__) && defined(__APPLE__)
-	semaphore_t semaphore;
-#else
-	sem_t semaphore;
-#endif
-};
+void Semaphore::wait()
+{
+	int ret = SDL_SemWait(semaphore);
+	assert(!ret);
+	UNUSED(ret);
+}
+
+bool Semaphore::wait(unsigned int time_ms)
+{
+	int ret;
+	if (time_ms > 0) {
+		ret = SDL_SemWaitTimeout(semaphore, time_ms);
+	} else {
+		ret = SDL_SemTryWait(semaphore);
+	}
+	assert(!ret || ret == SDL_MUTEX_TIMEDOUT);
+	return !ret;
+}
 
 #endif

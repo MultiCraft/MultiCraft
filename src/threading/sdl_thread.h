@@ -27,35 +27,15 @@ DEALINGS IN THE SOFTWARE.
 
 #include "IrrCompileConfig.h"
 
-#ifndef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
 #include "util/basic_macros.h"
 
 #include <string>
 #include <atomic>
-#include <thread>
 #include <mutex>
 
-#ifdef _AIX
-	#include <sys/thread.h> // for tid_t
-#endif
-
-#ifdef __HAIKU__
-	#include <kernel/OS.h>
-#endif
-
-/*
- * On platforms using pthreads, these five priority classes correlate to
- * even divisions between the minimum and maximum reported thread priority.
- */
-#if !defined(_WIN32)
-	#define THREAD_PRIORITY_LOWEST       0
-	#define THREAD_PRIORITY_BELOW_NORMAL 1
-	#define THREAD_PRIORITY_NORMAL       2
-	#define THREAD_PRIORITY_ABOVE_NORMAL 3
-	#define THREAD_PRIORITY_HIGHEST      4
-#endif
-
+#include <SDL.h>
 
 
 class Thread {
@@ -89,12 +69,12 @@ public:
 	/*
 	 * Returns true if the calling thread is this Thread object.
 	 */
-	bool isCurrentThread() { return std::this_thread::get_id() == getThreadId(); }
+	bool isCurrentThread() { return SDL_ThreadID() == getThreadId(); }
 
 	bool isRunning() { return m_running; }
 	bool stopRequested() { return m_request_stop; }
 
-	std::thread::id getThreadId() { return m_thread_obj->get_id(); }
+	SDL_threadID getThreadId() { return SDL_GetThreadID(m_thread_obj); }
 
 	/*
 	 * Gets the thread return value.
@@ -112,16 +92,10 @@ public:
 	/*
 	 * Sets the thread priority to the specified priority.
 	 *
-	 * prio can be one of: THREAD_PRIORITY_LOWEST, THREAD_PRIORITY_BELOW_NORMAL,
-	 * THREAD_PRIORITY_NORMAL, THREAD_PRIORITY_ABOVE_NORMAL, THREAD_PRIORITY_HIGHEST.
-	 * On Windows, any of the other priorites as defined by SetThreadPriority
-	 * are supported as well.
-	 *
-	 * Note that it may be necessary to first set the threading policy or
-	 * scheduling algorithm to one that supports thread priorities if not
-	 * supported by default, otherwise this call will have no effect.
+	 * prio can be one of: SDL_THREAD_PRIORITY_LOW, SDL_THREAD_PRIORITY_NORMAL,
+	 * SDL_THREAD_PRIORITY_HIGH.
 	 */
-	bool setPriority(int prio);
+	bool setPriority(SDL_ThreadPriority prio);
 
 	/*
 	 * Sets the currently executing thread's name to where supported; useful
@@ -140,10 +114,7 @@ protected:
 	virtual void *run() = 0;
 
 private:
-	std::thread::native_handle_type getThreadHandle()
-		{ return m_thread_obj->native_handle(); }
-
-	static void threadProc(Thread *thr);
+	static int threadProc(void *data);
 
 	void *m_retval = nullptr;
 	bool m_joinable = false;
@@ -152,14 +123,7 @@ private:
 	std::mutex m_mutex;
 	std::mutex m_start_finished_mutex;
 
-	std::thread *m_thread_obj = nullptr;
-
-
-#ifdef _AIX
-	// For AIX, there does not exist any mapping from pthread_t to tid_t
-	// available to us, so we maintain one ourselves.  This is set on thread start.
-	tid_t m_kernel_thread_id;
-#endif
+	SDL_Thread *m_thread_obj = nullptr;
 };
 
 #endif

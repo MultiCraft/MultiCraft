@@ -23,10 +23,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #error This file may only be compiled for android!
 #endif
 
+#include "IrrCompileConfig.h"
+
 #include "util/numeric.h"
 #include "porting.h"
 #include "porting_android.h"
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include "threading/sdl_thread.h"
+#else
 #include "threading/thread.h"
+#endif
 #include "config.h"
 #include "filesys.h"
 #include "log.h"

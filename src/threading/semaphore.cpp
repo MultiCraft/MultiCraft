@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "threading/semaphore.h"
 
+#ifndef _IRR_COMPILE_WITH_SDL_DEVICE_
+
 #include <iostream>
 #include <cstdlib>
 #include <cassert>
@@ -55,9 +57,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 Semaphore::Semaphore(int val)
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	semaphore = SDL_CreateSemaphore(val);
-#elif defined(_WIN32)
+#ifdef _WIN32
 	semaphore = CreateSemaphore(NULL, val, MAX_SEMAPHORE_COUNT, NULL);
 #else
 	int ret = sem_init(&semaphore, 0, val);
@@ -69,9 +69,7 @@ Semaphore::Semaphore(int val)
 
 Semaphore::~Semaphore()
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	SDL_DestroySemaphore(semaphore);
-#elif defined(_WIN32)
+#ifdef _WIN32
 	CloseHandle(semaphore);
 #else
 	int ret = sem_destroy(&semaphore);
@@ -93,11 +91,7 @@ void Semaphore::post(unsigned int num)
 	ReleaseSemaphore(semaphore, num, NULL);
 #else
 	for (unsigned i = 0; i < num; i++) {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-		int ret = SDL_SemPost(semaphore);
-#else
 		int ret = sem_post(&semaphore);
-#endif
 		assert(!ret);
 		UNUSED(ret);
 	}
@@ -110,11 +104,7 @@ void Semaphore::wait()
 #ifdef _WIN32
 	WaitForSingleObject(semaphore, INFINITE);
 #else
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	int ret = SDL_SemWait(semaphore);
-#else
 	int ret = sem_wait(&semaphore);
-#endif
 	assert(!ret);
 	UNUSED(ret);
 #endif
@@ -123,16 +113,7 @@ void Semaphore::wait()
 
 bool Semaphore::wait(unsigned int time_ms)
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	int ret;
-	if (time_ms > 0) {
-		ret = SDL_SemWaitTimeout(semaphore, time_ms);
-	} else {
-		ret = SDL_SemTryWait(semaphore);
-	}
-	assert(!ret || ret == SDL_MUTEX_TIMEDOUT);
-	return !ret;
-#elif defined(_WIN32)
+#ifdef _WIN32
 	unsigned int ret = WaitForSingleObject(semaphore, time_ms);
 
 	if (ret == WAIT_OBJECT_0) {
@@ -186,3 +167,4 @@ bool Semaphore::wait(unsigned int time_ms)
 #endif
 }
 
+#endif

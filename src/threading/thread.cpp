@@ -23,10 +23,13 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
+
 #include "threading/thread.h"
 #include "threading/mutex_auto_lock.h"
 #include "log.h"
 #include "porting.h"
+
+#ifndef _IRR_COMPILE_WITH_SDL_DEVICE_
 
 // for setName
 #if defined(__linux__)
@@ -73,10 +76,6 @@ Thread::Thread(const std::string &name) :
 
 Thread::~Thread()
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	m_running = false;
-	wait();
-#else
 	// kill the thread if running
 	if (!m_running) {
 		wait();
@@ -99,7 +98,6 @@ Thread::~Thread()
 		wait();
 #endif
 	}
-#endif
 
 	// Make sure start finished mutex is unlocked before it's destroyed
 	if (m_start_finished_mutex.try_lock())
@@ -120,18 +118,11 @@ bool Thread::start()
 	// The mutex may already be locked if the thread is being restarted
 	m_start_finished_mutex.try_lock();
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	m_thread_obj = SDL_CreateThread(&threadProc, m_name.c_str(), this);
-	
-	if (!m_thread_obj)
- 		return false;
-#else
 	try {
 		m_thread_obj = new std::thread(threadProc, this);
 	} catch (const std::system_error &e) {
 		return false;
 	}
-#endif
 
 	// Allow spawned thread to continue
 	m_start_finished_mutex.unlock();
@@ -159,13 +150,10 @@ bool Thread::wait()
 	if (!m_joinable)
 		return false;
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	SDL_WaitThread(m_thread_obj, NULL);
-#else
-	m_thread_obj->join();
-	delete m_thread_obj;
-#endif
 
+	m_thread_obj->join();
+
+	delete m_thread_obj;
 	m_thread_obj = nullptr;
 
 	assert(m_running == false);
@@ -185,16 +173,8 @@ bool Thread::getReturnValue(void **ret)
 }
 
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-int Thread::threadProc(void *data)
-#else
 void Thread::threadProc(Thread *thr)
-#endif
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	Thread* thr = (Thread*)data;
-#endif
-
 #ifdef _AIX
 	thr->m_kernel_thread_id = thread_self();
 #endif
@@ -216,20 +196,12 @@ void Thread::threadProc(Thread *thr)
 	// released. We try to unlock it from caller thread and it's refused by system.
 	thr->m_start_finished_mutex.unlock();
 	g_logger.deregisterThread();
-	
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	return 0;
-#endif
 }
 
 
 void Thread::setName(const std::string &name)
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-
-	// Name can be set only during thread creation.
-
-#elif defined(__linux__)
+#if defined(__linux__)
 
 	// It would be cleaner to do this with pthread_setname_np,
 	// which was added to glibc in version 2.12, but some major
@@ -282,22 +254,13 @@ void Thread::setName(const std::string &name)
 
 unsigned int Thread::getNumberOfProcessors()
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	return SDL_GetCPUCount();
-#else
 	return std::thread::hardware_concurrency();
-#endif
 }
 
 
 bool Thread::bindToProcessor(unsigned int proc_number)
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-
-	// Not available in SDL
-	return false;
-
-#elif defined(__ANDROID__)
+#if defined(__ANDROID__)
 
 	return false;
 
@@ -357,15 +320,6 @@ bool Thread::bindToProcessor(unsigned int proc_number)
 #endif
 }
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-
-bool Thread::setPriority(SDL_ThreadPriority prio)
-{
-	int result = SDL_SetThreadPriority(prio);
-	return result == 0;
-}
-
-#else
 
 bool Thread::setPriority(int prio)
 {
