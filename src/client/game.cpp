@@ -1888,7 +1888,7 @@ void Game::processUserInput(f32 dtime)
 	}
 #endif
 
-	if (!guienv->hasFocus(gui_chat_console) && gui_chat_console->isOpen()) {
+	if (!gui_chat_console->hasFocus() && gui_chat_console->isOpen()) {
 		gui_chat_console->closeConsoleAtOnce();
 	}
 

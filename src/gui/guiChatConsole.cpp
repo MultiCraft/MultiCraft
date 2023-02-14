@@ -101,6 +101,9 @@ GUIChatConsole::GUIChatConsole(
 
 GUIChatConsole::~GUIChatConsole()
 {
+	removeChild(m_vscrollbar);
+	delete m_vscrollbar;
+	
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
 		SDL_StopTextInput();
@@ -239,6 +242,21 @@ void GUIChatConsole::reformatConsole()
 		cols = rows = 0;
 	recalculateConsolePosition();
 	m_chat_backend->reformat(cols, rows);
+
+	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
+	if (buf.getBottomScrollPos() > 0)
+	{
+		buf.scrollAbsolute(buf.getBottomScrollPos());
+		m_vscrollbar->setMax(buf.getBottomScrollPos());
+		m_vscrollbar->setPos(buf.getBottomScrollPos());
+		m_vscrollbar->setPageSize(buf.getRows());
+	}
+	else
+	{
+		m_vscrollbar->setMax(0);
+		m_vscrollbar->setPos(0);
+		m_vscrollbar->setPageSize(0);
+	}
 }
 
 void GUIChatConsole::recalculateConsolePosition()
@@ -902,6 +920,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		{
 			s32 rows = myround(-3.0 * event.MouseInput.Wheel);
 			m_chat_backend->scroll(rows);
+			m_vscrollbar->setPos(m_vscrollbar->getPos() + rows);
 		}
 		else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
 		{
@@ -996,6 +1015,13 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		return true;
 	}
 #endif
+	else if (event.EventType == EET_GUI_EVENT)
+	{
+		if (event.GUIEvent.EventType == EGET_SCROLL_BAR_CHANGED)
+		{
+			updateVScrollBar();
+		}
+	}
 
 	return Parent ? Parent->OnEvent(event) : false;
 }
@@ -1023,9 +1049,47 @@ void GUIChatConsole::createVScrollBar()
 
 	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width, 0, m_screensize.X, m_height);
 	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
-			scrollbarrect, false, true);
+			scrollbarrect, false, false);
 
 	m_vscrollbar->setVisible(false);
 	m_vscrollbar->setSmallStep(1);
 	m_vscrollbar->setLargeStep(1);
+	
+	addChild(m_vscrollbar);
+}
+
+void GUIChatConsole::updateVScrollBar()
+{
+	if (!m_vscrollbar) 
+		return;
+	
+	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
+	
+	if (buf.getScrollPos() < 0)
+		return;
+
+	if (m_vscrollbar->getPos() != buf.getScrollPos()) 
+	{
+		s32 deltaScrollY = m_vscrollbar->getPos() - buf.getScrollPos();
+		m_chat_backend->scroll(deltaScrollY);
+	}
+}
+
+bool GUIChatConsole::hasFocus()
+{
+	if (Environment->hasFocus(this))
+		return true;
+	
+	if (Environment->hasFocus(m_vscrollbar))
+		return true;
+	
+	const core::list<gui::IGUIElement*> &children = m_vscrollbar->getChildren();
+
+	for (gui::IGUIElement *it : children) 
+	{
+		if (Environment->hasFocus(it)) 
+			return true;
+	}
+
+	return false;
 }

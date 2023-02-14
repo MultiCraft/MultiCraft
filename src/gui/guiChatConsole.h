@@ -147,6 +147,8 @@ public:
 	virtual bool OnEvent(const SEvent& event);
 
 	virtual void setVisible(bool visible);
+	
+	bool hasFocus();
 
 private:
 	void reformatConsole();
@@ -161,6 +163,7 @@ private:
 	ChatSelection getCursorPos(s32 x, s32 y);
 	irr::core::stringc getSelectedText();
 	void createVScrollBar();
+	void updateVScrollBar();
 
 private:
 	ChatBackend* m_chat_backend;

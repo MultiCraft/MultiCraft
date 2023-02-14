@@ -130,7 +130,7 @@ public:
 			std::vector<ChatFormattedLine>& destination) const;
 
 	void resize(u32 scrollback);
-protected:
+
 	s32 getTopScrollPos() const;
 	s32 getBottomScrollPos() const;
 
