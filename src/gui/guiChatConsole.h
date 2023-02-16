@@ -149,6 +149,13 @@ public:
 	virtual void setVisible(bool visible);
 	
 	bool hasFocus();
+	
+	bool convertToMouseEvent(
+		SEvent &mouse_event, SEvent touch_event) const noexcept;
+		
+	bool preprocessEvent(SEvent event);
+
+	static GUIChatConsole* getChatConsole() { return m_chat_console; }
 
 private:
 	void reformatConsole();
@@ -166,6 +173,8 @@ private:
 	void updateVScrollBar();
 
 private:
+	static GUIChatConsole* m_chat_console;
+
 	ChatBackend* m_chat_backend;
 	Client* m_client;
 	IMenuManager* m_menumgr;

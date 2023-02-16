@@ -45,6 +45,7 @@ inline u32 clamp_u8(s32 value)
 	return (u32) MYMIN(MYMAX(value, 0), 255);
 }
 
+GUIChatConsole* GUIChatConsole::m_chat_console = nullptr;
 
 GUIChatConsole::GUIChatConsole(
 		gui::IGUIEnvironment* env,
@@ -61,6 +62,8 @@ GUIChatConsole::GUIChatConsole(
 	m_menumgr(menumgr),
 	m_animate_time_old(porting::getTimeMs())
 {
+	m_chat_console = this;
+
 	// load background settings
 	s32 console_alpha = g_settings->getS32("console_alpha");
 	m_background_color.setAlpha(clamp_u8(console_alpha));
@@ -101,6 +104,8 @@ GUIChatConsole::GUIChatConsole(
 
 GUIChatConsole::~GUIChatConsole()
 {
+	m_chat_console = nullptr;
+
 	removeChild(m_vscrollbar);
 	delete m_vscrollbar;
 	
@@ -1091,5 +1096,69 @@ bool GUIChatConsole::hasFocus()
 			return true;
 	}
 
+	return false;
+}
+
+bool GUIChatConsole::convertToMouseEvent(
+		SEvent &mouse_event, SEvent touch_event) const noexcept
+{
+	mouse_event = {};
+	mouse_event.EventType = EET_MOUSE_INPUT_EVENT;
+	mouse_event.MouseInput.X = touch_event.TouchInput.X;
+	mouse_event.MouseInput.Y = touch_event.TouchInput.Y;
+	switch (touch_event.TouchInput.Event) {
+	case ETIE_PRESSED_DOWN:
+		mouse_event.MouseInput.Event = EMIE_LMOUSE_PRESSED_DOWN;
+		mouse_event.MouseInput.ButtonStates = EMBSM_LEFT;
+		break;
+	case ETIE_MOVED:
+		mouse_event.MouseInput.Event = EMIE_MOUSE_MOVED;
+		mouse_event.MouseInput.ButtonStates = EMBSM_LEFT;
+		break;
+	case ETIE_LEFT_UP:
+		mouse_event.MouseInput.Event = EMIE_LMOUSE_LEFT_UP;
+		mouse_event.MouseInput.ButtonStates = 0;
+		break;
+	default:
+		return false;
+	}
+
+	return true;
+}
+
+bool GUIChatConsole::preprocessEvent(SEvent event)
+{
+	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) 
+	{
+		const core::position2di p(event.TouchInput.X, event.TouchInput.Y);
+		
+		u32 row = m_chat_backend->getConsoleBuffer().getRows();
+		s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
+		
+		if (m_vscrollbar->isPointInside(p) || !isPointInside(p))
+		{
+			SEvent mouse_event = {};
+			bool success = convertToMouseEvent(mouse_event, event);
+			
+			if (success)
+			{
+				Environment->postEventFromUser(mouse_event);
+			}
+		}
+		else if (!porting::hasRealKeyboard() && 
+				event.TouchInput.Y >= prompt_y && 
+				event.TouchInput.Y <= prompt_y + m_fontsize.Y)
+		{
+			ChatPrompt& prompt = m_chat_backend->getPrompt();
+			porting::showInputDialog("chat", wide_to_utf8(prompt.getLine()), 2);
+		}
+		else
+		{
+			OnEvent(event);
+		}
+		
+		return true;
+	}
+	
 	return false;
 }
