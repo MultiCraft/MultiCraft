@@ -155,6 +155,9 @@ public:
 		
 	bool preprocessEvent(SEvent event);
 
+	bool getAndroidChatOpen() { return m_android_chat_open; }
+	void setAndroidChatOpen(bool value) { m_android_chat_open = value; }
+
 	static GUIChatConsole* getChatConsole() { return m_chat_console; }
 
 private:
@@ -225,4 +228,7 @@ private:
 	
 	u32 m_scrollbar_width = 0;
 	GUIScrollBar *m_vscrollbar = nullptr;
+	s32 m_bottom_scroll_pos = 0;
+	
+	bool m_android_chat_open = false;
 };

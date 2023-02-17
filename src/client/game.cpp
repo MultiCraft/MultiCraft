@@ -957,10 +957,6 @@ private:
 #ifdef HAVE_TOUCHSCREENGUI
 	bool m_cache_touchtarget;
 #endif
-
-#if defined(__ANDROID__) || defined(__IOS__)
-	bool m_android_chat_open = false;
-#endif
 };
 
 Game::Game() :
@@ -1927,7 +1923,7 @@ void Game::processKeyInput()
 		openInventory();
 	} else if (input->cancelPressed()) {
 #if defined(__ANDROID__) || defined(__IOS__)
-		m_android_chat_open = false;
+		gui_chat_console->setAndroidChatOpen(false);
 #endif
 		if (!gui_chat_console->isOpenInhibited()) {
 			showPauseMenu();
@@ -2140,12 +2136,6 @@ void Game::openConsole(float scale, const wchar_t *line)
 {
 	assert(scale > 0.0f && scale <= 1.0f);
 
-#if defined(__ANDROID__) || defined(__IOS__)
-	//~ if (!porting::hasRealKeyboard()) {
-		//~ porting::showInputDialog("", "", 2);
-		//~ m_android_chat_open = true;
-	//~ } else {
-#endif
 	if (gui_chat_console->isOpenInhibited())
 		return;
 	gui_chat_console->openConsole(scale);
@@ -2153,18 +2143,16 @@ void Game::openConsole(float scale, const wchar_t *line)
 		gui_chat_console->setCloseOnEnter(true);
 		gui_chat_console->replaceAndAddToHistory(line);
 	}
-#if defined(__ANDROID__) || defined(__IOS__)
-	//~ }
-#endif
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
 void Game::handleAndroidChatInput()
 {
-	if (m_android_chat_open && porting::getInputDialogState() == 0) {
+	if (gui_chat_console->getAndroidChatOpen() && 
+			porting::getInputDialogState() == 0) {
 		std::string text = porting::getInputDialogValue();
 		client->typeChatMessage(utf8_to_wide(text));
-		m_android_chat_open = false;
+		gui_chat_console->setAndroidChatOpen(false);
 	}
 }
 #endif

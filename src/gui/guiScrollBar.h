@@ -40,6 +40,7 @@ public:
 	s32 getLargeStep() const { return large_step; }
 	s32 getSmallStep() const { return small_step; }
 	s32 getPos() const;
+	s32 getPageSize() const { return page_size; }
 
 	void setMax(const s32 &max);
 	void setMin(const s32 &min);

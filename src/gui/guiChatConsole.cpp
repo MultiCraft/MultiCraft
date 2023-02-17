@@ -207,6 +207,8 @@ void GUIChatConsole::draw()
 {
 	if(!IsVisible)
 		return;
+		
+	updateVScrollBar();
 
 	video::IVideoDriver* driver = Environment->getVideoDriver();
 
@@ -241,27 +243,14 @@ void GUIChatConsole::draw()
 
 void GUIChatConsole::reformatConsole()
 {
-	s32 cols = m_screensize.X / m_fontsize.X - 2; // make room for a margin (looks better)
+	s32 cols = (m_screensize.X - m_scrollbar_width) / m_fontsize.X - 2; // make room for a margin (looks better)
 	s32 rows = m_desired_height / m_fontsize.Y - 1; // make room for the input prompt
 	if (cols <= 0 || rows <= 0)
 		cols = rows = 0;
 	recalculateConsolePosition();
 	m_chat_backend->reformat(cols, rows);
-
-	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
-	if (buf.getBottomScrollPos() > 0)
-	{
-		buf.scrollAbsolute(buf.getBottomScrollPos());
-		m_vscrollbar->setMax(buf.getBottomScrollPos());
-		m_vscrollbar->setPos(buf.getBottomScrollPos());
-		m_vscrollbar->setPageSize(buf.getRows());
-	}
-	else
-	{
-		m_vscrollbar->setMax(0);
-		m_vscrollbar->setPos(0);
-		m_vscrollbar->setPageSize(0);
-	}
+	
+	updateVScrollBar();
 }
 
 void GUIChatConsole::recalculateConsolePosition()
@@ -965,6 +954,16 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			m_mouse_marking = false;
 			m_long_press = false;
 			m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+			
+			ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+			ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+			
+			if (m_cursor_press_pos < real_mark_begin || m_cursor_press_pos > real_mark_end) 
+			{
+				m_mark_begin = m_cursor_press_pos;
+				m_mark_end = m_cursor_press_pos;
+				m_mouse_marking = true;
+			}
 		}
 		else if (event.TouchInput.Event == irr::ETIE_LEFT_UP)
 		{
@@ -1051,12 +1050,14 @@ void GUIChatConsole::createVScrollBar()
 
 	m_scrollbar_width = skin ? skin->getSize(gui::EGDS_SCROLLBAR_SIZE) : 16;
 
-
 	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width, 0, m_screensize.X, m_height);
 	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
 			scrollbarrect, false, false);
 
 	m_vscrollbar->setVisible(false);
+	m_vscrollbar->setMax(0);
+	m_vscrollbar->setPos(0);
+	m_vscrollbar->setPageSize(0);
 	m_vscrollbar->setSmallStep(1);
 	m_vscrollbar->setLargeStep(1);
 	
@@ -1069,14 +1070,43 @@ void GUIChatConsole::updateVScrollBar()
 		return;
 	
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
-	
-	if (buf.getScrollPos() < 0)
-		return;
 
+	if (m_bottom_scroll_pos != buf.getBottomScrollPos())
+	{
+		m_bottom_scroll_pos = buf.getBottomScrollPos();
+
+		if (buf.getBottomScrollPos() > 0)
+		{
+			buf.scrollAbsolute(m_bottom_scroll_pos);
+			m_vscrollbar->setMax(m_bottom_scroll_pos);
+			m_vscrollbar->setPos(m_bottom_scroll_pos);
+		}
+		else
+		{
+			m_vscrollbar->setMax(0);
+			m_vscrollbar->setPos(0);
+		}
+	}
+	
+	if (m_vscrollbar->getPageSize() != buf.getRows())
+	{
+		if (buf.getRows() > 0)
+		{
+			m_vscrollbar->setPageSize(buf.getRows());
+		}
+		else
+		{
+			m_vscrollbar->setPageSize(0);
+		}
+	}
+	
 	if (m_vscrollbar->getPos() != buf.getScrollPos()) 
 	{
-		s32 deltaScrollY = m_vscrollbar->getPos() - buf.getScrollPos();
-		m_chat_backend->scroll(deltaScrollY);
+		if (buf.getScrollPos() >= 0)
+		{
+			s32 deltaScrollY = m_vscrollbar->getPos() - buf.getScrollPos();
+			m_chat_backend->scroll(deltaScrollY);
+		}
 	}
 }
 
@@ -1128,6 +1158,8 @@ bool GUIChatConsole::convertToMouseEvent(
 
 bool GUIChatConsole::preprocessEvent(SEvent event)
 {
+	updateVScrollBar();
+
 	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) 
 	{
 		const core::position2di p(event.TouchInput.X, event.TouchInput.Y);
@@ -1145,13 +1177,19 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 				Environment->postEventFromUser(mouse_event);
 			}
 		}
+#if defined(__ANDROID__) || defined(__IOS__)
 		else if (!porting::hasRealKeyboard() && 
 				event.TouchInput.Y >= prompt_y && 
-				event.TouchInput.Y <= prompt_y + m_fontsize.Y)
+				event.TouchInput.Y <= m_height)
 		{
-			ChatPrompt& prompt = m_chat_backend->getPrompt();
-			porting::showInputDialog("chat", wide_to_utf8(prompt.getLine()), 2);
+			if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
+			{
+				ChatPrompt& prompt = m_chat_backend->getPrompt();
+				porting::showInputDialog("chat", wide_to_utf8(prompt.getLine()), 2);
+				m_android_chat_open = true;
+			}
 		}
+#endif
 		else
 		{
 			OnEvent(event);
