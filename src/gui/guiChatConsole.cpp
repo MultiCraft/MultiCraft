@@ -366,18 +366,20 @@ void GUIChatConsole::drawText()
 			(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll &&
 			(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll)
 		{
-			ChatFormattedFragment fragment_first = line.fragments[real_mark_begin.fragment];
+			ChatFormattedFragment fragment_first = line.fragments[0];
 
-			if ((s32)row + scroll_pos != real_mark_begin.row + real_mark_begin.scroll)
+			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll &&
+				real_mark_begin.fragment < line.fragments.size())
 			{
-				fragment_first = line.fragments[0];
+				fragment_first = line.fragments[real_mark_begin.fragment];
 			}
 
-			ChatFormattedFragment fragment_last = line.fragments[real_mark_end.fragment];
+			ChatFormattedFragment fragment_last = line.fragments[line.fragments.size() - 1];
 
-			if ((s32)row + scroll_pos != real_mark_end.row + real_mark_end.scroll)
+			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
+				real_mark_end.fragment < line.fragments.size())
 			{
-				fragment_last = line.fragments[line.fragments.size() - 1];
+				fragment_last = line.fragments[real_mark_end.fragment];
 			}
 
 			s32 x_begin = (fragment_first.column + 1) * m_fontsize.X;
@@ -672,7 +674,6 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 
 bool GUIChatConsole::OnEvent(const SEvent& event)
 {
-
 	ChatPrompt &prompt = m_chat_backend->getPrompt();
 
 	if(event.EventType == EET_KEY_INPUT_EVENT && event.KeyInput.PressedDown)
@@ -1088,7 +1089,7 @@ void GUIChatConsole::updateVScrollBar()
 		}
 	}
 	
-	if (m_vscrollbar->getPageSize() != buf.getRows())
+	if (m_vscrollbar->getPageSize() != (s32)buf.getRows())
 	{
 		if (buf.getRows() > 0)
 		{
