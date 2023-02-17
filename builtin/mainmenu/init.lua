@@ -48,7 +48,6 @@ dofile(menupath .. DIR_DELIM .. "dlg_create_world_default.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_content.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")
-dofile(menupath .. DIR_DELIM .. "dlg_outdated_server.lua")
 
 if not mobile then
 	dofile(menupath .. DIR_DELIM .. "dlg_settings_advanced.lua")
@@ -70,7 +69,7 @@ tabs.local_default_game = dofile(menupath .. DIR_DELIM .. "tab_local_default.lua
 tabs.local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua")
 tabs.play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua")
 
-local func = loadfile(menupath .. DIR_DELIM .. "hosting" .. DIR_DELIM .. "init.lua")
+local func = loadfile(basepath .. DIR_DELIM .. "hosting" .. DIR_DELIM .. "init.lua")
 
 --------------------------------------------------------------------------------
 local function main_event_handler(tabview, event)

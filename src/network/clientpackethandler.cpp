@@ -397,35 +397,6 @@ void Client::handleCommand_TimeOfDay(NetworkPacket* pkt)
 	//		<< " dr=" << dr << std::endl;
 }
 
-void Client::handleCommand_ChatMessageOld(NetworkPacket* pkt)
-{
-	/*
-		u16 command
-		u16 length
-		wstring message
-	*/
-	u16 len, read_wchar;
-
-	*pkt >> len;
-
-	std::wstring message;
-	for (u32 i = 0; i < len; i++) {
-		*pkt >> read_wchar;
-		message += (wchar_t)read_wchar;
-	}
-
-	ChatMessage *chatMessage = new ChatMessage(message);
-
-	// @TODO send this to CSM using ChatMessage object
-	if (modsLoaded() && m_script->on_receiving_message(
-			wide_to_utf8(chatMessage->message))) {
-		// Message was consumed by CSM and should not be handled by client
-		delete chatMessage;
-	} else {
-		pushToChatQueue(chatMessage);
-	}
-}
-
 void Client::handleCommand_ChatMessage(NetworkPacket *pkt)
 {
 	/*
@@ -589,13 +560,7 @@ void Client::handleCommand_HP(NetworkPacket *pkt)
 	u16 oldhp = player->hp;
 
 	u16 hp;
-	if (m_proto_ver >= 37) {
-		*pkt >> hp;
-	} else {
-		u8 raw_hp;
-		*pkt >> raw_hp;
-		hp = raw_hp;
-	}
+	*pkt >> hp;
 
 	player->hp = hp;
 
@@ -951,27 +916,6 @@ void Client::handleCommand_InventoryFormSpec(NetworkPacket* pkt)
 
 void Client::handleCommand_DetachedInventory(NetworkPacket* pkt)
 {
-	// TODO: Unify this legacy code with the new code.
-	if (m_proto_ver < 37) {
-		std::string datastring(pkt->getString(0), pkt->getSize());
-		std::istringstream is(datastring, std::ios_base::binary);
-
-		std::string name = deSerializeString16(is);
-
-		infostream << "Client: Detached inventory update: \"" << name
-				<< "\"" << std::endl;
-
-		Inventory *inv = nullptr;
-		if (m_detached_inventories.count(name) > 0)
-			inv = m_detached_inventories[name];
-		else {
-			inv = new Inventory(m_itemdef);
-			m_detached_inventories[name] = inv;
-		}
-		inv->deSerialize(is);
-		return;
-	}
-
 	std::string name;
 	bool keep_inv = true;
 	*pkt >> name >> keep_inv;
@@ -1044,17 +988,17 @@ void Client::handleCommand_AddParticleSpawner(NetworkPacket* pkt)
 	u16 attached_id = 0;
 
 	p.amount             = readU16(is);
-	p.time               = readF(is, m_proto_ver);
-	p.minpos             = readV3F(is, m_proto_ver);
-	p.maxpos             = readV3F(is, m_proto_ver);
-	p.minvel             = readV3F(is, m_proto_ver);
-	p.maxvel             = readV3F(is, m_proto_ver);
-	p.minacc             = readV3F(is, m_proto_ver);
-	p.maxacc             = readV3F(is, m_proto_ver);
-	p.minexptime         = readF(is, m_proto_ver);
-	p.maxexptime         = readF(is, m_proto_ver);
-	p.minsize            = readF(is, m_proto_ver);
-	p.maxsize            = readF(is, m_proto_ver);
+	p.time               = readF32(is);
+	p.minpos             = readV3F32(is);
+	p.maxpos             = readV3F32(is);
+	p.minvel             = readV3F32(is);
+	p.maxvel             = readV3F32(is);
+	p.minacc             = readV3F32(is);
+	p.maxacc             = readV3F32(is);
+	p.minexptime         = readF32(is);
+	p.maxexptime         = readF32(is);
+	p.minsize            = readF32(is);
+	p.maxsize            = readF32(is);
 	p.collisiondetection = readU8(is);
 	p.texture            = deSerializeString32(is);
 
@@ -1065,7 +1009,7 @@ void Client::handleCommand_AddParticleSpawner(NetworkPacket* pkt)
 
 	attached_id = readU16(is);
 
-	p.animation.deSerializeWithProtoVer(is, m_proto_ver);
+	p.animation.deSerialize(is, m_proto_ver);
 	p.glow = readU8(is);
 	p.object_collision = readU8(is);
 

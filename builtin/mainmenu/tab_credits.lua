@@ -23,13 +23,14 @@ local multicraft_developers = {
 	"Alexander Zavrin (Ransom.00) <alexanderzavrin@gmail.com>",
 	"Luke (luk3yx) <luk3yx@proton.me>",
 	"Nathan Salapat (NathanS21) <nathan@nathansalapat.com>",
-	"Vitaliy Lobachevskiy (numberZero) <numzer0@yandex.ru>",
 	"Abdullaah Iqbal (An0n3m0us) <an0n3m0us@hotmail.com>",
 	"ElCeejo",
+	"Dawid Gan (deveee) <deveee@gmail.com>",
+	"Vitaliy Lobachevskiy (numberZero) <numzer0@yandex.ru>",
 	"Jean-Patrick Guerrero (kilbith) <jeanpatrick.guerrero@gmail.com>",
 	"sfan5 <sfan5@live.de>",
 	"Stuart Jones (stujones11) <stujones111@gmail.com>",
-	"And other people who helped make the world better!"
+	"And other people who have helped make the world better!"
 }
 
 local core_developers = {
@@ -121,7 +122,7 @@ return {
 		local fs = "image[-0.25,-0.3;2,2;" .. logofile .. "]" ..
 			"label[1.3,-0.25;" ..
 			"MultiCraft Open Source, ver. " .. version.string .. "\n" ..
-			"Copyright (C) 2014-2022 MultiCraft Development Team\n" ..
+			"Copyright (C) 2014–" .. os.date("%Y") .. " MultiCraft Development Team\n" ..
 			"License: GNU LGPLv3.0+ and CC BY-SA 4.0\n" ..
 			"Created and Powered by Minetest Engine, ver. 5.4.1]" ..
 
@@ -157,14 +158,14 @@ return {
 	end,
 	cbf_button_handler = function(this, fields, name, tabdata)
 		if fields.homepage then
-			core.open_url("http://multicraft.world")
+			core.open_url("https://multicraft.world")
 		end
 		if fields.privacy then
-			core.open_url("http://multicraft.world/privacy")
+			core.open_url("https://multicraft.world/privacy")
 		end
 
-		if fields.userdata then
+	--[[if fields.userdata then
 			core.open_dir(core.get_user_path())
-		end
+		end]]
 	end,
 }
