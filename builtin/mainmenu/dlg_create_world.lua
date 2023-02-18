@@ -16,6 +16,7 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 local worldname = ""
+local dropdown_open = false
 
 local function table_to_flags(ftable)
 	-- Convert e.g. { jungles = true, caves = false } to "jungles,nocaves"
@@ -182,25 +183,23 @@ local function create_world_formspec(dialogdata)
 		end
 	end
 
-	local mglist = ""
-	local selindex
-	local i = 1
-	local first_mg
-	for k,v in pairs(mapgens) do
+	local first_mg, selindex
+	local mapgen_names = {}
+	dialogdata.mapgens = mapgens
+	for i, v in ipairs(mapgens) do
 		if not first_mg then
 			first_mg = v
 		end
 		if current_mg == v then
 			selindex = i
 		end
-		i = i + 1
-		mglist = mglist .. v .. ","
+
+		mapgen_names[i] = v:sub(1, 1):upper() .. v:sub(2)
 	end
 	if not selindex then
 		selindex = 1
 		current_mg = first_mg
 	end
-	mglist = mglist:sub(1, -2)
 
 	local mg_main_flags = function(mapgen, y)
 		if mapgen == "singlenode" or mapgen == "superflat" then
@@ -354,11 +353,8 @@ local function create_world_formspec(dialogdata)
 		"field[0.42,1.9;7.18,0.8;te_seed;" ..
 		fgettext("Seed") ..
 		":;".. current_seed .. "]" ..
+
 		"real_coordinates[false]" ..
-
-		"label[0,2.1;" .. fgettext("Mapgen") .. ":]"..
-		"dropdown[0,2.5;6.27;dd_mapgen;" .. mglist .. ";" .. selindex .. "]" ..
-
 		"label[0,3.45;" .. fgettext("Game") .. ":]"..
 		"textlist[0,3.85;5.8,"..gamelist_height..";games;" ..
 		pkgmgr.gamelist() .. ";" .. _gameidx .. ";false]" ..
@@ -377,7 +373,12 @@ local function create_world_formspec(dialogdata)
 		btn_style("world_create_confirm", "green") ..
 		"button[3.25,6.5;3,0.5;world_create_confirm;" .. fgettext("Create") .. "]" ..
 		btn_style("world_create_cancel") ..
-		"button[6.25,6.5;3,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]"
+		"button[6.25,6.5;3,0.5;world_create_cancel;" .. fgettext("Cancel") .. "]" ..
+
+		-- Mapgen (must be last)
+		"real_coordinates[true]" ..
+		"label[0.43,3;" .. fgettext("Mapgen") .. ":]"..
+		get_dropdown(0.37, 3.2, 7.28, "change_mapgen", mapgen_names, selindex, dropdown_open)
 
 	return retval
 
@@ -505,6 +506,22 @@ local function create_world_buttonhandler(this, fields)
 		return true
 	end
 
+	if fields.change_mapgen then
+		dropdown_open = true
+		return true
+	end
+
+	for field in pairs(fields) do
+		if field:sub(1, 9) == "dropdown_" and this.data.mapgens then
+			dropdown_open = false
+			local new_mapgen = this.data.mapgens[tonumber(field:sub(10))]
+			if new_mapgen then
+				core.settings:set("mg_name", new_mapgen)
+			end
+			return true
+		end
+	end
+
 	if fields["mgv6_biomes"] then
 		local entry = core.formspec_escape(fields["mgv6_biomes"])
 		for b=1, #mgv6_biomes do
@@ -517,11 +534,6 @@ local function create_world_buttonhandler(this, fields)
 				return true
 			end
 		end
-	end
-
-	if fields["dd_mapgen"] then
-		core.settings:set("mg_name", fields["dd_mapgen"])
-		return true
 	end
 
 	return false

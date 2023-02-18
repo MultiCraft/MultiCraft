@@ -16,7 +16,6 @@
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 local esc = core.formspec_escape
-local fmt = string.format
 
 if not core.get_http_api then
 	function create_store_dlg()
@@ -62,8 +61,6 @@ local filter_types_type = {
 	"mod",
 	"txp",
 }
-
-local guitexturedir = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 
 
 local function download_package(param)
@@ -694,35 +691,6 @@ function store.filter_packages(query)
 	end
 end
 
-local function get_dropdown(x, y, w)
-	local fs = {}
-	fs[#fs + 1] = fmt("style[change_type;bgimg=%s%s;bgimg_middle=32;padding=-24;border=false]",
-		guitexturedir, dropdown_open and "dropdown_open.png" or "dropdown.png")
-	fs[#fs + 1] = fmt("button[%s,%s;%s,0.8;change_type;%s]", x, y, w, filter_types_titles[filter_type])
-	fs[#fs + 1] = fmt("image[%s,%s;0.3375,0.225;%sdropdown_arrow.png]",
-		x + w - 0.2 - 0.3375, y + 0.325, guitexturedir)
-
-	if dropdown_open then
-		-- Make clicking outside of the dropdown close the menu
-		fs[#fs + 1] = "image_button[-50,-50;100,100;;dropdown_close;;true;false]"
-
-		-- Add a button for each dropdown entry
-		for i, entry in ipairs(filter_types_titles) do
-			local btn_name = "dropdown_" .. i
-			local suffix = i == #filter_types_titles and "_end" or ""
-			fs[#fs + 1] = fmt("style[%s;bgimg=%sdropdown_bg%s.png;bgimg_middle=32;padding=-24;border=false]",
-				btn_name, guitexturedir, suffix)
-			fs[#fs + 1] = fmt("style[%s:hovered,%s:pressed;bgimg=%sdropdown_bg%s_hover.png]",
-				btn_name, btn_name, guitexturedir, suffix)
-
-			-- 0.79 is used to prevent any 1px gaps between entries
-			fs[#fs + 1] = fmt("button[%s,%s;%s,0.8;%s;%s]", x, y + i * 0.79, w, btn_name, entry)
-		end
-	end
-
-	return table.concat(fs)
-end
-
 function store.get_formspec(dlgdata)
 	store.update_paths()
 
@@ -907,7 +875,8 @@ function store.get_formspec(dlgdata)
 
 	-- Add the dropdown last so that it is over top of everything else
 	if #store.packages_full > 0 then
-		formspec[#formspec + 1] = get_dropdown(8.22, 0.375, 4)
+		formspec[#formspec + 1] = get_dropdown(8.22, 0.375, 4, "change_type",
+			filter_types_titles, filter_type, dropdown_open)
 	end
 
 	return table.concat(formspec, "")
@@ -951,15 +920,6 @@ function store.handle_submit(this, fields)
 			cur_page = cur_page - 1
 		end
 		return true
-	end
-
-	if fields.type then
-		local new_type = table.indexof(filter_types_titles, fields.type)
-		if new_type ~= filter_type then
-			filter_type = new_type
-			store.filter_packages(search_string)
-			return true
-		end
 	end
 
 	if fields.change_type then
