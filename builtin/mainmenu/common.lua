@@ -168,7 +168,7 @@ function menu_render_worldlist()
 			-- There's a built-in menu_worldmt function that can read from
 			-- world.mt but it would read from the file once for each setting
 			-- read
-			local world_conf = Settings(world.path .. "/world.mt")
+			local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
 			world.creative_mode = world_conf:get_bool("creative_mode", creative)
 			world.enable_damage = world_conf:get_bool("enable_damage", damage)
 		end

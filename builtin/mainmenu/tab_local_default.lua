@@ -188,7 +188,7 @@ local function main_button_handler(this, fields, name)
 			world.enable_damage = creative_mode
 
 			-- Update the settings in world.mt
-			local world_conf = Settings(world.path .. "/world.mt")
+			local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
 			world_conf:set_bool("creative_mode", not creative_mode)
 			world_conf:set_bool("enable_damage", creative_mode)
 			world_conf:write()
@@ -319,6 +319,21 @@ local function on_change(type, _, _, this)
 			else
 				mm_texture.update("singleplayer",game)
 				menudata.worldlist:set_filtercriteria("default")
+
+				-- Update creative_mode and enable_damage settings
+				local index = filterlist.get_current_index(menudata.worldlist,
+						tonumber(core.settings:get("mainmenu_last_selected_world")))
+				local world = menudata.worldlist:get_list()[index] or menudata.worldlist:get_list()[1]
+				if world then
+					if world.creative_mode == nil or world.enable_damage == nil then
+						local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
+						world.creative_mode = world_conf:get_bool("creative_mode")
+						world.enable_damage = world_conf:get_bool("enable_damage")
+					end
+
+					core.settings:set_bool("creative_mode", world.creative_mode)
+					core.settings:set_bool("enable_damage", world.enable_damage)
+				end
 			end
 		end
 	end
