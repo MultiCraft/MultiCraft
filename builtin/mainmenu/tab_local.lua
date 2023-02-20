@@ -154,6 +154,7 @@ local function get_formspec(_, _, tab_data)
 
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
+			"tablecolumns[" .. image_column(fgettext("Creative mode")) .. ";text]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
 	if tab_data.hidden then
@@ -199,6 +200,13 @@ local function main_button_handler(this, fields, name, tab_data)
 		end
 
 		if event.type == "CHG" and selected ~= nil then
+			local world = menudata.worldlist:get_list()[selected]
+			if world and world.creative_mode ~= nil and
+					world.enable_damage ~= nil then
+				core.settings:set_bool("creative_mode", world.creative_mode)
+				core.settings:set_bool("enable_damage", world.enable_damage)
+			end
+
 			core.settings:set("mainmenu_last_selected_world",
 				menudata.worldlist:get_raw_index(selected))
 			return true
@@ -210,9 +218,23 @@ local function main_button_handler(this, fields, name, tab_data)
 	end
 
 	if fields["cb_creative_mode"] then
-		local creative_mode = core.settings:get_bool("creative_mode")
-		core.settings:set("creative_mode", tostring(not creative_mode))
-		core.settings:set("enable_damage", tostring(creative_mode))
+		local creative_mode = core.settings:get_bool("creative_mode", false)
+		core.settings:set_bool("creative_mode", not creative_mode)
+		core.settings:set_bool("enable_damage", creative_mode)
+
+		local selected = core.get_table_index("sp_worlds")
+		local world = menudata.worldlist:get_list()[selected]
+		if world then
+			-- Update the cached values
+			world.creative_mode = not creative_mode
+			world.enable_damage = creative_mode
+
+			-- Update the settings in world.mt
+			local world_conf = Settings(world.path .. "/world.mt")
+			world_conf:set_bool("creative_mode", not creative_mode)
+			world_conf:set_bool("enable_damage", creative_mode)
+			world_conf:write()
+		end
 
 		return true
 	end

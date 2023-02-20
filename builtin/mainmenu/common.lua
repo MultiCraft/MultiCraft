@@ -158,15 +158,26 @@ end
 
 --------------------------------------------------------------------------------
 function menu_render_worldlist()
-	local retval = ""
-	local current_worldlist = menudata.worldlist:get_list()
+	local retval = {}
 
-	for _, v in ipairs(current_worldlist) do
-		if retval ~= "" then retval = retval .. "," end
-		retval = retval .. core.formspec_escape(v.name)
+	local creative = core.settings:get_bool("creative_mode", false)
+	local damage = core.settings:get_bool("enable_damage", true)
+
+	for _, world in ipairs(menudata.worldlist:get_list()) do
+		if world.creative_mode == nil or world.enable_damage == nil then
+			-- There's a built-in menu_worldmt function that can read from
+			-- world.mt but it would read from the file once for each setting
+			-- read
+			local world_conf = Settings(world.path .. "/world.mt")
+			world.creative_mode = world_conf:get_bool("creative_mode", creative)
+			world.enable_damage = world_conf:get_bool("enable_damage", damage)
+		end
+
+		retval[#retval + 1] = world.creative_mode and "5" or "4"
+		retval[#retval + 1] = core.formspec_escape(world.name)
 	end
 
-	return retval
+	return table.concat(retval, ",")
 end
 
 --------------------------------------------------------------------------------

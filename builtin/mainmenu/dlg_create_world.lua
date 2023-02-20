@@ -424,17 +424,16 @@ local function create_world_buttonhandler(this, fields)
 			local message
 			if not menudata.worldlist:uid_exists_raw(worldname) then
 				local old_mg_flags
-				if fields["dd_mapgen"] == "superflat" then
+				local mg_name = core.settings:get("mg_name")
+				if mg_name == "superflat" then
 					core.settings:set("mg_name", "flat")
 					old_mg_flags = core.settings:get("mg_flags")
 					core.settings:set("mg_flags", "nocaves,nodungeons,nodecorations")
-				else
-					core.settings:set("mg_name", fields["dd_mapgen"])
 				end
 				message = core.create_world(worldname,gameindex)
 
 				-- Restore the old mg_flags setting if creating a superflat world
-				if fields["dd_mapgen"] == "superflat" then
+				if mg_name == "superflat" then
 					core.settings:set("mg_name", "superflat")
 					if old_mg_flags then
 						core.settings:set("mg_flags", old_mg_flags)
