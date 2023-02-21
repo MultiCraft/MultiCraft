@@ -112,7 +112,7 @@ public:
 	void scrollBottom();
 	// Scroll to top of buffer (oldest)
 	void scrollTop();
-	
+
 	s32 getScrollPos() { return m_scroll; }
 	u32 getColsCount() { return m_cols; }
 

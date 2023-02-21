@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct ChatSelection
 {
-	ChatSelection() : initialized(false), scroll(0), row(0), row_buf(0), 
+	ChatSelection() : initialized(false), scroll(0), row(0), row_buf(0),
 			line(0), fragment(0), character(0), x_max(false) {};
 
 	void reset()
@@ -147,12 +147,12 @@ public:
 	virtual bool OnEvent(const SEvent& event);
 
 	virtual void setVisible(bool visible);
-	
+
 	bool hasFocus();
-	
+
 	bool convertToMouseEvent(
 		SEvent &mouse_event, SEvent touch_event) const noexcept;
-		
+
 	bool preprocessEvent(SEvent event);
 
 	bool getAndroidChatOpen() { return m_android_chat_open; }
@@ -225,10 +225,10 @@ private:
 	bool m_mouse_marking = false;
 	bool m_long_press = false;
 	ChatSelection m_cursor_press_pos;
-	
+
 	u32 m_scrollbar_width = 0;
 	GUIScrollBar *m_vscrollbar = nullptr;
 	s32 m_bottom_scroll_pos = 0;
-	
+
 	bool m_android_chat_open = false;
 };

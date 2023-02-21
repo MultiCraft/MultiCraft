@@ -95,7 +95,7 @@ GUIChatConsole::GUIChatConsole(
 	}
 	m_fontsize.X = MYMAX(m_fontsize.X, 1);
 	m_fontsize.Y = MYMAX(m_fontsize.Y, 1);
-	
+
 	createVScrollBar();
 
 	// set default cursor options
@@ -108,7 +108,7 @@ GUIChatConsole::~GUIChatConsole()
 
 	removeChild(m_vscrollbar);
 	delete m_vscrollbar;
-	
+
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
 		SDL_StopTextInput();
@@ -207,7 +207,7 @@ void GUIChatConsole::draw()
 {
 	if(!IsVisible)
 		return;
-		
+
 	updateVScrollBar();
 
 	video::IVideoDriver* driver = Environment->getVideoDriver();
@@ -249,7 +249,7 @@ void GUIChatConsole::reformatConsole()
 		cols = rows = 0;
 	recalculateConsolePosition();
 	m_chat_backend->reformat(cols, rows);
-	
+
 	updateVScrollBar();
 }
 
@@ -911,7 +911,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				prompt.input(text[i]);
 
 		}
-		
+
 		return true;
 	}
 #endif
@@ -961,11 +961,11 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			m_mouse_marking = false;
 			m_long_press = false;
 			m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-			
+
 			ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 			ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
-			
-			if (m_cursor_press_pos < real_mark_begin || m_cursor_press_pos > real_mark_end) 
+
+			if (m_cursor_press_pos < real_mark_begin || m_cursor_press_pos > real_mark_end)
 			{
 				m_mark_begin = m_cursor_press_pos;
 				m_mark_end = m_cursor_press_pos;
@@ -975,13 +975,13 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		else if (event.TouchInput.Event == irr::ETIE_LEFT_UP)
 		{
 			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-			
+
 			if (!m_long_press && m_cursor_press_pos == cursor_pos)
 			{
 				m_mark_begin.reset();
 				m_mark_end.reset();
 			}
-			
+
 			m_cursor_press_pos.reset();
 			m_mouse_marking = false;
 			m_long_press = false;
@@ -989,7 +989,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		else if (event.TouchInput.Event == irr::ETIE_MOVED)
 		{
 			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-			
+
 			if (!m_mouse_marking && !m_long_press && m_cursor_press_pos.initialized &&
 				m_cursor_press_pos != cursor_pos)
 			{
@@ -997,15 +997,15 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				m_mark_end = m_cursor_press_pos;
 				m_mouse_marking = true;
 			}
-			
+
 			if (m_mouse_marking)
 			{
 				m_mark_end = cursor_pos;
 			}
 		}
-		else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) 
+		else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG)
 		{
-			if (!m_mouse_marking) 
+			if (!m_mouse_marking)
 			{
 				m_long_press = true;
 				if (m_mark_begin != m_mark_end)
@@ -1067,15 +1067,15 @@ void GUIChatConsole::createVScrollBar()
 	m_vscrollbar->setPageSize(0);
 	m_vscrollbar->setSmallStep(1);
 	m_vscrollbar->setLargeStep(1);
-	
+
 	addChild(m_vscrollbar);
 }
 
 void GUIChatConsole::updateVScrollBar()
 {
-	if (!m_vscrollbar) 
+	if (!m_vscrollbar)
 		return;
-	
+
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 
 	if (m_bottom_scroll_pos != buf.getBottomScrollPos())
@@ -1094,7 +1094,7 @@ void GUIChatConsole::updateVScrollBar()
 			m_vscrollbar->setPos(0);
 		}
 	}
-	
+
 	if (m_vscrollbar->getPageSize() != (s32)buf.getRows())
 	{
 		if (buf.getRows() > 0)
@@ -1106,8 +1106,8 @@ void GUIChatConsole::updateVScrollBar()
 			m_vscrollbar->setPageSize(0);
 		}
 	}
-	
-	if (m_vscrollbar->getPos() != buf.getScrollPos()) 
+
+	if (m_vscrollbar->getPos() != buf.getScrollPos())
 	{
 		if (buf.getScrollPos() >= 0)
 		{
@@ -1121,15 +1121,15 @@ bool GUIChatConsole::hasFocus()
 {
 	if (Environment->hasFocus(this))
 		return true;
-	
+
 	if (Environment->hasFocus(m_vscrollbar))
 		return true;
-	
+
 	const core::list<gui::IGUIElement*> &children = m_vscrollbar->getChildren();
 
-	for (gui::IGUIElement *it : children) 
+	for (gui::IGUIElement *it : children)
 	{
-		if (Environment->hasFocus(it)) 
+		if (Environment->hasFocus(it))
 			return true;
 	}
 
@@ -1173,26 +1173,26 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 	updateVScrollBar();
 
 #ifdef HAVE_TOUCHSCREENGUI
-	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) 
+	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT)
 	{
 		const core::position2di p(event.TouchInput.X, event.TouchInput.Y);
-		
+
 		u32 row = m_chat_backend->getConsoleBuffer().getRows();
 		s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
-		
+
 		if (m_vscrollbar->isPointInside(p) || !isPointInside(p))
 		{
 			SEvent mouse_event = {};
 			bool success = convertToMouseEvent(mouse_event, event);
-			
+
 			if (success)
 			{
 				Environment->postEventFromUser(mouse_event);
 			}
 		}
 #if defined(__ANDROID__) || defined(__IOS__)
-		else if (!porting::hasRealKeyboard() && 
-				event.TouchInput.Y >= prompt_y && 
+		else if (!porting::hasRealKeyboard() &&
+				event.TouchInput.Y >= prompt_y &&
 				event.TouchInput.Y <= m_height)
 		{
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
@@ -1207,10 +1207,10 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 		{
 			OnEvent(event);
 		}
-		
+
 		return true;
 	}
 #endif
-	
+
 	return false;
 }

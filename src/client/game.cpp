@@ -2145,7 +2145,7 @@ void Game::openConsole(float scale, const wchar_t *line)
 #if defined(__ANDROID__) || defined(__IOS__)
 void Game::handleAndroidChatInput()
 {
-	if (gui_chat_console->getAndroidChatOpen() && 
+	if (gui_chat_console->getAndroidChatOpen() &&
 			porting::getInputDialogState() == 0) {
 		std::string text = porting::getInputDialogValue();
 		client->typeChatMessage(utf8_to_wide(text));
