@@ -31,6 +31,17 @@ if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 	set(BUILD_SERVER TRUE)
 endif()
 
+option(USE_SDL "Use SDL2 for window management" FALSE)
+
+if(USE_SDL)
+	find_package(SDL2)
+	if (SDL2_FOUND)
+		message(STATUS "SDL2 found.")
+		include_directories(${SDL2_INCLUDEDIR})
+	else()
+		message(FATAL_ERROR "SDL2 not found.")
+	endif()
+endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
 set(USE_CURL FALSE)
@@ -555,6 +566,7 @@ if(BUILD_CLIENT)
 		${JSON_LIBRARY}
 		${PLATFORM_LIBS}
 		${CLIENT_PLATFORM_LIBS}
+		${SDL2_LIBRARIES}
 		luautf8
 		luachacha
 	)
