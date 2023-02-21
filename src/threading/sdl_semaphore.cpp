@@ -1,6 +1,5 @@
 /*
 MultiCraft
-
 Copyright (C) 2013 sapier <sapier AT gmx DOT net>
 Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
 

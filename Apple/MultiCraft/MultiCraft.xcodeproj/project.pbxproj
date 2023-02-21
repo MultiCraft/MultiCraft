@@ -140,8 +140,6 @@
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
 		849D0848278AC1B200471354 /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0846278AC1B200471354 /* chacha.c */; };
-		84A1F9B2252E616B00000717 /* semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9AC252E616B00000717 /* semaphore.cpp */; };
-		84A1F9B3252E616B00000717 /* thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9AF252E616B00000717 /* thread.cpp */; };
 		84A1F9BB252E617D00000717 /* scripting_mainmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */; };
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
@@ -584,13 +582,9 @@
 		849D0844278AC1B200471354 /* ecrypt-machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-machine.h"; path = "../../../lib/luachacha/ecrypt-machine.h"; sourceTree = "<group>"; };
 		849D0845278AC1B200471354 /* lchacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lchacha.c; path = ../../../lib/luachacha/lchacha.c; sourceTree = "<group>"; };
 		849D0846278AC1B200471354 /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/luachacha/chacha.c; sourceTree = "<group>"; };
-		84A1F9A6252E616A00000717 /* thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = thread.h; path = ../../../src/threading/thread.h; sourceTree = "<group>"; };
 		84A1F9A7252E616A00000717 /* mutex_auto_lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mutex_auto_lock.h; path = ../../../src/threading/mutex_auto_lock.h; sourceTree = "<group>"; };
 		84A1F9A8252E616A00000717 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = event.cpp; path = ../../../src/threading/event.cpp; sourceTree = "<group>"; };
-		84A1F9AC252E616B00000717 /* semaphore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = semaphore.cpp; path = ../../../src/threading/semaphore.cpp; sourceTree = "<group>"; };
-		84A1F9AD252E616B00000717 /* semaphore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = semaphore.h; path = ../../../src/threading/semaphore.h; sourceTree = "<group>"; };
 		84A1F9AE252E616B00000717 /* event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event.h; path = ../../../src/threading/event.h; sourceTree = "<group>"; };
-		84A1F9AF252E616B00000717 /* thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = thread.cpp; path = ../../../src/threading/thread.cpp; sourceTree = "<group>"; };
 		84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_mainmenu.cpp; path = ../../../src/script/scripting_mainmenu.cpp; sourceTree = "<group>"; };
 		84A1F9B6252E617D00000717 /* scripting_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_client.h; path = ../../../src/script/scripting_client.h; sourceTree = "<group>"; };
 		84A1F9B7252E617D00000717 /* scripting_mainmenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_mainmenu.h; path = ../../../src/script/scripting_mainmenu.h; sourceTree = "<group>"; };
@@ -1547,17 +1541,13 @@
 		84A1F9A5252E615B00000717 /* threading */ = {
 			isa = PBXGroup;
 			children = (
+				84A1F9A8252E616A00000717 /* event.cpp */,
+				84A1F9AE252E616B00000717 /* event.h */,
+				84A1F9A7252E616A00000717 /* mutex_auto_lock.h */,
 				848920FA29984994001CB194 /* sdl_semaphore.cpp */,
 				848920F929984994001CB194 /* sdl_semaphore.h */,
 				848920FB29984994001CB194 /* sdl_thread.cpp */,
 				848920FC29984994001CB194 /* sdl_thread.h */,
-				84A1F9A8252E616A00000717 /* event.cpp */,
-				84A1F9AE252E616B00000717 /* event.h */,
-				84A1F9A7252E616A00000717 /* mutex_auto_lock.h */,
-				84A1F9AC252E616B00000717 /* semaphore.cpp */,
-				84A1F9AD252E616B00000717 /* semaphore.h */,
-				84A1F9AF252E616B00000717 /* thread.cpp */,
-				84A1F9A6252E616A00000717 /* thread.h */,
 			);
 			name = threading;
 			sourceTree = "<group>";
@@ -1829,7 +1819,6 @@
 				84135C2125D526D700CA4DCF /* sound.cpp in Sources */,
 				84135B8B25D5264C00CA4DCF /* noise.cpp in Sources */,
 				84F20E2A25D5282A009562A9 /* l_minimap.cpp in Sources */,
-				84A1F9B2252E616B00000717 /* semaphore.cpp in Sources */,
 				84F20F1825D52958009562A9 /* guiScrollContainer.cpp in Sources */,
 				84135B6425D5264B00CA4DCF /* map_settings_manager.cpp in Sources */,
 				84F20F4425D52975009562A9 /* dungeongen.cpp in Sources */,
@@ -1991,7 +1980,6 @@
 				84135B7F25D5264C00CA4DCF /* version.cpp in Sources */,
 				84F20F0C25D52958009562A9 /* guiAnimatedImage.cpp in Sources */,
 				84135C1A25D526D700CA4DCF /* clientmap.cpp in Sources */,
-				84A1F9B3252E616B00000717 /* thread.cpp in Sources */,
 				84F20F0125D52958009562A9 /* guiInventoryList.cpp in Sources */,
 				84F20EA525D528C5009562A9 /* factory.cpp in Sources */,
 				84F20E2425D5282A009562A9 /* l_env.cpp in Sources */,

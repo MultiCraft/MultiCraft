@@ -1,6 +1,5 @@
 /*
 MultiCraft
-
 Copyright (C) 2000-2006  Jori Liesenborgs <jori.liesenborgs@gmail.com>
 Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
 
