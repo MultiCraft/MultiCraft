@@ -697,11 +697,17 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_PRIOR)
 		{
+			ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
+			s32 rows = -(s32)buf.getRows();
+			m_vscrollbar->setPos(m_vscrollbar->getPos() + rows);
 			m_chat_backend->scrollPageUp();
 			return true;
 		}
 		else if(event.KeyInput.Key == KEY_NEXT)
 		{
+			ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
+			s32 rows = buf.getRows();
+			m_vscrollbar->setPos(m_vscrollbar->getPos() + rows);
 			m_chat_backend->scrollPageDown();
 			return true;
 		}
@@ -947,7 +953,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 
 		return true;
 	}
-#if defined(__ANDROID__) || defined(__IOS__)
+#ifdef HAVE_TOUCHSCREENGUI
 	else if (event.EventType == EET_TOUCH_INPUT_EVENT)
 	{
 		if (event.TouchInput.Event == irr::ETIE_PRESSED_DOWN)
@@ -1133,6 +1139,7 @@ bool GUIChatConsole::hasFocus()
 bool GUIChatConsole::convertToMouseEvent(
 		SEvent &mouse_event, SEvent touch_event) const noexcept
 {
+#ifdef HAVE_TOUCHSCREENGUI
 	mouse_event = {};
 	mouse_event.EventType = EET_MOUSE_INPUT_EVENT;
 	mouse_event.MouseInput.X = touch_event.TouchInput.X;
@@ -1155,12 +1162,17 @@ bool GUIChatConsole::convertToMouseEvent(
 	}
 
 	return true;
+#else
+
+	return false;
+#endif
 }
 
 bool GUIChatConsole::preprocessEvent(SEvent event)
 {
 	updateVScrollBar();
 
+#ifdef HAVE_TOUCHSCREENGUI
 	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) 
 	{
 		const core::position2di p(event.TouchInput.X, event.TouchInput.Y);
@@ -1198,6 +1210,7 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 		
 		return true;
 	}
+#endif
 	
 	return false;
 }
