@@ -122,6 +122,9 @@ function sscsm.register(def)
 		error('Invalid "code" parameter passed to sscsm.register_csm.', 2)
 	end
 
+	if block_colon then
+		def.code = "local minetest=core;" .. def.code
+	end
 	def.code = sscsm.minify_code(def.code)
 	if (#def.name + #def.code) > 65300 then
 		error("The code (or name) passed to sscsm.register_csm is too large."
