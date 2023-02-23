@@ -23,7 +23,6 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 */
 
-
 #include "threading/thread.h"
 #include "threading/mutex_auto_lock.h"
 #include "log.h"
