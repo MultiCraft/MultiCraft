@@ -223,6 +223,7 @@ void set_default_settings()
 	settings->setDefault("menu_clouds", "true");
 	settings->setDefault("opaque_water", "false");
 	settings->setDefault("console_height", "0.6");
+	settings->setDefault("console_message_height", "0.2");
 	settings->setDefault("console_color", "(0,0,0)");
 	settings->setDefault("console_alpha", "200");
 	settings->setDefault("formspec_fullscreen_bg_color", "(0,0,0)");
