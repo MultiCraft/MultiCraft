@@ -1115,6 +1115,18 @@ void GUIChatConsole::updateVScrollBar()
 			m_chat_backend->scroll(deltaScrollY);
 		}
 	}
+
+	if (IsVisible)
+	{
+		if (m_vscrollbar->isVisible() && m_vscrollbar->getMax() == 0)
+		{
+			m_vscrollbar->setVisible(false);
+		}
+		else if (!m_vscrollbar->isVisible() && m_vscrollbar->getMax() > 0)
+		{
+			m_vscrollbar->setVisible(true);
+		}
+	}
 }
 
 bool GUIChatConsole::hasFocus()
