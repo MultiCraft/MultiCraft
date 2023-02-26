@@ -19,12 +19,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include "IrrCompileConfig.h"
+
 #include <vector>
 #include <deque>
 #include <map>
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include "threading/sdl_semaphore.h"
+#include "threading/sdl_thread.h"
+#else
 #include "threading/semaphore.h"
 #include "threading/thread.h"
+#endif
 #include "lua.h"
 #include "cpp_api/s_base.h"
 
