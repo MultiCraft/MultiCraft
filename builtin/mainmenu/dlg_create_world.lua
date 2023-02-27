@@ -27,13 +27,7 @@ local function table_to_flags(ftable)
 	return table.concat(str, ",")
 end
 
--- Same as check_flag but returns a string
-local function strflag(flags, flag)
-	return (flags[flag] == true) and "true" or "false"
-end
-
 local function checkbox(y, name, label, checked)
-	-- return ("checkbox[0,%.2f;%s;%s;%s]"):format(y, name, label, checked)
 	return ([[
 		image[0,%.3f;0.4,0.4;%sgui%scheckbox%s.png]
 		label[0.6,%.3f;%s]
