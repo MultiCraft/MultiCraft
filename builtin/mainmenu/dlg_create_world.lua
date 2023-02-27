@@ -32,6 +32,19 @@ local function strflag(flags, flag)
 	return (flags[flag] == true) and "true" or "false"
 end
 
+local function checkbox(y, name, label, checked)
+	-- return ("checkbox[0,%.2f;%s;%s;%s]"):format(y, name, label, checked)
+	return ([[
+		image[0,%.3f;0.4,0.4;%sgui%scheckbox%s.png]
+		label[0.6,%.3f;%s]
+		image_button[0,%.2f;7,0.5;;%s;;false;false]
+	]]):format(
+		y - 0.2, defaulttexturedir_esc, DIR_DELIM_esc, checked and "_checked" or "",
+		y, label,
+		y - 0.25, name
+	)
+end
+
 local cb_caverns = { "caverns", fgettext("Caverns"), "caverns",
 	fgettext("Very large caverns deep in the underground") }
 local tt_sea_rivers = fgettext("Sea level rivers")
@@ -209,13 +222,11 @@ local function create_world_formspec(dialogdata)
 			return "", y
 		end
 
-		local form = "checkbox[0," .. y .. ";flag_mg_caves;" ..
-			fgettext("Caves") .. ";"..strflag(flags.main, "caves").."]"
-		y = y + 0.5
+		local form = checkbox(y, "flag_mg_caves", fgettext("Caves"), flags.main.caves)
+		y = y + 0.575
 
-		form = form .. "checkbox[0,"..y..";flag_mg_dungeons;" ..
-			fgettext("Dungeons") .. ";"..strflag(flags.main, "dungeons").."]"
-		y = y + 0.5
+		form = form .. checkbox(y, "flag_mg_dungeons", fgettext("Dungeons"), flags.main.dungeons)
+		y = y + 0.575
 
 		local d_name = fgettext("Decorations")
 		local d_tt
@@ -224,13 +235,11 @@ local function create_world_formspec(dialogdata)
 		else
 			d_tt = fgettext("Structures appearing on the terrain, typically trees and plants")
 		end
-		form = form .. "checkbox[0,"..y..";flag_mg_decorations;" ..
-			d_name .. ";" ..
-			strflag(flags.main, "decorations").."]" ..
+		form = form .. checkbox(y, "flag_mg_decorations", d_name, flags.main.decorations) ..
 			"tooltip[flag_mg_decorations;" ..
 			d_tt ..
 			"]"
-		y = y + 0.5
+		y = y + 0.575
 
 		form = form .. "tooltip[flag_mg_caves;" ..
 		fgettext("Network of tunnels and caves")
@@ -248,13 +257,12 @@ local function create_world_formspec(dialogdata)
 		local form = ""
 		for _,tab in pairs(flag_checkboxes[mapgen]) do
 			local id = "flag_mg"..mapgen.."_"..tab[1]
-			form = form .. ("checkbox[0,%f;%s;%s;%s]"):
-				format(y, id, tab[2], strflag(flags[mapgen], tab[3]))
+			form = form .. checkbox(y, id, tab[2], flags[mapgen][tab[3]])
 
 			if tab[4] then
 				form = form .. "tooltip["..id..";"..tab[4].."]"
 			end
-			y = y + 0.5
+			y = y + 0.575
 		end
 
 		if mapgen ~= "v6" then
@@ -272,10 +280,10 @@ local function create_world_formspec(dialogdata)
 		else
 			biometype = 3
 		end
-		y = y + 0.3
+		y = y + 0.345
 
-		form = form .. "label[0,"..(y+0.1)..";" .. fgettext("Biomes") .. ":]"
-		y = y + 0.6
+		form = form .. "label[0,"..(y+0.11)..";" .. fgettext("Biomes") .. ":]"
+		y = y + 0.69
 
 		form = form .. "dropdown[0,"..y..";6.3;mgv6_biomes;"
 		for b=1, #mgv6_biomes do
@@ -287,9 +295,9 @@ local function create_world_formspec(dialogdata)
 		form = form .. ";" .. biometype.. "]"
 
 		-- biomeblend
-		y = y + 0.55
-		form = form .. "checkbox[0,"..y..";flag_mgv6_biomeblend;" ..
-			fgettext("Biome blending") .. ";"..strflag(flags.v6, "biomeblend").."]" ..
+		y = y + 0.6325
+		form = form .. checkbox(y, "flag_mgv6_biomeblend",
+			fgettext("Biome blending"), flags.v6.biomeblend) ..
 			"tooltip[flag_mgv6_biomeblend;" ..
 			fgettext("Smooth transition between biomes") .. "]"
 
@@ -298,19 +306,17 @@ local function create_world_formspec(dialogdata)
 
 	current_seed = core.formspec_escape(current_seed)
 
-	local y_start = 0.0
+	local y_start = 0.575
 	local y = y_start
 	local str_flags, str_spflags
 	local label_flags, label_spflags = "", ""
-	y = y + 0.3
+	y = y + 0.5
 	str_flags, y = mg_main_flags(current_mg, y)
 	if str_flags ~= "" then
 		label_flags = "label[0,"..y_start..";" .. fgettext("Mapgen flags") .. ":]"
-		y_start = y + 0.4
-	else
-		y_start = 0.0
+		y_start = y + 0.5
 	end
-	y = y_start + 0.3
+	y = y_start + 0.5
 	str_spflags = mg_specific_flags(current_mg, y)
 	if str_spflags ~= "" then
 		label_spflags = "label[0,"..y_start..";" .. fgettext("Mapgen-specific flags") .. ":]"
@@ -364,10 +370,12 @@ local function create_world_formspec(dialogdata)
 		"container_end[]" ..
 
 		-- Right side
-		"container[6.2,0]"..
+		"real_coordinates[true]" ..
+		"container[8.25,0]" ..
 		label_flags .. str_flags ..
 		label_spflags .. str_spflags ..
-		"container_end[]"..
+		"container_end[]" ..
+		"real_coordinates[false]" ..
 
 		-- Menu buttons
 		btn_style("world_create_confirm", "green") ..
@@ -385,7 +393,6 @@ local function create_world_formspec(dialogdata)
 end
 
 local function create_world_buttonhandler(this, fields)
-
 	if fields["world_create_confirm"] or
 		fields["key_enter"] then
 
@@ -477,7 +484,7 @@ local function create_world_buttonhandler(this, fields)
 		return true
 	end
 
-	for k,v in pairs(fields) do
+	for k in pairs(fields) do
 		local split = string.split(k, "_", nil, 3)
 		if split and split[1] == "flag" then
 			local setting
@@ -489,11 +496,12 @@ local function create_world_buttonhandler(this, fields)
 			-- We replaced the underscore of flag names with a dash.
 			local flag = string.gsub(split[3], "-", "_")
 			local ftable = core.settings:get_flags(setting)
-			if v == "true" then
-				ftable[flag] = true
-			else
-				ftable[flag] = false
-			end
+			-- if v == "true" then
+			-- 	ftable[flag] = true
+			-- else
+			-- 	ftable[flag] = false
+			-- end
+			ftable[flag] = not ftable[flag]
 			local flags = table_to_flags(ftable)
 			core.settings:set(setting, flags)
 			return true
