@@ -322,13 +322,13 @@ local function create_world_formspec(dialogdata)
 
 	-- Warning if only devtest is installed
 	local devtest_only = ""
-	local gamelist_height = 2.3
+	local gamelist_height = 2.97
 	if #pkgmgr.games == 1 and pkgmgr.games[1].id == "devtest" then
-		devtest_only = "box[0,0;5.8,1.7;#ff8800]" ..
-				"textarea[0.3,0;6,1.8;;;"..
+		devtest_only = "box[0,0;7.25,1.6;#ff8800]" ..
+				"textarea[0,0;7.25,1.6;;;"..
 				fgettext("Warning: The Development Test is meant for developers.") .. "\n" ..
 				fgettext("Download a game, such as Minetest Game, from minetest.net") .. "]"
-		gamelist_height = 0.5
+		gamelist_height = 1.12
 	end
 
 	local _gameidx = gameidx
@@ -342,8 +342,6 @@ local function create_world_formspec(dialogdata)
 		"background9[0,0;0,0;" .. defaulttexturedir_esc .. "bg_common.png;true;40]" ..
 
 		-- Left side
-		"container[0,0]"..
-
 		"real_coordinates[true]" ..
 		"formspec_version[3]" ..
 		"image[0.37,0.6;7.28,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
@@ -358,17 +356,15 @@ local function create_world_formspec(dialogdata)
 		fgettext("Seed") ..
 		":;".. current_seed .. "]" ..
 
-		"real_coordinates[false]" ..
-		"label[0,3.45;" .. fgettext("Game") .. ":]"..
-		"textlist[0,3.85;5.8,"..gamelist_height..";games;" ..
-		pkgmgr.gamelist() .. ";" .. _gameidx .. ";false]" ..
-		"container[0,4.5]" ..
+		"label[0.43,4.3;" .. fgettext("Game") .. ":]" ..
+		"background9[0.37,4.5;7.28," .. gamelist_height .. ";" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
+		"textlist[0.47,4.6;7.08,".. gamelist_height - 0.2 .. ";games;" ..
+			pkgmgr.gamelist() .. ";" .. _gameidx .. ";true]" ..
+		"container[0.37,5.8]" ..
 		devtest_only ..
-		"container_end[]" ..
 		"container_end[]" ..
 
 		-- Right side
-		"real_coordinates[true]" ..
 		"container[8.25,0]" ..
 		label_flags .. str_flags ..
 		label_spflags .. str_spflags ..
