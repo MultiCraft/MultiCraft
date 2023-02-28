@@ -144,24 +144,19 @@ local function get_formspec(data)
 		DIR_DELIM_esc .. "btn_download.png]"
 
 	if mod.name ~= "" and not mod.is_game_content then
+		local is_enabled, msg
 		if mod.is_modpack then
-
-			if pkgmgr.is_modpack_entirely_enabled(data, mod.name) then
-				retval = retval ..
-					btn_style("btn_mp_disable", "yellow") ..
-					"button[5.5,0.025;3,0.5;btn_mp_disable;" ..
-					fgettext("Disable modpack") .. "]"
-			else
-				retval = retval ..
-					btn_style("btn_mp_enable", "green") ..
-					"button[5.5,0.025;3,0.5;btn_mp_enable;" ..
-					fgettext("Enable modpack") .. "]"
-			end
+			is_enabled = pkgmgr.is_modpack_entirely_enabled(data, mod.name)
+			msg = is_enabled and fgettext("Disable modpack") or fgettext("Enable modpack")
 		else
-			retval = retval ..
-				"checkbox[5.5,-0.125;cb_mod_enable;" .. fgettext("Enabled") ..
-				";" .. tostring(mod.enabled) .. "]"
+			is_enabled = mod.enabled
+			msg = is_enabled and fgettext("Disable mod") or fgettext("Enable mod")
 		end
+
+		local btn_name = is_enabled and "btn_mod_disable" or "btn_mod_enable"
+		retval = retval ..
+			btn_style(btn_name, is_enabled and "yellow" or "green") ..
+			"button[5.5,0.025;3,0.5;" .. btn_name .. ";" .. msg .. "]"
 	end
 	if enabled_all then
 		retval = retval ..
@@ -198,14 +193,9 @@ local function handle_buttons(this, fields)
 		return true
 	end
 
-	if fields.cb_mod_enable ~= nil then
-		pkgmgr.enable_mod(this, core.is_yes(fields.cb_mod_enable))
-		return true
-	end
-
-	if fields.btn_mp_enable ~= nil or
-			fields.btn_mp_disable then
-		pkgmgr.enable_mod(this, fields.btn_mp_enable ~= nil)
+	if fields.btn_mod_enable ~= nil or
+			fields.btn_mod_disable then
+		pkgmgr.enable_mod(this, fields.btn_mod_enable ~= nil)
 		return true
 	end
 
