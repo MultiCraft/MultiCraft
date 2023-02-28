@@ -201,7 +201,11 @@ local function create_world_formspec(dialogdata)
 			selindex = i
 		end
 
-		mapgen_names[i] = v:sub(1, 1):upper() .. v:sub(2)
+		if v == "v7p" then
+			mapgen_names[i] = "Default"
+		else
+			mapgen_names[i] = v:sub(1, 1):upper() .. v:sub(2)
+		end
 	end
 	if not selindex then
 		selindex = 1
