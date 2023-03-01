@@ -15,9 +15,6 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-local lang = core.settings:get("language")
-if not lang or lang == "" then lang = os.getenv("LANG") end
-
 local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
 local default_worlds = {
@@ -79,15 +76,9 @@ local function get_formspec(this)
 		end
 	end
 
-	local creative_checkbox = core.settings:get_bool("creative_mode") and
-			"creative_checkbox.png" or "blank.png"
-
-	local creative_bg = "creative_bg.png"
-	if lang and lang == "ru" then
-		creative_bg = "creative_bg_" .. lang .. ".png"
-	end
-
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
+	local c_label = utf8.gsub(fgettext("Creative mode"), "(%w)(%w+)",
+		function(a, b) return utf8.upper(a) .. b end)
 	local retval =
 			"style[world_delete,world_create;font_size=*" ..
 				(small_screen and 1.2 or 1.5) .. "]" ..
@@ -106,10 +97,12 @@ local function get_formspec(this)
 			"image[7,1.63;1,1;" .. defaulttexturedir_esc .. "btn_play_icon.png]" ..
 			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
-			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_bg .. ";;;true;false]" ..
-			"style[cb_creative_mode;content_offset=0]" ..
-			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_checkbox ..
-				";cb_creative_mode;;true;false]" ..
+			"style[cb_creative_mode;content_offset=0;font_size=*" .. (small_screen and 1.2 or 1.5) ..
+				";textcolor=#53659C]" ..
+			"image_button[6.86,3.09;4.65,0.83;" .. defaulttexturedir_esc .. "creative_bg.png;cb_creative_mode;;true;false]" ..
+			"image[6.96,3.19;0.55,0.55;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc ..
+				(core.settings:get_bool("creative_mode") and "checkbox_checked" or "checkbox") .. ".png]" ..
+			"image_button[7.31,3.09;4.2,0.83;;cb_creative_mode;" .. c_label .. ";true;false]" ..
 
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
