@@ -2133,6 +2133,18 @@ void Game::openConsole(float scale, const wchar_t *line)
 {
 	assert(scale > 0.0f && scale <= 1.0f);
 
+#if defined(__ANDROID__) || defined(__IOS__)
+	if (!porting::hasRealKeyboard()) {
+		porting::showInputDialog("", "", 2);
+		gui_chat_console->setAndroidChatOpen(true);
+	}
+#endif
+#if defined(__ANDROID__)
+	return;
+#elif defined(__IOS__)
+	if (!g_settings->getBool("device_is_tablet"))
+		return;
+#endif
 	if (gui_chat_console->isOpenInhibited())
 		return;
 	gui_chat_console->openConsole(scale);
@@ -2150,6 +2162,9 @@ void Game::handleAndroidChatInput()
 		std::string text = porting::getInputDialogValue();
 		client->typeChatMessage(utf8_to_wide(text));
 		gui_chat_console->setAndroidChatOpen(false);
+		if (!text.empty() && gui_chat_console->isOpen()) {
+			gui_chat_console->closeConsoleAtOnce();
+		}
 	}
 }
 #endif

@@ -1210,7 +1210,7 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
 			{
 				ChatPrompt& prompt = m_chat_backend->getPrompt();
-				porting::showInputDialog("chat", wide_to_utf8(prompt.getLine()), 2);
+				porting::showInputDialog("", "", 2);
 				m_android_chat_open = true;
 			}
 		}
