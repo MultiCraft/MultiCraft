@@ -27,18 +27,6 @@ local function table_to_flags(ftable)
 	return table.concat(str, ",")
 end
 
-local function checkbox(y, name, label, checked)
-	return ([[
-		image[0,%.3f;0.4,0.4;%sgui%scheckbox%s.png]
-		label[0.6,%.3f;%s]
-		image_button[0,%.2f;7,0.5;;%s;;false;false]
-	]]):format(
-		y - 0.2, defaulttexturedir_esc, DIR_DELIM_esc, checked and "_checked" or "",
-		y, label,
-		y - 0.25, name
-	)
-end
-
 local cb_caverns = { "caverns", fgettext("Caverns"), "caverns",
 	fgettext("Very large caverns deep in the underground") }
 local tt_sea_rivers = fgettext("Sea level rivers")
@@ -220,10 +208,10 @@ local function create_world_formspec(dialogdata)
 			return "", y
 		end
 
-		local form = checkbox(y, "flag_mg_caves", fgettext("Caves"), flags.main.caves)
+		local form = checkbox(0, y, "flag_mg_caves", fgettext("Caves"), flags.main.caves)
 		y = y + 0.575
 
-		form = form .. checkbox(y, "flag_mg_dungeons", fgettext("Dungeons"), flags.main.dungeons)
+		form = form .. checkbox(0, y, "flag_mg_dungeons", fgettext("Dungeons"), flags.main.dungeons)
 		y = y + 0.575
 
 		local d_name = fgettext("Decorations")
@@ -233,7 +221,7 @@ local function create_world_formspec(dialogdata)
 		else
 			d_tt = fgettext("Structures appearing on the terrain, typically trees and plants")
 		end
-		form = form .. checkbox(y, "flag_mg_decorations", d_name, flags.main.decorations) ..
+		form = form .. checkbox(0, y, "flag_mg_decorations", d_name, flags.main.decorations) ..
 			"tooltip[flag_mg_decorations;" ..
 			d_tt ..
 			"]"
@@ -255,7 +243,7 @@ local function create_world_formspec(dialogdata)
 		local form = ""
 		for _,tab in pairs(flag_checkboxes[mapgen]) do
 			local id = "flag_mg"..mapgen.."_"..tab[1]
-			form = form .. checkbox(y, id, tab[2], flags[mapgen][tab[3]])
+			form = form .. checkbox(0, y, id, tab[2], flags[mapgen][tab[3]])
 
 			if tab[4] then
 				form = form .. "tooltip["..id..";"..tab[4].."]"
@@ -294,7 +282,7 @@ local function create_world_formspec(dialogdata)
 
 		-- biomeblend
 		y = y + 0.6325
-		form = form .. checkbox(y, "flag_mgv6_biomeblend",
+		form = form .. checkbox(0, y, "flag_mgv6_biomeblend",
 			fgettext("Biome blending"), flags.v6.biomeblend) ..
 			"tooltip[flag_mgv6_biomeblend;" ..
 			fgettext("Smooth transition between biomes") .. "]"

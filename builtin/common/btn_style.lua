@@ -87,3 +87,18 @@ function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open)
 
 	return table.concat(fs)
 end
+--------------------------------------------------------------------------------
+function checkbox(x, y, name, label, checked)
+	-- Note: checkbox[] sends a "true" or "false" value in fields but this
+	-- doesn't, code will have to be changed to toggle the value and redraw the
+	-- formspec instead
+	return ([[
+		image[%s,%.3f;0.4,0.4;%sgui%scheckbox%s.png]
+		label[%s,%.3f;%s]
+		image_button[%s,%.2f;7,0.5;;%s;;false;false]
+	]]):format(
+		x, y - 0.2, defaulttexturedir_esc, DIR_DELIM_esc, checked and "_checked" or "",
+		x + 0.6, y, label,
+		x, y - 0.25, name
+	)
+end
