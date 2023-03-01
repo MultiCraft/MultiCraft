@@ -136,7 +136,6 @@ local function get_formspec(_, _, tab_data)
 			"image_button[6.72,1.43;4.96,1.41;;play;" .. space .. " " ..
 				fgettext("Play") .. space .. ";true;false]" ..
 			"image[7,1.63;1,1;" .. defaulttexturedir_esc .. "btn_play_icon.png]" ..
-			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
 			"style[cb_creative_mode;content_offset=0;font_size=*" .. (small_screen and 1.2 or 1.5) ..
 				";textcolor=#53659C]" ..
