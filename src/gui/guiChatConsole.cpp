@@ -271,8 +271,7 @@ void GUIChatConsole::animate(u32 msec)
 	// Set invisible if close animation finished (reset by openConsole)
 	// This function (animate()) is never called once its visibility becomes false so do not
 	//		actually set visible to false before the inhibited period is over
-	if (!m_open && m_height == 0 && m_open_inhibited == 0)
-	{
+	if (!m_open && m_height == 0 && m_open_inhibited == 0) {
 		m_vscrollbar->setVisible(false);
 		IGUIElement::setVisible(false);
 	}
@@ -363,45 +362,38 @@ void GUIChatConsole::drawText()
 		ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 		ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
 		if (real_mark_begin != real_mark_end &&
-			(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll &&
-			(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll)
-		{
+				(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll &&
+				(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll) {
 			ChatFormattedFragment fragment_first = line.fragments[0];
 
 			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll &&
-				real_mark_begin.fragment < line.fragments.size())
-			{
+					real_mark_begin.fragment < line.fragments.size()) {
 				fragment_first = line.fragments[real_mark_begin.fragment];
 			}
 
 			ChatFormattedFragment fragment_last = line.fragments[line.fragments.size() - 1];
 
 			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
-				real_mark_end.fragment < line.fragments.size())
-			{
+					real_mark_end.fragment < line.fragments.size()) {
 				fragment_last = line.fragments[real_mark_end.fragment];
 			}
 
 			s32 x_begin = (fragment_first.column + 1) * m_fontsize.X;
 			s32 x_end = (fragment_last.column + fragment_last.text.size() + 1) * m_fontsize.X;
 
-			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll)
-			{
+			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll) {
 				x_begin += real_mark_begin.character * m_fontsize.X;
 
-				if (real_mark_begin.x_max)
-				{
+				if (real_mark_begin.x_max) {
 					x_begin += m_fontsize.X;
 				}
 			}
 
 			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
-				(real_mark_end.character < fragment_last.text.size()))
-			{
+					(real_mark_end.character < fragment_last.text.size())) {
 				x_end += (real_mark_end.character - fragment_last.text.size()) * m_fontsize.X;
 
-				if (real_mark_end.x_max)
-				{
+				if (real_mark_end.x_max) {
 					x_end += m_fontsize.X;
 				}
 			}
@@ -513,26 +505,19 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	s32 y_min = m_height - m_desired_height;
 	s32 y_max = buf.getRows() * line_height + y_min;
 
-	if (y <= y_min)
-	{
+	if (y <= y_min) {
 		selection.row = 0;
-	}
-	else if (y >= y_max)
-	{
+	} else if (y >= y_max) {
 		selection.row = buf.getRows() - 1;
-	}
-	else
-	{
-		for (u32 row = 0; row < buf.getRows(); row++)
-		{
+	} else {
+		for (u32 row = 0; row < buf.getRows(); row++) {
 			s32 y1 = row * line_height + m_height - m_desired_height;
 			s32 y2 = y1 + line_height;
 
 			if (y1 + line_height < 0)
 				return selection;
 
-			if (y >= y1 && y <= y2)
-			{
+			if (y >= y1 && y <= y2) {
 				selection.row = row;
 				break;
 			}
@@ -543,8 +528,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	selection.row_buf = line.line_index;
 	int current_row = selection.row;
 
-	while (!line.first)
-	{
+	while (!line.first) {
 		current_row--;
 		line = buf.getFormattedLine(current_row);
 		selection.line++;
@@ -560,28 +544,22 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	s32 x_min = (fragment_first.column + 1) * m_fontsize.X;
 	s32 x_max = (fragment_last.column + 1) * m_fontsize.X + fragment_last.text.size() * m_fontsize.X;
 
-	if (x < x_min)
-	{
+	if (x < x_min) {
 		x = x_min;
-	}
-	else if (x > x_max)
-	{
+	} else if (x > x_max) {
 		x = x_max;
 		selection.x_max = true;
 	}
 
-	for (unsigned int i = 0; i < line.fragments.size(); i++)
-	{
+	for (unsigned int i = 0; i < line.fragments.size(); i++) {
 		const ChatFormattedFragment &fragment = line.fragments[i];
 		s32 fragment_x = (fragment.column + 1) * m_fontsize.X;
 
-		for (unsigned int j = 0; j < fragment.text.size(); j++)
-		{
+		for (unsigned int j = 0; j < fragment.text.size(); j++) {
 			s32 x1 = fragment_x + j * m_fontsize.X;
 			s32 x2 = fragment_x + (j + 1) * m_fontsize.X;
 
-			if (x >= x1 && x <= x2)
-			{
+			if (x >= x1 && x <= x2) {
 				selection.fragment = i;
 				selection.character = j;
 				return selection;
@@ -608,44 +586,36 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 
-	for (int row = real_mark_begin.row_buf; row < real_mark_end.row_buf + 1; row++)
-	{
+	for (int row = real_mark_begin.row_buf; row < real_mark_end.row_buf + 1; row++) {
 		const ChatLine& line = buf.getLine(row);
 
 		std::vector<ChatFormattedLine> formatted_lines;
 		buf.formatChatLine(line, 0, buf.getColsCount(), formatted_lines);
 
-		for (unsigned int i = 0; i < formatted_lines.size(); i++)
-		{
+		for (unsigned int i = 0; i < formatted_lines.size(); i++) {
 			const ChatFormattedLine &line = formatted_lines[i];
 
-			for (unsigned int j = 0; j < line.fragments.size(); j++)
-			{
+			for (unsigned int j = 0; j < line.fragments.size(); j++) {
 				const ChatFormattedFragment &fragment = line.fragments[j];
 
-				for (unsigned int k = 0; k < fragment.text.size(); k++)
-				{
+				for (unsigned int k = 0; k < fragment.text.size(); k++) {
 					if (!add_to_string &&
-						row == real_mark_begin.row_buf &&
-						i == real_mark_begin.line &&
-						j == real_mark_begin.fragment &&
-						k == real_mark_begin.character)
-					{
+							row == real_mark_begin.row_buf &&
+							i == real_mark_begin.line &&
+							j == real_mark_begin.fragment &&
+							k == real_mark_begin.character) {
 						add_to_string = true;
 
 						if (real_mark_begin.x_max)
 							continue;
 					}
 
-					if (add_to_string)
-					{
+					if (add_to_string) {
 						if (row == real_mark_end.row_buf &&
-							i == real_mark_end.line &&
-							j == real_mark_end.fragment &&
-							k == real_mark_end.character)
-						{
-							if (real_mark_end.x_max)
-							{
+								i == real_mark_end.line &&
+								j == real_mark_end.fragment &&
+								k == real_mark_end.character) {
+							if (real_mark_end.x_max) {
 								text += fragment.text.c_str()[k];
 							}
 
@@ -659,8 +629,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 				}
 			}
 
-			if (row < real_mark_end.row_buf)
-			{
+			if (row < real_mark_end.row_buf) {
 				text += L"\n";
 			}
 		}
@@ -812,8 +781,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_KEY_C && event.KeyInput.Control)
 		{
-			if (m_mark_begin != m_mark_end)
-			{
+			if (m_mark_begin != m_mark_end) {
 				irr::core::stringc text = getSelectedText();
 				Environment->getOSOperator()->copyToClipboard(text.c_str());
 				return true;
@@ -922,31 +890,22 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			s32 rows = myround(-3.0 * event.MouseInput.Wheel);
 			m_chat_backend->scroll(rows);
 			m_vscrollbar->setPos(m_vscrollbar->getPos() + rows);
-		}
-		else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
-		{
+		} else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 			m_mouse_marking = true;
 			m_mark_begin = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
 			m_mark_end = m_mark_begin;
-		}
-		else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP)
-		{
-			if (m_mouse_marking)
-			{
+		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
+			if (m_mouse_marking) {
 				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
 				m_mouse_marking = false;
 
-				if (m_mark_begin == m_mark_end)
-				{
+				if (m_mark_begin == m_mark_end) {
 					m_mark_begin.reset();
 					m_mark_end.reset();
 				}
 			}
-		}
-		else if (event.MouseInput.Event == EMIE_MOUSE_MOVED)
-		{
-			if (m_mouse_marking)
-			{
+		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
+			if (m_mouse_marking) {
 				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
 			}
 		}
@@ -954,10 +913,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		return true;
 	}
 #ifdef HAVE_TOUCHSCREENGUI
-	else if (event.EventType == EET_TOUCH_INPUT_EVENT)
-	{
-		if (event.TouchInput.Event == irr::ETIE_PRESSED_DOWN)
-		{
+	else if (event.EventType == EET_TOUCH_INPUT_EVENT) {
+		if (event.TouchInput.Event == irr::ETIE_PRESSED_DOWN) {
 			m_mouse_marking = false;
 			m_long_press = false;
 			m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
@@ -965,19 +922,15 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 			ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
 
-			if (m_cursor_press_pos < real_mark_begin || m_cursor_press_pos > real_mark_end)
-			{
+			if (m_cursor_press_pos < real_mark_begin || m_cursor_press_pos > real_mark_end) {
 				m_mark_begin = m_cursor_press_pos;
 				m_mark_end = m_cursor_press_pos;
 				m_mouse_marking = true;
 			}
-		}
-		else if (event.TouchInput.Event == irr::ETIE_LEFT_UP)
-		{
+		} else if (event.TouchInput.Event == irr::ETIE_LEFT_UP) {
 			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
 
-			if (!m_long_press && m_cursor_press_pos == cursor_pos)
-			{
+			if (!m_long_press && m_cursor_press_pos == cursor_pos) {
 				m_mark_begin.reset();
 				m_mark_end.reset();
 			}
@@ -985,31 +938,23 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			m_cursor_press_pos.reset();
 			m_mouse_marking = false;
 			m_long_press = false;
-		}
-		else if (event.TouchInput.Event == irr::ETIE_MOVED)
-		{
+		} else if (event.TouchInput.Event == irr::ETIE_MOVED) {
 			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
 
 			if (!m_mouse_marking && !m_long_press && m_cursor_press_pos.initialized &&
-				m_cursor_press_pos != cursor_pos)
-			{
+					m_cursor_press_pos != cursor_pos) {
 				m_mark_begin = m_cursor_press_pos;
 				m_mark_end = m_cursor_press_pos;
 				m_mouse_marking = true;
 			}
 
-			if (m_mouse_marking)
-			{
+			if (m_mouse_marking) {
 				m_mark_end = cursor_pos;
 			}
-		}
-		else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG)
-		{
-			if (!m_mouse_marking)
-			{
+		} else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
+			if (!m_mouse_marking) {
 				m_long_press = true;
-				if (m_mark_begin != m_mark_end)
-				{
+				if (m_mark_begin != m_mark_end) {
 					irr::core::stringc text = getSelectedText();
 					Environment->getOSOperator()->copyToClipboard(text.c_str());
 #ifdef __ANDROID__
@@ -1026,10 +971,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		return true;
 	}
 #endif
-	else if (event.EventType == EET_GUI_EVENT)
-	{
-		if (event.GUIEvent.EventType == EGET_SCROLL_BAR_CHANGED)
-		{
+	else if (event.EventType == EET_GUI_EVENT) {
+		if (event.GUIEvent.EventType == EGET_SCROLL_BAR_CHANGED) {
 			updateVScrollBar();
 		}
 	}
@@ -1057,7 +1000,8 @@ void GUIChatConsole::createVScrollBar()
 
 	m_scrollbar_width = skin ? skin->getSize(gui::EGDS_SCROLLBAR_SIZE) : 16;
 
-	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width, 0, m_screensize.X, m_height);
+	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width, 
+			0, m_screensize.X, m_height);
 	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
 			scrollbarrect, false, false);
 
@@ -1078,39 +1022,25 @@ void GUIChatConsole::updateVScrollBar()
 
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 
-	if (m_bottom_scroll_pos != buf.getBottomScrollPos())
-	{
+	if (m_bottom_scroll_pos != buf.getBottomScrollPos()) {
 		m_bottom_scroll_pos = buf.getBottomScrollPos();
 
-		if (buf.getBottomScrollPos() > 0)
-		{
+		if (buf.getBottomScrollPos() > 0) {
 			buf.scrollAbsolute(m_bottom_scroll_pos);
 			m_vscrollbar->setMax(m_bottom_scroll_pos);
 			m_vscrollbar->setPos(m_bottom_scroll_pos);
-		}
-		else
-		{
+		} else {
 			m_vscrollbar->setMax(0);
 			m_vscrollbar->setPos(0);
 		}
 	}
 
-	if (m_vscrollbar->getPageSize() != (s32)buf.getRows())
-	{
-		if (buf.getRows() > 0)
-		{
-			m_vscrollbar->setPageSize(buf.getRows());
-		}
-		else
-		{
-			m_vscrollbar->setPageSize(0);
-		}
+	if (m_vscrollbar->getPageSize() != (s32)buf.getRows()) {
+		m_vscrollbar->setPageSize(buf.getRows() > 0 ? buf.getRows() : 0);
 	}
 
-	if (m_vscrollbar->getPos() != buf.getScrollPos())
-	{
-		if (buf.getScrollPos() >= 0)
-		{
+	if (m_vscrollbar->getPos() != buf.getScrollPos()) {
+		if (buf.getScrollPos() >= 0) {
 			s32 deltaScrollY = m_vscrollbar->getPos() - buf.getScrollPos();
 			m_chat_backend->scroll(deltaScrollY);
 		}
@@ -1118,12 +1048,9 @@ void GUIChatConsole::updateVScrollBar()
 
 	if (IsVisible)
 	{
-		if (m_vscrollbar->isVisible() && m_vscrollbar->getMax() == 0)
-		{
+		if (m_vscrollbar->isVisible() && m_vscrollbar->getMax() == 0) {
 			m_vscrollbar->setVisible(false);
-		}
-		else if (!m_vscrollbar->isVisible() && m_vscrollbar->getMax() > 0)
-		{
+		} else if (!m_vscrollbar->isVisible() && m_vscrollbar->getMax() > 0) {
 			m_vscrollbar->setVisible(true);
 		}
 	}
@@ -1139,8 +1066,7 @@ bool GUIChatConsole::hasFocus()
 
 	const core::list<gui::IGUIElement*> &children = m_vscrollbar->getChildren();
 
-	for (gui::IGUIElement *it : children)
-	{
+	for (gui::IGUIElement *it : children) {
 		if (Environment->hasFocus(it))
 			return true;
 	}
@@ -1185,38 +1111,31 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 	updateVScrollBar();
 
 #ifdef HAVE_TOUCHSCREENGUI
-	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT)
-	{
+	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
 		const core::position2di p(event.TouchInput.X, event.TouchInput.Y);
 
 		u32 row = m_chat_backend->getConsoleBuffer().getRows();
 		s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
 
-		if (m_vscrollbar->isPointInside(p) || !isPointInside(p))
-		{
+		if (m_vscrollbar->isPointInside(p) || !isPointInside(p)) {
 			SEvent mouse_event = {};
 			bool success = convertToMouseEvent(mouse_event, event);
-
-			if (success)
-			{
+			if (success) {
 				Environment->postEventFromUser(mouse_event);
 			}
 		}
 #if defined(__ANDROID__) || defined(__IOS__)
 		else if (!porting::hasRealKeyboard() &&
 				event.TouchInput.Y >= prompt_y &&
-				event.TouchInput.Y <= m_height)
-		{
-			if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
-			{
+				event.TouchInput.Y <= m_height) {
+			if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
 				ChatPrompt& prompt = m_chat_backend->getPrompt();
 				porting::showInputDialog("", "", 2);
 				m_android_chat_open = true;
 			}
 		}
 #endif
-		else
-		{
+		else {
 			OnEvent(event);
 		}
 

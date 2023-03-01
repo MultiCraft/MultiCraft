@@ -30,8 +30,7 @@ struct ChatSelection
 	ChatSelection() : initialized(false), scroll(0), row(0), row_buf(0),
 			line(0), fragment(0), character(0), x_max(false) {};
 
-	void reset()
-	{
+	void reset() {
 		initialized = false;
 		scroll = 0;
 		row = 0;
@@ -42,8 +41,7 @@ struct ChatSelection
 		x_max = false;
 	}
 
-	bool operator== (const ChatSelection &other) const
-	{
+	bool operator== (const ChatSelection &other) const {
 		return (row + scroll == other.row + other.scroll &&
 				row_buf == other.row_buf &&
 				line == other.line &&
@@ -52,8 +50,7 @@ struct ChatSelection
 				x_max == other.x_max);
 	}
 
-	bool operator< (const ChatSelection &other) const
-	{
+	bool operator< (const ChatSelection &other) const {
 		if (row + scroll != other.row + other.scroll)
 			return (row + scroll < other.row + other.scroll);
 		if (row_buf != other.row_buf)
@@ -70,23 +67,19 @@ struct ChatSelection
 		return false;
 	}
 
-	bool operator> (const ChatSelection &other)
-	{
+	bool operator> (const ChatSelection &other) {
 		return other < *this;
 	}
 
-	bool operator<= (const ChatSelection &other)
-	{
+	bool operator<= (const ChatSelection &other) {
 		return !(*this > other);
 	}
 
-	bool operator>= (const ChatSelection &other)
-	{
+	bool operator>= (const ChatSelection &other) {
 		return !(*this < other);
 	}
 
-	bool operator!= (const ChatSelection &other) const
-	{
+	bool operator!= (const ChatSelection &other) const {
 		return !this->operator==(other);
 	}
 
