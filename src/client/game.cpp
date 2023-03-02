@@ -2133,6 +2133,9 @@ void Game::openConsole(float scale, const wchar_t *line)
 {
 	assert(scale > 0.0f && scale <= 1.0f);
 
+	if (gui_chat_console->getAndroidChatOpen())
+		return;
+
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (!porting::hasRealKeyboard()) {
 		porting::showInputDialog("", "", 2);

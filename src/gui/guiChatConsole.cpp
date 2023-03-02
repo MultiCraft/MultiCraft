@@ -1128,7 +1128,8 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 		else if (!porting::hasRealKeyboard() &&
 				event.TouchInput.Y >= prompt_y &&
 				event.TouchInput.Y <= m_height) {
-			if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
+			if (event.TouchInput.Event == ETIE_PRESSED_DOWN &&
+					!m_android_chat_open) {
 				ChatPrompt& prompt = m_chat_backend->getPrompt();
 				porting::showInputDialog("", "", 2);
 				m_android_chat_open = true;
