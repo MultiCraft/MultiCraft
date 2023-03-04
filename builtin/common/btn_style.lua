@@ -63,7 +63,7 @@ function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open)
 		for i, entry in ipairs(items) do
 			local btn_name = "dropdown_" .. i
 			local suffix = i <= 6 and i == #items and "_end" or ""
-			fs[#fs + 1] = fmt("style[%s;bgimg=%sdropdown_bg%s.png;bgimg_middle=32;padding=-24;border=false]",
+			fs[#fs + 1] = fmt("style[%s;bgimg=%sdropdown_bg%s.png;bgimg_middle=32;padding=-24;border=false;noclip=true]",
 				btn_name, button_path, suffix)
 			fs[#fs + 1] = fmt("style[%s:hovered,%s:pressed;bgimg=%sdropdown_bg%s_hover.png]",
 				btn_name, btn_name, button_path, suffix)
@@ -88,17 +88,17 @@ function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open)
 	return table.concat(fs)
 end
 --------------------------------------------------------------------------------
-function checkbox(x, y, name, label, checked)
+function checkbox(x, y, name, label, checked, small)
 	-- Note: checkbox[] sends a "true" or "false" value in fields but this
 	-- doesn't, code will have to be changed to toggle the value and redraw the
 	-- formspec instead
 	return ([[
 		image[%s,%.3f;0.4,0.4;%sgui%scheckbox%s.png]
 		label[%s,%.3f;%s]
-		image_button[%s,%.2f;7,0.5;;%s;;false;false]
+		image_button[%s,%.2f;%s,0.5;;%s;;false;false]
 	]]):format(
 		x, y - 0.2, defaulttexturedir_esc, DIR_DELIM_esc, checked and "_checked" or "",
 		x + 0.6, y, label,
-		x, y - 0.25, name
+		x, y - 0.25, small and 4.3 or 7, name
 	)
 end
