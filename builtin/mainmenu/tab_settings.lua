@@ -108,8 +108,15 @@ end
 
 local open_dropdown
 local function formspec(tabview, name, tabdata)
-	-- Dropdowns must be added last and in reverse order
-	local dropdowns = {}
+	local open_dropdown_fs
+	local function dropdown(x, y, w, name, items, selected_idx, max_items)
+		local dd = get_dropdown(x, y, w, name, items, selected_idx, open_dropdown == name, max_items)
+		if open_dropdown == name then
+			open_dropdown_fs = dd
+			return ""
+		end
+		return dd
+	end
 
 	local fs = {
 		"formspec_version[4]",
@@ -120,43 +127,35 @@ local function formspec(tabview, name, tabdata)
 		setting_cb(0.825, 2.2, "enable_3d_clouds", fgettext("3D Clouds")),
 		setting_cb(0.825, 2.8, "opaque_water", fgettext("Opaque Water")),
 		setting_cb(0.825, 3.4, "connected_glass", fgettext("Connected Glass")),
-	}
+		dropdown(0.825, 3.8, 4.3, "dd_node_highlighting", labels.node_highlighting,
+			getSettingIndex.NodeHighlighting()),
+		dropdown(0.825, 4.8, 4.3, "dd_leaves_style", labels.leaves,
+			getSettingIndex.Leaves()),
 
-	dropdowns[#dropdowns + 1] = get_dropdown(0.825, 3.8, 4.3, "dd_node_highlighting",
-			labels.node_highlighting, getSettingIndex.NodeHighlighting(),
-			open_dropdown == "dd_node_highlighting")
-	dropdowns[#dropdowns + 1] = get_dropdown(0.825, 4.8, 4.3, "dd_leaves_style",
-			labels.leaves, getSettingIndex.Leaves(),
-			open_dropdown == "dd_leaves_style")
-
-	table.insert_all(fs, {
+		-- Middle column
 		"background9[5.6875,0.6;4.7,5.2;", defaulttexturedir_esc, "desc_bg.png;false;32]",
 		"label[5.8875,1;", fgettext("Texturing:"), "]",
-	})
+		dropdown(5.8875, 1.3, 4.3, "dd_filters", labels.filters,
+			getSettingIndex.Filter()),
+		dropdown(5.8875, 2.3, 4.3, "dd_mipmap", labels.mipmap,
+			getSettingIndex.Mipmap()),
 
-	dropdowns[#dropdowns + 1] = get_dropdown(5.8875, 1.3, 4.3, "dd_filters",
-		labels.filters, getSettingIndex.Filter(), open_dropdown == "dd_filters")
-	dropdowns[#dropdowns + 1] = get_dropdown(5.8875, 2.3, 4.3, "dd_mipmap",
-		labels.mipmap, getSettingIndex.Mipmap(), open_dropdown == "dd_mipmap")
+		"label[5.8875,3.4;", fgettext("Antialiasing:"), "]",
+		dropdown(5.8875, 3.7, 4.3, "dd_antialiasing", labels.antialiasing,
+			getSettingIndex.Antialiasing()),
 
-	fs[#fs + 1] = "label[5.8875,3.4;" .. fgettext("Antialiasing:") .. "]"
-	dropdowns[#dropdowns + 1] = get_dropdown(5.8875, 3.7, 4.3, "dd_antialiasing",
-		labels.antialiasing, getSettingIndex.Antialiasing(), open_dropdown == "dd_antialiasing")
-
-	table.insert_all(fs, {
 		"label[5.8875,4.8;", fgettext("Screen:"), "]",
 		checkbox(5.8875, 5.3, "cb_autosave_screensize", fgettext("Autosave Screen Size"),
 			core.settings:get_bool("autosave_screensize")),
 		"background9[10.75,0.6;4.7,5.2;", defaulttexturedir_esc, "desc_bg.png;false;32]",
-	})
+	}
 
 	local shader_y = 1
 	if core.settings:get("touchscreen_threshold") ~= nil then
 		fs[#fs + 1] = "label[10.95,1;" .. fgettext("Touchthreshold: (px)") .. "]"
-		dropdowns[#dropdowns + 1] = get_dropdown(10.95, 1.3, 4.3, "dd_touchthreshold",
+		fs[#fs + 1] = dropdown(10.95, 1.3, 4.3, "dd_touchthreshold",
 				{"0", "10", "20", "30", "40", "50"},
-				(tonumber(core.settings:get("touchscreen_threshold")) / 10) + 1,
-				open_dropdown == "dd_touchthreshold")
+				(tonumber(core.settings:get("touchscreen_threshold")) / 10) + 1)
 		shader_y = 2.9
 	end
 
@@ -172,14 +171,6 @@ local function formspec(tabview, name, tabdata)
 		fs[#fs + 1] = disabled_cb(10.95, shader_y, nil, fgettext("Shaders (unavailable)"))
 	end
 
-	table.insert_all(fs, {
-		btn_style("btn_change_keys"),
-		"button[10.75,6.1;4.7,0.8;btn_change_keys;", fgettext("Change Keys"), "]",
-
-		btn_style("btn_advanced_settings"),
-		"button[0.625,6.1;4.7,0.8;btn_advanced_settings;", fgettext("All Settings"), "]",
-	})
-
 	local shader_cb = shaders_enabled and setting_cb or disabled_cb
 	table.insert_all(fs, {
 		shader_cb(10.95, shader_y + 0.6, "cb_tonemapping", fgettext("Tone Mapping"),
@@ -190,12 +181,16 @@ local function formspec(tabview, name, tabdata)
 				core.settings:get_bool("enable_waving_leaves")),
 		shader_cb(10.95, shader_y + 2.4, "cb_waving_plants", fgettext("Waving Plants"),
 				core.settings:get_bool("enable_waving_plants")),
+
+		btn_style("btn_change_keys"),
+		"button[10.75,6.1;4.7,0.8;btn_change_keys;", fgettext("Change Keys"), "]",
+
+		btn_style("btn_advanced_settings"),
+		"button[0.625,6.1;4.7,0.8;btn_advanced_settings;", fgettext("All Settings"), "]",
 	})
 
-	-- Add the dropdowns in reverse order
-	for i = #dropdowns, 1, -1 do
-		fs[#fs + 1] = dropdowns[i]
-	end
+	-- Add the open dropdown (if any) last
+	fs[#fs + 1] = open_dropdown_fs
 	fs[#fs + 1] = "real_coordinates[false]"
 
 	return table.concat(fs)
