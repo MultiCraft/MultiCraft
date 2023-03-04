@@ -94,6 +94,7 @@ local function disabled_cb(x, y, _, label)
 end
 
 local open_dropdown
+local guitexturedir = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
 	local range = tonumber(core.settings:get("viewing_range"))
@@ -154,7 +155,9 @@ local function formspec(tabview, name, tabdata)
 			getSettingIndex.NodeHighlighting()),
 
 		"label[5.9,5.5;", fgettext("Mouse sensitivity"), ":]",
-		"scrollbar[5.9,5.8;4.2,0.8;horizontal;sb_sensitivity;", tostring(sensitivity), "]",
+		"scrollbar[5.9,5.8;4.2,0.8;horizontal;sb_sensitivity;", tostring(sensitivity), ";",
+			guitexturedir, "scrollbar_horiz_bg.png,", guitexturedir, "scrollbar_horiz_slider.png,",
+			guitexturedir, "scrollbar_left.png,", guitexturedir, "scrollbar_right.png]",
 
 		-- Right column
 		"background9[10.7,0.5;4.8,1.9;", defaulttexturedir_esc, "desc_bg.png;false;32]",
