@@ -41,7 +41,7 @@ function btn_style(field, color, no_padding)
 	return retval
 end
 --------------------------------------------------------------------------------
-function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open)
+function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open, max_items)
 	local fs = {}
 	fs[#fs + 1] = fmt("style[%s;bgimg=%s%s;bgimg_middle=32;padding=-24;border=false]",
 		name, button_path, dropdown_open and "dropdown_open.png" or "dropdown.png")
@@ -53,8 +53,10 @@ function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open)
 		-- Make clicking outside of the dropdown close the menu
 		fs[#fs + 1] = "image_button[-50,-50;100,100;;dropdown_close;;true;false]"
 
-		if #items > 6 then
-			fs[#fs + 1] = fmt("scroll_container[%s,%s;%s,4.74;scrbar;vertical]", x, y + 0.79, w)
+		max_items = max_items or 6
+		local scroll_container = #items > max_items
+		if scroll_container then
+			fs[#fs + 1] = fmt("scroll_container[%s,%s;%s,%s;scrbar;vertical]", x, y + 0.79, w, 0.79 * max_items)
 		else
 			fs[#fs + 1] = fmt("container[%s,%s]", x, y + 0.79)
 		end
@@ -63,8 +65,8 @@ function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open)
 		for i, entry in ipairs(items) do
 			local btn_name = "dropdown_" .. i
 			local suffix = i <= 6 and i == #items and "_end" or ""
-			fs[#fs + 1] = fmt("style[%s;bgimg=%sdropdown_bg%s.png;bgimg_middle=32;padding=-24;border=false;noclip=true]",
-				btn_name, button_path, suffix)
+			fs[#fs + 1] = fmt("style[%s;bgimg=%sdropdown_bg%s.png;bgimg_middle=32;padding=-24;border=false;noclip=%s]",
+				btn_name, button_path, suffix, scroll_container and "false" or "true")
 			fs[#fs + 1] = fmt("style[%s:hovered,%s:pressed;bgimg=%sdropdown_bg%s_hover.png]",
 				btn_name, btn_name, button_path, suffix)
 
@@ -72,14 +74,14 @@ function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open)
 			fs[#fs + 1] = fmt("button[0,%s;%s,0.8;%s;%s]", (i - 1) * 0.79, w, btn_name, entry)
 		end
 
-		if #items > 6 then
+		if scroll_container then
 			fs[#fs + 1] = "scroll_container_end[]"
-			local scrollbar_max = math.ceil((#items * 0.79 - 4.74) * 10)
+			local scrollbar_max = math.ceil((#items - max_items) * 0.79 * 10)
 			fs[#fs + 1] = fmt("scrollbaroptions[max=%s;thumbsize=%s]", scrollbar_max, scrollbar_max * 0.75)
-			fs[#fs + 1] = fmt("scrollbar[%s,%s;0.7,4.63;vertical;scrbar;0;" ..
+			fs[#fs + 1] = fmt("scrollbar[%s,%s;0.7,%s;vertical;scrbar;0;" ..
 				"%sscrollbar_bg.png,%sscrollbar_slider.png,%sscrollbar_up.png,%sscrollbar_down.png]",
-				x + w - 0.76, y + 0.84, button_path, button_path, button_path, button_path)
-			fs[#fs + 1] = fmt("image[%s,%s;%s,0.79;%sdropdown_fg_end.png;32]", x, y + 4.76, w, button_path)
+				x + w - 0.76, y + 0.84, max_items * 0.79 - 0.11, button_path, button_path, button_path, button_path)
+			fs[#fs + 1] = fmt("image[%s,%s;%s,0.79;%sdropdown_fg_end.png;32]", x, y + 0.79 * max_items + 0.02, w, button_path)
 		else
 			fs[#fs + 1] = "container_end[]"
 		end
