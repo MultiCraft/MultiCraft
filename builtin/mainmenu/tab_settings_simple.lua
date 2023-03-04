@@ -206,6 +206,11 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 			local setting = open_dropdown:sub(4)
 			if i and dd_options[setting] then
 				core.settings:set(setting, dd_options[setting][i])
+
+				-- Reload the main menu so that everything uses the new language
+				if setting == "language" then
+					dofile(core.get_builtin_path() .. "init.lua")
+				end
 			end
 
 			open_dropdown = nil
@@ -240,9 +245,6 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		return true
 	end
 
-	-- Note dropdowns have to be handled LAST!
-	local ddhandled = false
-
 	if fields["sb_sensitivity"] then
 		-- reset old setting
 		core.settings:remove("touchscreen_threshold")
@@ -250,24 +252,8 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		local event = core.explode_scrollbar_event(fields["sb_sensitivity"])
 		if event.type == "CHG" then
 			core.settings:set("touch_sensitivity", event.value / 2000)
-
-			-- The formspec cannot be updated or the scrollbar movement will
-			-- break.
-			ddhandled = false
 		end
 	end
-	if fields["dd_language"] then
-		local new_idx = tonumber(fields["dd_language"])
-		if lang_idx ~= new_idx then
-			core.settings:set("language", languages[new_idx] or "")
-			ddhandled = true
-
-			-- Reload the main menu so that everything uses the new language
-			dofile(core.get_builtin_path() .. "init.lua")
-		end
-	end
-
-	return ddhandled
 end
 
 return {
