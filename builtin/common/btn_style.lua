@@ -76,12 +76,16 @@ function get_dropdown(x, y, w, name, items, selected_idx, dropdown_open, max_ite
 
 		if scroll_container then
 			fs[#fs + 1] = "scroll_container_end[]"
-			local scrollbar_max = math.ceil((#items - max_items) * 0.79 * 10)
-			fs[#fs + 1] = fmt("scrollbaroptions[max=%s;thumbsize=%s]", scrollbar_max, scrollbar_max * 0.75)
+			local outer_h = max_items * 0.79
+			local inner_h = #items * 0.79
+			local scrollbar_max = (inner_h - outer_h) * 10
+
+			fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", math.ceil(scrollbar_max),
+				(outer_h / inner_h) * scrollbar_max)
 			fs[#fs + 1] = fmt("scrollbar[%s,%s;0.7,%s;vertical;scrbar;0;" ..
 				"%sscrollbar_bg.png,%sscrollbar_slider.png,%sscrollbar_up.png,%sscrollbar_down.png]",
-				x + w - 0.76, y + 0.84, max_items * 0.79 - 0.11, button_path, button_path, button_path, button_path)
-			fs[#fs + 1] = fmt("image[%s,%s;%s,0.79;%sdropdown_fg_end.png;32]", x, y + 0.79 * max_items + 0.02, w, button_path)
+				x + w - 0.76, y + 0.84, outer_h - 0.11, button_path, button_path, button_path, button_path)
+			fs[#fs + 1] = fmt("image[%s,%s;%s,0.79;%sdropdown_fg_end.png;32]", x, y + outer_h + 0.02, w, button_path)
 		else
 			fs[#fs + 1] = "container_end[]"
 		end
