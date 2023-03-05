@@ -68,8 +68,11 @@ local node_highlighting_labels = {
 	fgettext("None")
 }
 
+local fps_max_labels = {"30", "60", "90", [-1] = "45"}
+
 local dd_options = {
-	fps_max = {"30", "35", "45", "60", "90"},
+	-- "30 FPS" actually sets 35 FPS for some reason
+	fps_max = {"35", "60", "90"},
 	language = languages,
 	node_highlighting = {"box", "halo", "none"},
 	viewing_range = {"30", "40", "60", "80", "100", "125", "150", "175", "200"},
@@ -141,8 +144,8 @@ local function formspec(tabview, name, tabdata)
 		-- Middle column
 		"background9[5.6,0.5;4.8,6.4;", defaulttexturedir_esc, "desc_bg.png;false;32]",
 		"label[5.9,1;", fgettext("Maximum FPS"), ":]",
-		dropdown(5.9, 1.3, 4.2, "dd_fps_max", dd_options.fps_max,
-			fps <= 30 and 1 or fps == 35 and 2 or fps == 45 and 3 or fps == 60 and 4 or 5),
+		dropdown(5.9, 1.3, 4.2, "dd_fps_max", fps_max_labels,
+			fps <= 35 and 1 or fps == 45 and -1 or fps == 60 and 2 or 3),
 
 		"label[5.9,2.5;", fgettext("Viewing range"), ":]",
 		dropdown(5.9, 2.8, 4.2, "dd_viewing_range", dd_options.viewing_range,
