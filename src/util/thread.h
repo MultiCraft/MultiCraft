@@ -19,8 +19,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include "IrrCompileConfig.h"
+
 #include "irrlichttypes.h"
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include "threading/sdl_thread.h"
+#else
 #include "threading/thread.h"
+#endif
 #include "threading/mutex_auto_lock.h"
 #include "porting.h"
 #include "log.h"

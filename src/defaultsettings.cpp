@@ -223,7 +223,7 @@ void set_default_settings()
 	settings->setDefault("menu_clouds", "true");
 	settings->setDefault("opaque_water", "false");
 	settings->setDefault("console_height", "0.6");
-	settings->setDefault("console_message_height", "0.2");
+	settings->setDefault("console_message_height", "0.25");
 	settings->setDefault("console_color", "(0,0,0)");
 	settings->setDefault("console_alpha", "200");
 	settings->setDefault("formspec_fullscreen_bg_color", "(0,0,0)");
@@ -655,6 +655,7 @@ void set_default_settings()
 		} else if (x_inches >= 7.0) {
 			settings->setDefault("device_is_tablet", "true");
 			settings->setDefault("recent_chat_messages", "8");
+			settings->setDefault("console_message_height", "0.4");
 		}
 
 		if (x_inches <= 4.5) {
@@ -686,6 +687,7 @@ void set_default_settings()
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 		settings->setDefault("device_is_tablet", "true");
 		settings->setDefault("recent_chat_messages", "8");
+		settings->setDefault("console_message_height", "0.4");
 	}
 
 	// Set the size of the elements depending on the screen size

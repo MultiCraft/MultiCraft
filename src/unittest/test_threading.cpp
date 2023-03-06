@@ -19,9 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "test.h"
 
+#include "IrrCompileConfig.h"
+
 #include <atomic>
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include "threading/sdl_semaphore.h"
+#include "threading/sdl_thread.h"
+#else
 #include "threading/semaphore.h"
 #include "threading/thread.h"
+#endif
 
 
 class TestThreading : public TestBase {

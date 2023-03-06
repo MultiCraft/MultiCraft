@@ -167,7 +167,9 @@ LOCAL_SRC_FILES := \
 	../../src/script/lua_api/l_util.cpp            \
 	../../src/script/lua_api/l_vmanip.cpp          \
 	$(wildcard ../../src/server/*.cpp)             \
-	$(wildcard ../../src/threading/*.cpp)          \
+	../../src/threading/event.cpp                  \
+	../../src/threading/sdl_semaphore.cpp          \
+	../../src/threading/sdl_thread.cpp             \
 	$(wildcard ../../src/util/*.c)                 \
 	$(wildcard ../../src/util/*.cpp)               \
 	../../src/ban.cpp                              \

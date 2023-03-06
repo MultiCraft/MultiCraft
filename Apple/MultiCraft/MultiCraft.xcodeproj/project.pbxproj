@@ -130,6 +130,8 @@
 		846F883B27A59704007B6210 /* libluajit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 846F883A27A596F9007B6210 /* libluajit.a */; };
 		847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4A25D6F483008F5FC8 /* lutf8lib.c */; };
 		8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8488539E28DA4851004AD90F /* libjpeg.a */; };
+		848920FD29984994001CB194 /* sdl_semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FA29984994001CB194 /* sdl_semaphore.cpp */; };
+		848920FE29984994001CB194 /* sdl_thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FB29984994001CB194 /* sdl_thread.cpp */; };
 		848ADEF427BD68AE001C60F3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 848ADEF627BD68AE001C60F3 /* Localizable.strings */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
 		8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL2.a */; };
@@ -138,8 +140,6 @@
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
 		849D0848278AC1B200471354 /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0846278AC1B200471354 /* chacha.c */; };
-		84A1F9B2252E616B00000717 /* semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9AC252E616B00000717 /* semaphore.cpp */; };
-		84A1F9B3252E616B00000717 /* thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9AF252E616B00000717 /* thread.cpp */; };
 		84A1F9BB252E617D00000717 /* scripting_mainmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */; };
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
@@ -250,7 +250,6 @@
 		84F20F0225D52958009562A9 /* guiEditBoxWithScrollbar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20ECB25D52954009562A9 /* guiEditBoxWithScrollbar.cpp */; };
 		84F20F0325D52958009562A9 /* guiFormSpecMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20ECF25D52955009562A9 /* guiFormSpecMenu.cpp */; };
 		84F20F0525D52958009562A9 /* profilergraph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20ED225D52955009562A9 /* profilergraph.cpp */; };
-		84F20F0625D52958009562A9 /* intlGUIEditBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20ED425D52955009562A9 /* intlGUIEditBox.cpp */; };
 		84F20F0725D52958009562A9 /* guiSkin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20ED525D52955009562A9 /* guiSkin.cpp */; };
 		84F20F0825D52958009562A9 /* guiButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20ED825D52955009562A9 /* guiButton.cpp */; };
 		84F20F0925D52958009562A9 /* guiItemImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EE025D52956009562A9 /* guiItemImage.cpp */; };
@@ -292,6 +291,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		840A686F2989C8B400ADE329 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84135AC625D5261C00CA4DCF /* craftdef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = craftdef.cpp; path = ../../../src/craftdef.cpp; sourceTree = "<group>"; };
 		84135AC725D5261C00CA4DCF /* modchannels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modchannels.cpp; path = ../../../src/modchannels.cpp; sourceTree = "<group>"; };
 		84135AC825D5261C00CA4DCF /* nodemetadata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nodemetadata.cpp; path = ../../../src/nodemetadata.cpp; sourceTree = "<group>"; };
@@ -547,6 +547,10 @@
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
 		847C6D4A25D6F483008F5FC8 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = ../../../lib/luautf8/lutf8lib.c; sourceTree = "<group>"; };
 		8488539E28DA4851004AD90F /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../deps/libjpeg/libjpeg.a; sourceTree = "<group>"; };
+		848920F929984994001CB194 /* sdl_semaphore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sdl_semaphore.h; path = ../../../src/threading/sdl_semaphore.h; sourceTree = "<group>"; };
+		848920FA29984994001CB194 /* sdl_semaphore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_semaphore.cpp; path = ../../../src/threading/sdl_semaphore.cpp; sourceTree = "<group>"; };
+		848920FB29984994001CB194 /* sdl_thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_thread.cpp; path = ../../../src/threading/sdl_thread.cpp; sourceTree = "<group>"; };
+		848920FC29984994001CB194 /* sdl_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sdl_thread.h; path = ../../../src/threading/sdl_thread.h; sourceTree = "<group>"; };
 		848ADEF527BD68AE001C60F3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADEF827BD6904001C60F3 /* bg */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = bg; path = bg.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848ADEF927BD695E001C60F3 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -578,13 +582,9 @@
 		849D0844278AC1B200471354 /* ecrypt-machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-machine.h"; path = "../../../lib/luachacha/ecrypt-machine.h"; sourceTree = "<group>"; };
 		849D0845278AC1B200471354 /* lchacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lchacha.c; path = ../../../lib/luachacha/lchacha.c; sourceTree = "<group>"; };
 		849D0846278AC1B200471354 /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/luachacha/chacha.c; sourceTree = "<group>"; };
-		84A1F9A6252E616A00000717 /* thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = thread.h; path = ../../../src/threading/thread.h; sourceTree = "<group>"; };
 		84A1F9A7252E616A00000717 /* mutex_auto_lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mutex_auto_lock.h; path = ../../../src/threading/mutex_auto_lock.h; sourceTree = "<group>"; };
 		84A1F9A8252E616A00000717 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = event.cpp; path = ../../../src/threading/event.cpp; sourceTree = "<group>"; };
-		84A1F9AC252E616B00000717 /* semaphore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = semaphore.cpp; path = ../../../src/threading/semaphore.cpp; sourceTree = "<group>"; };
-		84A1F9AD252E616B00000717 /* semaphore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = semaphore.h; path = ../../../src/threading/semaphore.h; sourceTree = "<group>"; };
 		84A1F9AE252E616B00000717 /* event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event.h; path = ../../../src/threading/event.h; sourceTree = "<group>"; };
-		84A1F9AF252E616B00000717 /* thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = thread.cpp; path = ../../../src/threading/thread.cpp; sourceTree = "<group>"; };
 		84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_mainmenu.cpp; path = ../../../src/script/scripting_mainmenu.cpp; sourceTree = "<group>"; };
 		84A1F9B6252E617D00000717 /* scripting_client.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_client.h; path = ../../../src/script/scripting_client.h; sourceTree = "<group>"; };
 		84A1F9B7252E617D00000717 /* scripting_mainmenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_mainmenu.h; path = ../../../src/script/scripting_mainmenu.h; sourceTree = "<group>"; };
@@ -812,12 +812,10 @@
 		84F20ECA25D52954009562A9 /* guiHyperText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiHyperText.h; path = ../../../src/gui/guiHyperText.h; sourceTree = "<group>"; };
 		84F20ECB25D52954009562A9 /* guiEditBoxWithScrollbar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiEditBoxWithScrollbar.cpp; path = ../../../src/gui/guiEditBoxWithScrollbar.cpp; sourceTree = "<group>"; };
 		84F20ECC25D52955009562A9 /* guiButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiButton.h; path = ../../../src/gui/guiButton.h; sourceTree = "<group>"; };
-		84F20ECE25D52955009562A9 /* intlGUIEditBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = intlGUIEditBox.h; path = ../../../src/gui/intlGUIEditBox.h; sourceTree = "<group>"; };
 		84F20ECF25D52955009562A9 /* guiFormSpecMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiFormSpecMenu.cpp; path = ../../../src/gui/guiFormSpecMenu.cpp; sourceTree = "<group>"; };
 		84F20ED125D52955009562A9 /* guiButtonImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiButtonImage.h; path = ../../../src/gui/guiButtonImage.h; sourceTree = "<group>"; };
 		84F20ED225D52955009562A9 /* profilergraph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = profilergraph.cpp; path = ../../../src/gui/profilergraph.cpp; sourceTree = "<group>"; };
 		84F20ED325D52955009562A9 /* guiConfirmRegistration.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiConfirmRegistration.h; path = ../../../src/gui/guiConfirmRegistration.h; sourceTree = "<group>"; };
-		84F20ED425D52955009562A9 /* intlGUIEditBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = intlGUIEditBox.cpp; path = ../../../src/gui/intlGUIEditBox.cpp; sourceTree = "<group>"; };
 		84F20ED525D52955009562A9 /* guiSkin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiSkin.cpp; path = ../../../src/gui/guiSkin.cpp; sourceTree = "<group>"; };
 		84F20ED625D52955009562A9 /* guiBackgroundImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiBackgroundImage.h; path = ../../../src/gui/guiBackgroundImage.h; sourceTree = "<group>"; };
 		84F20ED725D52955009562A9 /* guiChatConsole.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiChatConsole.h; path = ../../../src/gui/guiChatConsole.h; sourceTree = "<group>"; };
@@ -1069,8 +1067,6 @@
 				84F20EE125D52956009562A9 /* guiTable.h */,
 				84F20EEA25D52957009562A9 /* guiVolumeChange.cpp */,
 				84F20EDE25D52956009562A9 /* guiVolumeChange.h */,
-				84F20ED425D52955009562A9 /* intlGUIEditBox.cpp */,
-				84F20ECE25D52955009562A9 /* intlGUIEditBox.h */,
 				84F20EFA25D52958009562A9 /* mainmenumanager.h */,
 				84F20EE825D52956009562A9 /* modalMenu.cpp */,
 				84F20EF825D52957009562A9 /* modalMenu.h */,
@@ -1544,10 +1540,10 @@
 				84A1F9A8252E616A00000717 /* event.cpp */,
 				84A1F9AE252E616B00000717 /* event.h */,
 				84A1F9A7252E616A00000717 /* mutex_auto_lock.h */,
-				84A1F9AC252E616B00000717 /* semaphore.cpp */,
-				84A1F9AD252E616B00000717 /* semaphore.h */,
-				84A1F9AF252E616B00000717 /* thread.cpp */,
-				84A1F9A6252E616A00000717 /* thread.h */,
+				848920FA29984994001CB194 /* sdl_semaphore.cpp */,
+				848920F929984994001CB194 /* sdl_semaphore.h */,
+				848920FB29984994001CB194 /* sdl_thread.cpp */,
+				848920FC29984994001CB194 /* sdl_thread.h */,
 			);
 			name = threading;
 			sourceTree = "<group>";
@@ -1782,6 +1778,7 @@
 				tr,
 				id,
 				ja,
+				nb,
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			productRefGroup = 845856AA24B1322C0040BA4F /* Products */;
@@ -1801,9 +1798,9 @@
 				8458617F24B1C3BC0040BA4F /* builtin in Resources */,
 				8453A49E24DB22F00087ECF9 /* client in Resources */,
 				8458618024B1C3BC0040BA4F /* textures in Resources */,
-				845856B324B1322D0040BA4F /* Assets.xcassets in Resources */,
 				84287CA7291ED0F000E30F96 /* fonts in Resources */,
 				84287CA6291ED0F000E30F96 /* locale in Resources */,
+				845856B324B1322D0040BA4F /* Assets.xcassets in Resources */,
 				848ADEF427BD68AE001C60F3 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1819,7 +1816,6 @@
 				84135C2125D526D700CA4DCF /* sound.cpp in Sources */,
 				84135B8B25D5264C00CA4DCF /* noise.cpp in Sources */,
 				84F20E2A25D5282A009562A9 /* l_minimap.cpp in Sources */,
-				84A1F9B2252E616B00000717 /* semaphore.cpp in Sources */,
 				84F20F1825D52958009562A9 /* guiScrollContainer.cpp in Sources */,
 				84135B6425D5264B00CA4DCF /* map_settings_manager.cpp in Sources */,
 				84F20F4425D52975009562A9 /* dungeongen.cpp in Sources */,
@@ -1871,6 +1867,7 @@
 				84F20F4D25D52975009562A9 /* mapgen_v7.cpp in Sources */,
 				84F20E8F25D52868009562A9 /* directiontables.cpp in Sources */,
 				84F20E5625D5283F009562A9 /* player_sao.cpp in Sources */,
+				848920FD29984994001CB194 /* sdl_semaphore.cpp in Sources */,
 				84135B8C25D5264C00CA4DCF /* serverenvironment.cpp in Sources */,
 				84F20E5325D5283F009562A9 /* luaentity_sao.cpp in Sources */,
 				84F20F1425D52958009562A9 /* guiKeyChangeMenu.cpp in Sources */,
@@ -1887,6 +1884,7 @@
 				84135C1425D526D700CA4DCF /* inputhandler.cpp in Sources */,
 				84F20E3E25D5282A009562A9 /* l_vmanip.cpp in Sources */,
 				84F20E3325D5282A009562A9 /* l_areastore.cpp in Sources */,
+				848920FE29984994001CB194 /* sdl_thread.cpp in Sources */,
 				84F20DB725D527D8009562A9 /* c_converter.cpp in Sources */,
 				84135B7125D5264B00CA4DCF /* tool.cpp in Sources */,
 				84135BA125D5264C00CA4DCF /* serialization.cpp in Sources */,
@@ -1937,7 +1935,6 @@
 				84F20E8025D52868009562A9 /* srp.cpp in Sources */,
 				84F20E3525D5282A009562A9 /* l_http.cpp in Sources */,
 				84F20D5A25D52790009562A9 /* CGUITTFont.cpp in Sources */,
-				84F20F0625D52958009562A9 /* intlGUIEditBox.cpp in Sources */,
 				84F20E8D25D52868009562A9 /* base64.cpp in Sources */,
 				84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */,
 				84135B9F25D5264C00CA4DCF /* staticobject.cpp in Sources */,
@@ -1979,7 +1976,6 @@
 				84135B7F25D5264C00CA4DCF /* version.cpp in Sources */,
 				84F20F0C25D52958009562A9 /* guiAnimatedImage.cpp in Sources */,
 				84135C1A25D526D700CA4DCF /* clientmap.cpp in Sources */,
-				84A1F9B3252E616B00000717 /* thread.cpp in Sources */,
 				84F20F0125D52958009562A9 /* guiInventoryList.cpp in Sources */,
 				84F20EA525D528C5009562A9 /* factory.cpp in Sources */,
 				84F20E2425D5282A009562A9 /* l_env.cpp in Sources */,
@@ -2100,6 +2096,7 @@
 				8425D3702837D89300753F0E /* tr */,
 				8425D3712837D89600753F0E /* id */,
 				8457C2C52848DB7300D69304 /* ja */,
+				840A686F2989C8B400ADE329 /* nb */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -2113,7 +2110,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -2133,7 +2129,6 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
@@ -2142,7 +2137,6 @@
 					"-Wno-builtin-macro-redefined",
 				);
 				SDKROOT = macosx;
-				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
 			};
 			name = Debug;
 		};
@@ -2152,7 +2146,6 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
-				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -2169,7 +2162,6 @@
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-Wno-inconsistent-missing-override",
@@ -2178,7 +2170,6 @@
 				);
 				SDKROOT = macosx;
 				VALIDATE_PRODUCT = YES;
-				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
 			};
 			name = Release;
 		};
@@ -2188,7 +2179,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
@@ -2230,12 +2220,6 @@
 					"${SRCROOT}/../deps/libvorbis/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.3;
 				OTHER_CFLAGS = "$(inherited)";
@@ -2265,7 +2249,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
@@ -2309,12 +2292,6 @@
 					"${SRCROOT}/../deps/libvorbis/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.3;
 				OTHER_CFLAGS = "$(inherited)";

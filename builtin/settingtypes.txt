@@ -703,7 +703,7 @@ fall_bobbing_amount (Fall bobbing factor) float 0.03
 console_height (Console height) float 0.6 0.1 1.0
 
 #    In-game chat message console height, between 0.1 (10%) and 1.0 (100%).
-console_message_height (Console message height) float 0.2 0.1 1.0
+console_message_height (Console message height) float 0.25 0.1 1.0
 
 #    In-game chat console background color (R,G,B).
 console_color (Console color) string (0,0,0)

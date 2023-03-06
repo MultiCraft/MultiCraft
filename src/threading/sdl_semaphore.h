@@ -1,6 +1,7 @@
 /*
-Minetest
+MultiCraft
 Copyright (C) 2013 sapier <sapier AT gmx DOT net>
+Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -21,17 +22,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "IrrCompileConfig.h"
 
-#ifndef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined(__MACH__) && defined(__APPLE__)
-#include <mach/semaphore.h>
-#else
-#include <semaphore.h>
-#endif
-
+#include "porting.h"
 #include "util/basic_macros.h"
+
+#include <SDL.h>
 
 class Semaphore
 {
@@ -46,13 +42,7 @@ public:
 	bool wait(unsigned int time_ms);
 
 private:
-#if defined(WIN32)
-	HANDLE semaphore;
-#elif defined(__MACH__) && defined(__APPLE__)
-	semaphore_t semaphore;
-#else
-	sem_t semaphore;
-#endif
+	SDL_sem *semaphore;
 };
 
 #endif
