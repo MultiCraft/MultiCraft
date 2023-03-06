@@ -1011,6 +1011,27 @@ void GUIChatConsole::createVScrollBar()
 	m_vscrollbar->setPageSize(0);
 	m_vscrollbar->setSmallStep(1);
 	m_vscrollbar->setLargeStep(1);
+	m_vscrollbar->setArrowsVisible(GUIScrollBar::ArrowVisibility::SHOW);
+
+	std::vector<std::string> texture_names = {
+		"gui/scrollbar_bg.png",
+		"gui/scrollbar_slider.png",
+		"gui/scrollbar_up.png",
+		"gui/scrollbar_down.png"
+	};
+
+	ITextureSource *tsrc = m_client->getTextureSource();
+	std::vector<video::ITexture *> textures;
+
+	for (std::string texture_name : texture_names) {
+		if (tsrc->isKnownSourceImage(texture_name)) {
+			textures.push_back(tsrc->getTexture(texture_name));
+		}
+	}
+
+	if (textures.size() > 3) {
+		m_vscrollbar->setTextures(textures);
+	}
 
 	addChild(m_vscrollbar);
 }
