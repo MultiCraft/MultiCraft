@@ -111,10 +111,17 @@ local function formspec(tabview, name, tabdata)
 	core.settings:set_bool("enable_shaders", shaders_enabled)
 
 	local open_dropdown_fs
-	local function dropdown(x, y, w, name, items, selected_idx, max_items)
+	local function dropdown(x, y, w, name, items, selected_idx, max_items, container_pos)
 		local dd = get_dropdown(x, y, w, name, items, selected_idx, open_dropdown == name, max_items)
 		if open_dropdown == name then
 			open_dropdown_fs = dd
+			-- Items positioned inside scroll containers are very slightly
+			-- offset from the same item in a regular container
+			if container_pos then
+				open_dropdown_fs = "scroll_container[" .. container_pos .. ";" .. w + x + 1 .. ",10;;vertical;0]" ..
+					open_dropdown_fs ..
+					"scroll_container_end[]"
+			end
 			return ""
 		end
 		return dd
@@ -126,41 +133,48 @@ local function formspec(tabview, name, tabdata)
 		"real_coordinates[true]",
 		"background9[0.5,0.5;4.8,6.4;", defaulttexturedir_esc, "desc_bg.png;false;32]",
 
-		setting_cb(0.8, 1, "smooth_lighting", fgettext("Smooth Lighting")),
-		setting_cb(0.8, 1.675, "enable_particles", fgettext("Particles")),
-		setting_cb(0.8, 2.35, "enable_3d_clouds", fgettext("3D Clouds")),
-		-- setting_cb(0.8, y, "opaque_water", fgettext("Opaque Water")),
-		-- setting_cb(0.8, y, "connected_glass", fgettext("Connected Glass")),
-		setting_cb(0.8, 3.025, "enable_fog", fgettext("Fog")),
-		setting_cb(0.8, 3.7, "inventory_items_animations", fgettext("Inv. animations")),
+		-- A scroll container is used so that long labels are clipped
+		"scroll_container[0.5,0.5;4.8,6.4;;vertical;0]",
+
+		setting_cb(0.3, 0.5, "smooth_lighting", fgettext("Smooth Lighting")),
+		setting_cb(0.3, 1.175, "enable_particles", fgettext("Particles")),
+		setting_cb(0.3, 1.85, "enable_3d_clouds", fgettext("3D Clouds")),
+		-- setting_cb(0.3, y, "opaque_water", fgettext("Opaque Water")),
+		-- setting_cb(0.3, y, "connected_glass", fgettext("Connected Glass")),
+		setting_cb(0.3, 2.525, "enable_fog", fgettext("Fog")),
+		setting_cb(0.3, 3.2, "inventory_items_animations", fgettext("Inv. animations")),
 
 		-- Some checkboxes don't directly have a boolean setting so they need
 		-- to be handled separately
-		checkbox(0.8, 4.375, "fancy_leaves", fgettext("Fancy Leaves"), fancy_leaves, true),
-		checkbox(0.8, 5.05, "crosshair", fgettext("Crosshair"), not touchtarget, true),
-		setting_cb(0.8, 5.725, "arm_inertia", fgettext("Arm inertia")),
-		checkbox(0.8, 6.4, "sound", fgettext("Sound"), sound, true),
+		checkbox(0.3, 3.875, "fancy_leaves", fgettext("Fancy Leaves"), fancy_leaves, true),
+		checkbox(0.3, 4.55, "crosshair", fgettext("Crosshair"), not touchtarget, true),
+		setting_cb(0.3, 5.225, "arm_inertia", fgettext("Arm inertia")),
+		checkbox(0.3, 5.9, "sound", fgettext("Sound"), sound, true),
+
+		"scroll_container_end[]",
 
 		-- Middle column
 		"background9[5.6,0.5;4.8,6.4;", defaulttexturedir_esc, "desc_bg.png;false;32]",
-		"label[5.9,1;", fgettext("Maximum FPS"), ":]",
-		dropdown(5.9, 1.3, 4.2, "dd_fps_max", fps_max_labels,
-			fps <= 35 and 1 or fps == 45 and -1 or fps == 60 and 2 or 3),
+		"scroll_container[5.6,0.5;4.8,6.4;;vertical;0]",
+		"label[0.3,0.5;", fgettext("Maximum FPS"), ":]",
+		dropdown(0.3, 0.8, 4.2, "dd_fps_max", fps_max_labels,
+			fps <= 35 and 1 or fps == 45 and -1 or fps == 60 and 2 or 3, nil, "5.6,0.5"),
 
-		"label[5.9,2.5;", fgettext("Viewing range"), ":]",
-		dropdown(5.9, 2.8, 4.2, "dd_viewing_range", dd_options.viewing_range,
+		"label[0.3,2;", fgettext("Viewing range"), ":]",
+		dropdown(0.3, 2.3, 4.2, "dd_viewing_range", dd_options.viewing_range,
 			range <= 30 and 1 or range == 40 and 2 or range == 60 and 3 or
 			range == 80 and 4 or range == 100 and 5 or range == 125 and 6 or
-			range == 150 and 7 or range == 175 and 8 or 9, 4.5),
+			range == 150 and 7 or range == 175 and 8 or 9, 4.5, "5.6,0.5"),
 
-		"label[5.9,4;", fgettext("Node highlighting"), ":]",
-		dropdown(5.9, 4.3, 4.2, "dd_node_highlighting", node_highlighting_labels,
-			getSettingIndex.NodeHighlighting()),
+		"label[0.3,3.5;", fgettext("Node highlighting"), ":]",
+		dropdown(0.3, 3.8, 4.2, "dd_node_highlighting", node_highlighting_labels,
+			getSettingIndex.NodeHighlighting(), nil, "5.6,0.5"),
 
-		"label[5.9,5.5;", fgettext("Mouse sensitivity"), ":]",
-		"scrollbar[5.9,5.8;4.2,0.8;horizontal;sb_sensitivity;", tostring(sensitivity), ";",
+		"label[0.3,5;", fgettext("Mouse sensitivity"), ":]",
+		"scrollbar[0.3,5.3;4.2,0.8;horizontal;sb_sensitivity;", tostring(sensitivity), ";",
 			guitexturedir, "scrollbar_horiz_bg.png,", guitexturedir, "scrollbar_horiz_slider.png,",
 			guitexturedir, "scrollbar_left.png,", guitexturedir, "scrollbar_right.png]",
+		"scroll_container_end[]",
 
 		-- Right column
 		"background9[10.7,0.5;4.8,1.9;", defaulttexturedir_esc, "desc_bg.png;false;32]",
@@ -168,12 +182,14 @@ local function formspec(tabview, name, tabdata)
 		dropdown(11, 1.3, 4.2, "dd_language", language_labels, lang_idx, 6.4),
 
 		"background9[10.7,2.6;4.8,4.3;", defaulttexturedir_esc, "desc_bg.png;false;32]",
-		"label[11,3.1;", shaders_enabled and fgettext("Shaders") or
+		"scroll_container[10.7,2.6;4.8,4.3;;vertical;0]",
+		"label[0.3,0.5;", shaders_enabled and fgettext("Shaders") or
 			core.colorize("#888888", fgettext("Shaders (unavailable)")), "]",
-		shader_cb(11, 3.6, "tone_mapping", fgettext("Tone Mapping")),
-		shader_cb(11, 4.2, "enable_waving_water", fgettext("Waving liquids")),
-		shader_cb(11, 4.8, "enable_waving_leaves", fgettext("Waving leaves")),
-		shader_cb(11, 5.4, "enable_waving_plants", fgettext("Waving plants")),
+		shader_cb(0.3, 1, "tone_mapping", fgettext("Tone Mapping")),
+		shader_cb(0.3, 1.6, "enable_waving_water", fgettext("Waving liquids")),
+		shader_cb(0.3, 2.2, "enable_waving_leaves", fgettext("Waving leaves")),
+		shader_cb(0.3, 2.8, "enable_waving_plants", fgettext("Waving plants")),
+		"scroll_container_end[]",
 
 		btn_style("btn_reset"),
 		"button[11,5.8;4.2,0.8;btn_reset;", fgettext("Reset all settings"), "]",
