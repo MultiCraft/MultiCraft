@@ -60,7 +60,7 @@ end
 
 --------------------------------------------------------------------------------
 
-local languages, _, lang_idx, language_labels = get_language_list()
+local languages, lang_idx, language_labels = get_language_list()
 
 local node_highlighting_labels = {
 	fgettext("Node Outlining"),

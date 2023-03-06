@@ -516,7 +516,8 @@ local full_settings = parse_config_file(false, true)
 local search_string = ""
 local settings = full_settings
 local selected_setting = 1
-local languages, language_dropdown, lang_idx, language_name_list = get_language_list()
+local languages, lang_idx, language_name_list = get_language_list()
+local language_dropdown = table.concat(language_name_list, ",")
 
 local function get_current_value(setting)
 	local value = core.settings:get(setting.name)

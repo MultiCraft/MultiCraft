@@ -293,21 +293,21 @@ function get_language_list()
 	languages[#languages + 1] = "en"
 	language_names.en = "English"
 
-	-- Sort the languages list based on their human readable name
+	-- Sort the languages list based on their human readable name and make sure
+	-- that English is the first entry
 	table.sort(languages, function(a, b)
-		return language_names[a] < language_names[b]
+		return a == "en" or (b ~= "en" and language_names[a] < language_names[b])
 	end)
 
 	local language_name_list = {}
 	for i, language in ipairs(languages) do
 		language_name_list[i] = core.formspec_escape(language_names[language])
 	end
-	local language_dropdown = table.concat(language_name_list, ",")
 
 	local lang_idx = table.indexof(languages, fgettext("LANG_CODE"))
 	if lang_idx < 0 then
 		lang_idx = table.indexof(languages, "en")
 	end
 
-	return languages, language_dropdown, lang_idx, language_name_list
+	return languages, lang_idx, language_name_list
 end
