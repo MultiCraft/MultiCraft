@@ -1000,10 +1000,10 @@ void GUIChatConsole::createVScrollBar()
 
 	m_scrollbar_width = skin ? skin->getSize(gui::EGDS_SCROLLBAR_SIZE) : 16;
 
-	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width, 
+	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width,
 			0, m_screensize.X, m_height);
 	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
-			scrollbarrect, false, false);
+			scrollbarrect, false, true);
 
 	m_vscrollbar->setVisible(false);
 	m_vscrollbar->setMax(0);
@@ -1035,8 +1035,9 @@ void GUIChatConsole::updateVScrollBar()
 		}
 	}
 
-	if (m_vscrollbar->getPageSize() != (s32)buf.getRows()) {
-		m_vscrollbar->setPageSize(buf.getRows() > 0 ? buf.getRows() : 0);
+	s32 page_size = (m_bottom_scroll_pos + buf.getRows() + 1) * m_fontsize.Y;
+	if (m_vscrollbar->getPageSize() != page_size) {
+		m_vscrollbar->setPageSize(page_size);
 	}
 
 	if (m_vscrollbar->getPos() != buf.getScrollPos()) {
