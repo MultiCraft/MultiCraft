@@ -1307,6 +1307,18 @@ void GUIFormSpecMenu::parseTable(parserData* data, const std::string &element)
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
 		e->setOverrideFont(style.getFont());
 
+		if (style.isNotDefault(StyleSpec::SCROLLBAR_BGIMG) &&
+				style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_IMG) &&
+				style.isNotDefault(StyleSpec::SCROLLBAR_UP_IMG) &&
+				style.isNotDefault(StyleSpec::SCROLLBAR_DOWN_IMG)) {
+			e->setScrollbarTextures({
+				style.getTexture(StyleSpec::SCROLLBAR_BGIMG, m_tsrc),
+				style.getTexture(StyleSpec::SCROLLBAR_THUMB_IMG, m_tsrc),
+				style.getTexture(StyleSpec::SCROLLBAR_UP_IMG, m_tsrc),
+				style.getTexture(StyleSpec::SCROLLBAR_DOWN_IMG, m_tsrc)
+			});
+		}
+
 		m_tables.emplace_back(spec, e);
 		m_fields.push_back(spec);
 		return;

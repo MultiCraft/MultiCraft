@@ -147,6 +147,13 @@ public:
 	/* Irrlicht event handler */
 	virtual bool OnEvent(const SEvent &event);
 
+	/* Set scrollbar texture */
+	void setScrollbarTextures(std::vector<video::ITexture *> textures)
+	{
+		m_scrollbar->setArrowsVisible(GUIScrollBar::ArrowVisibility::SHOW);
+		m_scrollbar->setTextures(textures);
+	}
+
 protected:
 	enum ColumnType {
 		COLUMN_TYPE_TEXT,
