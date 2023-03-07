@@ -999,6 +999,7 @@ void GUIChatConsole::createVScrollBar()
 		skin = Environment->getSkin();
 
 	m_scrollbar_width = skin ? skin->getSize(gui::EGDS_SCROLLBAR_SIZE) : 16;
+	m_scrollbar_width *= 2;
 
 	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width,
 			0, m_screensize.X, m_height);
