@@ -384,18 +384,16 @@ void GUIChatConsole::drawText()
 			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll) {
 				x_begin += real_mark_begin.character * m_fontsize.X;
 
-				if (real_mark_begin.x_max) {
+				if (real_mark_begin.x_max)
 					x_begin += m_fontsize.X;
-				}
 			}
 
 			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
 					(real_mark_end.character < fragment_last.text.size())) {
 				x_end += (real_mark_end.character - fragment_last.text.size()) * m_fontsize.X;
 
-				if (real_mark_end.x_max) {
+				if (real_mark_end.x_max)
 					x_end += m_fontsize.X;
-				}
 			}
 
 			core::rect<s32> destrect(x_begin, y, x_end, y + m_fontsize.Y);
@@ -615,9 +613,8 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 								i == real_mark_end.line &&
 								j == real_mark_end.fragment &&
 								k == real_mark_end.character) {
-							if (real_mark_end.x_max) {
+							if (real_mark_end.x_max)
 								text += fragment.text.c_str()[k];
-							}
 
 							irr::core::stringc text_c;
 							text_c = wide_to_utf8(text.c_str()).c_str();
@@ -1025,14 +1022,12 @@ void GUIChatConsole::createVScrollBar()
 	std::vector<video::ITexture *> textures;
 
 	for (std::string texture_name : texture_names) {
-		if (tsrc->isKnownSourceImage(texture_name)) {
+		if (tsrc->isKnownSourceImage(texture_name))
 			textures.push_back(tsrc->getTexture(texture_name));
-		}
 	}
 
-	if (textures.size() > 3) {
+	if (textures.size() > 3)
 		m_vscrollbar->setTextures(textures);
-	}
 
 	addChild(m_vscrollbar);
 }
@@ -1069,13 +1064,11 @@ void GUIChatConsole::updateVScrollBar()
 		}
 	}
 
-	if (IsVisible)
-	{
-		if (m_vscrollbar->isVisible() && m_vscrollbar->getMax() == 0) {
+	if (IsVisible) {
+		if (m_vscrollbar->isVisible() && m_vscrollbar->getMax() == 0)
 			m_vscrollbar->setVisible(false);
-		} else if (!m_vscrollbar->isVisible() && m_vscrollbar->getMax() > 0) {
+		else if (!m_vscrollbar->isVisible() && m_vscrollbar->getMax() > 0)
 			m_vscrollbar->setVisible(true);
-		}
 	}
 }
 
