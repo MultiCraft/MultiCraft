@@ -58,6 +58,8 @@ private:
 
 	IGUIButton *up_button;
 	IGUIButton *down_button;
+	gui::IGUIImage *bg_image;
+	gui::IGUIImage *slider_image;
 	ArrowVisibility arrow_visibility = DEFAULT;
 	bool is_dragging;
 	bool is_horizontal;

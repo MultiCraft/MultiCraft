@@ -17,11 +17,12 @@ the arrow buttons where there is insufficient space.
 GUIScrollBar::GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s32 id,
 		core::rect<s32> rectangle, bool horizontal, bool auto_scale) :
 		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
-		up_button(nullptr), down_button(nullptr), is_dragging(false),
-		is_horizontal(horizontal), is_auto_scaling(auto_scale),
-		dragged_by_slider(false), tray_clicked(false), scroll_pos(0),
-		draw_center(0), thumb_size(0), min_pos(0), max_pos(100), small_step(10),
-		large_step(50), drag_offset(0), page_size(100), border_size(0)
+		up_button(nullptr), down_button(nullptr), bg_image(nullptr), 
+		slider_image(nullptr), is_dragging(false), is_horizontal(horizontal), 
+		is_auto_scaling(auto_scale), dragged_by_slider(false), 
+		tray_clicked(false), scroll_pos(0), draw_center(0), thumb_size(0), 
+		min_pos(0), max_pos(100), small_step(10), large_step(50), 
+		drag_offset(0), page_size(100), border_size(0)
 {
 	refreshControls();
 	setNotClipped(false);
@@ -217,9 +218,13 @@ void GUIScrollBar::draw()
 		if (is_horizontal)
 			rect = {h, 0, w - h, h};
 
-		gui::IGUIImage *e = Environment->addImage(rect, this);
-		e->setImage(m_textures[0]);
-		e->setScaleImage(true);
+		if (!bg_image) {
+			bg_image = Environment->addImage(rect, this);
+			bg_image->setImage(m_textures[0]);
+			bg_image->setScaleImage(true);
+		} else {
+			bg_image->setRelativePosition(rect);
+		}
 	} else {
 		skin->draw2DRectangle(this, skin->getColor(EGDC_SCROLLBAR),
 			slider_rect, &AbsoluteClippingRect);
@@ -247,9 +252,13 @@ void GUIScrollBar::draw()
 			if (is_horizontal)
 				rect = {draw_center - (w / 2), 0, draw_center + w - (w / 2), h};
 
-			gui::IGUIImage *e = Environment->addImage(core::rect<s32>(rect), this);
-			e->setImage(m_textures[1]);
-			e->setScaleImage(true);
+			if (!slider_image) {
+				slider_image = Environment->addImage(core::rect<s32>(rect), this);
+				slider_image->setImage(m_textures[1]);
+				slider_image->setScaleImage(true);
+			} else {
+				slider_image->setRelativePosition(rect);
+			}
 		} else {
 			skin->draw3DButtonPaneStandard(this, slider_rect, &AbsoluteClippingRect);
 		}
