@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "irrlichttypes_extrabloated.h"
 #include "guiScrollBar.h"
+#include "StyleSpec.h"
 
 class ISimpleTextureSource;
 
@@ -148,10 +149,11 @@ public:
 	virtual bool OnEvent(const SEvent &event);
 
 	/* Set scrollbar texture */
-	void setScrollbarTextures(std::vector<video::ITexture *> textures)
+	void setStyle(const StyleSpec &style)
 	{
-		m_scrollbar->setArrowsVisible(GUIScrollBar::ArrowVisibility::SHOW);
-		m_scrollbar->setTextures(textures);
+		setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
+		setOverrideFont(style.getFont());
+		m_scrollbar->setStyle(style, m_tsrc);
 	}
 
 protected:

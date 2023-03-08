@@ -138,6 +138,13 @@ public:
 	virtual void deserializeAttributes(
 			io::IAttributes *in, io::SAttributeReadWriteOptions *options);
 
+	//! Sets the scrollbar texture
+	void setScrollbarStyle(const StyleSpec &style, ISimpleTextureSource *tsrc)
+	{
+		if (m_vscrollbar != nullptr)
+			m_vscrollbar->setStyle(style, tsrc);
+	}
+
 protected:
 	virtual void breakText() = 0;
 

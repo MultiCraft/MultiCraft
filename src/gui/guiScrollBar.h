@@ -13,6 +13,7 @@ the arrow buttons where there is insufficient space.
 #pragma once
 
 #include "irrlichttypes_extrabloated.h"
+#include "StyleSpec.h"
 #include <vector>
 
 using namespace irr;
@@ -50,6 +51,7 @@ public:
 	void setPageSize(const s32 &size);
 	void setArrowsVisible(ArrowVisibility visible);
 	void setTextures(const std::vector<video::ITexture *> &textures);
+	void setStyle(const StyleSpec &style, ISimpleTextureSource *tsrc);
 
 private:
 	void refreshControls();

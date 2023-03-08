@@ -739,7 +739,10 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 
 		std::vector<video::ITexture *> itextures;
 
-		if (!textures.empty()) {
+		if (textures.empty()) {
+			// Fall back to the scrollbar textures specified in style[]
+			e->setStyle(style, m_tsrc);
+		} else {
 			for (u32 i = 0; i < textures.size(); ++i)
 				itextures.push_back(m_tsrc->getTexture(textures[i]));
 
@@ -1304,20 +1307,7 @@ void GUIFormSpecMenu::parseTable(parserData* data, const std::string &element)
 			e->setSelected(stoi(str_initial_selection));
 
 		auto style = getDefaultStyleForElement("table", name);
-		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
-		e->setOverrideFont(style.getFont());
-
-		if (style.isNotDefault(StyleSpec::SCROLLBAR_BGIMG) &&
-				style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_IMG) &&
-				style.isNotDefault(StyleSpec::SCROLLBAR_UP_IMG) &&
-				style.isNotDefault(StyleSpec::SCROLLBAR_DOWN_IMG)) {
-			e->setScrollbarTextures({
-				style.getTexture(StyleSpec::SCROLLBAR_BGIMG, m_tsrc),
-				style.getTexture(StyleSpec::SCROLLBAR_THUMB_IMG, m_tsrc),
-				style.getTexture(StyleSpec::SCROLLBAR_UP_IMG, m_tsrc),
-				style.getTexture(StyleSpec::SCROLLBAR_DOWN_IMG, m_tsrc)
-			});
-		}
+		e->setStyle(style);
 
 		m_tables.emplace_back(spec, e);
 		m_fields.push_back(spec);
@@ -1394,8 +1384,7 @@ void GUIFormSpecMenu::parseTextList(parserData* data, const std::string &element
 			e->setSelected(stoi(str_initial_selection));
 
 		auto style = getDefaultStyleForElement("textlist", name);
-		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
-		e->setOverrideFont(style.getFont());
+		e->setStyle(style);
 
 		m_tables.emplace_back(spec, e);
 		m_fields.push_back(spec);
@@ -1617,15 +1606,18 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 		spec.flabel.swap(spec.fdefault);
 	}
 
+	GUIEditBox *box = nullptr;
 	gui::IGUIEditBox *e = nullptr;
 
 #if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
-		e = new gui::intlGUIEditBox(spec.fdefault.c_str(), true, Environment,
+		box = new gui::intlGUIEditBox(spec.fdefault.c_str(), true, Environment,
 				data->current_parent, spec.fid, rect, is_editable, is_multiline);
+		e = box;
 #else
 		if (is_multiline) {
-			e = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
+			box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
 					data->current_parent, spec.fid, rect, is_editable, !is_editable);
+			e = box;
 		} else if (is_editable) {
 			e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
 					data->current_parent, spec.fid);
@@ -1661,6 +1653,8 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 			e->setDrawBackground(false);
 		}
 		e->setOverrideFont(style.getFont());
+		if (box != nullptr)
+			box->setScrollbarStyle(style, m_tsrc);
 
 		e->drop();
 	}

@@ -372,6 +372,22 @@ void GUIScrollBar::setTextures(const std::vector<video::ITexture *> &textures)
 	refreshControls();
 };
 
+void GUIScrollBar::setStyle(const StyleSpec &style, ISimpleTextureSource *tsrc)
+{
+	if (style.isNotDefault(StyleSpec::SCROLLBAR_BGIMG) &&
+			style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_IMG) &&
+			style.isNotDefault(StyleSpec::SCROLLBAR_UP_IMG) &&
+			style.isNotDefault(StyleSpec::SCROLLBAR_DOWN_IMG)) {
+		arrow_visibility = ArrowVisibility::SHOW;
+		setTextures({
+			style.getTexture(StyleSpec::SCROLLBAR_BGIMG, tsrc),
+			style.getTexture(StyleSpec::SCROLLBAR_THUMB_IMG, tsrc),
+			style.getTexture(StyleSpec::SCROLLBAR_UP_IMG, tsrc),
+			style.getTexture(StyleSpec::SCROLLBAR_DOWN_IMG, tsrc)
+		});
+	}
+}
+
 void GUIScrollBar::refreshControls()
 {
 	IGUISkin *skin = Environment->getSkin();
