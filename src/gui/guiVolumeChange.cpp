@@ -21,11 +21,11 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include "debug.h"
 #include "guiBackgroundImage.h"
 #include "guiButton.h"
+#include "guiScrollBar.h"
 #include "serialization.h"
 #include <string>
 #include <IGUICheckBox.h>
 #include <IGUIButton.h>
-#include <IGUIScrollBar.h>
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
 #include "settings.h"
@@ -139,12 +139,19 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 		e->setStyles(StyleSpec::getButtonStyle());
 	}
 	{
-		core::rect<s32> rect(0, 0, 320 * s, 25 * s);
+		core::rect<s32> rect(0, 0, 320 * s, 30 * s);
 		rect = rect + v2s32(size.X / 2 - 160 * s, size.Y / 2 - 12 * s); // 30
-		gui::IGUIScrollBar *e = Environment->addScrollBar(true,
-			rect, this, ID_soundSlider);
+		GUIScrollBar *e = new GUIScrollBar(Environment, this,
+			ID_soundSlider, rect, true, false);
 		e->setMax(100);
 		e->setPos(volume);
+		e->setArrowsVisible(GUIScrollBar::ArrowVisibility::SHOW);
+		e->setTextures({
+			m_tsrc->getTexture("gui/scrollbar_horiz_bg.png"),
+			m_tsrc->getTexture("gui/scrollbar_slider.png"),
+			m_tsrc->getTexture("gui/scrollbar_minus.png"),
+			m_tsrc->getTexture("gui/scrollbar_plus.png"),
+		});
 	}
 	/*{
 		core::rect<s32> rect(0, 0, 150 * s, 25 * s);
@@ -219,7 +226,7 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 		}
 		if (event.GUIEvent.EventType == gui::EGET_SCROLL_BAR_CHANGED) {
 			if (event.GUIEvent.Caller->getID() == ID_soundSlider) {
-				s32 pos = ((gui::IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
+				s32 pos = ((GUIScrollBar*)event.GUIEvent.Caller)->getPos();
 				g_settings->setFloat("sound_volume", (float) pos / 100);
 
 				// unmute sound when changing the volume
