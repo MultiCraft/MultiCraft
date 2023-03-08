@@ -832,7 +832,7 @@ function store.get_formspec(dlgdata)
 			formspec[#formspec + 1] = "cdb_queued.png;queued]"
 		elseif not package.path then
 			local elem_name = "install_" .. i .. ";"
-				formspec[#formspec + 1] = btn_style("install_" .. i, "green", true)
+			formspec[#formspec + 1] = btn_style("install_" .. i, "green", true)
 			formspec[#formspec + 1] = left_base .. "cdb_add.png;" .. elem_name .. "]"
 			formspec[#formspec + 1] = "tooltip[" .. elem_name .. fgettext("Install") .. tooltip_colors
 		else

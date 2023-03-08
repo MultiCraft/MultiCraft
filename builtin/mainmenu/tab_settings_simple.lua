@@ -173,7 +173,7 @@ local function formspec(tabview, name, tabdata)
 		"label[0.3,5;", fgettext("Mouse sensitivity"), ":]",
 		"scrollbar[0.3,5.3;4.2,0.8;horizontal;sb_sensitivity;", tostring(sensitivity), ";",
 			guitexturedir, "scrollbar_horiz_bg.png,", guitexturedir, "scrollbar_slider.png,",
-			guitexturedir, "scrollbar_left.png,", guitexturedir, "scrollbar_right.png]",
+			guitexturedir, "scrollbar_minus.png,", guitexturedir, "scrollbar_plus.png]",
 		"scroll_container_end[]",
 
 		-- Right column
