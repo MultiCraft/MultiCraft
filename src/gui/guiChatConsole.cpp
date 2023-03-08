@@ -124,6 +124,12 @@ void GUIChatConsole::openConsole(f32 scale)
 
 	m_open = true;
 	m_desired_height_fraction = scale;
+
+	if (g_settings->getU32("fps_max") < 60) {
+		m_desired_height_fraction *= m_screensize.Y;
+		m_height = m_desired_height_fraction;
+	}
+
 	m_desired_height = scale * m_screensize.Y;
 	reformatConsole();
 	m_animate_time_old = porting::getTimeMs();
@@ -154,17 +160,16 @@ void GUIChatConsole::closeConsole()
 	Environment->removeFocus(this);
 	m_menumgr->deletingMenu(this);
 
+	if (g_settings->getU32("fps_max") < 60) {
+		m_height = 0;
+		recalculateConsolePosition();
+	}
+
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
 		SDL_StopTextInput();
 #endif
-}
 
-void GUIChatConsole::closeConsoleAtOnce()
-{
-	closeConsole();
-	m_height = 0;
-	recalculateConsolePosition();
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui && g_touchscreengui->isActive())
 		g_touchscreengui->show();
@@ -655,7 +660,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 
 		if (event.KeyInput.Key == KEY_ESCAPE || event.KeyInput.Key == KEY_CANCEL) {
-			closeConsoleAtOnce();
+			closeConsole();
 			m_close_on_enter = false;
 			// inhibit open so the_game doesn't reopen immediately
 			m_open_inhibited = 1; // so the ESCAPE button doesn't open the "pause menu"
@@ -683,7 +688,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			std::wstring text = prompt.replace(L"");
 			m_client->typeChatMessage(text);
 			if (m_close_on_enter) {
-				closeConsoleAtOnce();
+				closeConsole();
 				m_close_on_enter = false;
 			}
 			return true;

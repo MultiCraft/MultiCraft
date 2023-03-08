@@ -119,8 +119,6 @@ public:
 	// Close the console, equivalent to openConsole(0).
 	// This doesn't close immediately but initiates an animation.
 	void closeConsole();
-	// Close the console immediately, without animation.
-	void closeConsoleAtOnce();
 	// Set whether to close the console after the user presses enter.
 	void setCloseOnEnter(bool close) { m_close_on_enter = close; }
 

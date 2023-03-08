@@ -1882,7 +1882,7 @@ void Game::processUserInput(f32 dtime)
 #endif
 
 	if (!gui_chat_console->hasFocus() && gui_chat_console->isOpen()) {
-		gui_chat_console->closeConsoleAtOnce();
+		gui_chat_console->closeConsole();
 	}
 
 	// Input handler step() (used by the random input generator)
@@ -2166,7 +2166,7 @@ void Game::handleAndroidChatInput()
 		client->typeChatMessage(utf8_to_wide(text));
 		gui_chat_console->setAndroidChatOpen(false);
 		if (!text.empty() && gui_chat_console->isOpen()) {
-			gui_chat_console->closeConsoleAtOnce();
+			gui_chat_console->closeConsole();
 		}
 	}
 }
