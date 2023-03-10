@@ -440,8 +440,13 @@ int ModApiEnvMod::l_get_natural_light(lua_State *L)
 
 	// If it's the same as the artificial light, the sunlight needs to be
 	// searched for because the value may not emanate from the sun
-	if (daylight == n.param1 >> 4)
-		daylight = env->findSunlight(pos);
+	try {
+		if (daylight == n.param1 >> 4)
+			daylight = env->findSunlight(pos);
+	} catch (InvalidPositionException &e) {
+		errorstream << "InvalidPositionException when getting natural light at "
+			<< PP(pos) << std::endl;
+	}
 
 	lua_pushinteger(L, dnr * daylight / 1000);
 	return 1;
