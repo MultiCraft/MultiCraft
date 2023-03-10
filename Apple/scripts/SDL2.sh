@@ -10,6 +10,8 @@ if [ ! -d SDL2-src ]; then
 	tar -xzvf release-$SDL2_VERSION.tar.gz
 	mv SDL-release-$SDL2_VERSION SDL2-src
 	rm release-$SDL2_VERSION.tar.gz
+	# Patch SDL2
+	patch -p1 < ../SDL2-handle-modifiers.diff
 	# Disable some features that are not needed
 	sed -i '' 's/#define SDL_AUDIO_DRIVER_COREAUDIO  1/#define SDL_AUDIO_DRIVER_COREAUDIO  0/g' SDL2-src/include/SDL_config_macosx.h
 	sed -i '' 's/#define SDL_AUDIO_DRIVER_DISK   1/#define SDL_AUDIO_DRIVER_DISK   0/g' SDL2-src/include/SDL_config_macosx.h
