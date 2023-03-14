@@ -2923,6 +2923,12 @@ Some types may inherit styles from parent types.
     * sound - a sound to be played when triggered.
 * scrollbar
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
+* scrollbar, table, textarea
+    * scrollbar_bgimg - The background image of the scrollbar
+    * scrollbar_thumb_img - The thumb/slider image of the scrollbar
+    * scrollbar_up_img - The up arrow image to use for the scrollbar
+    * scrollbar_down_img - The down arrow image to use for the scrollbar
+    * NOTE: Scrollbar textures will only be applied if all scrollbar image properties are specified.
 * tabheader
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
     * sound - a sound to be played when a different tab is selected.
