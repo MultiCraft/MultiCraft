@@ -58,11 +58,17 @@ local function get_formspec(tabview, name, tabdata)
 	end
 
 
+	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 	local retval =
 		"label[-0.05,-0.25;".. fgettext("Installed Packages:") .. "]" ..
 		"background9[0,0.23;5.3,4.46;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 		"tablecolumns[color;tree;text]" ..
 		"tableoptions[background=#0000;border=false]" ..
+		"style_type[table;scrollbar_bgimg=" ..
+			tpath .. "scrollbar_bg.png;scrollbar_thumb_img=" ..
+			tpath .. "scrollbar_slider_long.png;scrollbar_up_img=" ..
+			tpath .. "scrollbar_up.png;scrollbar_down_img=" ..
+			tpath .. "scrollbar_down.png]" ..
 		"table[0,0.25;5.1,4.3;pkglist;" ..
 		pkgmgr.render_packagelist(packages) ..
 		";" .. tabdata.selected_pkg .. "]" ..

@@ -130,6 +130,7 @@ local function get_formspec(_, _, tab_data)
 
 	local c_label = utf8.gsub(fgettext("Creative mode"), "(%w)(%w+)",
 		function(a, b) return utf8.upper(a) .. b end)
+	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 	retval = retval ..
 			btn_style("play") ..
 			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..
@@ -147,6 +148,11 @@ local function get_formspec(_, _, tab_data)
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"tablecolumns[" .. image_column(fgettext("Creative mode")) .. ";text]" ..
+			"style_type[table;scrollbar_bgimg=" ..
+				tpath .. "scrollbar_bg.png;scrollbar_thumb_img=" ..
+				tpath .. "scrollbar_slider_long.png;scrollbar_up_img=" ..
+				tpath .. "scrollbar_up.png;scrollbar_down_img=" ..
+				tpath .. "scrollbar_down.png]" ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
 	if tab_data.hidden then
