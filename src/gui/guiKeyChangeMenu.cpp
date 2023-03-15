@@ -353,7 +353,7 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 	if (event.EventType == EET_KEY_INPUT_EVENT && active_key
 			&& event.KeyInput.PressedDown) {
 
-		bool prefer_character = shift_down;
+		bool prefer_character = shift_down && event.KeyInput.Char != 0;
 		KeyPress kp(event.KeyInput, prefer_character);
 
 		if (event.KeyInput.Key == irr::KEY_DELETE)
