@@ -1111,7 +1111,9 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		end
 	end
 
-	if fields.Dsearch_string or fields.key_enter_field == "Dsearch_string" then
+	if (fields.Dsearch_string or fields.key_enter_field == "Dsearch_string") and
+			not (fields["btn_edit"] or list_enter or fields["btn_restore"] or
+			fields["btn_back"] or fields["cb_tech_settings"]) then
 		if search_string == fields.Dsearch_string then
 			if selected_setting > 0 then
 				-- Go to next result on enter press
