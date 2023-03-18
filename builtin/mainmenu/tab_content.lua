@@ -104,6 +104,7 @@ local function get_formspec(tabview, name, tabdata)
 
 		retval = retval ..
 				"image[5.5,0;3,2;" .. core.formspec_escape(modscreenshot) .. "]" ..
+				"image[5.5,0;3,2;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "cdb_img_corners.png;15]" ..
 				"label[8.25,0.6;" .. core.formspec_escape(selected_pkg.name) .. "]" ..
 				"background9[5.6,2.3;6.2,2.4;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]"
 

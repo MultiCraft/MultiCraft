@@ -809,6 +809,12 @@ function store.get_formspec(dlgdata)
 		formspec[#formspec + 1] = get_screenshot(package)
 		formspec[#formspec + 1] = "]"
 
+		formspec[#formspec + 1] = "image[-0.01,-0.01;1.52,1.02;"
+		formspec[#formspec + 1] = defaulttexturedir_esc
+		formspec[#formspec + 1] = "gui"
+		formspec[#formspec + 1] = DIR_DELIM_esc
+		formspec[#formspec + 1] = "cdb_img_corners.png;15]"
+
 		-- title
 		formspec[#formspec + 1] = "label[1.875,0.1;"
 		formspec[#formspec + 1] = esc(
