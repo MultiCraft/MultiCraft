@@ -17,11 +17,12 @@ the arrow buttons where there is insufficient space.
 GUIScrollBar::GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s32 id,
 		core::rect<s32> rectangle, bool horizontal, bool auto_scale) :
 		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
-		up_button(nullptr), down_button(nullptr), bg_image(nullptr), 
-		slider_image(nullptr), is_dragging(false), is_horizontal(horizontal), 
-		is_auto_scaling(auto_scale), dragged_by_slider(false), 
-		tray_clicked(false), scroll_pos(0), draw_center(0), thumb_size(0), 
-		min_pos(0), max_pos(100), small_step(10), large_step(50), 
+		up_button(nullptr), down_button(nullptr),
+		up_image(nullptr), down_image(nullptr), bg_image(nullptr),
+		slider_image(nullptr), is_dragging(false), is_horizontal(horizontal),
+		is_auto_scaling(auto_scale), dragged_by_slider(false),
+		tray_clicked(false), scroll_pos(0), draw_center(0), thumb_size(0),
+		min_pos(0), max_pos(100), small_step(10), large_step(50),
 		drag_offset(0), page_size(100), border_size(0)
 {
 	refreshControls();
@@ -194,6 +195,22 @@ bool GUIScrollBar::OnEvent(const SEvent &event)
 	return IGUIElement::OnEvent(event);
 }
 
+IGUIElement* GUIScrollBar::addImage(const core::rect<s32> &rect, video::ITexture *texture)
+{
+	if (m_texture_middle.getArea() > 0) {
+		GUIAnimatedImage *image = new GUIAnimatedImage(Environment, this, -1, rect);
+
+		image->setTexture(texture);
+		image->setMiddleRect(m_texture_middle);
+		return image;
+	}
+
+	gui::IGUIImage *e = Environment->addImage(rect, this);
+	e->setImage(texture);
+	e->setScaleImage(true);
+	return e;
+}
+
 void GUIScrollBar::draw()
 {
 	if (!IsVisible)
@@ -218,13 +235,10 @@ void GUIScrollBar::draw()
 		if (is_horizontal)
 			rect = {h, 0, w - h, h};
 
-		if (!bg_image) {
-			bg_image = Environment->addImage(rect, this);
-			bg_image->setImage(m_textures[0]);
-			bg_image->setScaleImage(true);
-		} else {
+		if (!bg_image)
+			bg_image = addImage(rect, m_textures[0]);
+		else
 			bg_image->setRelativePosition(rect);
-		}
 	} else {
 		skin->draw2DRectangle(this, skin->getColor(EGDC_SCROLLBAR),
 			slider_rect, &AbsoluteClippingRect);
@@ -252,17 +266,31 @@ void GUIScrollBar::draw()
 			if (is_horizontal)
 				rect = {draw_center - (w / 2), 0, draw_center + w - (w / 2), h};
 
-			if (!slider_image) {
-				slider_image = Environment->addImage(core::rect<s32>(rect), this);
-				slider_image->setImage(m_textures[1]);
-				slider_image->setScaleImage(true);
-			} else {
+			if (!slider_image)
+				slider_image = addImage(rect, m_textures[1]);
+			else
 				slider_image->setRelativePosition(rect);
-			}
 		} else {
 			skin->draw3DButtonPaneStandard(this, slider_rect, &AbsoluteClippingRect);
 		}
 	//}
+
+	// HACK: Draw 9-sliced images over top of the buttons (if required)
+	if (m_texture_middle.getArea() > 0) {
+		if (!up_image && m_textures.size() >= 3 && up_button && up_button->isVisible()) {
+			up_image = new GUIAnimatedImage(Environment, this, -1, up_button->getRelativePosition());
+			up_image->setTexture(m_textures[2]);
+			up_image->setMiddleRect(m_texture_middle);
+			up_image->setVisible(false);
+		}
+
+		if (!down_image && m_textures.size() >= 4 && down_button && down_button->isVisible()) {
+			down_image = new GUIAnimatedImage(Environment, this, -1, down_button->getRelativePosition());
+			down_image->setTexture(m_textures[3]);
+			down_image->setMiddleRect(m_texture_middle);
+			down_image->setVisible(false);
+		}
+	}
 
 	IGUIElement::draw();
 }
@@ -379,6 +407,7 @@ void GUIScrollBar::setStyle(const StyleSpec &style, ISimpleTextureSource *tsrc)
 			style.isNotDefault(StyleSpec::SCROLLBAR_UP_IMG) &&
 			style.isNotDefault(StyleSpec::SCROLLBAR_DOWN_IMG)) {
 		arrow_visibility = ArrowVisibility::SHOW;
+		m_texture_middle = style.getRect(StyleSpec::SCROLLBAR_MIDDLE, core::rect<s32>(0, 0, 0, 0));
 		setTextures({
 			style.getTexture(StyleSpec::SCROLLBAR_BGIMG, tsrc),
 			style.getTexture(StyleSpec::SCROLLBAR_THUMB_IMG, tsrc),

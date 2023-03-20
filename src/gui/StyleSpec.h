@@ -63,6 +63,7 @@ public:
 		SCROLLBAR_THUMB_IMG,
 		SCROLLBAR_UP_IMG,
 		SCROLLBAR_DOWN_IMG,
+		SCROLLBAR_MIDDLE,
 		NUM_PROPERTIES,
 		NONE
 	};
@@ -167,6 +168,8 @@ public:
 			return SCROLLBAR_UP_IMG;
 		} else if (name == "scrollbar_down_img") {
 			return SCROLLBAR_DOWN_IMG;
+		} else if (name == "scrollbar_middle") {
+			return SCROLLBAR_MIDDLE;
 		} else {
 			return NONE;
 		}
