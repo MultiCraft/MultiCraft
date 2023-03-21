@@ -1028,11 +1028,7 @@ local function create_settings_formspec(tabview, _, tabdata)
 			"style[Dsearch_string;border=false;bgcolor=transparent]" ..
 			"field[0.3,0.15;12.0,0.9;Dsearch_string;;" .. core.formspec_escape(search_string) .. "]" ..
 			"field_close_on_enter[Dsearch_string;false]" ..
-			"style_type[table;scrollbar_bgimg=" ..
-				tpath .. "scrollbar_bg.png;scrollbar_thumb_img=" ..
-				tpath .. "scrollbar_slider_long.png;scrollbar_up_img=" ..
-				tpath .. "scrollbar_up.png;scrollbar_down_img=" ..
-				tpath .. "scrollbar_down.png]" ..
+			scrollbar_style("list_settings") ..
 			"table[0,0.8;11.8,3.5;list_settings;"
 
 	local current_level = 0

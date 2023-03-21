@@ -136,9 +136,7 @@ return {
 				"worldlist_bg.png;false;40]" ..
 			"tablecolumns[color;text]" ..
 			"tableoptions[background=#0000;highlight=#00000000;border=false]" ..
-			"style_type[table;scrollbar_bgimg=" .. tpath .. "scrollbar_bg.png;scrollbar_thumb_img=" ..
-				tpath .. "scrollbar_slider.png;scrollbar_up_img=" .. tpath .. "scrollbar_up.png;scrollbar_down_img=" ..
-				tpath .. "scrollbar_down.png]" ..
+			scrollbar_style("list_credits") ..
 			"table[0,1.5;11.75,4.05;list_credits;" ..
 			"#FFFF00," .. fgettext("Core Developers") .. " (MultiCraft),," ..
 			buildCreditList(multicraft_developers) .. ",,," ..

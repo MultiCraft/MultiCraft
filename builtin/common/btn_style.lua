@@ -108,3 +108,12 @@ function checkbox(x, y, name, label, checked, small)
 		x, y - 0.25, small and 4.3 or 7, name
 	)
 end
+--------------------------------------------------------------------------------
+function scrollbar_style(name, style_type)
+	local btn_size = is_high_dpi() and "" or ".1x"
+	return "style" .. (style_type and "_type" or "") .. "[" .. name .. ";scrollbar_bgimg=" ..
+		button_path .. "scrollbar_bg" .. btn_size .. ".png;scrollbar_thumb_img=" ..
+		button_path .. "scrollbar_slider" .. btn_size .. ".png;scrollbar_up_img=" ..
+		button_path .. "scrollbar_up" .. btn_size .. ".png;scrollbar_down_img=" ..
+		button_path .. "scrollbar_down" .. btn_size .. ".png]"
+end
