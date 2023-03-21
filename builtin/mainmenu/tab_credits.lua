@@ -118,7 +118,6 @@ return {
 	caption = "", -- fgettext("Credits"),
 	cbf_formspec = function(tabview, name, tabdata)
 		local version = core.get_version()
-		local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 		local logofile = defaulttexturedir_esc .. "logo.png"
 		local fs = "image[-0.25,-0.3;2,2;" .. logofile .. "]" ..
 			"label[1.3,-0.25;" ..

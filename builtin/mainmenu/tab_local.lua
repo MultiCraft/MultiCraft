@@ -130,7 +130,6 @@ local function get_formspec(_, _, tab_data)
 
 	local c_label = utf8.gsub(fgettext("Creative mode"), "(%w)(%w+)",
 		function(a, b) return utf8.upper(a) .. b end)
-	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 	retval = retval ..
 			btn_style("play") ..
 			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..

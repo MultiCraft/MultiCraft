@@ -79,7 +79,6 @@ local function get_formspec(this)
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local c_label = utf8.gsub(fgettext("Creative mode"), "(%w)(%w+)",
 		function(a, b) return utf8.upper(a) .. b end)
-	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 	local retval =
 			"style[world_delete,world_create;font_size=*" ..
 				(small_screen and 1.2 or 1.5) .. "]" ..

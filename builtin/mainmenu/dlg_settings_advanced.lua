@@ -1019,7 +1019,6 @@ local function handle_change_setting_buttons(this, fields)
 end
 
 local function create_settings_formspec(tabview, _, tabdata)
-	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 	local formspec =
 			"tablecolumns[color;tree;text,width=28;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..

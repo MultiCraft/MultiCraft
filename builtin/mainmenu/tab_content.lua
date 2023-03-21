@@ -58,7 +58,6 @@ local function get_formspec(tabview, name, tabdata)
 	end
 
 
-	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 	local retval =
 		"label[-0.05,-0.25;".. fgettext("Installed Packages:") .. "]" ..
 		"background9[0,0.23;5.3,4.46;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..

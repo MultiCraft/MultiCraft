@@ -43,8 +43,6 @@ local function get_formspec(tabview, name, tabdata)
 		address = address .. ":" .. port
 	end
 
-	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
-
 	local retval =
 		-- Search
 		"formspec_version[3]" ..
@@ -115,7 +113,7 @@ local function get_formspec(tabview, name, tabdata)
 		image_column(fgettext("Server mode")) .. ",padding=0.5;" ..
 		"color,span=1;" ..
 		"text,padding=0.5]" ..
-		scrollbar_style("favorites"),
+		scrollbar_style("favorites") ..
 		"table[-0.02,-0.1;6.91,4.87;favorites;"
 
 	if menudata.search_result then
