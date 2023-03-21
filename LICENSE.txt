@@ -25,6 +25,7 @@ MultiCraft Development Team:
   textures/base/pack/chat_btn.png
   textures/base/pack/crack_anylength_touch.png
   textures/base/pack/creative_bg.png
+  textures/base/pack/error_screenshot.png
   textures/base/pack/desc_bg.png
   textures/base/pack/down_btn.png
   textures/base/pack/drop_btn.png
@@ -33,6 +34,7 @@ MultiCraft Development Team:
   textures/base/pack/inventory_btn.png
   textures/base/pack/joystick_*.png
   textures/base/pack/jump_btn.png
+  textures/base/pack/loading_screenshot.png
   textures/base/pack/logo.png
   textures/base/pack/minimap_btn.png
   textures/base/pack/progress_bar.png
