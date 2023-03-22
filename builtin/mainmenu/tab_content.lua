@@ -63,7 +63,6 @@ local function get_formspec(tabview, name, tabdata)
 		"background9[0,0.23;5.3,4.46;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 		"tablecolumns[color;tree;text]" ..
 		"tableoptions[background=#0000;border=false]" ..
-		scrollbar_style("pkglist") ..
 		"table[0,0.25;5.1,4.3;pkglist;" ..
 		pkgmgr.render_packagelist(packages) ..
 		";" .. tabdata.selected_pkg .. "]" ..
