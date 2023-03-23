@@ -63,7 +63,8 @@ public:
 		SCROLLBAR_THUMB_IMG,
 		SCROLLBAR_UP_IMG,
 		SCROLLBAR_DOWN_IMG,
-		SCROLLBAR_MIDDLE,
+		SCROLLBAR_THUMB_TOP_IMG,
+		SCROLLBAR_THUMB_BOTTOM_IMG,
 		NUM_PROPERTIES,
 		NONE
 	};
@@ -168,8 +169,10 @@ public:
 			return SCROLLBAR_UP_IMG;
 		} else if (name == "scrollbar_down_img") {
 			return SCROLLBAR_DOWN_IMG;
-		} else if (name == "scrollbar_middle") {
-			return SCROLLBAR_MIDDLE;
+		} else if (name == "scrollbar_thumb_top_img") {
+			return SCROLLBAR_THUMB_TOP_IMG;
+		} else if (name == "scrollbar_thumb_bottom_img") {
+			return SCROLLBAR_THUMB_BOTTOM_IMG;
 		} else {
 			return NONE;
 		}

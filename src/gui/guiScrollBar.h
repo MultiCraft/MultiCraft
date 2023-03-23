@@ -58,14 +58,14 @@ private:
 	void refreshControls();
 	s32 getPosFromMousePos(const core::position2di &p) const;
 	f32 range() const { return f32(max_pos - min_pos); }
-	IGUIElement *addImage(const core::rect<s32> &rect, video::ITexture *texture);
+	gui::IGUIImage *addImage(const core::rect<s32> &rect, video::ITexture *texture);
 
 	IGUIButton *up_button;
 	IGUIButton *down_button;
-	GUIAnimatedImage *up_image;
-	GUIAnimatedImage *down_image;
-	IGUIElement *bg_image;
-	IGUIElement *slider_image;
+	gui::IGUIImage *bg_image;
+	gui::IGUIImage *slider_image;
+	gui::IGUIImage *slider_top_image;
+	gui::IGUIImage *slider_bottom_image;
 	ArrowVisibility arrow_visibility = DEFAULT;
 	bool is_dragging;
 	bool is_horizontal;

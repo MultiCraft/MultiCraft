@@ -17,9 +17,9 @@ the arrow buttons where there is insufficient space.
 GUIScrollBar::GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s32 id,
 		core::rect<s32> rectangle, bool horizontal, bool auto_scale) :
 		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
-		up_button(nullptr), down_button(nullptr),
-		up_image(nullptr), down_image(nullptr), bg_image(nullptr),
-		slider_image(nullptr), is_dragging(false), is_horizontal(horizontal),
+		up_button(nullptr), down_button(nullptr), bg_image(nullptr),
+		slider_image(nullptr), slider_top_image(nullptr),
+		slider_bottom_image(nullptr), is_dragging(false), is_horizontal(horizontal),
 		is_auto_scaling(auto_scale), dragged_by_slider(false),
 		tray_clicked(false), scroll_pos(0), draw_center(0), thumb_size(0),
 		min_pos(0), max_pos(100), small_step(10), large_step(50),
@@ -195,16 +195,8 @@ bool GUIScrollBar::OnEvent(const SEvent &event)
 	return IGUIElement::OnEvent(event);
 }
 
-IGUIElement* GUIScrollBar::addImage(const core::rect<s32> &rect, video::ITexture *texture)
+gui::IGUIImage* GUIScrollBar::addImage(const core::rect<s32> &rect, video::ITexture *texture)
 {
-	if (m_texture_middle.getArea() > 0) {
-		GUIAnimatedImage *image = new GUIAnimatedImage(Environment, this, -1, rect);
-
-		image->setTexture(texture);
-		image->setMiddleRect(m_texture_middle);
-		return image;
-	}
-
 	gui::IGUIImage *e = Environment->addImage(rect, this);
 	e->setImage(texture);
 	e->setScaleImage(true);
@@ -270,27 +262,28 @@ void GUIScrollBar::draw()
 				slider_image = addImage(rect, m_textures[1]);
 			else
 				slider_image->setRelativePosition(rect);
+
+			// Add top and bottom images if required
+			// TODO: Horizontal scrollbars
+			if (m_textures.size() >= 6 && !is_horizontal) {
+				core::rect<s32> top_rect = rect;
+				top_rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + w / 2;
+				if (!slider_top_image)
+					slider_top_image = addImage(top_rect, m_textures[4]);
+				else
+					slider_top_image->setRelativePosition(top_rect);
+
+				core::rect<s32> bottom_rect = rect;
+				bottom_rect.UpperLeftCorner.Y = rect.LowerRightCorner.Y - w / 2;
+				if (!slider_bottom_image)
+					slider_bottom_image = addImage(bottom_rect, m_textures[5]);
+				else
+					slider_bottom_image->setRelativePosition(bottom_rect);
+			}
 		} else {
 			skin->draw3DButtonPaneStandard(this, slider_rect, &AbsoluteClippingRect);
 		}
 	//}
-
-	// HACK: Draw 9-sliced images over top of the buttons (if required)
-	if (m_texture_middle.getArea() > 0) {
-		if (!up_image && m_textures.size() >= 3 && up_button && up_button->isVisible()) {
-			up_image = new GUIAnimatedImage(Environment, this, -1, up_button->getRelativePosition());
-			up_image->setTexture(m_textures[2]);
-			up_image->setMiddleRect(m_texture_middle);
-			up_image->setVisible(false);
-		}
-
-		if (!down_image && m_textures.size() >= 4 && down_button && down_button->isVisible()) {
-			down_image = new GUIAnimatedImage(Environment, this, -1, down_button->getRelativePosition());
-			down_image->setTexture(m_textures[3]);
-			down_image->setMiddleRect(m_texture_middle);
-			down_image->setVisible(false);
-		}
-	}
 
 	IGUIElement::draw();
 }
@@ -407,13 +400,18 @@ void GUIScrollBar::setStyle(const StyleSpec &style, ISimpleTextureSource *tsrc)
 			style.isNotDefault(StyleSpec::SCROLLBAR_UP_IMG) &&
 			style.isNotDefault(StyleSpec::SCROLLBAR_DOWN_IMG)) {
 		arrow_visibility = ArrowVisibility::SHOW;
-		m_texture_middle = style.getRect(StyleSpec::SCROLLBAR_MIDDLE, core::rect<s32>(0, 0, 0, 0));
-		setTextures({
+		std::vector<video::ITexture *> textures = {
 			style.getTexture(StyleSpec::SCROLLBAR_BGIMG, tsrc),
 			style.getTexture(StyleSpec::SCROLLBAR_THUMB_IMG, tsrc),
 			style.getTexture(StyleSpec::SCROLLBAR_UP_IMG, tsrc),
 			style.getTexture(StyleSpec::SCROLLBAR_DOWN_IMG, tsrc)
-		});
+		};
+		if (style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_TOP_IMG) &&
+				style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_BOTTOM_IMG)) {
+			textures.push_back(style.getTexture(StyleSpec::SCROLLBAR_THUMB_TOP_IMG, tsrc));
+			textures.push_back(style.getTexture(StyleSpec::SCROLLBAR_THUMB_BOTTOM_IMG, tsrc));
+		}
+		setTextures(textures);
 	}
 }
 
