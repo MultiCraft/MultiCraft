@@ -138,7 +138,7 @@ local function get_formspec(data)
 		"button[8.5,7.1;3,0.5;btn_config_world_cancel;" ..
 		fgettext("Cancel") .. "]" ..
 		btn_style("btn_config_world_cdb") ..
-		"button[-0.05,7.1;3.5,0.5;btn_config_world_cdb;" ..
+		"button[-0.05,7.1;5.5,0.5;btn_config_world_cdb;" ..
 		fgettext("Find More Mods") .. "]" ..
 		"image[0.09,7.05;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
 		DIR_DELIM_esc .. "btn_download.png]"
