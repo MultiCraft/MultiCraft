@@ -136,12 +136,12 @@ local function get_formspec(tabview, name, tabdata)
 				if selected_pkg.enabled then
 					retval = retval ..
 						btn_style("btn_mod_mgr_disable_txp") ..
-						"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_disable_txp;" ..
+						"image_button[6.4,4.8;5.5,0.9;;btn_mod_mgr_disable_txp;" ..
 						fgettext("Disable Texture Pack") .. ";true;false]"
 				else
 					retval = retval ..
 						btn_style("btn_mod_mgr_use_txp", "green") ..
-						"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_use_txp;" ..
+						"image_button[6.4,4.8;5.5,0.9;;btn_mod_mgr_use_txp;" ..
 						fgettext("Use Texture Pack") .. ";true;false]"
 				end
 			end
