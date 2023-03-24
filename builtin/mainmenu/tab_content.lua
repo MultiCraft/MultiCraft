@@ -103,12 +103,13 @@ local function get_formspec(tabview, name, tabdata)
 				"background9[5.6,2.3;6.2,2.4;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]"
 
 		if selected_pkg.type == "mod" then
-			if selected_pkg.is_modpack then
-				retval = retval ..
-					btn_style("btn_mod_mgr_rename_modpack") ..
-					"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_rename_modpack;" ..
-					fgettext("Rename") .. ";true;false]"
-			else
+			-- if selected_pkg.is_modpack then
+			-- 	retval = retval ..
+			-- 		btn_style("btn_mod_mgr_rename_modpack") ..
+			-- 		"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_rename_modpack;" ..
+			-- 		fgettext("Rename") .. ";true;false]"
+			-- else
+			if not selected_pkg.is_modpack then
 				--show dependencies
 				desc = desc .. "\n\n"
 				local toadd_hard = table.concat(info.depends or {}, "\n")
@@ -152,8 +153,9 @@ local function get_formspec(tabview, name, tabdata)
 		if core.may_modify_path(selected_pkg.path) then
 			retval = retval ..
 				btn_style("btn_mod_mgr_delete_mod", "red") ..
-				"image_button[5.5,4.8;3.25,0.9;;btn_mod_mgr_delete_mod;" ..
-				fgettext("Uninstall Package") .. ";true;false]"
+				"image_button[5.5,4.8;0.9,0.9;" .. defaulttexturedir_esc ..
+				"trash.png;btn_mod_mgr_delete_mod;;true;false;" .. defaulttexturedir_esc .. "trash_pressed.png]" ..
+				"tooltip[btn_mod_mgr_delete_mod;" .. fgettext("Uninstall Package") .. "]"
 		end
 	end
 	return retval
@@ -176,6 +178,7 @@ local function handle_buttons(tabview, fields, tabname, tabdata)
 		return true
 	end
 
+	--[[
 	if fields["btn_mod_mgr_rename_modpack"] ~= nil then
 		local mod = packages:get_list()[tabdata.selected_pkg]
 		local dlg_renamemp = create_rename_modpack_dlg(mod)
@@ -185,6 +188,7 @@ local function handle_buttons(tabview, fields, tabname, tabdata)
 		packages = nil
 		return true
 	end
+	]]
 
 	if fields["btn_mod_mgr_delete_mod"] ~= nil then
 		local mod = packages:get_list()[tabdata.selected_pkg]
