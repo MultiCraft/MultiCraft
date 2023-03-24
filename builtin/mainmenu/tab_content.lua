@@ -67,7 +67,9 @@ local function get_formspec(tabview, name, tabdata)
 		pkgmgr.render_packagelist(packages) ..
 		";" .. tabdata.selected_pkg .. "]" ..
 		btn_style("btn_contentdb") ..
-		"image_button[-0.11,4.8;5.5,0.9;;btn_contentdb;" .. fgettext("Browse online content") .. ";true;false]"
+		"image_button[-0.11,4.8;5.5,0.9;;btn_contentdb;" .. fgettext("Browse online content") .. ";true;false]" ..
+		"image[0.03,4.925;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
+			DIR_DELIM_esc .. "btn_download.png]"
 
 
 	local selected_pkg
