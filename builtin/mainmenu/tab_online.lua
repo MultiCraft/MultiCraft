@@ -46,10 +46,9 @@ local function get_formspec(tabview, name, tabdata)
 	local retval =
 		-- Search
 		"formspec_version[3]" ..
-		"image[-0.11,4.93;7.02,0.81;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+		"image[-0.11,4.93;8.02,0.81;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
 		"style[Dte_search;border=false;bgcolor=transparent]" ..
-		"field[0.25,5.25;5.7,0.83;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-		btn_style("btn_mp_clear") ..
+		"field[0.25,5.25;5.9,0.83;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
 		"image_button[5.62,4.93;0.83,0.83;" .. defaulttexturedir_esc ..
 			"clear.png;btn_mp_clear;;true;false]" ..
 		btn_style("btn_mp_refresh") ..
@@ -94,8 +93,8 @@ local function get_formspec(tabview, name, tabdata)
 					"tooltip[btn_delete_favorite;" .. fgettext("Del. Favorite") .. "]"
 		end
 		if selected.description then
-			retval = retval .. "textarea[7.5,2.2;4.8,3;;" ..
-				esc((gamedata.serverdescription or ""), true) .. ";]"
+			retval = retval ..
+				"textarea[7.5,2.2;4.8,3;;" .. esc((gamedata.serverdescription or ""), true) .. ";]"
 		end
 	end
 

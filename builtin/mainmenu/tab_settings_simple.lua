@@ -60,141 +60,146 @@ end
 
 --------------------------------------------------------------------------------
 
-local labels = {
-	node_highlighting = {
-		fgettext("Node Outlining"),
-		fgettext("Node Highlighting"),
-		fgettext("None")
-	}
+local languages, lang_idx, language_labels = get_language_list()
+
+local node_highlighting_labels = {
+	fgettext("Node Outlining"),
+	fgettext("Node Highlighting"),
+	fgettext("None")
 }
 
+local fps_max_labels = {"30", "60", "90", [-1] = "45"}
+
 local dd_options = {
-	node_highlighting = {
-		table.concat(labels.node_highlighting, ","),
-		{"box", "halo", "none"}
-	}
+	-- "30 FPS" actually sets 35 FPS for some reason
+	fps_max = {"35", "60", "90"},
+	language = languages,
+	node_highlighting = {"box", "halo", "none"},
+	viewing_range = {"30", "40", "60", "80", "100", "125", "150", "175", "200"},
 }
 
 local getSettingIndex = {
 	NodeHighlighting = function()
 		local style = core.settings:get("node_highlighting")
-		for idx, name in pairs(dd_options.node_highlighting[2]) do
+		for idx, name in pairs(dd_options.node_highlighting) do
 			if style == name then return idx end
 		end
 		return 1
 	end
 }
 
-local languages, language_dropdown, lang_idx = get_language_list()
+local function setting_cb(x, y, setting, label)
+	return checkbox(x, y, "cb_" .. setting, label, core.settings:get_bool(setting), true)
+end
 
+local function disabled_cb(x, y, _, label)
+	return ("label[%s,%s;%s]"):format(x + 0.6, y, core.colorize("#888", label))
+end
+
+local open_dropdown
+local guitexturedir = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 local function formspec(tabview, name, tabdata)
 	local fps = tonumber(core.settings:get("fps_max"))
 	local range = tonumber(core.settings:get("viewing_range"))
 	local sensitivity = tonumber(core.settings:get("touch_sensitivity") or 0) * 2000
 	local touchtarget = core.settings:get_bool("touchtarget", false)
 	local fancy_leaves = core.settings:get("leaves_style") == "fancy"
-	local arm_inertia = core.settings:get_bool("arm_inertia", false)
-	local sound = tonumber(core.settings:get("sound_volume")) ~= 0 and true or false
-
-	local tab_string =
-		"background9[0,0.05;3.85,5.5;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
-		"checkbox[0.15,-0.1;cb_smooth_lighting;" .. fgettext("Smooth Lighting") .. ";"
-				.. dump(core.settings:get_bool("smooth_lighting")) .. "]" ..
-		"checkbox[0.15,0.45;cb_particles;" .. fgettext("Particles") .. ";"
-				.. dump(core.settings:get_bool("enable_particles")) .. "]" ..
-		"checkbox[0.15,1.05;cb_3d_clouds;" .. fgettext("3D Clouds") .. ";"
-				.. dump(core.settings:get_bool("enable_3d_clouds")) .. "]" ..
-	--[["checkbox[0.15,1.65;cb_opaque_water;" .. fgettext("Opaque Water") .. ";"
-				.. dump(core.settings:get_bool("opaque_water")) .. "]" ..
-		"checkbox[0.15,1.95;cb_connected_glass;" .. fgettext("Connected Glass") .. ";"
-				.. dump(core.settings:get_bool("connected_glass")) .. "]" ..]]
-		"checkbox[0.15,1.65;cb_fog;" .. fgettext("Fog") .. ";"
-				.. dump(core.settings:get_bool("enable_fog")) .. "]" ..
-		"checkbox[0.15,2.25;cb_inventory_items_animations;" .. fgettext("Inv. animations") .. ";"
-				.. dump(core.settings:get_bool("inventory_items_animations")) .. "]" ..
-		"checkbox[0.15,2.85;cb_fancy_leaves;" .. fgettext("Fancy Leaves") .. ";"
-				.. dump(fancy_leaves) .. "]" ..
-		"checkbox[0.15,3.45;cb_crosshair;" .. fgettext("Crosshair") .. ";"
-				.. dump(not touchtarget) .. "]" ..
-		"checkbox[0.15,4.05;cb_arm_inertia;" .. fgettext("Arm inertia") .. ";"
-			.. dump(arm_inertia) .. "]" ..
-		"checkbox[0.15,4.65;cb_sound;" .. fgettext("Sound") .. ";"
-				.. dump(sound) .. "]" ..
-
-		"background9[4.1,0.05;3.75,5.5;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
-
-		"label[4.25,0.1;" .. fgettext("Maximum FPS") .. ":]" ..
-		"dropdown[4.25,0.55;3.5;dd_fps_max;30,35,45,60,90;" ..
-			(fps <= 30 and 1 or fps == 35 and 2 or fps == 45 and 3 or fps == 60 and 4 or 5) .. "]" ..
-
-		"label[4.25,1.5;" .. fgettext("Viewing range") .. ":]" ..
-		"dropdown[4.25,1.95;3.5;dd_viewing_range;30,40,60,80,100,125,150,175,200;" ..
-			(range <= 30 and 1 or range == 40 and 2 or range == 60 and 3 or
-			range == 80 and 4 or range == 100 and 5 or range == 125 and 6 or
-			range == 150 and 7 or range == 175 and 8 or 9) .. "]" ..
-
-		"label[4.25,2.9;" .. fgettext("Node highlighting") .. ":]" ..
-		"dropdown[4.25,3.35;3.5;dd_node_highlighting;" .. dd_options.node_highlighting[1] .. ";"
-				.. getSettingIndex.NodeHighlighting() .. "]" ..
-
-		"label[4.25,4.3;" .. fgettext("Mouse sensitivity") .. ":]" ..
-		"scrollbar[4.25,4.75;3.23,0.5;horizontal;sb_sensitivity;" .. sensitivity .. "]" ..
-
-		"background9[8.1,0.05;3.85,3.15;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]"
+	local sound = tonumber(core.settings:get("sound_volume")) ~= 0
 
 	local video_driver = core.settings:get("video_driver")
 	local shaders_enabled = video_driver == "opengl" or video_driver == "ogles2"
 	core.settings:set_bool("enable_shaders", shaders_enabled)
-	if shaders_enabled then
-		tab_string = tab_string ..
-			"label[8.25,0.1;" .. fgettext("Shaders") .. "]"
-	else
-		tab_string = tab_string ..
-			"label[8.25,0.1;" .. core.colorize("#888888",
-					fgettext("Shaders (unavailable)")) .. "]"
+
+	local open_dropdown_fs
+	local function dropdown(x, y, w, name, items, selected_idx, max_items, container_pos)
+		local dd = get_dropdown(x, y, w, name, items, selected_idx, open_dropdown == name, max_items)
+		if open_dropdown == name then
+			open_dropdown_fs = dd
+			-- Items positioned inside scroll containers are very slightly
+			-- offset from the same item in a regular container
+			if container_pos then
+				open_dropdown_fs = "scroll_container[" .. container_pos .. ";" .. w + x + 1 .. ",10;;vertical;0]" ..
+					open_dropdown_fs ..
+					"scroll_container_end[]"
+			end
+			return ""
+		end
+		return dd
 	end
 
---[[tab_string = tab_string ..
-		btn_style("btn_change_keys") ..
-		"button[8,3.22;3.95,1;btn_change_keys;"
-		.. fgettext("Change Keys") .. "]"
+	local shader_cb = shaders_enabled and setting_cb or disabled_cb
+	local fs = {
+		"formspec_version[4]",
+		"real_coordinates[true]",
+		"background9[0.5,0.5;4.8,6.4;", defaulttexturedir_esc, "desc_bg.png;false;32]",
 
-	tab_string = tab_string ..
-		btn_style("btn_advanced_settings") ..
-		"button[8,4.57;3.95,1;btn_advanced_settings;"
-		.. fgettext("All Settings") .. "]"]]
+		-- A scroll container is used so that long labels are clipped
+		"scroll_container[0.5,0.5;4.8,6.4;;vertical;0]",
 
-	if shaders_enabled then
-		tab_string = tab_string ..
-			"checkbox[8.25,0.45;cb_tonemapping;" .. fgettext("Tone Mapping") .. ";"
-					.. dump(core.settings:get_bool("tone_mapping")) .. "]" ..
-			"checkbox[8.25,1.05;cb_waving_water;" .. fgettext("Waving liquids") .. ";"
-					.. dump(core.settings:get_bool("enable_waving_water")) .. "]" ..
-			"checkbox[8.25,1.65;cb_waving_leaves;" .. fgettext("Waving leaves") .. ";"
-					.. dump(core.settings:get_bool("enable_waving_leaves")) .. "]" ..
-			"checkbox[8.25,2.25;cb_waving_plants;" .. fgettext("Waving plants") .. ";"
-					.. dump(core.settings:get_bool("enable_waving_plants")) .. "]"
-	else
-		tab_string = tab_string ..
-			"label[8.38,0.65;" .. core.colorize("#888888",
-					fgettext("Tone Mapping")) .. "]" ..
-			"label[8.38,1.25;" .. core.colorize("#888888",
-					fgettext("Waving Liquids")) .. "]" ..
-			"label[8.38,1.85;" .. core.colorize("#888888",
-					fgettext("Waving Leaves")) .. "]" ..
-			"label[8.38,2.45;" .. core.colorize("#888888",
-					fgettext("Waving Plants")) .. "]"
-	end
+		setting_cb(0.3, 0.5, "smooth_lighting", fgettext("Smooth Lighting")),
+		setting_cb(0.3, 1.175, "enable_particles", fgettext("Particles")),
+		setting_cb(0.3, 1.85, "enable_3d_clouds", fgettext("3D Clouds")),
+		-- setting_cb(0.3, y, "opaque_water", fgettext("Opaque Water")),
+		-- setting_cb(0.3, y, "connected_glass", fgettext("Connected Glass")),
+		setting_cb(0.3, 2.525, "enable_fog", fgettext("Fog")),
+		setting_cb(0.3, 3.2, "inventory_items_animations", fgettext("Inv. animations")),
 
-	tab_string = tab_string ..
-		"background9[8.1,3.35;3.85,2.2;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
-		"label[8.25,3.3;" .. fgettext("Language") .. ":]" ..
-		"dropdown[8.25,3.75;3.58;dd_language;" .. language_dropdown .. ";" ..
-			lang_idx .. ";true]" ..
-		btn_style("btn_reset") ..
-		"button[8.25,4.6;3.5,0.8;btn_reset;" .. fgettext("Reset all settings") .. "]"
+		-- Some checkboxes don't directly have a boolean setting so they need
+		-- to be handled separately
+		checkbox(0.3, 3.875, "fancy_leaves", fgettext("Fancy Leaves"), fancy_leaves, true),
+		checkbox(0.3, 4.55, "crosshair", fgettext("Crosshair"), not touchtarget, true),
+		setting_cb(0.3, 5.225, "arm_inertia", fgettext("Arm inertia")),
+		checkbox(0.3, 5.9, "sound", fgettext("Sound"), sound, true),
 
-	return tab_string
+		"scroll_container_end[]",
+
+		-- Middle column
+		"background9[5.6,0.5;4.8,6.4;", defaulttexturedir_esc, "desc_bg.png;false;32]",
+		"scroll_container[5.6,0.5;4.8,6.4;;vertical;0]",
+		"label[0.3,0.5;", fgettext("Maximum FPS"), ":]",
+		dropdown(0.3, 0.8, 4.2, "dd_fps_max", fps_max_labels,
+			fps <= 35 and 1 or fps == 45 and -1 or fps == 60 and 2 or 3, nil, "5.6,0.5"),
+
+		"label[0.3,2;", fgettext("Viewing range"), ":]",
+		dropdown(0.3, 2.3, 4.2, "dd_viewing_range", dd_options.viewing_range,
+			range <= 30 and 1 or range == 40 and 2 or range == 60 and 3 or
+			range == 80 and 4 or range == 100 and 5 or range == 125 and 6 or
+			range == 150 and 7 or range == 175 and 8 or 9, 4.5, "5.6,0.5"),
+
+		"label[0.3,3.5;", fgettext("Node highlighting"), ":]",
+		dropdown(0.3, 3.8, 4.2, "dd_node_highlighting", node_highlighting_labels,
+			getSettingIndex.NodeHighlighting(), nil, "5.6,0.5"),
+
+		"label[0.3,5;", fgettext("Mouse sensitivity"), ":]",
+		"scrollbar[0.3,5.3;4.2,0.8;horizontal;sb_sensitivity;", tostring(sensitivity), ";",
+			guitexturedir, "scrollbar_horiz_bg.png,", guitexturedir, "scrollbar_slider.png,",
+			guitexturedir, "scrollbar_minus.png,", guitexturedir, "scrollbar_plus.png]",
+		"scroll_container_end[]",
+
+		-- Right column
+		"background9[10.7,0.5;4.8,1.9;", defaulttexturedir_esc, "desc_bg.png;false;32]",
+		"label[11,1;", fgettext("Language"), ":]",
+		dropdown(11, 1.3, 4.2, "dd_language", language_labels, lang_idx, 6.4),
+
+		"background9[10.7,2.6;4.8,4.3;", defaulttexturedir_esc, "desc_bg.png;false;32]",
+		"scroll_container[10.7,2.6;4.8,4.3;;vertical;0]",
+		"label[0.3,0.5;", shaders_enabled and fgettext("Shaders") or
+			core.colorize("#888888", fgettext("Shaders (unavailable)")), "]",
+		shader_cb(0.3, 1, "tone_mapping", fgettext("Tone Mapping")),
+		shader_cb(0.3, 1.6, "enable_waving_water", fgettext("Waving liquids")),
+		shader_cb(0.3, 2.2, "enable_waving_leaves", fgettext("Waving leaves")),
+		shader_cb(0.3, 2.8, "enable_waving_plants", fgettext("Waving plants")),
+		"scroll_container_end[]",
+
+		btn_style("btn_reset"),
+		"button[11,5.8;4.2,0.8;btn_reset;", fgettext("Reset all settings"), "]",
+	}
+
+	-- Show the open dropdown (if any) last
+	fs[#fs + 1] = open_dropdown_fs
+	fs[#fs + 1] = "real_coordinates[false]"
+
+	return table.concat(fs)
 end
 
 --------------------------------------------------------------------------------
@@ -206,65 +211,49 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		adv_settings_dlg:show()
 		return true
 	end]]
-	if fields["cb_smooth_lighting"] then
-		core.settings:set("smooth_lighting", fields["cb_smooth_lighting"])
+
+	for field in pairs(fields) do
+		if field:sub(1, 3) == "cb_" then
+			-- Checkboxes
+			local setting_name = field:sub(4)
+			core.settings:set_bool(setting_name, not core.settings:get_bool(setting_name))
+			return true
+		elseif field:sub(1, 3) == "dd_" then
+			-- Dropdown buttons
+			open_dropdown = field
+			return true
+		elseif open_dropdown and field:sub(1, 9) == "dropdown_" then
+			-- Dropdown fields
+			local i = tonumber(field:sub(10))
+			local setting = open_dropdown:sub(4)
+			if i and dd_options[setting] then
+				core.settings:set(setting, dd_options[setting][i])
+
+				-- Reload the main menu so that everything uses the new language
+				if setting == "language" then
+					dofile(core.get_builtin_path() .. "init.lua")
+				end
+			end
+
+			open_dropdown = nil
+			return true
+		end
+	end
+
+	-- Special checkboxes
+	if fields["fancy_leaves"] then
+		core.settings:set("leaves_style", core.settings:get("leaves_style") == "fancy" and "opaque" or "fancy")
 		return true
 	end
-	if fields["cb_particles"] then
-		core.settings:set("enable_particles", fields["cb_particles"])
+	if fields["crosshair"] then
+		core.settings:set_bool("touchtarget", not core.settings:get_bool("touchtarget"))
 		return true
 	end
-	if fields["cb_3d_clouds"] then
-		core.settings:set("enable_3d_clouds", fields["cb_3d_clouds"])
+	if fields["sound"] then
+		core.settings:set("sound_volume", tonumber(core.settings:get("sound_volume")) == 0 and "1.0" or "0.0")
 		return true
 	end
-	if fields["cb_opaque_water"] then
-		core.settings:set("opaque_water", fields["cb_opaque_water"])
-		return true
-	end
---[[if fields["cb_connected_glass"] then
-		core.settings:set("connected_glass", fields["cb_connected_glass"])
-		return true
-	end]]
-	if fields["cb_fog"] then
-		core.settings:set("enable_fog", fields["cb_fog"])
-		return true
-	end
-	if fields["cb_inventory_items_animations"] then
-		core.settings:set("inventory_items_animations", fields["cb_inventory_items_animations"])
-		return true
-	end
-	if fields["cb_fancy_leaves"] then
-		core.settings:set("leaves_style", (minetest.is_yes(fields["cb_fancy_leaves"]) and "fancy" or "opaque"))
-		return true
-	end
-	if fields["cb_crosshair"] then
-		core.settings:set_bool("touchtarget", not minetest.is_yes(fields["cb_crosshair"]))
-		return true
-	end
-	if fields["cb_arm_inertia"] then
-		core.settings:set("arm_inertia", fields["cb_arm_inertia"])
-		return true
-	end
-	if fields["cb_sound"] then
-		core.settings:set("sound_volume", (minetest.is_yes(fields["cb_sound"]) and "1.0") or "0.0")
-		return true
-	end
-	if fields["cb_tonemapping"] then
-		core.settings:set("tone_mapping", fields["cb_tonemapping"])
-		return true
-	end
-	if fields["cb_waving_water"] then
-		core.settings:set("enable_waving_water", fields["cb_waving_water"])
-		return true
-	end
-	if fields["cb_waving_leaves"] then
-		core.settings:set("enable_waving_leaves", fields["cb_waving_leaves"])
-	end
-	if fields["cb_waving_plants"] then
-		core.settings:set("enable_waving_plants", fields["cb_waving_plants"])
-		return true
-	end
+
 --[[if fields["btn_change_keys"] then
 		core.show_keys_menu()
 		return true
@@ -278,27 +267,6 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		return true
 	end
 
-	-- Note dropdowns have to be handled LAST!
-	local ddhandled = false
-
-	if fields["cb_touchscreen_target"] then
-		core.settings:set("touchtarget", fields["cb_touchscreen_target"])
-		ddhandled = true
-	end
-	for i = 1, #labels.node_highlighting do
-		if fields["dd_node_highlighting"] == labels.node_highlighting[i] then
-			core.settings:set("node_highlighting", dd_options.node_highlighting[2][i])
-			ddhandled = true
-		end
-	end
-	if fields["dd_fps_max"] then
-		core.settings:set("fps_max", fields["dd_fps_max"])
-		ddhandled = true
-	end
-	if fields["dd_viewing_range"] then
-		core.settings:set("viewing_range", fields["dd_viewing_range"])
-		ddhandled = true
-	end
 	if fields["sb_sensitivity"] then
 		-- reset old setting
 		core.settings:remove("touchscreen_threshold")
@@ -306,24 +274,8 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		local event = core.explode_scrollbar_event(fields["sb_sensitivity"])
 		if event.type == "CHG" then
 			core.settings:set("touch_sensitivity", event.value / 2000)
-
-			-- The formspec cannot be updated or the scrollbar movement will
-			-- break.
-			ddhandled = false
 		end
 	end
-	if fields["dd_language"] then
-		local new_idx = tonumber(fields["dd_language"])
-		if lang_idx ~= new_idx then
-			core.settings:set("language", languages[new_idx] or "")
-			ddhandled = true
-
-			-- Reload the main menu so that everything uses the new language
-			dofile(core.get_builtin_path() .. "init.lua")
-		end
-	end
-
-	return ddhandled
 end
 
 return {
