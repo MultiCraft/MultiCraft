@@ -1228,7 +1228,7 @@
 #    Remove color codes from incoming chat messages
 #    Use this to stop players from being able to use color in their messages
 #    type: bool
-# strip_color_codes = false
+# strip_color_codes = true
 
 ## Network
 
