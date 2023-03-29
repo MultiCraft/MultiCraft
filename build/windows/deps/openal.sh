@@ -1,46 +1,35 @@
 #!/bin/bash -e
 
-OPENAL_VERSION=1.22.1
-
-. sdk.sh
-
-export SDL_PATH="$(pwd)/deps/sdl2-src"
-
-mkdir -p output/openal/lib/$TARGET_ABI
-mkdir -p deps; cd deps
+. ./sdk.sh
+OPENAL_VERSION=1.22.2
 
 if [ ! -d openal-src ]; then
 	git clone -b $OPENAL_VERSION --depth 1 https://github.com/kcat/openal-soft openal-src
+	mkdir openal-src/build
 fi
 
 cd openal-src/build
 
-cmake .. -DANDROID_STL="c++_static" \
-	-DANDROID_NATIVE_API_LEVEL="$NATIVE_API_LEVEL" \
-	-DANDROID_ABI="$ANDROID_ABI" \
-	-DANDROID_PLATFORM="$API" \
-	-DALSOFT_UTILS=NO \
-	-DALSOFT_EXAMPLES=NO \
-	-DALSOFT_BACKEND_OPENSL=NO \
-	-DALSOFT_BACKEND_WAVE=NO \
-	-DALSOFT_BACKEND_SDL2=YES \
-	-DALSOFT_EMBED_HRTF_DATA=NO \
-	-DALSOFT_UPDATE_BUILD_VERSION=NO \
+cmake .. \
 	-DCMAKE_BUILD_TYPE=Release \
-	-DCMAKE_C_FLAGS="$CFLAGS -I $SDL_PATH" \
-	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC -I $SDL_PATH/inlcude" \
-	-DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
 	-DLIBTYPE=STATIC \
-	-DSDL2_INCLUDE_DIR="$SDL_PATH/include" \
-	-DSDL2_LIBRARY="$SDL_PATH/lib/$TARGET_ABI/libSDL2.a"
+	-DALSOFT_EMBED_HRTF_DATA=ON \
+	-DALSOFT_UTILS=OFF \
+	-DALSOFT_EXAMPLES=OFF \
+	-DALSOFT_BACKEND_WAVE=OFF \
+    -DCMAKE_C_FLAGS="$CFLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC"
 
 cmake --build . -j
 
 # update `include` folder
-rm -rf ../../../output/openal/include/
-cp -r ../include ../../../output/openal/include
+rm -rf ../../openal/include
+mkdir -p ../../openal/include
+cp -a ../include ../../openal
+cp -a *.h ../../openal/include
 # update lib
-rm -rf ../../../output/openal/lib/$TARGET_ABI/libopenal.a
-cp -r libopenal.a ../../../output/openal/lib/$TARGET_ABI/libopenal.a
+rm -rf ../../openal/lib
+mkdir -p ../../openal/lib
+cp libOpenAL32.a ../../openal/lib
 
 echo "OpenAL-Soft build successful"

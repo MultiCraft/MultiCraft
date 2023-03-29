@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-. sdk.sh
+. ./sdk.sh
 JPEG_VERSION=2.1.5.1
 
 if [ ! -d libjpeg-src ]; then
@@ -19,8 +19,6 @@ cmake .. \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
 
 cmake --build . -j
-
-mkdir -p ../../libjpeg
 
 # update `include` folder
 rm -rf ../../libjpeg/include

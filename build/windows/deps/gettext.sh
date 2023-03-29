@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-. sdk.sh
+. ./sdk.sh
 GETTEXT_VERSION=0.21.1
 
 if [ ! -d gettext-src ]; then

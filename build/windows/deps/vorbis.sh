@@ -1,30 +1,31 @@
 #!/bin/bash -e
 
-. sdk.sh
+. ./sdk.sh
+VORBIS_VERSION=1.3.7
 
-export ANDR_ROOT=$(pwd)
-
-mkdir -p output/vorbis/lib/$TARGET_ABI
-mkdir -p deps; cd deps
-
-if [ ! -d vorbis-src ]; then
-	git clone https://github.com/MoNTE48/libvorbis-android vorbis-src
+if [ ! -d libvorbis-src ]; then
+	git clone -b v$VORBIS_VERSION --depth 1 https://github.com/xiph/vorbis libvorbis-src
+	mkdir libvorbis-src/build
 fi
 
-cd vorbis-src
+cd libvorbis-src/build
 
-$ANDROID_NDK/ndk-build -j \
-	APP_ABI="$TARGET_ABI" \
-	APP_PLATFORM=android-"$API" \
-	APP_CFLAGS="$CFLAGS" \
-	APP_STL="c++_static"
+cmake .. \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DOGG_LIBRARY="../../libogg/libogg.a" \
+	-DOGG_INCLUDE_DIR="../../libogg/include" \
+	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS" \
+	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC"
+
+cmake --build . -j
 
 # update `include` folder
-rm -rf ../../output/vorbis/include/
-cp -r jni/include ../../output/vorbis/include
-rm -rf ../../output/vorbis/include/dlg
+rm -rf ../../libvorbis/include
+mkdir -p ../../libvorbis/include
+cp -a ../include ../../libvorbis
 # update lib
-rm -rf ../../output/vorbis/lib/$TARGET_ABI/libvorbis.a
-cp -r obj/local/$TARGET_ABI/libvorbis.a ../../output/vorbis/lib/$TARGET_ABI/libvorbis.a
+rm -rf ../../libvorbis/lib
+mkdir -p ../../libvorbis/lib
+cp -a lib/*.a ../../libvorbis/lib
 
 echo "Vorbis build successful"

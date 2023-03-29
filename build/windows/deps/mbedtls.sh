@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-. sdk.sh
+. ./sdk.sh
 MBEDTLS_VERSION=3.3.0
 
 if [ ! -d mbedtls-src ]; then

@@ -2,7 +2,7 @@
 
 LEVELDB_VERSION=1.23
 
-. sdk.sh
+. ./sdk.sh
 
 if [ ! -d leveldb-src ]; then
 	git clone -b $LEVELDB_VERSION --depth 1 https://github.com/google/leveldb leveldb-src

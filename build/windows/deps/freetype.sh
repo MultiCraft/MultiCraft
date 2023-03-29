@@ -2,7 +2,7 @@
 
 FREETYPE_VERSION=2.13.0
 
-. sdk.sh
+. ./sdk.sh
 
 if [ ! -d freetype-src ]; then
 	wget https://download.savannah.gnu.org/releases/freetype/freetype-$FREETYPE_VERSION.tar.gz

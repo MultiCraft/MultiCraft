@@ -2,10 +2,7 @@
 
 LUAJIT_VERSION=2.1
 
-. sdk.sh
-
-mkdir -p output/luajit/lib/$TARGET_ABI
-mkdir -p deps; cd deps
+. ./sdk.sh
 
 if [ ! -d luajit-src ]; then
 	wget https://github.com/LuaJIT/LuaJIT/archive/v$LUAJIT_VERSION.tar.gz
@@ -16,28 +13,15 @@ fi
 
 cd luajit-src
 
-if [ $TARGET_ABI == armeabi-v7a ];
-then
-	HOST_CC="clang -m32"
-else
-	HOST_CC="clang -m64"
-fi
+make amalg -j BUILDMODE=static
 
-make amalg -j \
-	HOST_CC="$HOST_CC" \
-	TARGET_SYS=Linux \
-	CC="$CC" \
-	TARGET_AR="$AR rcus" \
-	TARGET_STRIP="$STRIP" \
-	TARGET_FLAGS="$CFLAGS -fno-fast-math -Wno-undef-prefix" \
-	BUILDMODE=static
-
-# update `src` folder
-rm -rf ../../output/luajit/include
-mkdir -p ../../output/luajit/include
-cp src/*.h ../../output/luajit/include/
+# update `include` folder
+rm -rf ../luajit/include
+mkdir -p ../luajit/include
+cp -a ./src/*.h ../luajit/include
 # update lib
-rm -rf ../../output/luajit/lib/$TARGET_ABI/libluajit.a
-cp -r src/libluajit.a ../../output/luajit/lib/$TARGET_ABI/
+rm -rf ../luajit/lib
+mkdir -p ../luajit/lib
+cp src/libluajit.a ../luajit/lib
 
 echo "LuaJIT build successful"

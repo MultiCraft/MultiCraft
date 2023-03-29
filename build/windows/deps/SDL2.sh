@@ -2,10 +2,7 @@
 
 SDL2_VERSION=2.26.4
 
-. sdk.sh
-
-mkdir -p output/sdl2/lib/$TARGET_ABI
-mkdir -p deps; cd deps
+. ./sdk.sh
 
 if [ ! -d SDL2-src ]; then
 	wget https://github.com/libsdl-org/SDL/archive/release-$SDL2_VERSION.tar.gz
@@ -18,23 +15,23 @@ cd SDL2-src
 
 mkdir -p build; cd build
 
-cmake .. -DANDROID_STL="c++_static" \
-    -DANDROID_NATIVE_API_LEVEL="$NATIVE_API_LEVEL" \
-    -DANDROID_ABI="$ANDROID_ABI" \
-    -DANDROID_PLATFORM="$API" \
+cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_C_FLAGS="$CFLAGS" \
     -DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC" \
-    -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
-    -DLIBTYPE=STATIC
+    -DSDL_SHARED=0 \
+    -DSDL_STATIC=1
 
 cmake --build . -j
 
 # update `include` folder
-rm -rf ../../../output/sdl2/include/
-cp -r ../include ../../../output/sdl2/include
+rm -rf ../../sdl2/include
+mkdir -p ../../sdl2/include
+cp -a ./include ../../sdl2
+cp -a ./include-config-release/* ../../sdl2/include
 # update lib
-rm -rf ../../../output/sdl2/lib/$TARGET_ABI/libSDL2.a
-cp -r libSDL2.a ../../../output/sdl2/lib/$TARGET_ABI/libSDL2.a
+rm -rf ../../sdl2/lib
+mkdir -p ../../sdl2/lib
+cp libSDL2.a ../../sdl2/lib
 
 echo "SDL2 build successful"

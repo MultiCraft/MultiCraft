@@ -1,33 +1,38 @@
 #!/bin/bash -e
 
-. sdk.sh
+. ./sdk.sh
 
-mkdir -p output/irrlicht/lib/$TARGET_ABI
-mkdir -p deps; cd deps
+export DEPS_ROOT=$(pwd)
 
 [ ! -d irrlicht-src ] && \
 	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht-src
 
-cd irrlicht-src/source/Irrlicht/Android-SDL2
+cd irrlicht-src/source/Irrlicht
 
-export SDL2_PATH="$OUTPUT_PATH/sdl2/"
-$ANDROID_NDK/ndk-build -j \
-	NDEBUG=1 \
-	APP_ABI="$TARGET_ABI" \
-	APP_PLATFORM=android-"$API" \
-	APP_CFLAGS="$CFLAGS" \
-	APP_CXXFLAGS="$CXXFLAGS -std=gnu++17" \
-	APP_CPPFLAGS="$APP_CXXFLAGS -DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ -I$OUTPUT_PATH/libjpeg/include -I$OUTPUT_PATH/libpng/include" \
-	APP_STL="c++_static"
+CPPFLAGS="$CPPFLAGS \
+          -D_IRR_COMPILE_WITH_SDL_DEVICE_ \
+          -DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
+          -DNO_IRR_COMPILE_WITH_OGLES2_ \
+          -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
+          -DNO_IRR_COMPILE_WITH_LIBPNG_ \
+          -DNO_IRR_COMPILE_WITH_LIBJPEG_ \
+          -DNO_IRR_COMPILE_WITH_ZLIB_ \
+          -DNO_IRR_COMPILE_WITH_BZIP2_ \
+          -DNO_IRR_COMPILE_WITH_LZMA_ \
+          -I$DEPS_ROOT/sdl2/include \
+          -I$DEPS_ROOT/zlib/include \
+          -I$DEPS_ROOT/libjpeg/include \
+          -I$DEPS_ROOT/libpng/include" \
+CXXFLAGS="$CXXFLAGS -std=gnu++17" \
+make staticlib_win32 -j NDEBUG=1
 
 # update `include` folder
-rm -rf ../../../../../output/irrlicht/include
-cp -r ../../../include ../../../../../output/irrlicht/include
+rm -rf ../../../irrlicht/include
+mkdir -p ../../../irrlicht/include
+cp -a ../../include ../../../irrlicht
 # update lib
-rm -rf ../../../../../../../Irrlicht/lib/$TARGET_ABI/libIrrlicht.a
-cp -r ../../../lib/Android-SDL2/$TARGET_ABI/libIrrlicht.a ../../../../../output/irrlicht/lib/$TARGET_ABI/libIrrlicht.a
-# update shaders
-rm -rf ../../../../../output/irrlicht/shaders
-cp -r ../../../media/Shaders ../../../../../output/irrlicht/shaders
+rm -rf ../../../irrlicht/lib
+mkdir -p ../../../irrlicht/lib
+cp ../../lib/Win32-gcc/libIrrlicht.a ../../../irrlicht/lib
 
 echo "Irrlicht build successful"
