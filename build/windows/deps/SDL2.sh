@@ -32,6 +32,6 @@ cp -a ./include-config-release/* ../../sdl2/include
 # update lib
 rm -rf ../../sdl2/lib
 mkdir -p ../../sdl2/lib
-cp libSDL2.a ../../sdl2/lib
+cp -a *.a ../../sdl2/lib
 
 echo "SDL2 build successful"

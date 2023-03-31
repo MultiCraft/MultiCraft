@@ -7,6 +7,7 @@ sh ./gettext.sh
 sh ./leveldb.sh
 sh ./luajit.sh
 sh ./libjpeg.sh
+sh ./zlib.sh
 sh ./libpng.sh
 sh ./SDL2.sh
 sh ./irrlicht.sh
@@ -16,4 +17,5 @@ sh ./libcurl.sh
 sh ./libogg.sh
 sh ./vorbis.sh
 
-echo "Done!"
+echo
+echo "All libraries were built!"

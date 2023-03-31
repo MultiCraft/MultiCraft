@@ -34,10 +34,14 @@ endif()
 option(USE_SDL "Use SDL2 for window management" FALSE)
 
 if(USE_SDL)
-	find_package(SDL2)
+	if(NOT WIN32)
+		find_package(SDL2)
+	else()
+		set(SDL2_FOUND TRUE)
+	endif()
 	if (SDL2_FOUND)
 		message(STATUS "SDL2 found.")
-		include_directories(${SDL2_INCLUDEDIR})
+		include_directories(${SDL2_INCLUDE_DIR})
 	else()
 		message(FATAL_ERROR "SDL2 not found.")
 	endif()
@@ -566,7 +570,7 @@ if(BUILD_CLIENT)
 		${JSON_LIBRARY}
 		${PLATFORM_LIBS}
 		${CLIENT_PLATFORM_LIBS}
-		${SDL2_LIBRARIES}
+		${SDL2_LIBRARIES} -lmingw32 -mwindows -lm -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid -ladvapi32 -lsetupapi -lshell32 -ldinput8 -lopengl32
 		luautf8
 		luachacha
 	)
