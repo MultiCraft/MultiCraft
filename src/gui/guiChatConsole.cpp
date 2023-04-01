@@ -255,6 +255,12 @@ void GUIChatConsole::reformatConsole()
 	recalculateConsolePosition();
 	m_chat_backend->reformat(cols, rows);
 
+	m_mark_begin.reset();
+	m_mark_end.reset();
+	m_cursor_press_pos.reset();
+	m_mouse_marking = false;
+	m_long_press = false;
+
 	updateVScrollBar();
 }
 
@@ -1039,14 +1045,14 @@ void GUIChatConsole::createVScrollBar()
 	addChild(m_vscrollbar);
 }
 
-void GUIChatConsole::updateVScrollBar()
+void GUIChatConsole::updateVScrollBar(bool force_update)
 {
 	if (!m_vscrollbar)
 		return;
 
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 
-	if (m_bottom_scroll_pos != buf.getBottomScrollPos()) {
+	if (m_bottom_scroll_pos != buf.getBottomScrollPos() || force_update) {
 		m_bottom_scroll_pos = buf.getBottomScrollPos();
 
 		if (buf.getBottomScrollPos() > 0) {
@@ -1077,6 +1083,17 @@ void GUIChatConsole::updateVScrollBar()
 		else if (!m_vscrollbar->isVisible() && m_vscrollbar->getMax() > 0)
 			m_vscrollbar->setVisible(true);
 	}
+}
+
+void GUIChatConsole::onLinesModified()
+{
+	m_mark_begin.reset();
+	m_mark_end.reset();
+	m_cursor_press_pos.reset();
+	m_mouse_marking = false;
+	m_long_press = false;
+
+	updateVScrollBar(true);
 }
 
 bool GUIChatConsole::hasFocus()

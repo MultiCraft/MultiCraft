@@ -148,6 +148,8 @@ public:
 
 	bool getAndroidChatOpen() { return m_android_chat_open; }
 	void setAndroidChatOpen(bool value) { m_android_chat_open = value; }
+	
+	void onLinesModified();
 
 	static GUIChatConsole* getChatConsole() { return m_chat_console; }
 
@@ -164,7 +166,7 @@ private:
 	ChatSelection getCursorPos(s32 x, s32 y);
 	irr::core::stringc getSelectedText();
 	void createVScrollBar();
-	void updateVScrollBar();
+	void updateVScrollBar(bool force_update = false);
 
 private:
 	static GUIChatConsole* m_chat_console;

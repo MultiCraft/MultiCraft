@@ -2986,6 +2986,7 @@ void Game::updateChat(f32 dtime)
 	if (buf.getLinesModified()) {
 		buf.resetLinesModified();
 		m_game_ui->setChatText(chat_backend->getRecentChat(), buf.getLineCount());
+		gui_chat_console->onLinesModified();
 	}
 
 	// Make sure that the size is still correct
