@@ -132,6 +132,7 @@ void GUIChatConsole::openConsole(f32 scale)
 
 	m_desired_height = scale * m_screensize.Y;
 	reformatConsole();
+	updateVScrollBar(false, true);
 	m_animate_time_old = porting::getTimeMs();
 	IGUIElement::setVisible(true);
 	m_vscrollbar->setVisible(true);
@@ -228,6 +229,7 @@ void GUIChatConsole::draw()
 		m_screensize = screensize;
 		m_desired_height = m_desired_height_fraction * m_screensize.Y;
 		reformatConsole();
+		updateVScrollBar(true, false);
 	}
 
 	// Animation
@@ -260,8 +262,6 @@ void GUIChatConsole::reformatConsole()
 	m_cursor_press_pos.reset();
 	m_mouse_marking = false;
 	m_long_press = false;
-
-	updateVScrollBar();
 }
 
 void GUIChatConsole::recalculateConsolePosition()
@@ -1045,7 +1045,7 @@ void GUIChatConsole::createVScrollBar()
 	addChild(m_vscrollbar);
 }
 
-void GUIChatConsole::updateVScrollBar(bool force_update)
+void GUIChatConsole::updateVScrollBar(bool force_update, bool move_bottom)
 {
 	if (!m_vscrollbar)
 		return;
@@ -1053,12 +1053,14 @@ void GUIChatConsole::updateVScrollBar(bool force_update)
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 
 	if (m_bottom_scroll_pos != buf.getBottomScrollPos() || force_update) {
+		bool is_bottom = m_vscrollbar->getPos() == m_bottom_scroll_pos;
 		m_bottom_scroll_pos = buf.getBottomScrollPos();
 
 		if (buf.getBottomScrollPos() > 0) {
 			buf.scrollAbsolute(m_bottom_scroll_pos);
 			m_vscrollbar->setMax(m_bottom_scroll_pos);
-			m_vscrollbar->setPos(m_bottom_scroll_pos);
+			if (is_bottom || move_bottom)
+				m_vscrollbar->setPos(m_bottom_scroll_pos);
 		} else {
 			m_vscrollbar->setMax(0);
 			m_vscrollbar->setPos(0);

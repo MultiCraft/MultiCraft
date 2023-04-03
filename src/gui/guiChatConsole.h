@@ -166,7 +166,7 @@ private:
 	ChatSelection getCursorPos(s32 x, s32 y);
 	irr::core::stringc getSelectedText();
 	void createVScrollBar();
-	void updateVScrollBar(bool force_update = false);
+	void updateVScrollBar(bool force_update = false, bool move_bottom = false);
 
 private:
 	static GUIChatConsole* m_chat_console;
