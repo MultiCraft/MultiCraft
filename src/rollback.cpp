@@ -17,6 +17,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include "config.h"
+
+#if USE_SQLITE
+
 #include "rollback.h"
 #include <fstream>
 #include <list>
@@ -969,3 +973,4 @@ std::list<RollbackAction> RollbackManager::getRevertActions(
 	return getActionsSince(first_time, actor_filter);
 }
 
+#endif

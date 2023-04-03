@@ -12,9 +12,8 @@ fi
 
 cd gettext-src/gettext-runtime
 
-./configure --host=$TARGET CFLAGS="$CFLAGS" CPPFLAGS="$CXXFLAGS" \
-	--prefix=/ --disable-shared --enable-static \
-	--disable-libasprintf
+./configure CFLAGS="$CFLAGS" CPPFLAGS="$CXXFLAGS" \
+	--disable-shared --enable-static --disable-libasprintf
 
 make -j
 

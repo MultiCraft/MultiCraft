@@ -23,9 +23,11 @@ cd libcurl-src
 	--disable-proxy --disable-unix-sockets --without-librtmp \
 	--disable-ftp --disable-ldap --disable-ldaps --disable-rtsp \
 	--disable-dict --disable-telnet --disable-tftp --disable-pop3 \
-	--disable-imap --disable-smtp --disable-gopher --disable-sspi
+	--disable-imap --disable-smtp --disable-gopher --disable-sspi \
+	--without-zstd --without-brotli --without-nghttp2 --without-libidn2 \
+	--without-libpsl  
 
-make -j
+make
 
 # update `include` folder
 rm -rf ../libcurl/include

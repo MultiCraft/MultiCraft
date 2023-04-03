@@ -48,6 +48,7 @@ if(USE_SDL)
 endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
+option(USE_STATIC_CURL "Link additional libraries needed for static cURL" FALSE)
 set(USE_CURL FALSE)
 
 if(ENABLE_CURL)
@@ -197,7 +198,18 @@ if(ENABLE_LEVELDB)
 endif(ENABLE_LEVELDB)
 
 option(ENABLE_SQLITE "Enable SQLite backend" TRUE)
-set(USE_SQLITE TRUE)
+set(USE_SQLITE FALSE)
+
+if(ENABLE_SQLITE)
+	find_package(SQLite3)
+	if(SQLITE3_LIBRARY AND SQLITE3_INCLUDE_DIR)
+		set(USE_SQLITE TRUE)
+		message(STATUS "SQLite backend enabled.")
+		include_directories(${SQLITE3_INCLUDE_DIR})
+	else()
+		message(STATUS "SQLite not found!")
+	endif()
+endif(ENABLE_SQLITE)
 
 OPTION(ENABLE_REDIS "Enable Redis backend" TRUE)
 set(USE_REDIS FALSE)
@@ -214,8 +226,6 @@ if(ENABLE_REDIS)
 	endif(REDIS_LIBRARY AND REDIS_INCLUDE_DIR)
 endif(ENABLE_REDIS)
 
-
-find_package(SQLite3 REQUIRED)
 
 OPTION(ENABLE_PROMETHEUS "Enable prometheus client support" FALSE)
 set(USE_PROMETHEUS FALSE)
@@ -564,13 +574,11 @@ if(BUILD_CLIENT)
 		${PNG_LIBRARIES}
 		${X11_LIBRARIES}
 		${SOUND_LIBRARIES}
-		${SQLITE3_LIBRARY}
 		${LUA_LIBRARY}
 		${GMP_LIBRARY}
 		${JSON_LIBRARY}
 		${PLATFORM_LIBS}
 		${CLIENT_PLATFORM_LIBS}
-		${SDL2_LIBRARIES} -lmingw32 -mwindows -lm -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid -ladvapi32 -lsetupapi -lshell32 -ldinput8 -lopengl32
 		luautf8
 		luachacha
 	)
@@ -582,6 +590,21 @@ if(BUILD_CLIENT)
 		)
 	endif()
 
+	if(USE_SDL)
+		target_link_libraries(
+			${PROJECT_NAME}
+			${SDL2_LIBRARIES}
+		)
+		if(WIN32)
+			target_link_libraries(
+				${PROJECT_NAME}
+				winmm
+				imm32
+				setupapi
+				opengl32
+			)
+		endif()
+	endif()
 	if(ENABLE_GLES)
 		target_link_libraries(
 			${PROJECT_NAME}
@@ -605,6 +628,17 @@ if(BUILD_CLIENT)
 			${PROJECT_NAME}
 			${CURL_LIBRARY}
 		)
+		if(USE_STATIC_CURL)
+			target_link_libraries(
+				${PROJECT_NAME}
+				${MBEDTLS_LIBRARY}
+				${MBEDCRYPTO_LIBRARY}
+				${MBEDX509_LIBRARY}
+			)
+			if(WIN32)
+				target_link_libraries(${PROJECT_NAME} bcrypt ws2_32)
+			endif()			
+		endif()
 	endif()
 	if(USE_FREETYPE)
 		if(FREETYPE_PKGCONFIG_FOUND)
@@ -626,6 +660,9 @@ if(BUILD_CLIENT)
 	endif()
 	if (USE_LEVELDB)
 		target_link_libraries(${PROJECT_NAME} ${LEVELDB_LIBRARY})
+	endif()
+	if (USE_SQLITE)
+		target_link_libraries(${PROJECT_NAME} ${SQLITE3_LIBRARY})
 	endif()
 	if (USE_REDIS)
 		target_link_libraries(${PROJECT_NAME} ${REDIS_LIBRARY})
@@ -675,6 +712,9 @@ if(BUILD_SERVER)
 	if (USE_LEVELDB)
 		target_link_libraries(${PROJECT_NAME}server ${LEVELDB_LIBRARY})
 	endif()
+	if (USE_SQLITE)
+		target_link_libraries(${PROJECT_NAME}server ${SQLITE3_LIBRARY})
+	endif()
 	if (USE_REDIS)
 		target_link_libraries(${PROJECT_NAME}server ${REDIS_LIBRARY})
 	endif()
@@ -689,6 +729,17 @@ if(BUILD_SERVER)
 			${PROJECT_NAME}server
 			${CURL_LIBRARY}
 		)
+		if(USE_STATIC_CURL)
+			target_link_libraries(
+				${PROJECT_NAME}
+				${MBEDTLS_LIBRARY}
+				${MBEDCRYPTO_LIBRARY}
+				${MBEDX509_LIBRARY}
+			)
+			if(WIN32)
+				target_link_libraries(${PROJECT_NAME} bcrypt ws2_32)
+			endif()	
+		endif()
 	endif()
 endif(BUILD_SERVER)
 
