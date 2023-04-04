@@ -407,7 +407,7 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 	std::string conf_path = path_world + DIR_DELIM + "world.mt";
 	Settings conf;
 
-#if !defined(__ANDROID__) && !defined(__APPLE__)
+#if !defined(__ANDROID__) && !defined(__APPLE__) && !defined(_WIN32)
 	std::string player_backend_name = "sqlite3";
 	std::string auth_backend_name = "sqlite3";
 #else

@@ -16,7 +16,7 @@ cmake ../../ \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DENABLE_SQLITE=0 \
 	-DUSE_SDL=1 \
-	-DUSE_STATIC_CURL=1 \
+	-DUSE_STATIC_BUILD=1 \
 	-DENABLE_SYSTEM_GMP=0 \
 	-DENABLE_CURSES=0 \
 	-DCMAKE_C_FLAGS="-static \
@@ -51,9 +51,9 @@ cmake ../../ \
 	-DLUA_INCLUDE_DIR="$DEPS_ROOT/luajit/include" \
 	-DZLIB_LIBRARIES="$DEPS_ROOT/zlib/lib/libzlibstatic.a" \
 	-DZLIB_INCLUDE_DIR="$DEPS_ROOT/zlib/include" \
-	-DPNG_LIBRARY="$DEPS_ROOT/libpng/lib/libpng16.a" \
+	-DPNG_LIBRARIES="$DEPS_ROOT/libpng/lib/libpng16.a" \
 	-DPNG_INCLUDE_DIR="$DEPS_ROOT/libpng/include" \
-	-DJPEG_LIBRARY="$DEPS_ROOT/libjpeg/lib/libjpeg.a" \
+	-DJPEG_LIBRARIES="$DEPS_ROOT/libjpeg/lib/libjpeg.a" \
 	-DJPEG_INCLUDE_DIR="$DEPS_ROOT/libjpeg/include" \
 	-DFREETYPE_LIBRARY="$DEPS_ROOT/freetype/lib/libfreetype.a" \
 	-DFREETYPE_INCLUDE_DIRS="$DEPS_ROOT/freetype/include" \
@@ -64,7 +64,8 @@ cmake ../../ \
 	-DVORBIS_LIBRARY="$DEPS_ROOT/libvorbis/lib/libvorbis.a" \
 	-DVORBISFILE_LIBRARY="$DEPS_ROOT/libvorbis/lib/libvorbisfile.a" \
 	-DVORBIS_INCLUDE_DIR="$DEPS_ROOT/libvorbis/include" \
-	-DGETTEXT_DLL="$DEPS_ROOT/gettext/lib/libintl.a" \
+	-DGETTEXT_LIBRARY="$DEPS_ROOT/gettext/lib/libintl.a" \
+	-DGETTEXT_ICONV_LIBRARY="/mingw64/lib/libiconv.a" \
 	-DGETTEXT_INCLUDE_DIR="$DEPS_ROOT/gettext/include" \
 	-DOPENAL_LIBRARY="$DEPS_ROOT/openal/lib/libOpenAL32.a" \
 	-DOPENAL_INCLUDE_DIR="$DEPS_ROOT/openal/include/AL"

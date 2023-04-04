@@ -1235,7 +1235,7 @@ ServerMap::ServerMap(const std::string &savedir, IGameDef *gamedef,
 	Settings conf;
 	bool succeeded = conf.readConfigFile(conf_path.c_str());
 	if (!succeeded || !conf.exists("backend")) {
-#if !defined(__ANDROID__) && !defined(__APPLE__)
+#if !defined(__ANDROID__) && !defined(__APPLE__) && !defined(_WIN32)
 		// fall back to sqlite3
 		conf.set("backend", "sqlite3");
 #else

@@ -48,7 +48,7 @@ if(USE_SDL)
 endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
-option(USE_STATIC_CURL "Link additional libraries needed for static cURL" FALSE)
+option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
 set(USE_CURL FALSE)
 
 if(ENABLE_CURL)
@@ -622,13 +622,19 @@ if(BUILD_CLIENT)
 			${PROJECT_NAME}
 			${GETTEXT_LIBRARY}
 		)
+		if(USE_STATIC_BUILD)
+			target_link_libraries(
+				${PROJECT_NAME}
+				${GETTEXT_ICONV_LIBRARY}
+			)
+		endif()
 	endif()
 	if(USE_CURL)
 		target_link_libraries(
 			${PROJECT_NAME}
 			${CURL_LIBRARY}
 		)
-		if(USE_STATIC_CURL)
+		if(USE_STATIC_BUILD)
 			target_link_libraries(
 				${PROJECT_NAME}
 				${MBEDTLS_LIBRARY}
@@ -729,7 +735,7 @@ if(BUILD_SERVER)
 			${PROJECT_NAME}server
 			${CURL_LIBRARY}
 		)
-		if(USE_STATIC_CURL)
+		if(USE_STATIC_BUILD)
 			target_link_libraries(
 				${PROJECT_NAME}
 				${MBEDTLS_LIBRARY}
