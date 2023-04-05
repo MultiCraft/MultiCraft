@@ -21,7 +21,7 @@ cmake .. \
 	-DENABLE_TESTING=OFF \
 	-DENABLE_PROGRAMS=OFF
 
-cmake --build . -j
+cmake --build . -j$NPROC
 
 # update `include` folder
 rm -rf ../../mbedtls/include

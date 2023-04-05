@@ -27,7 +27,7 @@ cd libcurl-src
 	--without-zstd --without-brotli --without-nghttp2 --without-libidn2 \
 	--without-libpsl  
 
-make
+make -j$NPROC
 
 # update `include` folder
 rm -rf ../libcurl/include

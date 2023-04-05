@@ -22,7 +22,7 @@ cmake .. \
     -DSDL_SHARED=0 \
     -DSDL_STATIC=1
 
-cmake --build . -j
+cmake --build . -j$NPROC
 
 # update `include` folder
 rm -rf ../../sdl2/include

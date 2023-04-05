@@ -70,4 +70,5 @@ cmake ../../ \
 	-DOPENAL_LIBRARY="$DEPS_ROOT/openal/lib/libOpenAL32.a" \
 	-DOPENAL_INCLUDE_DIR="$DEPS_ROOT/openal/include/AL"
 
+echo
 echo "Build with 'cmake --build . -j'"

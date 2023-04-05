@@ -481,8 +481,8 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 	Display *x11_dpl = info.info.x11.display;
 	Window x11_win = info.info.x11.window;
 #else
-	Display *x11_dpl = (Display *)video_data.OpenGLLinux.X11Display;
-	Window x11_win = (Window)video_data.OpenGLLinux.X11Window;
+	Display *x11_dpl = (Display *)exposedData.OpenGLLinux.X11Display;
+	Window x11_win = (Window)exposedData.OpenGLLinux.X11Window;
 #endif
 
 	if (x11_dpl == NULL) {

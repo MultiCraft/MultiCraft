@@ -20,7 +20,7 @@ cmake .. \
 	-DLEVELDB_BUILD_BENCHMARKS=OFF \
 	-DLEVELDB_INSTALL=OFF
 
-cmake --build . -j
+cmake --build . -j$NPROC
 
 # update `include` folder
 rm -rf ../../leveldb/include

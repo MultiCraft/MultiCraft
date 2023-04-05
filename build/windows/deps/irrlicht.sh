@@ -24,7 +24,7 @@ CPPFLAGS="$CPPFLAGS \
           -I$DEPS_ROOT/libjpeg/include \
           -I$DEPS_ROOT/libpng/include" \
 CXXFLAGS="$CXXFLAGS -std=gnu++17" \
-make staticlib_win32 -j NDEBUG=1
+make staticlib_win32 -j$NPROC NDEBUG=1
 
 # update `include` folder
 rm -rf ../../../irrlicht/include

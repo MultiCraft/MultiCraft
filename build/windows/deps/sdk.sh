@@ -2,3 +2,5 @@
 
 export CFLAGS="-fvisibility=hidden -fexceptions"
 export CXXFLAGS="$CFLAGS -frtti"
+
+export NPROC=`nproc`

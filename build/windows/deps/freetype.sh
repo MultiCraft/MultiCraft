@@ -23,7 +23,7 @@ cmake .. \
 	-DFT_DISABLE_BROTLI=TRUE \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
 
-cmake --build . -j
+cmake --build . -j$NPROC
 
 # update `include` folder
 rm -rf ../../freetype/include
