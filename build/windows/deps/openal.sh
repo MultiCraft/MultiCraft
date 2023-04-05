@@ -5,7 +5,6 @@ OPENAL_VERSION=1.22.2
 
 if [ ! -d openal-src ]; then
 	git clone -b $OPENAL_VERSION --depth 1 https://github.com/kcat/openal-soft openal-src
-	mkdir openal-src/build
 fi
 
 cd openal-src/build

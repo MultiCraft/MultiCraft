@@ -33,8 +33,4 @@ rm -rf ../../mbedtls/lib
 mkdir -p ../../mbedtls/lib
 cp -a library/*.a ../../mbedtls/lib
 
-# update lib
-#~ rm -rf ../../../output/mbedtls/lib/$TARGET_ABI/*.a
-#~ cp -r library/*.a ../../../output/mbedtls/lib/$TARGET_ABI/
-
 echo "MbedTLS build successful"
