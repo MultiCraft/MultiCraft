@@ -32,9 +32,10 @@ if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 endif()
 
 option(USE_SDL "Use SDL2 for window management" FALSE)
+option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
 
 if(USE_SDL)
-	if(NOT WIN32)
+	if(NOT USE_STATIC_BUILD)
 		find_package(SDL2)
 	else()
 		set(SDL2_FOUND TRUE)
@@ -48,7 +49,6 @@ if(USE_SDL)
 endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
-option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
 set(USE_CURL FALSE)
 
 if(ENABLE_CURL)
@@ -595,7 +595,7 @@ if(BUILD_CLIENT)
 			${PROJECT_NAME}
 			${SDL2_LIBRARIES}
 		)
-		if(WIN32)
+		if(USE_STATIC_BUILD AND WIN32)
 			target_link_libraries(
 				${PROJECT_NAME}
 				winmm
@@ -735,17 +735,6 @@ if(BUILD_SERVER)
 			${PROJECT_NAME}server
 			${CURL_LIBRARY}
 		)
-		if(USE_STATIC_BUILD)
-			target_link_libraries(
-				${PROJECT_NAME}
-				${MBEDTLS_LIBRARY}
-				${MBEDCRYPTO_LIBRARY}
-				${MBEDX509_LIBRARY}
-			)
-			if(WIN32)
-				target_link_libraries(${PROJECT_NAME} bcrypt ws2_32)
-			endif()	
-		endif()
 	endif()
 endif(BUILD_SERVER)
 

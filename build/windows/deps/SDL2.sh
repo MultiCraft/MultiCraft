@@ -11,7 +11,7 @@ if [ ! -d SDL2-src ]; then
 	rm release-$SDL2_VERSION.tar.gz
 fi
 
-cd SDL2-src
+cd sdl2-src
 
 mkdir -p build; cd build
 
