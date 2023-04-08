@@ -19,10 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "config.h"
-
-#if USE_SQLITE
-
 #include <string>
 #include "irr_v3d.h"
 #include "rollback_interface.h"
@@ -106,5 +102,3 @@ private:
 	std::vector<Entity> knownActors;
 	std::vector<Entity> knownNodes;
 };
-
-#endif

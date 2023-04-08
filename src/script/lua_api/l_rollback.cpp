@@ -17,10 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "config.h"
-
-#if USE_SQLITE
-
 #include "lua_api/l_rollback.h"
 #include "lua_api/l_internal.h"
 #include "common/c_converter.h"
@@ -119,5 +115,3 @@ void ModApiRollback::Initialize(lua_State *L, int top)
 	API_FCT(rollback_get_node_actions);
 	API_FCT(rollback_revert_actions_by);
 }
-
-#endif

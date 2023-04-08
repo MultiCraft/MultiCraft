@@ -280,12 +280,10 @@ public:
 	// Envlock and conlock should be locked when using scriptapi
 	ServerScripting *getScriptIface(){ return m_script; }
 
-#if USE_SQLITE
 	// actions: time-reversed list
 	// Return value: success/failure
 	bool rollbackRevertActions(const std::list<RollbackAction> &actions,
 			std::list<std::string> *log);
-#endif
 
 	// IGameDef interface
 	// Under envlock

@@ -365,7 +365,7 @@ void loadGameConfAndInitWorld(const std::string &path, const std::string &name,
 
 		conf.set("world_name", name);
 		conf.set("gameid", gamespec.id);
-#if !defined(__ANDROID__) && !defined(__APPLE__) && !defined(_WIN32)
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 		conf.set("backend", "sqlite3");
 		conf.set("player_backend", "sqlite3");
 		conf.set("auth_backend", "sqlite3");

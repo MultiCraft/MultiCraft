@@ -24,9 +24,6 @@ SQLite format specification:
 		BLOB data
 */
 
-#include "config.h"
-
-#if USE_SQLITE
 
 #include "database-sqlite3.h"
 
@@ -777,5 +774,3 @@ void AuthDatabaseSQLite3::writePrivileges(const AuthEntry &authEntry)
 		sqlite3_reset(m_stmt_write_privs);
 	}
 }
-
-#endif

@@ -198,18 +198,7 @@ if(ENABLE_LEVELDB)
 endif(ENABLE_LEVELDB)
 
 option(ENABLE_SQLITE "Enable SQLite backend" TRUE)
-set(USE_SQLITE FALSE)
-
-if(ENABLE_SQLITE)
-	find_package(SQLite3)
-	if(SQLITE3_LIBRARY AND SQLITE3_INCLUDE_DIR)
-		set(USE_SQLITE TRUE)
-		message(STATUS "SQLite backend enabled.")
-		include_directories(${SQLITE3_INCLUDE_DIR})
-	else()
-		message(STATUS "SQLite not found!")
-	endif()
-endif(ENABLE_SQLITE)
+set(USE_SQLITE TRUE)
 
 OPTION(ENABLE_REDIS "Enable Redis backend" TRUE)
 set(USE_REDIS FALSE)
@@ -226,6 +215,8 @@ if(ENABLE_REDIS)
 	endif(REDIS_LIBRARY AND REDIS_INCLUDE_DIR)
 endif(ENABLE_REDIS)
 
+
+find_package(SQLite3 REQUIRED)
 
 OPTION(ENABLE_PROMETHEUS "Enable prometheus client support" FALSE)
 set(USE_PROMETHEUS FALSE)
@@ -574,6 +565,7 @@ if(BUILD_CLIENT)
 		${PNG_LIBRARIES}
 		${X11_LIBRARIES}
 		${SOUND_LIBRARIES}
+		${SQLITE3_LIBRARY}
 		${LUA_LIBRARY}
 		${GMP_LIBRARY}
 		${JSON_LIBRARY}
@@ -667,9 +659,6 @@ if(BUILD_CLIENT)
 	if (USE_LEVELDB)
 		target_link_libraries(${PROJECT_NAME} ${LEVELDB_LIBRARY})
 	endif()
-	if (USE_SQLITE)
-		target_link_libraries(${PROJECT_NAME} ${SQLITE3_LIBRARY})
-	endif()
 	if (USE_REDIS)
 		target_link_libraries(${PROJECT_NAME} ${REDIS_LIBRARY})
 	endif()
@@ -717,9 +706,6 @@ if(BUILD_SERVER)
 	endif()
 	if (USE_LEVELDB)
 		target_link_libraries(${PROJECT_NAME}server ${LEVELDB_LIBRARY})
-	endif()
-	if (USE_SQLITE)
-		target_link_libraries(${PROJECT_NAME}server ${SQLITE3_LIBRARY})
 	endif()
 	if (USE_REDIS)
 		target_link_libraries(${PROJECT_NAME}server ${REDIS_LIBRARY})

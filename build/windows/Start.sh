@@ -14,8 +14,9 @@ export DEPS_ROOT=$(pwd)/deps
 
 cmake ../../ \
 	-DCMAKE_BUILD_TYPE=Release \
-	-DENABLE_SQLITE=0 \
+	-DENABLE_SQLITE=1 \
 	-DENABLE_POSTGRESQL=0 \
+	-DENABLE_LEVELDB=0 \
 	-DENABLE_REDIS=0 \
 	-DENABLE_SPATIAL=0 \
 	-DENABLE_PROMETHEUS=0 \
@@ -61,8 +62,8 @@ cmake ../../ \
 	-DJPEG_INCLUDE_DIR="$DEPS_ROOT/libjpeg/include" \
 	-DFREETYPE_LIBRARY="$DEPS_ROOT/freetype/lib/libfreetype.a" \
 	-DFREETYPE_INCLUDE_DIRS="$DEPS_ROOT/freetype/include" \
-	-DLEVELDB_LIBRARY="$DEPS_ROOT/leveldb/lib/libleveldb.a" \
-	-DLEVELDB_INCLUDE_DIR="$DEPS_ROOT/leveldb/include" \
+	-DSQLITE3_LIBRARY="$DEPS_ROOT/sqlite/lib/libsqlite3.a" \
+	-DSQLITE3_INCLUDE_DIR="$DEPS_ROOT/sqlite/include" \
 	-DOGG_LIBRARY="$DEPS_ROOT/libogg/lib/libogg.a" \
 	-DOGG_INCLUDE_DIR="$DEPS_ROOT/libogg/include" \
 	-DVORBIS_LIBRARY="$DEPS_ROOT/libvorbis/lib/libvorbis.a" \

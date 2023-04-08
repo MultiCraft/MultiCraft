@@ -19,10 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "config.h"
-
-#if USE_SQLITE
-
 #include "lua_api/l_base.h"
 
 class ModApiRollback : public ModApiBase
@@ -37,5 +33,3 @@ private:
 public:
 	static void Initialize(lua_State *L, int top);
 };
-
-#endif

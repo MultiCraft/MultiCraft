@@ -4,7 +4,7 @@
 
 sh ./freetype.sh
 sh ./gettext.sh
-sh ./leveldb.sh
+sh ./sqlite.sh
 sh ./luajit.sh
 sh ./libjpeg.sh
 sh ./zlib.sh

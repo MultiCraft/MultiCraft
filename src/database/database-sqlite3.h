@@ -19,10 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "config.h"
-
-#if USE_SQLITE
-
 #include <cstring>
 #include <string>
 #include "database.h"
@@ -236,5 +232,3 @@ private:
 	sqlite3_stmt *m_stmt_delete_privs = nullptr;
 	sqlite3_stmt *m_stmt_last_insert_rowid = nullptr;
 };
-
-#endif
