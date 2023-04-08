@@ -25,7 +25,7 @@ cd libcurl-src
 	--disable-dict --disable-telnet --disable-tftp --disable-pop3 \
 	--disable-imap --disable-smtp --disable-gopher --disable-sspi \
 	--without-zstd --without-brotli --without-nghttp2 --without-libidn2 \
-	--without-libpsl  
+	--without-libpsl
 
 make -j$NPROC
 

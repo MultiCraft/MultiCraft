@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-SDL2_VERSION=2.26.4
+SDL2_VERSION=2.26.5
 
 . ./sdk.sh
 
