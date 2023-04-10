@@ -46,6 +46,7 @@ public:
 	void allowFocusRemoval(bool allow);
 	bool canTakeFocus(gui::IGUIElement *e);
 	void draw();
+	void drawCursor();
 	void quitMenu();
 	void removeChildren();
 
