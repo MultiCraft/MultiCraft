@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/guiscalingfilter.h"
 #include "client/joystick_controller.h"
 #include "client/tile.h"
+#include "client/renderingengine.h"
 #include "filesys.h"
 #include "gettext.h"
 #include "porting.h"
@@ -30,7 +31,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifdef HAVE_TOUCHSCREENGUI
 #include "touchscreengui.h"
-#include "client/renderingengine.h"
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
