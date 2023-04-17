@@ -187,7 +187,10 @@ end
 local button_path = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 local worldlist_scrbar_pos = 0
 function menu_render_worldlist2(selected_index)
-	local fs = {"formspec_version[4]scroll_container[0.5,0.475;7,5.5;scrbar;vertical]"}
+	local fs = {"formspec_version[4]"}
+
+	local outer_w, outer_h = 7, 5.65
+	fs[#fs + 1] = fmt("scroll_container[0.5,0.31;%s,%s;scrbar;vertical]", outer_w, outer_h)
 
 	local creative = core.settings:get_bool("creative_mode", false)
 	local damage = core.settings:get_bool("enable_damage", true)
@@ -204,18 +207,22 @@ function menu_render_worldlist2(selected_index)
 		end
 
 		local y = (i - 1) * 0.9
-		fs[#fs + 1] = fmt("image[0,%s;7,0.8;%s%s;32]",
-			y, defaulttexturedir_esc, i == selected_index and "gui/dropdown.png" or "worldlist_bg.png"
+		fs[#fs + 1] = fmt("image[0,%s;%s,0.8;%sgui/row_bg%s.png;32]",
+			y, outer_w, defaulttexturedir_esc, i == selected_index and "_selected" or ""
 		)
 		fs[#fs + 1] = fmt("image[0.2,%s;0.4,0.4;%sserver_flags_%s.png]",
 			y + 0.2, defaulttexturedir_esc, world.creative_mode and "creative" or "damage")
-		fs[#fs + 1] = fmt("label[0.8,%s;%s]", y + 0.4, esc(world.name))
-		fs[#fs + 1] = fmt("image_button[0,%s;7,0.8;;worldlist_%d;;false;false]", y, i)
+
+		-- Use a scroll_container to clip the label
+		fs[#fs + 1] = fmt("scroll_container[0.8,%s;%s,0.8;;vertical]", y, outer_w - 1)
+		fs[#fs + 1] = fmt("label[0,0.4;%s]", esc(world.name))
+		fs[#fs + 1] = "scroll_container_end[]"
+
+		fs[#fs + 1] = fmt("image_button[0,%s;%s,0.8;;worldlist_%d;;false;false]", y, outer_w, i)
 	end
 
 	fs[#fs + 1] = "scroll_container_end[]"
 
-	local outer_h = 5.5
 	local inner_h = math.max(#list * 0.9 - 0.1, outer_h)
 	local scrollbar_max = (inner_h - outer_h) * 10
 
@@ -226,7 +233,7 @@ function menu_render_worldlist2(selected_index)
 
 	fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", math.ceil(scrollbar_max),
 		(outer_h / inner_h) * scrollbar_max)
-	fs[#fs + 1] = fmt("scrollbar[7.7,0.475;0.9,5.5;vertical;scrbar;%s;" ..
+	fs[#fs + 1] = fmt("scrollbar[7.7,0.31;0.9,5.65;vertical;scrbar;%s;" ..
 		"%sscrollbar_bg.png,%sscrollbar_slider_long.png,%sscrollbar_up.png,%sscrollbar_down.png]",
 		worldlist_scrbar_pos, button_path, button_path, button_path, button_path)
 
