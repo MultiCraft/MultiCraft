@@ -227,11 +227,11 @@ function menu_render_worldlist2(selected_index)
 	local scrollbar_max = (inner_h - outer_h) * 10
 
 	-- Make sure the selected world is visible
-	local min_pos = ((selected_index - 1) * 0.9 - outer_h + 0.8) * 10
-	local max_pos = (selected_index - 1) * 0.9 * 10
+	local min_pos = math.ceil(((selected_index - 1) * 0.9 - outer_h + 0.8) * 10)
+	local max_pos = math.floor((selected_index - 1) * 0.9 * 10)
 	worldlist_scrbar_pos = math.min(math.max(worldlist_scrbar_pos, min_pos), max_pos)
 
-	fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", math.ceil(scrollbar_max),
+	fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", scrollbar_max,
 		(outer_h / inner_h) * scrollbar_max)
 	fs[#fs + 1] = fmt("scrollbar[7.7,0.31;0.9,5.65;vertical;scrbar;%s;" ..
 		"%sscrollbar_bg.png,%sscrollbar_slider_long.png,%sscrollbar_up.png,%sscrollbar_down.png]",
