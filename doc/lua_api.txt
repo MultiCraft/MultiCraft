@@ -2927,7 +2927,7 @@ Some types may inherit styles from parent types.
     * scrollbar_bgimg - The background image of the scrollbar
     * scrollbar_thumb_img - The thumb/slider image of the scrollbar.
                             If scrollbar_thumb_top_img and scrollbar_thumb_bottom_img are specified,
-			    this should be middle texture.
+                            this should be middle texture.
     * scrollbar_thumb_top_img - The top half of the thumb image
     * scrollbar_thumb_bottom_img - The bottom half of the thumb image
     * scrollbar_up_img - The up arrow image to use for the scrollbar
