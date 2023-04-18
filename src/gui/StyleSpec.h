@@ -59,6 +59,12 @@ public:
 		SOUND,
 		SPACING,
 		SIZE,
+		SCROLLBAR_BGIMG,
+		SCROLLBAR_THUMB_IMG,
+		SCROLLBAR_UP_IMG,
+		SCROLLBAR_DOWN_IMG,
+		SCROLLBAR_THUMB_TOP_IMG,
+		SCROLLBAR_THUMB_BOTTOM_IMG,
 		NUM_PROPERTIES,
 		NONE
 	};
@@ -155,6 +161,18 @@ public:
 			return SPACING;
 		} else if (name == "size") {
 			return SIZE;
+		} else if (name == "scrollbar_bgimg") {
+			return SCROLLBAR_BGIMG;
+		} else if (name == "scrollbar_thumb_img") {
+			return SCROLLBAR_THUMB_IMG;
+		} else if (name == "scrollbar_up_img") {
+			return SCROLLBAR_UP_IMG;
+		} else if (name == "scrollbar_down_img") {
+			return SCROLLBAR_DOWN_IMG;
+		} else if (name == "scrollbar_thumb_top_img") {
+			return SCROLLBAR_THUMB_TOP_IMG;
+		} else if (name == "scrollbar_thumb_bottom_img") {
+			return SCROLLBAR_THUMB_BOTTOM_IMG;
 		} else {
 			return NONE;
 		}

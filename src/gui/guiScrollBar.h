@@ -12,7 +12,9 @@ the arrow buttons where there is insufficient space.
 
 #pragma once
 
+#include "guiAnimatedImage.h"
 #include "irrlichttypes_extrabloated.h"
+#include "StyleSpec.h"
 #include <vector>
 
 using namespace irr;
@@ -50,16 +52,20 @@ public:
 	void setPageSize(const s32 &size);
 	void setArrowsVisible(ArrowVisibility visible);
 	void setTextures(const std::vector<video::ITexture *> &textures);
+	void setStyle(const StyleSpec &style, ISimpleTextureSource *tsrc);
 
 private:
 	void refreshControls();
 	s32 getPosFromMousePos(const core::position2di &p) const;
 	f32 range() const { return f32(max_pos - min_pos); }
+	gui::IGUIImage *addImage(const core::rect<s32> &rect, video::ITexture *texture);
 
 	IGUIButton *up_button;
 	IGUIButton *down_button;
 	gui::IGUIImage *bg_image;
 	gui::IGUIImage *slider_image;
+	gui::IGUIImage *slider_top_image;
+	gui::IGUIImage *slider_bottom_image;
 	ArrowVisibility arrow_visibility = DEFAULT;
 	bool is_dragging;
 	bool is_horizontal;
@@ -78,6 +84,7 @@ private:
 	s32 border_size;
 
 	std::vector<video::ITexture *> m_textures;
+	core::rect<s32> m_texture_middle;
 
 	core::rect<s32> slider_rect;
 	video::SColor current_icon_color;
