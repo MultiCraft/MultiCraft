@@ -121,15 +121,16 @@ void GUIModalMenu::drawCursor()
 	const int cursor_line_size = 16;
 	float hud_scaling = g_settings->getFloat("hud_scaling");
 	float scale_factor = hud_scaling * RenderingEngine::getDisplayDensity();
-	int cursor_size = (int) (cursor_line_size * scale_factor);
+	int cursor_size = (int)(cursor_line_size * scale_factor);
 
-	std::string sprite_path = porting::path_share + DIR_DELIM + "textures"
-	+ DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM + "cursor.png";
+	std::string sprite_path = porting::path_share + DIR_DELIM + "textures" +
+				  DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM +
+				  "cursor.png";
 	video::ITexture *cursor = driver->getTexture(sprite_path.c_str());
 
 	if (cursor) {
 		core::rect<s32> rect(pointer.X - cursor_size, pointer.Y - cursor_size,
-							 pointer.X + cursor_size, pointer.Y + cursor_size);
+				pointer.X + cursor_size, pointer.Y + cursor_size);
 		video::SColor crosshair_color[] = {crosshair_argb, crosshair_argb,
 				crosshair_argb, crosshair_argb};
 		draw2DImageFilterScaled(driver, cursor, rect,
@@ -137,9 +138,9 @@ void GUIModalMenu::drawCursor()
 				nullptr, crosshair_color, true);
 	} else {
 		driver->draw2DLine(pointer - v2s32(cursor_size, 0),
-						   pointer + v2s32(cursor_size, 0), crosshair_argb);
+				pointer + v2s32(cursor_size, 0), crosshair_argb);
 		driver->draw2DLine(pointer - v2s32(0, cursor_size),
-						   pointer + v2s32(0, cursor_size), crosshair_argb);
+				pointer + v2s32(0, cursor_size), crosshair_argb);
 	}
 }
 
