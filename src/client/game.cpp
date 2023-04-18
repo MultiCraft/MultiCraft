@@ -2436,9 +2436,7 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 			&& !isMenuActive()) || input->isRandom()) {
 
 		if (!input->isRandom()) {
-			// Mac OSX gets upset if this is set every frame
-			if (device->getCursorControl()->isVisible())
-				device->getCursorControl()->setVisible(false);
+			input->setCursorVisible(false);
 		}
 
 		if (m_first_loop_after_window_activation) {
@@ -2452,10 +2450,7 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 
 	} else {
 
-		// Mac OSX gets upset if this is set every frame
-		if (!device->getCursorControl()->isVisible())
-			device->getCursorControl()->setVisible(true);
-
+		input->setCursorVisible(true);
 		m_first_loop_after_window_activation = true;
 
 	}

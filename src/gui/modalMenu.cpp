@@ -22,8 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "modalMenu.h"
 #include "client/guiscalingfilter.h"
 #include "client/joystick_controller.h"
-#include "client/tile.h"
 #include "client/renderingengine.h"
+#include "client/tile.h"
 #include "filesys.h"
 #include "gettext.h"
 #include "porting.h"
@@ -99,14 +99,12 @@ void GUIModalMenu::draw()
 	drawMenu();
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#if defined(__ANDROID__) || defined(__IOS__)
-	if (RenderingEngine::get_raw_device()->getCursorControl()->isVisible() &&
-		SDLGameController::isActive())
+	if (SDLGameController::isActive() && SDLGameController::isCursorVisible())
 		drawCursor();
-#endif
 #endif
 }
 
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 void GUIModalMenu::drawCursor()
 {
 	video::IVideoDriver *driver = Environment->getVideoDriver();
@@ -165,6 +163,7 @@ void GUIModalMenu::quitMenu()
 		g_touchscreengui->show();
 #endif
 }
+#endif
 
 void GUIModalMenu::removeChildren()
 {

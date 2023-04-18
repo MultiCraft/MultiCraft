@@ -110,14 +110,19 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT ||
 			event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
-		if (g_settings->getBool("enable_joysticks"))
+		if (g_settings->getBool("enable_joysticks")) {
 			sdl_game_controller->translateEvent(event);
+			input->setCursorVisible(sdl_game_controller->isCursorVisible());
+		}
 		return true;
 	} else if ((event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
 			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
 			event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
-		if (!sdl_game_controller->isFakeEvent())
+		if (!sdl_game_controller->isFakeEvent() &&
+				sdl_game_controller->isActive()) {
 			sdl_game_controller->setActive(false);
+			input->setCursorVisible(sdl_game_controller->isCursorVisible());
+		}
 	}
 #endif
 
