@@ -193,6 +193,7 @@ private:
 	s16 m_camera_pitch = 0;
 
 	static bool m_active;
+	static bool m_cursor_visible;
 	bool m_is_fake_event = false;
 
 public:
@@ -205,6 +206,8 @@ public:
 
 	void setActive(bool value) { m_active = value; }
 	static bool isActive() { return m_active; }
+	void setCursorVisible(bool visible) { m_cursor_visible = visible; }
+	static bool isCursorVisible() { return m_cursor_visible; }
 	bool isFakeEvent() { return m_is_fake_event; }
 };
 #endif

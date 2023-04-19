@@ -46,6 +46,9 @@ public:
 	void allowFocusRemoval(bool allow);
 	bool canTakeFocus(gui::IGUIElement *e);
 	void draw();
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	void drawCursor();
+#endif
 	void quitMenu();
 	void removeChildren();
 

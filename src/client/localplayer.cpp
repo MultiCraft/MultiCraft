@@ -27,6 +27,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "map.h"
 #include "client.h"
 #include "content_cao.h"
+#include "client/joystick_controller.h"
+#include "gui/touchscreengui.h"
 
 /*
 	LocalPlayer
@@ -293,7 +295,7 @@ void LocalPlayer::move(f32 dtime, Environment *env, f32 pos_max_d,
 		(touching_ground ? m_cao->getStepHeight() : (0.2f * BS));
 
 #ifdef HAVE_TOUCHSCREENGUI
-	if (touching_ground)
+	if (TouchScreenGUI::isActive() && touching_ground)
 		player_stepheight += (0.6f * BS);
 #endif
 
@@ -926,7 +928,8 @@ void LocalPlayer::old_move(f32 dtime, Environment *env, f32 pos_max_d,
 	float player_stepheight = touching_ground ? (BS * 0.6f) : (BS * 0.2f);
 
 #ifdef HAVE_TOUCHSCREENGUI
-	player_stepheight += (0.6 * BS);
+	if (TouchScreenGUI::isActive())
+		player_stepheight += (0.6 * BS);
 #endif
 
 	v3f accel_f;
@@ -1159,8 +1162,21 @@ void LocalPlayer::handleAutojump(f32 dtime, Environment *env,
 	const collisionMoveResult &result, const v3f &initial_position,
 	const v3f &initial_speed, f32 pos_max_d)
 {
+#ifdef HAVE_TOUCHSCREENGUI
+	// Touchscreen uses player_stepheight for autojump
+	if (TouchScreenGUI::isActive())
+		return;
+#endif
+
 	PlayerSettings &player_settings = getPlayerSettings();
-	if (!player_settings.autojump)
+	bool autojump_enabled = player_settings.autojump;
+
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	// Force autojump on gamepad
+	autojump_enabled |= SDLGameController::isActive();
+#endif
+
+	if (!autojump_enabled)
 		return;
 
 	if (m_autojump)

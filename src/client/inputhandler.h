@@ -195,6 +195,7 @@ public:
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	SDLGameController* sdl_game_controller = nullptr;
+	InputHandler* input = nullptr;
 #endif
 
 #ifdef HAVE_TOUCHSCREENGUI
@@ -259,6 +260,8 @@ public:
 
 	virtual void clear() {}
 
+	virtual void setCursorVisible(bool visible) {};
+
 	JoystickController joystick;
 	KeyCache keycache;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
@@ -277,6 +280,7 @@ public:
 		m_receiver->joystick = &joystick;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 		m_receiver->sdl_game_controller = &sdl_game_controller;
+		m_receiver->input = this;
 #endif
 	}
 	virtual bool isKeyDown(GameKeyType k)
@@ -335,6 +339,22 @@ public:
 	}
 
 	virtual s32 getMouseWheel() { return m_receiver->getMouseWheel(); }
+
+	virtual void setCursorVisible(bool visible)
+	{
+	#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		sdl_game_controller.setCursorVisible(visible);
+
+		if (sdl_game_controller.isActive())
+			visible = false;
+	#endif
+		IrrlichtDevice *device = RenderingEngine::get_raw_device();
+
+		if (device->getCursorControl()) {
+			if (visible != device->getCursorControl()->isVisible())
+				device->getCursorControl()->setVisible(visible);
+		}
+	}
 
 	void clear()
 	{

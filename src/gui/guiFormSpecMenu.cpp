@@ -3673,54 +3673,6 @@ void GUIFormSpecMenu::drawSelectedItem()
 	drawItemStack(driver, m_font, stack, rect, NULL, m_client, IT_ROT_DRAGGED);
 }
 
-void GUIFormSpecMenu::drawCursor()
-{
-	video::IVideoDriver* driver = Environment->getVideoDriver();
-	ITextureSource *tsrc = nullptr;
-
-	if (m_client)
-		tsrc = m_client->getTextureSource();
-
-	v3f crosshair_color = g_settings->getV3F("crosshair_color");
-	u32 cross_r = rangelim(myround(crosshair_color.X), 0, 255);
-	u32 cross_g = rangelim(myround(crosshair_color.Y), 0, 255);
-	u32 cross_b = rangelim(myround(crosshair_color.Z), 0, 255);
-	u32 cross_a = rangelim(g_settings->getS32("crosshair_alpha"), 0, 255);
-	video::SColor crosshair_argb = video::SColor(cross_a, cross_r, cross_g, cross_b);
-
-	const int crosshair_line_size = 16;
-	float hud_scaling = g_settings->getFloat("hud_scaling");
-	float scale_factor = hud_scaling * RenderingEngine::getDisplayDensity();
-	int crosshair_size = (int) (crosshair_line_size * scale_factor);
-	bool use_crosshair_image = tsrc && tsrc->isKnownSourceImage("cursor.png");
-
-	video::ITexture *crosshair = nullptr;
-	if (use_crosshair_image) {
-		crosshair = tsrc->getTexture("cursor.png");
-	} else {
-		std::string sprite_path = porting::path_share + DIR_DELIM + "textures"
-		+ DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM + "cursor.png";
-		crosshair = driver->getTexture(sprite_path.c_str());
-	}
-
-	if (crosshair) {
-		core::rect<s32> rect(m_pointer.X - crosshair_size,
-							 m_pointer.Y - crosshair_size,
-							 m_pointer.X + crosshair_size,
-							 m_pointer.Y + crosshair_size);
-		video::SColor crosshair_color[] = {crosshair_argb, crosshair_argb,
-				crosshair_argb, crosshair_argb};
-		draw2DImageFilterScaled(driver, crosshair, rect,
-				core::rect<s32>({0, 0}, crosshair->getOriginalSize()),
-				nullptr, crosshair_color, true);
-	} else {
-		driver->draw2DLine(m_pointer - v2s32(crosshair_size, 0),
-						   m_pointer + v2s32(crosshair_size, 0), crosshair_argb);
-		driver->draw2DLine(m_pointer - v2s32(0, crosshair_size),
-						   m_pointer + v2s32(0, crosshair_size), crosshair_argb);
-	}
-}
-
 void GUIFormSpecMenu::drawMenu()
 {
 	if (m_form_src) {
@@ -3884,14 +3836,6 @@ void GUIFormSpecMenu::drawMenu()
 		Draw dragged item stack
 	*/
 	drawSelectedItem();
-
-#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#if defined(__ANDROID__) || defined(__IOS__)
-	if (RenderingEngine::get_raw_device()->getCursorControl()->isVisible() &&
-		SDLGameController::isActive())
-		drawCursor();
-#endif
-#endif
 
 	skin->setFont(old_font);
 }

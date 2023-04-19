@@ -558,7 +558,7 @@ void ClientLauncher::main_menu(MainMenuData *menudata)
 	infostream << "Waited for other menus" << std::endl;
 
 	// Cursor can be non-visible when coming from the game
-	RenderingEngine::get_raw_device()->getCursorControl()->setVisible(true);
+	input->setCursorVisible(true);
 
 	/* show main menu */
 	GUIEngine mymenu(&input->joystick, guiroot, &g_menumgr, menudata, *kill);

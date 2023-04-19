@@ -264,6 +264,7 @@ s16 JoystickController::getAxisWithoutDead(JoystickAxis axis)
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 bool SDLGameController::m_active = false;
+bool SDLGameController::m_cursor_visible = false;
 
 void SDLGameController::handleMouseMovement(int x, int y)
 {
