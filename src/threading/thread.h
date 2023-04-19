@@ -25,6 +25,10 @@ DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include "IrrCompileConfig.h"
+
+#ifndef _IRR_COMPILE_WITH_SDL_DEVICE_
+
 #include "util/basic_macros.h"
 
 #include <string>
@@ -158,3 +162,4 @@ private:
 #endif
 };
 
+#endif

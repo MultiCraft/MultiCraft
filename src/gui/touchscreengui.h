@@ -51,11 +51,11 @@ typedef enum
 	after_last_element_id,
 	// settings_starter_id,
 	// rare_controls_starter_id,
-	fly_id,
-	noclip_id,
-	fast_id,
-	debug_id,
-	toggle_chat_id,
+	// fly_id,
+	// noclip_id,
+	// fast_id,
+	// debug_id,
+	// toggle_chat_id,
 	forward_id,
 	backward_id,
 	left_id,
@@ -83,12 +83,9 @@ typedef enum
 } autohide_button_bar_dir;
 
 #define MIN_DIG_TIME_MS 500
-#define BUTTON_REPEAT_DELAY 0.2f
+#define BUTTON_REPEAT_DELAY 1.0f
 #define SETTINGS_BAR_Y_OFFSET 5
 #define RARE_CONTROLS_BAR_Y_OFFSET 5
-
-// Very slow button repeat frequency
-#define SLOW_BUTTON_REPEAT 1.0f
 
 extern const char *button_imagenames[];
 extern const char *joystick_imagenames[];
@@ -277,7 +274,7 @@ private:
 	// initialize a button
 	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 			const std::wstring &caption, bool immediate_release,
-			float repeat_delay = SLOW_BUTTON_REPEAT);
+			float repeat_delay = BUTTON_REPEAT_DELAY);
 
 	// initialize a joystick button
 	button_info *initJoystickButton(touch_gui_button_id id,

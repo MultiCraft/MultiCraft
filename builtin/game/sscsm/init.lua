@@ -20,6 +20,7 @@
 --
 
 sscsm = {minify=true}
+local format = string.format
 local modpath = core.get_builtin_path() .. "game" .. DIR_DELIM ..
 	"sscsm" .. DIR_DELIM
 
@@ -121,6 +122,9 @@ function sscsm.register(def)
 		error('Invalid "code" parameter passed to sscsm.register_csm.', 2)
 	end
 
+	if block_colon then
+		def.code = "local minetest=core;" .. def.code
+	end
 	def.code = sscsm.minify_code(def.code)
 	if (#def.name + #def.code) > 65300 then
 		error("The code (or name) passed to sscsm.register_csm is too large."
@@ -218,8 +222,19 @@ function sscsm.com_send(pname, channel, msg)
 		msg = assert(core.write_json(msg))
 	end
 
+	-- Compress long messages
+	if #msg > 4096 then
+		-- Chat messages can't contain binary data so base64 is used
+		local compressed_msg = minetest.encode_base64(minetest.compress(msg))
+
+		-- Only use the compressed message if it's shorter
+		if #msg > #compressed_msg + 1 then
+			msg = "\003" .. compressed_msg
+		end
+	end
+
 	-- Short messages can be sent all at once
-	local prefix = "\001SSCSM_COM\001" .. channel .. "\001"
+	local prefix = format("\001SSCSM_COM\001%s\001", channel)
 	if #msg < 65300 then
 		core.chat_send_player(pname, prefix .. msg)
 		return

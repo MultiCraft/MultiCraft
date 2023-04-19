@@ -158,15 +158,26 @@ end
 
 --------------------------------------------------------------------------------
 function menu_render_worldlist()
-	local retval = ""
-	local current_worldlist = menudata.worldlist:get_list()
+	local retval = {}
 
-	for _, v in ipairs(current_worldlist) do
-		if retval ~= "" then retval = retval .. "," end
-		retval = retval .. core.formspec_escape(v.name)
+	local creative = core.settings:get_bool("creative_mode", false)
+	local damage = core.settings:get_bool("enable_damage", true)
+
+	for _, world in ipairs(menudata.worldlist:get_list()) do
+		if world.creative_mode == nil or world.enable_damage == nil then
+			-- There's a built-in menu_worldmt function that can read from
+			-- world.mt but it would read from the file once for each setting
+			-- read
+			local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
+			world.creative_mode = world_conf:get_bool("creative_mode", creative)
+			world.enable_damage = world_conf:get_bool("enable_damage", damage)
+		end
+
+		retval[#retval + 1] = world.creative_mode and "5" or "4"
+		retval[#retval + 1] = core.formspec_escape(world.name)
 	end
 
-	return retval
+	return table.concat(retval, ",")
 end
 
 --------------------------------------------------------------------------------
@@ -282,54 +293,21 @@ function get_language_list()
 	languages[#languages + 1] = "en"
 	language_names.en = "English"
 
-	-- Sort the languages list based on their human readable name
+	-- Sort the languages list based on their human readable name and make sure
+	-- that English is the first entry
 	table.sort(languages, function(a, b)
-		return language_names[a] < language_names[b]
+		return a == "en" or (b ~= "en" and language_names[a] < language_names[b])
 	end)
 
 	local language_name_list = {}
 	for i, language in ipairs(languages) do
 		language_name_list[i] = core.formspec_escape(language_names[language])
 	end
-	local language_dropdown = table.concat(language_name_list, ",")
 
 	local lang_idx = table.indexof(languages, fgettext("LANG_CODE"))
 	if lang_idx < 0 then
 		lang_idx = table.indexof(languages, "en")
 	end
 
-	return languages, language_dropdown, lang_idx, language_name_list
-end
---------------------------------------------------------------------------------
-local device_is_tablet = core.settings:get_bool("device_is_tablet", false)
-local screen_density = core.get_screen_info().density
-function is_high_dpi()
-	if PLATFORM == "OSX" then
-		return tonumber(core.settings:get("screen_dpi")) / 72 >= 2
-	elseif PLATFORM == "iOS" and device_is_tablet then
-		return screen_density >= 2
-	else
-		return screen_density >= 3
-	end
-end
---------------------------------------------------------------------------------
-function btn_style(field, color)
-	local button_path = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
-	local btn_size = is_high_dpi() and ".x2" or ""
-	color = (color and "_" .. color) or ""
-
-	local retval =
-		"style[" .. field .. ";border=false]" ..
-		"style[" .. field .. ";bgimg=" .. button_path .. "gui_button" .. color .. btn_size ..
-			".png;bgimg_middle=" .. (is_high_dpi() and 48 or 32) .. ";padding=" .. (is_high_dpi() and -30 or -20) .. "]"
-
-	if color ~= "_gray" then
-		retval = retval ..
-			"style[" .. field .. ":hovered;bgimg=" .. button_path .. "gui_button" .. color .. "_hovered" .. btn_size ..
-				".png]" ..
-			"style[" .. field .. ":pressed;bgimg=" .. button_path .. "gui_button" .. color .. "_pressed" .. btn_size ..
-				".png]"
-	end
-
-	return retval
+	return languages, lang_idx, language_name_list
 end

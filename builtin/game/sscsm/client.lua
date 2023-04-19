@@ -307,17 +307,23 @@ core.register_on_receiving_chat_message(function(message)
 	if not callbacks then return true end
 
 	-- Handle split messages
-	local prefix = msg:sub(1, 1)
-	if prefix == '\001' then
+	local prefix = msg:byte(1)
+	if prefix == 1 then
 		msg = load_split_message(chan, msg)
 		if not msg then
 			return true
 		end
-		prefix = msg:sub(1, 1)
+		prefix = msg:byte(1)
+	end
+
+	-- Decompress messages
+	if prefix == 3 then
+		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)))
+		prefix = msg:byte(1)
 	end
 
 	-- Load the message
-	if prefix == '\002' then
+	if prefix == 2 then
 		msg = msg:sub(2)
 	else
 		msg = core.parse_json(msg)

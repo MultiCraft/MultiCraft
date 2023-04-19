@@ -52,7 +52,6 @@ struct TileAnimationParams
 
 	void serialize(std::ostream &os, u8 tiledef_version) const;
 	void deSerialize(std::istream &is, u8 tiledef_version);
-	void deSerializeWithProtoVer(std::istream &is, u16 protocol_version);
 	void determineParams(v2u32 texture_size, int *frame_count, int *frame_length_ms,
 			v2u32 *frame_size) const;
 	void getTextureModifer(std::ostream &os, v2u32 texture_size, int frame) const;

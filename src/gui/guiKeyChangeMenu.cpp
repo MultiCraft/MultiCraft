@@ -353,7 +353,7 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 	if (event.EventType == EET_KEY_INPUT_EVENT && active_key
 			&& event.KeyInput.PressedDown) {
 
-		bool prefer_character = shift_down;
+		bool prefer_character = shift_down && event.KeyInput.Char != 0;
 		KeyPress kp(event.KeyInput, prefer_character);
 
 		if (event.KeyInput.Key == irr::KEY_DELETE)
@@ -412,6 +412,13 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 			&& event.KeyInput.Key == irr::KEY_ESCAPE) {
 		quitMenu();
 		return true;
+	} else if (event.EventType == EET_KEY_INPUT_EVENT &&
+			!event.KeyInput.PressedDown) {
+		if (shift_down && !event.KeyInput.Shift) {
+			shift_down = false;
+			active_key = nullptr;
+			return true;
+		}
 	} else if (event.EventType == EET_GUI_EVENT) {
 		if (event.GUIEvent.EventType == gui::EGET_ELEMENT_FOCUS_LOST
 			&& isVisible())

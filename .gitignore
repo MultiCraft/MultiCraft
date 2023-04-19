@@ -55,8 +55,6 @@ build/.cmake/
 /clientmods/*
 !/clientmods/preview/
 /client/mod_storage/
-/builtin/mainmenu/hosting/
-/textures/base/pack/hosting/
 
 ## Configuration/log files
 multicraft.conf

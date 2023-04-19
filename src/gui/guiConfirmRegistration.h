@@ -57,7 +57,10 @@ public:
 
 private:
 	std::wstring getLabelByID(s32 id) { return L""; }
-	std::string getNameByID(s32 id) { return "password"; }
+	std::string getNameByID(s32 id)
+	{
+		return id == 262 ? "password" : ""; // 262 is ID_confirmPassword
+	}
 
 	Client *m_client = nullptr;
 	const std::string &m_playername;
@@ -65,4 +68,5 @@ private:
 	bool *m_aborted = nullptr;
 	std::wstring m_pass_confirm = L"";
 	ISimpleTextureSource *m_tsrc;
+	video::SColor m_fullscreen_bgcolor;
 };

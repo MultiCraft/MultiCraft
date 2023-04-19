@@ -1,6 +1,6 @@
 vector = {}
 
-local floor, hypot = math.floor, math.hypot
+local floor, hypot, round = math.floor, math.hypot, math.round
 local min, max, pi = math.min, math.max, math.pi
 
 function vector.new(a, b, c)
@@ -43,9 +43,9 @@ end
 
 function vector.round(v)
 	return {
-		x = floor(v.x + 0.5),
-		y = floor(v.y + 0.5),
-		z = floor(v.z + 0.5)
+		x = round(v.x),
+		y = round(v.y),
+		z = round(v.z)
 	}
 end
 

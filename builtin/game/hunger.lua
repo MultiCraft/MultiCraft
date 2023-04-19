@@ -382,7 +382,7 @@ hunger.bar_definition = {
 	number = settings.visual_max,
 	item = settings.visual_max,
 	size = {x = 24, y = 24},
-	offset = {x = -265, y = -126}
+	offset = {x = -265, y = -118}
 }
 
 core.register_on_joinplayer(function(player)

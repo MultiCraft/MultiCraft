@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "util/numeric.h"
 #include "inputhandler.h"
+#include "gui/guiChatConsole.h"
 #include "gui/mainmenumanager.h"
 #include "hud.h"
 #include "settings.h"
@@ -134,6 +135,13 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 			m_touchscreengui->hide();
 	}
 #endif
+
+	GUIChatConsole* chat_console = GUIChatConsole::getChatConsole();
+	if (chat_console && chat_console->isOpen()) {
+		bool result = chat_console->preprocessEvent(event);
+		if (result)
+			return true;
+	}
 
 	/*
 		React to nothing here if a menu is active

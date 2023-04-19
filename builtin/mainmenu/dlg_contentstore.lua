@@ -44,6 +44,7 @@ local search_string = ""
 local cur_page = 1
 local num_per_page = 5
 local filter_type = 1
+local dropdown_open = false
 local filter_types_titles = {
 	fgettext("All packages"),
 	fgettext("Games"),
@@ -711,15 +712,11 @@ function store.get_formspec(dlgdata)
 			"style[status,downloading,queued;border=false]",
 
 			"container[0.375,0.375]",
-			"image[0,0;7.25,0.8;", defaulttexturedir_esc, "field_bg.png;32]",
-			"style[search_string;border=false;bgcolor=transparent]",
-			"field[0.1,0;7.15,0.8;search_string;;", esc(search_string), "]",
-			"field_close_on_enter[search_string;false]",
-			"set_focus[search_string;true]",
-			btn_style("search"),
-			"image_button[7.4,0;0.8,0.8;", defaulttexturedir_esc, "search.png;search;;true;false]",
-		--	"image_button[8.125,0;0.8,0.8;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
-			"dropdown[8.35,0;3.5,0.8;type;", table.concat(filter_types_titles, ","), ";", filter_type, "]",
+			"image[0,0;7.7,0.8;", defaulttexturedir_esc, "field_bg.png;32]",
+			"style[Dsearch_string;border=false;bgcolor=transparent]",
+			"field[0.1,0;6.65,0.8;Dsearch_string;;", esc(search_string), "]",
+			"set_focus[Dsearch_string;true]",
+			"image_button[6.9,0.05;0.7,0.7;", defaulttexturedir_esc, "clear.png;clear;;true;false]",
 			"container_end[]",
 
 			-- Page nav buttons
@@ -733,7 +730,8 @@ function store.get_formspec(dlgdata)
 			btn_style("pback"),
 			"image_button[0.8,0;0.8,0.8;", defaulttexturedir_esc, "prev_icon.png;pback;;true;false]",
 			"style[pagenum;border=false]",
-			"button[1.5,0;2,0.8;pagenum;", tonumber(cur_page), " / ", tonumber(dlgdata.pagemax), "]",
+			"button[1.5,0;2,0.8;pagenum;", core.colorize("#FFDF00", tostring(cur_page)),
+				" / ", core.colorize("#FFDF00", tostring(dlgdata.pagemax)), "]",
 			btn_style("pnext"),
 			"image_button[3.5,0;0.8,0.8;", defaulttexturedir_esc, "next_icon.png;pnext;;true;false]",
 			btn_style("pend"),
@@ -811,6 +809,12 @@ function store.get_formspec(dlgdata)
 		formspec[#formspec + 1] = get_screenshot(package)
 		formspec[#formspec + 1] = "]"
 
+		formspec[#formspec + 1] = "image[-0.01,-0.01;1.52,1.02;"
+		formspec[#formspec + 1] = defaulttexturedir_esc
+		formspec[#formspec + 1] = "gui"
+		formspec[#formspec + 1] = DIR_DELIM_esc
+		formspec[#formspec + 1] = "cdb_img_corners.png;15]"
+
 		-- title
 		formspec[#formspec + 1] = "label[1.875,0.1;"
 		formspec[#formspec + 1] = esc(
@@ -834,7 +838,7 @@ function store.get_formspec(dlgdata)
 			formspec[#formspec + 1] = "cdb_queued.png;queued]"
 		elseif not package.path then
 			local elem_name = "install_" .. i .. ";"
-			formspec[#formspec + 1] = "style[" .. elem_name .. "bgcolor=#71aa34]"
+			formspec[#formspec + 1] = btn_style("install_" .. i, "green", true)
 			formspec[#formspec + 1] = left_base .. "cdb_add.png;" .. elem_name .. "]"
 			formspec[#formspec + 1] = "tooltip[" .. elem_name .. fgettext("Install") .. tooltip_colors
 		else
@@ -842,19 +846,20 @@ function store.get_formspec(dlgdata)
 
 				-- The install_ action also handles updating
 				local elem_name = "install_" .. i .. ";"
-				formspec[#formspec + 1] = "style[" .. elem_name .. "bgcolor=#28ccdf]"
+				formspec[#formspec + 1] = btn_style("install_" .. i, nil, true)
 				formspec[#formspec + 1] = left_base .. "cdb_update.png;" .. elem_name .. "]"
 				formspec[#formspec + 1] = "tooltip[" .. elem_name .. fgettext("Update") .. tooltip_colors
 			else
 
 				local elem_name = "uninstall_" .. i .. ";"
-				formspec[#formspec + 1] = "style[" .. elem_name .. "bgcolor=#a93b3b]"
+				formspec[#formspec + 1] = btn_style("uninstall_" .. i, "red", true)
 				formspec[#formspec + 1] = left_base .. "cdb_clear.png;" .. elem_name .. "]"
 				formspec[#formspec + 1] = "tooltip[" .. elem_name .. fgettext("Uninstall") .. tooltip_colors
 			end
 		end
 
 		local web_elem_name = "view_" .. i .. ";"
+		formspec[#formspec + 1] = btn_style("view_" .. i, nil, true)
 		formspec[#formspec + 1] = "image_button[-0.7,0;0.7,0.7;" ..
 			defaulttexturedir_esc .. "cdb_viewonline.png;" .. web_elem_name .. "]"
 		formspec[#formspec + 1] = "tooltip[" .. web_elem_name ..
@@ -874,17 +879,16 @@ function store.get_formspec(dlgdata)
 		formspec[#formspec + 1] = "container_end[]"
 	end
 
+	-- Add the dropdown last so that it is over top of everything else
+	if #store.packages_full > 0 then
+		formspec[#formspec + 1] = get_dropdown(8.22, 0.375, 4, "change_type",
+			filter_types_titles, filter_type, dropdown_open)
+	end
+
 	return table.concat(formspec, "")
 end
 
 function store.handle_submit(this, fields)
-	if fields.search or fields.key_enter_field == "search_string" then
-		search_string = fields.search_string:trim()
-		cur_page = 1
-		store.filter_packages(search_string)
-		return true
-	end
-
 	if fields.clear then
 		search_string = ""
 		cur_page = 1
@@ -924,11 +928,20 @@ function store.handle_submit(this, fields)
 		return true
 	end
 
-	if fields.type then
-		local new_type = table.indexof(filter_types_titles, fields.type)
-		if new_type ~= filter_type then
-			filter_type = new_type
-			store.filter_packages(search_string)
+	if fields.change_type then
+		dropdown_open = true
+		return true
+	end
+
+	for field in pairs(fields) do
+		if field:sub(1, 9) == "dropdown_" then
+			dropdown_open = false
+			local new_type = tonumber(field:sub(10))
+			if new_type and new_type ~= filter_type then
+				filter_type = new_type
+				cur_page = 1
+				store.filter_packages(search_string)
+			end
 			return true
 		end
 	end
@@ -1002,6 +1015,14 @@ function store.handle_submit(this, fields)
 			core.open_url(url)
 			return true
 		end
+	end
+
+	-- Should be last
+	if fields.Dsearch_string then
+		search_string = fields.Dsearch_string:trim()
+		cur_page = 1
+		store.filter_packages(search_string)
+		return true
 	end
 
 	return false

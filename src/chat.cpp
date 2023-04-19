@@ -35,6 +35,7 @@ ChatBuffer::ChatBuffer(u32 scrollback):
 	if (m_scrollback == 0)
 		m_scrollback = 1;
 	m_empty_formatted_line.first = true;
+	m_empty_formatted_line.line_index = 0;
 }
 
 void ChatBuffer::addLine(const std::wstring &name, const std::wstring &text)
@@ -47,7 +48,7 @@ void ChatBuffer::addLine(const std::wstring &name, const std::wstring &text)
 	if (m_rows > 0) {
 		// m_formatted is valid and must be kept valid
 		bool scrolled_at_bottom = (m_scroll == getBottomScrollPos());
-		u32 num_added = formatChatLine(line, m_cols, m_formatted);
+		u32 num_added = formatChatLine(line, m_unformatted.size() - 1, m_cols, m_formatted);
 		if (scrolled_at_bottom)
 			m_scroll += num_added;
 	}
@@ -172,7 +173,7 @@ void ChatBuffer::reformat(u32 cols, u32 rows)
 			{
 				if (i == restore_scroll_unformatted)
 					restore_scroll_formatted = m_formatted.size();
-				formatChatLine(m_unformatted[i], cols, m_formatted);
+				formatChatLine(m_unformatted[i], i, cols, m_formatted);
 			}
 		}
 
@@ -223,7 +224,7 @@ void ChatBuffer::scrollBottom()
 	m_scroll = getBottomScrollPos();
 }
 
-u32 ChatBuffer::formatChatLine(const ChatLine& line, u32 cols,
+u32 ChatBuffer::formatChatLine(const ChatLine& line, int line_index, u32 cols,
 		std::vector<ChatFormattedLine>& destination) const
 {
 	u32 num_added = 0;
@@ -266,6 +267,7 @@ u32 ChatBuffer::formatChatLine(const ChatLine& line, u32 cols,
 	//EnrichedString line_text(line.text);
 
 	next_line.first = true;
+	next_line.line_index = line_index;
 	bool text_processing = false;
 
 	// Produce fragments and layout them into lines

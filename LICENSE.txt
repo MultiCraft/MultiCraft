@@ -16,23 +16,16 @@ Everything not listed in here:
 Copyright (C) 2010-2012 celeron55, Perttu Ahola <celeron55@gmail.com>
 
 MultiCraft Development Team:
+  textures/base/pack/gui/*.png
   textures/base/pack/attention.png
-  textures/base/pack/authors_menu.png
-  textures/base/pack/authors_menu_*.png
   textures/base/pack/bg_common.png
-  textures/base/pack/btn_down.png
-  textures/base/pack/btn_down_hover.png
-  textures/base/pack/btn_download.png
-  textures/base/pack/btn_download_hover.png
   textures/base/pack/btn_play.png
   textures/base/pack/btn_play_hover.png
-  textures/base/pack/btn_up.png
   textures/base/pack/camera_btn.png
   textures/base/pack/chat_btn.png
   textures/base/pack/crack_anylength_touch.png
   textures/base/pack/creative_bg.png
-  textures/base/pack/creative_bg_*.png
-  textures/base/pack/creative_checkbox.png
+  textures/base/pack/error_screenshot.png
   textures/base/pack/desc_bg.png
   textures/base/pack/down_btn.png
   textures/base/pack/drop_btn.png
@@ -41,14 +34,13 @@ MultiCraft Development Team:
   textures/base/pack/inventory_btn.png
   textures/base/pack/joystick_*.png
   textures/base/pack/jump_btn.png
+  textures/base/pack/loading_screenshot.png
   textures/base/pack/logo.png
   textures/base/pack/minimap_btn.png
   textures/base/pack/progress_bar.png
-  textures/base/pack/progress_bar_bg.png
+  textures/base/pack/progress_bar_*.png
   textures/base/pack/rangeview_btn.png
   textures/base/pack/refresh.png
-  textures/base/pack/search.png
-  textures/base/pack/select_btn.png
   textures/base/pack/server_flags_creative.png
   textures/base/pack/server_flags_damage.png
   textures/base/pack/server_flags_favorite.png
@@ -56,19 +48,9 @@ MultiCraft Development Team:
   textures/base/pack/server_flags_mt.png
   textures/base/pack/server_flags_pvp.png
   textures/base/pack/server_ping_*.png
-  textures/base/pack/settings_menu.png
-  textures/base/pack/settings_menu_*.png
-  textures/base/pack/side_menu_divider.png
-  textures/base/pack/side_menu.png
-  textures/base/pack/side_menu_left.png
   textures/base/pack/switch_local_*.png
   textures/base/pack/trash.png
-  textures/base/pack/trash_hover.png
-  textures/base/pack/upper_buttons_*.png
-  textures/base/pack/world_delete.png
-  textures/base/pack/world_delete_hover.png
-  textures/base/pack/world_new.png
-  textures/base/pack/world_new_hover.png
+  textures/base/pack/trash_pressed.png
   textures/base/pack/worldlist_bg.png
 
 ShadowNinja:

@@ -67,6 +67,8 @@ struct ChatFormattedLine
 	std::vector<ChatFormattedFragment> fragments;
 	// true if first line of one formatted ChatLine
 	bool first;
+	// Line index in ChatLine buffer
+	int line_index;
 };
 
 class ChatBuffer
@@ -111,6 +113,9 @@ public:
 	// Scroll to top of buffer (oldest)
 	void scrollTop();
 
+	s32 getScrollPos() { return m_scroll; }
+	u32 getColsCount() { return m_cols; }
+
 	// Functions for keeping track of whether the lines were modified by any
 	// preceding operations
 	// If they were not changed, getLineCount() and getLine() output the same as
@@ -121,11 +126,11 @@ public:
 	// Format a chat line for the given number of columns.
 	// Appends the formatted lines to the destination array and
 	// returns the number of formatted lines.
-	u32 formatChatLine(const ChatLine& line, u32 cols,
+	u32 formatChatLine(const ChatLine& line, int line_index, u32 cols,
 			std::vector<ChatFormattedLine>& destination) const;
 
 	void resize(u32 scrollback);
-protected:
+
 	s32 getTopScrollPos() const;
 	s32 getBottomScrollPos() const;
 

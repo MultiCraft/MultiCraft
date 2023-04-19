@@ -30,6 +30,7 @@ defaulttexturedir_esc = core.formspec_escape(defaulttexturedir)
 DIR_DELIM_esc = core.formspec_escape(DIR_DELIM) -- for use in formspecs only
 
 dofile(basepath .. "common" .. DIR_DELIM .. "filterlist.lua")
+dofile(basepath .. "common" .. DIR_DELIM .. "btn_style.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "buttonbar.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "dialog.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "tabview.lua")
@@ -47,7 +48,6 @@ dofile(menupath .. DIR_DELIM .. "dlg_create_world_default.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_content.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")
-dofile(menupath .. DIR_DELIM .. "dlg_outdated_server.lua")
 
 if not mobile then
 	dofile(menupath .. DIR_DELIM .. "dlg_settings_advanced.lua")
@@ -69,7 +69,7 @@ tabs.local_default_game = dofile(menupath .. DIR_DELIM .. "tab_local_default.lua
 tabs.local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua")
 tabs.play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua")
 
-local func = loadfile(menupath .. DIR_DELIM .. "hosting" .. DIR_DELIM .. "init.lua")
+local func = loadfile(basepath .. DIR_DELIM .. "hosting" .. DIR_DELIM .. "init.lua")
 
 --------------------------------------------------------------------------------
 local function main_event_handler(tabview, event)
@@ -150,6 +150,17 @@ function menudata.init_tabs()
 			mm_texture.reset()
 		end
 	end
+
+	tv_main:add_side_button({
+		tooltip = fgettext("Settings"),
+		tab_name = "settings",
+	})
+
+	tv_main:add_side_button({
+		tooltip = fgettext("Credits"),
+		tab_name = "credits",
+		texture_prefix = "authors"
+	})
 
 	ui.set_default("maintab")
 
