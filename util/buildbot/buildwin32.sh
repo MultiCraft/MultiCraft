@@ -30,15 +30,15 @@ fi
 echo "Using $toolchain_file"
 
 irrlicht_version=1.8.4
-ogg_version=1.3.2
-vorbis_version=1.3.5
-curl_version=7.65.3
-gettext_version=0.20.1
-freetype_version=2.10.1
-sqlite3_version=3.27.2
-luajit_version=2.1.0-beta3
-leveldb_version=1.22
-zlib_version=1.2.11
+ogg_version=1.3.5
+vorbis_version=1.3.7
+curl_version=8.0.1
+gettext_version=0.20.2
+freetype_version=2.12.1
+sqlite3_version=3.41.2
+luajit_version=20230221
+leveldb_version=1.23
+zlib_version=1.2.13
 
 mkdir -p $packagedir
 mkdir -p $libdir
@@ -58,8 +58,8 @@ cd $builddir
 	-c -O $packagedir/curl-$curl_version.zip
 [ -e $packagedir/gettext-$gettext_version.zip ] || wget http://minetest.kitsunemimi.pw/gettext-$gettext_version-win32.zip \
 	-c -O $packagedir/gettext-$gettext_version.zip
-[ -e $packagedir/freetype2-$freetype_version.zip ] || wget http://minetest.kitsunemimi.pw/freetype2-$freetype_version-win32.zip \
-	-c -O $packagedir/freetype2-$freetype_version.zip
+[ -e $packagedir/freetype-$freetype_version.zip ] || wget http://minetest.kitsunemimi.pw/freetype-$freetype_version-win32.zip \
+	-c -O $packagedir/freetype-$freetype_version.zip
 [ -e $packagedir/sqlite3-$sqlite3_version.zip ] || wget http://minetest.kitsunemimi.pw/sqlite3-$sqlite3_version-win32.zip \
 	-c -O $packagedir/sqlite3-$sqlite3_version.zip
 [ -e $packagedir/luajit-$luajit_version.zip ] || wget http://minetest.kitsunemimi.pw/luajit-$luajit_version-win32.zip \
@@ -77,7 +77,7 @@ cd $libdir
 [ -d libvorbis ] || unzip -o $packagedir/libvorbis-$vorbis_version.zip -d libvorbis
 [ -d libcurl ] || unzip -o $packagedir/curl-$curl_version.zip -d libcurl
 [ -d gettext ] || unzip -o $packagedir/gettext-$gettext_version.zip -d gettext
-[ -d freetype ] || unzip -o $packagedir/freetype2-$freetype_version.zip -d freetype
+[ -d freetype ] || unzip -o $packagedir/freetype-$freetype_version.zip -d freetype
 [ -d sqlite3 ] || unzip -o $packagedir/sqlite3-$sqlite3_version.zip -d sqlite3
 [ -d openal_stripped ] || unzip -o $packagedir/openal_stripped.zip
 [ -d luajit ] || unzip -o $packagedir/luajit-$luajit_version.zip -d luajit
