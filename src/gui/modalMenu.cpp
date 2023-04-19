@@ -143,6 +143,7 @@ void GUIModalMenu::drawCursor()
 				pointer + v2s32(0, cursor_size), crosshair_argb);
 	}
 }
+#endif
 
 /*
 	This should be called when the menu wants to quit.
@@ -164,7 +165,6 @@ void GUIModalMenu::quitMenu()
 		g_touchscreengui->show();
 #endif
 }
-#endif
 
 void GUIModalMenu::removeChildren()
 {

@@ -342,12 +342,12 @@ public:
 
 	virtual void setCursorVisible(bool visible)
 	{
-	#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 		sdl_game_controller.setCursorVisible(visible);
 
 		if (sdl_game_controller.isActive())
 			visible = false;
-	#endif
+#endif
 		IrrlichtDevice *device = RenderingEngine::get_raw_device();
 
 		if (device->getCursorControl()) {
