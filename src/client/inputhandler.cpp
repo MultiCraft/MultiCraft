@@ -115,7 +115,6 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 			sdl_game_controller->translateEvent(event);
 			input->setCursorVisible(sdl_game_controller->isCursorVisible());
 		}
-		return true;
 	} else if ((event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
 			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
 			event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
@@ -139,6 +138,11 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		if (m_touchscreengui && !isMenuActive())
 			m_touchscreengui->hide();
 	}
+#endif
+
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT)
+		return true;
 #endif
 
 	GUIChatConsole* chat_console = GUIChatConsole::getChatConsole();
