@@ -1898,8 +1898,12 @@ void Game::processUserInput(f32 dtime)
 	}
 #endif
 
+	bool doubletap_jump = m_cache_doubletap_jump;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	doubletap_jump |= input->sdl_game_controller.isActive();
+#endif
 	// Increase timer for double tap of "keymap_jump"
-	if (m_cache_doubletap_jump && runData.jump_timer <= 0.15f)
+	if (doubletap_jump && runData.jump_timer <= 0.15f)
 		runData.jump_timer += dtime;
 
 	processKeyInput();
@@ -2191,7 +2195,12 @@ void Game::toggleFreeMove()
 
 void Game::toggleFreeMoveAlt()
 {
-	if (m_cache_doubletap_jump && runData.jump_timer < 0.15f &&
+	bool doubletap_jump = m_cache_doubletap_jump;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	doubletap_jump |= input->sdl_game_controller.isActive();
+#endif
+
+	if (doubletap_jump && runData.jump_timer < 0.15f &&
 			(!simple_singleplayer_mode || client->checkPrivilege("fly")))
 		toggleFreeMove();
 
