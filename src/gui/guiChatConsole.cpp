@@ -1031,9 +1031,11 @@ void GUIChatConsole::createVScrollBar()
 	ITextureSource *tsrc = m_client->getTextureSource();
 	m_vscrollbar->setTextures({
 		tsrc->getTexture("gui/scrollbar_bg.png"),
-		tsrc->getTexture("gui/scrollbar_slider_long.png"),
+		tsrc->getTexture("gui/scrollbar_slider_middle.png"),
 		tsrc->getTexture("gui/scrollbar_up.png"),
 		tsrc->getTexture("gui/scrollbar_down.png"),
+		tsrc->getTexture("gui/scrollbar_slider_top.png"),
+		tsrc->getTexture("gui/scrollbar_slider_bottom.png"),
 	});
 
 	addChild(m_vscrollbar);
