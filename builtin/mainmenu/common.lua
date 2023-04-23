@@ -206,32 +206,32 @@ function menu_render_worldlist2(selected_index)
 			world.enable_damage = world_conf:get_bool("enable_damage", damage)
 		end
 
-		local y = (i - 1) * 0.9
-		fs[#fs + 1] = fmt("image[0,%s;%s,0.8;%sgui/row_bg%s.png;32]",
+		local y = (i - 1) * 0.8
+		fs[#fs + 1] = fmt("image[0,%s;%s,0.7;%sgui/row_bg%s.png;32]",
 			y, outer_w, defaulttexturedir_esc, i == selected_index and "_selected" or ""
 		)
 		fs[#fs + 1] = fmt("image[0.2,%s;0.4,0.4;%sserver_flags_%s.png]",
-			y + 0.2, defaulttexturedir_esc, world.creative_mode and "creative" or "damage")
+			y + 0.15, defaulttexturedir_esc, world.creative_mode and "creative" or "damage")
 
 		-- Use a scroll_container to clip the label
-		fs[#fs + 1] = fmt("scroll_container[0.8,%s;%s,0.8;;vertical]", y, outer_w - 1)
-		fs[#fs + 1] = fmt("label[0,0.4;%s]", esc(world.name))
+		fs[#fs + 1] = fmt("scroll_container[0.8,%s;%s,0.7;;vertical]", y, outer_w - 1)
+		fs[#fs + 1] = fmt("label[0,0.35;%s]", esc(world.name))
 		fs[#fs + 1] = "scroll_container_end[]"
 
-		fs[#fs + 1] = fmt("image_button[0,%s;%s,0.8;;worldlist_%d;;false;false]", y, outer_w, i)
+		fs[#fs + 1] = fmt("image_button[0,%s;%s,0.7;;worldlist_%d;;false;false]", y, outer_w, i)
 	end
 
 	fs[#fs + 1] = "scroll_container_end[]"
 
-	local inner_h = math.max(#list * 0.9 - 0.1, outer_h)
+	local inner_h = math.max(#list * 0.8 - 0.1, outer_h)
 	local scrollbar_max = (inner_h - outer_h) * 10
 
 	-- Make sure the selected world is visible
-	local min_pos = math.ceil(((selected_index - 1) * 0.9 - outer_h + 0.8) * 10)
-	local max_pos = math.floor((selected_index - 1) * 0.9 * 10)
+	local min_pos = math.ceil(((selected_index - 1) * 0.8 - outer_h + 0.7) * 10)
+	local max_pos = math.floor((selected_index - 1) * 0.8 * 10)
 	worldlist_scrbar_pos = math.min(math.max(worldlist_scrbar_pos, min_pos), max_pos)
 
-	fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", scrollbar_max,
+	fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", math.ceil(scrollbar_max),
 		(outer_h / inner_h) * scrollbar_max)
 	fs[#fs + 1] = fmt("scrollbar[7.8,0.31;0.8,5.65;vertical;scrbar;%s;" ..
 		"%sscrollbar_bg.png,%sscrollbar_slider_long.png,%sscrollbar_up.png,%sscrollbar_down.png]",
