@@ -27,11 +27,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 struct ChatSelection
 {
-	ChatSelection() : initialized(false), scroll(0), row(0), row_buf(0),
-			line(0), fragment(0), character(0), x_max(false) {};
+	enum SelectionType {
+		SELECTION_NONE,
+		SELECTION_HISTORY,
+		SELECTION_PROMPT
+	};
+
+	ChatSelection() : selection_type(SELECTION_NONE), scroll(0), row(0),
+			row_buf(0), line(0), fragment(0), character(0), x_max(false) {};
 
 	void reset() {
-		initialized = false;
+		selection_type = SELECTION_NONE;
 		scroll = 0;
 		row = 0;
 		row_buf = 0;
@@ -83,7 +89,7 @@ struct ChatSelection
 		return !this->operator==(other);
 	}
 
-	bool initialized;
+	SelectionType selection_type;
 	int scroll;
 	int row;
 	int row_buf;
@@ -148,7 +154,7 @@ public:
 
 	bool getAndroidChatOpen() { return m_android_chat_open; }
 	void setAndroidChatOpen(bool value) { m_android_chat_open = value; }
-	
+
 	void onLinesModified();
 
 	static GUIChatConsole* getChatConsole() { return m_chat_console; }
@@ -164,7 +170,9 @@ private:
 	void drawPrompt();
 
 	ChatSelection getCursorPos(s32 x, s32 y);
+	ChatSelection getPromptCursorPos(s32 x, s32 y);
 	irr::core::stringc getSelectedText();
+	irr::core::stringc getPromptSelectedText();
 	void createVScrollBar();
 	void updateVScrollBar(bool force_update = false, bool move_bottom = false);
 
@@ -215,7 +223,9 @@ private:
 
 	ChatSelection m_mark_begin;
 	ChatSelection m_mark_end;
-	bool m_mouse_marking = false;
+	int m_prompt_selection = 0;
+	bool m_history_marking = false;
+	bool m_prompt_marking = false;
 	bool m_long_press = false;
 	ChatSelection m_cursor_press_pos;
 
