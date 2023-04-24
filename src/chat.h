@@ -196,6 +196,8 @@ public:
 	std::wstring getVisiblePortion() const;
 	// Get cursor position (relative to visible portion). -1 if invalid
 	s32 getVisibleCursorPosition() const;
+	// Get view position (absolute value)
+	s32 getViewPosition() const { return m_view; }
 	// Get length of cursor selection
 	s32 getCursorLength() const { return m_cursor_len; }
 

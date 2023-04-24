@@ -478,19 +478,25 @@ void GUIChatConsole::drawPrompt()
 		s32 text_size = m_font->getDimension(prompt_text.c_str()).Width;
 		s32 x_end = x_begin + text_size;
 
+		int current_scroll = prompt.getViewPosition();
 		if (real_mark_begin.character > 0) {
 			irr::core::stringw text = prompt_text.c_str();
-			text = text.subString(1, real_mark_begin.character);
+			int scroll_offset = real_mark_begin.scroll - current_scroll;
+			int length = scroll_offset + real_mark_begin.character;
+			length = MYMIN(MYMAX(length, 0), prompt_text.size() - 1);
+			text = text.subString(1, length);
 			s32 text_size = m_font->getDimension(text.c_str()).Width;
 			x_begin = text_pos + text_size;
 		}
 
 		if (real_mark_end.character < prompt_text.size() - 1) {
 			irr::core::stringw text = prompt_text.c_str();
+			int scroll_offset = real_mark_end.scroll - current_scroll;
+			int length = scroll_offset + real_mark_end.character;
 			if (real_mark_end.x_max)
-				text = text.subString(1, real_mark_end.character + 1);
-			else
-				text = text.subString(1, real_mark_end.character);
+				length++;
+			length = MYMIN(MYMAX(length, 0), prompt_text.size() - 1);
+			text = text.subString(1, length);
 			s32 text_size = m_font->getDimension(text.c_str()).Width;
 			x_end = text_pos + text_size;
 		}
@@ -638,9 +644,10 @@ ChatSelection GUIChatConsole::getPromptCursorPos(s32 x, s32 y)
 	if (m_font == NULL)
 		return selection;
 
-	selection.selection_type = ChatSelection::SELECTION_PROMPT;
-
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
+
+	selection.selection_type = ChatSelection::SELECTION_PROMPT;
+	selection.scroll = prompt.getViewPosition();
 
 	std::wstring prompt_text = prompt.getVisiblePortion();
 	irr::core::stringw text = prompt_text.c_str();
@@ -743,14 +750,14 @@ irr::core::stringc GUIChatConsole::getPromptSelectedText()
 	ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 	ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
 
-	std::wstring prompt_text = prompt.getVisiblePortion();
+	std::wstring prompt_text = prompt.getLine();
 
-	if (real_mark_end.character >= prompt_text.size() - 1)
+	if (real_mark_end.scroll + real_mark_end.character > prompt_text.size())
 		return "";
 
 	irr::core::stringw text = prompt_text.c_str();
-	int begin = real_mark_begin.character + 1;
-	int length = real_mark_end.character - begin + 1;
+	int begin = real_mark_begin.scroll + real_mark_begin.character;
+	int length = real_mark_end.scroll + real_mark_end.character - begin;
 	if (real_mark_end.x_max)
 		length++;
 	text = text.subString(begin, length);
