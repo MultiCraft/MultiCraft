@@ -156,6 +156,7 @@ public:
 	void setAndroidChatOpen(bool value) { m_android_chat_open = value; }
 
 	void onLinesModified();
+	void onPromptModified();
 
 	static GUIChatConsole* getChatConsole() { return m_chat_console; }
 

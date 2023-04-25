@@ -391,6 +391,7 @@ void ChatPrompt::input(wchar_t ch)
 	clampView();
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+	m_line_modified = true;
 }
 
 void ChatPrompt::input(const std::wstring &str)
@@ -400,6 +401,7 @@ void ChatPrompt::input(const std::wstring &str)
 	clampView();
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+	m_line_modified = true;
 }
 
 void ChatPrompt::addToHistory(const std::wstring &line)
@@ -424,6 +426,7 @@ void ChatPrompt::clear()
 	m_cursor = 0;
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+	m_line_modified = true;
 }
 
 std::wstring ChatPrompt::replace(const std::wstring &line)
@@ -434,6 +437,7 @@ std::wstring ChatPrompt::replace(const std::wstring &line)
 	clampView();
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+	m_line_modified = true;
 	return old_line;
 }
 
@@ -535,6 +539,7 @@ void ChatPrompt::nickCompletion(const std::list<std::string>& names, bool backwa
 	clampView();
 	m_nick_completion_start = prefix_start;
 	m_nick_completion_end = prefix_end;
+	m_line_modified = true;
 }
 
 void ChatPrompt::reformat(u32 cols)
@@ -616,6 +621,7 @@ void ChatPrompt::cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope sco
 			m_line.erase(m_cursor, abs(new_cursor - old_cursor));
 		}
 		m_cursor_len = 0;
+		m_line_modified = true;
 		break;
 	case CURSOROP_SELECT:
 		if (scope == CURSOROP_SCOPE_LINE) {

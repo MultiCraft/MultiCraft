@@ -2989,6 +2989,12 @@ void Game::updateChat(f32 dtime)
 		gui_chat_console->onLinesModified();
 	}
 
+	auto &prompt = chat_backend->getPrompt();
+	if (prompt.getLineModified()) {
+		prompt.resetLineModified();
+		gui_chat_console->onPromptModified();
+	}
+
 	// Make sure that the size is still correct
 	m_game_ui->updateChatSize();
 }

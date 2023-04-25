@@ -233,6 +233,11 @@ public:
 	//     deletes the word to the left of the cursor.
 	void cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope scope);
 
+	// Functions for keeping track of whether the line was modified by any
+	// preceding operations
+	bool getLineModified() const { return m_line_modified; }
+	void resetLineModified() { m_line_modified = false; }
+
 protected:
 	// set m_view to ensure that 0 <= m_view <= m_cursor < m_view + m_cols
 	// if line can be fully shown, set m_view to zero
@@ -264,6 +269,9 @@ private:
 	s32 m_nick_completion_start = 0;
 	// Last nick completion start (index into m_line)
 	s32 m_nick_completion_end = 0;
+	
+	// True if line was modified
+	bool m_line_modified = true;
 };
 
 class ChatBackend
