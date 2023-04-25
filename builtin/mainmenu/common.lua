@@ -234,8 +234,10 @@ function menu_render_worldlist2(selected_index)
 	fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", math.ceil(scrollbar_max),
 		(outer_h / inner_h) * scrollbar_max)
 	fs[#fs + 1] = fmt("scrollbar[7.8,0.31;0.8,5.65;vertical;scrbar;%s;" ..
-		"%sscrollbar_bg.png,%sscrollbar_slider_long.png,%sscrollbar_up.png,%sscrollbar_down.png]",
-		worldlist_scrbar_pos, button_path, button_path, button_path, button_path)
+		"%sscrollbar_bg.png,%sscrollbar_slider_middle.png,%sscrollbar_up.png," ..
+		"%sscrollbar_down.png,%sscrollbar_slider_top.png,%sscrollbar_slider_bottom.png]",
+		worldlist_scrbar_pos, button_path, button_path, button_path,
+		button_path, button_path, button_path)
 
 	return table.concat(fs)
 end
