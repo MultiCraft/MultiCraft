@@ -1085,32 +1085,82 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			m_history_marking = false;
 			m_prompt_marking = false;
 			m_long_press = false;
-			m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+			
+			u32 row = m_chat_backend->getConsoleBuffer().getRows();
+			s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
 
-			ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
-			ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+			if (event.TouchInput.Y >= prompt_y) {
+				ChatSelection real_mark_begin;
+				ChatSelection real_mark_end;
+				if (m_mark_end.scroll + m_mark_end.character > m_mark_begin.scroll + m_mark_begin.character) {
+					real_mark_begin = m_mark_begin;
+					real_mark_end = m_mark_end;
+				} else {
+					real_mark_begin = m_mark_end;
+					real_mark_end = m_mark_begin;
+				}
 
-			if (m_cursor_press_pos < real_mark_begin || m_cursor_press_pos > real_mark_end) {
-				m_mark_begin = m_cursor_press_pos;
-				m_mark_end = m_cursor_press_pos;
-				m_history_marking = true;
+				m_cursor_press_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
+				
+				if (real_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
+						real_mark_end.selection_type != ChatSelection::SELECTION_PROMPT ||
+						m_cursor_press_pos.scroll + m_cursor_press_pos.character < real_mark_begin.scroll + real_mark_begin.character || 
+						m_cursor_press_pos.scroll + m_cursor_press_pos.character > real_mark_end.scroll + real_mark_end.character) {
+					m_mark_begin = m_cursor_press_pos;
+					m_mark_end = m_cursor_press_pos;
+					m_prompt_marking = true;
+				}
+			} else {
+				ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+				ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+	
+				m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+	
+				if (real_mark_begin.selection_type != ChatSelection::SELECTION_HISTORY ||
+						real_mark_end.selection_type != ChatSelection::SELECTION_HISTORY ||
+						m_cursor_press_pos < real_mark_begin || 
+						m_cursor_press_pos > real_mark_end) {
+					m_mark_begin = m_cursor_press_pos;
+					m_mark_end = m_cursor_press_pos;
+					m_history_marking = true;
+				}
 			}
-		} else if (event.TouchInput.Event == irr::ETIE_LEFT_UP) {
-			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
 
-			if (!m_long_press && m_cursor_press_pos == cursor_pos) {
-				m_mark_begin.reset();
-				m_mark_end.reset();
+		} else if (event.TouchInput.Event == irr::ETIE_LEFT_UP) {
+			if (m_prompt_marking) {
+				ChatSelection cursor_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
+	
+				if (!m_long_press && m_cursor_press_pos == cursor_pos) {
+					m_mark_begin.reset();
+					m_mark_end.reset();
+				}
+				
+				m_prompt_marking = false;
+			} else if (m_history_marking) {
+				ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+	
+				if (!m_long_press && m_cursor_press_pos == cursor_pos) {
+					m_mark_begin.reset();
+					m_mark_end.reset();
+				}
+	
+				m_history_marking = false;
 			}
 
 			m_cursor_press_pos.reset();
-			m_history_marking = false;
-			m_prompt_marking = false;
 			m_long_press = false;
+
 		} else if (event.TouchInput.Event == irr::ETIE_MOVED) {
 			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-
-			if (!m_history_marking && !m_long_press &&
+			ChatSelection prompt_cursor_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
+			
+			if (!m_prompt_marking && !m_long_press &&
+					m_cursor_press_pos.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_cursor_press_pos != prompt_cursor_pos) {
+				m_mark_begin = m_cursor_press_pos;
+				m_mark_end = m_cursor_press_pos;
+				m_prompt_marking = true;
+			} else if (!m_history_marking && !m_long_press &&
 					m_cursor_press_pos.selection_type == ChatSelection::SELECTION_HISTORY &&
 					m_cursor_press_pos != cursor_pos) {
 				m_mark_begin = m_cursor_press_pos;
@@ -1118,14 +1168,24 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				m_history_marking = true;
 			}
 
-			if (m_history_marking) {
+			if (m_prompt_marking) {
+				m_mark_end = prompt_cursor_pos;
+			} else if (m_history_marking) {
 				m_mark_end = cursor_pos;
 			}
+
 		} else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
-			if (!m_history_marking) {
+			if (!m_history_marking && ! m_prompt_marking) {
 				m_long_press = true;
 				if (m_mark_begin != m_mark_end) {
-					irr::core::stringc text = getSelectedText();
+					irr::core::stringc text;
+					if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+							m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
+						text = getPromptSelectedText();
+					} else if (m_mark_begin.selection_type == ChatSelection::SELECTION_HISTORY &&
+							m_mark_end.selection_type == ChatSelection::SELECTION_HISTORY) {
+						text = getSelectedText();
+					}
 					Environment->getOSOperator()->copyToClipboard(text.c_str());
 #ifdef __ANDROID__
 					SDL_AndroidShowToast(
