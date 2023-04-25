@@ -190,6 +190,8 @@ function menu_render_worldlist2(selected_index)
 	local fs = {"formspec_version[4]"}
 
 	local outer_w, outer_h = 7.1, 5.65
+	fs[#fs + 1] = fmt("background9[0.4,0.21;%s,%s;%sworldlist_bg_new.png;false;32]",
+		outer_w + 1.2, outer_h + 0.2, button_path)
 	fs[#fs + 1] = fmt("scroll_container[0.5,0.31;%s,%s;scrbar;vertical]", outer_w, outer_h)
 
 	local creative = core.settings:get_bool("creative_mode", false)
