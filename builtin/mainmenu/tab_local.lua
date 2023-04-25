@@ -147,6 +147,7 @@ local function get_formspec(_, _, tab_data)
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"tablecolumns[" .. image_column(fgettext("Creative mode")) .. ";text]" ..
+			scrollbar_style("sp_worlds") ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
 	if tab_data.hidden then

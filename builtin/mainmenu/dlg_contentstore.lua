@@ -381,6 +381,7 @@ function install_dialog.get_formspec()
 		"label[0,0.8;", fgettext("Dependencies:"), "]",
 
 		"tablecolumns[color;text;color;text]",
+		scrollbar_style("packages") ..
 		"table[0,1.1;6.25,3;packages;", table.concat(formatted_deps, ","), "]",
 
 		"container_end[]",
