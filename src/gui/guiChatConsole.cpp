@@ -814,6 +814,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			if (m_close_on_enter) {
 				closeConsole();
 				m_close_on_enter = false;
+			} else {
+				updateVScrollBar(true, true);
 			}
 			return true;
 		}
