@@ -464,15 +464,8 @@ void GUIChatConsole::drawPrompt()
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring prompt_text = prompt.getVisiblePortion();
 
-	ChatSelection real_mark_begin;
-	ChatSelection real_mark_end;
-	if (m_mark_end.scroll + m_mark_end.character > m_mark_begin.scroll + m_mark_begin.character) {
-		real_mark_begin = m_mark_begin;
-		real_mark_end = m_mark_end;
-	} else {
-		real_mark_begin = m_mark_end;
-		real_mark_end = m_mark_begin;
-	}
+	ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+	ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
 
 	if (real_mark_begin != real_mark_end &&
 		real_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
@@ -754,15 +747,8 @@ irr::core::stringc GUIChatConsole::getPromptSelectedText()
 
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 
-	ChatSelection real_mark_begin;
-	ChatSelection real_mark_end;
-	if (m_mark_end.scroll + m_mark_end.character > m_mark_begin.scroll + m_mark_begin.character) {
-		real_mark_begin = m_mark_begin;
-		real_mark_end = m_mark_end;
-	} else {
-		real_mark_begin = m_mark_end;
-		real_mark_end = m_mark_begin;
-	}
+	ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+	ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
 
 	std::wstring prompt_text = prompt.getLine();
 
@@ -1085,40 +1071,31 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			m_history_marking = false;
 			m_prompt_marking = false;
 			m_long_press = false;
-			
+
 			u32 row = m_chat_backend->getConsoleBuffer().getRows();
 			s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
 
+			ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+			ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+
 			if (event.TouchInput.Y >= prompt_y) {
-				ChatSelection real_mark_begin;
-				ChatSelection real_mark_end;
-				if (m_mark_end.scroll + m_mark_end.character > m_mark_begin.scroll + m_mark_begin.character) {
-					real_mark_begin = m_mark_begin;
-					real_mark_end = m_mark_end;
-				} else {
-					real_mark_begin = m_mark_end;
-					real_mark_end = m_mark_begin;
-				}
 
 				m_cursor_press_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
-				
+
 				if (real_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
 						real_mark_end.selection_type != ChatSelection::SELECTION_PROMPT ||
-						m_cursor_press_pos.scroll + m_cursor_press_pos.character < real_mark_begin.scroll + real_mark_begin.character || 
-						m_cursor_press_pos.scroll + m_cursor_press_pos.character > real_mark_end.scroll + real_mark_end.character) {
+						m_cursor_press_pos < real_mark_begin ||
+						m_cursor_press_pos > real_mark_end) {
 					m_mark_begin = m_cursor_press_pos;
 					m_mark_end = m_cursor_press_pos;
 					m_prompt_marking = true;
 				}
 			} else {
-				ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
-				ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
-	
 				m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-	
+
 				if (real_mark_begin.selection_type != ChatSelection::SELECTION_HISTORY ||
 						real_mark_end.selection_type != ChatSelection::SELECTION_HISTORY ||
-						m_cursor_press_pos < real_mark_begin || 
+						m_cursor_press_pos < real_mark_begin ||
 						m_cursor_press_pos > real_mark_end) {
 					m_mark_begin = m_cursor_press_pos;
 					m_mark_end = m_cursor_press_pos;
@@ -1129,21 +1106,21 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		} else if (event.TouchInput.Event == irr::ETIE_LEFT_UP) {
 			if (m_prompt_marking) {
 				ChatSelection cursor_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
-	
+
 				if (!m_long_press && m_cursor_press_pos == cursor_pos) {
 					m_mark_begin.reset();
 					m_mark_end.reset();
 				}
-				
+
 				m_prompt_marking = false;
 			} else if (m_history_marking) {
 				ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-	
+
 				if (!m_long_press && m_cursor_press_pos == cursor_pos) {
 					m_mark_begin.reset();
 					m_mark_end.reset();
 				}
-	
+
 				m_history_marking = false;
 			}
 
@@ -1153,7 +1130,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		} else if (event.TouchInput.Event == irr::ETIE_MOVED) {
 			ChatSelection cursor_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
 			ChatSelection prompt_cursor_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
-			
+
 			if (!m_prompt_marking && !m_long_press &&
 					m_cursor_press_pos.selection_type == ChatSelection::SELECTION_PROMPT &&
 					m_cursor_press_pos != prompt_cursor_pos) {
@@ -1280,6 +1257,19 @@ void GUIChatConsole::updateVScrollBar(bool force_update, bool move_bottom)
 	s32 page_size = (m_bottom_scroll_pos + buf.getRows() + 1) * m_fontsize.Y;
 	if (m_vscrollbar->getPageSize() != page_size) {
 		m_vscrollbar->setPageSize(page_size);
+	}
+
+	if (buf.getDelFormatted() > 0) {
+		bool is_bottom = m_vscrollbar->getPos() == m_bottom_scroll_pos;
+
+		if (!is_bottom && ! move_bottom) {
+			s32 pos = m_vscrollbar->getPos() - buf.getDelFormatted();
+
+			if (pos >= 0)
+				m_vscrollbar->setPos(pos);
+		}
+
+		buf.resetDelFormatted();
 	}
 
 	if (m_vscrollbar->getPos() != buf.getScrollPos()) {

@@ -48,29 +48,41 @@ struct ChatSelection
 	}
 
 	bool operator== (const ChatSelection &other) const {
-		return (row + scroll == other.row + other.scroll &&
-				row_buf == other.row_buf &&
-				line == other.line &&
-				fragment == other.fragment &&
-				character == other.character &&
-				x_max == other.x_max);
+		if (selection_type == SELECTION_HISTORY &&
+				other.selection_type == SELECTION_HISTORY) {
+			return (row + scroll == other.row + other.scroll &&
+					row_buf == other.row_buf &&
+					line == other.line &&
+					fragment == other.fragment &&
+					character == other.character &&
+					x_max == other.x_max);
+
+		} else {
+			return (scroll + character == other.scroll + other.character);
+		}
 	}
 
 	bool operator< (const ChatSelection &other) const {
-		if (row + scroll != other.row + other.scroll)
-			return (row + scroll < other.row + other.scroll);
-		if (row_buf != other.row_buf)
-			return (row_buf < other.row_buf);
-		if (line != other.line)
-			return (line < other.line);
-		if (fragment != other.fragment)
-			return (fragment < other.fragment);
-		if (character != other.character)
-			return (character < other.character);
-		if (x_max != other.x_max)
-			return (x_max < other.x_max);
+		if (selection_type == SELECTION_HISTORY &&
+				other.selection_type == SELECTION_HISTORY) {
+			if (row + scroll != other.row + other.scroll)
+				return (row + scroll < other.row + other.scroll);
+			if (row_buf != other.row_buf)
+				return (row_buf < other.row_buf);
+			if (line != other.line)
+				return (line < other.line);
+			if (fragment != other.fragment)
+				return (fragment < other.fragment);
+			if (character != other.character)
+				return (character < other.character);
+			if (x_max != other.x_max)
+				return (x_max < other.x_max);
 
-		return false;
+			return false;
+
+		} else {
+			return (scroll + character < other.scroll + other.character);
+		}
 	}
 
 	bool operator> (const ChatSelection &other) {

@@ -123,6 +123,9 @@ public:
 	bool getLinesModified() const { return m_lines_modified; }
 	void resetLinesModified() { m_lines_modified = false; }
 
+	u32 getDelFormatted() const { return m_del_formatted; }
+	void resetDelFormatted() { m_del_formatted = 0; }
+
 	// Format a chat line for the given number of columns.
 	// Appends the formatted lines to the destination array and
 	// returns the number of formatted lines.
@@ -155,6 +158,9 @@ private:
 	// Is always set to true when m_unformatted is modified, because that's what
 	// determines the output of getLineCount() and getLine()
 	bool m_lines_modified = true;
+
+	// How many formatted lines have been deleted
+	u32 m_del_formatted = 0;
 };
 
 class ChatPrompt
@@ -269,7 +275,7 @@ private:
 	s32 m_nick_completion_start = 0;
 	// Last nick completion start (index into m_line)
 	s32 m_nick_completion_end = 0;
-	
+
 	// True if line was modified
 	bool m_line_modified = true;
 };
