@@ -37,6 +37,9 @@ MultiCraft Development Team:
   textures/base/pack/loading_screenshot.png
   textures/base/pack/logo.png
   textures/base/pack/minimap_btn.png
+  textures/base/pack/minimap_mask_*.png
+  textures/base/pack/minimap_overlay_*.png
+  textures/base/pack/player_marker.png
   textures/base/pack/progress_bar.png
   textures/base/pack/progress_bar_*.png
   textures/base/pack/rangeview_btn.png
@@ -69,9 +72,6 @@ erlehmann:
   misc/minetest-icon-24x24.png
   misc/minetest-icon.ico
   misc/minetest.svg
-
-JRottm
-  textures/base/pack/player_marker.png
 
 srifqi
   textures/base/pack/chat_hide_btn.png
