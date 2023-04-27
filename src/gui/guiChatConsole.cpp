@@ -585,7 +585,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	}
 
 	ChatFormattedLine line = buf.getFormattedLine(selection.row);
-	selection.row_buf = line.line_index;
+	selection.line_index = line.line_index;
 	int current_row = selection.row;
 
 	while (!line.first) {
@@ -684,11 +684,19 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 
-	for (int row = real_mark_begin.row_buf; row < real_mark_end.row_buf + 1; row++) {
+	const ChatLine& first_line = buf.getLine(0);
+	int first_line_index = first_line.line_index;
+	int mark_begin_row_buf = real_mark_begin.line_index - first_line_index;
+	int mark_end_row_buf = real_mark_end.line_index - first_line_index;
+
+	if (mark_begin_row_buf < 0 || mark_end_row_buf < 0)
+		return "";
+
+	for (int row = mark_begin_row_buf; row < mark_end_row_buf + 1; row++) {
 		const ChatLine& line = buf.getLine(row);
 
 		std::vector<ChatFormattedLine> formatted_lines;
-		buf.formatChatLine(line, 0, buf.getColsCount(), formatted_lines);
+		buf.formatChatLine(line, buf.getColsCount(), formatted_lines);
 
 		for (unsigned int i = 0; i < formatted_lines.size(); i++) {
 			const ChatFormattedLine &line = formatted_lines[i];
@@ -698,7 +706,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 
 				for (unsigned int k = 0; k < fragment.text.size(); k++) {
 					if (!add_to_string &&
-							row == real_mark_begin.row_buf &&
+							row == mark_begin_row_buf &&
 							i == real_mark_begin.line &&
 							j == real_mark_begin.fragment &&
 							k == real_mark_begin.character) {
@@ -709,7 +717,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 					}
 
 					if (add_to_string) {
-						if (row == real_mark_end.row_buf &&
+						if (row == mark_end_row_buf &&
 								i == real_mark_end.line &&
 								j == real_mark_end.fragment &&
 								k == real_mark_end.character) {
@@ -726,7 +734,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 				}
 			}
 
-			if (row < real_mark_end.row_buf) {
+			if (row < mark_end_row_buf) {
 				text += L"\n";
 			}
 		}
@@ -1271,6 +1279,8 @@ void GUIChatConsole::updateVScrollBar(bool force_update, bool move_bottom)
 				m_vscrollbar->setPos(pos);
 		}
 
+		m_mark_begin.scroll -= buf.getDelFormatted();
+		m_mark_end.scroll -= buf.getDelFormatted();
 		buf.resetDelFormatted();
 	}
 
@@ -1291,15 +1301,21 @@ void GUIChatConsole::updateVScrollBar(bool force_update, bool move_bottom)
 
 void GUIChatConsole::onLinesModified()
 {
-	if (m_mark_begin.selection_type == ChatSelection::SELECTION_HISTORY)
-		m_mark_begin.reset();
-	if (m_mark_end.selection_type == ChatSelection::SELECTION_HISTORY)
-		m_mark_end.reset();
-	if (m_cursor_press_pos.selection_type == ChatSelection::SELECTION_HISTORY)
-		m_cursor_press_pos.reset();
-	if (m_history_marking) {
-		m_history_marking = false;
-		m_long_press = false;
+	if (m_mark_begin.selection_type == ChatSelection::SELECTION_HISTORY &&
+			m_mark_end.selection_type == ChatSelection::SELECTION_HISTORY) {
+
+		ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
+		const ChatLine& first_line = buf.getLine(0);
+		int first_line_index = first_line.line_index;
+
+		if (m_mark_begin.line_index < first_line_index ||
+				m_mark_end.line_index < first_line_index) {
+			m_mark_begin.reset();
+			m_mark_end.reset();
+			m_cursor_press_pos.reset();
+			m_history_marking = false;
+			m_long_press = false;
+		}
 	}
 
 	updateVScrollBar(true);

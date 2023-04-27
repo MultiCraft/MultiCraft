@@ -37,16 +37,22 @@ struct ChatLine
 	EnrichedString name;
 	// message text
 	EnrichedString text;
+	// Line index in ChatLine buffer
+	int line_index;
 
-	ChatLine(const std::wstring &a_name, const std::wstring &a_text):
+	ChatLine(const std::wstring &a_name, const std::wstring &a_text, 
+			int a_line_index):
 		name(a_name),
-		text(a_text)
+		text(a_text),
+		line_index(a_line_index)
 	{
 	}
 
-	ChatLine(const EnrichedString &a_name, const EnrichedString &a_text):
+	ChatLine(const EnrichedString &a_name, const EnrichedString &a_text, 
+			int a_line_index):
 		name(a_name),
-		text(a_text)
+		text(a_text),
+		line_index(a_line_index)
 	{
 	}
 };
@@ -129,7 +135,7 @@ public:
 	// Format a chat line for the given number of columns.
 	// Appends the formatted lines to the destination array and
 	// returns the number of formatted lines.
-	u32 formatChatLine(const ChatLine& line, int line_index, u32 cols,
+	u32 formatChatLine(const ChatLine& line, u32 cols,
 			std::vector<ChatFormattedLine>& destination) const;
 
 	void resize(u32 scrollback);
@@ -161,6 +167,8 @@ private:
 
 	// How many formatted lines have been deleted
 	u32 m_del_formatted = 0;
+
+	int m_current_line_index = 0;
 };
 
 class ChatPrompt

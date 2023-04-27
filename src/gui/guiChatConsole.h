@@ -34,13 +34,13 @@ struct ChatSelection
 	};
 
 	ChatSelection() : selection_type(SELECTION_NONE), scroll(0), row(0),
-			row_buf(0), line(0), fragment(0), character(0), x_max(false) {};
+			line_index(0), line(0), fragment(0), character(0), x_max(false) {};
 
 	void reset() {
 		selection_type = SELECTION_NONE;
 		scroll = 0;
 		row = 0;
-		row_buf = 0;
+		line_index = 0;
 		line = 0;
 		fragment = 0;
 		character = 0;
@@ -51,7 +51,7 @@ struct ChatSelection
 		if (selection_type == SELECTION_HISTORY &&
 				other.selection_type == SELECTION_HISTORY) {
 			return (row + scroll == other.row + other.scroll &&
-					row_buf == other.row_buf &&
+					line_index == other.line_index &&
 					line == other.line &&
 					fragment == other.fragment &&
 					character == other.character &&
@@ -67,8 +67,8 @@ struct ChatSelection
 				other.selection_type == SELECTION_HISTORY) {
 			if (row + scroll != other.row + other.scroll)
 				return (row + scroll < other.row + other.scroll);
-			if (row_buf != other.row_buf)
-				return (row_buf < other.row_buf);
+			if (line_index != other.line_index)
+				return (line_index < other.line_index);
 			if (line != other.line)
 				return (line < other.line);
 			if (fragment != other.fragment)
@@ -104,7 +104,7 @@ struct ChatSelection
 	SelectionType selection_type;
 	int scroll;
 	int row;
-	int row_buf;
+	int line_index;
 	unsigned int line;
 	unsigned int fragment;
 	unsigned int character;
