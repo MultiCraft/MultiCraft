@@ -1,7 +1,8 @@
 -- Minetest: builtin/item.lua
 
-local random, pi = math.random, math.pi
-local vnew, vround, vadd, vapply = vector.new, vector.round, vector.add, vector.apply
+local abs, random, pi = math.abs, math.random, math.pi
+local vnew, vround, vadd, vapply, vsubtract =
+	vector.new, vector.round, vector.add, vector.apply, vector.subtract
 
 local builtin_shared = ...
 local SCALE = 0.667
@@ -369,7 +370,7 @@ core.register_entity(":__builtin:falling_node", {
 		local failure = false
 
 		local pos = self.object:get_pos()
-		local distance = vapply(vector.subtract(pos, bcp), math.abs)
+		local distance = vapply(vsubtract(pos, bcp), abs)
 		if distance.x >= 1 or distance.z >= 1 then
 			-- We're colliding with some part of a node that's sticking out
 			-- Since we don't want to visually teleport, drop as item

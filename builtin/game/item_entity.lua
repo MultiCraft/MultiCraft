@@ -1,7 +1,7 @@
 -- Minetest: builtin/item_entity.lua
 
 local abs, min, floor, random, pi = math.abs, math.min, math.floor, math.random, math.pi
-local vnormalize = vector.normalize
+local vadd, vnormalize = vector.add, vector.normalize
 
 function core.spawn_item(pos, item)
 	-- Take item in any format
@@ -276,7 +276,7 @@ core.register_entity(":__builtin:item", {
 
 			-- Check which one of the 4 sides is free
 			for o = 1, #order do
-				local cnode = core.get_node(vector.add(pos, order[o])).name
+				local cnode = core.get_node(vadd(pos, order[o])).name
 				local cdef = core.registered_nodes[cnode] or {}
 				if cnode ~= "ignore" and cdef.walkable == false then
 					shootdir = order[o]
@@ -286,7 +286,7 @@ core.register_entity(":__builtin:item", {
 			-- If none of the 4 sides is free, check upwards
 			if not shootdir then
 				shootdir = {x=0, y=1, z=0}
-				local cnode = core.get_node(vector.add(pos, shootdir)).name
+				local cnode = core.get_node(vadd(pos, shootdir)).name
 				if cnode == "ignore" then
 					shootdir = nil -- Do not push into ignore
 				end
