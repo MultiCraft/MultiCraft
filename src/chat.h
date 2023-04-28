@@ -248,6 +248,7 @@ public:
 	void cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope scope);
 
 	void setCursorPos(int cursor_pos);
+	void setViewPosition(int view);
 
 	// Functions for keeping track of whether the line was modified by any
 	// preceding operations

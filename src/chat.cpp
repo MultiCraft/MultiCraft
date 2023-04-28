@@ -657,6 +657,13 @@ void ChatPrompt::setCursorPos(int cursor_pos)
 	m_nick_completion_end = 0;
 }
 
+void ChatPrompt::setViewPosition(int view)
+{
+	m_view = view;
+
+	clampView();
+}
+
 void ChatPrompt::clampView()
 {
 	s32 length = m_line.size();

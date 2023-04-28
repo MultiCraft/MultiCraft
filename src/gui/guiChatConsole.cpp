@@ -808,6 +808,39 @@ void GUIChatConsole::movePromptCursor(s32 x, s32 y)
 	prompt.setCursorPos(cursor_pos);
 }
 
+void GUIChatConsole::deletePromptSelection()
+{
+	if (m_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
+			m_mark_end.selection_type != ChatSelection::SELECTION_PROMPT ||
+			m_mark_begin == m_mark_end)
+		return;
+
+	ChatPrompt& prompt = m_chat_backend->getPrompt();
+	int scroll_pos = prompt.getViewPosition();
+
+	ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+	ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+
+	int pos_begin = real_mark_begin.scroll + real_mark_begin.character;
+	int pos_end = real_mark_end.scroll + real_mark_end.character;
+	if (real_mark_end.x_max)
+		pos_end++;
+
+	std::wstring prompt_text = prompt.getLine();
+	std::wstring new_text;
+	new_text = prompt_text.substr(0, pos_begin);
+	new_text += prompt_text.substr(pos_end, prompt_text.size() - pos_end);
+
+	prompt.replace(new_text);
+
+	int cursor_pos = real_mark_begin.scroll + real_mark_begin.character;
+	prompt.setCursorPos(cursor_pos);
+	prompt.setViewPosition(scroll_pos);
+
+	m_mark_begin.reset();
+	m_mark_end.reset();
+}
+
 bool GUIChatConsole::OnEvent(const SEvent& event)
 {
 	ChatPrompt &prompt = m_chat_backend->getPrompt();
@@ -961,6 +994,13 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_BACK)
 		{
+			if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_begin != m_mark_end) {
+				deletePromptSelection();
+				return true;
+			}
+
 			// Backspace or Ctrl-Backspace pressed
 			// delete character / word to the left
 			ChatPrompt::CursorOpScope scope =
@@ -975,6 +1015,13 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_DELETE)
 		{
+			if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_begin != m_mark_end) {
+				deletePromptSelection();
+				return true;
+			}
+
 			// Delete or Ctrl-Delete pressed
 			// delete character / word to the right
 			ChatPrompt::CursorOpScope scope =
@@ -1036,6 +1083,12 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_KEY_V && event.KeyInput.Control)
 		{
+			if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_begin != m_mark_end) {
+				deletePromptSelection();
+			}
+
 			// Ctrl-V pressed
 			// paste text from clipboard
 			if (prompt.getCursorLength() > 0) {
@@ -1054,6 +1107,15 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_KEY_X && event.KeyInput.Control)
 		{
+			if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_begin != m_mark_end) {
+				irr::core::stringc text = getPromptSelectedText();
+				Environment->getOSOperator()->copyToClipboard(text.c_str());
+				deletePromptSelection();
+				return true;
+			}
+
 			// Ctrl-X pressed
 			// Cut text to clipboard
 			if (prompt.getCursorLength() <= 0)
@@ -1096,6 +1158,12 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			prompt.nickCompletion(names, backwards);
 			return true;
 		} else if (!iswcntrl(event.KeyInput.Char) && !event.KeyInput.Control) {
+			if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_begin != m_mark_end) {
+				deletePromptSelection();
+			}
+
 			#if defined(__linux__) && (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9)
 				wchar_t wc = L'_';
 				mbtowc( &wc, (char *) &event.KeyInput.Char, sizeof(event.KeyInput.Char) );
@@ -1122,6 +1190,12 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 	{
 		if (event.SDLTextEvent.Type == ESDLET_TEXTINPUT)
 		{
+			if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT &&
+					m_mark_begin != m_mark_end) {
+				deletePromptSelection();
+			}
+
 			std::wstring text = utf8_to_wide(event.SDLTextEvent.Text);
 
 			for (u32 i = 0; i < text.size(); i++)

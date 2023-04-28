@@ -194,6 +194,7 @@ private:
 	irr::core::stringc getSelectedText();
 	irr::core::stringc getPromptSelectedText();
 	void movePromptCursor(s32 x, s32 y);
+	void deletePromptSelection();
 	void createVScrollBar();
 	void updateVScrollBar(bool force_update = false, bool move_bottom = false);
 
