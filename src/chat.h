@@ -40,7 +40,7 @@ struct ChatLine
 	// Line index in ChatLine buffer
 	int line_index;
 
-	ChatLine(const std::wstring &a_name, const std::wstring &a_text, 
+	ChatLine(const std::wstring &a_name, const std::wstring &a_text,
 			int a_line_index):
 		name(a_name),
 		text(a_text),
@@ -48,7 +48,7 @@ struct ChatLine
 	{
 	}
 
-	ChatLine(const EnrichedString &a_name, const EnrichedString &a_text, 
+	ChatLine(const EnrichedString &a_name, const EnrichedString &a_text,
 			int a_line_index):
 		name(a_name),
 		text(a_text),
@@ -246,6 +246,8 @@ public:
 	//   cursorOperation(CURSOROP_DELETE, CURSOROP_DIR_LEFT, CURSOROP_SCOPE_WORD)
 	//     deletes the word to the left of the cursor.
 	void cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope scope);
+
+	void setCursorPos(int cursor_pos);
 
 	// Functions for keeping track of whether the line was modified by any
 	// preceding operations

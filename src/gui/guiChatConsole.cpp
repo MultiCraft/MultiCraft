@@ -668,6 +668,27 @@ ChatSelection GUIChatConsole::getPromptCursorPos(s32 x, s32 y)
 	return selection;
 }
 
+ChatSelection GUIChatConsole::getCurrentPromptCursorPos()
+{
+	ChatSelection selection;
+
+	if (m_font == NULL)
+		return selection;
+
+	ChatPrompt& prompt = m_chat_backend->getPrompt();
+
+	selection.selection_type = ChatSelection::SELECTION_PROMPT;
+	selection.scroll = prompt.getViewPosition();
+	selection.character = prompt.getVisibleCursorPosition() - 1;
+
+	if ((unsigned int)selection.character > prompt.getLine().size() - selection.scroll - 1) {
+		selection.character--;
+		selection.x_max = true;
+	}
+
+	return selection;
+}
+
 irr::core::stringc GUIChatConsole::getSelectedText()
 {
 	if (m_font == NULL)
@@ -775,6 +796,18 @@ irr::core::stringc GUIChatConsole::getPromptSelectedText()
 	return text_c;
 }
 
+void GUIChatConsole::movePromptCursor(s32 x, s32 y)
+{
+	ChatSelection selection = getPromptCursorPos(x, y);
+
+	int cursor_pos = selection.scroll + selection.character;
+	if (selection.x_max)
+		cursor_pos++;
+
+	ChatPrompt& prompt = m_chat_backend->getPrompt();
+	prompt.setCursorPos(cursor_pos);
+}
+
 bool GUIChatConsole::OnEvent(const SEvent& event)
 {
 	ChatPrompt &prompt = m_chat_backend->getPrompt();
@@ -843,11 +876,11 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_LEFT || event.KeyInput.Key == KEY_RIGHT)
 		{
+			ChatSelection old_pos = getCurrentPromptCursorPos();
+
 			// Left/right pressed
 			// Move/select character/word to the left depending on control and shift keys
-			ChatPrompt::CursorOp op = event.KeyInput.Shift ?
-				ChatPrompt::CURSOROP_SELECT :
-				ChatPrompt::CURSOROP_MOVE;
+			ChatPrompt::CursorOp op =  ChatPrompt::CURSOROP_MOVE;
 			ChatPrompt::CursorOpDir dir = event.KeyInput.Key == KEY_LEFT ?
 				ChatPrompt::CURSOROP_DIR_LEFT :
 				ChatPrompt::CURSOROP_DIR_RIGHT;
@@ -855,26 +888,75 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				ChatPrompt::CURSOROP_SCOPE_WORD :
 				ChatPrompt::CURSOROP_SCOPE_CHARACTER;
 			prompt.cursorOperation(op, dir, scope);
+
+			if (event.KeyInput.Shift) {
+				if (m_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
+						m_mark_end.selection_type != ChatSelection::SELECTION_PROMPT) {
+					m_mark_begin = old_pos;
+				}
+				m_mark_end = getCurrentPromptCursorPos();
+			} else {
+				if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+						m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
+					m_mark_begin.reset();
+					m_mark_end.reset();
+				}
+			}
+
 			return true;
 		}
 		else if(event.KeyInput.Key == KEY_HOME)
 		{
+			ChatSelection old_pos = getCurrentPromptCursorPos();
+
 			// Home pressed
 			// move to beginning of line
 			prompt.cursorOperation(
 				ChatPrompt::CURSOROP_MOVE,
 				ChatPrompt::CURSOROP_DIR_LEFT,
 				ChatPrompt::CURSOROP_SCOPE_LINE);
+
+			if (event.KeyInput.Shift) {
+				if (m_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
+						m_mark_end.selection_type != ChatSelection::SELECTION_PROMPT) {
+					m_mark_begin = old_pos;
+				}
+				m_mark_end = getCurrentPromptCursorPos();
+			} else {
+				if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+						m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
+					m_mark_begin.reset();
+					m_mark_end.reset();
+				}
+			}
+
 			return true;
 		}
 		else if(event.KeyInput.Key == KEY_END)
 		{
+			ChatSelection old_pos = getCurrentPromptCursorPos();
+
 			// End pressed
 			// move to end of line
 			prompt.cursorOperation(
 				ChatPrompt::CURSOROP_MOVE,
 				ChatPrompt::CURSOROP_DIR_RIGHT,
 				ChatPrompt::CURSOROP_SCOPE_LINE);
+
+			if (event.KeyInput.Shift) {
+				if (m_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
+						m_mark_end.selection_type != ChatSelection::SELECTION_PROMPT) {
+					m_mark_begin = old_pos;
+				}
+				m_mark_end = getCurrentPromptCursorPos();
+			} else {
+				if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+						m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
+					m_mark_begin.reset();
+					m_mark_end.reset();
+				}
+			}
+
 			return true;
 		}
 		else if(event.KeyInput.Key == KEY_BACK)
@@ -907,12 +989,24 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_KEY_A && event.KeyInput.Control)
 		{
-			// Ctrl-A pressed
-			// Select all text
+			ChatPrompt& prompt = m_chat_backend->getPrompt();
+
+			m_mark_begin.reset();
+			m_mark_begin.selection_type = ChatSelection::SELECTION_PROMPT;
+			m_mark_begin.scroll = 0;
+			m_mark_begin.character = 0;
+
+			m_mark_end.reset();
+			m_mark_end.selection_type = ChatSelection::SELECTION_PROMPT;
+			m_mark_end.scroll = 0;
+			m_mark_end.character = prompt.getLine().size() - 1;
+			m_mark_end.x_max = true;
+
 			prompt.cursorOperation(
-				ChatPrompt::CURSOROP_SELECT,
-				ChatPrompt::CURSOROP_DIR_LEFT, // Ignored
+				ChatPrompt::CURSOROP_MOVE,
+				ChatPrompt::CURSOROP_DIR_RIGHT,
 				ChatPrompt::CURSOROP_SCOPE_LINE);
+
 			return true;
 		}
 		else if(event.KeyInput.Key == KEY_KEY_C && event.KeyInput.Control)
@@ -1012,6 +1106,17 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			return true;
 		}
 	}
+	else if (event.EventType == EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown) {
+		if (event.KeyInput.Key == KEY_SHIFT ||
+				event.KeyInput.Key == KEY_LSHIFT ||
+				event.KeyInput.Key == KEY_RSHIFT) {
+			if (!event.KeyInput.Shift) {
+				m_prompt_marking = false;
+			}
+
+			return true;
+		}
+	}
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	else if(event.EventType == EET_SDL_TEXT_EVENT)
 	{
@@ -1040,8 +1145,17 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 
 			if (event.MouseInput.Y >= prompt_y) {
 				m_prompt_marking = true;
-				m_mark_begin = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
-				m_mark_end = m_mark_begin;
+				if (event.MouseInput.Shift) {
+					if (m_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
+							m_mark_end.selection_type != ChatSelection::SELECTION_PROMPT) {
+						m_mark_begin = getCurrentPromptCursorPos();
+						m_mark_end = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
+					}
+				} else {
+					m_mark_begin = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
+					m_mark_end = m_mark_begin;
+				}
+				movePromptCursor(event.MouseInput.X, event.MouseInput.Y);
 			} else {
 				m_history_marking = true;
 				m_mark_begin = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
@@ -1052,9 +1166,11 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				m_mark_end = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
 				m_prompt_marking = false;
 
-				if (m_mark_begin == m_mark_end) {
-					m_mark_begin.reset();
-					m_mark_end.reset();
+				if (!event.MouseInput.Shift) {
+					if (m_mark_begin == m_mark_end) {
+						m_mark_begin.reset();
+						m_mark_end.reset();
+					}
 				}
 			} else if (m_history_marking) {
 				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
@@ -1068,6 +1184,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
 			if (m_prompt_marking) {
 				m_mark_end = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
+				movePromptCursor(event.MouseInput.X, event.MouseInput.Y);
 			} else if (m_history_marking) {
 				m_mark_end = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
 			}

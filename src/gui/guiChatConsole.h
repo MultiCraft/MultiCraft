@@ -58,7 +58,8 @@ struct ChatSelection
 					x_max == other.x_max);
 
 		} else {
-			return (scroll + character == other.scroll + other.character);
+			return (scroll + character == other.scroll + other.character &&
+					x_max == other.x_max);
 		}
 	}
 
@@ -81,7 +82,12 @@ struct ChatSelection
 			return false;
 
 		} else {
-			return (scroll + character < other.scroll + other.character);
+			if (scroll + character != other.scroll + other.character)
+				return (scroll + character < other.scroll + other.character);
+			if (x_max != other.x_max)
+				return (x_max < other.x_max);
+
+			return false;
 		}
 	}
 
@@ -184,8 +190,10 @@ private:
 
 	ChatSelection getCursorPos(s32 x, s32 y);
 	ChatSelection getPromptCursorPos(s32 x, s32 y);
+	ChatSelection getCurrentPromptCursorPos();
 	irr::core::stringc getSelectedText();
 	irr::core::stringc getPromptSelectedText();
+	void movePromptCursor(s32 x, s32 y);
 	void createVScrollBar();
 	void updateVScrollBar(bool force_update = false, bool move_bottom = false);
 
@@ -236,7 +244,6 @@ private:
 
 	ChatSelection m_mark_begin;
 	ChatSelection m_mark_end;
-	int m_prompt_selection = 0;
 	bool m_history_marking = false;
 	bool m_prompt_marking = false;
 	bool m_long_press = false;

@@ -645,6 +645,18 @@ void ChatPrompt::cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope sco
 	m_nick_completion_end = 0;
 }
 
+void ChatPrompt::setCursorPos(int cursor_pos)
+{
+	s32 length = m_line.size();
+	m_cursor = MYMAX(MYMIN(cursor_pos, length), 0);
+	m_cursor_len = 0;
+
+	clampView();
+
+	m_nick_completion_start = 0;
+	m_nick_completion_end = 0;
+}
+
 void ChatPrompt::clampView()
 {
 	s32 length = m_line.size();
