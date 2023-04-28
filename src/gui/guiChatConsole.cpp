@@ -1174,17 +1174,6 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			return true;
 		}
 	}
-	else if (event.EventType == EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown) {
-		if (event.KeyInput.Key == KEY_SHIFT ||
-				event.KeyInput.Key == KEY_LSHIFT ||
-				event.KeyInput.Key == KEY_RSHIFT) {
-			if (!event.KeyInput.Shift) {
-				m_prompt_marking = false;
-			}
-
-			return true;
-		}
-	}
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	else if(event.EventType == EET_SDL_TEXT_EVENT)
 	{
