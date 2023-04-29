@@ -421,7 +421,7 @@ if collection then
 							max_hear_distance = 10,
 							gain = 0.2,
 							pitch = random(60, 100) / 100
-						})
+						}, true)
 						entity.itemstring = ""
 						obj:remove()
 						item = inv:add_item("main", item)
