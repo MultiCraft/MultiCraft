@@ -507,22 +507,15 @@ void GUIChatConsole::drawPrompt()
 		driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
 	}
 
-	// FIXME Draw string at once, not character by character
-	// That will only work with the cursor once we have a monospace font
-	for (u32 i = 0; i < prompt_text.size(); ++i)
-	{
-		wchar_t ws[2] = {prompt_text[i], 0};
-		s32 x = (1 + i) * m_fontsize.X;
-		core::rect<s32> destrect(
-			x, y, x + m_fontsize.X, y + m_fontsize.Y);
-		m_font->draw(
-			ws,
-			destrect,
-			video::SColor(255, 255, 255, 255),
-			false,
-			false,
-			&AbsoluteClippingRect);
-	}
+	core::rect<s32> destrect(
+		m_fontsize.X, y, prompt_text.size() * m_fontsize.X, y + m_fontsize.Y);
+	m_font->draw(
+		prompt_text.c_str(),
+		destrect,
+		video::SColor(255, 255, 255, 255),
+		false,
+		false,
+		&AbsoluteClippingRect);
 
 	// Draw the cursor during on periods
 	if ((m_cursor_blink & 0x8000) != 0)
@@ -532,7 +525,9 @@ void GUIChatConsole::drawPrompt()
 		{
 			s32 cursor_len = prompt.getCursorLength();
 			video::IVideoDriver* driver = Environment->getVideoDriver();
-			s32 x = (1 + cursor_pos) * m_fontsize.X;
+			std::wstring text = prompt_text.substr(0, cursor_pos);
+			s32 x = m_font->getDimension(text.c_str()).Width + m_fontsize.X;
+
 			core::rect<s32> destrect(
 				x,
 				y + m_fontsize.Y * (1.0 - m_cursor_height),
@@ -546,7 +541,6 @@ void GUIChatConsole::drawPrompt()
 				&AbsoluteClippingRect);
 		}
 	}
-
 }
 
 
