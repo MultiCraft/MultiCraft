@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/fontengine.h"
 #include "log.h"
 #include "gettext.h"
+#include <algorithm>
 #include <string>
 #include "touchscreengui.h"
 
@@ -463,6 +464,8 @@ void GUIChatConsole::drawPrompt()
 
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring prompt_text = prompt.getVisiblePortion();
+	std::replace_if(prompt_text.begin(), prompt_text.end(), 
+			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
 
 	ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 	ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
