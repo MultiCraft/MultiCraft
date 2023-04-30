@@ -1033,23 +1033,25 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		}
 		else if(event.KeyInput.Key == KEY_KEY_A && event.KeyInput.Control)
 		{
-			ChatPrompt& prompt = m_chat_backend->getPrompt();
-
-			m_mark_begin.reset();
-			m_mark_begin.selection_type = ChatSelection::SELECTION_PROMPT;
-			m_mark_begin.scroll = 0;
-			m_mark_begin.character = 0;
-
-			m_mark_end.reset();
-			m_mark_end.selection_type = ChatSelection::SELECTION_PROMPT;
-			m_mark_end.scroll = 0;
-			m_mark_end.character = prompt.getLine().size() - 1;
-			m_mark_end.x_max = true;
-
-			prompt.cursorOperation(
-				ChatPrompt::CURSOROP_MOVE,
-				ChatPrompt::CURSOROP_DIR_RIGHT,
-				ChatPrompt::CURSOROP_SCOPE_LINE);
+			if (prompt.getLine().size() > 0) {
+				ChatPrompt& prompt = m_chat_backend->getPrompt();
+	
+				m_mark_begin.reset();
+				m_mark_begin.selection_type = ChatSelection::SELECTION_PROMPT;
+				m_mark_begin.scroll = 0;
+				m_mark_begin.character = 0;
+	
+				m_mark_end.reset();
+				m_mark_end.selection_type = ChatSelection::SELECTION_PROMPT;
+				m_mark_end.scroll = 0;
+				m_mark_end.character = prompt.getLine().size() - 1;
+				m_mark_end.x_max = true;
+	
+				prompt.cursorOperation(
+					ChatPrompt::CURSOROP_MOVE,
+					ChatPrompt::CURSOROP_DIR_RIGHT,
+					ChatPrompt::CURSOROP_SCOPE_LINE);
+			}
 
 			return true;
 		}
