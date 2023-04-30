@@ -209,7 +209,7 @@ function menu_render_worldlist2(selected_index)
 		end
 
 		local y = (i - 1) * 0.8
-		fs[#fs + 1] = fmt("image[0,%s;%s,0.7;%sgui/row_bg%s.png;32]",
+		fs[#fs + 1] = fmt("image[0,%s;%s,0.7;%sgui/row_bg%s.png;16]",
 			y, outer_w, defaulttexturedir_esc, i == selected_index and "_selected" or ""
 		)
 		fs[#fs + 1] = fmt("image[0.2,%s;0.4,0.4;%sserver_flags_%s.png]",
