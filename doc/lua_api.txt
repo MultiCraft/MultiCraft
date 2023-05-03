@@ -2923,6 +2923,17 @@ Some types may inherit styles from parent types.
     * sound - a sound to be played when triggered.
 * scrollbar
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
+* scrollbar, table, textarea
+    * scrollbar_bgimg - The background image of the scrollbar
+    * scrollbar_thumb_img - The thumb/slider image of the scrollbar.
+                            If scrollbar_thumb_top_img and scrollbar_thumb_bottom_img are specified,
+                            this should be middle texture.
+    * scrollbar_thumb_top_img - The top half of the thumb image
+    * scrollbar_thumb_bottom_img - The bottom half of the thumb image
+    * scrollbar_up_img - The up arrow image to use for the scrollbar
+    * scrollbar_down_img - The down arrow image to use for the scrollbar
+    * scrollbar_middle - The middle for all 9-sliced scrollbar textures
+    * NOTE: Scrollbar textures will only be applied if all scrollbar image properties are specified.
 * tabheader
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
     * sound - a sound to be played when a different tab is selected.
@@ -3164,6 +3175,7 @@ For the following functions, `v`, `v1`, `v2` are vectors,
     * Returns a vector, each dimension rounded down.
 * `vector.round(v)`:
     * Returns a vector, each dimension rounded to nearest integer.
+    * At a multiple of 0.5, rounds away from zero.
 * `vector.apply(v, func)`:
     * Returns a vector where the function `func` has been applied to each
       component.
@@ -3342,6 +3354,8 @@ Helper functions
     * If the absolute value of `x` is within the `tolerance` or `x` is NaN,
       `0` is returned.
 * `math.factorial(x)`: returns the factorial of `x`
+* `math.round(x)`: Returns `x` rounded to the nearest integer.
+    * At a multiple of 0.5, rounds away from zero.
 * `string.split(str, separator, include_empty, max_splits, sep_is_pattern)`
     * `separator`: string, default: `","`
     * `include_empty`: boolean, default: `false`

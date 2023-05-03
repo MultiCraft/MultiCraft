@@ -1795,7 +1795,7 @@ msgstr "Hasła nie są jednakowe!"
 
 #: src/gui/guiConfirmRegistration.cpp
 msgid "Register and Join"
-msgstr "Zarejestruj się i dołącz"
+msgstr "Zarejestruj się i Dołącz"
 
 #: src/gui/guiConfirmRegistration.cpp
 #, c-format
@@ -1806,9 +1806,9 @@ msgid ""
 "Please retype your password and click 'Register and Join' to confirm account "
 "creation, or click 'Cancel' to abort."
 msgstr ""
-"Próbujesz wejść na serwer \"%s\" o nazwie \"%2$s2\" po raz pierwszy . Jeśli "
-"zdecydujesz się kontynuować na serwerze zostanie utworzone nowe konto z "
-"Twoim danymi.\n"
+"Próbujesz wejść na serwer o nazwie \"%s\" po raz pierwszy. Jeśli "
+"zdecydujesz się kontynuować, na serwerze zostanie utworzone nowe konto z "
+"Twoimi danymi.\n"
 "Wpisz ponownie hasło i wciśnij \"Zarejestruj się i Dołącz\" aby potwierdzić "
 "utworzenie konta lub wciśnij \"Anuluj\" aby przerwać ten proces."
 

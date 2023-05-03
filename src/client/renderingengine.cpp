@@ -508,6 +508,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		get_video_driver()->beginScene(true, true, video::SColor(255, 0, 0, 0));
 		video::ITexture *background_image = tsrc->getTexture("bg.png");
 
+		v2u32 screensize = driver->getScreenSize();
 		get_video_driver()->draw2DImage(background_image,
 			irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
 			irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
@@ -583,7 +584,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 	Draws the menu scene including (optional) cloud background.
 */
 void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
-		float dtime, bool clouds)
+		ITextureSource *tsrc, float dtime, bool clouds)
 {
 	bool cloud_menu_background = clouds && g_settings->getBool("menu_clouds");
 	if (cloud_menu_background) {
@@ -592,8 +593,15 @@ void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
 		get_video_driver()->beginScene(
 				true, true, video::SColor(255, 140, 186, 250));
 		g_menucloudsmgr->drawAll();
-	} else
+	} else {
 		get_video_driver()->beginScene(true, true, video::SColor(255, 0, 0, 0));
+		video::ITexture *background_image = tsrc->getTexture("bg.png");
+
+		v2u32 screensize = driver->getScreenSize();
+		get_video_driver()->draw2DImage(background_image,
+			irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
+			irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
+	}
 
 	guienv->drawAll();
 	get_video_driver()->endScene();

@@ -81,7 +81,7 @@ void set_default_settings()
 	settings->setDefault("enable_client_modding", "true");
 	settings->setDefault("max_out_chat_queue_size", "20");
 	settings->setDefault("pause_on_lost_focus", "true");
-	settings->setDefault("enable_register_confirmation", "false");
+	settings->setDefault("enable_register_confirmation", "true");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");
@@ -227,6 +227,7 @@ void set_default_settings()
 	settings->setDefault("menu_clouds", "true");
 	settings->setDefault("opaque_water", "false");
 	settings->setDefault("console_height", "0.6");
+	settings->setDefault("console_message_height", "0.25");
 	settings->setDefault("console_color", "(0,0,0)");
 	settings->setDefault("console_alpha", "200");
 	settings->setDefault("formspec_fullscreen_bg_color", "(0,0,0)");
@@ -388,7 +389,7 @@ void set_default_settings()
 	settings->setDefault("compat_send_original_model", "true");
 	settings->setDefault("disable_texture_packs", "false");
 	settings->setDefault("disable_escape_sequences", "false");
-	settings->setDefault("strip_color_codes", "false");
+	settings->setDefault("strip_color_codes", "true");
 	settings->setDefault("announce_mt", "true");
 #if USE_PROMETHEUS
 	settings->setDefault("prometheus_listener_address", "127.0.0.1:30000");
@@ -516,11 +517,12 @@ void set_default_settings()
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 	settings->setDefault("vsync", "true");
 
-	float ScaleFactor = [NSScreen mainScreen].backingScaleFactor;
+	int ScaleFactor = (int) [NSScreen mainScreen].backingScaleFactor;
 	settings->setDefault("screen_dpi", std::to_string(ScaleFactor * 72));
 	if (ScaleFactor >= 2) {
 		settings->setDefault("hud_scaling", "1.5");
 	} else {
+		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
 		settings->setDefault("hud_scaling", "1.25");
 		settings->setDefault("gui_scaling", "1.5");
 	}
@@ -656,6 +658,7 @@ void set_default_settings()
 		} else if (x_inches >= 7.0) {
 			settings->setDefault("device_is_tablet", "true");
 			settings->setDefault("recent_chat_messages", "8");
+			settings->setDefault("console_message_height", "0.4");
 		}
 
 		if (x_inches <= 4.5) {
@@ -687,6 +690,7 @@ void set_default_settings()
 	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
 		settings->setDefault("device_is_tablet", "true");
 		settings->setDefault("recent_chat_messages", "8");
+		settings->setDefault("console_message_height", "0.4");
 	}
 
 	// Set the size of the elements depending on the screen size

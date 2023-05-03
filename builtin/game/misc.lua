@@ -1,5 +1,7 @@
 -- Minetest: builtin/misc.lua
 
+local ceil, floor = math.ceil, math.floor
+
 --
 -- Misc. API functions
 --
@@ -139,9 +141,9 @@ end
 function core.get_position_from_hash(hash)
 	local pos = {}
 	pos.x = (hash % 65536) - 32768
-	hash  = math.floor(hash / 65536)
+	hash  = floor(hash / 65536)
 	pos.y = (hash % 65536) - 32768
-	hash  = math.floor(hash / 65536)
+	hash  = floor(hash / 65536)
 	pos.z = (hash % 65536) - 32768
 	return pos
 end
@@ -173,7 +175,7 @@ end
 
 -- See l_env.cpp for the other functions
 function core.get_artificial_light(param1)
-	return math.floor(param1 / 16)
+	return floor(param1 / 16)
 end
 
 
@@ -220,18 +222,18 @@ function core.is_area_protected(minp, maxp, player_name, interval)
 
 		if maxp[c] > minp[c] then
 			d[c] = (maxp[c] - minp[c]) /
-				math.ceil((maxp[c] - minp[c]) / interval) - 1e-4
+				ceil((maxp[c] - minp[c]) / interval) - 1e-4
 		else
 			d[c] = 1 -- Any value larger than 0 to avoid division by zero
 		end
 	end
 
 	for zf = minp.z, maxp.z, d.z do
-		local z = math.floor(zf + 0.5)
+		local z = floor(zf + 0.5)
 		for yf = minp.y, maxp.y, d.y do
-			local y = math.floor(yf + 0.5)
+			local y = floor(yf + 0.5)
 			for xf = minp.x, maxp.x, d.x do
-				local x = math.floor(xf + 0.5)
+				local x = floor(xf + 0.5)
 				local pos = {x = x, y = y, z = z}
 				if core.is_protected(pos, player_name) then
 					return pos

@@ -8,7 +8,7 @@ local vadd, vnew, vmultiply, vnormalize, vsubtract =
 	vector.add, vector.new, vector.multiply, vector.normalize, vector.subtract
 
 local creative_mode = core.settings:get_bool("creative_mode")
-local node_drop = core.settings:get_bool("node_drop", true)
+local node_drop = core.settings:get_bool("node_drop")
 
 local function copy_pointed_thing(pointed_thing)
 	return {
@@ -585,12 +585,14 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 		if def and def.sound and def.sound.eat then
 			core.sound_play(def.sound.eat, {
 				pos = pos,
-				max_hear_distance = 16})
+				max_hear_distance = 16
+			}, true)
 		else
 			core.sound_play("player_eat", {
 				pos = pos,
-				max_hear_distance = 10,
-				gain = 0.3})
+				max_hear_distance = 16,
+				gain = 0.3
+			}, true)
 		end
 
 		local dir = user:get_look_dir()

@@ -46,36 +46,35 @@ local function get_formspec(tabview, name, tabdata)
 	local retval =
 		-- Search
 		"formspec_version[3]" ..
-		"image[-0.1,4.93;7,0.81;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+		"image[-0.11,4.93;8.02,0.81;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
 		"style[Dte_search;border=false;bgcolor=transparent]" ..
-		"field[0.25,5.25;5.7,0.83;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
-		btn_style("btn_mp_search") ..
-		"image_button[5.6,4.93;0.83,0.83;" .. defaulttexturedir_esc ..
-			"search.png;btn_mp_search;;true;false]" ..
+		"field[0.25,5.25;5.9,0.83;Dte_search;;" .. esc(tabdata.search_for) .. "]" ..
+		"image_button[5.62,4.93;0.83,0.83;" .. defaulttexturedir_esc ..
+			"clear.png;btn_mp_clear;;true;false]" ..
 		btn_style("btn_mp_refresh") ..
-		"image_button[6.35,4.93;0.83,0.83;" .. defaulttexturedir_esc ..
+		"image_button[6.37,4.93;0.83,0.83;" .. defaulttexturedir_esc ..
 			"refresh.png;btn_mp_refresh;;true;false]" ..
 
 		-- Address / Port
 		"image[7.1,0.09;6,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
 		"style[te_address;border=false;bgcolor=transparent]" ..
-		"field[7.45,0.55;4.9,0.5;te_address;" .. fgettext("Address / Port") .. ":" .. ";" ..
+		"field[7.45,0.55;4.9,0.5;te_address;" .. fgettext("Address / Port") .. ":;" ..
 			esc(address) .. "]" ..
 
 		-- Name
 		"image[7.1,1.25;2.95,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
 		"style[te_name;border=false;bgcolor=transparent]" ..
-		"field[7.45,1.7;2.45,0.5;te_name;" .. fgettext("Name") .. ":" .. ";" ..
+		"field[7.45,1.7;2.45,0.5;te_name;" .. fgettext("Name") .. ":;" ..
 			esc(core.settings:get("name")) .. "]" ..
 
 		-- Password
 		"image[9.55,1.25;2.95,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
 		"style[te_pwd;border=false;bgcolor=transparent]" ..
-		"pwdfield[9.9,1.7;2.45,0.5;te_pwd;" .. fgettext("Password") .. ":" .. ";" ..
+		"pwdfield[9.9,1.7;2.45,0.5;te_pwd;" .. fgettext("Password") .. ":;" ..
 			esc(password_tmp) .. "]" ..
 
 		-- Description Background
-		"background9[7.2,2.2;4.8,2.65;" .. defaulttexturedir_esc .. "desc_bg.png" .. ";false;32]" ..
+		"background9[7.2,2.2;4.8,2.65;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
 
 		-- Connect
 		btn_style("btn_mp_connect") ..
@@ -94,15 +93,15 @@ local function get_formspec(tabview, name, tabdata)
 					"tooltip[btn_delete_favorite;" .. fgettext("Del. Favorite") .. "]"
 		end
 		if selected.description then
-			retval = retval .. "textarea[7.5,2.2;4.8,3;;" ..
-				esc((gamedata.serverdescription or ""), true) .. ";]"
+			retval = retval ..
+				"textarea[7.5,2.2;4.8,3;;" .. esc((gamedata.serverdescription or ""), true) .. ";]"
 		end
 	end
 
 	--favorites
 	retval = retval ..
 		"background9[0,-0.1;7.1,5;" ..
-			defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
+			defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 		"tableoptions[background=#0000;border=false]" ..
 		"tablecolumns[" ..
 		image_column(fgettext("Favorite")) .. ",align=center;" ..
@@ -114,6 +113,7 @@ local function get_formspec(tabview, name, tabdata)
 		image_column(fgettext("Server mode")) .. ",padding=0.5;" ..
 		"color,span=1;" ..
 		"text,padding=0.5]" ..
+		scrollbar_style("favorites") ..
 		"table[-0.02,-0.1;6.91,4.87;favorites;"
 
 	if menudata.search_result then
@@ -162,17 +162,6 @@ local function get_formspec(tabview, name, tabdata)
 	end
 
 	return retval
-end
-
-local function is_favorite(server)
-	local favs = serverlistmgr.get_favorites()
-	for fav_id = 1, #favs do
-		if server.address == favs[fav_id].address and
-				server.port == favs[fav_id].port then
-			return true
-		end
-	end
-	return false
 end
 
 --------------------------------------------------------------------------------
@@ -289,12 +278,18 @@ local function main_button_handler(tabview, fields, name, tabdata)
 		return true
 	end
 
+	if fields.btn_mp_clear then
+		tabdata.search_for = ""
+		menudata.search_result = nil
+		return true
+	end
+
 	if fields.btn_mp_refresh then
 		serverlistmgr.sync()
 		return true
 	end
 
-	if (fields.Dte_search or fields.btn_mp_search) and not
+	if fields.Dte_search and not
 			(fields.btn_mp_connect or fields.key_enter) then
 		tabdata.selected = 1
 		local input = lower(fields.Dte_search or "")
@@ -377,12 +372,6 @@ local function main_button_handler(tabview, fields, name, tabdata)
 				fav.port    == gamedata.port then
 			if not is_server_protocol_compat_or_error(
 						fav.proto_min, fav.proto_max) then
-				return true
-			elseif fav.proto_max and fav.proto_max < 37 and not is_favorite(fav) then
-				local dlg = create_outdated_server_dlg(fav)
-				dlg:set_parent(tabview)
-				tabview:hide()
-				dlg:show()
 				return true
 			end
 

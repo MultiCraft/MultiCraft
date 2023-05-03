@@ -23,6 +23,75 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "modalMenu.h"
 #include "chat.h"
 #include "config.h"
+#include "guiScrollBar.h"
+
+struct ChatSelection
+{
+	ChatSelection() : initialized(false), scroll(0), row(0), row_buf(0),
+			line(0), fragment(0), character(0), x_max(false) {};
+
+	void reset() {
+		initialized = false;
+		scroll = 0;
+		row = 0;
+		row_buf = 0;
+		line = 0;
+		fragment = 0;
+		character = 0;
+		x_max = false;
+	}
+
+	bool operator== (const ChatSelection &other) const {
+		return (row + scroll == other.row + other.scroll &&
+				row_buf == other.row_buf &&
+				line == other.line &&
+				fragment == other.fragment &&
+				character == other.character &&
+				x_max == other.x_max);
+	}
+
+	bool operator< (const ChatSelection &other) const {
+		if (row + scroll != other.row + other.scroll)
+			return (row + scroll < other.row + other.scroll);
+		if (row_buf != other.row_buf)
+			return (row_buf < other.row_buf);
+		if (line != other.line)
+			return (line < other.line);
+		if (fragment != other.fragment)
+			return (fragment < other.fragment);
+		if (character != other.character)
+			return (character < other.character);
+		if (x_max != other.x_max)
+			return (x_max < other.x_max);
+
+		return false;
+	}
+
+	bool operator> (const ChatSelection &other) {
+		return other < *this;
+	}
+
+	bool operator<= (const ChatSelection &other) {
+		return !(*this > other);
+	}
+
+	bool operator>= (const ChatSelection &other) {
+		return !(*this < other);
+	}
+
+	bool operator!= (const ChatSelection &other) const {
+		return !this->operator==(other);
+	}
+
+	bool initialized;
+	int scroll;
+	int row;
+	int row_buf;
+	unsigned int line;
+	unsigned int fragment;
+	unsigned int character;
+	bool x_max;
+};
 
 class Client;
 
@@ -50,8 +119,6 @@ public:
 	// Close the console, equivalent to openConsole(0).
 	// This doesn't close immediately but initiates an animation.
 	void closeConsole();
-	// Close the console immediately, without animation.
-	void closeConsoleAtOnce();
 	// Set whether to close the console after the user presses enter.
 	void setCloseOnEnter(bool close) { m_close_on_enter = close; }
 
@@ -72,6 +139,18 @@ public:
 
 	virtual void setVisible(bool visible);
 
+	bool hasFocus();
+
+	bool convertToMouseEvent(
+		SEvent &mouse_event, SEvent touch_event) const noexcept;
+
+	bool preprocessEvent(SEvent event);
+
+	bool getAndroidChatOpen() { return m_android_chat_open; }
+	void setAndroidChatOpen(bool value) { m_android_chat_open = value; }
+
+	static GUIChatConsole* getChatConsole() { return m_chat_console; }
+
 private:
 	void reformatConsole();
 	void recalculateConsolePosition();
@@ -82,7 +161,14 @@ private:
 	void drawText();
 	void drawPrompt();
 
+	ChatSelection getCursorPos(s32 x, s32 y);
+	irr::core::stringc getSelectedText();
+	void createVScrollBar();
+	void updateVScrollBar();
+
 private:
+	static GUIChatConsole* m_chat_console;
+
 	ChatBackend* m_chat_backend;
 	Client* m_client;
 	IMenuManager* m_menumgr;
@@ -124,4 +210,16 @@ private:
 	// font
 	gui::IGUIFont *m_font = nullptr;
 	v2u32 m_fontsize;
+
+	ChatSelection m_mark_begin;
+	ChatSelection m_mark_end;
+	bool m_mouse_marking = false;
+	bool m_long_press = false;
+	ChatSelection m_cursor_press_pos;
+
+	u32 m_scrollbar_width = 0;
+	GUIScrollBar *m_vscrollbar = nullptr;
+	s32 m_bottom_scroll_pos = 0;
+
+	bool m_android_chat_open = false;
 };

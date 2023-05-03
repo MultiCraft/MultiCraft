@@ -20,16 +20,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "guiConfirmRegistration.h"
 #include "client/client.h"
+#include "filesys.h"
+#include "guiBackgroundImage.h"
 #include "guiButton.h"
+#include "guiEditBoxWithScrollbar.h"
 #include <IGUICheckBox.h>
 #include <IGUIButton.h>
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
-#include "intlGUIEditBox.h"
 #include "porting.h"
+
+#if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
+	#include "intlGUIEditBox.h"
+#endif
 
 #ifdef HAVE_TOUCHSCREENGUI
 	#include "client/renderingengine.h"
+#endif
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	#include <SDL.h>
 #endif
 
 #include "gettext.h"
@@ -40,6 +50,8 @@ const int ID_confirm = 263;
 const int ID_intotext = 264;
 const int ID_cancel = 265;
 const int ID_message = 266;
+const int ID_background = 267;
+const int ID_confirmPasswordBg = 268;
 
 GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 		gui::IGUIElement *parent, s32 id, IMenuManager *menumgr, Client *client,
@@ -52,11 +64,29 @@ GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 #ifdef HAVE_TOUCHSCREENGUI
 	m_touchscreen_visible = false;
 #endif
+
+	v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
+	m_fullscreen_bgcolor = video::SColor(
+		(u8) MYMIN(MYMAX(g_settings->getS32("formspec_fullscreen_bg_opacity"), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.X), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Y), 0), 255),
+		MYMIN(MYMAX(myround(formspec_bgcolor.Z), 0), 255)
+	);
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	if (porting::hasRealKeyboard())
+		SDL_StartTextInput();
+#endif
 }
 
 GUIConfirmRegistration::~GUIConfirmRegistration()
 {
 	removeChildren();
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
+		SDL_StopTextInput();
+#endif
 }
 
 void GUIConfirmRegistration::removeChildren()
@@ -77,11 +107,13 @@ void GUIConfirmRegistration::regenerateGui(v2u32 screensize)
 	/*
 		Calculate new sizes and positions
 	*/
-#ifdef HAVE_TOUCHSCREENGUI
-	const float s = m_gui_scale * RenderingEngine::getDisplayDensity() / 2;
+	float s = MYMIN(screensize.X / 600.f, screensize.Y / 360.f);
+#if HAVE_TOUCHSCREENGUI
+	s *= g_settings->getBool("device_is_tablet") ? 0.7f : 0.8f;
 #else
-	const float s = m_gui_scale;
+	s *= 0.5f;
 #endif
+
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 600 * s / 2,
 		screensize.Y / 2 - 360 * s / 2,
@@ -98,11 +130,21 @@ void GUIConfirmRegistration::regenerateGui(v2u32 screensize)
 	/*
 		Add stuff
 	*/
-	s32 ypos = 30 * s;
+
+	// Background image
+	{
+		const std::string texture = "bg_common.png";
+		const core::rect<s32> rect(0, 0, 0, 0);
+		const core::rect<s32> middle(40, 40, -40, -40);
+		new GUIBackgroundImage(Environment, this, ID_background, rect,
+				texture, middle, m_tsrc, true);
+	}
+
+	s32 ypos = 20 * s;
 	{
 		core::rect<s32> rect2(0, 0, 540 * s, 180 * s);
 		rect2 += topleft_client + v2s32(30 * s, ypos);
-		static const std::string info_text_template = strgettext(
+		const std::string info_text_template = strgettext(
 				"You are about to join this server with the name \"%s\" for the "
 				"first time.\n"
 				"If you proceed, a new account using your credentials will be "
@@ -114,8 +156,13 @@ void GUIConfirmRegistration::regenerateGui(v2u32 screensize)
 				info_text_template.c_str(), m_playername.c_str());
 
 		wchar_t *info_text_buf_wide = utf8_to_wide_c(info_text_buf);
+#if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
 		gui::IGUIEditBox *e = new gui::intlGUIEditBox(info_text_buf_wide, true,
 				Environment, this, ID_intotext, rect2, false, true);
+#else
+		gui::IGUIEditBox *e = new GUIEditBoxWithScrollBar(info_text_buf_wide, true,
+				Environment, this, ID_intotext, rect2, false, true);
+#endif
 		delete[] info_text_buf_wide;
 		e->drop();
 		e->setMultiLine(true);
@@ -123,38 +170,52 @@ void GUIConfirmRegistration::regenerateGui(v2u32 screensize)
 		e->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
 	}
 
-	ypos += 200 * s;
-	{
-		core::rect<s32> rect2(0, 0, 540 * s, 30 * s);
-		rect2 += topleft_client + v2s32(30 * s, ypos);
-		gui::IGUIEditBox *e = Environment->addEditBox(m_pass_confirm.c_str(),
-				rect2, true, this, ID_confirmPassword);
-		e->setPasswordBox(true);
-		Environment->setFocus(e);
-	}
-
-	ypos += 50 * s;
-	{
-		core::rect<s32> rect2(0, 0, 230 * s, 35 * s);
-		rect2 = rect2 + v2s32(size.X / 2 - 220 * s, ypos);
-		text = wgettext("Register and Join");
-		GUIButton::addButton(Environment, rect2, m_tsrc, this, ID_confirm, text);
-		delete[] text;
-	}
-	{
-		core::rect<s32> rect2(0, 0, 120 * s, 35 * s);
-		rect2 = rect2 + v2s32(size.X / 2 + 70 * s, ypos);
-		text = wgettext("Cancel");
-		GUIButton::addButton(Environment, rect2, m_tsrc, this, ID_cancel, text);
-		delete[] text;
-	}
+	ypos += 140 * s;
 	{
 		core::rect<s32> rect2(0, 0, 500 * s, 40 * s);
-		rect2 += topleft_client + v2s32(30 * s, ypos + 40 * s);
+		rect2 += topleft_client + v2s32(30 * s, ypos + 45 * s);
 		text = wgettext("Passwords do not match!");
 		IGUIElement *e = Environment->addStaticText(
 				text, rect2, false, true, this, ID_message);
 		e->setVisible(false);
+		delete[] text;
+	}
+
+	ypos += 75 * s;
+	{
+		core::rect<s32> rect2(0, 0, 540 * s, 40 * s);
+		rect2 += topleft_client + v2s32(30 * s, ypos);
+
+		core::rect<s32> bg_middle(10, 10, -10, -10);
+		new GUIBackgroundImage(Environment, this, ID_confirmPasswordBg,
+				rect2, "field_bg.png", bg_middle, m_tsrc, false);
+
+		rect2.UpperLeftCorner.X += 5 * s;
+		rect2.LowerRightCorner.X -= 5 * s;
+
+		gui::IGUIEditBox *e = Environment->addEditBox(m_pass_confirm.c_str(),
+				rect2, true, this, ID_confirmPassword);
+		e->setDrawBorder(false);
+		e->setDrawBackground(false);
+		e->setPasswordBox(true);
+		Environment->setFocus(e);
+	}
+
+	ypos += 60 * s;
+	{
+		core::rect<s32> rect2(0, 0, 300 * s, 40 * s);
+		rect2 = rect2 + v2s32(size.X / 2 - 250 * s, ypos);
+		text = wgettext("Register and Join");
+		GUIButton *e = GUIButton::addButton(Environment, rect2, m_tsrc, this, ID_confirm, text);
+		e->setStyles(StyleSpec::getButtonStyle("", "green"));
+		delete[] text;
+	}
+	{
+		core::rect<s32> rect2(0, 0, 140 * s, 40 * s);
+		rect2 = rect2 + v2s32(size.X / 2 + 110 * s, ypos);
+		text = wgettext("Cancel");
+		GUIButton *e = GUIButton::addButton(Environment, rect2, m_tsrc, this, ID_cancel, text);
+		e->setStyles(StyleSpec::getButtonStyle());
 		delete[] text;
 	}
 }
@@ -165,9 +226,10 @@ void GUIConfirmRegistration::drawMenu()
 	if (!skin)
 		return;
 	video::IVideoDriver *driver = Environment->getVideoDriver();
+	v2u32 screensize = driver->getScreenSize();
 
-	video::SColor bgcolor(140, 0, 0, 0);
-	driver->draw2DRectangle(bgcolor, AbsoluteRect, &AbsoluteClippingRect);
+	core::rect<s32> allbg(0, 0, screensize.X, screensize.Y);
+	driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
 
 	gui::IGUIElement::draw();
 #if defined(__ANDROID__) || defined(__IOS__)

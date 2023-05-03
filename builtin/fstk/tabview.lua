@@ -68,20 +68,51 @@ local function add_tab(self,tab)
 end
 
 --------------------------------------------------------------------------------
-local function make_side_pane_tab(y, tab_name, tooltip, selected)
-	local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
-	local formspec = "style[" .. tab_name .. "_tab;bgimg=" ..
-			tpath .. tab_name
-	if selected then
-		formspec = formspec .. "_menu_selected.png]"
+local function add_side_button(self, btn)
+	if btn.pos then
+		table.insert(self.side_buttons, btn.pos, btn)
 	else
-		formspec = formspec .. "_menu.png;bgimg_hovered=" ..
-				tpath .. tab_name .. "_menu_hover.png]"
+		self.side_buttons[#self.side_buttons + 1] = btn
+	end
+end
+
+--------------------------------------------------------------------------------
+local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
+local function get_side_menu(self, selected_tab)
+	if #self.side_buttons == 0 then return "" end
+
+	local side_menu_h = #self.side_buttons * 1.2 + 0.2
+	local bg_y = 2.35 - side_menu_h / 2
+	local fs = {
+		"background9[12.13,", bg_y, ";0.9,", side_menu_h, ";", tpath,
+			"side_menu.png;false;30]"
+	}
+
+	for i, btn in ipairs(self.side_buttons) do
+		local y = bg_y - 1.15 + 1.2 * i
+		if i > 1 then
+			fs[#fs + 1] = "image[12.15," .. y - 0.04 .. ";0.9,0.06;" ..
+					tpath .. "side_menu_divider.png]"
+		end
+
+		local btn_name = self.name .. "_side_" .. i
+		fs[#fs + 1] = "style[" .. btn_name .. ";bgimg="
+
+		local texture_prefix = btn.texture_prefix or btn.tab_name
+		if btn.tab_name and btn.tab_name == selected_tab then
+			fs[#fs + 1] = btn.texture_selected or tpath .. texture_prefix .. "_menu_selected.png"
+		else
+			fs[#fs + 1] = btn.texture or tpath .. texture_prefix .. "_menu.png"
+			fs[#fs + 1] = ";bgimg_hovered="
+			fs[#fs + 1] = btn.texture_hover or tpath .. texture_prefix .. "_menu_hover.png]"
+		end
+		fs[#fs + 1] = "]"
+
+		fs[#fs + 1] = "image_button[12.1," .. y .. ";1,1.3;;" .. btn_name .. ";;true;false]"
+		fs[#fs + 1] = "tooltip[" .. btn_name .. ";" .. btn.tooltip .. "]"
 	end
 
-	return formspec ..
-			"image_button[12.1," .. y .. ";1,1.5;;" .. tab_name .. "_tab;;true;false]" ..
-			"tooltip[" .. tab_name .. "_tab;" .. tooltip .. "]"
+	return table.concat(fs)
 end
 
 local function get_formspec(self)
@@ -93,7 +124,6 @@ local function get_formspec(self)
 		if self.parent == nil then
 			local tsize = self.tablist[self.last_tab_index].tabsize or
 					{width=self.width, height=self.height}
-			local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 			formspec = formspec ..
 					string.format("size[%f,%f,%s]",tsize.width + 2,tsize.height + 1,
 						dump(self.fixed_size)) ..
@@ -103,11 +133,7 @@ local function get_formspec(self)
 					"background9[-0.2,-1.26;" .. tsize.width + 0.4 .. "," ..
 						tsize.height + 1.75 .. ";" .. defaulttexturedir_esc ..
 						"bg_common.png;false;40]" ..
-
-					"background9[12.13,1.05;0.9,2.6;" .. tpath .. "side_menu.png;false;30]" ..
-					make_side_pane_tab(0.9, "settings", fgettext("Settings"), name == "settings") ..
-					"image[12.15,2.26;0.9,0.06;" .. tpath .. "side_menu_divider.png]" ..
-					make_side_pane_tab(2.3, "authors", fgettext("Credits"), name == "credits")
+						get_side_menu(self, name)
 		end
 
 	--	formspec = formspec .. self:tab_header()
@@ -140,14 +166,6 @@ local function handle_buttons(self,fields)
 
 	if self.glb_btn_handler ~= nil and
 		self.glb_btn_handler(self,fields) then
-		return true
-	end
-
-	if fields.authors_tab then
-		set_tab_by_name(self, "credits")
-		return true
-	elseif fields.settings_tab then
-		set_tab_by_name(self, "settings")
 		return true
 	end
 
@@ -230,25 +248,20 @@ local function button_header(self)
 	for i = 1, #visible_tabs do
 		local caption = visible_tabs[i].caption
 	--	local w = btn_widths[i] * coords_per_char
-		local texture = "upper_buttons_middle"
+		local side = "middle"
 		if i == 1 then
-			texture = "upper_buttons_left"
+			side = "left"
 		elseif i == #visible_tabs then
-			texture = "upper_buttons_right"
+			side = "right"
 		end
 		local btn_name = self.name .. "_" .. i
-		toadd = toadd ..
-			"style[" .. btn_name .. ";padding=-10;bgimg=" .. defaulttexturedir_esc ..
-				DIR_DELIM_esc .. "gui" .. DIR_DELIM_esc .. texture
-
 		if i == math.abs(self.last_tab_index) then
-			toadd = toadd .. "_selected.png;"
-		else
-			toadd = toadd .. ".png;bgimg_hovered=" .. defaulttexturedir_esc ..
-				DIR_DELIM_esc .. "gui" .. DIR_DELIM_esc .. texture .. "_hover.png;"
+			side = side .. "_pressed"
 		end
 
-		toadd = toadd .. "bgimg_middle=20;content_offset=0]" ..
+		toadd = toadd ..
+			btn_style(btn_name, side) ..
+			"style[" .. btn_name .. ";content_offset=0]" ..
 			"image_button[" .. x .. ",-1.1;" .. w + 0.22 .. ",0.9;;" ..
 				btn_name .. ";" .. caption .. ";true;false]"
 		x = x + w
@@ -282,7 +295,7 @@ local function switch_to_tab(self, index)
 end
 
 --------------------------------------------------------------------------------
-local function handle_tab_buttons(self,fields)
+local function handle_tab_buttons(self, fields)
 	--save tab selection to config file
 	--[[if fields[self.name] then
 		local index = tonumber(fields[self.name])
@@ -294,9 +307,18 @@ local function handle_tab_buttons(self,fields)
 	local name_prefix_len = #name_prefix
 	for field in pairs(fields) do
 		if field:sub(1, name_prefix_len) == name_prefix then
-			local index = tonumber(field:sub(name_prefix_len + 1))
-			if math.abs(self.last_tab_index) == index then return false end
-			switch_to_tab(self, index)
+			if field:sub(name_prefix_len + 1, name_prefix_len + 5) == "side_" then
+				local btn = self.side_buttons[tonumber(field:sub(name_prefix_len + 6))]
+				if btn.tab_name then
+					set_tab_by_name(self, btn.tab_name)
+				else
+					btn.on_click(self)
+				end
+			else
+				local index = tonumber(field:sub(name_prefix_len + 1))
+				if math.abs(self.last_tab_index) == index then return false end
+				switch_to_tab(self, index)
+			end
 			return true
 		end
 	end
@@ -364,6 +386,7 @@ local tabview_metatable = {
 			function(self,handler) self.glb_evt_handler = handler end,
 	set_fixed_size =
 			function(self,state) self.fixed_size = state end,
+	add_side_button = add_side_button,
 --	tab_header = tab_header,
 	button_header = button_header,
 	handle_tab_buttons = handle_tab_buttons
@@ -389,6 +412,7 @@ function tabview_create(name, size, tabheaderpos)
 	self.current_tab    = nil
 	self.last_tab_index = 1
 	self.tablist        = {}
+	self.side_buttons   = {}
 
 	self.autosave_tab   = false
 

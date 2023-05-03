@@ -15,9 +15,6 @@
 --with this program; if not, write to the Free Software Foundation, Inc.,
 --51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-local lang = core.settings:get("language")
-if not lang or lang == "" then lang = os.getenv("LANG") end
-
 local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
 local default_worlds = {
@@ -79,52 +76,43 @@ local function get_formspec(this)
 		end
 	end
 
-	local creative_checkbox = core.settings:get_bool("creative_mode") and
-			"creative_checkbox.png" or "blank.png"
-
-	local creative_bg = "creative_bg.png"
-	if lang and lang == "ru" then
-		creative_bg = "creative_bg_" .. lang .. ".png"
-	end
-
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
+	local c_label = utf8.gsub(fgettext("Creative mode"), "(%w)(%w+)",
+		function(a, b) return utf8.upper(a) .. b end)
 	local retval =
-			"style[world_delete;fgimg=" .. defaulttexturedir_esc ..
-			"world_delete.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_delete_hover.png]" ..
-			"image_button[-0.1,4.84;3.45,0.92;;world_delete;;true;false]" ..
-			"tooltip[world_delete;".. fgettext("Delete") .. "]" ..
+			"style[world_delete,world_create;font_size=*" ..
+				(small_screen and 1.2 or 1.5) .. "]" ..
+			btn_style("world_delete", "left") ..
+			"image_button[-0.12,4.85;3.48,0.9;;world_delete;" .. fgettext("Delete") .. ";true;false]" ..
+			"image[0.1,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_delete.png]" ..
 
-			"style[world_create;fgimg=" .. defaulttexturedir_esc ..
-				"world_new.png;fgimg_hovered=" .. defaulttexturedir_esc .. "world_new_hover.png]" ..
-			"image_button[3.15,4.84;3.45,0.92;;world_create;;true;false]" ..
-			"tooltip[world_create;".. fgettext("New") .. "]" ..
+			btn_style("world_create", "right") ..
+			"image_button[3.14,4.85;3.48,0.9;;world_create;".. fgettext("Create") .. ";true;false]" ..
+			"image[3.35,5;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_create.png]" ..
 
 			btn_style("play") ..
 			"style[play;font_size=*" .. (small_screen and 2.25 or 3) .. "]" ..
 			"image_button[6.72,1.43;4.96,1.41;;play;" .. space .. " " ..
 				fgettext("Play") .. space .. ";true;false]" ..
 			"image[7,1.63;1,1;" .. defaulttexturedir_esc .. "btn_play_icon.png]" ..
-			"tooltip[play;".. fgettext("Play Game") .. "]" ..
 
-			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_bg .. ";;;true;false]" ..
-			"style[cb_creative_mode;content_offset=0]" ..
-			"image_button[7.2,3.09;4,0.83;" .. defaulttexturedir_esc .. creative_checkbox ..
-				";cb_creative_mode;;true;false]" ..
+			"style[cb_creative_mode;content_offset=0;font_size=*" .. (small_screen and 1.2 or 1.5) ..
+				";textcolor=#53659C]" ..
+			"image_button[6.86,3.09;4.65,0.83;" .. defaulttexturedir_esc .. "creative_bg.png;cb_creative_mode;;true;false]" ..
+			"image[6.96,3.19;0.55,0.55;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc ..
+				(core.settings:get_bool("creative_mode") and "checkbox_checked" or "checkbox") .. ".png]" ..
+			"image_button[7.31,3.09;4.2,0.83;;cb_creative_mode;" .. c_label .. ";true;false]" ..
 
-			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
+			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
+			"tablecolumns[" .. image_column(fgettext("Creative mode")) .. ";text]" ..
+			scrollbar_style("sp_worlds") ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
 
+			btn_style("switch_local") ..
 			"style[switch_local;fgimg=" .. defaulttexturedir_esc .. "switch_local.png;fgimg_hovered=" ..
-				defaulttexturedir_esc .. "switch_local_hover.png]" ..
+				defaulttexturedir_esc .. "switch_local_hover.png;padding=" .. (is_high_dpi() and -42 or -30) .. "]" ..
 			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
-
-	if PLATFORM == "Android" then
-		retval = retval ..
-			"image_button[6.6,-0.1;1.5,1.5;" ..
-				defaulttexturedir_esc .. "gift_btn.png;upgrade;;true;false;" ..
-				defaulttexturedir_esc .. "gift_btn_pressed.png]"
-	end
 
 	local enable_server = core.settings:get_bool("enable_server")
 	if enable_server then
@@ -163,6 +151,13 @@ local function main_button_handler(this, fields, name)
 		end
 
 		if event.type == "CHG" and selected ~= nil then
+			local world = menudata.worldlist:get_list()[selected]
+			if world and world.creative_mode ~= nil and
+					world.enable_damage ~= nil then
+				core.settings:set_bool("creative_mode", world.creative_mode)
+				core.settings:set_bool("enable_damage", world.enable_damage)
+			end
+
 			core.settings:set("mainmenu_last_selected_world",
 				menudata.worldlist:get_raw_index(selected))
 			return true
@@ -174,9 +169,23 @@ local function main_button_handler(this, fields, name)
 	end
 
 	if fields["cb_creative_mode"] then
-		local creative_mode = core.settings:get_bool("creative_mode")
-		core.settings:set("creative_mode", tostring(not creative_mode))
-		core.settings:set("enable_damage", tostring(creative_mode))
+		local creative_mode = core.settings:get_bool("creative_mode", false)
+		core.settings:set_bool("creative_mode", not creative_mode)
+		core.settings:set_bool("enable_damage", creative_mode)
+
+		local selected = core.get_table_index("sp_worlds")
+		local world = menudata.worldlist:get_list()[selected]
+		if world then
+			-- Update the cached values
+			world.creative_mode = not creative_mode
+			world.enable_damage = creative_mode
+
+			-- Update the settings in world.mt
+			local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
+			world_conf:set_bool("creative_mode", not creative_mode)
+			world_conf:set_bool("enable_damage", creative_mode)
+			world_conf:write()
+		end
 
 		return true
 	end
@@ -274,10 +283,6 @@ local function main_button_handler(this, fields, name)
 		return true
 	end
 
-	if fields["upgrade"] then
-		core.upgrade("")
-	end
-
 --[[if fields["world_configure"] ~= nil then
 		local selected = core.get_table_index("sp_worlds")
 		if selected ~= nil then
@@ -307,6 +312,21 @@ local function on_change(type, _, _, this)
 			else
 				mm_texture.update("singleplayer",game)
 				menudata.worldlist:set_filtercriteria("default")
+
+				-- Update creative_mode and enable_damage settings
+				local index = filterlist.get_current_index(menudata.worldlist,
+						tonumber(core.settings:get("mainmenu_last_selected_world")))
+				local world = menudata.worldlist:get_list()[index] or menudata.worldlist:get_list()[1]
+				if world then
+					if world.creative_mode == nil or world.enable_damage == nil then
+						local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
+						world.creative_mode = world_conf:get_bool("creative_mode")
+						world.enable_damage = world_conf:get_bool("enable_damage")
+					end
+
+					core.settings:set_bool("creative_mode", world.creative_mode)
+					core.settings:set_bool("enable_damage", world.enable_damage)
+				end
 			end
 		end
 	end

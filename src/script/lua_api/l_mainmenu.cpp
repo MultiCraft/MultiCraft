@@ -145,7 +145,7 @@ int ModApiMainMenu::l_start(lua_State *L)
 	data->serverdescription = getTextData(L,"serverdescription");
 	data->servername        = getTextData(L,"servername");
 
-#ifdef __IOS__
+#if defined(__ANDROID__) || defined(__IOS__)
 	if (!g_settings_path.empty())
 		g_settings->updateConfigFile(g_settings_path.c_str());
 #endif
@@ -658,83 +658,14 @@ int ModApiMainMenu::l_extract_zip(lua_State *L)
 	std::string absolute_destination = fs::RemoveRelativePathComponents(destination);
 
 	if (ModApiMainMenu::mayModifyPath(absolute_destination)) {
-		fs::CreateAllDirs(absolute_destination);
-
-		io::IFileSystem *fs = RenderingEngine::get_filesystem();
-
-		if (!fs->addFileArchive(zipfile, false, false, io::EFAT_ZIP, password)) {
-			lua_pushboolean(L,false);
-			return 1;
+		std::string errorMessage;
+		auto fs = RenderingEngine::get_filesystem();
+		bool ok = fs::extractZipFile(fs, zipfile, destination, password, &errorMessage);
+		lua_pushboolean(L, ok);
+		if (!errorMessage.empty()) {
+			lua_pushstring(L, errorMessage.c_str());
+			return 2;
 		}
-
-		sanity_check(fs->getFileArchiveCount() > 0);
-
-		/**********************************************************************/
-		/* WARNING this is not threadsafe!!                                   */
-		/**********************************************************************/
-		io::IFileArchive* opened_zip =
-			fs->getFileArchive(fs->getFileArchiveCount()-1);
-
-		const io::IFileList* files_in_zip = opened_zip->getFileList();
-
-		unsigned int number_of_files = files_in_zip->getFileCount();
-
-		for (unsigned int i=0; i < number_of_files; i++) {
-			std::string fullpath = destination;
-			fullpath += DIR_DELIM;
-			fullpath += files_in_zip->getFullFileName(i).c_str();
-			std::string fullpath_dir = fs::RemoveLastPathComponent(fullpath);
-
-			if (!files_in_zip->isDirectory(i)) {
-				if (!fs::PathExists(fullpath_dir) && !fs::CreateAllDirs(fullpath_dir)) {
-					fs->removeFileArchive(fs->getFileArchiveCount()-1);
-					lua_pushboolean(L,false);
-					return 1;
-				}
-
-				io::IReadFile* toread = opened_zip->createAndOpenFile(i);
-
-				if (toread == nullptr) {
-					// Wrong password
-					fs->removeFileArchive(fs->getFileArchiveCount()-1);
-					lua_pushboolean(L, false);
-					lua_pushstring(L, "invalid password");
-					return 2;
-				}
-
-				FILE *targetfile = fopen(fullpath.c_str(),"wb");
-
-				if (targetfile == NULL) {
-					fs->removeFileArchive(fs->getFileArchiveCount()-1);
-					lua_pushboolean(L,false);
-					return 1;
-				}
-
-				char read_buffer[1024];
-				long total_read = 0;
-
-				while (total_read < toread->getSize()) {
-
-					unsigned int bytes_read =
-							toread->read(read_buffer,sizeof(read_buffer));
-					if ((bytes_read == 0 ) ||
-						(fwrite(read_buffer, 1, bytes_read, targetfile) != bytes_read))
-					{
-						fclose(targetfile);
-						fs->removeFileArchive(fs->getFileArchiveCount()-1);
-						lua_pushboolean(L,false);
-						return 1;
-					}
-					total_read += bytes_read;
-				}
-
-				fclose(targetfile);
-			}
-
-		}
-
-		fs->removeFileArchive(fs->getFileArchiveCount()-1);
-		lua_pushboolean(L,true);
 		return 1;
 	}
 
@@ -892,34 +823,6 @@ int ModApiMainMenu::l_gettext(lua_State *L)
 }
 
 /******************************************************************************/
-int ModApiMainMenu::l_get_screen_info(lua_State *L)
-{
-	lua_newtable(L);
-	int top = lua_gettop(L);
-	lua_pushstring(L,"density");
-	lua_pushnumber(L,RenderingEngine::getDisplayDensity());
-	lua_settable(L, top);
-
-	lua_pushstring(L,"display_width");
-	lua_pushnumber(L,RenderingEngine::getDisplaySize().X);
-	lua_settable(L, top);
-
-	lua_pushstring(L,"display_height");
-	lua_pushnumber(L,RenderingEngine::getDisplaySize().Y);
-	lua_settable(L, top);
-
-	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
-	lua_pushstring(L,"window_width");
-	lua_pushnumber(L, window_size.X);
-	lua_settable(L, top);
-
-	lua_pushstring(L,"window_height");
-	lua_pushnumber(L, window_size.Y);
-	lua_settable(L, top);
-	return 1;
-}
-
-/******************************************************************************/
 int ModApiMainMenu::l_get_min_supp_proto(lua_State *L)
 {
 	lua_pushinteger(L, CLIENT_PROTOCOL_VERSION_MIN);
@@ -1035,7 +938,6 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(gettext);
 	API_FCT(get_video_drivers);
 	API_FCT(get_video_modes);
-	API_FCT(get_screen_info);
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
 	API_FCT(open_url);
@@ -1064,7 +966,7 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(delete_dir);
 	API_FCT(copy_dir);
 	API_FCT(is_dir);
-	//API_FCT(extract_zip); //TODO remove dependency to GuiEngine
+	API_FCT(extract_zip);
 	API_FCT(may_modify_path);
 	API_FCT(download_file);
 	API_FCT(get_min_supp_proto);

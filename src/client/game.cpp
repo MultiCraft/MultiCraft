@@ -655,7 +655,7 @@ struct GameRunData {
 	float jump_timer;
 	float damage_flash;
 	float update_draw_list_timer;
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__)
 	float item_select_timer;
 #endif
 
@@ -700,9 +700,6 @@ public:
 	void shutdown();
 #if defined(__ANDROID__) || defined(__IOS__)
 	void pauseGame();
-#endif
-#ifdef __IOS__
-	void customStatustext(const std::wstring &text);
 #endif
 
 protected:
@@ -957,10 +954,6 @@ private:
 #ifdef HAVE_TOUCHSCREENGUI
 	bool m_cache_touchtarget;
 #endif
-
-#if defined(__ANDROID__) || defined(__IOS__)
-	bool m_android_chat_open = false;
-#endif
 };
 
 Game::Game() :
@@ -1141,14 +1134,14 @@ void Game::run()
 		//  + Sleep time until the wanted FPS are reached
 		limitFps(&draw_times, &dtime);
 
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
 		if (!device->isWindowFocused()) {
 			if (m_does_lost_focus_pause_game && !isMenuActive())
 				showPauseMenu();
 			sleep_ms(50);
 			continue;
 		}
-#elif defined(__ANDROID__) || defined(__IOS__)
+#else
 		if (device->isWindowMinimized()) {
 			sleep_ms(50);
 			continue;
@@ -1583,7 +1576,8 @@ bool Game::connectToServer(const GameStartData &start_data,
 			if (client->m_is_registration_confirmation_state) {
 				if (registration_confirmation_shown) {
 					// Keep drawing the GUI
-					RenderingEngine::draw_menu_scene(guienv, dtime, true);
+					ITextureSource *tsrc = client->getTextureSource();
+					RenderingEngine::draw_menu_scene(guienv, tsrc, dtime);
 				} else {
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
@@ -1887,8 +1881,8 @@ void Game::processUserInput(f32 dtime)
 	}
 #endif
 
-	if (!guienv->hasFocus(gui_chat_console) && gui_chat_console->isOpen()) {
-		gui_chat_console->closeConsoleAtOnce();
+	if (!gui_chat_console->hasFocus() && gui_chat_console->isOpen()) {
+		gui_chat_console->closeConsole();
 	}
 
 	// Input handler step() (used by the random input generator)
@@ -1926,7 +1920,7 @@ void Game::processKeyInput()
 		openInventory();
 	} else if (input->cancelPressed()) {
 #if defined(__ANDROID__) || defined(__IOS__)
-		m_android_chat_open = false;
+		gui_chat_console->setAndroidChatOpen(false);
 #endif
 		if (!gui_chat_console->isOpenInhibited()) {
 			showPauseMenu();
@@ -1937,12 +1931,12 @@ void Game::processKeyInput()
 			m_game_ui->toggleChat();
 		else
  #endif
-		openConsole(0.2, L"");
+		openConsole(core::clamp(g_settings->getFloat("console_message_height"), 0.1f, 1.0f), L"");
 	} else if (wasKeyDown(KeyType::CMD)) {
-		openConsole(0.2, L"/");
+		openConsole(core::clamp(g_settings->getFloat("console_message_height"), 0.1f, 1.0f), L"/");
 	} else if (wasKeyDown(KeyType::CMD_LOCAL)) {
 		if (client->modsLoaded())
-			openConsole(0.2, L".");
+			openConsole(core::clamp(g_settings->getFloat("console_message_height"), 0.1f, 1.0f), L".");
 		else
 			m_game_ui->showStatusText(wgettext("Client side scripting is disabled"));
 	} else if (wasKeyDown(KeyType::CONSOLE)) {
@@ -2051,7 +2045,7 @@ void Game::processKeyInput()
 
 void Game::processItemSelection(f32 dtime, GameRunData *run_data)
 {
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__)
 	if (run_data->item_select_timer)
 			run_data->item_select_timer = MYMAX(0.0f, run_data->item_select_timer - dtime);
 #endif
@@ -2074,7 +2068,7 @@ void Game::processItemSelection(f32 dtime, GameRunData *run_data)
 	if (wasKeyDown(KeyType::HOTBAR_PREV))
 		dir = 1;
 
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__)
 	if (dir && !run_data->item_select_timer) {
 		run_data->item_select_timer = 0.05f;
 #else
@@ -2139,11 +2133,20 @@ void Game::openConsole(float scale, const wchar_t *line)
 {
 	assert(scale > 0.0f && scale <= 1.0f);
 
+	if (gui_chat_console->getAndroidChatOpen())
+		return;
+
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (!porting::hasRealKeyboard()) {
 		porting::showInputDialog("", "", 2);
-		m_android_chat_open = true;
-	} else {
+		gui_chat_console->setAndroidChatOpen(true);
+	}
+#endif
+#if defined(__ANDROID__)
+	return;
+#elif defined(__IOS__)
+	if (!g_settings->getBool("device_is_tablet"))
+		return;
 #endif
 	if (gui_chat_console->isOpenInhibited())
 		return;
@@ -2152,18 +2155,19 @@ void Game::openConsole(float scale, const wchar_t *line)
 		gui_chat_console->setCloseOnEnter(true);
 		gui_chat_console->replaceAndAddToHistory(line);
 	}
-#if defined(__ANDROID__) || defined(__IOS__)
-	}
-#endif
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
 void Game::handleAndroidChatInput()
 {
-	if (m_android_chat_open && porting::getInputDialogState() == 0) {
+	if (gui_chat_console->getAndroidChatOpen() &&
+			porting::getInputDialogState() == 0) {
 		std::string text = porting::getInputDialogValue();
 		client->typeChatMessage(utf8_to_wide(text));
-		m_android_chat_open = false;
+		gui_chat_console->setAndroidChatOpen(false);
+		if (!text.empty() && gui_chat_console->isOpen()) {
+			gui_chat_console->closeConsole();
+		}
 	}
 }
 #endif
@@ -2409,16 +2413,13 @@ void Game::toggleFullViewRange()
 #if !defined(__ANDROID__) && !defined(__IOS__)
 	draw_control->range_all = !draw_control->range_all;
 	if (draw_control->range_all)
-		m_game_ui->showTranslatedStatusText("Enabled unlimited viewing range");
-	else
-		m_game_ui->showTranslatedStatusText("Disabled unlimited viewing range");
 #else
 	draw_control->extended_range = !draw_control->extended_range;
 	if (draw_control->extended_range)
-		m_game_ui->showTranslatedStatusText("Enabled far viewing range");
-	else
-		m_game_ui->showTranslatedStatusText("Disabled far viewing range");
 #endif
+		m_game_ui->showTranslatedStatusText("Enabled unlimited viewing range");
+	else
+		m_game_ui->showTranslatedStatusText("Disabled unlimited viewing range");
 }
 
 
@@ -2627,11 +2628,6 @@ void Game::handleClientEvent_None(ClientEvent *event, CameraOrientation *cam)
 
 void Game::handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation *cam)
 {
-	// Don't do anything if proto_ver < 36 and the player is dead.
-	// This reverts the change introduced in dcd1a15 for old servers.
-	if (client->getProtoVersion() < 36 && client->getHP() == 0)
-		return;
-
 	if (client->modsLoaded())
 		client->getScript()->on_damage_taken(event->player_damage.amount);
 
@@ -4230,13 +4226,6 @@ void Game::pauseGame()
 }
 #endif
 
-#ifdef __IOS__
-void Game::customStatustext(const std::wstring &text)
-{
-	m_game_ui->showStatusText(text);
-}
-#endif
-
 /****************************************************************************/
 /****************************************************************************
  Shutdown / cleanup
@@ -4289,7 +4278,7 @@ void Game::showDeathFormspec()
 #define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
 void Game::showPauseMenu()
 {
-#ifdef HAVE_TOUCHSCREENGUI
+/*#ifdef HAVE_TOUCHSCREENGUI
 	static const std::string control_text = strgettext("Default Controls:\n"
 		"No menu visible:\n"
 		"- single tap: button activate\n"
@@ -4338,7 +4327,7 @@ void Game::showPauseMenu()
 
 	std::string control_text = std::string(control_text_buf);
 	str_formspec_escape(control_text);
-#endif
+#endif*/
 
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
 #if defined(__ANDROID__) || defined(__IOS__)
@@ -4383,7 +4372,7 @@ void Game::showPauseMenu()
 		<< strgettext("Change Keys")  << ";;false]";
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << ";;false]";
-#ifndef __IOS__
+#if !defined(__ANDROID__) && !defined(__IOS__)
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_os;"
 		<< strgettext("Exit to OS")   << ";;false]";
 #endif
@@ -4542,14 +4531,5 @@ extern "C" void external_pause_game()
 	if (!g_game)
 		return;
 	g_game->pauseGame();
-}
-#endif
-
-#ifdef __IOS__
-extern "C" void external_statustext(const char *text)
-{
-	if (!g_game)
-		return;
-	g_game->customStatustext(utf8_to_wide_c(text));
 }
 #endif

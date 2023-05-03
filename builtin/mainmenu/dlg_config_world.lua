@@ -131,50 +131,57 @@ local function get_formspec(data)
 	end
 
 	retval = retval ..
-		btn_style("btn_config_world_save") ..
+		btn_style("btn_config_world_save", "green") ..
 		"button[5.5,7.1;3,0.5;btn_config_world_save;" ..
 		fgettext("Save") .. "]" ..
 		btn_style("btn_config_world_cancel") ..
 		"button[8.5,7.1;3,0.5;btn_config_world_cancel;" ..
 		fgettext("Cancel") .. "]" ..
 		btn_style("btn_config_world_cdb") ..
-		"button[-0.05,7.1;3.5,0.5;btn_config_world_cdb;" ..
-		fgettext("Find More Mods") .. "]"
+		"button[-0.05,7.1;5.5,0.5;btn_config_world_cdb;" ..
+		fgettext("Find More Mods") .. "]" ..
+		"image[0.09,7.05;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
+		DIR_DELIM_esc .. "btn_download.png]"
 
 	if mod.name ~= "" and not mod.is_game_content then
 		if mod.is_modpack then
 
 			if pkgmgr.is_modpack_entirely_enabled(data, mod.name) then
 				retval = retval ..
-					btn_style("btn_mp_disable") ..
-					"button[5.5,0.025;3,0.5;btn_mp_disable;" ..
+					btn_style("btn_mod_disable", "yellow") ..
+					"button[5.5,0.025;3.3,0.5;btn_mod_disable;" ..
 					fgettext("Disable modpack") .. "]"
 			else
 				retval = retval ..
-					btn_style("btn_mp_enable") ..
-					"button[5.5,0.025;3,0.5;btn_mp_enable;" ..
+					btn_style("btn_mod_enable", "green") ..
+					"button[5.5,0.025;3.3,0.5;btn_mod_enable;" ..
 					fgettext("Enable modpack") .. "]"
 			end
 		else
 			retval = retval ..
-				"checkbox[5.5,-0.125;cb_mod_enable;" .. fgettext("Enabled") ..
-				";" .. tostring(mod.enabled) .. "]"
+				"real_coordinates[true]" ..
+				checkbox(7.3, 0.64, mod.enabled and "btn_mod_disable" or "btn_mod_enable",
+					fgettext("Enabled"), mod.enabled) ..
+				"real_coordinates[false]"
 		end
 	end
 	if enabled_all then
 		retval = retval ..
-			btn_style("btn_disable_all_mods") ..
-			"button[8.95,0.025;2.5,0.5;btn_disable_all_mods;" ..
+			btn_style("btn_disable_all_mods", "yellow") ..
+			"button[8.8,0.025;2.695,0.5;btn_disable_all_mods;" ..
 			fgettext("Disable all") .. "]"
 	else
 		retval = retval ..
-			btn_style("btn_enable_all_mods") ..
-			"button[8.95,0.025;2.5,0.5;btn_enable_all_mods;" ..
+			btn_style("btn_enable_all_mods", "green") ..
+			"button[8.8,0.025;2.695,0.5;btn_enable_all_mods;" ..
 			fgettext("Enable all") .. "]"
 	end
 	return retval ..
+		"background9[5.6,0.85;5.8,6;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 		"tablecolumns[color;tree;text]" ..
-		"table[5.5,0.75;5.75,6;world_config_modlist;" ..
+		"tableoptions[background=#0000;border=false]" ..
+		scrollbar_style("world_config_modlist") ..
+		"table[5.58,0.84;5.59,5.82;world_config_modlist;" ..
 		pkgmgr.render_packagelist(data.list) .. ";" .. data.selected_mod .."]"
 end
 
@@ -196,14 +203,9 @@ local function handle_buttons(this, fields)
 		return true
 	end
 
-	if fields.cb_mod_enable ~= nil then
-		pkgmgr.enable_mod(this, core.is_yes(fields.cb_mod_enable))
-		return true
-	end
-
-	if fields.btn_mp_enable ~= nil or
-			fields.btn_mp_disable then
-		pkgmgr.enable_mod(this, fields.btn_mp_enable ~= nil)
+	if fields.btn_mod_enable ~= nil or
+			fields.btn_mod_disable then
+		pkgmgr.enable_mod(this, fields.btn_mod_enable ~= nil)
 		return true
 	end
 

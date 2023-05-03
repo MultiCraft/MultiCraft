@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "irrlichttypes_extrabloated.h"
 #include "guiScrollBar.h"
+#include "StyleSpec.h"
 
 class ISimpleTextureSource;
 
@@ -146,6 +147,14 @@ public:
 
 	/* Irrlicht event handler */
 	virtual bool OnEvent(const SEvent &event);
+
+	/* Set scrollbar texture */
+	void setStyle(const StyleSpec &style)
+	{
+		setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
+		setOverrideFont(style.getFont());
+		m_scrollbar->setStyle(style, m_tsrc);
+	}
 
 protected:
 	enum ColumnType {

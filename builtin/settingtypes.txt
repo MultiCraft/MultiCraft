@@ -702,6 +702,9 @@ fall_bobbing_amount (Fall bobbing factor) float 0.03
 #    In-game chat console height, between 0.1 (10%) and 1.0 (100%).
 console_height (Console height) float 0.6 0.1 1.0
 
+#    In-game chat message console height, between 0.1 (10%) and 1.0 (100%).
+console_message_height (Console message height) float 0.25 0.1 1.0
+
 #    In-game chat console background color (R,G,B).
 console_color (Console color) string (0,0,0)
 
@@ -1039,7 +1042,7 @@ serverlist_url (Serverlist URL) string servers.multicraft.world
 
 #    Remove color codes from incoming chat messages
 #    Use this to stop players from being able to use color in their messages
-strip_color_codes (Strip color codes) bool false
+strip_color_codes (Strip color codes) bool true
 
 [*Network]
 
@@ -2241,3 +2244,25 @@ contentdb_flag_blacklist (ContentDB Flag Blacklist) string nonfree, desktop_defa
 #    Maximum number of concurrent downloads. Downloads exceeding this limit will be queued.
 #    This should be lower than curl_parallel_limit.
 contentdb_max_concurrent_downloads (ContentDB Max Concurrent Downloads) int 3
+
+[Hunger]
+
+hunger.enabled          (Hunger enabled) bool true
+hunger.tick             (Time in seconds after that 1 saturation point is taken) float 600
+hunger.tick_min         (Hunger ticks won't reduce saturation below this level) int 4
+hunger.health_tick      (Time in seconds after player gets healed/damaged) float 4.0
+hunger.move_tick        (Time in seconds after the movement is checked) float 0.5
+hunger.poison_tick      (Time in seconds between actions of poisoning) float 1.0
+hunger.exhaust_dig      (Exhaustion for digging a node) float 2.0
+hunger.exhaust_place    (Exhaustion for placing a node) float 1.0
+hunger.exhaust_move     (Exhaustion for moving) float 2.0
+hunger.exhaust_jump     (Exhaustion for jumping) float 4.0
+hunger.exhaust_craft    (Exhaustion for crafting) float 2.0
+hunger.exhaust_punch    (Exhaustion for punching) float 5.0
+hunger.exhaust_lvl      (Exhaustion level at which saturation gets lowered) int 192
+hunger.heal             (Amount of HP a player gains per health tick) int 1 0 20
+hunger.heal_lvl         (Minimum saturation needed for healing) int 5 1 20
+hunger.starve           (Amount of HP a player loses per health tick) int 1 0 20
+hunger.starve_lvl       (Maximum hunger needed for starving) int 2 0 19
+hunger.level_max        (Maximum hunger level) int 21 3 21
+hunger.visual_max       (Visual hunger bar size) int 20 2 20

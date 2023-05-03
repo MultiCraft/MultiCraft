@@ -59,6 +59,12 @@ public:
 		SOUND,
 		SPACING,
 		SIZE,
+		SCROLLBAR_BGIMG,
+		SCROLLBAR_THUMB_IMG,
+		SCROLLBAR_UP_IMG,
+		SCROLLBAR_DOWN_IMG,
+		SCROLLBAR_THUMB_TOP_IMG,
+		SCROLLBAR_THUMB_BOTTOM_IMG,
 		NUM_PROPERTIES,
 		NONE
 	};
@@ -71,15 +77,15 @@ public:
 		STATE_INVALID = 1 << 3,
 	};
 
-	// Used in guiKeyChangeMenu.cpp and guiVolumeChange.h
-	// Is this the best place to put this function?
-	static std::array<StyleSpec, NUM_STATES> getButtonStyle(const std::string texture_path = "") {
+	// Used in guiConfirmRegistration.cpp, guiKeyChangeMenu.cpp and guiVolumeChange.h
+	static std::array<StyleSpec, NUM_STATES> getButtonStyle(const std::string texture_path = "", std::string color = "") {
 		std::array<StyleSpec, NUM_STATES> ret;
+		color = color != "" ? "_" + color : "";
 
 		const bool high_dpi = RenderingEngine::isHighDpi();
 		const std::string x2 = high_dpi ? ".x2" : "";
 		StyleSpec btn_spec;
-		btn_spec.set(BGIMG, texture_path + "gui/gui_button" + x2 + ".png");
+		btn_spec.set(BGIMG, texture_path + "gui/gui_button" + color + x2 + ".png");
 		btn_spec.set(BGIMG_MIDDLE, high_dpi ? "48" : "32");
 		btn_spec.set(BORDER, "false");
 		btn_spec.set(PADDING, high_dpi ? "-30" : "-20");
@@ -87,11 +93,11 @@ public:
 		ret[STATE_DEFAULT] = btn_spec;
 
 		StyleSpec hovered_spec;
-		hovered_spec.set(BGIMG, texture_path + "gui/gui_button_hovered" + x2 + ".png");
+		hovered_spec.set(BGIMG, texture_path + "gui/gui_button" + color + "_hovered" + x2 + ".png");
 		ret[STATE_HOVERED] = hovered_spec;
 
 		StyleSpec pressed_spec;
-		pressed_spec.set(BGIMG, texture_path + "gui/gui_button_pressed" + x2 + ".png");
+		pressed_spec.set(BGIMG, texture_path + "gui/gui_button" + color + "_pressed" + x2 + ".png");
 		ret[STATE_PRESSED] = pressed_spec;
 
 		return ret;
@@ -155,6 +161,18 @@ public:
 			return SPACING;
 		} else if (name == "size") {
 			return SIZE;
+		} else if (name == "scrollbar_bgimg") {
+			return SCROLLBAR_BGIMG;
+		} else if (name == "scrollbar_thumb_img") {
+			return SCROLLBAR_THUMB_IMG;
+		} else if (name == "scrollbar_up_img") {
+			return SCROLLBAR_UP_IMG;
+		} else if (name == "scrollbar_down_img") {
+			return SCROLLBAR_DOWN_IMG;
+		} else if (name == "scrollbar_thumb_top_img") {
+			return SCROLLBAR_THUMB_TOP_IMG;
+		} else if (name == "scrollbar_thumb_bottom_img") {
+			return SCROLLBAR_THUMB_BOTTOM_IMG;
 		} else {
 			return NONE;
 		}

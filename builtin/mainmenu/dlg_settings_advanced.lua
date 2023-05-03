@@ -516,7 +516,8 @@ local full_settings = parse_config_file(false, true)
 local search_string = ""
 local settings = full_settings
 local selected_setting = 1
-local languages, language_dropdown, lang_idx, language_name_list = get_language_list()
+local languages, lang_idx, language_name_list = get_language_list()
+local language_dropdown = table.concat(language_name_list, ",")
 
 local function get_current_value(setting)
 	local value = core.settings:get(setting.name)
@@ -1022,13 +1023,12 @@ local function create_settings_formspec(tabview, _, tabdata)
 			"tablecolumns[color;tree;text,width=28;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..
 			"formspec_version[3]" ..
-			"image[-0.05,-0.13;12.55,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
-			"style[search_string;border=false;bgcolor=transparent]" ..
-			"field[0.3,0.15;10.15,0.9;search_string;;" .. core.formspec_escape(search_string) .. "]" ..
-			"field_close_on_enter[search_string;false]" ..
-			btn_style("search") ..
-			"button[10.1,-0.22;2,1;search;" .. fgettext("Search") .. "]" ..
-			"table[0,0.8;12,3.5;list_settings;"
+			"image[-0.04,-0.13;14.9,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
+			"style[Dsearch_string;border=false;bgcolor=transparent]" ..
+			"field[0.3,0.15;12.0,0.9;Dsearch_string;;" .. core.formspec_escape(search_string) .. "]" ..
+			"field_close_on_enter[Dsearch_string;false]" ..
+			scrollbar_style("list_settings") ..
+			"table[0,0.8;11.8,3.5;list_settings;"
 
 	local current_level = 0
 	for _, entry in ipairs(settings) do
@@ -1106,8 +1106,10 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 		end
 	end
 
-	if fields.search or fields.key_enter_field == "search_string" then
-		if search_string == fields.search_string then
+	if (fields.Dsearch_string or fields.key_enter_field == "Dsearch_string") and
+			not (fields["btn_edit"] or list_enter or fields["btn_restore"] or
+			fields["btn_back"] or fields["cb_tech_settings"]) then
+		if search_string == fields.Dsearch_string then
 			if selected_setting > 0 then
 				-- Go to next result on enter press
 				local i = selected_setting + 1
@@ -1129,7 +1131,7 @@ local function handle_settings_buttons(this, fields, tabname, tabdata)
 			end
 		else
 			-- Search for setting
-			search_string = fields.search_string
+			search_string = fields.Dsearch_string
 			settings, selected_setting = filter_settings(full_settings, search_string)
 			core.update_formspec(this:get_formspec())
 		end

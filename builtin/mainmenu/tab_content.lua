@@ -60,14 +60,17 @@ local function get_formspec(tabview, name, tabdata)
 
 	local retval =
 		"label[-0.05,-0.25;".. fgettext("Installed Packages:") .. "]" ..
-		"background9[0,0.23;5.3,4.46;" .. defaulttexturedir_esc .. "worldlist_bg.png" .. ";false;40]" ..
+		"background9[0,0.23;5.3,4.46;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 		"tablecolumns[color;tree;text]" ..
 		"tableoptions[background=#0000;border=false]" ..
+		scrollbar_style("pkglist") ..
 		"table[0,0.25;5.1,4.3;pkglist;" ..
 		pkgmgr.render_packagelist(packages) ..
 		";" .. tabdata.selected_pkg .. "]" ..
 		btn_style("btn_contentdb") ..
-		"image_button[-0.11,4.8;5.5,0.9;;btn_contentdb;" .. fgettext("Browse online content") .. ";true;false]"
+		"image_button[-0.11,4.8;5.5,0.9;;btn_contentdb;" .. fgettext("Browse online content") .. ";true;false]" ..
+		"image[0.03,4.925;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
+			DIR_DELIM_esc .. "btn_download.png]"
 
 
 	local selected_pkg
@@ -98,16 +101,18 @@ local function get_formspec(tabview, name, tabdata)
 
 		retval = retval ..
 				"image[5.5,0;3,2;" .. core.formspec_escape(modscreenshot) .. "]" ..
+				"image[5.5,0;3,2;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "cdb_img_corners.png;15]" ..
 				"label[8.25,0.6;" .. core.formspec_escape(selected_pkg.name) .. "]" ..
-				"background9[5.6,2.3;6.2,2.4;" .. defaulttexturedir_esc .. "desc_bg.png" .. ";false;32]"
+				"background9[5.6,2.3;6.2,2.4;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]"
 
 		if selected_pkg.type == "mod" then
-			if selected_pkg.is_modpack then
-				retval = retval ..
-					btn_style("btn_mod_mgr_rename_modpack") ..
-					"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_rename_modpack;" ..
-					fgettext("Rename") .. ";true;false]"
-			else
+			-- if selected_pkg.is_modpack then
+			-- 	retval = retval ..
+			-- 		btn_style("btn_mod_mgr_rename_modpack") ..
+			-- 		"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_rename_modpack;" ..
+			-- 		fgettext("Rename") .. ";true;false]"
+			-- else
+			if not selected_pkg.is_modpack then
 				--show dependencies
 				desc = desc .. "\n\n"
 				local toadd_hard = table.concat(info.depends or {}, "\n")
@@ -134,12 +139,12 @@ local function get_formspec(tabview, name, tabdata)
 				if selected_pkg.enabled then
 					retval = retval ..
 						btn_style("btn_mod_mgr_disable_txp") ..
-						"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_disable_txp;" ..
+						"image_button[6.4,4.8;5.5,0.9;;btn_mod_mgr_disable_txp;" ..
 						fgettext("Disable Texture Pack") .. ";true;false]"
 				else
 					retval = retval ..
-						btn_style("btn_mod_mgr_use_txp") ..
-						"image_button[8.65,4.8;3.25,0.9;;btn_mod_mgr_use_txp;" ..
+						btn_style("btn_mod_mgr_use_txp", "green") ..
+						"image_button[6.4,4.8;5.5,0.9;;btn_mod_mgr_use_txp;" ..
 						fgettext("Use Texture Pack") .. ";true;false]"
 				end
 			end
@@ -150,9 +155,10 @@ local function get_formspec(tabview, name, tabdata)
 
 		if core.may_modify_path(selected_pkg.path) then
 			retval = retval ..
-				btn_style("btn_mod_mgr_delete_mod") ..
-				"image_button[5.5,4.8;3.25,0.9;;btn_mod_mgr_delete_mod;" ..
-				fgettext("Uninstall Package") .. ";true;false]"
+				btn_style("btn_mod_mgr_delete_mod", "red") ..
+				"image_button[5.5,4.8;0.9,0.9;" .. defaulttexturedir_esc ..
+				"trash.png;btn_mod_mgr_delete_mod;;true;false;" .. defaulttexturedir_esc .. "trash_pressed.png]" ..
+				"tooltip[btn_mod_mgr_delete_mod;" .. fgettext("Uninstall Package") .. "]"
 		end
 	end
 	return retval
@@ -175,6 +181,7 @@ local function handle_buttons(tabview, fields, tabname, tabdata)
 		return true
 	end
 
+	--[[
 	if fields["btn_mod_mgr_rename_modpack"] ~= nil then
 		local mod = packages:get_list()[tabdata.selected_pkg]
 		local dlg_renamemp = create_rename_modpack_dlg(mod)
@@ -184,6 +191,7 @@ local function handle_buttons(tabview, fields, tabname, tabdata)
 		packages = nil
 		return true
 	end
+	]]
 
 	if fields["btn_mod_mgr_delete_mod"] ~= nil then
 		local mod = packages:get_list()[tabdata.selected_pkg]

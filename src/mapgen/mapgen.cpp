@@ -90,7 +90,6 @@ struct MapgenDesc {
 // Of the remaining, v5 last due to age, v7 first due to being the default.
 // The order of 'enum MapgenType' in mapgen.h must match this order.
 static MapgenDesc g_reg_mapgens[] = {
-//#if !defined(__ANDROID__) && !defined(__IOS__)
 	{"v7p",        true},
 	{"v7",         true},
 	{"valleys",    true},
@@ -99,18 +98,7 @@ static MapgenDesc g_reg_mapgens[] = {
 	{"flat",       true},
 	{"fractal",    true},
 	{"singlenode", true},
-	{"v6",         true},
-/*#else
-	{"v7p",        true},
-	{"v7",         false},
-	{"valleys",    true},
-	{"carpathian", false},
-	{"v5",         false},
-	{"flat",       true},
-	{"fractal",    false},
-	{"singlenode", false},
 	{"v6",         false},
-#endif*/
 };
 
 STATIC_ASSERT(
@@ -174,20 +162,16 @@ Mapgen *Mapgen::createMapgen(MapgenType mgtype, MapgenParams *params,
 	EmergeParams *emerge)
 {
 	switch (mgtype) {
-//#if !defined(__ANDROID__) && !defined(__IOS__)
 	case MAPGEN_CARPATHIAN:
 		return new MapgenCarpathian((MapgenCarpathianParams *)params, emerge);
-//#endif
 	case MAPGEN_FLAT:
 		return new MapgenFlat((MapgenFlatParams *)params, emerge);
-//#if !defined(__ANDROID__) && !defined(__IOS__)
 	case MAPGEN_FRACTAL:
 		return new MapgenFractal((MapgenFractalParams *)params, emerge);
 	case MAPGEN_SINGLENODE:
 		return new MapgenSinglenode((MapgenSinglenodeParams *)params, emerge);
 	case MAPGEN_V5:
 		return new MapgenV5((MapgenV5Params *)params, emerge);
-//#endif
 	case MAPGEN_V6:
 		return new MapgenV6((MapgenV6Params *)params, emerge);
 	case MAPGEN_V7:
@@ -205,20 +189,16 @@ Mapgen *Mapgen::createMapgen(MapgenType mgtype, MapgenParams *params,
 MapgenParams *Mapgen::createMapgenParams(MapgenType mgtype)
 {
 	switch (mgtype) {
-//#if !defined(__ANDROID__) && !defined(__IOS__)
 	case MAPGEN_CARPATHIAN:
 		return new MapgenCarpathianParams;
-//#endif
 	case MAPGEN_FLAT:
 		return new MapgenFlatParams;
-//#if !defined(__ANDROID__) && !defined(__IOS__)
 	case MAPGEN_FRACTAL:
 		return new MapgenFractalParams;
 	case MAPGEN_SINGLENODE:
 		return new MapgenSinglenodeParams;
 	case MAPGEN_V5:
 		return new MapgenV5Params;
-//#endif
 	case MAPGEN_V6:
 		return new MapgenV6Params;
 	case MAPGEN_V7:

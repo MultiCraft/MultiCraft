@@ -23,10 +23,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #error This file may only be compiled for android!
 #endif
 
+#include "IrrCompileConfig.h"
+
 #include "util/numeric.h"
 #include "porting.h"
 #include "porting_android.h"
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include "threading/sdl_thread.h"
+#else
 #include "threading/thread.h"
+#endif
 #include "config.h"
 #include "filesys.h"
 #include "log.h"
@@ -53,8 +59,6 @@ extern "C" int SDL_main(int argc, char *argv[])
 		errorstream << "Caught second android_main execution in a process" << std::endl;
 		return 0;
 	}
-
-	Thread::setName("Main");
 
 	try {
 		char *argv[] = {strdup(PROJECT_NAME), nullptr};
@@ -190,7 +194,7 @@ static std::string getAndroidPath(
 	return javaStringToUTF8(js_path);
 }
 
-void initializePathsAndroid()
+void initializePaths()
 {
 	// Get Environment class
 	jclass cls_Env = jnienv->FindClass("android/os/Environment");

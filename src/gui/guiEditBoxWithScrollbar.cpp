@@ -83,6 +83,7 @@ void GUIEditBoxWithScrollBar::draw()
 		return;
 
 	const bool focus = Environment->hasFocus(this);
+	const bool scollbar_focus = Environment->hasFocus(m_vscrollbar);
 
 	IGUISkin* skin = Environment->getSkin();
 	if (!skin)
@@ -138,10 +139,8 @@ void GUIEditBoxWithScrollBar::draw()
 
 		// get mark position
 		const bool ml = (!m_passwordbox && (m_word_wrap || m_multiline));
-		const s32 realmbgn = m_mark_begin < m_mark_end ? m_mark_begin : m_mark_end;
-		const s32 realmend = m_mark_begin < m_mark_end ? m_mark_end : m_mark_begin;
-		const s32 hline_start = ml ? getLineFromPos(realmbgn) : 0;
-		const s32 hline_count = ml ? getLineFromPos(realmend) - hline_start + 1 : 1;
+		const s32 hline_start = ml ? getLineFromPos(m_real_mark_begin) : 0;
+		const s32 hline_count = ml ? getLineFromPos(m_real_mark_end) - hline_start + 1 : 1;
 		const s32 line_count = ml ? m_broken_text.size() : 1;
 
 		// Save the override color information.
@@ -191,26 +190,26 @@ void GUIEditBoxWithScrollBar::draw()
 					false, true, &local_clip_rect);
 
 				// draw mark and marked text
-				if (focus && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
+				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
 
 					s32 mbegin = 0, mend = 0;
 					s32 lineStartPos = 0, lineEndPos = txt_line->size();
 
 					if (i == hline_start) {
 						// highlight start is on this line
-						s = txt_line->subString(0, realmbgn - start_pos);
+						s = txt_line->subString(0, m_real_mark_begin - start_pos);
 						mbegin = font->getDimension(s.c_str()).Width;
 
 						// deal with kerning
 						mbegin += font->getKerningWidth(
-							&((*txt_line)[realmbgn - start_pos]),
-							realmbgn - start_pos > 0 ? &((*txt_line)[realmbgn - start_pos - 1]) : 0);
+							&((*txt_line)[m_real_mark_begin - start_pos]),
+							m_real_mark_begin - start_pos > 0 ? &((*txt_line)[m_real_mark_begin - start_pos - 1]) : 0);
 
-						lineStartPos = realmbgn - start_pos;
+						lineStartPos = m_real_mark_begin - start_pos;
 					}
 					if (i == hline_start + hline_count - 1) {
 						// highlight end is on this line
-						s2 = txt_line->subString(0, realmend - start_pos);
+						s2 = txt_line->subString(0, m_real_mark_end - start_pos);
 						mend = font->getDimension(s2.c_str()).Width;
 						lineEndPos = (s32)s2.size();
 					} else {
