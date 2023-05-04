@@ -2141,11 +2141,11 @@ void Game::openConsole(float scale, const wchar_t *line)
 		porting::showInputDialog("", "", 2);
 		gui_chat_console->setAndroidChatOpen(true);
 	}
-#endif
-#if defined(__ANDROID__) || defined(__IOS__)
+
 	if (!g_settings->getBool("device_is_tablet"))
 		return;
 #endif
+
 	if (gui_chat_console->isOpenInhibited())
 		return;
 	gui_chat_console->openConsole(scale);
