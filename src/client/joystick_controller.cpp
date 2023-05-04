@@ -286,7 +286,6 @@ void SDLGameController::handleMouseMovement(int x, int y)
 			mouse_pos.X = device->getVideoDriver()->getScreenSize().Width;
 
 		changed = true;
-		m_active = true;
 	}
 
 	if (y > deadzone || y < -deadzone) {
@@ -299,7 +298,6 @@ void SDLGameController::handleMouseMovement(int x, int y)
 			mouse_pos.Y = device->getVideoDriver()->getScreenSize().Height;
 
 		changed = true;
-		m_active = true;
 	}
 
 	if (changed) {
@@ -569,6 +567,7 @@ void SDLGameController::handleCameraOrientation(int x, int y)
 
 void SDLGameController::sendEvent(const SEvent &event)
 {
+	m_active = true;
 	m_is_fake_event = true;
 	IrrlichtDevice* device = RenderingEngine::get_raw_device();
 	device->postEventFromUser(event);
