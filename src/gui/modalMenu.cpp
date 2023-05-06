@@ -160,6 +160,19 @@ void GUIModalMenu::quitMenu()
 	Environment->removeFocus(this);
 	m_menumgr->deletingMenu(this);
 	this->remove();
+	
+	// Send fake mouse event to force run updateHoveredElement() function in
+	// GUI Environment, so that it will drop elements that are not hovered
+	// anymore
+	SEvent mouse_event = {};
+	mouse_event.EventType = EET_MOUSE_INPUT_EVENT;
+	mouse_event.MouseInput.X = m_pointer.X;
+	mouse_event.MouseInput.Y = m_pointer.Y;
+	mouse_event.MouseInput.Event = EMIE_COUNT;
+	mouse_event.MouseInput.ButtonStates = EMBSM_LEFT;
+	IrrlichtDevice* device = RenderingEngine::get_raw_device();
+	device->postEventFromUser(mouse_event);
+
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui && g_touchscreengui->isActive() && m_touchscreen_visible)
 		g_touchscreengui->show();
