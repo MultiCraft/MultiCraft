@@ -42,13 +42,14 @@ void ChatBuffer::addLine(const std::wstring &name, const std::wstring &text)
 {
 	m_lines_modified = true;
 
-	ChatLine line(name, text);
+	ChatLine line(name, text, m_current_line_index);
 	m_unformatted.push_back(line);
+	m_current_line_index++;
 
 	if (m_rows > 0) {
 		// m_formatted is valid and must be kept valid
 		bool scrolled_at_bottom = (m_scroll == getBottomScrollPos());
-		u32 num_added = formatChatLine(line, m_unformatted.size() - 1, m_cols, m_formatted);
+		u32 num_added = formatChatLine(line, m_cols, m_formatted);
 		if (scrolled_at_bottom)
 			m_scroll += num_added;
 	}
@@ -63,6 +64,7 @@ void ChatBuffer::clear()
 {
 	m_unformatted.clear();
 	m_formatted.clear();
+	m_current_line_index = 0;
 	m_scroll = 0;
 	m_lines_modified = true;
 }
@@ -117,6 +119,8 @@ void ChatBuffer::deleteOldest(u32 count)
 		m_scroll = getBottomScrollPos();
 	else
 		scrollAbsolute(m_scroll - del_formatted);
+
+	m_del_formatted += del_formatted;
 }
 
 void ChatBuffer::deleteByAge(f32 maxAge)
@@ -173,7 +177,7 @@ void ChatBuffer::reformat(u32 cols, u32 rows)
 			{
 				if (i == restore_scroll_unformatted)
 					restore_scroll_formatted = m_formatted.size();
-				formatChatLine(m_unformatted[i], i, cols, m_formatted);
+				formatChatLine(m_unformatted[i], cols, m_formatted);
 			}
 		}
 
@@ -224,7 +228,7 @@ void ChatBuffer::scrollBottom()
 	m_scroll = getBottomScrollPos();
 }
 
-u32 ChatBuffer::formatChatLine(const ChatLine& line, int line_index, u32 cols,
+u32 ChatBuffer::formatChatLine(const ChatLine& line, u32 cols,
 		std::vector<ChatFormattedLine>& destination) const
 {
 	u32 num_added = 0;
@@ -267,7 +271,7 @@ u32 ChatBuffer::formatChatLine(const ChatLine& line, int line_index, u32 cols,
 	//EnrichedString line_text(line.text);
 
 	next_line.first = true;
-	next_line.line_index = line_index;
+	next_line.line_index = line.line_index;
 	bool text_processing = false;
 
 	// Produce fragments and layout them into lines
@@ -391,6 +395,7 @@ void ChatPrompt::input(wchar_t ch)
 	clampView();
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+	m_line_modified = true;
 }
 
 void ChatPrompt::input(const std::wstring &str)
@@ -400,6 +405,7 @@ void ChatPrompt::input(const std::wstring &str)
 	clampView();
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+	m_line_modified = true;
 }
 
 void ChatPrompt::addToHistory(const std::wstring &line)
@@ -424,6 +430,7 @@ void ChatPrompt::clear()
 	m_cursor = 0;
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+	m_line_modified = true;
 }
 
 std::wstring ChatPrompt::replace(const std::wstring &line)
@@ -434,6 +441,7 @@ std::wstring ChatPrompt::replace(const std::wstring &line)
 	clampView();
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+	m_line_modified = true;
 	return old_line;
 }
 
@@ -535,6 +543,7 @@ void ChatPrompt::nickCompletion(const std::list<std::string>& names, bool backwa
 	clampView();
 	m_nick_completion_start = prefix_start;
 	m_nick_completion_end = prefix_end;
+	m_line_modified = true;
 }
 
 void ChatPrompt::reformat(u32 cols)
@@ -616,6 +625,7 @@ void ChatPrompt::cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope sco
 			m_line.erase(m_cursor, abs(new_cursor - old_cursor));
 		}
 		m_cursor_len = 0;
+		m_line_modified = true;
 		break;
 	case CURSOROP_SELECT:
 		if (scope == CURSOROP_SCOPE_LINE) {
@@ -633,6 +643,25 @@ void ChatPrompt::cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope sco
 
 	m_nick_completion_start = 0;
 	m_nick_completion_end = 0;
+}
+
+void ChatPrompt::setCursorPos(int cursor_pos)
+{
+	s32 length = m_line.size();
+	m_cursor = MYMAX(MYMIN(cursor_pos, length), 0);
+	m_cursor_len = 0;
+
+	clampView();
+
+	m_nick_completion_start = 0;
+	m_nick_completion_end = 0;
+}
+
+void ChatPrompt::setViewPosition(int view)
+{
+	m_view = view;
+
+	clampView();
 }
 
 void ChatPrompt::clampView()
