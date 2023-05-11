@@ -160,30 +160,6 @@ os.tmpname = function()
 end
 
 --------------------------------------------------------------------------------
-function menu_render_worldlist()
-	local retval = {}
-
-	local creative = core.settings:get_bool("creative_mode", false)
-	local damage = core.settings:get_bool("enable_damage", true)
-
-	for _, world in ipairs(menudata.worldlist:get_list()) do
-		if world.creative_mode == nil or world.enable_damage == nil then
-			-- There's a built-in menu_worldmt function that can read from
-			-- world.mt but it would read from the file once for each setting
-			-- read
-			local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
-			world.creative_mode = world_conf:get_bool("creative_mode", creative)
-			world.enable_damage = world_conf:get_bool("enable_damage", damage)
-		end
-
-		retval[#retval + 1] = world.creative_mode and "5" or "4"
-		retval[#retval + 1] = core.formspec_escape(world.name)
-	end
-
-	return table.concat(retval, ",")
-end
-
---------------------------------------------------------------------------------
 local button_path = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 local worldlist_scrbar_pos = 0
 function menu_render_worldlist2(selected_index)
