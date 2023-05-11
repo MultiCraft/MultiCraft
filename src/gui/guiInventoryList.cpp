@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "guiInventoryList.h"
 #include "guiFormSpecMenu.h"
+#include "client/guiscalingfilter.h"
 #include "client/hud.h"
 #include "client/client.h"
 
@@ -33,6 +34,9 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	const s32 start_item_i,
 	const v2s32 &slot_size,
 	const v2f32 &slot_spacing,
+	video::ITexture* slotbg_n_texture,
+	video::ITexture* slotbg_h_texture,
+	const core::rect<s32> &slotbg_middle,
 	GUIFormSpecMenu *fs_menu,
 	const Options &options,
 	gui::IGUIFont *font) :
@@ -44,6 +48,9 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	m_start_item_i(start_item_i),
 	m_slot_size(slot_size),
 	m_slot_spacing(slot_spacing),
+	m_slotbg_n_texture(slotbg_n_texture),
+	m_slotbg_h_texture(slotbg_h_texture),
+	m_slotbg_middle(slotbg_middle),
 	m_fs_menu(fs_menu),
 	m_options(options),
 	m_font(font),
@@ -109,34 +116,52 @@ void GUIInventoryList::draw()
 			(hovering ? IT_ROT_HOVERED : IT_ROT_NONE);
 
 		// layer 0
-		if (hovering) {
-			driver->draw2DRectangle(m_options.slotbg_h, rect, &AbsoluteClippingRect);
-		} else {
-			driver->draw2DRectangle(m_options.slotbg_n, rect, &AbsoluteClippingRect);
-		}
+		if (m_slotbg_n_texture) {
+			video::ITexture *texture = m_slotbg_n_texture;
+			if (hovering && m_slotbg_h_texture)
+				texture = m_slotbg_h_texture;
 
-		// Draw inv slot borders
-		if (m_options.slotborder) {
-			s32 x1 = rect.UpperLeftCorner.X;
-			s32 y1 = rect.UpperLeftCorner.Y;
-			s32 x2 = rect.LowerRightCorner.X;
-			s32 y2 = rect.LowerRightCorner.Y;
-			s32 border = 1;
-			core::rect<s32> clipping_rect = Parent ? Parent->getAbsoluteClippingRect()
-					: core::rect<s32>();
-			core::rect<s32> *clipping_rect_ptr = Parent ? &clipping_rect : nullptr;
-			driver->draw2DRectangle(m_options.slotbordercolor,
-				core::rect<s32>(v2s32(x1 - border, y1 - border),
-								v2s32(x2 + border, y1)), clipping_rect_ptr);
-			driver->draw2DRectangle(m_options.slotbordercolor,
-				core::rect<s32>(v2s32(x1 - border, y2),
-								v2s32(x2 + border, y2 + border)), clipping_rect_ptr);
-			driver->draw2DRectangle(m_options.slotbordercolor,
-				core::rect<s32>(v2s32(x1 - border, y1),
-								v2s32(x1, y2)), clipping_rect_ptr);
-			driver->draw2DRectangle(m_options.slotbordercolor,
-				core::rect<s32>(v2s32(x2, y1),
-								v2s32(x2 + border, y2)), clipping_rect_ptr);
+			core::rect<s32> srcrect(core::position2d<s32>(0, 0),
+									core::dimension2di(texture->getOriginalSize()));
+			if (m_slotbg_middle.getArea() == 0) {
+				const video::SColor color(255, 255, 255, 255);
+				const video::SColor colors[] = {color, color, color, color};
+				draw2DImageFilterScaled(driver, texture, rect, srcrect,
+					&AbsoluteClippingRect, colors, true);
+			} else {
+				draw2DImage9Slice(driver, texture, rect, srcrect, m_slotbg_middle,
+					&AbsoluteClippingRect);
+			}
+		} else {
+			if (hovering) {
+				driver->draw2DRectangle(m_options.slotbg_h, rect, &AbsoluteClippingRect);
+			} else {
+				driver->draw2DRectangle(m_options.slotbg_n, rect, &AbsoluteClippingRect);
+			}
+
+			// Draw inv slot borders
+			if (m_options.slotborder) {
+				s32 x1 = rect.UpperLeftCorner.X;
+				s32 y1 = rect.UpperLeftCorner.Y;
+				s32 x2 = rect.LowerRightCorner.X;
+				s32 y2 = rect.LowerRightCorner.Y;
+				s32 border = 1;
+				core::rect<s32> clipping_rect = Parent ? Parent->getAbsoluteClippingRect()
+						: core::rect<s32>();
+				core::rect<s32> *clipping_rect_ptr = Parent ? &clipping_rect : nullptr;
+				driver->draw2DRectangle(m_options.slotbordercolor,
+					core::rect<s32>(v2s32(x1 - border, y1 - border),
+									v2s32(x2 + border, y1)), clipping_rect_ptr);
+				driver->draw2DRectangle(m_options.slotbordercolor,
+					core::rect<s32>(v2s32(x1 - border, y2),
+									v2s32(x2 + border, y2 + border)), clipping_rect_ptr);
+				driver->draw2DRectangle(m_options.slotbordercolor,
+					core::rect<s32>(v2s32(x1 - border, y1),
+									v2s32(x1, y2)), clipping_rect_ptr);
+				driver->draw2DRectangle(m_options.slotbordercolor,
+					core::rect<s32>(v2s32(x2, y1),
+									v2s32(x2 + border, y2)), clipping_rect_ptr);
+			}
 		}
 
 		// layer 1

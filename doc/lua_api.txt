@@ -2911,6 +2911,9 @@ Some types may inherit styles from parent types.
     * noclip - boolean, set to true to allow the element to exceed formspec bounds.
     * size - 2d vector, sets the size of inventory slots in coordinates.
     * spacing - 2d vector, sets the space between inventory slots in coordinates.
+    * bgimg - slot background image. Defaults to none.
+    * bgimg_hovered - hovered slot background image.
+    * bgimg_middle - Makes the bgimg textures render in 9-sliced mode and defines the middle rect.
 * image_button (additional properties)
     * fgimg - standard image. Defaults to none.
     * fgimg_hovered - image when hovered. Defaults to fgimg when not provided.

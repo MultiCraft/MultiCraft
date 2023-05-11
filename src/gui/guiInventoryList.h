@@ -69,6 +69,9 @@ public:
 		const s32 start_item_i,
 		const v2s32 &slot_size,
 		const v2f32 &slot_spacing,
+		video::ITexture* slotbg_n_texture,
+		video::ITexture* slotbg_h_texture,
+		const core::rect<s32> &slotbg_middle,
 		GUIFormSpecMenu *fs_menu,
 		const Options &options,
 		gui::IGUIFont *font);
@@ -116,6 +119,11 @@ private:
 	const v2s32 m_slot_size;
 	// specifies how large the space between slots is (space between is spacing-size)
 	const v2f32 m_slot_spacing;
+
+	// Slot textures
+	video::ITexture* m_slotbg_n_texture;
+	video::ITexture* m_slotbg_h_texture;
+	core::rect<s32> m_slotbg_middle;
 
 	// the GUIFormSpecMenu can have an item selected and co.
 	GUIFormSpecMenu *m_fs_menu;
