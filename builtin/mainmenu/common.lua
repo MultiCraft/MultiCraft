@@ -162,7 +162,7 @@ end
 --------------------------------------------------------------------------------
 local button_path = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 local worldlist_scrbar_pos = 0
-function menu_render_worldlist2(selected_index)
+function menu_render_worldlist(selected_index)
 	local fs = {"formspec_version[4]"}
 
 	local outer_w, outer_h = 6.93, 5.65

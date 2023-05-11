@@ -151,7 +151,7 @@ local function get_formspec(_, _, tab_data)
 			"image_button[7.31,3.09;4.2,0.83;;cb_creative_mode;" .. c_label .. ";true;false]" ..
 
 			"real_coordinates[true]" ..
-			menu_render_worldlist2(index) ..
+			menu_render_worldlist(index) ..
 			"real_coordinates[false]"
 
 	if tab_data.hidden then
