@@ -159,6 +159,7 @@ void GUIModalMenu::quitMenu()
 	// This removes Environment's grab on us
 	Environment->removeFocus(this);
 	m_menumgr->deletingMenu(this);
+	this->grab();
 	this->remove();
 
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
@@ -166,6 +167,8 @@ void GUIModalMenu::quitMenu()
 	// grabbed elements that are not hovered anymore
 	Environment->forceUpdateHoveredElement();
 #endif
+
+	this->drop();
 
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui && g_touchscreengui->isActive() && m_touchscreen_visible)
