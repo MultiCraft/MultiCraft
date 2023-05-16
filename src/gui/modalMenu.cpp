@@ -110,6 +110,13 @@ void GUIModalMenu::quitMenu()
 	Environment->removeFocus(this);
 	m_menumgr->deletingMenu(this);
 	this->remove();
+
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
+	// Force update hovered elements, so that GUI Environment drops previously
+	// grabbed elements that are not hovered anymore
+	Environment->forceUpdateHoveredElement();
+#endif
+
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui && g_touchscreengui->isActive() && m_touchscreen_visible)
 		g_touchscreengui->show();
