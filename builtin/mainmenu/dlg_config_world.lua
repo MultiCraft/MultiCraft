@@ -180,6 +180,7 @@ local function get_formspec(data)
 		"background9[5.6,0.85;5.8,6;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 		"tablecolumns[color;tree;text]" ..
 		"tableoptions[background=#0000;border=false]" ..
+		scrollbar_style("world_config_modlist") ..
 		"table[5.58,0.84;5.59,5.82;world_config_modlist;" ..
 		pkgmgr.render_packagelist(data.list) .. ";" .. data.selected_mod .."]"
 end

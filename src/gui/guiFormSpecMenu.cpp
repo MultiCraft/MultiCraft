@@ -538,10 +538,14 @@ void GUIFormSpecMenu::parseList(parserData *data, const std::string &element)
 				pos.X + (geom.X - 1) * slot_spacing.X + slot_size.X,
 				pos.Y + (geom.Y - 1) * slot_spacing.Y + slot_size.Y);
 
+		video::ITexture *bgimg = style.getTexture(StyleSpec::BGIMG, m_tsrc, nullptr);
+		video::ITexture *bgimg_hovered = style.getTexture(StyleSpec::BGIMG_HOVERED, m_tsrc, nullptr);
+		core::rect<s32> bgimg_middle = style.getRect(StyleSpec::BGIMG_MIDDLE, core::rect<s32>());
+
 		GUIInventoryList *e = new GUIInventoryList(Environment, data->current_parent,
 				spec.fid, rect, m_invmgr, loc, listname, geom, start_i,
-				v2s32(slot_size.X, slot_size.Y), slot_spacing, this,
-				data->inventorylist_options, m_font);
+				v2s32(slot_size.X, slot_size.Y), slot_spacing, bgimg, bgimg_hovered,
+				bgimg_middle, this, data->inventorylist_options, m_font);
 
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
 

@@ -2145,13 +2145,11 @@ void Game::openConsole(float scale, const wchar_t *line)
 		porting::showInputDialog("", "", 2);
 		gui_chat_console->setAndroidChatOpen(true);
 	}
-#endif
-#if defined(__ANDROID__)
-	return;
-#elif defined(__IOS__)
+
 	if (!g_settings->getBool("device_is_tablet"))
 		return;
 #endif
+
 	if (gui_chat_console->isOpenInhibited())
 		return;
 	gui_chat_console->openConsole(scale);
@@ -3000,6 +2998,13 @@ void Game::updateChat(f32 dtime)
 	if (buf.getLinesModified()) {
 		buf.resetLinesModified();
 		m_game_ui->setChatText(chat_backend->getRecentChat(), buf.getLineCount());
+		gui_chat_console->onLinesModified();
+	}
+
+	auto &prompt = chat_backend->getPrompt();
+	if (prompt.getLineModified()) {
+		prompt.resetLineModified();
+		gui_chat_console->onPromptModified();
 	}
 
 	// Make sure that the size is still correct

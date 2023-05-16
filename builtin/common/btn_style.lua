@@ -108,3 +108,13 @@ function checkbox(x, y, name, label, checked, small)
 		x, y - 0.25, small and 4.3 or 7, name
 	)
 end
+--------------------------------------------------------------------------------
+function scrollbar_style(name, style_type)
+	return "style" .. (style_type and "_type" or "") .. "[" .. name .. ";scrollbar_bgimg=" ..
+		button_path .. "scrollbar_bg.png;scrollbar_thumb_top_img=" ..
+		button_path .. "scrollbar_slider_top.png;scrollbar_thumb_bottom_img=" ..
+		button_path .. "scrollbar_slider_bottom.png;scrollbar_thumb_img=" ..
+		button_path .. "scrollbar_slider_middle.png;scrollbar_up_img=" ..
+		button_path .. "scrollbar_up.png;scrollbar_down_img=" ..
+		button_path .. "scrollbar_down.png;scrollbar_middle=16]"
+end

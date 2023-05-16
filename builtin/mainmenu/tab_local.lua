@@ -52,7 +52,7 @@ local function singleplayer_refresh_gamebar()
 					--[[local index = filterlist.get_current_index(menudata.worldlist,
 						tonumber(core.settings:get("mainmenu_last_selected_world")))
 					if not index or index < 1 then
-						local selected = core.get_table_index("sp_worlds")
+						local selected = get_index()
 						if selected ~= nil and selected < #menudata.worldlist:get_list() then
 							index = selected
 						else
@@ -100,12 +100,18 @@ local function singleplayer_refresh_gamebar()
 	btnbar:add_button("game_open_cdb", "", "", fgettext("Install games from ContentDB"), true)
 end
 
-local function get_formspec(_, _, tab_data)
+local function get_index()
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 
 	-- Default index
 	if index == 0 then index = 1 end
+
+	return index
+end
+
+local function get_formspec(_, _, tab_data)
+	local index = get_index()
 
 	local space = small_screen and ("\n"):rep(3) or ("\n"):rep(5)
 	local retval =
@@ -144,10 +150,9 @@ local function get_formspec(_, _, tab_data)
 				(core.settings:get_bool("creative_mode") and "checkbox_checked" or "checkbox") .. ".png]" ..
 			"image_button[7.31,3.09;4.2,0.83;;cb_creative_mode;" .. c_label .. ";true;false]" ..
 
-			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
-			"tableoptions[background=#0000;border=false]" ..
-			"tablecolumns[" .. image_column(fgettext("Creative mode")) .. ";text]" ..
-			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
+			"real_coordinates[true]" ..
+			menu_render_worldlist(index) ..
+			"real_coordinates[false]"
 
 	if tab_data.hidden then
 		retval = retval ..
@@ -181,30 +186,6 @@ end
 local function main_button_handler(this, fields, name, tab_data)
 	assert(name == "local")
 
-	local world_doubleclick = false
-
-	if fields["sp_worlds"] ~= nil then
-		local event = core.explode_table_event(fields["sp_worlds"])
-		local selected = core.get_table_index("sp_worlds")
-
-		if event.type == "DCL" then
-			world_doubleclick = true
-		end
-
-		if event.type == "CHG" and selected ~= nil then
-			local world = menudata.worldlist:get_list()[selected]
-			if world and world.creative_mode ~= nil and
-					world.enable_damage ~= nil then
-				core.settings:set_bool("creative_mode", world.creative_mode)
-				core.settings:set_bool("enable_damage", world.enable_damage)
-			end
-
-			core.settings:set("mainmenu_last_selected_world",
-				menudata.worldlist:get_raw_index(selected))
-			return true
-		end
-	end
-
 	if menu_handle_key_up_down(fields,"sp_worlds","mainmenu_last_selected_world") then
 		return true
 	end
@@ -214,7 +195,7 @@ local function main_button_handler(this, fields, name, tab_data)
 		core.settings:set_bool("creative_mode", not creative_mode)
 		core.settings:set_bool("enable_damage", creative_mode)
 
-		local selected = core.get_table_index("sp_worlds")
+		local selected = get_index()
 		local world = menudata.worldlist:get_list()[selected]
 		if world then
 			-- Update the cached values
@@ -245,8 +226,8 @@ local function main_button_handler(this, fields, name, tab_data)
 		return true
 	end
 
-	if fields["play"] ~= nil or world_doubleclick or fields["key_enter"] then
-		local selected = core.get_table_index("sp_worlds")
+	if fields["play"] ~= nil or fields["key_enter"] then
+		local selected = get_index()
 		gamedata.selected_world = menudata.worldlist:get_raw_index(selected)
 		core.settings:set("maintab_LAST", "local")
 		core.settings:set("mainmenu_last_selected_world", gamedata.selected_world)
@@ -320,7 +301,7 @@ local function main_button_handler(this, fields, name, tab_data)
 	end
 
 	if fields["world_delete"] ~= nil then
-		local selected = core.get_table_index("sp_worlds")
+		local selected = get_index()
 		if selected ~= nil and
 			selected <= menudata.worldlist:size() then
 			local world = menudata.worldlist:get_list()[selected]
@@ -341,7 +322,7 @@ local function main_button_handler(this, fields, name, tab_data)
 	end
 
 	if fields["world_configure"] ~= nil then
-		local selected = core.get_table_index("sp_worlds")
+		local selected = get_index()
 		if selected ~= nil then
 			local configdialog =
 				create_configure_world_dlg(

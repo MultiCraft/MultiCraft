@@ -1,4 +1,5 @@
 -- can be overriden by mods
+local exp = math.exp
 function core.calculate_knockback(player, hitter, time_from_last_punch, tool_capabilities, dir, distance, damage)
 	if damage == 0 or player:get_armor_groups().immortal then
 		return 0.0
@@ -7,7 +8,7 @@ function core.calculate_knockback(player, hitter, time_from_last_punch, tool_cap
 	local m = 8
 	-- solve m - m*e^(k*4) = 4 for k
 	local k = -0.17328
-	local res = m - m * math.exp(k * damage)
+	local res = m - m * exp(k * damage)
 
 	if distance < 2.0 then
 		res = res * 1.1 -- more knockback when closer
@@ -22,6 +23,7 @@ local function vector_absmax(v)
 	return max(max(abs(v.x), abs(v.y)), abs(v.z))
 end
 
+local vdivide, vlength, vsubtract = vector.divide, vector.length, vector.subtract
 core.register_on_punchplayer(function(player, hitter, time_from_last_punch, tool_capabilities, unused_dir, damage)
 	if player:get_hp() == 0 then
 		return -- RIP
@@ -29,10 +31,10 @@ core.register_on_punchplayer(function(player, hitter, time_from_last_punch, tool
 
 	-- Server::handleCommand_Interact() adds eye offset to one but not the other
 	-- so the direction is slightly off, calculate it ourselves
-	local dir = vector.subtract(player:get_pos(), hitter:get_pos())
-	local d = vector.length(dir)
+	local dir = vsubtract(player:get_pos(), hitter:get_pos())
+	local d = vlength(dir)
 	if d ~= 0.0 then
-		dir = vector.divide(dir, d)
+		dir = vdivide(dir, d)
 	end
 
 	local k = core.calculate_knockback(player, hitter, time_from_last_punch, tool_capabilities, dir, d, damage)

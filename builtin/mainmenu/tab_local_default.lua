@@ -25,6 +25,29 @@ local default_worlds = {
 	{name = "World 5 Flat", mg_name = "flat", seed = "2"}
 }
 
+local function menu_render_worldlist()
+	local retval = {}
+
+	local creative = core.settings:get_bool("creative_mode", false)
+	local damage = core.settings:get_bool("enable_damage", true)
+
+	for _, world in ipairs(menudata.worldlist:get_list()) do
+		if world.creative_mode == nil or world.enable_damage == nil then
+			-- There's a built-in menu_worldmt function that can read from
+			-- world.mt but it would read from the file once for each setting
+			-- read
+			local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
+			world.creative_mode = world_conf:get_bool("creative_mode", creative)
+			world.enable_damage = world_conf:get_bool("enable_damage", damage)
+		end
+
+		retval[#retval + 1] = world.creative_mode and "5" or "4"
+		retval[#retval + 1] = core.formspec_escape(world.name)
+	end
+
+	return table.concat(retval, ",")
+end
+
 local function create_default_worlds()
 	if #menudata.worldlist:get_list() > 0 then return end
 
@@ -106,6 +129,7 @@ local function get_formspec(this)
 			"background9[0,0;6.5,4.8;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
 			"tableoptions[background=#0000;border=false]" ..
 			"tablecolumns[" .. image_column(fgettext("Creative mode")) .. ";text]" ..
+			scrollbar_style("sp_worlds") ..
 			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
 
 			btn_style("switch_local") ..

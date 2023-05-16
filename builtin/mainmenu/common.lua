@@ -19,6 +19,9 @@
 --------------------------------------------------------------------------------
 menudata = {}
 
+local fmt = string.format
+local esc = core.formspec_escape
+
 --------------------------------------------------------------------------------
 -- Local cached values
 --------------------------------------------------------------------------------
@@ -157,13 +160,21 @@ os.tmpname = function()
 end
 
 --------------------------------------------------------------------------------
-function menu_render_worldlist()
-	local retval = {}
+local button_path = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
+local worldlist_scrbar_pos = 0
+function menu_render_worldlist(selected_index)
+	local fs = {"formspec_version[4]"}
+
+	local outer_w, outer_h = 6.93, 5.65
+	fs[#fs + 1] = fmt("background9[0.52,0.21;%s,%s;%sworldlist_bg_new.png;false;32]",
+		outer_w + 1.2, outer_h + 0.2, button_path)
+	fs[#fs + 1] = fmt("scroll_container[0.62,0.31;%s,%s;scrbar;vertical]", outer_w, outer_h)
 
 	local creative = core.settings:get_bool("creative_mode", false)
 	local damage = core.settings:get_bool("enable_damage", true)
 
-	for _, world in ipairs(menudata.worldlist:get_list()) do
+	local list = menudata.worldlist:get_list()
+	for i, world in ipairs(list) do
 		if world.creative_mode == nil or world.enable_damage == nil then
 			-- There's a built-in menu_worldmt function that can read from
 			-- world.mt but it would read from the file once for each setting
@@ -173,22 +184,76 @@ function menu_render_worldlist()
 			world.enable_damage = world_conf:get_bool("enable_damage", damage)
 		end
 
-		retval[#retval + 1] = world.creative_mode and "5" or "4"
-		retval[#retval + 1] = core.formspec_escape(world.name)
+		local y = (i - 1) * 0.8
+		fs[#fs + 1] = fmt("image[0,%s;%s,0.7;%sgui/row_bg%s.png;16]",
+			y, outer_w, defaulttexturedir_esc, i == selected_index and "_selected" or ""
+		)
+		fs[#fs + 1] = fmt("image[0.2,%s;0.4,0.4;%sserver_flags_%s.png]",
+			y + 0.15, defaulttexturedir_esc, world.creative_mode and "creative" or "damage")
+
+		-- Use a scroll_container to clip the label
+		fs[#fs + 1] = fmt("scroll_container[0.8,%s;%s,0.7;;vertical]", y, outer_w - 1)
+		fs[#fs + 1] = fmt("label[0,0.35;%s]", esc(world.name))
+		fs[#fs + 1] = "scroll_container_end[]"
+
+		fs[#fs + 1] = fmt("image_button[0,%s;%s,0.7;;worldlist_%d;;false;false]", y, outer_w, i)
 	end
 
-	return table.concat(retval, ",")
+	fs[#fs + 1] = "scroll_container_end[]"
+
+	local inner_h = math.max(#list * 0.8 - 0.1, outer_h)
+	local scrollbar_max = (inner_h - outer_h) * 10
+
+	-- Make sure the selected world is visible
+	local min_pos = math.ceil(((selected_index - 1) * 0.8 - outer_h + 0.7) * 10)
+	local max_pos = math.floor((selected_index - 1) * 0.8 * 10)
+	worldlist_scrbar_pos = math.min(math.max(worldlist_scrbar_pos, min_pos), max_pos)
+
+	fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", math.ceil(scrollbar_max),
+		(outer_h / inner_h) * scrollbar_max)
+	fs[#fs + 1] = fmt("scrollbar[%s,0.31;0.8,5.65;vertical;scrbar;%s;" ..
+		"%sscrollbar_bg.png,%sscrollbar_slider_middle.png,%sscrollbar_up.png," ..
+		"%sscrollbar_down.png,%sscrollbar_slider_top.png,%sscrollbar_slider_bottom.png]",
+		outer_w + 0.82, worldlist_scrbar_pos, button_path, button_path,
+		button_path, button_path, button_path, button_path)
+
+	return table.concat(fs)
 end
 
 --------------------------------------------------------------------------------
 function menu_handle_key_up_down(fields, textlist, settingname)
-	local oldidx, newidx = core.get_textlist_index(textlist), 1
+	if fields.scrbar then
+		worldlist_scrbar_pos = core.explode_scrollbar_event(fields.scrbar).value
+	end
+
+	for field in pairs(fields) do
+		if field:sub(1, 10) == "worldlist_" then
+			local idx = menudata.worldlist:get_raw_index(tonumber(field:sub(11)))
+			if idx then
+				core.settings:set(settingname, idx)
+
+				local world = menudata.worldlist:get_raw_element(idx)
+				if world and world.creative_mode ~= nil and
+						world.enable_damage ~= nil then
+					core.settings:set_bool("creative_mode", world.creative_mode)
+					core.settings:set_bool("enable_damage", world.enable_damage)
+				end
+
+				return true
+			end
+		end
+	end
+
 	if fields.key_up or fields.key_down then
+		local oldidx = menudata.worldlist:get_current_index(tonumber(core.settings:get(settingname)))
+		local newidx
 		if fields.key_up and oldidx and oldidx > 1 then
 			newidx = oldidx - 1
 		elseif fields.key_down and oldidx and
 				oldidx < menudata.worldlist:size() then
 			newidx = oldidx + 1
+		else
+			return false
 		end
 		core.settings:set(settingname, menudata.worldlist:get_raw_index(newidx))
 		return true

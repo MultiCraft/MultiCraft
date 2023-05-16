@@ -585,12 +585,14 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 		if def and def.sound and def.sound.eat then
 			core.sound_play(def.sound.eat, {
 				pos = pos,
-				max_hear_distance = 16})
+				max_hear_distance = 16
+			}, true)
 		else
 			core.sound_play("player_eat", {
 				pos = pos,
-				max_hear_distance = 10,
-				gain = 0.3})
+				max_hear_distance = 16,
+				gain = 0.3
+			}, true)
 		end
 
 		local dir = user:get_look_dir()
