@@ -5,7 +5,7 @@
 export DEPS_ROOT=$(pwd)
 
 [ ! -d irrlicht-src ] && \
-	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht-src
+	git clone --depth 1 -b windows-build https://github.com/deveee/Irrlicht irrlicht-src
 
 cd irrlicht-src/source/Irrlicht
 
