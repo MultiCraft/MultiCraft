@@ -542,9 +542,12 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 			u32 imgH = rangelim(img_size.Height, 32, 128) * scale;
 #else
 			float imgRatio = (float) img_size.Height / img_size.Width;
-			u32 imgW = npot2(screensize.X / 2);
-			if (imgW > (screensize.X * 0.7) && imgW >= 1024)
-				imgW /= 2;
+			u32 imgW = screensize.X / 2;
+			if (!hasNPotSupport()) {
+				imgW = npot2(imgW);
+				if (imgW > (screensize.X * 0.7) && imgW >= 1024)
+					imgW /= 2;
+			}
 			u32 imgH = imgW * imgRatio;
 #endif
 			v2s32 img_pos((screensize.X - imgW) / 2,
