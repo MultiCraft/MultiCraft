@@ -214,6 +214,30 @@ jobs:
           NO_MINETEST_GAME: 1
           NO_PACKAGE: 1
 
+  msys2-mingw64:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-autotools git
+      - name: CI-Build
+        run: |
+          cd ./build/Windows
+          ./Start.sh
+          cmake --build . -j
+          cd -
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: multicraft
+          path: ./bin/multicraft.exe
+
   msvc:
     name: VS 2022 ${{ matrix.config.arch }}-${{ matrix.type }}
     runs-on: windows-2022
