@@ -65,14 +65,6 @@ GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 	m_touchscreen_visible = false;
 #endif
 
-	v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
-	m_fullscreen_bgcolor = video::SColor(
-		(u8) MYMIN(MYMAX(g_settings->getS32("formspec_fullscreen_bg_opacity"), 0), 255),
-		MYMIN(MYMAX(myround(formspec_bgcolor.X), 0), 255),
-		MYMIN(MYMAX(myround(formspec_bgcolor.Y), 0), 255),
-		MYMIN(MYMAX(myround(formspec_bgcolor.Z), 0), 255)
-	);
-
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (porting::hasRealKeyboard())
 		SDL_StartTextInput();
@@ -225,11 +217,6 @@ void GUIConfirmRegistration::drawMenu()
 	gui::IGUISkin *skin = Environment->getSkin();
 	if (!skin)
 		return;
-	video::IVideoDriver *driver = Environment->getVideoDriver();
-	v2u32 screensize = driver->getScreenSize();
-
-	core::rect<s32> allbg(0, 0, screensize.X, screensize.Y);
-	driver->draw2DRectangle(m_fullscreen_bgcolor, allbg, &allbg);
 
 	gui::IGUIElement::draw();
 #if defined(__ANDROID__) || defined(__IOS__)
