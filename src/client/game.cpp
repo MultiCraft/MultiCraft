@@ -1898,8 +1898,12 @@ void Game::processUserInput(f32 dtime)
 	}
 #endif
 
+	bool doubletap_jump = m_cache_doubletap_jump;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	doubletap_jump |= input->sdl_game_controller.isActive();
+#endif
 	// Increase timer for double tap of "keymap_jump"
-	if (m_cache_doubletap_jump && runData.jump_timer <= 0.15f)
+	if (doubletap_jump && runData.jump_timer <= 0.15f)
 		runData.jump_timer += dtime;
 
 	processKeyInput();
@@ -2189,7 +2193,12 @@ void Game::toggleFreeMove()
 
 void Game::toggleFreeMoveAlt()
 {
-	if (m_cache_doubletap_jump && runData.jump_timer < 0.15f &&
+	bool doubletap_jump = m_cache_doubletap_jump;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	doubletap_jump |= input->sdl_game_controller.isActive();
+#endif
+
+	if (doubletap_jump && runData.jump_timer < 0.15f &&
 			(!simple_singleplayer_mode || client->checkPrivilege("fly")))
 		toggleFreeMove();
 
@@ -2435,9 +2444,7 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 			&& !isMenuActive()) || input->isRandom()) {
 
 		if (!input->isRandom()) {
-			// Mac OSX gets upset if this is set every frame
-			if (device->getCursorControl()->isVisible())
-				device->getCursorControl()->setVisible(false);
+			input->setCursorVisible(false);
 		}
 
 		if (m_first_loop_after_window_activation) {
@@ -2451,10 +2458,7 @@ void Game::updateCameraDirection(CameraOrientation *cam, float dtime)
 
 	} else {
 
-		// Mac OSX gets upset if this is set every frame
-		if (!device->getCursorControl()->isVisible())
-			device->getCursorControl()->setVisible(true);
-
+		input->setCursorVisible(true);
 		m_first_loop_after_window_activation = true;
 
 	}
@@ -2485,8 +2489,13 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 
 	if (m_cache_enable_joysticks) {
 		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		cam->camera_yaw -= input->sdl_game_controller.getCameraYaw() * c;
+		cam->camera_pitch += input->sdl_game_controller.getCameraPitch() * c;
+#else
 		cam->camera_yaw -= input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL) * c;
 		cam->camera_pitch += input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL) * c;
+#endif
 	}
 
 	cam->camera_pitch = rangelim(cam->camera_pitch, -89.5, 89.5);
@@ -2514,8 +2523,13 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		isKeyDown(KeyType::PLACE),
 		cam.camera_pitch,
 		cam.camera_yaw,
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		input->sdl_game_controller.getMoveSideward(),
+		input->sdl_game_controller.getMoveForward()
+#else
 		input->joystick.getAxisWithoutDead(JA_SIDEWARD_MOVE),
 		input->joystick.getAxisWithoutDead(JA_FORWARD_MOVE)
+#endif
 	);
 
 	u32 keypress_bits = (

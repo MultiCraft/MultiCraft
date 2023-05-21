@@ -20,13 +20,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <cstdlib>
 #include "modalMenu.h"
+#include "client/guiscalingfilter.h"
+#include "client/joystick_controller.h"
+#include "client/renderingengine.h"
+#include "client/tile.h"
+#include "filesys.h"
 #include "gettext.h"
 #include "porting.h"
 #include "settings.h"
 
 #ifdef HAVE_TOUCHSCREENGUI
 #include "touchscreengui.h"
-#include "client/renderingengine.h"
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
@@ -93,7 +97,53 @@ void GUIModalMenu::draw()
 	}
 
 	drawMenu();
+
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	if (SDLGameController::isActive() && SDLGameController::isCursorVisible())
+		drawCursor();
+#endif
 }
+
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+void GUIModalMenu::drawCursor()
+{
+	video::IVideoDriver *driver = Environment->getVideoDriver();
+	irr::IrrlichtDevice *device = RenderingEngine::get_raw_device();
+	v2s32 pointer = device->getCursorControl()->getPosition();
+
+	v3f crosshair_color = g_settings->getV3F("crosshair_color");
+	u32 cross_r = rangelim(myround(crosshair_color.X), 0, 255);
+	u32 cross_g = rangelim(myround(crosshair_color.Y), 0, 255);
+	u32 cross_b = rangelim(myround(crosshair_color.Z), 0, 255);
+	u32 cross_a = rangelim(g_settings->getS32("crosshair_alpha"), 0, 255);
+	video::SColor crosshair_argb = video::SColor(cross_a, cross_r, cross_g, cross_b);
+
+	const int cursor_line_size = 16;
+	float hud_scaling = g_settings->getFloat("hud_scaling");
+	float scale_factor = hud_scaling * RenderingEngine::getDisplayDensity();
+	int cursor_size = (int)(cursor_line_size * scale_factor);
+
+	std::string sprite_path = porting::path_share + DIR_DELIM + "textures" +
+				  DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM +
+				  "cursor.png";
+	video::ITexture *cursor = driver->getTexture(sprite_path.c_str());
+
+	if (cursor) {
+		core::rect<s32> rect(pointer.X - cursor_size, pointer.Y - cursor_size,
+				pointer.X + cursor_size, pointer.Y + cursor_size);
+		video::SColor crosshair_color[] = {crosshair_argb, crosshair_argb,
+				crosshair_argb, crosshair_argb};
+		draw2DImageFilterScaled(driver, cursor, rect,
+				core::rect<s32>({0, 0}, cursor->getOriginalSize()),
+				nullptr, crosshair_color, true);
+	} else {
+		driver->draw2DLine(pointer - v2s32(cursor_size, 0),
+				pointer + v2s32(cursor_size, 0), crosshair_argb);
+		driver->draw2DLine(pointer - v2s32(0, cursor_size),
+				pointer + v2s32(0, cursor_size), crosshair_argb);
+	}
+}
+#endif
 
 /*
 	This should be called when the menu wants to quit.

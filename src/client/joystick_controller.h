@@ -167,3 +167,47 @@ private:
 	std::bitset<KeyType::INTERNAL_ENUM_COUNT> m_past_keys_pressed;
 	std::bitset<KeyType::INTERNAL_ENUM_COUNT> m_keys_released;
 };
+
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+class SDLGameController
+{
+private:
+	void handleMouseMovement(int x, int y);
+	void handleTriggerLeft(s16 value);
+	void handleTriggerRight(s16 value);
+	void handleMouseClickLeft(bool pressed);
+	void handleMouseClickRight(bool pressed);
+	void handleButton(const SEvent &event);
+	void handleButtonInMenu(const SEvent &event);
+	void handlePlayerMovement(int x, int y);
+	void handleCameraOrientation(int x, int y);
+	void sendEvent(const SEvent &event);
+
+	int m_button_states = 0;
+	u32 m_mouse_time = 0;
+	s16 m_trigger_left_value = 0;
+	s16 m_trigger_right_value = 0;
+	s16 m_move_sideward = 0;
+	s16 m_move_forward = 0;
+	s16 m_camera_yaw = 0;
+	s16 m_camera_pitch = 0;
+
+	static bool m_active;
+	static bool m_cursor_visible;
+	bool m_is_fake_event = false;
+
+public:
+	void translateEvent(const SEvent &event);
+
+	s16 getMoveSideward() { return m_move_sideward; }
+	s16 getMoveForward() { return m_move_forward; }
+	s16 getCameraYaw() { return m_camera_yaw; }
+	s16 getCameraPitch() { return m_camera_pitch; }
+
+	void setActive(bool value) { m_active = value; }
+	static bool isActive() { return m_active; }
+	void setCursorVisible(bool visible) { m_cursor_visible = visible; }
+	static bool isCursorVisible() { return m_cursor_visible; }
+	bool isFakeEvent() { return m_is_fake_event; }
+};
+#endif
