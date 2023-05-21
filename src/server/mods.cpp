@@ -76,9 +76,22 @@ void ServerModManager::loadMods(ServerScripting *script)
 
 		// This is behind a setting since getMemoryUsageKB calls
 		// collectgarbage() first which will slow down load times.
-		if (log_mem) {
-			size_t old_usage = script->getMemoryUsageKB();
+		size_t old_usage = log_mem ? script->getMemoryUsageKB() : 0;
+
+		try {
 			script->loadMod(script_path, mod.name);
+		} catch (ModError &e) {
+			// Only re-throw the error if the file exists
+			// The PathExists check is done here since init.lua is expected to
+			// exist so checking it first would just waste time
+			if (fs::PathExists(script_path))
+				throw;
+
+			errorstream << "Ignoring invalid mod directory: " << e.what() << std::endl;
+			continue;
+		}
+
+		if (log_mem) {
 			size_t new_usage = script->getMemoryUsageKB();
 			actionstream << "Mod \"" << mod.name << "\" loaded, ";
 			if (new_usage >= old_usage)
@@ -86,9 +99,8 @@ void ServerModManager::loadMods(ServerScripting *script)
 			else
 				actionstream << "somehow freeing " << (old_usage - new_usage);
 			actionstream << "KB of memory" << std::endl;
-		} else {
-			script->loadMod(script_path, mod.name);
 		}
+
 		infostream << "Mod \"" << mod.name << "\" loaded after "
 			<< (porting::getTimeMs() - t) << " ms" << std::endl;
 	}
