@@ -232,6 +232,7 @@ jobs:
           ./Start.sh
           cmake --build . -j
           cd -
+          strip -s ./bin/multicraft.exe
       - name: Upload artifact
         uses: actions/upload-artifact@v2
         with:
