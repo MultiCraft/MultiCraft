@@ -968,3 +968,4 @@ std::list<RollbackAction> RollbackManager::getRevertActions(
 
 	return getActionsSince(first_time, actor_filter);
 }
+
