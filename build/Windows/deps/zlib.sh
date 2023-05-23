@@ -17,7 +17,7 @@ mkdir -p build; cd build
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_C_FLAGS=""
+    -DCMAKE_C_FLAGS="$CFLAGS"
 
 cmake --build . -j$NPROC
 

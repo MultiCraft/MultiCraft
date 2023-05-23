@@ -15,7 +15,6 @@ fi
 cd libcurl-src
 
 ./configure \
-	--without-mbedtls \
 	--with-schannel \
 	--disable-shared --enable-static \
 	--disable-debug --disable-verbose --disable-versioned-symbols \
