@@ -12,7 +12,6 @@ sh ./libpng.sh
 sh ./SDL2.sh
 sh ./irrlicht.sh
 sh ./openal.sh
-sh ./mbedtls.sh
 sh ./libcurl.sh
 sh ./libogg.sh
 sh ./vorbis.sh

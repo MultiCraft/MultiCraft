@@ -627,14 +627,8 @@ if(BUILD_CLIENT)
 			${CURL_LIBRARY}
 		)
 		if(USE_STATIC_BUILD)
-			target_link_libraries(
-				${PROJECT_NAME}
-				${MBEDTLS_LIBRARY}
-				${MBEDCRYPTO_LIBRARY}
-				${MBEDX509_LIBRARY}
-			)
 			if(WIN32)
-				target_link_libraries(${PROJECT_NAME} bcrypt ws2_32)
+				target_link_libraries(${PROJECT_NAME} bcrypt crypt32 ws2_32)
 			endif()
 		endif()
 	endif()

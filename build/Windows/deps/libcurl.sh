@@ -15,7 +15,8 @@ fi
 cd libcurl-src
 
 ./configure \
-	--with-mbedtls="$DEPS_ROOT/mbedtls" \
+	--without-mbedtls \
+	--with-schannel \
 	--disable-shared --enable-static \
 	--disable-debug --disable-verbose --disable-versioned-symbols \
 	--disable-dependency-tracking --disable-libcurl-option \
@@ -23,7 +24,7 @@ cd libcurl-src
 	--disable-proxy --disable-unix-sockets --without-librtmp \
 	--disable-ftp --disable-ldap --disable-ldaps --disable-rtsp \
 	--disable-dict --disable-telnet --disable-tftp --disable-pop3 \
-	--disable-imap --disable-smtp --disable-gopher --disable-sspi \
+	--disable-imap --disable-smtp --disable-gopher \
 	--without-zstd --without-brotli --without-nghttp2 --without-libidn2 \
 	--without-libpsl
 
