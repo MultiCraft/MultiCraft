@@ -1,0 +1,9 @@
+CMakeFiles
+deps/*
+!deps/*.sh
+lib
+locale
+src
+*.ninja*
+*.cmake
+CMakeCache.txt

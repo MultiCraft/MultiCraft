@@ -31,6 +31,22 @@ if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 	set(BUILD_SERVER TRUE)
 endif()
 
+option(USE_SDL "Use SDL2 for window management" FALSE)
+option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
+
+if(USE_SDL)
+	if(NOT USE_STATIC_BUILD)
+		find_package(SDL2)
+	else()
+		set(SDL2_FOUND TRUE)
+	endif()
+	if (SDL2_FOUND)
+		message(STATUS "SDL2 found.")
+		include_directories(${SDL2_INCLUDE_DIR})
+	else()
+		message(FATAL_ERROR "SDL2 not found.")
+	endif()
+endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
 set(USE_CURL FALSE)
@@ -566,6 +582,21 @@ if(BUILD_CLIENT)
 		)
 	endif()
 
+	if(USE_SDL)
+		target_link_libraries(
+			${PROJECT_NAME}
+			${SDL2_LIBRARIES}
+		)
+		if(USE_STATIC_BUILD AND WIN32)
+			target_link_libraries(
+				${PROJECT_NAME}
+				winmm
+				imm32
+				setupapi
+				opengl32
+			)
+		endif()
+	endif()
 	if(ENABLE_GLES)
 		target_link_libraries(
 			${PROJECT_NAME}
@@ -583,12 +614,23 @@ if(BUILD_CLIENT)
 			${PROJECT_NAME}
 			${GETTEXT_LIBRARY}
 		)
+		if(USE_STATIC_BUILD)
+			target_link_libraries(
+				${PROJECT_NAME}
+				${GETTEXT_ICONV_LIBRARY}
+			)
+		endif()
 	endif()
 	if(USE_CURL)
 		target_link_libraries(
 			${PROJECT_NAME}
 			${CURL_LIBRARY}
 		)
+		if(USE_STATIC_BUILD)
+			if(WIN32)
+				target_link_libraries(${PROJECT_NAME} bcrypt crypt32 ws2_32)
+			endif()
+		endif()
 	endif()
 	if(USE_FREETYPE)
 		if(FREETYPE_PKGCONFIG_FOUND)

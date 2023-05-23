@@ -219,8 +219,8 @@ void init_gettext(const char *path, const std::string &configured_language,
 			if (locale[0].language) {
 				char lang[3] = {0};
 				strncpy(lang, locale[0].language, 2);
-				setenv("LANG", lang, 1);
-				setenv("LANGUAGE", lang, 1);
+				SDL_setenv("LANG", lang, 1);
+				SDL_setenv("LANGUAGE", lang, 1);
 			}
 
 			SDL_free(locale);

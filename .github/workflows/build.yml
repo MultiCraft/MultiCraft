@@ -214,6 +214,46 @@ jobs:
           NO_MINETEST_GAME: 1
           NO_PACKAGE: 1
 
+  msys2-mingw64:
+    name: "MSYS2-MinGW (64-bit)"
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-autotools git zip
+
+      - name: Build
+        run: |
+          cd ./Windows
+          ./Start.sh
+          cmake --build . -j
+          cd -
+          strip -s ./bin/multicraft.exe
+
+      - name: Create ZIP
+        run: |
+          mkdir MultiCraft
+          cp -r ./bin MultiCraft/
+          cp -r ./builtin MultiCraft/
+          cp -r ./client MultiCraft/
+          cp -r ./fonts MultiCraft/
+          cp -r ./games MultiCraft/
+          cp -r ./locale MultiCraft/
+          cp -r ./textures MultiCraft/
+          zip -r MultiCraft.zip MultiCraft
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: MultiCraft-msys2-mingw64
+          path: ./MultiCraft.zip
+
   msvc:
     name: VS 2022 ${{ matrix.config.arch }}-${{ matrix.type }}
     runs-on: windows-2022
