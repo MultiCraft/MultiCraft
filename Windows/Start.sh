@@ -12,7 +12,7 @@ cd ..
 
 export DEPS_ROOT=$(pwd)/deps
 
-cmake ../../ \
+cmake ../ \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DENABLE_SQLITE=1 \
 	-DENABLE_POSTGRESQL=0 \

@@ -230,7 +230,7 @@ jobs:
 
       - name: Build
         run: |
-          cd ./build/Windows
+          cd ./Windows
           ./Start.sh
           cmake --build . -j
           cd -
