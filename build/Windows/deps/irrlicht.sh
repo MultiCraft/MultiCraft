@@ -10,7 +10,6 @@ export DEPS_ROOT=$(pwd)
 cd irrlicht-src/source/Irrlicht
 
 CPPFLAGS="$CPPFLAGS \
-          -D_IRR_COMPILE_WITH_SDL_DEVICE_ \
           -DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
           -DNO_IRR_COMPILE_WITH_OGLES2_ \
           -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
