@@ -215,6 +215,7 @@ jobs:
           NO_PACKAGE: 1
 
   msys2-mingw64:
+    name: "MSYS2-MinGW (64-bit)"
     runs-on: windows-latest
     defaults:
       run:
@@ -226,13 +227,15 @@ jobs:
           msystem: MINGW64
           update: true
           install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-autotools git zip
-      - name: CI-Build
+
+      - name: Build
         run: |
           cd ./build/Windows
           ./Start.sh
           cmake --build . -j
           cd -
           strip -s ./bin/multicraft.exe
+
       - name: Create ZIP
         run: |
           mkdir MultiCraft
@@ -244,6 +247,7 @@ jobs:
           cp -r ./locale MultiCraft/
           cp -r ./textures MultiCraft/
           zip -r MultiCraft.zip MultiCraft
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
