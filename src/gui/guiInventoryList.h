@@ -71,6 +71,7 @@ public:
 		const v2f32 &slot_spacing,
 		video::ITexture* slotbg_n_texture,
 		video::ITexture* slotbg_h_texture,
+		video::ITexture* slotbg_p_texture,
 		const core::rect<s32> &slotbg_middle,
 		GUIFormSpecMenu *fs_menu,
 		const Options &options,
@@ -123,6 +124,7 @@ private:
 	// Slot textures
 	video::ITexture* m_slotbg_n_texture;
 	video::ITexture* m_slotbg_h_texture;
+	video::ITexture* m_slotbg_p_texture;
 	core::rect<s32> m_slotbg_middle;
 
 	// the GUIFormSpecMenu can have an item selected and co.
@@ -135,6 +137,9 @@ private:
 
 	// the index of the hovered item; -1 if no item is hovered
 	s32 m_hovered_i;
+
+	// Whether the hovered item is being pressed
+	bool m_pressed;
 
 	// we do not want to write a warning on every draw
 	bool m_already_warned;
