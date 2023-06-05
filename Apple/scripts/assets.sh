@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-ALL_FONTS=true
+ALL_FONTS=false
 
 if [ ! -d MultiCraft/MultiCraft.xcodeproj ]; then
 	echo "Run this from Apple folder"
