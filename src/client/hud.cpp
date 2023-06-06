@@ -622,6 +622,7 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 	}
 
 	core::dimension2di srcd(stat_texture->getOriginalSize());
+	core::dimension2di srcd_bg = stat_texture_bg ? core::dimension2di(stat_texture_bg->getOriginalSize()) : srcd;
 	core::dimension2di dstd;
 	if (size == v2s32()) {
 		dstd = srcd;
@@ -685,7 +686,7 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 		// Need to draw halves: Calculate rectangles
 		srchalfrect  = calculate_clipping_rect(srcd, steppos);
 		dsthalfrect  = calculate_clipping_rect(dstd, steppos);
-		srchalfrect2 = calculate_clipping_rect(srcd, steppos * -1);
+		srchalfrect2 = calculate_clipping_rect(srcd_bg, steppos * -1);
 		dsthalfrect2 = calculate_clipping_rect(dstd, steppos * -1);
 	}
 
@@ -724,7 +725,7 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 		else
 			start_offset = count / 2;
 		for (s32 i = start_offset; i < maxcount / 2; i++) {
-			core::rect<s32> srcrect(0, 0, srcd.Width, srcd.Height);
+			core::rect<s32> srcrect(0, 0, srcd_bg.Width, srcd_bg.Height);
 			core::rect<s32> dstrect(0, 0, dstd.Width, dstd.Height);
 
 			dstrect += p;
@@ -736,7 +737,7 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 
 		if (maxcount % 2 == 1) {
 			draw2DImageFilterScaled(driver, stat_texture_bg,
-					dsthalfrect + p, srchalfrect,
+					dsthalfrect + p, calculate_clipping_rect(srcd_bg, steppos),
 					NULL, colors, true);
 		}
 	}
