@@ -36,6 +36,7 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	const v2f32 &slot_spacing,
 	video::ITexture* slotbg_n_texture,
 	video::ITexture* slotbg_h_texture,
+	video::ITexture* slotbg_p_texture,
 	const core::rect<s32> &slotbg_middle,
 	GUIFormSpecMenu *fs_menu,
 	const Options &options,
@@ -50,11 +51,13 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	m_slot_spacing(slot_spacing),
 	m_slotbg_n_texture(slotbg_n_texture),
 	m_slotbg_h_texture(slotbg_h_texture),
+	m_slotbg_p_texture(slotbg_p_texture),
 	m_slotbg_middle(slotbg_middle),
 	m_fs_menu(fs_menu),
 	m_options(options),
 	m_font(font),
 	m_hovered_i(-1),
+	m_pressed(false),
 	m_already_warned(false)
 {
 }
@@ -118,8 +121,12 @@ void GUIInventoryList::draw()
 		// layer 0
 		if (m_slotbg_n_texture) {
 			video::ITexture *texture = m_slotbg_n_texture;
-			if (hovering && m_slotbg_h_texture)
-				texture = m_slotbg_h_texture;
+			if (hovering) {
+				if (m_pressed && m_slotbg_p_texture)
+					texture = m_slotbg_p_texture;
+				else if (m_slotbg_h_texture)
+					texture = m_slotbg_h_texture;
+			}
 
 			core::rect<s32> srcrect(core::position2d<s32>(0, 0),
 									core::dimension2di(texture->getOriginalSize()));
@@ -198,8 +205,15 @@ bool GUIInventoryList::OnEvent(const SEvent &event)
 
 	m_hovered_i = getItemIndexAtPos(v2s32(event.MouseInput.X, event.MouseInput.Y));
 
-	if (m_hovered_i != -1)
+	if (m_hovered_i != -1) {
+		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN)
+			m_pressed = true;
+		else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP)
+			m_pressed = false;
 		return IGUIElement::OnEvent(event);
+	}
+
+	m_pressed = false;
 
 	// no item slot at pos of mouse event => allow clicking through
 	// find the element that would be hovered if this inventorylist was invisible
