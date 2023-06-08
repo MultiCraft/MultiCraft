@@ -118,7 +118,7 @@
 
 #    Enable joysticks
 #    type: bool
-# enable_joysticks = false
+# enable_joysticks = true
 
 #    The identifier of the joystick to use
 #    type: int
@@ -135,7 +135,7 @@
 
 #    The deadzone of the joystick
 #    type: int
-# joystick_deadzone = 2048
+# joystick_deadzone = 4096
 
 #    The sensitivity of the joystick axes for moving the
 #    ingame view frustum around.

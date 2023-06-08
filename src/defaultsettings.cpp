@@ -290,12 +290,16 @@ void set_default_settings()
 	settings->setDefault("always_fly_fast", "true");
 	settings->setDefault("autojump", "false");
 	settings->setDefault("continuous_forward", "false");
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	settings->setDefault("enable_joysticks", "true");
+#else
+	settings->setDefault("enable_joysticks", "false");
+#endif
 	settings->setDefault("joystick_id", "0");
 	settings->setDefault("joystick_type", "");
 	settings->setDefault("repeat_joystick_button_time", "0.17");
 	settings->setDefault("joystick_frustum_sensitivity", "170");
-	settings->setDefault("joystick_deadzone", "2048");
+	settings->setDefault("joystick_deadzone", "4096");
 
 	// Main menu
 	settings->setDefault("main_menu_path", "");

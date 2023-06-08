@@ -143,7 +143,7 @@ fixed_virtual_joystick (Fixed virtual joystick) bool false
 virtual_joystick_triggers_aux (Virtual joystick triggers aux button) bool false
 
 #    Enable joysticks
-enable_joysticks (Enable joysticks) bool false
+enable_joysticks (Enable joysticks) bool true
 
 #    The identifier of the joystick to use
 joystick_id (Joystick ID) int 0
@@ -156,7 +156,7 @@ joystick_type (Joystick type) enum auto auto,generic,xbox
 repeat_joystick_button_time (Joystick button repetition interval) float 0.17 0.001
 
 #    The deadzone of the joystick
-joystick_deadzone (Joystick deadzone) int 2048
+joystick_deadzone (Joystick deadzone) int 4096
 
 #    The sensitivity of the joystick axes for moving the
 #    ingame view frustum around.
