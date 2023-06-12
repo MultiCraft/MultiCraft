@@ -32,6 +32,7 @@ android {
 		abi {
 			enable true
 			reset()
+			//noinspection ChromeOsAbiSupport
 			include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
 		}
 	}
@@ -49,14 +50,15 @@ android {
 }
 
 // get precompiled deps
-task downloadDeps(type: Download) {
-	def VERSION = "20042023"
+tasks.register('downloadDeps', Download) {
+	def VERSION = "29052023"
 	src "https://github.com/MultiCraft/deps_android/releases/download/$VERSION/deps_android.zip"
 	dest new File(buildDir, 'deps.zip')
 	overwrite false
 }
 
-task getDeps(dependsOn: downloadDeps, type: Copy) {
+tasks.register('getDeps', Copy) {
+	dependsOn downloadDeps
 	def deps = file('deps')
 	def f = file("$buildDir/deps_android")
 

@@ -47,6 +47,7 @@ android {
 		abi {
 			enable true
 			reset()
+			//noinspection ChromeOsAbiSupport
 			include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
 		}
 	}
@@ -66,7 +67,7 @@ android {
 
 import org.apache.tools.ant.taskdefs.condition.Os
 
-task prepareAssetsFiles() {
+tasks.register('prepareAssetsFiles') {
 	def assetsFolder = "build/assets/Files"
 	def projRoot = "../.."
 
@@ -94,20 +95,22 @@ task prepareAssetsFiles() {
 	copy {
 		from "${projRoot}/textures" into "${assetsFolder}/textures" exclude '*.txt'
 	}
-
-	task zipAssetsFiles(type: Zip) {
-		archiveFileName = "Files.zip"
-		destinationDirectory = file("src/main/assets/data")
-
-		from "${assetsFolder}"
-	}
 }
 
-preBuild.dependsOn zipAssetsFiles
+tasks.register('zipAssetsFiles', Zip) {
+	dependsOn prepareAssetsFiles
+	archiveFileName = 'assets.zip'
+	destinationDirectory = file('src/main/assets/data')
+	from('build/assets/Files')
+}
+
+tasks.named("preBuild") {
+	dependsOn(zipAssetsFiles)
+}
 
 // Map for the version code that gives each ABI a value.
 def abiCodes = ['armeabi-v7a': 0, 'arm64-v8a': 1, 'x86_64': 2]
-android.applicationVariants.all { variant ->
+android.applicationVariants.configureEach { variant ->
 	variant.outputs.each {
 		output ->
 			def abiName = output.filters[0].identifier
@@ -124,5 +127,5 @@ dependencies {
 	implementation 'androidx.appcompat:appcompat-resources:1.6.1'
 	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
 	implementation 'androidx.work:work-runtime-ktx:2.8.1'
-	implementation 'com.google.android.material:material:1.8.0'
+	implementation 'com.google.android.material:material:1.9.0'
 }

@@ -86,7 +86,6 @@ LOCAL_CFLAGS += \
 	-DUSE_SQLITE=0                                 \
 	-DUSE_LUAJIT=1                                 \
 	-DUSE_GETTEXT=1                                \
-	-D_IRR_COMPILE_WITH_SDL_DEVICE_                \
 	-DVERSION_MAJOR=${versionMajor}                \
 	-DVERSION_MINOR=${versionMinor}                \
 	-DVERSION_PATCH=${versionPatch}                \

@@ -30,6 +30,7 @@ import android.provider.Settings
 import android.view.View
 import android.view.Window
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import com.multicraft.game.R
@@ -41,7 +42,7 @@ import java.io.InputStream
 import kotlin.system.exitProcess
 
 // Activity extensions
-fun Activity.getIcon() = try {
+fun AppCompatActivity.getIcon() = try {
 	packageManager.getApplicationIcon(packageName)
 } catch (e: PackageManager.NameNotFoundException) {
 	ContextCompat.getDrawable(this, R.mipmap.ic_launcher)
@@ -63,7 +64,7 @@ fun Activity.finishApp(restart: Boolean) {
 	exitProcess(0)
 }
 
-fun Activity.defaultDialog(title: Int, view: View, style: Int = R.style.CustomDialog): AlertDialog {
+fun AppCompatActivity.defaultDialog(title: Int, view: View, style: Int = R.style.CustomDialog): AlertDialog {
 	val builder = AlertDialog.Builder(this, style)
 		.setIcon(getIcon())
 		.setTitle(title)
@@ -72,7 +73,7 @@ fun Activity.defaultDialog(title: Int, view: View, style: Int = R.style.CustomDi
 	return builder.create()
 }
 
-fun Activity.headlessDialog(
+fun AppCompatActivity.headlessDialog(
 	view: View,
 	style: Int = R.style.LightTheme,
 	isCancelable: Boolean = false
@@ -83,16 +84,15 @@ fun Activity.headlessDialog(
 	return builder.create()
 }
 
-fun Activity.show(dialog: AlertDialog) {
+fun AppCompatActivity.show(dialog: AlertDialog) {
 	window?.makeFullScreen()
 	if (!isFinishing) dialog.show()
 }
 
-fun Activity.showConnectionDialog(listener: (() -> Unit)? = null) {
+fun AppCompatActivity.showConnectionDialog(listener: (() -> Unit)? = null) {
 	val binding = ConnDialogBinding.inflate(layoutInflater)
 	val dialog = defaultDialog(R.string.conn_title, binding.root)
 	binding.wifi.setOnClickListener {
-		@Suppress("DEPRECATION")
 		dialog.dismiss()
 		startActivityForResult(
 			Intent(Settings.ACTION_WIFI_SETTINGS),
@@ -100,7 +100,6 @@ fun Activity.showConnectionDialog(listener: (() -> Unit)? = null) {
 		)
 	}
 	binding.mobile.setOnClickListener {
-		@Suppress("DEPRECATION")
 		dialog.dismiss()
 		startActivityForResult(
 			Intent(Settings.ACTION_WIRELESS_SETTINGS),
@@ -114,7 +113,7 @@ fun Activity.showConnectionDialog(listener: (() -> Unit)? = null) {
 	show(dialog)
 }
 
-fun Activity.showRestartDialog(isRestart: Boolean = true) {
+fun AppCompatActivity.showRestartDialog(isRestart: Boolean = true) {
 	val message =
 		if (isRestart) getString(R.string.restart) else getString(R.string.no_space)
 	val binding = RestartDialogBinding.inflate(layoutInflater)
@@ -125,7 +124,7 @@ fun Activity.showRestartDialog(isRestart: Boolean = true) {
 	show(dialog)
 }
 
-fun Activity.isConnected(): Boolean {
+fun AppCompatActivity.isConnected(): Boolean {
 	val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 	if (ApiLevelHelper.isMarshmallow()) {
 		val activeNetwork = cm.activeNetwork ?: return false
