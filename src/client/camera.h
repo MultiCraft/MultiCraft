@@ -154,7 +154,7 @@ public:
 	void setDigging(s32 button);
 
 	// Replace the wielded item mesh
-	void wield(const ItemStack &item);
+	void wield(const ItemStack &item, const bool no_change_anim);
 
 	// Draw the wielded tool.
 	// This has to happen *after* the main scene is drawn.

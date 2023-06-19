@@ -1708,6 +1708,8 @@ to games.
 
 ### Node, item and tool groups
 
+* `no_change_anim`: Disables the wielditem changing animation when switching
+  to the item in the hotbar.
 * `not_in_creative_inventory`: (*) Special group for inventory mods to indicate
   that the item should be hidden in item lists.
 
