@@ -641,8 +641,11 @@ int ModApiEnvMod::l_add_entity(lua_State *L)
 	ServerActiveObject *obj = new LuaEntitySAO(env, pos, name, staticdata);
 	int objectid = env->addActiveObject(obj);
 	// If failed to add, return nothing (reads as nil)
-	if(objectid == 0)
+	if(objectid == 0) {
+		errorstream << "Failed to add entity " << name << " at " << PP(pos)
+			<< std::endl;
 		return 0;
+	}
 
 	// If already deleted (can happen in on_activate), return nil
 	if (obj->isGone())
