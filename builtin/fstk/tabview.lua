@@ -261,7 +261,7 @@ local function button_header(self)
 
 		toadd = toadd ..
 			btn_style(btn_name, side) ..
-			"style[" .. btn_name .. ";content_offset=0]" ..
+			"style[" .. btn_name .. ";content_offset=0;font_size=+1]" ..
 			"image_button[" .. x .. ",-1.1;" .. w + 0.22 .. ",0.9;;" ..
 				btn_name .. ";" .. caption .. ";true;false]"
 		x = x + w

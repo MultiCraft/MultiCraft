@@ -99,10 +99,13 @@ local function get_formspec(tabview, name, tabdata)
 			desc = info.description
 		end
 
+		local pkg_name = selected_pkg.name
+		pkg_name = (pkg_name:sub(1, 1)):upper() .. pkg_name:sub(2)
+
 		retval = retval ..
 				"image[5.5,0;3,2;" .. core.formspec_escape(modscreenshot) .. "]" ..
 				"image[5.5,0;3,2;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "cdb_img_corners.png;15]" ..
-				"label[8.25,0.6;" .. core.formspec_escape(selected_pkg.name) .. "]" ..
+				"label[8.25,0.6;" .. core.formspec_escape(pkg_name) .. "]" ..
 				"background9[5.6,2.3;6.2,2.4;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]"
 
 		if selected_pkg.type == "mod" then
@@ -150,8 +153,8 @@ local function get_formspec(tabview, name, tabdata)
 			end
 		end
 
-		retval = retval .. "textarea[5.85,2.2;6.35,2.9;;" ..
-			fgettext("Information:") .. ";" .. desc .. "]"
+		retval = retval .. scrollbar_style("textarea", true) ..
+			"textarea[5.83,2.23;6.33,2.89;;" .. fgettext("Information:") .. ";" .. desc .. "]"
 
 		if core.may_modify_path(selected_pkg.path) then
 			retval = retval ..
