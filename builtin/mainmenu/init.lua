@@ -110,6 +110,33 @@ function menudata.init_tabs()
 	-- Create main tabview
 	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0.1, y = 0})
 
+	tv_main:add_side_button({
+		tooltip = fgettext("Browse online content"),
+		tab_name_selected = "content",
+		is_open_cdb = true,
+		on_click = function(this)
+			if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
+				this:set_tab("content")
+			else
+				local dialog = create_store_dlg()
+				dialog:set_parent(this)
+				this:hide()
+				dialog:show()
+			end
+		end,
+	})
+
+	tv_main:add_side_button({
+		tooltip = fgettext("Settings"),
+		tab_name = "settings",
+	})
+
+	tv_main:add_side_button({
+		tooltip = fgettext("Credits"),
+		tab_name = "credits",
+		texture_prefix = "authors"
+	})
+
 	for i = 1, #pkgmgr.games do
 		if pkgmgr.games[i].id == "default" then
 			tv_main:add(tabs.local_default_game)
@@ -150,17 +177,6 @@ function menudata.init_tabs()
 			mm_texture.reset()
 		end
 	end
-
-	tv_main:add_side_button({
-		tooltip = fgettext("Settings"),
-		tab_name = "settings",
-	})
-
-	tv_main:add_side_button({
-		tooltip = fgettext("Credits"),
-		tab_name = "credits",
-		texture_prefix = "authors"
-	})
 
 	ui.set_default("maintab")
 
