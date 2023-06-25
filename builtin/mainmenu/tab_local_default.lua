@@ -83,12 +83,7 @@ local function get_formspec(this)
 			"tableoptions[background=#0000;border=false]" ..
 			"tablecolumns[" .. image_column(fgettext("Creative mode")) .. ";text]" ..
 			scrollbar_style("sp_worlds") ..
-			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
-
-			btn_style("switch_local") ..
-			"style[switch_local;fgimg=" .. defaulttexturedir_esc .. "switch_local.png;fgimg_hovered=" ..
-				defaulttexturedir_esc .. "switch_local_hover.png;padding=" .. (is_high_dpi() and -42 or -30) .. "]" ..
-			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
+			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
 	local enable_server = core.settings:get_bool("enable_server")
 	if enable_server then
