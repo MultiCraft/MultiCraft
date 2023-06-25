@@ -310,7 +310,7 @@ local function main_button_handler(this, fields, name, tab_data)
 				world.name ~= "" then
 				local index = menudata.worldlist:get_raw_index(selected)
 				local game = pkgmgr.find_by_gameid(world.gameid)
-				local delete_world_dlg = create_delete_world_dlg(world.name, index, game.name)
+				local delete_world_dlg = create_delete_world_dlg(world.name, index, game and game.name or world.gameid)
 				delete_world_dlg:set_parent(this)
 				this:hide()
 				delete_world_dlg:show()
