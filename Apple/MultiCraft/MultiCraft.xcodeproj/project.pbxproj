@@ -520,6 +520,7 @@
 		841AD8B828D0E2E40042E335 /* libvorbisfile.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisfile.a; path = ../deps/libvorbis/libvorbisfile.a; sourceTree = "<group>"; };
 		8425D3702837D89300753F0E /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		8425D3712837D89600753F0E /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/Localizable.strings; sourceTree = "<group>"; };
+		8425FC862A275920008569EE /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84287CA4291ED0F000E30F96 /* locale */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locale; path = ../../assets/locale; sourceTree = "<group>"; };
 		84287CA5291ED0F000E30F96 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../assets/fonts; sourceTree = "<group>"; };
 		844436EE28DA80C100662A9D /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../deps/freetype/libfreetype.a; sourceTree = "<group>"; };
@@ -1779,6 +1780,7 @@
 				id,
 				ja,
 				nb,
+				ar,
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			productRefGroup = 845856AA24B1322C0040BA4F /* Products */;
@@ -2097,6 +2099,7 @@
 				8425D3712837D89600753F0E /* id */,
 				8457C2C52848DB7300D69304 /* ja */,
 				840A686F2989C8B400ADE329 /* nb */,
+				8425FC862A275920008569EE /* ar */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -2130,12 +2133,15 @@
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fdata-sections",
+					"-ffunction-sections",
 					"-Wno-inconsistent-missing-override",
 					"-D__FILE__=__FILE_NAME__",
 					"-Wno-builtin-macro-redefined",
 				);
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -2162,12 +2168,15 @@
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
-				OTHER_CPLUSPLUSFLAGS = (
-					"$(OTHER_CFLAGS)",
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fdata-sections",
+					"-ffunction-sections",
 					"-Wno-inconsistent-missing-override",
 					"-D__FILE__=__FILE_NAME__",
 					"-Wno-builtin-macro-redefined",
 				);
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -2193,7 +2202,6 @@
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"USE_SYSTEM_GMP=0",
-					"_IRR_COMPILE_WITH_SDL_DEVICE_=1",
 					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
@@ -2222,7 +2230,6 @@
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.4;
-				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
@@ -2236,7 +2243,6 @@
 					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/SDL2",
 					"-L${SRCROOT}/../deps/libvorbis",
-					"-Wl,-dead_strip",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2265,7 +2271,6 @@
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"USE_SYSTEM_GMP=0",
-					"_IRR_COMPILE_WITH_SDL_DEVICE_=1",
 					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
@@ -2294,7 +2299,6 @@
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.4;
-				OTHER_CFLAGS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
@@ -2308,7 +2312,6 @@
 					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/SDL2",
 					"-L${SRCROOT}/../deps/libvorbis",
-					"-Wl,-dead_strip",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";

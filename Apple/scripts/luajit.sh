@@ -18,7 +18,7 @@ for ARCH in x86_64 arm64
 do
 	echo "Building LuaJIT for $ARCH"
 	make amalg -j \
-		TARGET_FLAGS="$OSX_FLAGS -fno-fast-math -funwind-tables -fasynchronous-unwind-tables -arch $ARCH"
+		TARGET_FLAGS="$OSX_FLAGS -fno-fast-math -Wno-overriding-t-option -arch $ARCH"
 	cp src/libluajit.a templib_$ARCH.a
 	make clean
 done
