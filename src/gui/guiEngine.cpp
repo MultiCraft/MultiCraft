@@ -81,6 +81,9 @@ video::ITexture *MenuTextureSource::getTexture(const std::string &name, u32 *id)
 		return NULL;
 
 #if ENABLE_GLES
+	if (hasNPotSupport())
+		return m_driver->getTexture(name.c_str());
+
 	video::ITexture *retval = m_driver->findTexture(name.c_str());
 	if (retval)
 		return retval;
