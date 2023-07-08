@@ -77,11 +77,6 @@ extern "C" int SDL_main(int argc, char *argv[])
 	_Exit(0);
 }
 
-/**
- * Handler for finished message box input
- * Intentionally NOT in namespace porting
- * ToDo: this doesn't work as expected, there's a workaround for it right now
- */
 extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
 			JNIEnv *env, jclass clazz)
@@ -138,7 +133,7 @@ void initAndroid()
 	activityClass = findClass("com/multicraft/game/GameActivity");
 	if (activityClass == nullptr)
 		errorstream <<
-			"porting::initAndroid unable to find java game activity class" <<
+			"porting::initAndroid unable to find Java game activity class" <<
 			std::endl;
 
 #ifdef GPROF
@@ -158,15 +153,14 @@ void cleanupAndroid()
 #endif
 }
 
-static std::string javaStringToUTF8(jstring js)
+static std::string readJavaString(jstring j_str)
 {
-	std::string str;
-	// Get string as a UTF-8 c-string
-	const char *c_str = jnienv->GetStringUTFChars(js, nullptr);
+	// Get string as a UTF-8 C string
+	const char *c_str = jnienv->GetStringUTFChars(j_str, nullptr);
 	// Save it
-	str = c_str;
-	// And free the c-string
-	jnienv->ReleaseStringUTFChars(js, c_str);
+	std::string str(c_str);
+	// And free the C string
+	jnienv->ReleaseStringUTFChars(j_str, c_str);
 	return str;
 }
 
@@ -191,7 +185,7 @@ static std::string getAndroidPath(
 	// Call getAbsolutePath
 	auto js_path = (jstring) jnienv->CallObjectMethod(ob_file, mt_getAbsPath);
 
-	return javaStringToUTF8(js_path);
+	return readJavaString(js_path);
 }
 
 void initializePaths()
@@ -221,7 +215,7 @@ void showInputDialog(const std::string &hint, const std::string &current, int ed
 		"(Ljava/lang/String;Ljava/lang/String;I)V");
 
 	FATAL_ERROR_IF(showdialog == nullptr,
-		"porting::showInputDialog unable to find java show dialog method");
+		"porting::showInputDialog unable to find Java show dialog method");
 
 	jstring jhint         = jnienv->NewStringUTF(hint.c_str());
 	jstring jcurrent      = jnienv->NewStringUTF(current.c_str());
@@ -236,7 +230,7 @@ void openURIAndroid(const std::string &url)
 		"(Ljava/lang/String;)V");
 
 	FATAL_ERROR_IF(url_open == nullptr,
-		"porting::openURIAndroid unable to find java openURI method");
+		"porting::openURIAndroid unable to find Java openURI method");
 
 	jstring jurl = jnienv->NewStringUTF(url.c_str());
 	jnienv->CallVoidMethod(activityObj, url_open, jurl);
@@ -248,7 +242,7 @@ int getInputDialogState()
 			"getDialogState", "()I");
 
 	FATAL_ERROR_IF(dialogstate == nullptr,
-		"porting::getInputDialogState unable to find java dialog state method");
+		"porting::getInputDialogState unable to find Java dialog state method");
 
 	return jnienv->CallIntMethod(activityObj, dialogstate);
 }
@@ -259,15 +253,10 @@ std::string getInputDialogValue()
 			"getDialogValue", "()Ljava/lang/String;");
 
 	FATAL_ERROR_IF(dialogvalue == nullptr,
-		"porting::getInputDialogValue unable to find java dialog value method");
+		"porting::getInputDialogValue unable to find Java getDialogValue method");
 
 	jobject result = jnienv->CallObjectMethod(activityObj, dialogvalue);
-
-	const char *javachars = jnienv->GetStringUTFChars((jstring) result, nullptr);
-	std::string text(javachars);
-	jnienv->ReleaseStringUTFChars((jstring) result, javachars);
-
-	return text;
+	return readJavaString((jstring) result);
 }
 
 float getTotalSystemMemory()
@@ -289,7 +278,7 @@ void handleError(const std::string &errType, const std::string &err)
 		"handleError", "(Ljava/lang/String;)V");
 
 	FATAL_ERROR_IF(report_err == nullptr,
-		"porting::handleError unable to find java handleError method");
+		"porting::handleError unable to find Java handleError method");
 
 	std::string errorMessage = errType + ": " + err;
 	jstring jerr = porting::getJniString(errorMessage);
@@ -302,7 +291,7 @@ void notifyServerConnect(bool is_multiplayer)
 			"notifyServerConnect", "(Z)V");
 
 	FATAL_ERROR_IF(notifyConnect == nullptr,
-		"porting::notifyServerConnect unable to find java notifyServerConnect method");
+		"porting::notifyServerConnect unable to find Java notifyServerConnect method");
 
 	auto param = (jboolean) is_multiplayer;
 
@@ -318,7 +307,7 @@ void notifyExitGame()
 			"notifyExitGame", "()V");
 
 	FATAL_ERROR_IF(notifyExit == nullptr,
-		"porting::notifyExitGame unable to find java notifyExitGame method");
+		"porting::notifyExitGame unable to find Java notifyExitGame method");
 
 	jnienv->CallVoidMethod(activityObj, notifyExit);
 
@@ -337,11 +326,12 @@ float getDisplayDensity()
 				"getDensity", "()F");
 
 		FATAL_ERROR_IF(getDensity == nullptr,
-			"porting::getDisplayDensity unable to find java getDensity method");
+			"porting::getDisplayDensity unable to find Java getDensity method");
 
 		value = jnienv->CallFloatMethod(activityObj, getDensity);
 		firstRun = false;
 	}
+
 	return value;
 }
 #endif // ndef SERVER
@@ -396,7 +386,7 @@ void upgrade(const std::string &item)
 			"upgrade", "(Ljava/lang/String;)V");
 
 	FATAL_ERROR_IF(upgradeGame == nullptr,
-		"porting::upgradeGame unable to find java upgrade method");
+		"porting::upgrade unable to find Java upgrade method");
 
 	jstring jitem = jnienv->NewStringUTF(item.c_str());
 	jnienv->CallVoidMethod(activityObj, upgradeGame, jitem);
@@ -412,11 +402,12 @@ int getRoundScreen()
 				"getRoundScreen", "()I");
 
 		FATAL_ERROR_IF(getRadius == nullptr,
-			"porting::getRadius unable to find java getRoundScreen method");
+			"porting::getRoundScreen unable to find Java getRoundScreen method");
 
 		radius = jnienv->CallIntMethod(activityObj, getRadius);
 		firstRun = false;
 	}
+
 	return radius;
 }
 
@@ -426,11 +417,11 @@ std::string getSecretKey(const std::string &key)
 			"getSecretKey", "(Ljava/lang/String;)Ljava/lang/String;");
 
 	FATAL_ERROR_IF(getKey == nullptr,
-		"porting::getSecretKey unable to find java getSecretKey method");
+		"porting::getSecretKey unable to find Java getSecretKey method");
 
 	jstring jkey = jnienv->NewStringUTF(key.c_str());
 	auto result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
 
-	return javaStringToUTF8(result);
+	return readJavaString(result);
 }
 }

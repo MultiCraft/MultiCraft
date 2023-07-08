@@ -5,9 +5,9 @@ APP_SHORT_COMMANDS := true
 APP_MODULES := MultiCraft
 
 ifdef NDEBUG
-APP_CFLAGS := -Ofast -fvisibility=hidden -Wno-extra-tokens -D__FILE__=__FILE_NAME__ -Wno-builtin-macro-redefined
+APP_CFLAGS := -Ofast -fvisibility=hidden -fvisibility-inlines-hidden -Wno-extra-tokens -D__FILE__=__FILE_NAME__ -Wno-builtin-macro-redefined
 else
-APP_CFLAGS := -g -D_DEBUG -O0 -fno-omit-frame-pointer
+APP_CFLAGS := -g -D_DEBUG -O1 -fno-omit-frame-pointer
 endif
 
 APP_CFLAGS += -fexceptions
