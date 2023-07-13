@@ -254,6 +254,9 @@ void GUIEngine::run()
 					   fog_pixelfog, fog_rangefog);
 	}
 
+	u64 t_last_frame = porting::getTimeUs();
+	f32 dtime = 0.0f;
+
 	while (RenderingEngine::run() && (!m_startgame) && (!m_kill)) {
 		const video::SColor sky_color = g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245);
 		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
@@ -325,7 +328,13 @@ void GUIEngine::run()
 		else
 			sleep_ms(frametime_min);
 
+		u64 t_now = porting::getTimeUs();
+		dtime = static_cast<f32>(t_now - t_last_frame) * 1.0e-6f;
+		t_last_frame = t_now;
+
 		m_script->step();
+
+		m_sound_manager->step(dtime);
 
 #if defined(__ANDROID__) || defined(__APPLE__)
 		std::string key, value;
