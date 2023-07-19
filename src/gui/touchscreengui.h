@@ -282,9 +282,9 @@ private:
 			bool visible = true);
 
 	rect<s32> getButtonRect(touch_gui_button_id id);
-	
+
 	void updateButtons();
-	
+
 	void moveJoystick(const SEvent &event, float dx, float dy);
 
 	struct id_status
