@@ -281,6 +281,10 @@ private:
 			const rect<s32> &button_rect, s32 texture_id,
 			bool visible = true);
 
+	rect<s32> getButtonRect(touch_gui_button_id id);
+	
+	void updateButtons();
+	
 	void moveJoystick(const SEvent &event, float dx, float dy);
 
 	struct id_status

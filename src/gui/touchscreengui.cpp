@@ -477,6 +477,126 @@ button_info *TouchScreenGUI::initJoystickButton(touch_gui_button_id id,
 	return btn;
 }
 
+rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
+{
+	switch (id) {
+	case joystick_off_id:
+		if (m_fixed_joystick) {
+			return rect<s32>(button_size / 2,
+					m_screensize.Y - button_size * 4.5,
+					button_size * 4.5,
+					m_screensize.Y - button_size / 2);
+		} else {
+			return rect<s32>(button_size / 2,
+					m_screensize.Y - button_size * 3.5,
+					button_size * 3.5,
+					m_screensize.Y - button_size / 2);
+		}
+	case joystick_bg_id:
+		return rect<s32>(button_size / 2,
+				m_screensize.Y - button_size * 4.5,
+				button_size * 4.5,
+				m_screensize.Y - button_size / 2);
+	case joystick_center_id:
+		return rect<s32>(0, 0, button_size * 1.5, button_size * 1.5);
+	case jump_id:
+		return rect<s32>(m_screensize.X - button_size * 3.37,
+				m_screensize.Y - button_size * 2.75,
+				m_screensize.X - button_size * 1.87,
+				m_screensize.Y - button_size * 1.25);
+	case drop_id:
+		return rect<s32>(m_screensize.X - button_size,
+				m_screensize.Y / 2 - button_size * 1.5,
+				m_screensize.X,
+				m_screensize.Y / 2 - button_size / 2);
+	case crunch_id:
+		return rect<s32>(m_screensize.X - button_size * 3.38,
+				m_screensize.Y - button_size * 0.75,
+				m_screensize.X - button_size * 1.7,
+				m_screensize.Y);
+	case inventory_id:
+		return rect<s32>(m_screensize.X - button_size * 1.7,
+				m_screensize.Y - button_size * 1.5,
+				m_screensize.X,
+				m_screensize.Y);
+	//case zoom_id:
+	//	return rect<s32>(m_screensize.X - (1.25 * button_size),
+	//			m_screensize.Y - (4 * button_size),
+	//			m_screensize.X - (0.25 * button_size),
+	//			m_screensize.Y - (3 * button_size));
+	case special1_id:
+		return rect<s32>(m_screensize.X - button_size * 1.8,
+				m_screensize.Y - button_size * 4,
+				m_screensize.X - button_size * 0.3,
+				m_screensize.Y - button_size * 2.5);
+	case escape_id:
+		return rect<s32>(m_screensize.X / 2 - button_size * 2,
+				0,
+				m_screensize.X / 2 - button_size,
+				button_size);
+	case minimap_id:
+		return rect<s32>(m_screensize.X / 2 - button_size,
+				0,
+				m_screensize.X / 2,
+				button_size);
+	case range_id:
+		return rect<s32>(m_screensize.X / 2,
+				0,
+				m_screensize.X / 2 + button_size,
+				button_size);
+	case camera_id:
+		return rect<s32>(m_screensize.X / 2 + button_size,
+				0,
+				m_screensize.X / 2 + button_size * 2,
+				button_size);
+	case chat_id:
+		return rect<s32>(m_screensize.X - button_size * 1.25,
+				0,
+				m_screensize.X,
+				button_size);
+	default:
+		return rect<s32>(0, 0, 0, 0);
+	}
+}
+
+void TouchScreenGUI::updateButtons()
+{
+	v2u32 screensize = m_device->getVideoDriver()->getScreenSize();
+
+	if (screensize != m_screensize) {
+		m_screensize = screensize;
+		button_size = std::min(m_screensize.Y / 4.5f,
+				RenderingEngine::getDisplayDensity() *
+				g_settings->getFloat("hud_scaling") * 65.0f);
+
+		for (auto &button : m_buttons) {
+			if (button.guibutton) {
+				s32 id = button.guibutton->getID();
+				rect<s32> rect = getButtonRect((touch_gui_button_id)id);
+				button.guibutton->setRelativePosition(rect);
+			}
+		}
+
+		if (m_joystick_btn_off->guibutton) {
+			s32 id = m_joystick_btn_off->guibutton->getID();
+			rect<s32> rect = getButtonRect((touch_gui_button_id)id);
+			m_joystick_btn_off->guibutton->setRelativePosition(rect);
+		}
+
+		if (m_joystick_btn_bg->guibutton) {
+			s32 id = m_joystick_btn_bg->guibutton->getID();
+			rect<s32> rect = getButtonRect((touch_gui_button_id)id);
+			m_joystick_btn_bg->guibutton->setRelativePosition(rect);
+		}
+
+		if (m_joystick_btn_center->guibutton) {
+			s32 id = m_joystick_btn_center->guibutton->getID();
+			rect<s32> rect = getButtonRect((touch_gui_button_id)id);
+			m_joystick_btn_center->guibutton->setRelativePosition(rect);
+		}
+	}
+}
+
 void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 {
 	assert(tsrc);
@@ -489,76 +609,36 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 	 */
 	if (m_fixed_joystick) {
 		m_joystick_btn_off = initJoystickButton(joystick_off_id,
-				rect<s32>(button_size / 2,
-						  m_screensize.Y - button_size * 4.5,
-						  button_size * 4.5,
-						  m_screensize.Y - button_size / 2), 0);
+				getButtonRect(joystick_off_id), 0);
 	} else {
 		m_joystick_btn_off = initJoystickButton(joystick_off_id,
-				rect<s32>(button_size / 2,
-						  m_screensize.Y - button_size * 3.5,
-						  button_size * 3.5,
-						  m_screensize.Y - button_size / 2), 0);
+				getButtonRect(joystick_off_id), 0);
 	}
 
 	m_joystick_btn_bg = initJoystickButton(joystick_bg_id,
-			rect<s32>(button_size / 2,
-					  m_screensize.Y - button_size * 4.5,
-					  button_size * 4.5,
-					  m_screensize.Y - button_size / 2),
-			1, false);
+			getButtonRect(joystick_bg_id), 1, false);
 
 	m_joystick_btn_center = initJoystickButton(joystick_center_id,
-			rect<s32>(0, 0, button_size * 1.5, button_size * 1.5), 2, false);
+			getButtonRect(joystick_center_id), 2, false);
 
 	// init jump button
-	initButton(jump_id,
-			rect<s32>(m_screensize.X - button_size * 3.37,
-					  m_screensize.Y - button_size * 2.75,
-					  m_screensize.X - button_size * 1.87,
-					  m_screensize.Y - button_size * 1.25),
-			L"x", false);
+	initButton(jump_id, getButtonRect(jump_id), L"x", false);
 
 	// init drop button
-	initButton(drop_id,
-			rect<s32>(m_screensize.X - button_size,
-					  m_screensize.Y / 2 - button_size * 1.5,
-					  m_screensize.X,
-					  m_screensize.Y / 2 - button_size / 2),
-			L"drop", false);
+	initButton(drop_id, getButtonRect(drop_id), L"drop", false);
 
 	// init crunch button
-	initButton(crunch_id,
-			rect<s32>(m_screensize.X - button_size * 3.38,
-					  m_screensize.Y - button_size * 0.75,
-					  m_screensize.X - button_size * 1.7,
-					  m_screensize.Y),
-			L"H", false);
+	initButton(crunch_id, getButtonRect(crunch_id), L"H", false);
 
 	// init inventory button
-	initButton(inventory_id,
-			rect<s32>(m_screensize.X - button_size * 1.7,
-					  m_screensize.Y - button_size * 1.5,
-					  m_screensize.X,
-					  m_screensize.Y),
-			L"inv", false);
+	initButton(inventory_id, getButtonRect(inventory_id), L"inv", false);
 
 	// init zoom button
-/*	initButton(zoom_id,
-			rect<s32>(m_screensize.X - (1.25 * button_size),
-					m_screensize.Y - (4 * button_size),
-					m_screensize.X - (0.25 * button_size),
-					m_screensize.Y - (3 * button_size)),
-			L"z", false);*/
+	// initButton(zoom_id, getButtonRect(zoom_id), L"z", false);
 
 	// init special1/aux button
 	if (!m_joystick_triggers_special1)
-		initButton(special1_id,
-				rect<s32>(m_screensize.X - button_size * 1.8,
-						m_screensize.Y - button_size * 4,
-						m_screensize.X - button_size * 0.3,
-						m_screensize.Y - button_size * 2.5),
-				L"spc1", false);
+		initButton(special1_id, getButtonRect(special1_id), L"spc1", false);
 
 /*	m_settingsbar.init(m_texturesource, "gear_icon.png", settings_starter_id,
 		v2s32(m_screensize.X - (1.25 * button_size),
@@ -593,44 +673,19 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 	m_rarecontrolsbar.addButton(drop_id,      L"drop", "drop_btn.png");*/
 
 	// init pause button [1]
-	initButton(escape_id,
-			rect<s32>(m_screensize.X / 2 - button_size * 2,
-					  0,
-					  m_screensize.X / 2 - button_size,
-					  button_size),
-			L"Exit", false);
+	initButton(escape_id, getButtonRect(escape_id), L"Exit", false);
 
 	// init minimap button [2]
-	initButton(minimap_id,
-			rect<s32>(m_screensize.X / 2 - button_size,
-					  0,
-					  m_screensize.X / 2,
-					  button_size),
-			L"minimap", false);
+	initButton(minimap_id, getButtonRect(minimap_id), L"minimap", false);
 
 	// init rangeselect button [3]
-	initButton(range_id,
-			rect<s32>(m_screensize.X / 2,
-					  0,
-					  m_screensize.X / 2 + button_size,
-					  button_size),
-			L"rangeview", false);
+	initButton(range_id, getButtonRect(range_id), L"rangeview", false);
 
 	// init camera button [4]
-	initButton(camera_id,
-			rect<s32>(m_screensize.X / 2 + button_size,
-					  0,
-					  m_screensize.X / 2 + button_size * 2,
-					  button_size),
-			L"camera", false);
+	initButton(camera_id, getButtonRect(camera_id), L"camera", false);
 
 	// init chat button
-	initButton(chat_id,
-			rect<s32>(m_screensize.X - button_size * 1.25,
-					  0,
-					  m_screensize.X,
-					  button_size),
-			L"Chat", false);
+	initButton(chat_id, getButtonRect(chat_id), L"Chat", false);
 
 	m_buttons_initialized = true;
 }
@@ -1161,6 +1216,8 @@ TouchScreenGUI::~TouchScreenGUI()
 
 void TouchScreenGUI::step(float dtime)
 {
+	updateButtons();
+
 	// simulate keyboard repeats
 	for (auto &button : m_buttons) {
 		if (!button.ids.empty()) {
