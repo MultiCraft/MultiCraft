@@ -177,7 +177,7 @@ void PlayerSAO::step(float dtime, bool send_recommended)
 		const ContentFeatures &c = m_env->getGameDef()->ndef()->get(n);
 		// If node generates drown
 		const bool noclip = m_privs.count("noclip") && (!m_is_singleplayer || g_settings->getBool("noclip"));
-		int drowning = (c.walkable && c.drawtype != NDT_NODEBOX && c.drawtype != NDT_AIRLIKE) ? 1 : c.drowning;
+		int drowning = (c.walkable && c.drawtype != NDT_NODEBOX && c.drawtype != NDT_AIRLIKE && c.drawtype != NDT_PLANTLIKE) ? 1 : c.drowning;
 		if (drowning > 0 && m_hp > 0 && !noclip) {
 			if (m_breath > 0)
 				setBreath(m_breath - 1);
