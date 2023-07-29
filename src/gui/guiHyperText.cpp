@@ -997,7 +997,7 @@ void TextDrawer::draw(const core::rect<s32> &clip_rect,
 //! constructor
 GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 		IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
-		Client *client, ISimpleTextureSource *tsrc) :
+		Client *client, ISimpleTextureSource *tsrc, const StyleSpec &style) :
 		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
 		m_client(client), m_vscrollbar(nullptr),
 		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
@@ -1019,6 +1019,7 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 
 	m_vscrollbar = new GUIScrollBar(Environment, this, -1, rect, false, true);
 	m_vscrollbar->setVisible(false);
+	m_vscrollbar->setStyle(style, tsrc);
 }
 
 //! destructor

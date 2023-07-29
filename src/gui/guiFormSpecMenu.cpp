@@ -1862,7 +1862,7 @@ void GUIFormSpecMenu::parseHyperText(parserData *data, const std::string &elemen
 	spec.sound = style.get(StyleSpec::Property::SOUND, "");
 
 	GUIHyperText *e = new GUIHyperText(spec.flabel.c_str(), Environment,
-			data->current_parent, spec.fid, rect, m_client, m_tsrc);
+			data->current_parent, spec.fid, rect, m_client, m_tsrc, style);
 	e->drop();
 
 	m_fields.push_back(spec);

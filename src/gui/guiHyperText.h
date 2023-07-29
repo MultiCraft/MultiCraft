@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include "config.h" // for USE_FREETYPE
+#include "StyleSpec.h"
 
 using namespace irr;
 
@@ -201,7 +202,7 @@ public:
 	GUIHyperText(const wchar_t *text, gui::IGUIEnvironment *environment,
 			gui::IGUIElement *parent, s32 id,
 			const core::rect<s32> &rectangle, Client *client,
-			ISimpleTextureSource *tsrc);
+			ISimpleTextureSource *tsrc, const StyleSpec &style);
 
 	//! destructor
 	virtual ~GUIHyperText();
