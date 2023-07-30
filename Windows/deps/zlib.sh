@@ -6,7 +6,7 @@ ZLIB_VERSION=1.2.13
 
 if [ ! -d zlib-src ]; then
 	wget https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz
-	tar -xzvf v$ZLIB_VERSION.tar.gz
+	tar -xzf v$ZLIB_VERSION.tar.gz
 	mv zlib-$ZLIB_VERSION zlib-src
 	rm v$ZLIB_VERSION.tar.gz
 fi

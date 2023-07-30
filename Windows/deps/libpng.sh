@@ -7,7 +7,7 @@ export DEPS_ROOT=$(pwd)
 
 if [ ! -d libpng-src ]; then
 	wget https://download.sourceforge.net/libpng/libpng-$PNG_VERSION.tar.gz
-	tar -xzvf libpng-$PNG_VERSION.tar.gz
+	tar -xzf libpng-$PNG_VERSION.tar.gz
 	mv libpng-$PNG_VERSION libpng-src
 	rm libpng-$PNG_VERSION.tar.gz
 	mkdir libpng-src/build
