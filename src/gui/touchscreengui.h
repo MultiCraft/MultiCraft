@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <IrrlichtDevice.h>
 
 #include <map>
+#include <memory>
 #include <vector>
 
 #include "client/tile.h"
@@ -144,7 +145,7 @@ private:
 	IGUIEnvironment *m_guienv;
 	IEventReceiver *m_receiver;
 	button_info m_starter;
-	std::vector<button_info *> m_buttons;
+	std::vector<std::shared_ptr<button_info>> m_buttons;
 
 	v2s32 m_upper_left;
 	v2s32 m_lower_right;
@@ -256,9 +257,9 @@ private:
 	bool m_joystick_has_really_moved = false;
 	bool m_fixed_joystick = false;
 	bool m_joystick_triggers_special1 = false;
-	button_info *m_joystick_btn_off = nullptr;
-	button_info *m_joystick_btn_bg = nullptr;
-	button_info *m_joystick_btn_center = nullptr;
+	std::shared_ptr<button_info> m_joystick_btn_off = nullptr;
+	std::shared_ptr<button_info> m_joystick_btn_bg = nullptr;
+	std::shared_ptr<button_info> m_joystick_btn_center = nullptr;
 
 	button_info m_buttons[after_last_element_id];
 
@@ -277,9 +278,13 @@ private:
 			float repeat_delay = BUTTON_REPEAT_DELAY);
 
 	// initialize a joystick button
-	button_info *initJoystickButton(touch_gui_button_id id,
+	std::shared_ptr<button_info> initJoystickButton(touch_gui_button_id id,
 			const rect<s32> &button_rect, s32 texture_id,
 			bool visible = true);
+
+	rect<s32> getButtonRect(touch_gui_button_id id);
+
+	void updateButtons();
 
 	void moveJoystick(const SEvent &event, float dx, float dy);
 
