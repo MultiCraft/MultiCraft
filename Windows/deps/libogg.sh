@@ -15,7 +15,7 @@ cmake .. \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS" \
 	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC"
 
-cmake --build . -j$NPROC
+cmake --build . -j${NPROC}
 
 # update `include` folder
 rm -rf ../../libogg/include

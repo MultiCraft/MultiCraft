@@ -6,7 +6,7 @@ SDL2_VERSION=2.26.5
 
 if [ ! -d SDL2-src ]; then
 	wget https://github.com/libsdl-org/SDL/archive/release-$SDL2_VERSION.tar.gz
-	tar -xzvf release-$SDL2_VERSION.tar.gz
+	tar -xzf release-$SDL2_VERSION.tar.gz
 	mv SDL-release-$SDL2_VERSION sdl2-src
 	rm release-$SDL2_VERSION.tar.gz
 fi
@@ -22,7 +22,7 @@ cmake .. \
     -DSDL_SHARED=0 \
     -DSDL_STATIC=1
 
-cmake --build . -j$NPROC
+cmake --build . -j${NPROC}
 
 # update `include` folder
 rm -rf ../../sdl2/include

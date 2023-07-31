@@ -6,14 +6,14 @@ LUAJIT_VERSION=2.1
 
 if [ ! -d luajit-src ]; then
 	wget https://github.com/LuaJIT/LuaJIT/archive/v$LUAJIT_VERSION.tar.gz
-	tar -xzvf v$LUAJIT_VERSION.tar.gz
+	tar -xzf v$LUAJIT_VERSION.tar.gz
 	mv LuaJIT-$LUAJIT_VERSION luajit-src
 	rm v$LUAJIT_VERSION.tar.gz
 fi
 
 cd luajit-src
 
-make amalg -j$NPROC BUILDMODE=static
+make amalg -j${NPROC} BUILDMODE=static
 
 # update `include` folder
 rm -rf ../luajit/include

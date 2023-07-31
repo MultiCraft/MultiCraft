@@ -1,12 +1,12 @@
 #!/bin/bash -e
 
-FREETYPE_VERSION=2.13.0
+FREETYPE_VERSION=2.13.1
 
 . ./sdk.sh
 
 if [ ! -d freetype-src ]; then
-	wget https://download.savannah.gnu.org/releases/freetype/freetype-$FREETYPE_VERSION.tar.gz
-	tar -xzvf freetype-$FREETYPE_VERSION.tar.gz
+	wget https://download-mirror.savannah.gnu.org/releases/freetype/freetype-$FREETYPE_VERSION.tar.gz
+	tar -xzf freetype-$FREETYPE_VERSION.tar.gz
 	mv freetype-$FREETYPE_VERSION freetype-src
 	rm freetype-$FREETYPE_VERSION.tar.gz
 	mkdir freetype-src/build
@@ -23,7 +23,7 @@ cmake .. \
 	-DFT_DISABLE_BROTLI=TRUE \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
 
-cmake --build . -j$NPROC
+cmake --build . -j${NPROC}
 
 # update `include` folder
 rm -rf ../../freetype/include

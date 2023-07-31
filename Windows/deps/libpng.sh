@@ -1,13 +1,13 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-PNG_VERSION=1.6.39
+PNG_VERSION=1.6.40
 
 export DEPS_ROOT=$(pwd)
 
 if [ ! -d libpng-src ]; then
 	wget https://download.sourceforge.net/libpng/libpng-$PNG_VERSION.tar.gz
-	tar -xzvf libpng-$PNG_VERSION.tar.gz
+	tar -xzf libpng-$PNG_VERSION.tar.gz
 	mv libpng-$PNG_VERSION libpng-src
 	rm libpng-$PNG_VERSION.tar.gz
 	mkdir libpng-src/build
@@ -24,7 +24,7 @@ cmake .. \
 	-DZLIB_INCLUDE_DIRS="$DEPS_ROOT/zlib/include" \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
 
-cmake --build . -j$NPROC
+cmake --build . -j${NPROC}
 
 # update `include` folder
 rm -rf ../../libpng/include

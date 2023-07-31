@@ -221,12 +221,15 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v3
-      - uses: msys2/setup-msys2@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
           update: true
-          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-autotools git zip
+          install: mingw-w64-x86_64-clang mingw-w64-x86_64-cmake mingw-w64-x86_64-autotools mingw-w64-x86_64-tcl git zip
 
       - name: Build
         run: |
@@ -243,7 +246,6 @@ jobs:
           cp -r ./builtin MultiCraft/
           cp -r ./client MultiCraft/
           cp -r ./fonts MultiCraft/
-          cp -r ./games MultiCraft/
           cp -r ./locale MultiCraft/
           cp -r ./textures MultiCraft/
           zip -r MultiCraft.zip MultiCraft
@@ -322,5 +324,5 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: msvc-${{ matrix.config.arch }}-${{ matrix.type }}
+          name: MultiCraft-msvc-${{ matrix.config.arch }}-${{ matrix.type }}
           path: .\Package\

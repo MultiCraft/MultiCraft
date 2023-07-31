@@ -6,7 +6,7 @@ SQLITE_VERSION=3.42.0
 
 if [ ! -d sqlite-src ]; then
 	wget https://www.sqlite.org/src/tarball/sqlite.tar.gz?r=version-$SQLITE_VERSION
-	tar -xzvf sqlite.tar.gz?r=version-$SQLITE_VERSION
+	tar -xzf sqlite.tar.gz?r=version-$SQLITE_VERSION
 	mv sqlite sqlite-src
 	rm sqlite.tar.gz?r=version-$SQLITE_VERSION
 	mkdir sqlite-src/build
@@ -18,7 +18,7 @@ cd sqlite-src/build
 	--enable-shared \
 	--enable-static
 
-make -j$NPROC
+make -j${NPROC}
 
 # update `include` folder
 rm -rf ../../sqlite/include
