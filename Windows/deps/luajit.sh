@@ -13,7 +13,7 @@ fi
 
 cd luajit-src
 
-make amalg -j$NPROC BUILDMODE=static
+make amalg -j${NPROC} BUILDMODE=static
 
 # update `include` folder
 rm -rf ../luajit/include

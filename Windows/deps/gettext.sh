@@ -15,7 +15,7 @@ cd gettext-src/gettext-runtime
 ./configure CFLAGS="$CFLAGS" CPPFLAGS="$CXXFLAGS" \
 	--disable-shared --enable-static --disable-libasprintf
 
-make -j$NPROC
+make -j${NPROC}
 
 # update `include` folder
 rm -rf ../../gettext/include

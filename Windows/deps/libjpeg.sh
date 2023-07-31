@@ -18,7 +18,7 @@ cmake .. \
 	-DENABLE_SHARED=OFF \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
 
-cmake --build . -j$NPROC
+cmake --build . -j${NPROC}
 
 # update `include` folder
 rm -rf ../../libjpeg/include

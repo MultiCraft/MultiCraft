@@ -24,7 +24,7 @@ cmake .. \
 	-DZLIB_INCLUDE_DIRS="$DEPS_ROOT/zlib/include" \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
 
-cmake --build . -j$NPROC
+cmake --build . -j${NPROC}
 
 # update `include` folder
 rm -rf ../../libpng/include

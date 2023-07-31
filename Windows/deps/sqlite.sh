@@ -18,7 +18,7 @@ cd sqlite-src/build
 	--enable-shared \
 	--enable-static
 
-make -j$NPROC
+make -j${NPROC}
 
 # update `include` folder
 rm -rf ../../sqlite/include
