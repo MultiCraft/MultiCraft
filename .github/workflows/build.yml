@@ -246,7 +246,6 @@ jobs:
           cp -r ./builtin MultiCraft/
           cp -r ./client MultiCraft/
           cp -r ./fonts MultiCraft/
-          cp -r ./games MultiCraft/
           cp -r ./locale MultiCraft/
           cp -r ./textures MultiCraft/
           zip -r MultiCraft.zip MultiCraft
@@ -325,5 +324,5 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: msvc-${{ matrix.config.arch }}-${{ matrix.type }}
+          name: MultiCraft-msvc-${{ matrix.config.arch }}-${{ matrix.type }}
           path: .\Package\
