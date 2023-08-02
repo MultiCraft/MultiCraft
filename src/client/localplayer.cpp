@@ -997,7 +997,7 @@ void LocalPlayer::old_move(f32 dtime, Environment *env, f32 pos_max_d,
 				std::fabs(player_p2df.Y - node_p2df.Y));
 
 			if (distance_f > min_distance_f ||
-					max_axis_distance_f > 0.5f * BS + sneak_max + 0.1f * BS)
+					max_axis_distance_f > 0.5f * BS + sneak_max + 0.05f * BS)
 				continue;
 
 			// The node to be sneaked on has to be walkable
