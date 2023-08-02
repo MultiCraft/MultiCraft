@@ -1039,15 +1039,13 @@ bool hasNPotSupport()
 	return supported;
 }
 #else
-// gles3 has NPotSupport and used on iOS by default
 bool hasNPotSupport()
 {
 #ifdef __IOS__
-	static const std::string &driverstring = g_settings->get("video_driver");
-	return (driverstring != "ogles1");
-#else
-	return false;
+	return true; // Irrlicht cares about it on iOS
 #endif
+	static const std::string &driverstring = g_settings->get("video_driver");
+	return (driverstring != "ogles1"); // gles3 has NPot Support and used instead of gles2
 }
 #endif
 
