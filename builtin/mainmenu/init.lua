@@ -73,7 +73,7 @@ local func = loadfile(basepath .. DIR_DELIM .. "hosting" .. DIR_DELIM .. "init.l
 
 --------------------------------------------------------------------------------
 local function main_event_handler(tabview, event)
-	if event == "MenuQuit" then
+	if event == "MenuQuit" and PLATFORM ~= "iOS" then
 		core.close()
 	end
 	return true
