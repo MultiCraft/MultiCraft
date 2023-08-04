@@ -17,14 +17,6 @@
 
 local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
 
-local default_worlds = {
-	{name = "World 1", mg_name = "v7p", seed = "15823438331521897617"},
-	{name = "World 2", mg_name = "v7p", seed = "1841722166046826822"},
-	{name = "World 3", mg_name = "v7p", seed = "CC"},
-	{name = "World 4", mg_name = "valleys", seed = "8572"},
-	{name = "World 5 Flat", mg_name = "flat", seed = "2"}
-}
-
 local function menu_render_worldlist()
 	local retval = {}
 
@@ -48,46 +40,7 @@ local function menu_render_worldlist()
 	return table.concat(retval, ",")
 end
 
-local function create_default_worlds()
-	if #menudata.worldlist:get_list() > 0 then return end
-
-	local _, gameindex = pkgmgr.find_by_gameid("default")
-	if not gameindex or gameindex == 0 then return end
-
-	-- Preserve the old map seed and mapgen values
-	local old_map_seed = core.settings:get("fixed_map_seed")
-	local old_mapgen = core.settings:get("mg_name")
-
-	-- Create the worlds
-	for _, world in ipairs(default_worlds) do
-		core.settings:set("fixed_map_seed", world.seed)
-		core.settings:set("mg_name", world.mg_name)
-		core.create_world(world.name, gameindex)
-	end
-
-	-- Restore the old values
-	if old_map_seed then
-		core.settings:set("fixed_map_seed", old_map_seed)
-	else
-		core.settings:remove("fixed_map_seed")
-	end
-	if old_mapgen then
-		core.settings:set("mg_name", old_mapgen)
-	else
-		core.settings:remove("mg_name")
-	end
-
-	menudata.worldlist:refresh()
-end
-
-local checked_worlds = false
 local function get_formspec(this)
-	-- Only check the worlds once (on restart)
-	if not checked_worlds then
-		create_default_worlds()
-	end
-	checked_worlds = true
-
 	local index = filterlist.get_current_index(menudata.worldlist,
 				tonumber(core.settings:get("mainmenu_last_selected_world")))
 	if not index or index < 1 then
@@ -130,12 +83,7 @@ local function get_formspec(this)
 			"tableoptions[background=#0000;border=false]" ..
 			"tablecolumns[" .. image_column(fgettext("Creative mode")) .. ";text]" ..
 			scrollbar_style("sp_worlds") ..
-			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]" ..
-
-			btn_style("switch_local") ..
-			"style[switch_local;fgimg=" .. defaulttexturedir_esc .. "switch_local.png;fgimg_hovered=" ..
-				defaulttexturedir_esc .. "switch_local_hover.png;padding=" .. (is_high_dpi() and -42 or -30) .. "]" ..
-			"image_button[10.6,-0.1;1.5,1.5;;switch_local;;true;false]"
+			"table[0,0;6.28,4.64;sp_worlds;" .. menu_render_worldlist() .. ";" .. index .. "]"
 
 	local enable_server = core.settings:get_bool("enable_server")
 	if enable_server then

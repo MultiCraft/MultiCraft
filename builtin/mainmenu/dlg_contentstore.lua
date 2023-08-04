@@ -457,7 +457,8 @@ local confirm_overwrite = {}
 function confirm_overwrite.get_formspec()
 	local package = confirm_overwrite.package
 
-	return "size[11.5,4.5]" ..
+	return "size[11.5,4.5]bgcolor[#0000]" ..
+			"background9[0,0;0,0;" .. defaulttexturedir_esc .. "bg_common.png;true;40]" ..
 			"label[2,2;" ..
 			fgettext("\"$1\" already exists. Would you like to overwrite it?", package.name) .. "]"..
 			btn_style("install", "red") ..

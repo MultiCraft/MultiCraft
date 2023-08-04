@@ -94,6 +94,7 @@ local function get_formspec(tabview, name, tabdata)
 		end
 		if selected.description then
 			retval = retval ..
+				scrollbar_style("textarea", true) ..
 				"textarea[7.5,2.2;4.8,3;;" .. esc((gamedata.serverdescription or ""), true) .. ";]"
 		end
 	end

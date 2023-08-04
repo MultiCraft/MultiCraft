@@ -159,7 +159,9 @@ local function get_formspec(_, _, tab_data)
 			btn_style("switch_local_default") ..
 			"style[switch_local_default;fgimg=" .. defaulttexturedir_esc .. "switch_local_default.png;fgimg_hovered=" ..
 				defaulttexturedir_esc .. "switch_local_default_hover.png;padding=" .. (is_high_dpi() and -42 or -30) .. "]" ..
-			"image_button[10.6,-0.1;1.5,1.5;;switch_local_default;;true;false]"
+			"real_coordinates[true]" ..
+			"image_button[13.98,0.31;1.6,1.6;;switch_local_default;;true;false]" ..
+			"real_coordinates[false]"
 	end
 
 	local enable_server = core.settings:get_bool("enable_server")
@@ -310,7 +312,7 @@ local function main_button_handler(this, fields, name, tab_data)
 				world.name ~= "" then
 				local index = menudata.worldlist:get_raw_index(selected)
 				local game = pkgmgr.find_by_gameid(world.gameid)
-				local delete_world_dlg = create_delete_world_dlg(world.name, index, game.name)
+				local delete_world_dlg = create_delete_world_dlg(world.name, index, game and game.name or world.gameid)
 				delete_world_dlg:set_parent(this)
 				this:hide()
 				delete_world_dlg:show()
