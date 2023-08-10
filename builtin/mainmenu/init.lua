@@ -44,7 +44,6 @@ dofile(menupath .. DIR_DELIM .. "textures.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_config_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_contentstore.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_create_world.lua")
-dofile(menupath .. DIR_DELIM .. "dlg_create_world_default.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_content.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_delete_world.lua")
 dofile(menupath .. DIR_DELIM .. "dlg_rename_modpack.lua")
@@ -65,7 +64,6 @@ end
 
 tabs.content  = dofile(menupath .. DIR_DELIM .. "tab_content.lua")
 tabs.credits  = dofile(menupath .. DIR_DELIM .. "tab_credits.lua")
-tabs.local_default_game = dofile(menupath .. DIR_DELIM .. "tab_local_default.lua")
 tabs.local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua")
 tabs.play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua")
 
@@ -136,14 +134,6 @@ function menudata.init_tabs()
 		tab_name = "credits",
 		texture_prefix = "authors"
 	})
-
-	for i = 1, #pkgmgr.games do
-		if pkgmgr.games[i].id == "default" then
-			tv_main:add(tabs.local_default_game)
-			tabs.local_game.hidden = true
-			break
-		end
-	end
 
 	tv_main:add(tabs.local_game)
 	if func then
