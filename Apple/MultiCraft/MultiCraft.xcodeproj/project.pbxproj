@@ -147,6 +147,7 @@
 		84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974428CA129C004E8CEC /* CoreHaptics.framework */; };
 		84C2AB5328DA7776001968EE /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C2AB5228DA7770001968EE /* libpng.a */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
+		84E33D882A7BBEE900609F77 /* wrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 84E33D872A7BBEE900609F77 /* wrapper.m */; };
 		84F20D5925D52790009562A9 /* static_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5525D52790009562A9 /* static_text.cpp */; };
 		84F20D5A25D52790009562A9 /* CGUITTFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5725D52790009562A9 /* CGUITTFont.cpp */; };
 		84F20DA225D527C5009562A9 /* serverpackethandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D9325D527C4009562A9 /* serverpackethandler.cpp */; };
@@ -598,6 +599,8 @@
 		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		84C2AB5228DA7770001968EE /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../deps/libpng/libpng.a; sourceTree = "<group>"; };
+		84E33D862A7BBEC100609F77 /* wrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wrapper.h; sourceTree = "<group>"; };
+		84E33D872A7BBEE900609F77 /* wrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = wrapper.m; sourceTree = "<group>"; };
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/libintl.a; sourceTree = "<group>"; };
 		84F20D5425D52790009562A9 /* irrUString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrUString.h; path = ../../../src/irrlicht_changes/irrUString.h; sourceTree = "<group>"; };
 		84F20D5525D52790009562A9 /* static_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = static_text.cpp; path = ../../../src/irrlicht_changes/static_text.cpp; sourceTree = "<group>"; };
@@ -1108,6 +1111,7 @@
 				845856B724B1322D0040BA4F /* Info.plist */,
 				845856BA24B1322D0040BA4F /* MultiCraft.entitlements */,
 				848ADEF627BD68AE001C60F3 /* Localizable.strings */,
+				84E33D852A7BBEA200609F77 /* Supporting Files */,
 				84585CD524B138F50040BA4F /* src */,
 			);
 			path = MultiCraft;
@@ -1670,6 +1674,15 @@
 			name = lua_api;
 			sourceTree = "<group>";
 		};
+		84E33D852A7BBEA200609F77 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				84E33D862A7BBEC100609F77 /* wrapper.h */,
+				84E33D872A7BBEE900609F77 /* wrapper.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		84F20D5B25D5279D009562A9 /* mapgen */ = {
 			isa = PBXGroup;
 			children = (
@@ -1738,7 +1751,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 1430;
 				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
@@ -2022,6 +2035,7 @@
 				84F20EA625D528C5009562A9 /* sidebyside.cpp in Sources */,
 				84F20E8325D52868009562A9 /* metricsbackend.cpp in Sources */,
 				84135C2425D526D700CA4DCF /* content_mapblock.cpp in Sources */,
+				84E33D882A7BBEE900609F77 /* wrapper.m in Sources */,
 				84F20E3225D5282A009562A9 /* l_nodetimer.cpp in Sources */,
 				84135B7325D5264B00CA4DCF /* inventorymanager.cpp in Sources */,
 				84135C1825D526D700CA4DCF /* filecache.cpp in Sources */,
@@ -2186,6 +2200,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -2253,6 +2268,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;

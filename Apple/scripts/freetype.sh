@@ -7,7 +7,7 @@ mkdir -p deps; cd deps
 
 if [ ! -d freetype-src ]; then
 	wget http://download.savannah.gnu.org/releases/freetype/freetype-$FREETYPE_VERSION.tar.gz
-	tar -xzvf freetype-$FREETYPE_VERSION.tar.gz
+	tar -xzf freetype-$FREETYPE_VERSION.tar.gz
 	mv freetype-$FREETYPE_VERSION freetype-src
 	rm freetype-$FREETYPE_VERSION.tar.gz
 	mkdir freetype-src/build

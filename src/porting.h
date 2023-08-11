@@ -126,6 +126,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#endif
 #endif
 
+#if defined(__APPLE__)
+	#include "wrapper.h"
+#endif
+
 namespace porting
 {
 
@@ -353,6 +357,11 @@ bool open_url(const std::string &url);
  * @param path Path to directory
  * @return true on success, false on failure
  */
+
+#if defined(__APPLE__)
+std::string getSecretKey(const std::string &key);
+#endif
+
 bool open_directory(const std::string &path);
 
 } // namespace porting

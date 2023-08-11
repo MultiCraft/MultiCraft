@@ -7,7 +7,7 @@ mkdir -p deps; cd deps
 
 if [ ! -d gettext-src ]; then
 	wget https://ftp.gnu.org/pub/gnu/gettext/gettext-$GETTEXT_VERSION.tar.gz
-	tar -xzvf gettext-$GETTEXT_VERSION.tar.gz
+	tar -xzf gettext-$GETTEXT_VERSION.tar.gz
 	mv gettext-$GETTEXT_VERSION gettext-src
 	rm gettext-$GETTEXT_VERSION.tar.gz
 fi

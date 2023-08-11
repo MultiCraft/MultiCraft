@@ -1,13 +1,13 @@
 #!/bin/bash -e
 
-JPEG_VERSION=2.1.5.1
+JPEG_VERSION=3.0.0
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
 
 if [ ! -d libjpeg-src ]; then
 	wget https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-$JPEG_VERSION.tar.gz
-	tar -xzvf libjpeg-turbo-$JPEG_VERSION.tar.gz
+	tar -xzf libjpeg-turbo-$JPEG_VERSION.tar.gz
 	mv libjpeg-turbo-$JPEG_VERSION libjpeg-src
 	rm libjpeg-turbo-$JPEG_VERSION.tar.gz
 fi

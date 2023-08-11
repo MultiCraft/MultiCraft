@@ -742,6 +742,13 @@ bool open_url(const std::string &url)
 	return open_uri(url);
 }
 
+#if defined(__APPLE__)
+std::string getSecretKey(const std::string &key)
+{
+	return std::string(get_secret_key(key.c_str()));
+}
+#endif
+
 bool open_directory(const std::string &path)
 {
 	if (!fs::IsDir(path)) {
