@@ -24,6 +24,6 @@ popd
 find $DEST -type d,f -name '.*' -print0 | xargs -0 -- rm -rf
 
 # remove broken languages
-for broken_lang in dv eo he hi kn ko ms_Arab nn pt_BR sr_* th zh_*; do
+for broken_lang in dv eo he hi kn ko ms_Arab nn pt_BR sr_* zh_*; do
 	rm -rf $DEST/$broken_lang
 done
