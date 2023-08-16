@@ -52,8 +52,8 @@ public:
 	void quitMenu();
 	void removeChildren();
 
-	virtual void regenerateGui(v2u32 screensize) = 0;
-	virtual void drawMenu() = 0;
+	virtual void regenerateGui(v2u32 screensize) {};
+	virtual void drawMenu() {};
 	virtual bool preprocessEvent(const SEvent &event);
 	virtual bool OnEvent(const SEvent &event) { return false; };
 	virtual bool pausesGame() { return false; } // Used for pause menu

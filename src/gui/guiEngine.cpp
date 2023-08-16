@@ -640,7 +640,7 @@ void GUIEngine::updateTopLeftTextSize()
 {
 	core::rect<s32> rect(0, 0, g_fontengine->getTextWidth(m_toplefttext.c_str()),
 		g_fontengine->getTextHeight());
-	rect += v2s32(5 + g_settings->getU16("round_screen"), 0);
+	rect += v2s32(5 + g_settings->getU16("round_screen") * 1.1, 0);
 
 	m_irr_toplefttext->remove();
 	m_irr_toplefttext = gui::StaticText::add(RenderingEngine::get_gui_env(),

@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 
 #ifdef __IOS__
-#include "porting_ios.h"
+#include "porting.h"
 extern "C" void external_pause_game();
 #endif
 

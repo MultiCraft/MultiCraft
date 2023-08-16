@@ -193,18 +193,12 @@ Minimap::Minimap(Client *client)
 
 	// Initialize minimap modes
 	addMode(MINIMAP_TYPE_OFF);
-#if !defined(__ANDROID__) && !defined(__IOS__)
 	addMode(MINIMAP_TYPE_SURFACE, 256);
 	addMode(MINIMAP_TYPE_SURFACE, 128);
-#endif
 	addMode(MINIMAP_TYPE_SURFACE, 64);
-#if !defined(__ANDROID__) && !defined(__IOS__)
-	addMode(MINIMAP_TYPE_RADAR,   512);
 	addMode(MINIMAP_TYPE_RADAR,   256);
 	addMode(MINIMAP_TYPE_RADAR,   128);
-#else
 	addMode(MINIMAP_TYPE_RADAR,   64);
-#endif
 
 	// Initialize minimap data
 	data = new MinimapData;
@@ -362,9 +356,6 @@ void Minimap::addMode(MinimapModeDef mode)
 		porting::mt_snprintf(label_buf, sizeof(label_buf),
 			mode.label.c_str(), zoom);
 		mode.label = label_buf;
-#if defined(__ANDROID__) || defined(__IOS__)
-		mode.label = mode.label.substr(0, mode.label.find(", "));
-#endif
 	}
 
 	m_modes.push_back(mode);

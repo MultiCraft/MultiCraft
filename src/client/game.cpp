@@ -4354,8 +4354,6 @@ void Game::showPauseMenu()
 	bool hasRealKeyboard = porting::hasRealKeyboard();
 	if (simple_singleplayer_mode && hasRealKeyboard)
 		ypos -= 0.6f;
-#endif
-#ifdef __IOS__
 	ypos += 0.5f;
 #endif
 	const bool high_dpi = RenderingEngine::isHighDpi();

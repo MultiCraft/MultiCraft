@@ -536,7 +536,6 @@ void set_default_settings()
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
 	settings->setDefault("curl_verify_cert", "false");
-	settings->setDefault("max_objects_per_block", "16");
 	settings->setDefault("doubletap_jump", "true");
 	settings->setDefault("gui_scaling_filter_txr2img", "false");
 	settings->setDefault("autosave_screensize", "false");
@@ -559,13 +558,14 @@ void set_default_settings()
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "60");
 		settings->setDefault("client_mapblock_limit", "50");
-		settings->setDefault("fps_max", "30");
+		settings->setDefault("fps_max", "35");
 		settings->setDefault("fps_max_unfocused", "10");
 		settings->setDefault("viewing_range", "30");
 		settings->setDefault("smooth_lighting", "false");
 		settings->setDefault("enable_3d_clouds", "false");
 		settings->setDefault("active_object_send_range_blocks", "1");
 		settings->setDefault("active_block_range", "1");
+		settings->setDefault("max_objects_per_block", "16");
 		settings->setDefault("dedicated_server_step", "0.2");
 		settings->setDefault("abm_interval", "3.0");
 		settings->setDefault("chunksize", "3");
@@ -586,14 +586,15 @@ void set_default_settings()
 		settings->setDefault("smooth_lighting", "false");
 		settings->setDefault("active_object_send_range_blocks", "1");
 		settings->setDefault("active_block_range", "2");
+		settings->setDefault("max_objects_per_block", "16");
 		settings->setDefault("dedicated_server_step", "0.2");
 		settings->setDefault("abm_interval", "2.0");
 		settings->setDefault("chunksize", "3");
 		settings->setDefault("max_block_generate_distance", "2");
 		settings->setDefault("arm_inertia", "false");
 #ifdef __ANDROID__
-	} else if (memoryMax >= 4 && memoryMax < 6) {
-		// medium settings for 4.1-6GB RAM
+	} else if (memoryMax >= 4 && memoryMax <= 5) {
+		// medium settings for 4.1-5GB RAM
 #elif __IOS__
 	} else if (([SDVersion deviceVersion] == iPhone6S) || ([SDVersion deviceVersion] == iPhone6SPlus) || ([SDVersion deviceVersion] == iPhoneSE) ||
 			   ([SDVersion deviceVersion] == iPhone7) || ([SDVersion deviceVersion] == iPhone7Plus) ||
@@ -607,6 +608,7 @@ void set_default_settings()
 		settings->setDefault("viewing_range", "60");
 		settings->setDefault("active_object_send_range_blocks", "2");
 		settings->setDefault("active_block_range", "2");
+		settings->setDefault("max_objects_per_block", "32");
 		settings->setDefault("max_block_generate_distance", "3");
 	} else {
 		// high settings
@@ -624,7 +626,7 @@ void set_default_settings()
 	// Android Settings
 #ifdef __ANDROID__
 	// Switch to olges2 with shaders on powerful Android devices
-	if (memoryMax >= 6) {
+	if (memoryMax > 5) {
 		settings->setDefault("video_driver", "ogles2");
 		settings->setDefault("enable_shaders", "true");
 	} else {
@@ -669,7 +671,7 @@ void set_default_settings()
 	// iOS Settings
 #ifdef __IOS__
 	// Switch to olges2 with shaders in new iOS versions
-	if (IOS_VERSION_AVAILABLE("13.0")) {
+	if (IOS_VERSION_AVAILABLE("14.0")) {
 		settings->setDefault("video_driver", "ogles2");
 		settings->setDefault("enable_shaders", "true");
 	} else {
@@ -690,7 +692,7 @@ void set_default_settings()
 		settings->setDefault("touch_sensitivity", "0.27");
 	} else if SDVersion5and5Inch {
 		// 5.5" iPhone Plus
-		settings->setDefault("hud_scaling", "0.65");
+		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("touch_sensitivity", "0.3");
 	} else if (SDVersion5and8Inch || SDVersion6and1Inch) {
 		// 5.8" and 6.1" iPhones
@@ -725,7 +727,8 @@ void set_default_settings()
 	}
 
 	// Settings for the Rounded Screen and Home Bar
-	if SDVersionRoundScreen {
+	int RoundScreen = porting::getRoundScreen();
+	if (RoundScreen > 0) {
 		int upwards = 25, round = 40;
 		if SDVersioniPhone12Series {
 			upwards = 20, round = 90;

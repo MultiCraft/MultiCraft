@@ -401,7 +401,7 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 			if (!ret && m_hovered && m_hovered != focused)
 				ret = m_hovered->OnEvent(mouse_event);
 			if (event.TouchInput.Event == ETIE_LEFT_UP) {
-				m_pointer = v2s32(0, 0);
+				m_pointer = AbsoluteClippingRect.UpperLeftCorner;
 				leave();
 			}
 			return ret;

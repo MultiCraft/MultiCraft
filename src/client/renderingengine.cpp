@@ -53,7 +53,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <winuser.h>
 #endif
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 #include "defaultsettings.h"
 #endif
 
@@ -143,6 +143,10 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 #endif
 
 	m_device = createDeviceEx(params);
+#if defined(__ANDROID__) || defined(__IOS__)
+	FATAL_ERROR_IF(!m_device, ("Device create failed. Driver Type: \"" +
+			std::string(RenderingEngine::getVideoDriverName(driverType)) + "\".").c_str());
+#endif
 	driver = m_device->getVideoDriver();
 
 	s_singleton = this;
@@ -152,11 +156,10 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	m_device->getGUIEnvironment()->setSkin(skin);
 	skin->drop();
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(__IOS__)
 	// Apply settings according to screen size
 	// We can get real screen size only after device initialization finished
-	if (m_device)
-		set_default_settings();
+	set_default_settings();
 #endif
 }
 
