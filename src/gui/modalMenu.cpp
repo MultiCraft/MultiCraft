@@ -168,12 +168,12 @@ void GUIModalMenu::quitMenu()
 	Environment->forceUpdateHoveredElement();
 #endif
 
-	this->drop();
-
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui && g_touchscreengui->isActive() && m_touchscreen_visible)
 		g_touchscreengui->show();
 #endif
+
+	this->drop();
 }
 
 void GUIModalMenu::removeChildren()

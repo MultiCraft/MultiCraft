@@ -225,7 +225,7 @@ private:
 	double m_touch_sensitivity;
 	std::map<int, rect<s32>> m_hud_rects;
 	std::map<size_t, irr::EKEY_CODE> m_hud_ids;
-	bool m_visible; // is the gui visible
+	bool m_visible = true; // is the gui visible
 	bool m_buttons_initialized = false;
 
 	// value in degree
