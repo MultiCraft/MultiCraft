@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mapgen/mapgen.h" // Mapgen::setDefaultSettings
 #include "util/string.h"
 
-#ifdef __ANDROID__
+#ifndef SERVER
 #include "client/renderingengine.h"
 #endif
 
@@ -496,7 +496,9 @@ void set_default_settings()
 	settings->setDefault("screen_dpi", "72");
 	settings->setDefault("display_density_factor", "1");
 
-	settings->setDefault("device_is_tablet", "false");
+#ifndef SERVER
+	settings->setDefault("device_is_tablet", std::to_string(RenderingEngine::isTablet()));
+#endif
 
 	// Altered settings for macOS
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
@@ -539,6 +541,11 @@ void set_default_settings()
 	settings->setDefault("gui_scaling_filter_txr2img", "false");
 	settings->setDefault("autosave_screensize", "false");
 	settings->setDefault("recent_chat_messages", "6");
+
+	if (RenderingEngine::isTablet()) {
+		settings->setDefault("recent_chat_messages", "8");
+		settings->setDefault("console_message_height", "0.4");
+	}
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
 #ifdef __ANDROID__
@@ -644,10 +651,6 @@ void set_default_settings()
 			// 7" tablets
 			g_settings->setDefault("hud_scaling", "0.9");
 			g_settings->setDefault("selectionbox_width", "6");
-		} else if (x_inches >= 7.0) {
-			settings->setDefault("device_is_tablet", "true");
-			settings->setDefault("recent_chat_messages", "8");
-			settings->setDefault("console_message_height", "0.4");
 		}
 
 		if (x_inches <= 4.5) {
@@ -675,12 +678,6 @@ void set_default_settings()
 	}
 
 	settings->setDefault("debug_log_level", "none");
-
-	if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-		settings->setDefault("device_is_tablet", "true");
-		settings->setDefault("recent_chat_messages", "8");
-		settings->setDefault("console_message_height", "0.4");
-	}
 
 	// Set the size of the elements depending on the screen size
 	if SDVersion4Inch {

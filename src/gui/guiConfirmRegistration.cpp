@@ -101,7 +101,7 @@ void GUIConfirmRegistration::regenerateGui(v2u32 screensize)
 	*/
 	float s = MYMIN(screensize.X / 600.f, screensize.Y / 360.f);
 #if HAVE_TOUCHSCREENGUI
-	s *= g_settings->getBool("device_is_tablet") ? 0.7f : 0.8f;
+	s *= RenderingEngine::isTablet() ? 0.7f : 0.8f;
 #else
 	s *= 0.5f;
 #endif

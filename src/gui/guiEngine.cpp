@@ -530,7 +530,7 @@ void GUIEngine::drawHeader(video::IVideoDriver *driver)
 	core::rect<s32> splashrect(0, 0, splashsize.X, splashsize.Y);
 	splashrect += v2s32((screensize.Width/2)-(splashsize.X/2), 0);
 
-	if (g_settings->getBool("device_is_tablet"))
+	if (RenderingEngine::isTablet())
 		splashrect += v2s32(0, splashsize.Y/4);
 #endif
 

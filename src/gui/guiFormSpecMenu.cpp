@@ -3394,7 +3394,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 			double prefer_imgsize = padded_screensize.Y / 10 * gui_scaling;
 
 			// Try to fit 13 coordinates on large tablets.
-			if (g_settings->getBool("device_is_tablet"))
+			if (RenderingEngine::isTablet())
 				prefer_imgsize = padded_screensize.Y / 13 * gui_scaling;
 #else
 			// Desktop computers have more space, so try to fit 15 coordinates.

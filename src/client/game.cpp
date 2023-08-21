@@ -2146,7 +2146,7 @@ void Game::openConsole(float scale, const wchar_t *line)
 		gui_chat_console->setAndroidChatOpen(true);
 	}
 
-	if (!g_settings->getBool("device_is_tablet"))
+	if (!RenderingEngine::isTablet())
 		return;
 #endif
 

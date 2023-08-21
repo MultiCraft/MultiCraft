@@ -791,13 +791,23 @@ v2u32 RenderingEngine::getDisplaySize()
 }
 #endif // __ANDROID__/__IOS__
 
+bool RenderingEngine::isTablet()
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	static const bool isTablet = SDL_IsTablet();
+	return isTablet;
+#else
+	return false;
+#endif
+}
+
 bool RenderingEngine::isHighDpi()
 {
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	return g_settings->getFloat("screen_dpi") / 72.0f >= 2;
 #elif defined(__IOS__)
 	float density = RenderingEngine::getDisplayDensity();
-	return g_settings->getBool("device_is_tablet") ? (density >= 2) : (density >= 3);
+	return isTablet() ? (density >= 2) : (density >= 3);
 #else
 	return RenderingEngine::getDisplayDensity() >= 3;
 #endif
