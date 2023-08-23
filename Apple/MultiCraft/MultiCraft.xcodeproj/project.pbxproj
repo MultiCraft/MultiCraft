@@ -10,7 +10,6 @@
 		84135B5F25D5264B00CA4DCF /* craftdef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC625D5261C00CA4DCF /* craftdef.cpp */; };
 		84135B6025D5264B00CA4DCF /* modchannels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC725D5261C00CA4DCF /* modchannels.cpp */; };
 		84135B6125D5264B00CA4DCF /* nodemetadata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC825D5261C00CA4DCF /* nodemetadata.cpp */; };
-		84135B6225D5264B00CA4DCF /* terminal_chat_console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135ACD25D5261D00CA4DCF /* terminal_chat_console.cpp */; };
 		84135B6325D5264B00CA4DCF /* nameidmapping.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135ACF25D5261D00CA4DCF /* nameidmapping.cpp */; };
 		84135B6425D5264B00CA4DCF /* map_settings_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AD025D5261D00CA4DCF /* map_settings_manager.cpp */; };
 		84135B6525D5264B00CA4DCF /* itemdef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AD125D5261E00CA4DCF /* itemdef.cpp */; };
@@ -300,7 +299,6 @@
 		84135ACA25D5261C00CA4DCF /* mapblock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mapblock.h; path = ../../../src/mapblock.h; sourceTree = "<group>"; };
 		84135ACB25D5261D00CA4DCF /* irrlichttypes_extrabloated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrlichttypes_extrabloated.h; path = ../../../src/irrlichttypes_extrabloated.h; sourceTree = "<group>"; };
 		84135ACC25D5261D00CA4DCF /* itemstackmetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = itemstackmetadata.h; path = ../../../src/itemstackmetadata.h; sourceTree = "<group>"; };
-		84135ACD25D5261D00CA4DCF /* terminal_chat_console.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = terminal_chat_console.cpp; path = ../../../src/terminal_chat_console.cpp; sourceTree = "<group>"; };
 		84135ACE25D5261D00CA4DCF /* mapsector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mapsector.h; path = ../../../src/mapsector.h; sourceTree = "<group>"; };
 		84135ACF25D5261D00CA4DCF /* nameidmapping.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nameidmapping.cpp; path = ../../../src/nameidmapping.cpp; sourceTree = "<group>"; };
 		84135AD025D5261D00CA4DCF /* map_settings_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = map_settings_manager.cpp; path = ../../../src/map_settings_manager.cpp; sourceTree = "<group>"; };
@@ -319,7 +317,6 @@
 		84135ADE25D5262000CA4DCF /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = debug.h; path = ../../../src/debug.h; sourceTree = "<group>"; };
 		84135ADF25D5262000CA4DCF /* collision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = collision.cpp; path = ../../../src/collision.cpp; sourceTree = "<group>"; };
 		84135AE025D5262000CA4DCF /* chatmessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chatmessage.h; path = ../../../src/chatmessage.h; sourceTree = "<group>"; };
-		84135AE125D5262100CA4DCF /* terminal_chat_console.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = terminal_chat_console.h; path = ../../../src/terminal_chat_console.h; sourceTree = "<group>"; };
 		84135AE225D5262100CA4DCF /* constants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = constants.h; path = ../../../src/constants.h; sourceTree = "<group>"; };
 		84135AE325D5262100CA4DCF /* object_properties.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = object_properties.cpp; path = ../../../src/object_properties.cpp; sourceTree = "<group>"; };
 		84135AE425D5262100CA4DCF /* log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = log.h; path = ../../../src/log.h; sourceTree = "<group>"; };
@@ -1113,6 +1110,7 @@
 				848ADEF627BD68AE001C60F3 /* Localizable.strings */,
 				84E33D852A7BBEA200609F77 /* Supporting Files */,
 				84585CD524B138F50040BA4F /* src */,
+				84D4D9082A93707F00CACCC7 /* lib */,
 			);
 			path = MultiCraft;
 			sourceTree = "<group>";
@@ -1157,17 +1155,13 @@
 				84135C2F25D526E500CA4DCF /* content */,
 				84135C3C25D5270200CA4DCF /* database */,
 				84135C5225D5272B00CA4DCF /* gui */,
-				8458610424B13BD40040BA4F /* gmp */,
 				8458601724B1399F0040BA4F /* irrlicht_changes */,
 				84F20D5B25D5279D009562A9 /* mapgen */,
-				8458610824B13BF10040BA4F /* json */,
 				8458601B24B139B40040BA4F /* network */,
 				8458602D24B139F10040BA4F /* script */,
 				84135BA225D5267D00CA4DCF /* server */,
 				84A1F9A5252E615B00000717 /* threading */,
 				8458602F24B13A020040BA4F /* util */,
-				849D0840278AC1A300471354 /* luachacha */,
-				8473ED5825C053D00053293B /* luautf8 */,
 				84135AF225D5262500CA4DCF /* activeobject.h */,
 				84135AF825D5262800CA4DCF /* activeobjectmgr.h */,
 				84135B3925D5264100CA4DCF /* ban.cpp */,
@@ -1295,8 +1289,6 @@
 				84135AE625D5262100CA4DCF /* sound.h */,
 				84135B5925D5264A00CA4DCF /* staticobject.cpp */,
 				84135B5325D5264900CA4DCF /* staticobject.h */,
-				84135ACD25D5261D00CA4DCF /* terminal_chat_console.cpp */,
-				84135AE125D5262100CA4DCF /* terminal_chat_console.h */,
 				84135B3025D5263E00CA4DCF /* texture_override.cpp */,
 				84135B2225D5263A00CA4DCF /* texture_override.h */,
 				84135B3525D5264000CA4DCF /* tileanimation.cpp */,
@@ -1506,15 +1498,17 @@
 				8458610624B13BDF0040BA4F /* mini-gmp.h */,
 			);
 			name = gmp;
+			path = ..;
 			sourceTree = "<group>";
 		};
-		8458610824B13BF10040BA4F /* json */ = {
+		8458610824B13BF10040BA4F /* jsoncpp */ = {
 			isa = PBXGroup;
 			children = (
 				8458610B24B13C090040BA4F /* json.h */,
 				8458610924B13BF90040BA4F /* jsoncpp.cpp */,
 			);
-			name = json;
+			name = jsoncpp;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		8473ED5825C053D00053293B /* luautf8 */ = {
@@ -1524,6 +1518,7 @@
 				847C6D4A25D6F483008F5FC8 /* lutf8lib.c */,
 			);
 			name = luautf8;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		849D0840278AC1A300471354 /* luachacha */ = {
@@ -1537,6 +1532,7 @@
 				849D0845278AC1B200471354 /* lchacha.c */,
 			);
 			name = luachacha;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		84A1F9A5252E615B00000717 /* threading */ = {
@@ -1672,6 +1668,17 @@
 				84F20E0925D52829009562A9 /* l_vmanip.h */,
 			);
 			name = lua_api;
+			sourceTree = "<group>";
+		};
+		84D4D9082A93707F00CACCC7 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				8458610424B13BD40040BA4F /* gmp */,
+				8458610824B13BF10040BA4F /* jsoncpp */,
+				849D0840278AC1A300471354 /* luachacha */,
+				8473ED5825C053D00053293B /* luautf8 */,
+			);
+			path = lib;
 			sourceTree = "<group>";
 		};
 		84E33D852A7BBEA200609F77 /* Supporting Files */ = {
@@ -2027,7 +2034,6 @@
 				84F20F0B25D52958009562A9 /* guiHyperText.cpp in Sources */,
 				84135B6725D5264B00CA4DCF /* filesys.cpp in Sources */,
 				84F20EA325D528C5009562A9 /* plain.cpp in Sources */,
-				84135B6225D5264B00CA4DCF /* terminal_chat_console.cpp in Sources */,
 				84F20DD825D52812009562A9 /* s_nodemeta.cpp in Sources */,
 				84135B8225D5264C00CA4DCF /* server.cpp in Sources */,
 				84F20DDB25D52812009562A9 /* s_security.cpp in Sources */,
