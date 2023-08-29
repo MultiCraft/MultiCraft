@@ -1867,7 +1867,8 @@ void Game::updateStats(RunStats *stats, const FpsControl &draw_times,
 void Game::processUserInput(f32 dtime)
 {
 	// Reset input if window not active or some menu is active
-	if (!device->isWindowActive() || isMenuActive() || guienv->hasFocus(gui_chat_console)) {
+	if (!device->isWindowActive() || isMenuActive() || guienv->hasFocus(gui_chat_console) ||
+			gui_chat_console->getAndroidChatOpen()) {
 		input->clear();
 #ifdef HAVE_TOUCHSCREENGUI
 		g_touchscreengui->hide();
@@ -1891,10 +1892,11 @@ void Game::processUserInput(f32 dtime)
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (!porting::hasRealKeyboard()) {
 		auto formspec = m_game_ui->getFormspecGUI();
-		if (formspec)
-			formspec->getAndroidUIInput();
-		else
+		if (gui_chat_console->getAndroidChatOpen())
 			handleAndroidChatInput();
+		else if (formspec)
+			formspec->getAndroidUIInput();
+
 	}
 #endif
 
@@ -2170,6 +2172,12 @@ void Game::handleAndroidChatInput()
 		if (!text.empty() && gui_chat_console->isOpen()) {
 			gui_chat_console->closeConsole();
 		}
+#ifdef HAVE_TOUCHSCREENGUI
+		if (!gui_chat_console->isOpen()) {
+			if (g_touchscreengui && g_touchscreengui->isActive())
+				g_touchscreengui->show();
+		}
+#endif
 	}
 }
 #endif
