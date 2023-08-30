@@ -3607,6 +3607,9 @@ bool GUIFormSpecMenu::getAndroidUIInput()
 	if (m_jni_field_name.empty())
 		return false;
 
+	if (porting::getInputDialogOwner() != "modalmenu")
+		return false;
+
 	// still waiting
 	if (porting::getInputDialogState() == -1)
 		return true;

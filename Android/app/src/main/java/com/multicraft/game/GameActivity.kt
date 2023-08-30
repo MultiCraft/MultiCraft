@@ -260,6 +260,9 @@ class GameActivity : SDLActivity() {
 	}
 
 	@Suppress("unused")
+	fun isDialogActive() = isInputActive
+
+	@Suppress("unused")
 	fun getDialogState() = messageReturnCode
 
 	@Suppress("unused")
