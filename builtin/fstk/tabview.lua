@@ -178,7 +178,7 @@ local function get_formspec(self, popup_w, popup_h, popup_fs)
 		fs[#fs + 1] = "bgcolor[;neither]"
 		fs[#fs + 1] = "listcolors[#000;#000;#000;#dff6f5;#302c2e]"
 		fs[#fs + 1] = fmt("background9[1.25,0;%s,%s;%sbg_common.png;false;32]",
-			w, h + 1.15, defaulttexturedir)
+			w, h + 1.15, defaulttexturedir_esc)
 
 		add_button_header(self, fs, w)
 
@@ -211,7 +211,7 @@ local function get_formspec(self, popup_w, popup_h, popup_fs)
 			fs[#fs + 1] = fmt("container[%s,%s]", (w + 2.5 - popup_w) / 2,
 				(h + 1.15 - popup_h) / 2)
 			fs[#fs + 1] = fmt("style[popup_bg;bgimg=%sbg_common.png;bgimg_middle=32]",
-				defaulttexturedir)
+				defaulttexturedir_esc)
 			fs[#fs + 1] = fmt("image_button[0,0;%s,%s;;popup_bg;;false;false]",
 				popup_w, popup_h)
 			fs[#fs + 1] = popup_fs

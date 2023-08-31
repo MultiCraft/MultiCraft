@@ -160,14 +160,13 @@ os.tmpname = function()
 end
 
 --------------------------------------------------------------------------------
-local button_path = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
 local worldlist_scrbar_pos = 0
 function menu_render_worldlist(selected_index)
 	local fs = {"formspec_version[4]"}
 
 	local outer_w, outer_h = 6.93, 5.65
 	fs[#fs + 1] = fmt("background9[0.52,0.21;%s,%s;%sworldlist_bg_new.png;false;32]",
-		outer_w + 1.2, outer_h + 0.2, button_path)
+		outer_w + 1.2, outer_h + 0.2, defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc)
 	fs[#fs + 1] = fmt("scroll_container[0.62,0.31;%s,%s;scrbar;vertical]", outer_w, outer_h)
 
 	local creative = core.settings:get_bool("creative_mode", false)
@@ -211,11 +210,9 @@ function menu_render_worldlist(selected_index)
 
 	fs[#fs + 1] = fmt("scrollbaroptions[max=%d;thumbsize=%s]", math.ceil(scrollbar_max),
 		(outer_h / inner_h) * scrollbar_max)
-	fs[#fs + 1] = fmt("scrollbar[%s,0.31;0.8,5.65;vertical;scrbar;%s;" ..
-		"%sscrollbar_bg.png,%sscrollbar_slider_middle.png,%sscrollbar_up.png," ..
-		"%sscrollbar_down.png,%sscrollbar_slider_top.png,%sscrollbar_slider_bottom.png]",
-		outer_w + 0.82, worldlist_scrbar_pos, button_path, button_path,
-		button_path, button_path, button_path, button_path)
+	fs[#fs + 1] = scrollbar_style("scrbar")
+	fs[#fs + 1] = fmt("scrollbar[%s,0.31;0.8,5.65;vertical;scrbar;%s]",
+		outer_w + 0.82, worldlist_scrbar_pos)
 
 	return table.concat(fs)
 end
