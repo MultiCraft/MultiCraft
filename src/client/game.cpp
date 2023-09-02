@@ -819,7 +819,7 @@ protected:
 	}
 
 #if defined(__ANDROID__) || defined(__IOS__)
-	void handleAndroidChatInput();
+	void handleTouchChatInput();
 #endif
 
 private:
@@ -1897,11 +1897,11 @@ void Game::processUserInput(f32 dtime)
 	input->step(dtime);
 
 #if defined(__ANDROID__) || defined(__IOS__)
-	handleAndroidChatInput();
+	handleTouchChatInput();
 
 	auto formspec = m_game_ui->getFormspecGUI();
 	if (formspec)
-		formspec->getAndroidUIInput();
+		formspec->getTouchUIInput();
 #endif
 
 	bool doubletap_jump = m_cache_doubletap_jump;
@@ -2163,7 +2163,7 @@ void Game::openConsole(float scale, const wchar_t *line)
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
-void Game::handleAndroidChatInput()
+void Game::handleTouchChatInput()
 {
 	if (porting::getInputDialogOwner() == "chat" &&
 			porting::getInputDialogState() == 0) {

@@ -220,7 +220,7 @@ void GUIConfirmRegistration::drawMenu()
 
 	gui::IGUIElement::draw();
 #if defined(__ANDROID__) || defined(__IOS__)
-	getAndroidUIInput();
+	getTouchUIInput();
 #endif
 }
 
@@ -308,7 +308,7 @@ bool GUIConfirmRegistration::OnEvent(const SEvent &event)
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
-bool GUIConfirmRegistration::getAndroidUIInput()
+bool GUIConfirmRegistration::getTouchUIInput()
 {
 	if (m_jni_field_name.empty() || m_jni_field_name != "password")
 		return false;
