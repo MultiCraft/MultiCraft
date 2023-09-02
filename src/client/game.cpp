@@ -2173,7 +2173,7 @@ void Game::handleTouchChatInput()
 			gui_chat_console->closeConsole();
 		}
 #ifdef HAVE_TOUCHSCREENGUI
-		if (!gui_chat_console->isOpen()) {
+		if (!gui_chat_console->isOpen() && !isMenuActive()) {
 			if (g_touchscreengui && g_touchscreengui->isActive())
 				g_touchscreengui->show();
 		}
