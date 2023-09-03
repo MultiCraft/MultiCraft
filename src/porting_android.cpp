@@ -268,6 +268,8 @@ int getInputDialogState()
 
 std::string getInputDialogValue()
 {
+	input_dialog_owner = "";
+
 	jmethodID dialogvalue = jnienv->GetMethodID(activityClass,
 			"getDialogValue", "()Ljava/lang/String;");
 
