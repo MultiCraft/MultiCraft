@@ -266,7 +266,7 @@ public:
 	std::vector<std::string>* getDropDownValues(const std::string &name);
 
 #if defined(__ANDROID__) || defined(__IOS__)
-	bool getAndroidUIInput();
+	bool getTouchUIInput();
 #endif
 
 protected:

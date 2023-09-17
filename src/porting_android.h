@@ -34,6 +34,8 @@ namespace porting {
 // java <-> c++ interaction interface
 extern JNIEnv *jnienv;
 
+extern std::string input_dialog_owner;
+
 // do initialization required on android only
 void initAndroid();
 
@@ -51,7 +53,11 @@ void initializePaths();
  * @param editType type of texfield
  * (1 == multiline text input; 2 == single line text input; 3 == password field)
  */
-void showInputDialog(const std::string &hint, const std::string &current, int editType);
+void showInputDialog(const std::string &hint, const std::string &current, int editType, std::string owner = "");
+
+std::string getInputDialogOwner();
+
+bool isInputDialogActive();
 
 void openURIAndroid(const std::string &url);
 

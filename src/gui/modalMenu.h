@@ -58,7 +58,7 @@ public:
 	virtual bool OnEvent(const SEvent &event) { return false; };
 	virtual bool pausesGame() { return false; } // Used for pause menu
 #if defined(__ANDROID__) || defined(__IOS__)
-	virtual bool getAndroidUIInput() { return false; }
+	virtual bool getTouchUIInput() { return false; }
 #endif
 
 protected:

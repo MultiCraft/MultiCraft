@@ -52,7 +52,7 @@ public:
 
 	bool OnEvent(const SEvent &event);
 #if defined(__ANDROID__) || defined(__IOS__)
-	bool getAndroidUIInput();
+	bool getTouchUIInput();
 #endif
 
 private:
