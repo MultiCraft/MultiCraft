@@ -29,6 +29,7 @@ rm templib_*.a
 
 mkdir -p ../luajit/include
 cp -v src/*.h ../luajit/include
+cp -v ../luajit/include/luajit_rolling.h ../luajit/include/luajit.h
 cp -v libluajit.a ../luajit
 
 echo "LuaJIT build successful"

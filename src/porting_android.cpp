@@ -95,6 +95,7 @@ namespace porting {
 JNIEnv      *jnienv;
 jclass       activityClass;
 jobject      activityObj;
+std::string  input_dialog_owner;
 
 jclass findClass(const std::string &classname)
 {
@@ -209,8 +210,10 @@ void initializePaths()
 			activityObj, mt_getAbsPath, "getCacheDir");
 }
 
-void showInputDialog(const std::string &hint, const std::string &current, int editType)
+void showInputDialog(const std::string &hint, const std::string &current, int editType, std::string owner)
 {
+	input_dialog_owner = owner;
+
 	jmethodID showdialog = jnienv->GetMethodID(activityClass, "showDialog",
 		"(Ljava/lang/String;Ljava/lang/String;I)V");
 
@@ -236,6 +239,22 @@ void openURIAndroid(const std::string &url)
 	jnienv->CallVoidMethod(activityObj, url_open, jurl);
 }
 
+std::string getInputDialogOwner()
+{
+	return input_dialog_owner;
+}
+
+bool isInputDialogActive()
+{
+	jmethodID dialog_active = jnienv->GetMethodID(activityClass,
+			"isDialogActive", "()Z");
+
+	FATAL_ERROR_IF(dialog_active == nullptr,
+		"porting::isInputDialogActive unable to find Java dialog state method");
+
+	return jnienv->CallBooleanMethod(activityObj, dialog_active);
+}
+
 int getInputDialogState()
 {
 	jmethodID dialogstate = jnienv->GetMethodID(activityClass,
@@ -249,6 +268,8 @@ int getInputDialogState()
 
 std::string getInputDialogValue()
 {
+	input_dialog_owner = "";
+
 	jmethodID dialogvalue = jnienv->GetMethodID(activityClass,
 			"getDialogValue", "()Ljava/lang/String;");
 

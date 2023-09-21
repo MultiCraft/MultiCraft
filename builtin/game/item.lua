@@ -6,6 +6,7 @@ local abs, atan2, cos, floor, max, sin, random =
 	math.abs, math.atan2, math.cos, math.floor, math.max, math.sin, math.random
 local vadd, vnew, vmultiply, vnormalize, vsubtract =
 	vector.add, vector.new, vector.multiply, vector.normalize, vector.subtract
+local tcopy = table.copy
 
 local creative_mode = core.settings:get_bool("creative_mode")
 local node_drop = core.settings:get_bool("node_drop")
@@ -529,14 +530,15 @@ end
 
 function core.item_drop(itemstack, dropper, pos)
 	local dropper_is_player = dropper and dropper:is_player()
-	local p = table.copy(pos)
-	local cnt = itemstack:get_count()
+	local p = tcopy(pos)
 	if not core.is_valid_pos(p) then
 		return
 	end
 	if dropper_is_player then
 		p.y = p.y + 1.2
 	end
+	local sneak = dropper_is_player and dropper:get_player_control().sneak
+	local cnt = sneak and 1 or itemstack:get_count()
 	local item = itemstack:take_item(cnt)
 	local obj = core.add_item(p, item)
 	if obj then

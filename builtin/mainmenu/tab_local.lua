@@ -130,7 +130,7 @@ local function get_formspec(_, _, tab_data)
 	if game and game.moddable then
 		retval = retval ..
 			btn_style("world_configure") ..
-			"image_button[8.1,4.85;4,0.9;;world_configure;" .. fgettext("Select Mods") .. ";true;false]" ..
+			"image_button[8.1,4.85;4,0.9;;world_configure;" .. fgettext("Settings") .. ";true;false]" ..
 			"image[8.3,5.02;0.5,0.5;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "world_settings.png]"
 	end
 

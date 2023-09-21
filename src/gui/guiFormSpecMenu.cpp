@@ -3602,9 +3602,12 @@ void GUIFormSpecMenu::legacySortElements(core::list<IGUIElement *>::Iterator fro
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
-bool GUIFormSpecMenu::getAndroidUIInput()
+bool GUIFormSpecMenu::getTouchUIInput()
 {
 	if (m_jni_field_name.empty())
+		return false;
+
+	if (porting::getInputDialogOwner() != "modalmenu")
 		return false;
 
 	// still waiting

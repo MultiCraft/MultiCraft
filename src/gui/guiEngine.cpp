@@ -348,7 +348,7 @@ void GUIEngine::run()
 		m_script->step();
 
 #if defined(__ANDROID__) || defined(__IOS__)
-		m_menu->getAndroidUIInput();
+		m_menu->getTouchUIInput();
 #endif
 	}
 }
@@ -474,9 +474,15 @@ void GUIEngine::drawBackground(video::IVideoDriver *driver)
 	}
 
 	/* Draw background texture */
+	float aspectRatioScreen = (float) screensize.X / screensize.Y;
+	float aspectRatioSource = (float) sourcesize.X / sourcesize.Y;
+
+	int sourceX = aspectRatioSource > aspectRatioScreen ? (sourcesize.X - sourcesize.Y * aspectRatioScreen) / 2 : 0;
+	int sourceY = aspectRatioSource < aspectRatioScreen ? (sourcesize.Y - sourcesize.X / aspectRatioScreen) / 2 : 0;
+
 	draw2DImageFilterScaled(driver, texture,
 		core::rect<s32>(0, 0, screensize.X, screensize.Y),
-		core::rect<s32>(0, 0, sourcesize.X, sourcesize.Y),
+		core::rect<s32>(sourceX, sourceY, sourcesize.X - sourceX, sourcesize.Y - sourceY),
 		NULL, NULL, true);
 }
 

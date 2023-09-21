@@ -1589,10 +1589,9 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 				event.TouchInput.Y >= prompt_y &&
 				event.TouchInput.Y <= m_height) {
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN &&
-					!m_android_chat_open) {
+					!porting::isInputDialogActive()) {
 				ChatPrompt& prompt = m_chat_backend->getPrompt();
-				porting::showInputDialog("", "", 2);
-				m_android_chat_open = true;
+				porting::showInputDialog("", "", 2, "chat");
 			}
 		}
 #endif
