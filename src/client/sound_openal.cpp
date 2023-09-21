@@ -109,7 +109,6 @@ struct SoundBuffer
 	ALenum format;
 	ALsizei freq;
 	ALuint buffer_id;
-	std::vector<char> buffer;
 };
 
 SoundBuffer *load_opened_ogg_file(OggVorbis_File *oggFile,
@@ -120,6 +119,7 @@ SoundBuffer *load_opened_ogg_file(OggVorbis_File *oggFile,
 	long bytes;
 	char array[BUFFER_SIZE]; // Local fixed size array
 	vorbis_info *pInfo;
+	std::vector<char> buffer;
 
 	SoundBuffer *snd = new SoundBuffer;
 
@@ -151,12 +151,12 @@ SoundBuffer *load_opened_ogg_file(OggVorbis_File *oggFile,
 		}
 
 		// Append to end of buffer
-		snd->buffer.insert(snd->buffer.end(), array, array + bytes);
+		buffer.insert(buffer.end(), array, array + bytes);
 	} while (bytes > 0);
 
 	alGenBuffers(1, &snd->buffer_id);
 	alBufferData(snd->buffer_id, snd->format,
-			&(snd->buffer[0]), snd->buffer.size(),
+			&buffer[0], buffer.size(),
 			snd->freq);
 
 	ALenum error = alGetError();
@@ -170,6 +170,7 @@ SoundBuffer *load_opened_ogg_file(OggVorbis_File *oggFile,
 	//	<< filename_for_logging << " loaded" << std::endl;
 
 	// Clean up!
+	buffer.clear();
 	ov_clear(oggFile);
 
 	return snd;
