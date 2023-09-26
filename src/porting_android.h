@@ -74,11 +74,6 @@ int getInputDialogState();
 std::string getInputDialogValue();
 
 /**
- * get total device memory
- */
-float getTotalSystemMemory();
-
-/**
  * notify java on server connection
  */
 void notifyServerConnect(bool is_multiplayer);

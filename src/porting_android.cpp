@@ -280,14 +280,6 @@ std::string getInputDialogValue()
 	return readJavaString((jstring) result);
 }
 
-float getTotalSystemMemory()
-{
-	long pages = sysconf(_SC_PHYS_PAGES);
-	long page_size = sysconf(_SC_PAGE_SIZE);
-	int divisor = 1024 * 1024 * 1024;
-	return (float) (pages * page_size) / (float) divisor;
-}
-
 bool hasRealKeyboard()
 {
 	return device_has_keyboard;
