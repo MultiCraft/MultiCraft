@@ -397,7 +397,7 @@ local function create_world_buttonhandler(this, fields)
 			-- generated name number found.
 			if worldname == "" then
 				local worldnum_max = 0
-				for _, world in ipairs(menudata.worldlist:get_list()) do
+				for _, world in ipairs(menudata.worldlist:get_raw_list()) do
 					if world.name:match("^World %d+$") then
 						local worldnum = tonumber(world.name:sub(6))
 						worldnum_max = math.max(worldnum_max, worldnum)
