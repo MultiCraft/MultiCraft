@@ -52,7 +52,6 @@ class GameActivity : SDLActivity() {
 		external fun keyboardEvent(keyboard: Boolean)
 	}
 
-	private var messageReturnCode = -1
 	private var messageReturnValue = ""
 	private var hasKeyboard = false
 
@@ -106,8 +105,8 @@ class GameActivity : SDLActivity() {
 
 	@Suppress("unused")
 	fun showDialog(hint: String?, current: String?, editType: Int) {
+		isInputActive = true
 		messageReturnValue = ""
-		messageReturnCode = -1
 		if (editType == 1)
 			runOnUiThread { showMultiLineDialog(hint, current) }
 		else
@@ -115,7 +114,6 @@ class GameActivity : SDLActivity() {
 	}
 
 	private fun showSingleDialog(hint: String?, current: String?, editType: Int) {
-		isInputActive = true
 		val builder = AlertDialog.Builder(this, R.style.FullScreenDialogStyle)
 		val binding = InputTextBinding.inflate(layoutInflater)
 		var hintText: String = hint?.ifEmpty {
@@ -143,7 +141,6 @@ class GameActivity : SDLActivity() {
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
 				messageReturnValue = editText.text.toString()
-				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnEditorActionListener true
@@ -155,7 +152,6 @@ class GameActivity : SDLActivity() {
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
 				messageReturnValue = editText.text.toString()
-				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnKeyListener true
@@ -165,14 +161,12 @@ class GameActivity : SDLActivity() {
 		binding.input.setEndIconOnClickListener {
 			imm.hideSoftInputFromWindow(editText.windowToken, 0)
 			messageReturnValue = editText.text.toString()
-			messageReturnCode = 0
 			alertDialog.dismiss()
 			isInputActive = false
 		}
 		binding.rl.setOnClickListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
-			messageReturnCode = 0
 			alertDialog.dismiss()
 			isInputActive = false
 		}
@@ -185,13 +179,11 @@ class GameActivity : SDLActivity() {
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
-			messageReturnCode = 0
 			isInputActive = false
 		}
 	}
 
 	private fun showMultiLineDialog(hint: String?, current: String?) {
-		isInputActive = true
 		val builder = AlertDialog.Builder(this, R.style.FullScreenDialogStyle)
 		val binding = MultilineInputBinding.inflate(layoutInflater)
 		var hintText: String = hint?.ifEmpty {
@@ -212,7 +204,6 @@ class GameActivity : SDLActivity() {
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
 				messageReturnValue = editText.text.toString()
-				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnEditorActionListener true
@@ -224,7 +215,6 @@ class GameActivity : SDLActivity() {
 			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
 				messageReturnValue = editText.text.toString()
-				messageReturnCode = 0
 				alertDialog.dismiss()
 				isInputActive = false
 				return@setOnKeyListener true
@@ -234,14 +224,12 @@ class GameActivity : SDLActivity() {
 		binding.multiInput.setEndIconOnClickListener {
 			imm.hideSoftInputFromWindow(editText.windowToken, 0)
 			messageReturnValue = editText.text.toString()
-			messageReturnCode = 0
 			alertDialog.dismiss()
 			isInputActive = false
 		}
 		binding.multiRl.setOnClickListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
-			messageReturnCode = -1
 			alertDialog.dismiss()
 			isInputActive = false
 		}
@@ -254,7 +242,6 @@ class GameActivity : SDLActivity() {
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
-			messageReturnCode = -1
 			isInputActive = false
 		}
 	}
@@ -263,12 +250,10 @@ class GameActivity : SDLActivity() {
 	fun isDialogActive() = isInputActive
 
 	@Suppress("unused")
-	fun getDialogState() = messageReturnCode
-
-	@Suppress("unused")
 	fun getDialogValue(): String {
-		messageReturnCode = -1
-		return messageReturnValue
+		val value = messageReturnValue
+		messageReturnValue = ""
+		return value
 	}
 
 	@Suppress("unused")

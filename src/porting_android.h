@@ -1,8 +1,8 @@
 /*
 Minetest
 Copyright (C) 2014 celeron55, Perttu Ahola <celeron55@gmail.com>
-Copyright (C) 2014-2022 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
-Copyright (C) 2022 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2023 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
+Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -62,13 +62,6 @@ bool isInputDialogActive();
 void openURIAndroid(const std::string &url);
 
 /**
- * WORKAROUND for not working callbacks from java -> c++
- * get current state of input dialog
- */
-int getInputDialogState();
-
-/**
- * WORKAROUND for not working callbacks from java -> c++
  * get text in current input dialog
  */
 std::string getInputDialogValue();

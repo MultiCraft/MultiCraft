@@ -317,7 +317,7 @@ bool GUIConfirmRegistration::getTouchUIInput()
 		return false;
 
 	// still waiting
-	if (porting::getInputDialogState() == -1)
+	if (porting::isInputDialogActive())
 		return true;
 
 	m_jni_field_name.clear();

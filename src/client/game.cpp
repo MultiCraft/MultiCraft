@@ -2166,7 +2166,7 @@ void Game::openConsole(float scale, const wchar_t *line)
 void Game::handleTouchChatInput()
 {
 	if (porting::getInputDialogOwner() == "chat" &&
-			porting::getInputDialogState() == 0) {
+			!porting::isInputDialogActive()) {
 		std::string text = porting::getInputDialogValue();
 		client->typeChatMessage(utf8_to_wide(text));
 		if (!text.empty() && gui_chat_console->isOpen()) {

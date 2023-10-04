@@ -3611,7 +3611,7 @@ bool GUIFormSpecMenu::getTouchUIInput()
 		return false;
 
 	// still waiting
-	if (porting::getInputDialogState() == -1)
+	if (porting::isInputDialogActive())
 		return true;
 
 	std::string fieldname = m_jni_field_name;
