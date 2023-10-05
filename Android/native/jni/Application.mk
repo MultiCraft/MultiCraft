@@ -10,7 +10,7 @@ else
 APP_CFLAGS := -g -D_DEBUG -O1 -fno-omit-frame-pointer
 endif
 
-APP_CFLAGS += -fexceptions
+APP_CFLAGS += -fexceptions -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION
 
 APP_CXXFLAGS := $(APP_CFLAGS) -frtti -std=gnu++17 #-Werror=shorten-64-to-32
 

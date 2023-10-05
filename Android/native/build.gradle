@@ -50,17 +50,19 @@ android {
 }
 
 // get precompiled deps
+def buildDirectory = layout.buildDirectory.get().asFile
+
 tasks.register('downloadDeps', Download) {
-	def VERSION = "11082023"
+	def VERSION = "05102023"
 	src "https://github.com/MultiCraft/deps_android/releases/download/$VERSION/deps_android.zip"
-	dest new File(buildDir, 'deps.zip')
+	dest new File(buildDirectory, 'deps.zip')
 	overwrite false
 }
 
 tasks.register('getDeps', Copy) {
 	dependsOn downloadDeps
 	def deps = file('deps')
-	def f = file("$buildDir/deps_android")
+	def f = file("$buildDirectory/deps_android")
 
 	if (!f.exists()) {
 		from zipTree(downloadDeps.dest)
