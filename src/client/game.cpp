@@ -1530,6 +1530,8 @@ bool Game::connectToServer(const GameStartData &start_data,
 		Wait for server to accept connection
 	*/
 
+	bool result = true;
+
 	try {
 		input->clear();
 
@@ -1539,7 +1541,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 
 		fps_control.last_time = RenderingEngine::get_timer_time();
 
-		while (RenderingEngine::run()) {
+		while ((result = RenderingEngine::run())) {
 
 			limitFps(&fps_control, &dtime);
 
@@ -1603,7 +1605,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 		return false;
 	}
 
-	return true;
+	return result;
 }
 
 bool Game::getServerContent(bool *aborted)
@@ -1615,7 +1617,8 @@ bool Game::getServerContent(bool *aborted)
 
 	fps_control.last_time = RenderingEngine::get_timer_time();
 
-	while (RenderingEngine::run()) {
+	bool result = true;
+	while ((result = RenderingEngine::run())) {
 
 		limitFps(&fps_control, &dtime);
 
@@ -1691,7 +1694,7 @@ bool Game::getServerContent(bool *aborted)
 		}
 	}
 
-	return true;
+	return result;
 }
 
 
