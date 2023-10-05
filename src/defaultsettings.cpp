@@ -548,7 +548,7 @@ void set_default_settings()
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
 #ifdef __ANDROID__
-	float memoryMax = SDL_GetSystemRAM() / 1024;
+	float memoryMax = porting::getTotalSystemMemory() / 1024;
 
 	if (memoryMax < 2) {
 		// minimal settings for less than 2GB RAM

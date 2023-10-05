@@ -57,7 +57,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #if defined(__HAIKU__)
-        #include <FindDirectory.h>
+	#include <FindDirectory.h>
+#endif
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	#include <SDL.h>
 #endif
 
 #include "config.h"
@@ -748,6 +752,16 @@ std::string getSecretKey(const std::string &key)
 	return std::string(get_secret_key(key.c_str()));
 }
 #endif
+
+float getTotalSystemMemory()
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	static const float retval = SDL_GetSystemRAM();
+	return retval;
+#else
+	return 0;
+#endif
+}
 
 bool open_directory(const std::string &path)
 {

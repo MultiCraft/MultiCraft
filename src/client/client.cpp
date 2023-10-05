@@ -59,9 +59,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "game.h"
 #include "chatmessage.h"
 #include "translation.h"
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
-#endif
 
 extern gui::IGUIEnvironment* guienv;
 
@@ -693,9 +690,9 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 			return false;
 		}
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-		if (SDL_GetSystemRAM() < 2048) {
-			core::dimension2du dimensions = img->getDimension();
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
+		float memoryMax = porting::getTotalSystemMemory() / 1024;
+		if (memoryMax <= 2) {
 			irr::video::ECOLOR_FORMAT format = img->getColorFormat();
 			irr::video::ECOLOR_FORMAT new_format = irr::video::ECF_UNKNOWN;
 
@@ -719,6 +716,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 			}
 
 			if (new_format != irr::video::ECF_UNKNOWN) {
+				core::dimension2du dimensions = img->getDimension();
 				irr::video::IImage* converted_img = vdrv->createImage(new_format, dimensions);
 				img->copyTo(converted_img, core::position2d<s32>(0, 0));
 				img->drop();
@@ -726,6 +724,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 			}
 		}
 #endif
+
 		m_tsrc->insertSourceImage(filename, img);
 		img->drop();
 		rfile->drop();

@@ -362,6 +362,12 @@ bool open_url(const std::string &url);
 std::string getSecretKey(const std::string &key);
 #endif
 
+/**
+ * Get total device memory
+ */
+
+float getTotalSystemMemory();
+
 bool open_directory(const std::string &path);
 
 } // namespace porting
