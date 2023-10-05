@@ -398,7 +398,7 @@ void TerminalChatConsole::step(int ch)
 	minutes = (float)minutes / 1000 * 60;
 
 	if (m_game_time)
-		printw(" | Game %d Time of day %02d:%02d ",
+		printw(" | Game %ld Time of day %02d:%02d ",
 			m_game_time, hours, minutes);
 
 	// draw text

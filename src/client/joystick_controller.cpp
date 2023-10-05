@@ -319,8 +319,6 @@ void SDLGameController::handleMouseMovement(int x, int y)
 
 void SDLGameController::handleTriggerLeft(s16 value)
 {
-	IrrlichtDevice* device = RenderingEngine::get_raw_device();
-
 	int deadzone = g_settings->getU16("joystick_deadzone");
 
 	SEvent translated_event;
@@ -343,8 +341,6 @@ void SDLGameController::handleTriggerLeft(s16 value)
 
 void SDLGameController::handleTriggerRight(s16 value)
 {
-	IrrlichtDevice* device = RenderingEngine::get_raw_device();
-
 	int deadzone = g_settings->getU16("joystick_deadzone");
 
 	SEvent translated_event;
