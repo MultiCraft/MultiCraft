@@ -118,3 +118,11 @@ const u8 wallmounted_to_facedir[6] = {
 	8,
 	4 + 2
 };
+
+const u8 wallmountedToFacedir(u8 index)
+{
+	if (index > 5)
+		return 0;
+	else
+		return wallmounted_to_facedir[index];
+}
