@@ -151,7 +151,7 @@ u8 MapNode::getFaceDir(const NodeDefManager *nodemgr,
 		return (getParam2() & 0x1F) % 24;
 	if (allow_wallmounted && (f.param_type_2 == CPT2_WALLMOUNTED ||
 			f.param_type_2 == CPT2_COLORED_WALLMOUNTED))
-		return wallmounted_to_facedir[getParam2() & 0x07];
+		return wallmountedToFacedir(getParam2() & 0x07);
 	return 0;
 }
 
