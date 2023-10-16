@@ -230,14 +230,9 @@
 		84F20E8D25D52868009562A9 /* base64.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E7A25D52868009562A9 /* base64.cpp */; };
 		84F20E8E25D52868009562A9 /* pointedthing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E7B25D52868009562A9 /* pointedthing.cpp */; };
 		84F20E8F25D52868009562A9 /* directiontables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E7D25D52868009562A9 /* directiontables.cpp */; };
-		84F20EA025D528C5009562A9 /* stereo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9025D528C4009562A9 /* stereo.cpp */; };
 		84F20EA125D528C5009562A9 /* core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9425D528C5009562A9 /* core.cpp */; };
-		84F20EA225D528C5009562A9 /* anaglyph.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9625D528C5009562A9 /* anaglyph.cpp */; };
 		84F20EA325D528C5009562A9 /* plain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9725D528C5009562A9 /* plain.cpp */; };
-		84F20EA425D528C5009562A9 /* pageflip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9A25D528C5009562A9 /* pageflip.cpp */; };
 		84F20EA525D528C5009562A9 /* factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9B25D528C5009562A9 /* factory.cpp */; };
-		84F20EA625D528C5009562A9 /* sidebyside.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9C25D528C5009562A9 /* sidebyside.cpp */; };
-		84F20EA725D528C5009562A9 /* interlaced.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9E25D528C5009562A9 /* interlaced.cpp */; };
 		84F20EB025D528D7009562A9 /* subgames.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EA825D528D6009562A9 /* subgames.cpp */; };
 		84F20EB125D528D7009562A9 /* packages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAD25D528D7009562A9 /* packages.cpp */; };
 		84F20EB225D528D7009562A9 /* mods.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAE25D528D7009562A9 /* mods.cpp */; };
@@ -777,22 +772,12 @@
 		84F20E7D25D52868009562A9 /* directiontables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = directiontables.cpp; path = ../../../src/util/directiontables.cpp; sourceTree = "<group>"; };
 		84F20E7E25D52868009562A9 /* pointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pointer.h; path = ../../../src/util/pointer.h; sourceTree = "<group>"; };
 		84F20E7F25D52868009562A9 /* quicktune.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = quicktune.h; path = ../../../src/util/quicktune.h; sourceTree = "<group>"; };
-		84F20E9025D528C4009562A9 /* stereo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stereo.cpp; path = ../../../src/client/render/stereo.cpp; sourceTree = "<group>"; };
-		84F20E9125D528C4009562A9 /* sidebyside.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sidebyside.h; path = ../../../src/client/render/sidebyside.h; sourceTree = "<group>"; };
 		84F20E9225D528C5009562A9 /* factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = factory.h; path = ../../../src/client/render/factory.h; sourceTree = "<group>"; };
 		84F20E9325D528C5009562A9 /* plain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = plain.h; path = ../../../src/client/render/plain.h; sourceTree = "<group>"; };
 		84F20E9425D528C5009562A9 /* core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = core.cpp; path = ../../../src/client/render/core.cpp; sourceTree = "<group>"; };
-		84F20E9525D528C5009562A9 /* stereo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stereo.h; path = ../../../src/client/render/stereo.h; sourceTree = "<group>"; };
-		84F20E9625D528C5009562A9 /* anaglyph.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = anaglyph.cpp; path = ../../../src/client/render/anaglyph.cpp; sourceTree = "<group>"; };
 		84F20E9725D528C5009562A9 /* plain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = plain.cpp; path = ../../../src/client/render/plain.cpp; sourceTree = "<group>"; };
 		84F20E9825D528C5009562A9 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core.h; path = ../../../src/client/render/core.h; sourceTree = "<group>"; };
-		84F20E9925D528C5009562A9 /* anaglyph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = anaglyph.h; path = ../../../src/client/render/anaglyph.h; sourceTree = "<group>"; };
-		84F20E9A25D528C5009562A9 /* pageflip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pageflip.cpp; path = ../../../src/client/render/pageflip.cpp; sourceTree = "<group>"; };
 		84F20E9B25D528C5009562A9 /* factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = factory.cpp; path = ../../../src/client/render/factory.cpp; sourceTree = "<group>"; };
-		84F20E9C25D528C5009562A9 /* sidebyside.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sidebyside.cpp; path = ../../../src/client/render/sidebyside.cpp; sourceTree = "<group>"; };
-		84F20E9D25D528C5009562A9 /* pageflip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pageflip.h; path = ../../../src/client/render/pageflip.h; sourceTree = "<group>"; };
-		84F20E9E25D528C5009562A9 /* interlaced.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = interlaced.cpp; path = ../../../src/client/render/interlaced.cpp; sourceTree = "<group>"; };
-		84F20E9F25D528C5009562A9 /* interlaced.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = interlaced.h; path = ../../../src/client/render/interlaced.h; sourceTree = "<group>"; };
 		84F20EA825D528D6009562A9 /* subgames.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = subgames.cpp; path = ../../../src/content/subgames.cpp; sourceTree = "<group>"; };
 		84F20EA925D528D6009562A9 /* subgames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = subgames.h; path = ../../../src/content/subgames.h; sourceTree = "<group>"; };
 		84F20EAA25D528D6009562A9 /* mods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mods.h; path = ../../../src/content/mods.h; sourceTree = "<group>"; };
@@ -968,22 +953,12 @@
 		84135BA425D5269800CA4DCF /* render */ = {
 			isa = PBXGroup;
 			children = (
-				84F20E9625D528C5009562A9 /* anaglyph.cpp */,
-				84F20E9925D528C5009562A9 /* anaglyph.h */,
 				84F20E9425D528C5009562A9 /* core.cpp */,
 				84F20E9825D528C5009562A9 /* core.h */,
 				84F20E9B25D528C5009562A9 /* factory.cpp */,
 				84F20E9225D528C5009562A9 /* factory.h */,
-				84F20E9E25D528C5009562A9 /* interlaced.cpp */,
-				84F20E9F25D528C5009562A9 /* interlaced.h */,
-				84F20E9A25D528C5009562A9 /* pageflip.cpp */,
-				84F20E9D25D528C5009562A9 /* pageflip.h */,
 				84F20E9725D528C5009562A9 /* plain.cpp */,
 				84F20E9325D528C5009562A9 /* plain.h */,
-				84F20E9C25D528C5009562A9 /* sidebyside.cpp */,
-				84F20E9125D528C4009562A9 /* sidebyside.h */,
-				84F20E9025D528C4009562A9 /* stereo.cpp */,
-				84F20E9525D528C5009562A9 /* stereo.h */,
 			);
 			name = render;
 			sourceTree = "<group>";
@@ -1845,7 +1820,6 @@
 				84135B9E25D5264C00CA4DCF /* remoteplayer.cpp in Sources */,
 				84135C2025D526D700CA4DCF /* fontengine.cpp in Sources */,
 				84135B8425D5264C00CA4DCF /* chat.cpp in Sources */,
-				84F20EA425D528C5009562A9 /* pageflip.cpp in Sources */,
 				84F20E8125D52868009562A9 /* string.cpp in Sources */,
 				84135C1E25D526D700CA4DCF /* clientobject.cpp in Sources */,
 				84135B6B25D5264B00CA4DCF /* mapblock.cpp in Sources */,
@@ -1870,7 +1844,6 @@
 				84F20DA325D527C5009562A9 /* socket.cpp in Sources */,
 				84135C1B25D526D700CA4DCF /* hud.cpp in Sources */,
 				84F20DDD25D52812009562A9 /* s_inventory.cpp in Sources */,
-				84F20EA225D528C5009562A9 /* anaglyph.cpp in Sources */,
 				84F20DB925D527D8009562A9 /* c_internal.cpp in Sources */,
 				84135B6E25D5264B00CA4DCF /* object_properties.cpp in Sources */,
 				84F20DAA25D527C5009562A9 /* networkpacket.cpp in Sources */,
@@ -1928,7 +1901,6 @@
 				84135C2525D526D700CA4DCF /* imagefilters.cpp in Sources */,
 				84135C1325D526D700CA4DCF /* clientlauncher.cpp in Sources */,
 				849D0848278AC1B200471354 /* chacha.c in Sources */,
-				84F20EA025D528C5009562A9 /* stereo.cpp in Sources */,
 				84F20EB025D528D7009562A9 /* subgames.cpp in Sources */,
 				84135B7825D5264B00CA4DCF /* clientiface.cpp in Sources */,
 				84135C1725D526D700CA4DCF /* mesh.cpp in Sources */,
@@ -2014,7 +1986,6 @@
 				84F20F0E25D52958009562A9 /* modalMenu.cpp in Sources */,
 				84F20E2E25D5282A009562A9 /* l_inventory.cpp in Sources */,
 				84135BA725D526A900CA4DCF /* collector.cpp in Sources */,
-				84F20EA725D528C5009562A9 /* interlaced.cpp in Sources */,
 				8458610724B13BDF0040BA4F /* mini-gmp.c in Sources */,
 				84F20F0A25D52958009562A9 /* guiBackgroundImage.cpp in Sources */,
 				84F20DE325D52812009562A9 /* s_client.cpp in Sources */,
@@ -2038,7 +2009,6 @@
 				84135B8225D5264C00CA4DCF /* server.cpp in Sources */,
 				84F20DDB25D52812009562A9 /* s_security.cpp in Sources */,
 				84135B8825D5264C00CA4DCF /* gettext.cpp in Sources */,
-				84F20EA625D528C5009562A9 /* sidebyside.cpp in Sources */,
 				84F20E8325D52868009562A9 /* metricsbackend.cpp in Sources */,
 				84135C2425D526D700CA4DCF /* content_mapblock.cpp in Sources */,
 				84E33D882A7BBEE900609F77 /* wrapper.m in Sources */,

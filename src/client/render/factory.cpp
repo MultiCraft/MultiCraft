@@ -31,20 +31,20 @@ RenderingCore *createRenderingCore(const std::string &stereo_mode, IrrlichtDevic
 {
 	if (stereo_mode == "none")
 		return new RenderingCorePlain(device, client, hud);
+#ifdef STEREO_MODE_SUPPORTED
 	if (stereo_mode == "anaglyph")
 		return new RenderingCoreAnaglyph(device, client, hud);
 	if (stereo_mode == "interlaced")
 		return new RenderingCoreInterlaced(device, client, hud);
-#ifdef STEREO_PAGEFLIP_SUPPORTED
 	if (stereo_mode == "pageflip")
 		return new RenderingCorePageflip(device, client, hud);
-#endif
 	if (stereo_mode == "sidebyside")
 		return new RenderingCoreSideBySide(device, client, hud);
 	if (stereo_mode == "topbottom")
 		return new RenderingCoreSideBySide(device, client, hud, true);
 	if (stereo_mode == "crossview")
 		return new RenderingCoreSideBySide(device, client, hud, false, true);
+#endif
 
 	// fallback to plain renderer
 	errorstream << "Invalid rendering mode: " << stereo_mode << std::endl;

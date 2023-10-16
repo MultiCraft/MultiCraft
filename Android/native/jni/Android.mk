@@ -122,7 +122,10 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SRC_FILES := \
 	$(wildcard ../../src/client/*.cpp)             \
-	$(wildcard ../../src/client/*/*.cpp)           \
+	../../src/client/meshgen/collector.cpp         \
+	../../src/client/render/core.cpp               \
+	../../src/client/render/factory.cpp            \
+	../../src/client/render/plain.cpp              \
 	$(wildcard ../../src/content/*.cpp)            \
 	../../src/database/database.cpp                \
 	../../src/database/database-dummy.cpp          \
