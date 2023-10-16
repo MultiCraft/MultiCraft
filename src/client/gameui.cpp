@@ -74,14 +74,14 @@ void GameUI::init(Client *client)
 	// At the middle of the screen
 	// Object infos are shown in this
 	u32 chat_font_height = m_guitext_chat->getActiveFont()->getDimension(L"Ay").Height;
-	float scale = 1.0f;
-#if defined(__ANDROID__) || defined(__APPLE__)
-	scale = RenderingEngine::getDisplayDensity() * client->getHudScaling() * 0.5f;
-#endif
+	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
+	s32 text_height = g_fontengine->getTextHeight() * 6;
+	s32 top_y = (screensize.Y - text_height) / 2;
+	s32 horiz_offset = 100 + client->getRoundScreen();
+
 	m_guitext_info = gui::StaticText::add(guienv, L"",
-		core::rect<s32>(0, 0, 400, g_fontengine->getTextHeight() * 6) +
-			v2s32(100 + client->getRoundScreen(),
-			chat_font_height * (g_settings->getU16("recent_chat_messages") + 3) * scale),
+		core::rect<s32>(horiz_offset, top_y,
+			horiz_offset + 400, top_y + text_height),
 			false, true, guiroot);
 
 	// Status text (displays info when showing and hiding GUI stuff, etc.)
