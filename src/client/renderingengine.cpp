@@ -781,7 +781,7 @@ v2u32 RenderingEngine::getDisplaySize()
 #else // __ANDROID__/__IOS__
 float RenderingEngine::getDisplayDensity()
 {
-	static const float density = porting::getDisplayDensity();
+	static const float density = porting::getScreenScale();
 	return density;
 }
 

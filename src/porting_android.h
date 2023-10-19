@@ -76,9 +76,10 @@ void notifyServerConnect(bool is_multiplayer);
  */
 void notifyExitGame();
 
-#ifndef SERVER
-float getDisplayDensity();
-#endif
+/**
+ * get screen density
+ */
+float getScreenScale();
 
 /**
  * call Android function to finish

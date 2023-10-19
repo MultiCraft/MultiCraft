@@ -751,6 +751,12 @@ std::string getSecretKey(const std::string &key)
 {
 	return std::string(get_secret_key(key.c_str()));
 }
+
+float getScreenScale()
+{
+	static const float retval = get_screen_scale();
+	return retval;
+}
 #endif
 
 float getTotalSystemMemory()

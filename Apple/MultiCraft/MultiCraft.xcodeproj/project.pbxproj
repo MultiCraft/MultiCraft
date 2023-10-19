@@ -375,7 +375,7 @@
 		84135B2225D5263A00CA4DCF /* texture_override.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = texture_override.h; path = ../../../src/texture_override.h; sourceTree = "<group>"; };
 		84135B2325D5263A00CA4DCF /* gettext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = gettext.cpp; path = ../../../src/gettext.cpp; sourceTree = "<group>"; };
 		84135B2425D5263A00CA4DCF /* metadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = metadata.h; path = ../../../src/metadata.h; sourceTree = "<group>"; };
-		84135B2525D5263B00CA4DCF /* defaultsettings.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; name = defaultsettings.cpp; path = ../../../src/defaultsettings.cpp; sourceTree = "<group>"; };
+		84135B2525D5263B00CA4DCF /* defaultsettings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = defaultsettings.cpp; path = ../../../src/defaultsettings.cpp; sourceTree = "<group>"; };
 		84135B2625D5263B00CA4DCF /* mapnode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mapnode.h; path = ../../../src/mapnode.h; sourceTree = "<group>"; };
 		84135B2725D5263B00CA4DCF /* irr_aabb3d.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irr_aabb3d.h; path = ../../../src/irr_aabb3d.h; sourceTree = "<group>"; };
 		84135B2825D5263C00CA4DCF /* craftdef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = craftdef.h; path = ../../../src/craftdef.h; sourceTree = "<group>"; };
@@ -2201,6 +2201,7 @@
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=1",
 				);
+				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"${SRCROOT}/../../src",
@@ -2220,6 +2221,9 @@
 					"${SRCROOT}/../deps/libvorbis/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 MultiCraft Studio OÜ. All rights reserved.";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.5;
 				OTHER_LDFLAGS = (
@@ -2271,6 +2275,7 @@
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=0",
 				);
+				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"${SRCROOT}/../../src",
@@ -2290,6 +2295,9 @@
 					"${SRCROOT}/../deps/libvorbis/include",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 MultiCraft Studio OÜ. All rights reserved.";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MARKETING_VERSION = 2.0.5;
 				OTHER_LDFLAGS = (

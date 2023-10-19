@@ -317,8 +317,7 @@ void notifyExitGame()
 		jnienv->ExceptionClear();
 }
 
-#ifndef SERVER
-float getDisplayDensity()
+float getScreenScale()
 {
 	static bool firstRun = true;
 	static float value = 0;
@@ -336,7 +335,6 @@ float getDisplayDensity()
 
 	return value;
 }
-#endif // ndef SERVER
 
 void finishGame(const std::string &exc)
 {

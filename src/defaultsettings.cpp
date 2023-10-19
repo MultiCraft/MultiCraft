@@ -30,12 +30,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/renderingengine.h"
 #endif
 
-#ifdef __APPLE__
 #ifdef __IOS__
-#import "SDVersion.h"
-#else
-#import <AppKit/AppKit.h>
-#endif
+#import "wrapper.h"
 #endif
 
 void set_default_settings()
@@ -507,7 +503,7 @@ void set_default_settings()
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 	settings->setDefault("vsync", "true");
 
-	int ScaleFactor = (int) [NSScreen mainScreen].backingScaleFactor;
+	int ScaleFactor = porting::getScreenScale();
 	settings->setDefault("screen_dpi", std::to_string(ScaleFactor * 72));
 	if (ScaleFactor >= 2) {
 		settings->setDefault("hud_scaling", "1.5");
