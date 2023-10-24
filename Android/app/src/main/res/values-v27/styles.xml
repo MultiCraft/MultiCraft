@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+	<style name="CustomDialog" parent="Theme.MaterialComponents.Light.NoActionBar">
+		<item name="windowActionBar">false</item>
+		<item name="android:windowIsTranslucent">true</item>
+		<item name="android:windowBackground">@android:color/transparent</item>
+		<item name="android:windowFullscreen">true</item>
+		<item name="android:backgroundDimEnabled">true</item>
+		<item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
+		<item name="fontFamily">@font/multicraftfont</item>
+	</style>
+</resources>

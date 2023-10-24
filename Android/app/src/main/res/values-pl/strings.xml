@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">Przygotowania do uruchomienia&#8230;</string>
+	<string name="loading">Ładowanie&#8230;</string>
+	<string name="notification_title">Ładowanie MultiCraft</string>
+	<string name="notification_description">Mniej niż 1 minuta&#8230;</string>
+
+	<string name="input_text">Wprowadź tekst</string>
+	<string name="input_password">Wprowadź hasło</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">Brak połączenia z Internetem!</string>
+	<string name="conn_message">MultiCraft wymaga połączenia z Internetem, aby móc korzystać z wszystkich funkcji gry.\nW przeciwnym razie nie otrzymasz Aktualizacji, a tryb Multiplayer nie będzie dostępny!</string>
+	<string name="ignore">Zignoruj</string>
+
+	<!-- Crash -->
+	<string name="sorry">Przepraszamy!</string>
+	<string name="restart">Niestety, wystąpił nieoczekiwany problem, czy chcesz ponownie uruchomić aplikację?</string>
+	<string name="no_space">Brak miejsca na pliki gry, zwolnij miejsce na dysku przed ponownym uruchomieniem aplikacji</string>
+	<string name="close_game">Gra zamknięta</string>
+	<string name="restart_game">Uruchom ponownie stronę</string>
+</resources>

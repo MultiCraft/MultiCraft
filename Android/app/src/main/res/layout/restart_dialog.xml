@@ -1,34 +1,39 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
-	android:layout_width="wrap_content"
-	android:layout_height="wrap_content">
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:baselineAligned="false"
+	android:gravity="center"
+	android:weightSum="1">
 
 	<LinearLayout
-		android:layout_width="wrap_content"
+		android:id="@+id/restart_root"
+		android:layout_width="0dp"
 		android:layout_height="wrap_content"
-		android:layout_gravity="center"
+		android:layout_weight="0.7"
+		android:background="@drawable/bg_common"
 		android:orientation="vertical"
-		android:paddingHorizontal="10dp"
-		android:paddingTop="10dp">
+		android:padding="16dp"
+		tools:ignore="UselessParent">
 
 		<androidx.appcompat.widget.AppCompatTextView
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_marginTop="8dp"
-			android:layout_marginBottom="8dp"
+			style="?android:attr/textAppearanceLarge"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:drawableStart="@mipmap/ic_dialog"
+			android:drawablePadding="8dp"
 			android:gravity="center"
-			android:paddingStart="16dp"
-			android:paddingEnd="16dp"
 			android:text="@string/sorry"
-			android:textSize="22sp" />
+			android:textColor="@color/grey_900" />
 
 		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:orientation="horizontal">
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:padding="8dp">
 
-			<ImageView
+			<androidx.appcompat.widget.AppCompatImageView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:contentDescription="@string/restart"
@@ -42,46 +47,40 @@
 				android:id="@+id/error_desc"
 				android:layout_width="wrap_content"
 				android:layout_height="match_parent"
+				android:gravity="center"
 				android:minHeight="128dp"
-				android:paddingStart="4dp"
-				android:paddingTop="4dp"
-				android:paddingEnd="4dp"
-				android:paddingBottom="4dp"
+				android:padding="4dp"
 				android:text="@string/restart"
-				android:textSize="15sp" />
+				android:textColor="@color/grey_900"
+				android:textSize="16sp" />
 		</LinearLayout>
 
 		<LinearLayout
 			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_marginTop="8dp"
-			android:orientation="horizontal">
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp">
 
-			<com.google.android.material.button.MaterialButton
+			<androidx.appcompat.widget.AppCompatButton
 				android:id="@+id/close"
 				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:layout_marginStart="8dp"
-				android:layout_marginTop="4dp"
-				android:layout_marginEnd="4dp"
-				android:layout_marginBottom="4dp"
+				android:layout_height="48dp"
+				android:layout_margin="8dp"
 				android:layout_weight="0.5"
+				android:background="@drawable/btn_red"
 				android:text="@string/close_game"
-				android:textStyle="bold" />
+				android:textAllCaps="false"
+				android:textColor="@android:color/white" />
 
-			<com.google.android.material.button.MaterialButton
+			<androidx.appcompat.widget.AppCompatButton
 				android:id="@+id/restart"
 				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_gravity="center"
-				android:layout_marginStart="4dp"
-				android:layout_marginTop="4dp"
-				android:layout_marginEnd="8dp"
-				android:layout_marginBottom="4dp"
+				android:layout_height="48dp"
+				android:layout_margin="8dp"
 				android:layout_weight="0.5"
+				android:background="@drawable/btn_green"
 				android:text="@string/restart_game"
-				android:textStyle="bold" />
+				android:textAllCaps="false"
+				android:textColor="@android:color/white" />
 		</LinearLayout>
 	</LinearLayout>
-</ScrollView>
+</LinearLayout>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">Se pregătește lansarea&#8230;</string>
+	<string name="loading">Încărcare&#8230;</string>
+	<string name="notification_title">Încărcare MultiCraft</string>
+	<string name="notification_description">Mai puțin de 1 minut&#8230;</string>
+
+	<string name="input_text">Introduceți textul</string>
+	<string name="input_password">Introduceți parola</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">Fără conexiune la internet!</string>
+	<string name="conn_message">MultiCraft necesită o conexiune la internet pentru a utiliza toate caracteristicile jocului.\nÎn caz contrar, nu veți primi actualizări și modul Multiplayer nu va fi disponibil!</string>
+	<string name="ignore">Ignoră</string>
+
+	<!-- Crash -->
+	<string name="sorry">Ne pare rău!</string>
+	<string name="restart">Din păcate, s-a întâmplat o problemă neașteptată, doriți să reporniți aplicația?</string>
+	<string name="no_space">Nu mai există spațiu pentru fișierele de joc, vă rugăm să eliberați spațiu pe disc înainte de a reporni aplicația</string>
+	<string name="close_game">Joc strâns</string>
+	<string name="restart_game">Reporniți</string>
+</resources>

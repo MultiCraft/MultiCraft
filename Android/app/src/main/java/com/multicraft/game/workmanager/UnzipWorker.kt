@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2022 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2023 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2023 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -26,6 +26,7 @@ import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import androidx.core.app.NotificationCompat
 import androidx.work.*
+import com.multicraft.game.MainActivity.Companion.NO_SPACE_LEFT
 import com.multicraft.game.R
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.copyInputStreamToFile
@@ -83,7 +84,7 @@ class UnzipWorker(private val appContext: Context, workerParams: WorkerParameter
 			}
 			Result.success()
 		} catch (e: IOException) {
-			val isNotEnoughSpace = e.localizedMessage!!.contains("ENOSPC")
+			val isNotEnoughSpace = e.localizedMessage!!.contains(NO_SPACE_LEFT)
 			val out = Data.Builder()
 				.putBoolean("restart", !isNotEnoughSpace)
 				.build()

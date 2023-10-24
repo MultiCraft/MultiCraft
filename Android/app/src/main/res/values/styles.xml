@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+
 	<style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
 		<item name="windowActionBar">false</item>
 		<item name="android:windowBackground">@drawable/bg</item>
 		<item name="android:windowFullscreen">true</item>
 		<item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
 		<item name="fontFamily">@font/multicraftfont</item>
-		<item name="colorPrimary">@color/green</item>
 	</style>
 
-	<style name="LightTheme" parent="Theme.MaterialComponents.Light.Dialog">
-		<item name="android:windowBackground">@drawable/bg_common</item>
-		<item name="background">@android:color/transparent</item>
-		<item name="windowMinWidthMajor">0%</item>
-		<item name="windowMinWidthMinor">0%</item>
+	<style name="CustomDialog" parent="Theme.MaterialComponents.Light.NoActionBar">
+		<item name="windowActionBar">false</item>
+		<item name="android:windowIsTranslucent">true</item>
+		<item name="android:windowBackground">@android:color/transparent</item>
+		<item name="android:windowFullscreen">true</item>
+		<item name="android:backgroundDimEnabled">true</item>
+		<item name="android:windowLayoutInDisplayCutoutMode" tools:targetApi="p">shortEdges</item>
+		<item name="fontFamily">@font/multicraftfont</item>
 	</style>
 
-	<style name="CustomDialog" parent="Theme.MaterialComponents.Light.Dialog.Alert">
-		<item name="android:windowBackground">@drawable/bg_common</item>
-		<item name="background">@android:color/transparent</item>
-	</style>
-
-	<style name="FullScreenDialogStyle" parent="Theme.MaterialComponents.DayNight.Dialog">
+	<style name="FullScreenDialogStyle" parent="Theme.MaterialComponents.Light.Dialog">
 		<item name="android:windowFullscreen">true</item>
 		<item name="android:windowIsFloating">false</item>
 		<item name="android:backgroundDimEnabled">false</item>

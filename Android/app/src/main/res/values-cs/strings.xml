@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">Příprava na spuštění&#8230;</string>
+	<string name="loading">Načítání&#8230;</string>
+	<string name="notification_title">Načítání aplikace MultiCraft</string>
+	<string name="notification_description">Méně než 1 minuta&#8230;</string>
+
+	<string name="input_text">Zadejte text</string>
+	<string name="input_password">Zadejte heslo</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">Žádné připojení k internetu!</string>
+	<string name="conn_message">Hra MultiCraft vyžaduje připojení k internetu, abyste mohli využívat všechny herní funkce.\nV opačném případě nebudete dostávat aktualizace a režim Multiplayer nebude k dispozici!</string>
+	<string name="ignore">Ignorovat</string>
+
+	<!-- Crash -->
+	<string name="sorry">Omlouváme se!</string>
+	<string name="restart">Bohužel došlo k neočekávanému problému, chcete aplikaci restartovat?</string>
+	<string name="no_space">Pro herní soubory nezbylo místo, před restartováním aplikace uvolněte místo na disku.</string>
+	<string name="close_game">Uzavřená hra</string>
+	<string name="restart_game">Restartování</string>
+</resources>

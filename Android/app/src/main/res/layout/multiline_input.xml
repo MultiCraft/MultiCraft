@@ -12,7 +12,7 @@
 		android:layout_alignParentBottom="true"
 		android:background="@drawable/bg_input"
 		android:hint="@string/input_text"
-		android:padding="5dp"
+		android:padding="4dp"
 		app:endIconDrawable="@drawable/ic_baseline_send"
 		app:endIconMode="custom"
 		app:endIconTint="@null">

@@ -28,7 +28,6 @@
 	<application
 		android:allowBackup="true"
 		android:dataExtractionRules="@xml/data_extraction_rules"
-		android:enableOnBackInvokedCallback="false"
 		android:fullBackupContent="@xml/backup_rules"
 		android:icon="@mipmap/ic_launcher"
 		android:label="@string/app_name"
@@ -42,8 +41,8 @@
 			android:value="3.0" />
 
 		<activity
-			android:name="com.multicraft.game.MainActivity"
-			android:configChanges="orientation|keyboardHidden|navigation|screenSize"
+			android:name=".MainActivity"
+			android:configChanges="orientation|keyboardHidden|navigation|screenSize|screenLayout"
 			android:exported="true"
 			android:maxAspectRatio="3.0"
 			android:screenOrientation="sensorLandscape"
@@ -55,8 +54,8 @@
 		</activity>
 
 		<activity
-			android:name="com.multicraft.game.GameActivity"
-			android:configChanges="orientation|keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize"
+			android:name=".GameActivity"
+			android:configChanges="orientation|keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|uiMode"
 			android:exported="true"
 			android:hardwareAccelerated="true"
 			android:launchMode="singleTask"
@@ -72,6 +71,19 @@
 			</intent-filter>
 		</activity>
 
+		<activity
+			android:name=".dialogs.ConnectionDialog"
+			android:configChanges="orientation|keyboardHidden|navigation|screenSize"
+			android:exported="false"
+			android:screenOrientation="sensorLandscape"
+			android:theme="@style/CustomDialog" />
+
+		<activity
+			android:name=".dialogs.RestartDialog"
+			android:configChanges="orientation|keyboardHidden|navigation|screenSize"
+			android:exported="false"
+			android:screenOrientation="sensorLandscape"
+			android:theme="@style/CustomDialog" />
 	</application>
 
 </manifest>

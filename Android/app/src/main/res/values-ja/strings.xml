@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">発売準備中&#8230;</string>
+	<string name="loading">読み込み中&#8230;</string>
+	<string name="notification_title">マルチクラフトの読み込み</string>
+	<string name="notification_description">1分以内&#8230;</string>
+
+	<string name="input_text">テキスト入力</string>
+	<string name="input_password">パスワード</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">インターネットにつながらない！？</string>
+	<string name="conn_message">MultiCraftの全機能を使用するには、インターネット接続が必要です。そうでない場\n合は、アップデートを受け取ることができず、マルチプレイヤーモードも利用できません。</string>
+	<string name="ignore">無視</string>
+
+	<!-- Crash -->
+	<string name="sorry">申し訳ございませんでした。</string>
+	<string name="restart">予期せぬ問題が発生したため、アプリを再起動しますか？</string>
+	<string name="no_space">ゲームファイルの空き容量がありません。ディスクの空き容量を確保してからアプリを再起動してください。</string>
+	<string name="close_game">接戦</string>
+	<string name="restart_game">再スタート</string>
+</resources>

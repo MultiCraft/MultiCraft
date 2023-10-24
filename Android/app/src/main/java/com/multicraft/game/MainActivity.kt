@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2022 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2023 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2023 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -22,18 +22,25 @@ package com.multicraft.game
 
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Color
-import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
-import android.view.*
+import android.provider.Settings.ACTION_WIFI_SETTINGS
+import android.provider.Settings.ACTION_WIRELESS_SETTINGS
+import android.view.RoundedCorner
+import android.view.WindowManager
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.graphics.BlendModeColorFilterCompat
-import androidx.core.graphics.BlendModeCompat
-import androidx.lifecycle.*
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.work.WorkInfo
 import com.multicraft.game.databinding.ActivityMainBinding
+import com.multicraft.game.dialogs.ConnectionDialog
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
+import com.multicraft.game.helpers.ApiLevelHelper.isPie
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.getStringValue
 import com.multicraft.game.helpers.PreferenceHelper.set
@@ -49,11 +56,14 @@ class MainActivity : AppCompatActivity() {
 	private var externalStorage: File? = null
 	private val sep = File.separator
 	private lateinit var prefs: SharedPreferences
+	private lateinit var restartStartForResult: ActivityResultLauncher<Intent>
+	private lateinit var connStartForResult: ActivityResultLauncher<Intent>
 	private val versionCode = BuildConfig.VERSION_CODE
 	private val versionName = "${BuildConfig.VERSION_NAME}+$versionCode"
 
 	companion object {
 		var radius = 0
+		const val NO_SPACE_LEFT = "ENOSPC"
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,28 +71,32 @@ class MainActivity : AppCompatActivity() {
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		binding = ActivityMainBinding.inflate(layoutInflater)
 		setContentView(binding.root)
+		onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+			override fun handleOnBackPressed() {
+			}
+		})
+		connStartForResult = registerForActivityResult(
+			ActivityResultContracts.StartActivityForResult()
+		) {
+			checkAppVersion()
+		}
+		restartStartForResult = registerForActivityResult(
+			ActivityResultContracts.StartActivityForResult()
+		) {
+			if (it.resultCode == RESULT_OK)
+				finishApp(true)
+			else
+				finishApp(false)
+		}
 		try {
 			prefs = PreferenceHelper.init(this)
 			externalStorage = getExternalFilesDir(null)
-			if (filesDir == null || cacheDir == null || externalStorage == null)
-				throw IOException("Bad disk space state")
+			listOf(filesDir, cacheDir, externalStorage).requireNoNulls()
 			checkConnection()
-		} catch (e: Exception) { // Storage -> IOException, Prefs -> GeneralSecurityException
-			showRestartDialog(!e.message!!.contains("ENOPSC"))
+		} catch (e: Exception) {
+			val isRestart = e.message?.contains(NO_SPACE_LEFT) != true
+			showRestartDialog(restartStartForResult, isRestart)
 		}
-	}
-
-	@Deprecated("Deprecated in Java")
-	override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-		@Suppress("DEPRECATION")
-		super.onActivityResult(requestCode, resultCode, data)
-		if (requestCode == 104)
-			checkAppVersion()
-	}
-
-	@Deprecated("Deprecated in Java")
-	override fun onBackPressed() {
-		// Prevent abrupt interruption when copy game files from assets
 	}
 
 	override fun onResume() {
@@ -97,81 +111,69 @@ class MainActivity : AppCompatActivity() {
 
 	override fun onAttachedToWindow() {
 		super.onAttachedToWindow()
-		if (isAndroid12()) {
-			val insets = window.decorView.rootWindowInsets
-			if (insets != null) {
-				val tl = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)
-				radius = tl?.radius ?: 0
+		if (isPie()) {
+			val cutout = window.decorView.rootWindowInsets.displayCutout
+			if (cutout != null) {
+				radius = 40
+			}
+			if (isAndroid12()) {
+				val insets = window.decorView.rootWindowInsets
+				if (insets != null) {
+					val tl = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)
+					radius = tl?.radius ?: if (cutout != null) 40 else 0
+				}
 			}
 		}
-	}
-
-
-	// interface
-	private fun showProgress(textMessage: Int, progress: Int) {
-		if (binding.progressBar.visibility == View.GONE) {
-			binding.tvProgress.setText(textMessage)
-			binding.progressCircle.visibility = View.GONE
-			binding.progressBar.visibility = View.VISIBLE
-			binding.progressBar.progress = 0
-		} else if (progress > 0) {
-			val progressMessage = "${getString(textMessage)} $progress%"
-			binding.tvProgress.text = progressMessage
-			binding.progressBar.progress = progress
-			// colorize the progress bar
-			val progressBarDrawable =
-				(binding.progressBar.progressDrawable as LayerDrawable).getDrawable(0)
-			val progressDrawable = (progressBarDrawable as LayerDrawable).getDrawable(1)
-			val color = Color.rgb(255 - progress * 2, progress * 2, 25)
-			progressDrawable.colorFilter =
-				BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-					color, BlendModeCompat.SRC_IN
-				)
-		}
+		val animation = binding.loadingAnim.drawable as AnimationDrawable
+		animation.start()
 	}
 
 	private fun startNative() {
 		val initLua = File(filesDir, "builtin${sep}mainmenu${sep}init.lua")
 		if (initLua.exists() && initLua.canRead()) {
 			val intent = Intent(this, GameActivity::class.java)
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 			startActivity(intent)
 		} else {
 			prefs[TAG_BUILD_VER] = "0"
-			showRestartDialog()
+			showRestartDialog(restartStartForResult)
 		}
 	}
 
 	private fun prepareToRun() {
-		binding.tvProgress.setText(R.string.preparing)
-		binding.progressCircle.visibility = View.VISIBLE
-		binding.progressBar.visibility = View.GONE
-		val filesList = listOf(
-			File(externalStorage, "debug.txt"),
-			File(filesDir, "builtin"),
-			File(filesDir, "client"),
-			File(filesDir, "fonts"),
-			File(filesDir, "textures")
-		)
-		val zips = assets.list("data")!!.toList()
+		val filesList = mutableListOf<File>().apply {
+			addAll(listOf(
+				"builtin", "games${sep}default", "textures${sep}base", "debug.txt"
+			).map { File(externalStorage, it) })
+			addAll(listOf(
+				"builtin",
+				"client${sep}shaders",
+				"fonts",
+				"games${sep}default",
+				"textures${sep}base"
+			).map { File(filesDir, it) })
+		}
+
+		val zips = mutableListOf("assets.zip")
+
 		lifecycleScope.launch {
 			filesList.forEach { it.deleteRecursively() }
 			zips.forEach {
 				try {
-					assets.open("data$sep$it").use { input ->
+					assets.open(it).use { input ->
 						File(cacheDir, it).copyInputStreamToFile(input)
 					}
 				} catch (e: IOException) {
-					runOnUiThread { showRestartDialog(!e.message!!.contains("ENOSPC")) }
+					val isNotEnoughSpace = e.message!!.contains(NO_SPACE_LEFT)
+					runOnUiThread { showRestartDialog(restartStartForResult, !isNotEnoughSpace) }
 					return@forEach
 				}
 			}
 			try {
-				startUnzipWorker(zips)
+				startUnzipWorker(zips.toTypedArray())
 			} catch (e: Exception) {
-				runOnUiThread { showRestartDialog() }
+				runOnUiThread { showRestartDialog(restartStartForResult) }
 			}
 		}
 	}
@@ -180,35 +182,52 @@ class MainActivity : AppCompatActivity() {
 		val prefVersion = prefs.getStringValue(TAG_BUILD_VER)
 		if (prefVersion == versionName)
 			startNative()
-		else
+		else {
 			prepareToRun()
+		}
+	}
+
+	private fun showConnectionDialog() {
+		val intent = Intent(this, ConnectionDialog::class.java)
+		val startForResult = registerForActivityResult(
+			ActivityResultContracts.StartActivityForResult()
+		) {
+			when (it.resultCode) {
+				RESULT_OK -> connStartForResult.launch(Intent(ACTION_WIFI_SETTINGS))
+				RESULT_FIRST_USER -> connStartForResult.launch(Intent(ACTION_WIRELESS_SETTINGS))
+				else -> checkAppVersion()
+			}
+		}
+		startForResult.launch(intent)
 	}
 
 	// check connection available
 	private fun checkConnection() = lifecycleScope.launch {
-		val result = isConnected()
-		if (result) checkAppVersion()
+		if (isConnected()) checkAppVersion()
 		else try {
-			showConnectionDialog { checkAppVersion() }
+			showConnectionDialog()
 		} catch (e: Exception) {
 			checkAppVersion()
 		}
 	}
 
-	private fun startUnzipWorker(file: List<String>) {
-		val viewModelFactory = WorkerViewModelFactory(application, file.toTypedArray())
+	private fun startUnzipWorker(file: Array<String>) {
+		val viewModelFactory = WorkerViewModelFactory(application, file)
 		val viewModel = ViewModelProvider(this, viewModelFactory)[WorkerViewModel::class.java]
 		viewModel.unzippingWorkObserver
 			.observe(this, Observer { workInfo ->
 				if (workInfo == null)
 					return@Observer
 				val progress = workInfo.progress.getInt(PROGRESS, 0)
-				showProgress(R.string.loading, progress)
+				if (progress > 0) {
+					val progressMessage = "${getString(R.string.loading)} $progress%"
+					binding.tvProgress.text = progressMessage
+				}
 
 				if (workInfo.state.isFinished) {
 					if (workInfo.state == WorkInfo.State.FAILED) {
 						val isRestart = workInfo.outputData.getBoolean("restart", true)
-						showRestartDialog(isRestart)
+						showRestartDialog(restartStartForResult, isRestart)
 					} else if (workInfo.state == WorkInfo.State.SUCCEEDED) {
 						prefs[TAG_BUILD_VER] = versionName
 						startNative()

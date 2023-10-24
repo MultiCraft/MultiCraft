@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">Подготовка за пускане на пазара&#8230;</string>
+	<string name="loading">Зареждане&#8230;</string>
+	<string name="notification_title">Зареждане на MultiCraft</string>
+	<string name="notification_description">По-малко от 1 минута&#8230;</string>
+
+	<string name="input_text">Въведете текст</string>
+	<string name="input_password">Въведете парола</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">Няма интернет връзка!</string>
+	<string name="conn_message">MultiCraft изисква интернет връзка, за да използвате всички функции на играта. В противен\nслучай няма да получавате актуализации и режимът Multiplayer няма да е достъпен!</string>
+	<string name="ignore">Игнориране на</string>
+
+	<!-- Crash -->
+	<string name="sorry">Съжаляваме!</string>
+	<string name="restart">За съжаление се е появил неочакван проблем, искате ли да рестартирате приложението?</string>
+	<string name="no_space">Не е останало място за файловете на играта, моля, освободете място на диска, преди да рестартирате приложението</string>
+	<string name="close_game">Затворена игра</string>
+	<string name="restart_game">Рестартиране на</string>
+</resources>

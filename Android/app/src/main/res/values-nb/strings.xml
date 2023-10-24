@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">Forbereder lansering&#8230;</string>
+	<string name="loading">Laster&#8230;</string>
+	<string name="notification_title">Lasting av MultiCraft</string>
+	<string name="notification_description">Mindre enn 1 minutt&#8230;</string>
+
+	<string name="input_text">Skriv inn tekst</string>
+	<string name="input_password">Skriv inn passord</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">Ingen internettforbindelse!</string>
+	<string name="conn_message">MultiCraft krever en Internett-tilkobling for å bruke alle spillfunksjonene. Ellers\nvil du ikke få oppdateringer og flerspillermodus vil ikke være tilgjengelig!</string>
+	<string name="ignore">Ignorer</string>
+
+	<!-- Crash -->
+	<string name="sorry">Vi beklager!</string>
+	<string name="restart">Dessverre skjedde det et uventet problem, vil du starte appen på nytt?</string>
+	<string name="no_space">Ingen plass igjen til spillfiler, vennligst frigjør plass på disken før du starter appen på nytt.</string>
+	<string name="close_game">Lukk spillet</string>
+	<string name="restart_game">Start på nytt</string>
+</resources>

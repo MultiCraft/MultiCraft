@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">Priprava na začetek prodaje&#8230;</string>
+	<string name="loading">Nalaganje&#8230;</string>
+	<string name="notification_title">Nalaganje orodja MultiCraft</string>
+	<string name="notification_description">Manj kot 1 minuta&#8230;</string>
+
+	<string name="input_text">Vnesite besedilo</string>
+	<string name="input_password">Vnesite geslo</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">Brez internetne povezave!</string>
+	<string name="conn_message">Za uporabo vseh funkcij igre MultiCraft je potrebna internetna povezava. V nasprotnem\nprimeru ne boste dobili posodobitev in način za več igralcev ne bo na voljo!</string>
+	<string name="ignore">Ignoriraj</string>
+
+	<!-- Crash -->
+	<string name="sorry">Žal nam je!</string>
+	<string name="restart">Na žalost se je zgodila nepričakovana težava, ali želite ponovno zagnati aplikacijo?</string>
+	<string name="no_space">Za datoteke igre ni več prostora, pred ponovnim zagonom aplikacije sprostite prostor na disku.</string>
+	<string name="close_game">Tesna tekma</string>
+	<string name="restart_game">Ponovni zagon</string>
+</resources>

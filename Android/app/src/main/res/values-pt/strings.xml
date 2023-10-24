@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">Preparar para o lançamento&#8230;</string>
+	<string name="loading">Carregamento&#8230;</string>
+	<string name="notification_title">Carregamento de MultiCraft</string>
+	<string name="notification_description">Menos de 1 minuto&#8230;</string>
+
+	<string name="input_text">Introduzir texto</string>
+	<string name="input_password">Introduza a palavra-chave</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">Sem ligação à Internet!</string>
+	<string name="conn_message">O MultiCraft requer uma ligação à Internet para utilizar todas as características do jogo.\nCaso contrário, não receberá actualizações e o modo Multijogador não estará disponível!</string>
+	<string name="ignore">Ignorar</string>
+
+	<!-- Crash -->
+	<string name="sorry">Pedimos desculpa!</string>
+	<string name="restart">Infelizmente, aconteceu uma questão inesperada, gostaria de reiniciar a aplicação?</string>
+	<string name="no_space">Não há mais espaço para ficheiros de jogo, por favor liberte espaço no disco antes de reiniciar a aplicação</string>
+	<string name="close_game">Jogo fechado</string>
+	<string name="restart_game">Reiniciar</string>
+</resources>

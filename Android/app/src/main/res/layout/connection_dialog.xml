@@ -1,0 +1,78 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:baselineAligned="false"
+	android:gravity="center"
+	android:weightSum="1">
+
+	<LinearLayout
+		android:id="@+id/conn_root"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="0.7"
+		android:background="@drawable/bg_common"
+		android:orientation="vertical"
+		android:padding="16dp"
+		tools:ignore="UselessParent">
+
+		<androidx.appcompat.widget.AppCompatTextView
+			style="?android:attr/textAppearanceLarge"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:drawableStart="@mipmap/ic_dialog"
+			android:drawablePadding="8dp"
+			android:gravity="center"
+			android:text="@string/conn_title"
+			android:textColor="@color/grey_900" />
+
+		<androidx.appcompat.widget.AppCompatTextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center"
+			android:padding="8dp"
+			android:text="@string/conn_message"
+			android:textColor="@color/grey_900"
+			android:textSize="16sp" />
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<androidx.appcompat.widget.AppCompatButton
+				android:id="@+id/ignore"
+				android:layout_width="0dp"
+				android:layout_height="48dp"
+				android:layout_margin="8dp"
+				android:layout_weight="0.33"
+				android:background="@drawable/btn_yellow"
+				android:text="@string/ignore"
+				android:textAllCaps="false"
+				android:textColor="@android:color/white" />
+
+			<androidx.appcompat.widget.AppCompatButton
+				android:id="@+id/mobile"
+				android:layout_width="0dp"
+				android:layout_height="48dp"
+				android:layout_margin="8dp"
+				android:layout_weight="0.33"
+				android:background="@drawable/btn_green"
+				android:text="@string/conn_mobile"
+				android:textAllCaps="false"
+				android:textColor="@android:color/white"
+				android:visibility="gone" />
+
+			<androidx.appcompat.widget.AppCompatButton
+				android:id="@+id/wifi"
+				android:layout_width="0dp"
+				android:layout_height="48dp"
+				android:layout_margin="8dp"
+				android:layout_weight="0.33"
+				android:background="@drawable/btn_green"
+				android:text="@string/conn_wifi"
+				android:textAllCaps="false"
+				android:textColor="@android:color/white" />
+		</LinearLayout>
+	</LinearLayout>
+</LinearLayout>

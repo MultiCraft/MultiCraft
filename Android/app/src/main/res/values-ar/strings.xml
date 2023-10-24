@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- preparation for start -->
+	<string name="preparing">جارِ التحضير للبدء&#8230;</string>
+	<string name="loading">جارِ التحميل&#8230;</string>
+	<string name="notification_title">جارِ تحميل مالتيكرافت</string>
+	<string name="notification_description">أقل من دقيقة واحدة&#8230;</string>
+
+	<string name="input_text">أدخل النص</string>
+	<string name="input_password">أدخل كلمة المرور</string>
+
+	<!-- no connection dialog -->
+	<string name="conn_title">لا يوجد اتصال بالإنترنت!</string>
+	<string name="conn_message">يتطلب MultiCraft اتصالًا بالإنترنت لاستخدام جميع ميزات اللعبة.\n وإلا، لن تحصل على التحديثات ولن يكون وضع اللعب الجماعي متاحًا!</string>
+	<string name="ignore">تجاهل</string>
+
+	<!-- Crash -->
+	<string name="sorry">نأسف!</string>
+	<string name="restart">للأسف، حدث خطأ غير متوقع، هل تود إعادة تشغيل التطبيق؟</string>
+	<string name="no_space">لا توجد مساحة متاحة لملفات اللعبة، يرجى تحرير مساحة على القرص قبل إعادة تشغيل التطبيق</string>
+	<string name="close_game">إغلاق اللعبة</string>
+	<string name="restart_game">إعادة التشغيل</string>
+</resources>
