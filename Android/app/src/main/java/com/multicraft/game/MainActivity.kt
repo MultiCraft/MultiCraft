@@ -144,9 +144,6 @@ class MainActivity : AppCompatActivity() {
 	private fun prepareToRun() {
 		val filesList = mutableListOf<File>().apply {
 			addAll(listOf(
-				"builtin", "games${sep}default", "textures${sep}base", "debug.txt"
-			).map { File(externalStorage, it) })
-			addAll(listOf(
 				"builtin",
 				"client${sep}shaders",
 				"fonts",
