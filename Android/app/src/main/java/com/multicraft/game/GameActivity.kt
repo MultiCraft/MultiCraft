@@ -292,7 +292,7 @@ class GameActivity : SDLActivity() {
 	}
 
 	@Suppress("unused")
-	private fun upgrade(item: String) {
+	fun upgrade(item: String) {
 	}
 
 	@Suppress("unused")
