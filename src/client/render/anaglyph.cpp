@@ -20,6 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "anaglyph.h"
 
+#include <irrlicht.h>
+
 void RenderingCoreAnaglyph::drawAll()
 {
 	renderBothImages();

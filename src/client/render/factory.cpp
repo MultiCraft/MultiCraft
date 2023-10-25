@@ -31,13 +31,15 @@ RenderingCore *createRenderingCore(const std::string &stereo_mode, IrrlichtDevic
 {
 	if (stereo_mode == "none")
 		return new RenderingCorePlain(device, client, hud);
-#ifdef STEREO_MODE_SUPPORTED
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	if (stereo_mode == "anaglyph")
 		return new RenderingCoreAnaglyph(device, client, hud);
 	if (stereo_mode == "interlaced")
 		return new RenderingCoreInterlaced(device, client, hud);
+#ifdef STEREO_PAGEFLIP_SUPPORTED
 	if (stereo_mode == "pageflip")
 		return new RenderingCorePageflip(device, client, hud);
+#endif
 	if (stereo_mode == "sidebyside")
 		return new RenderingCoreSideBySide(device, client, hud);
 	if (stereo_mode == "topbottom")
