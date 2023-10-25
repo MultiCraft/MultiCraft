@@ -179,9 +179,8 @@ class MainActivity : AppCompatActivity() {
 		val prefVersion = prefs.getStringValue(TAG_BUILD_VER)
 		if (prefVersion == versionName)
 			startNative()
-		else {
+		else
 			prepareToRun()
-		}
 	}
 
 	private fun showConnectionDialog() {
