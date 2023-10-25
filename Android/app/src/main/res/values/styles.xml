@@ -27,4 +27,7 @@
 		<item name="android:windowEnterAnimation">@null</item>
 	</style>
 
+	<style name="TextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+		<item name="boxStrokeColor">@color/green_mc</item>
+	</style>
 </resources>

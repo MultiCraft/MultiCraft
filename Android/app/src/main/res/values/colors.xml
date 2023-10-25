@@ -1,5 +1,6 @@
 <resources>
 	<color name="light">#FAFAFA</color>
 	<color name="dark">#121212</color>
+	<color name="green_mc">#32783C</color>
 	<color name="grey_900">#212121</color>
 </resources>

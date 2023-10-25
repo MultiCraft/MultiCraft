@@ -6,7 +6,7 @@
 
 	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/input"
-		style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+		style="@style/TextInputLayoutStyle"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
@@ -15,7 +15,8 @@
 		android:padding="4dp"
 		app:endIconDrawable="@drawable/ic_baseline_send"
 		app:endIconMode="custom"
-		app:endIconTint="@null">
+		app:endIconTint="@null"
+		app:hintTextColor="@color/green_mc">
 
 		<com.multicraft.game.CustomEditText
 			android:id="@+id/editText"
