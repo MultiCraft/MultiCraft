@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2022 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2023 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2023 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -23,31 +23,22 @@ package com.multicraft.game.helpers
 import android.app.*
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.provider.Settings
-import android.view.View
+import android.content.res.Configuration
+import android.net.*
+import android.os.*
 import android.view.Window
-import androidx.appcompat.app.AlertDialog
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.*
-import com.multicraft.game.R
-import com.multicraft.game.databinding.ConnDialogBinding
-import com.multicraft.game.databinding.RestartDialogBinding
+import com.multicraft.game.*
+import com.multicraft.game.databinding.*
+import com.multicraft.game.dialogs.RestartDialog
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
-import java.io.File
-import java.io.InputStream
-import kotlin.system.exitProcess
+import com.multicraft.game.helpers.ApiLevelHelper.isMarshmallow
+import java.io.*
+import java.util.*
 
 // Activity extensions
-fun AppCompatActivity.getIcon() = try {
-	packageManager.getApplicationIcon(packageName)
-} catch (e: PackageManager.NameNotFoundException) {
-	ContextCompat.getDrawable(this, R.mipmap.ic_launcher)
-}
-
 fun Activity.finishApp(restart: Boolean) {
 	if (restart) {
 		val intent = Intent(this, this::class.java)
@@ -61,72 +52,12 @@ fun Activity.finishApp(restart: Boolean) {
 			)
 		)
 	}
-	exitProcess(0)
+	finish()
 }
 
-fun AppCompatActivity.defaultDialog(title: Int, view: View, style: Int = R.style.CustomDialog): AlertDialog {
-	val builder = AlertDialog.Builder(this, style)
-		.setIcon(getIcon())
-		.setTitle(title)
-		.setCancelable(false)
-		.setView(view)
-	return builder.create()
-}
-
-fun AppCompatActivity.headlessDialog(
-	view: View,
-	style: Int = R.style.LightTheme,
-	isCancelable: Boolean = false
-): AlertDialog {
-	val builder = AlertDialog.Builder(this, style)
-		.setCancelable(isCancelable)
-		.setView(view)
-	return builder.create()
-}
-
-fun AppCompatActivity.show(dialog: AlertDialog) {
-	window?.makeFullScreen()
-	if (!isFinishing) dialog.show()
-}
-
-fun AppCompatActivity.showConnectionDialog(listener: (() -> Unit)? = null) {
-	val binding = ConnDialogBinding.inflate(layoutInflater)
-	val dialog = defaultDialog(R.string.conn_title, binding.root)
-	binding.wifi.setOnClickListener {
-		dialog.dismiss()
-		startActivityForResult(
-			Intent(Settings.ACTION_WIFI_SETTINGS),
-			104
-		)
-	}
-	binding.mobile.setOnClickListener {
-		dialog.dismiss()
-		startActivityForResult(
-			Intent(Settings.ACTION_WIRELESS_SETTINGS),
-			104
-		)
-	}
-	binding.ignore.setOnClickListener {
-		dialog.dismiss()
-		listener?.invoke()
-	}
-	show(dialog)
-}
-
-fun AppCompatActivity.showRestartDialog(isRestart: Boolean = true) {
-	val message =
-		if (isRestart) getString(R.string.restart) else getString(R.string.no_space)
-	val binding = RestartDialogBinding.inflate(layoutInflater)
-	val dialog = headlessDialog(binding.root, R.style.CustomDialog)
-	binding.errorDesc.text = message
-	binding.close.setOnClickListener { finishApp(false) }
-	binding.restart.setOnClickListener { finishApp(true) }
-	show(dialog)
-}
-
-fun AppCompatActivity.isConnected(): Boolean {
+fun Activity.isConnected(): Boolean {
 	val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-	if (ApiLevelHelper.isMarshmallow()) {
+	if (isMarshmallow()) {
 		val activeNetwork = cm.activeNetwork ?: return false
 		val capabilities = cm.getNetworkCapabilities(activeNetwork) ?: return false
 		return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
@@ -135,6 +66,20 @@ fun AppCompatActivity.isConnected(): Boolean {
 		return activeNetworkInfo.isConnected
 	}
 }
+
+fun AppCompatActivity.showRestartDialog(
+	startForResult: ActivityResultLauncher<Intent>,
+	isRestart: Boolean = true
+) {
+	val message =
+		if (isRestart) getString(R.string.restart) else getString(R.string.no_space)
+	val intent = Intent(this, RestartDialog::class.java)
+	intent.putExtra("message", message)
+	startForResult.launch(intent)
+}
+
+fun Activity.hasHardKeyboard() =
+	resources.configuration.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
 
 // Other extensions
 fun File.copyInputStreamToFile(inputStream: InputStream) =

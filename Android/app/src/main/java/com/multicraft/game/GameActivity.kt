@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2022 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2022 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2023 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2023 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -20,11 +20,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game
 
-import android.content.Intent
 import android.content.res.Configuration
-import android.content.res.Configuration.HARDKEYBOARDHIDDEN_NO
 import android.net.Uri
-import android.os.Bundle
+import android.os.*
 import android.text.InputType
 import android.view.*
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
@@ -33,12 +31,15 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import com.multicraft.game.MainActivity.Companion.radius
-import com.multicraft.game.databinding.InputTextBinding
-import com.multicraft.game.databinding.MultilineInputBinding
+import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import org.libsdl.app.SDLActivity
+import java.util.*
+import kotlin.system.exitProcess
 
 class GameActivity : SDLActivity() {
 	companion object {
@@ -54,21 +55,21 @@ class GameActivity : SDLActivity() {
 
 	private var messageReturnValue = ""
 	private var hasKeyboard = false
+	override fun getLibraries() = arrayOf("MultiCraft")
 
-	override fun getLibraries(): Array<String> {
-		return arrayOf(
-			"MultiCraft"
-		)
-	}
-
-	override fun getMainSharedObject(): String {
-		return getContext().applicationInfo.nativeLibraryDir + "/libMultiCraft.so"
-	}
+	override fun getMainSharedObject() =
+		"${getContext().applicationInfo.nativeLibraryDir}/libMultiCraft.so"
 
 	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
+		try {
+			super.onCreate(savedInstanceState)
+		} catch (e: Error) {
+			exitProcess(0)
+		} catch (e: Exception) {
+			exitProcess(0)
+		}
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-		hasKeyboard = resources.configuration.hardKeyboardHidden == HARDKEYBOARDHIDDEN_NO
+		hasKeyboard = hasHardKeyboard()
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -88,15 +89,13 @@ class GameActivity : SDLActivity() {
 
 	override fun onResume() {
 		super.onResume()
-		if (hasKeyboard)
-			keyboardEvent(hasKeyboard)
+		if (hasKeyboard) keyboardEvent(true)
 		window.makeFullScreen()
 	}
 
 	override fun onConfigurationChanged(newConfig: Configuration) {
 		super.onConfigurationChanged(newConfig)
-		val statusKeyboard =
-			resources.configuration.hardKeyboardHidden == HARDKEYBOARDHIDDEN_NO
+		val statusKeyboard = hasHardKeyboard()
 		if (hasKeyboard != statusKeyboard) {
 			hasKeyboard = statusKeyboard
 			keyboardEvent(hasKeyboard)
@@ -137,8 +136,8 @@ class GameActivity : SDLActivity() {
 		editText.inputType = inputType
 		editText.setSelection(editText.text?.length ?: 0)
 		// for Android OS
-		editText.setOnEditorActionListener { _: TextView?, KeyCode: Int, _: KeyEvent? ->
-			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
+		editText.setOnEditorActionListener { _: TextView?, keyCode: Int, _: KeyEvent? ->
+			if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
 				messageReturnValue = editText.text.toString()
 				alertDialog.dismiss()
@@ -147,16 +146,17 @@ class GameActivity : SDLActivity() {
 			}
 			return@setOnEditorActionListener false
 		}
-		// for Chrome OS
-		editText.setOnKeyListener { _: View?, KeyCode: Int, _: KeyEvent? ->
-			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
-				imm.hideSoftInputFromWindow(editText.windowToken, 0)
-				messageReturnValue = editText.text.toString()
-				alertDialog.dismiss()
-				isInputActive = false
-				return@setOnKeyListener true
+		if (isChromebook()) {
+			editText.setOnKeyListener { _: View?, keyCode: Int, _: KeyEvent? ->
+				if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_ENDCALL) {
+					imm.hideSoftInputFromWindow(editText.windowToken, 0)
+					messageReturnValue = editText.text.toString()
+					alertDialog.dismiss()
+					isInputActive = false
+					return@setOnKeyListener true
+				}
+				return@setOnKeyListener false
 			}
-			return@setOnKeyListener false
 		}
 		binding.input.setEndIconOnClickListener {
 			imm.hideSoftInputFromWindow(editText.windowToken, 0)
@@ -174,7 +174,7 @@ class GameActivity : SDLActivity() {
 		// should be above `show()`
 		alertWindow.setSoftInputMode(SOFT_INPUT_STATE_VISIBLE)
 		alertDialog.show()
-		if (!resources.getBoolean(R.bool.isTablet))
+		if (!isTablet())
 			alertWindow.makeFullScreenAlert()
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
@@ -200,8 +200,8 @@ class GameActivity : SDLActivity() {
 		editText.setSelection(editText.text?.length ?: 0)
 		val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
 		// for Android OS
-		editText.setOnEditorActionListener { _: TextView?, KeyCode: Int, _: KeyEvent? ->
-			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
+		editText.setOnEditorActionListener { _: TextView?, keyCode: Int, _: KeyEvent? ->
+			if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_ENDCALL) {
 				imm.hideSoftInputFromWindow(editText.windowToken, 0)
 				messageReturnValue = editText.text.toString()
 				alertDialog.dismiss()
@@ -210,16 +210,17 @@ class GameActivity : SDLActivity() {
 			}
 			return@setOnEditorActionListener false
 		}
-		// for Chrome OS
-		editText.setOnKeyListener { _: View?, KeyCode: Int, _: KeyEvent? ->
-			if (KeyCode == KeyEvent.KEYCODE_ENTER || KeyCode == KeyEvent.KEYCODE_ENDCALL) {
-				imm.hideSoftInputFromWindow(editText.windowToken, 0)
-				messageReturnValue = editText.text.toString()
-				alertDialog.dismiss()
-				isInputActive = false
-				return@setOnKeyListener true
+		if (isChromebook()) {
+			editText.setOnKeyListener { _: View?, keyCode: Int, _: KeyEvent? ->
+				if (keyCode == KeyEvent.KEYCODE_ENTER || keyCode == KeyEvent.KEYCODE_ENDCALL) {
+					imm.hideSoftInputFromWindow(editText.windowToken, 0)
+					messageReturnValue = editText.text.toString()
+					alertDialog.dismiss()
+					isInputActive = false
+					return@setOnKeyListener true
+				}
+				return@setOnKeyListener false
 			}
-			return@setOnKeyListener false
 		}
 		binding.multiInput.setEndIconOnClickListener {
 			imm.hideSoftInputFromWindow(editText.windowToken, 0)
@@ -237,7 +238,7 @@ class GameActivity : SDLActivity() {
 		val alertWindow = alertDialog.window!!
 		alertWindow.setSoftInputMode(SOFT_INPUT_STATE_VISIBLE)
 		alertDialog.show()
-		if (!resources.getBoolean(R.bool.isTablet))
+		if (!isTablet())
 			alertWindow.makeFullScreenAlert()
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
@@ -270,9 +271,13 @@ class GameActivity : SDLActivity() {
 
 	@Suppress("unused")
 	fun openURI(uri: String?) {
+		val builder = CustomTabsIntent.Builder()
+		builder.setShareState(SHARE_STATE_OFF)
+			.setStartAnimations(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
+			.setExitAnimations(this, R.anim.slide_in_top, R.anim.slide_out_bottom)
+		val customTabsIntent = builder.build()
 		try {
-			val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(uri))
-			startActivity(browserIntent)
+			customTabsIntent.launchUrl(this, Uri.parse(uri))
 		} catch (ignored: Exception) {
 		}
 	}
@@ -292,7 +297,7 @@ class GameActivity : SDLActivity() {
 
 	@Suppress("unused")
 	fun getSecretKey(key: String): String {
-		return "Stub"
+		return key
 	}
 
 	@Suppress("unused")

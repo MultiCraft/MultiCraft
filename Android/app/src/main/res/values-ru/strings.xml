@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+	<!-- подготовка к запуску -->
 	<string name="preparing">Подготовка к запуску&#8230;</string>
 	<string name="loading">Загрузка&#8230;</string>
 	<string name="notification_title">Загрузка MultiCraft</string>
@@ -9,9 +10,8 @@
 
 	<!-- диалог отсутствия подключения -->
 	<string name="conn_title">Нет Интернет Подключения!</string>
-	<string name="conn_message">Для полноценной игры, MultiCraft требует подключение к Интернету.\nВ противном случае вам будет недоступно Обновление игры и режим Мультиплеера!</string>
-	<string name="conn_mobile">3G/4G</string>
-	<string name="ignore">Игнорировать</string>
+	<string name="conn_message">Для полноценной игры, MultiCraft требует подключение к Интернету.\nВ противном случае Обновление игры и режим Мультиплеера будут недоступны!</string>
+	<string name="ignore">Пропустить</string>
 
 	<!-- Crash -->
 	<string name="sorry">Нам очень жаль!</string>
