@@ -144,13 +144,17 @@ SubgameSpec findSubgame(const std::string &id)
 	if (conf.exists("moddable"))
 		moddable = conf.getBool("moddable");
 
+	bool hide_game = false;
+	if (conf.exists("hide_game"))
+		hide_game = conf.getBool("hide_game");
+
 	std::string menuicon_path;
 #ifndef SERVER
 	menuicon_path = getImagePath(
 			game_path + DIR_DELIM + "menu" + DIR_DELIM + "icon.png");
 #endif
 	return SubgameSpec(id, game_path, gamemod_path, mods_paths, game_name,
-			menuicon_path, game_author, game_release, moddable);
+			menuicon_path, game_author, game_release, moddable, hide_game);
 }
 
 SubgameSpec findWorldSubgame(const std::string &world_path)

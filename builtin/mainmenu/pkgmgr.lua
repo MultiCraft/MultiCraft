@@ -908,6 +908,10 @@ function pkgmgr.update_gamelist()
 	-- Update default_game_idx
 	for i, game in ipairs(pkgmgr.games) do
 		if game.id == "default" then
+			-- For compatibility with versions of the "default" game that don't
+			-- have hidden set
+			game.hidden = true
+
 			pkgmgr.default_game_idx = i
 			break
 		end

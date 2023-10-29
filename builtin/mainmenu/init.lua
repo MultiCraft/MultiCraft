@@ -103,14 +103,19 @@ function menudata.init_tabs()
 		tab_name_selected = "content",
 		is_open_cdb = true,
 		on_click = function(this)
-			if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
-				this:set_tab("content")
-			else
-				local dialog = create_store_dlg()
-				dialog:set_parent(this)
-				this:hide()
-				dialog:show()
+			-- Show the content tab if no hidden games are installed
+			for _, game in ipairs(pkgmgr.games) do
+				if not game.hidden then
+					this:set_tab("content")
+					return
+				end
 			end
+
+			-- Otherwise open the store dialog
+			local dialog = create_store_dlg("game")
+			dialog:set_parent(this)
+			this:hide()
+			dialog:show()
 		end,
 	})
 
