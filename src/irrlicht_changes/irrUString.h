@@ -3857,38 +3857,5 @@ inline std::wostream& operator<<(std::wostream& out, const ustring16<TAlloc>& in
 }
 #endif
 
-
-#ifndef USTRING_NO_STL
-
-namespace unicode
-{
-
-//! Hashing algorithm for hashing a ustring.  Used for things like unordered_maps.
-//! Algorithm taken from std::hash<std::string>.
-class hash : public std::unary_function<core::ustring, size_t>
-{
-	public:
-		size_t operator()(const core::ustring& s) const
-		{
-			size_t ret = 2166136261U;
-			size_t index = 0;
-			size_t stride = 1 + s.size_raw() / 10;
-
-			core::ustring::const_iterator i = s.begin();
-			while (i != s.end())
-			{
-				// TODO: Don't force u32 on an x64 OS.  Make it agnostic.
-				ret = 16777619U * ret ^ (size_t)s[(u32)index];
-				index += stride;
-				i += stride;
-			}
-			return (ret);
-		}
-};
-
-} // end namespace unicode
-
-#endif
-
 } // end namespace core
 } // end namespace irr
