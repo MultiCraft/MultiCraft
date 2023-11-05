@@ -908,6 +908,7 @@ function pkgmgr.update_gamelist()
 	-- Update default_game_idx
 	for i, game in ipairs(pkgmgr.games) do
 		if game.id == "default" then
+			-- Used by tab_local
 			pkgmgr.default_game_idx = i
 			break
 		end

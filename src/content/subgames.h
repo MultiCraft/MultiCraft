@@ -36,6 +36,7 @@ struct SubgameSpec
 	std::set<std::string> addon_mods_paths;
 	std::string menuicon_path;
 	bool moddable;
+	bool hidden;
 
 	SubgameSpec(const std::string &id = "", const std::string &path = "",
 			const std::string &gamemods_path = "",
@@ -44,11 +45,11 @@ struct SubgameSpec
 			const std::string &name = "",
 			const std::string &menuicon_path = "",
 			const std::string &author = "", int release = 0,
-			const bool moddable = true) :
+			const bool moddable = true, const bool hidden = false) :
 			id(id),
 			name(name), author(author), release(release), path(path),
 			gamemods_path(gamemods_path), addon_mods_paths(addon_mods_paths),
-			menuicon_path(menuicon_path), moddable(moddable)
+			menuicon_path(menuicon_path), moddable(moddable), hidden(hidden)
 	{
 	}
 

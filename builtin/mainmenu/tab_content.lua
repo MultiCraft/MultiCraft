@@ -32,7 +32,7 @@ local function get_formspec(tabview, name, tabdata)
 		packages_raw = {}
 		local i = 0
 		for _, game in ipairs(pkgmgr.games) do
-			if game.id ~= "default" then
+			if not game.hidden then
 				i = i + 1
 				packages_raw[i] = game
 			end
