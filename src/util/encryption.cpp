@@ -1,5 +1,5 @@
 /*
-Minetest
+MultiCraft
 Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
