@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/tile.h"
 #include "util/auth.h"
 #include "util/directiontables.h"
+#include "util/encryption.h"
 #include "util/pointedthing.h"
 #include "util/serialize.h"
 #include "util/string.h"
@@ -659,6 +660,27 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 {
 	std::string name;
 
+	const char *enc_ext[] = {
+		".enchive",
+		NULL
+	};
+
+	name = removeStringEnd(filename, enc_ext);
+	if (!name.empty()) {
+		Encryption::EncryptedData encrypted_data;
+		bool success = encrypted_data.fromString(data);
+
+		if (!success)
+			return false;
+
+		std::string decrypted_data;
+		Encryption::decrypt(encrypted_data, decrypted_data);
+
+		loadMedia(decrypted_data, name, from_media_push);
+
+		return true;
+	}
+
 	const char *image_ext[] = {
 		".png", ".jpg", ".bmp", ".tga",
 		".pcx", ".ppm", ".psd", ".wal", ".rgb",
@@ -1061,7 +1083,7 @@ void Client::sendInit(const std::string &playerName)
 
 	pkt << (u8) SER_FMT_VER_HIGHEST_READ << (u16) supp_comp_modes;
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
-	pkt << playerName << (u8) 1;
+	pkt << playerName << (u8) 2;
 
 	Send(&pkt);
 }

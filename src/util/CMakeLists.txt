@@ -3,6 +3,7 @@ set(UTIL_SRCS
 	${CMAKE_CURRENT_SOURCE_DIR}/auth.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/base64.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/directiontables.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/encryption.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/enriched_string.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/ieee_float.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/metricsbackend.cpp

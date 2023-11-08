@@ -531,6 +531,7 @@ include_directories(
 	${SOUND_INCLUDE_DIRS}
 	${SQLITE3_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
+	${ENCHIVE_INCLUDE_DIR}
 	${GMP_INCLUDE_DIR}
 	${JSON_INCLUDE_DIR}
 	${X11_INCLUDE_DIR}
@@ -573,6 +574,7 @@ if(BUILD_CLIENT)
 		${CLIENT_PLATFORM_LIBS}
 		luautf8
 		luachacha
+		enchive
 	)
 	if(NOT USE_LUAJIT)
 		set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -678,6 +680,7 @@ if(BUILD_SERVER)
 		${PLATFORM_LIBS}
 		luautf8
 		luachacha
+		enchive
 	)
 	set_target_properties(${PROJECT_NAME}server PROPERTIES
 		COMPILE_DEFINITIONS "SERVER")
