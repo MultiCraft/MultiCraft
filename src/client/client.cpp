@@ -661,7 +661,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 	std::string name;
 
 	const char *enc_ext[] = {
-		".enchive",
+		".e",
 		NULL
 	};
 
