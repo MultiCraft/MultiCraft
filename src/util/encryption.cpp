@@ -39,23 +39,23 @@ void Encryption::generateSalt(unsigned char *salt, unsigned int size)
 
 void Encryption::hmacInit(SHA256_CTX *ctx, const uint8_t *key)
 {
-	uint8_t pad[SHA256_BLOCK_SIZE];
-	sha256_init(ctx);
-	for (int i = 0; i < SHA256_BLOCK_SIZE; i++)
+	uint8_t pad[SHA256_DIGEST_LENGTH];
+	SHA256_Init(ctx);
+	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
 		pad[i] = key[i] ^ 0x36U;
-	sha256_update(ctx, pad, sizeof(pad));
+	SHA256_Update(ctx, pad, sizeof(pad));
 }
 
 void Encryption::hmacFinal(SHA256_CTX *ctx, const uint8_t *key, uint8_t *hash)
 {
-	uint8_t pad[SHA256_BLOCK_SIZE];
-	sha256_final(ctx, hash);
-	sha256_init(ctx);
-	for (int i = 0; i < SHA256_BLOCK_SIZE; i++)
+	uint8_t pad[SHA256_DIGEST_LENGTH];
+	SHA256_Final(hash, ctx);
+	SHA256_Init(ctx);
+	for (int i = 0; i < SHA256_DIGEST_LENGTH; i++)
 		pad[i] = key[i] ^ 0x5cU;
-	sha256_update(ctx, pad, sizeof(pad));
-	sha256_update(ctx, hash, SHA256_BLOCK_SIZE);
-	sha256_final(ctx, hash);
+	SHA256_Update(ctx, pad, sizeof(pad));
+	SHA256_Update(ctx, hash, SHA256_DIGEST_LENGTH);
+	SHA256_Final(hash, ctx);
 }
 
 bool Encryption::encrypt(const std::string &data, EncryptedData &encrypted_data)
@@ -83,7 +83,7 @@ bool Encryption::encrypt(const std::string &data, EncryptedData &encrypted_data)
 			z = sizeof(buffer[0]);
 
 		memcpy(buffer[0], &data[i], z);
-		sha256_update(hmac, buffer[0], z);
+		SHA256_Update(hmac, buffer[0], z);
 		chacha_encrypt(ctx, buffer[0], buffer[1], z);
 
 		encrypted_data.data.append((char *)buffer[1], z);
@@ -118,7 +118,7 @@ bool Encryption::decrypt(EncryptedData &encrypted_data, std::string &data)
 
 		memcpy(buffer[0], &(encrypted_data.data)[i], z);
 		chacha_encrypt(ctx, buffer[0], buffer[1], z);
-		sha256_update(hmac, buffer[1], z);
+		SHA256_Update(hmac, buffer[1], z);
 
 		data.append((char *)buffer[1], z);
 	}

@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include "chacha.h"
-#include "sha256.h"
+#include "util/sha2.h"
 
 #include <cstring>
 #include <string>
@@ -28,8 +28,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 class Encryption
 {
 private:
-	static const unsigned int salt_size = SHA256_BLOCK_SIZE;
-	static const unsigned int mac_size = SHA256_BLOCK_SIZE;
+	static const unsigned int salt_size = SHA256_DIGEST_LENGTH;
+	static const unsigned int mac_size = SHA256_DIGEST_LENGTH;
 
 	static void hmacInit(SHA256_CTX *ctx, const uint8_t *key);
 	static void hmacFinal(SHA256_CTX *ctx, const uint8_t *key, uint8_t *hash);
