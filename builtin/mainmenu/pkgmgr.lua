@@ -901,18 +901,8 @@ function pkgmgr.get_game(index)
 end
 
 --------------------------------------------------------------------------------
-pkgmgr.default_game_idx = math.huge
 function pkgmgr.update_gamelist()
 	pkgmgr.games = core.get_games()
-
-	-- Update default_game_idx
-	for i, game in ipairs(pkgmgr.games) do
-		if game.id == "default" then
-			-- Used by tab_local
-			pkgmgr.default_game_idx = i
-			break
-		end
-	end
 end
 
 --------------------------------------------------------------------------------
@@ -920,10 +910,8 @@ function pkgmgr.gamelist()
 	local retval = ""
 	if #pkgmgr.games > 0 then
 		for i = 1, #pkgmgr.games do
-			if pkgmgr.games[i].id ~= "default" then
-				if retval ~= "" then retval = retval .. "," end
-				retval = retval .. core.formspec_escape(pkgmgr.games[i].name)
-			end
+			if retval ~= "" then retval = retval .. "," end
+			retval = retval .. core.formspec_escape(pkgmgr.games[i].name)
 		end
 	end
 	return retval
