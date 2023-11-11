@@ -71,30 +71,28 @@ local function singleplayer_refresh_gamebar()
 		{x=-0.15, y=0.18}, "vertical", {x=1, y=6.14})
 
 	for i=1, #pkgmgr.games do
-		if pkgmgr.games[i].id ~= "default" then
-			local btn_name = "game_btnbar_" .. pkgmgr.games[i].id
+		local btn_name = "game_btnbar_" .. pkgmgr.games[i].id
 
-			local image = nil
-			local text = nil
-			local tooltip = esc(pkgmgr.games[i].name)
+		local image = nil
+		local text = nil
+		local tooltip = esc(pkgmgr.games[i].name)
 
-			if pkgmgr.games[i].menuicon_path ~= nil and
-				pkgmgr.games[i].menuicon_path ~= "" then
-				image = esc(pkgmgr.games[i].menuicon_path)
-			else
-				local part1 = pkgmgr.games[i].id:sub(1,5)
-				local part2 = pkgmgr.games[i].id:sub(6,10)
-				local part3 = pkgmgr.games[i].id:sub(11)
+		if pkgmgr.games[i].menuicon_path ~= nil and
+			pkgmgr.games[i].menuicon_path ~= "" then
+			image = esc(pkgmgr.games[i].menuicon_path)
+		else
+			local part1 = pkgmgr.games[i].id:sub(1,5)
+			local part2 = pkgmgr.games[i].id:sub(6,10)
+			local part3 = pkgmgr.games[i].id:sub(11)
 
-				text = part1 .. "\n" .. part2
-				if part3 ~= nil and
-					part3 ~= "" then
-					text = text .. "\n" .. part3
-				end
+			text = part1 .. "\n" .. part2
+			if part3 ~= nil and
+				part3 ~= "" then
+				text = text .. "\n" .. part3
 			end
-
-			btnbar:add_button(btn_name, text, image, tooltip)
 		end
+
+		btnbar:add_button(btn_name, text, image, tooltip)
 	end
 
 	btnbar:add_button("game_open_cdb", "", "", fgettext("Install games from ContentDB"), true)
@@ -309,7 +307,7 @@ local function main_button_handler(this, fields, name, tab_data)
 
 	if fields["world_create"] ~= nil then
 		local dlg
-		if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
+		if #pkgmgr.games > 0 then
 			mm_texture.update("singleplayer", current_game())
 			dlg = create_create_world_dlg(true)
 		else
@@ -362,14 +360,12 @@ local function main_button_handler(this, fields, name, tab_data)
 	end
 
 	if fields["switch_local_default"] then
-		core.settings:set("menu_last_game", "default")
 		this:set_tab("local_default")
-
 		return true
 	end
 
 	if fields["game_open_cdb"] then
-		if #pkgmgr.games > 1 or (pkgmgr.games[1] and pkgmgr.games[1].id ~= "default") then
+		if #pkgmgr.games > 0 then
 			this:set_tab("content")
 		else
 			local dlg = create_store_dlg("game")
@@ -385,11 +381,11 @@ end
 local function on_change(type, old_tab, new_tab)
 	if (type == "ENTER") then
 		local gameid = core.settings:get("menu_last_game")
-		if not gameid or gameid == "" or gameid == "default" then
+		if not gameid or gameid == "" then
 			local game_set
 			for _, game in ipairs(pkgmgr.games) do
 				local name = game.id
-				if name and name ~= "default" then
+				if name then
 					core.settings:set("menu_last_game", name)
 					game_set = true
 					break
@@ -402,7 +398,7 @@ local function on_change(type, old_tab, new_tab)
 
 		local game = current_game()
 
-		if game and game.id ~= "default" then
+		if game then
 			menudata.worldlist:set_filtercriteria(game.id)
 			mm_texture.update("singleplayer",game)
 		else
