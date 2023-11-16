@@ -136,3 +136,11 @@ void Encryption::setKey(uint8_t new_key[32])
 {
 	memcpy(key, new_key, 32);
 }
+
+void Encryption::setKey(std::string new_key)
+{
+	std::string resized_key = new_key;
+	resized_key.resize(32, '0');
+
+	setKey((uint8_t *)&resized_key[0]);
+}

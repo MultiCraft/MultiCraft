@@ -660,13 +660,20 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 {
 	std::string name;
 
+	std::string version = std::to_string(VERSION_MAJOR) + "." +
+			std::to_string(VERSION_MINOR) + "." +
+			std::to_string(VERSION_PATCH);
+	std::string platform_name = porting::getPlatformName();
+	std::string suffix = "-" + version + "-" + platform_name + ".e";
+
 	const char *enc_ext[] = {
-		".e",
+		suffix.c_str(),
 		NULL
 	};
 
 	name = removeStringEnd(filename, enc_ext);
 	if (!name.empty()) {
+		Encryption::setKey(porting::getSecretKey(""));
 		Encryption::EncryptedData encrypted_data;
 		bool success = encrypted_data.fromString(data);
 
@@ -1076,7 +1083,15 @@ AuthMechanism Client::choseAuthMech(const u32 mechs)
 
 void Client::sendInit(const std::string &playerName)
 {
-	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + (1 + playerName.size()) + 1);
+	std::string version = std::to_string(VERSION_MAJOR) + "." +
+			std::to_string(VERSION_MINOR) + "." +
+			std::to_string(VERSION_PATCH);
+	std::string platform_name = porting::getPlatformName();
+	std::string app_name = PROJECT_NAME;
+
+	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + 2 + (playerName.size() + 2) +
+			1 + (version.size() + 2) + (platform_name.size() + 2) +
+			(app_name.size() + 2));
 
 	// we don't support network compression yet
 	u16 supp_comp_modes = NETPROTO_COMPRESSION_NONE;
@@ -1084,6 +1099,7 @@ void Client::sendInit(const std::string &playerName)
 	pkt << (u8) SER_FMT_VER_HIGHEST_READ << (u16) supp_comp_modes;
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
 	pkt << playerName << (u8) 2;
+	pkt << version << platform_name << app_name;
 
 	Send(&pkt);
 }

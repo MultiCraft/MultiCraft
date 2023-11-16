@@ -94,4 +94,5 @@ public:
 	static bool encrypt(const std::string &data, EncryptedData &encrypted_data);
 	static bool decrypt(EncryptedData &encrypted_data, std::string &data);
 	static void setKey(uint8_t new_key[32]);
+	static void setKey(std::string new_key);
 };
