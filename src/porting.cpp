@@ -747,21 +747,15 @@ bool open_url(const std::string &url)
 }
 
 #if defined(__APPLE__)
+std::string getSecretKey(const std::string &key)
+{
+	return std::string(get_secret_key(key.c_str()));
+}
+
 float getScreenScale()
 {
 	static const float retval = get_screen_scale();
 	return retval;
-}
-#endif
-
-#if !defined(__ANDROID__) && !defined(__IOS__)
-std::string getSecretKey(const std::string &key)
-{
-#if defined(__APPLE__)
-	return std::string(get_secret_key(key.c_str()));
-#else
-	return "";
-#endif
 }
 #endif
 

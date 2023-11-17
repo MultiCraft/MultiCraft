@@ -358,11 +358,9 @@ bool open_url(const std::string &url);
  * @return true on success, false on failure
  */
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
-std::string getSecretKey(const std::string &key);
-#endif
-
 #if defined(__APPLE__)
+std::string getSecretKey(const std::string &key);
+
 float getScreenScale();
 #endif
 
