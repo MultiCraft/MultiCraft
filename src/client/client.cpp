@@ -660,6 +660,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 {
 	std::string name;
 
+#if defined(__ANDROID__) || defined(__APPLE__)
 	std::string version = std::to_string(VERSION_MAJOR) + "." +
 			std::to_string(VERSION_MINOR) + "." +
 			std::to_string(VERSION_PATCH);
@@ -687,6 +688,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 
 		return true;
 	}
+#endif
 
 	const char *image_ext[] = {
 		".png", ".jpg", ".bmp", ".tga",
