@@ -661,14 +661,8 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 	std::string name;
 
 #if defined(__ANDROID__) || defined(__APPLE__)
-	std::string version = std::to_string(VERSION_MAJOR) + "." +
-			std::to_string(VERSION_MINOR) + "." +
-			std::to_string(VERSION_PATCH);
-	std::string platform_name = porting::getPlatformName();
-	std::string suffix = "-" + version + "-" + platform_name + ".e";
-
 	const char *enc_ext[] = {
-		suffix.c_str(),
+		".e",
 		NULL
 	};
 
@@ -684,7 +678,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 		std::string decrypted_data;
 		Encryption::decrypt(encrypted_data, decrypted_data);
 
-		loadMedia(decrypted_data, name, from_media_push);
+		loadMedia(decrypted_data, encrypted_data.filename, from_media_push);
 
 		return true;
 	}

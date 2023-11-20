@@ -41,16 +41,20 @@ public:
 		const unsigned char id[4] = {'E', 'N', 'C', '1'};
 		unsigned char salt[salt_size] = {};
 		unsigned char mac[mac_size] = {};
+		std::string filename;
 		std::string data;
 
 		void toString(std::string &raw_data)
 		{
 			uint64_t data_size = data.size();
+			uint64_t filename_size = filename.size();
 
 			raw_data.clear();
 			raw_data.append((char *)id, sizeof(id));
 			raw_data.append((char *)salt, salt_size);
 			raw_data.append((char *)mac, mac_size);
+			raw_data.append((char *)(&filename_size), sizeof(uint64_t));
+			raw_data.append((char *)filename.c_str(), filename_size);
 			raw_data.append((char *)(&data_size), sizeof(uint64_t));
 			raw_data.append((char *)data.c_str(), data_size);
 		}
@@ -58,7 +62,7 @@ public:
 		bool fromString(const std::string &raw_data)
 		{
 			if (raw_data.size() < sizeof(id) + salt_size + mac_size +
-							      sizeof(uint64_t))
+							      sizeof(uint64_t) + sizeof(uint64_t))
 				return false;
 
 			unsigned char id_from_data[sizeof(id)] = {};
@@ -67,24 +71,41 @@ public:
 			if (memcmp(id_from_data, id, sizeof(id)))
 				return false;
 
-			uint64_t data_size = 0;
-
 			memcpy(salt, &raw_data[sizeof(id)], salt_size);
 			memcpy(mac, &raw_data[sizeof(id) + salt_size], mac_size);
-			memcpy(&data_size, &raw_data[sizeof(id) + salt_size + mac_size],
+
+			uint64_t filename_size = 0;
+
+			memcpy(&filename_size, &raw_data[sizeof(id) + salt_size + mac_size],
 					sizeof(uint64_t));
+
+			if (filename_size == 0)
+				return false;
+
+			if (raw_data.size() < sizeof(id) + salt_size + mac_size +
+							      sizeof(uint64_t) + filename_size)
+				return false;
+
+			filename.clear();
+			filename.append(&raw_data[sizeof(id) + salt_size + mac_size +
+					sizeof(uint64_t)], filename_size);
+
+			uint64_t data_size = 0;
+
+			memcpy(&data_size, &raw_data[sizeof(id) + salt_size + mac_size +
+					sizeof(uint64_t) + filename_size], sizeof(uint64_t));
 
 			if (data_size == 0)
 				return false;
 
 			if (raw_data.size() < sizeof(id) + salt_size + mac_size +
-							      sizeof(uint64_t) +
-							      data_size)
+							      sizeof(uint64_t) + filename_size +
+							      sizeof(uint64_t) + data_size)
 				return false;
 
 			data.clear();
 			data.append(&raw_data[sizeof(id) + salt_size + mac_size +
-						    sizeof(uint64_t)],
+					sizeof(uint64_t) + filename_size + sizeof(uint64_t)],
 					data_size);
 
 			return true;
