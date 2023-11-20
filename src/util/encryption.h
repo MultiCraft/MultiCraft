@@ -62,7 +62,8 @@ public:
 		bool fromString(const std::string &raw_data)
 		{
 			if (raw_data.size() < sizeof(id) + salt_size + mac_size +
-							      sizeof(uint64_t) + sizeof(uint64_t))
+							      sizeof(uint64_t) +
+							      sizeof(uint64_t))
 				return false;
 
 			unsigned char id_from_data[sizeof(id)] = {};
@@ -76,36 +77,43 @@ public:
 
 			uint64_t filename_size = 0;
 
-			memcpy(&filename_size, &raw_data[sizeof(id) + salt_size + mac_size],
+			memcpy(&filename_size,
+					&raw_data[sizeof(id) + salt_size + mac_size],
 					sizeof(uint64_t));
 
 			if (filename_size == 0)
 				return false;
 
 			if (raw_data.size() < sizeof(id) + salt_size + mac_size +
-							      sizeof(uint64_t) + filename_size)
+							      sizeof(uint64_t) +
+							      filename_size)
 				return false;
 
 			filename.clear();
 			filename.append(&raw_data[sizeof(id) + salt_size + mac_size +
-					sizeof(uint64_t)], filename_size);
+							sizeof(uint64_t)],
+					filename_size);
 
 			uint64_t data_size = 0;
 
-			memcpy(&data_size, &raw_data[sizeof(id) + salt_size + mac_size +
-					sizeof(uint64_t) + filename_size], sizeof(uint64_t));
+			memcpy(&data_size,
+					&raw_data[sizeof(id) + salt_size + mac_size +
+							sizeof(uint64_t) + filename_size],
+					sizeof(uint64_t));
 
 			if (data_size == 0)
 				return false;
 
-			if (raw_data.size() < sizeof(id) + salt_size + mac_size +
-							      sizeof(uint64_t) + filename_size +
-							      sizeof(uint64_t) + data_size)
+			if (raw_data.size() <
+					sizeof(id) + salt_size + mac_size +
+							sizeof(uint64_t) + filename_size +
+							sizeof(uint64_t) + data_size)
 				return false;
 
 			data.clear();
 			data.append(&raw_data[sizeof(id) + salt_size + mac_size +
-					sizeof(uint64_t) + filename_size + sizeof(uint64_t)],
+						    sizeof(uint64_t) + filename_size +
+						    sizeof(uint64_t)],
 					data_size);
 
 			return true;
