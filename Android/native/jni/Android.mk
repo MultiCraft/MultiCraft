@@ -108,7 +108,7 @@ LOCAL_C_INCLUDES := \
 	../../src/script                               \
 	../../lib/gmp                                  \
 	../../lib/jsoncpp                              \
-	../../lib/enchive                              \
+	../../lib/chacha                               \
 	deps/freetype/include                          \
 	deps/gettext/include                           \
 	deps/irrlicht/include                          \
@@ -249,8 +249,8 @@ LOCAL_SRC_FILES += ../../lib/luautf8/lutf8lib.c
 # Lua ChaCha Lib
 LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
 
-# Enchive Lib
-LOCAL_SRC_FILES += $(wildcard ../../lib/enchive/*.cpp)
+# ChaCha Lib
+LOCAL_SRC_FILES += $(wildcard ../../lib/chacha/*.cpp)
 
 LOCAL_STATIC_LIBRARIES += \
 	Curl mbedTLS mbedx509 mbedcrypto \
