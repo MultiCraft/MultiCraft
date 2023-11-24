@@ -31,6 +31,8 @@ private:
 	static const unsigned int salt_size = SHA256_DIGEST_LENGTH;
 	static const unsigned int mac_size = SHA256_DIGEST_LENGTH;
 
+	static uint8_t key[32];
+
 	static void hmacInit(SHA256_CTX *ctx, const uint8_t *key);
 	static void hmacFinal(SHA256_CTX *ctx, const uint8_t *key, uint8_t *hash);
 	static void generateSalt(unsigned char *salt, unsigned int size);

@@ -668,7 +668,11 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 
 	name = removeStringEnd(filename, enc_ext);
 	if (!name.empty()) {
+#ifdef OFFICIAL
+		static std::string secret_key = porting::getSecretKey(SIGN_KEY);
+#else
 		static std::string secret_key = porting::getSecretKey("");
+#endif
 		Encryption::setKey(secret_key);
 		Encryption::EncryptedData encrypted_data;
 		bool success = encrypted_data.fromString(data);

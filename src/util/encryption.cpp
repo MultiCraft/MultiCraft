@@ -24,9 +24,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cstring>
 #include <random>
 
-uint8_t key[32] = {230, 46, 18, 105, 49, 123, 150, 84, 225, 49, 77, 254, 203, 120, 242,
-		155, 53, 173, 77, 54, 45, 160, 169, 194, 204, 219, 104, 10, 165, 53, 215,
-		234};
+
+uint8_t Encryption::key[32] = {};
 
 void Encryption::generateSalt(unsigned char *salt, unsigned int size)
 {
