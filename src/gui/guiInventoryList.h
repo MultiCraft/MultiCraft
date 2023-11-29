@@ -73,6 +73,7 @@ public:
 		video::ITexture* slotbg_h_texture,
 		video::ITexture* slotbg_p_texture,
 		const core::rect<s32> &slotbg_middle,
+		const bool readonly,
 		GUIFormSpecMenu *fs_menu,
 		const Options &options,
 		gui::IGUIFont *font);
@@ -143,4 +144,7 @@ private:
 
 	// we do not want to write a warning on every draw
 	bool m_already_warned;
+
+	// Whether the list is read-only
+	bool m_readonly;
 };

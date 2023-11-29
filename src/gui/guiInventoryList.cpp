@@ -38,6 +38,7 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	video::ITexture* slotbg_h_texture,
 	video::ITexture* slotbg_p_texture,
 	const core::rect<s32> &slotbg_middle,
+	const bool readonly,
 	GUIFormSpecMenu *fs_menu,
 	const Options &options,
 	gui::IGUIFont *font) :
@@ -53,6 +54,7 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	m_slotbg_h_texture(slotbg_h_texture),
 	m_slotbg_p_texture(slotbg_p_texture),
 	m_slotbg_middle(slotbg_middle),
+	m_readonly(readonly),
 	m_fs_menu(fs_menu),
 	m_options(options),
 	m_font(font),
@@ -240,7 +242,7 @@ bool GUIInventoryList::OnEvent(const SEvent &event)
 s32 GUIInventoryList::getItemIndexAtPos(v2s32 p) const
 {
 	// no item if no gui element at pointer
-	if (!IsVisible || AbsoluteClippingRect.getArea() <= 0 ||
+	if (!IsVisible || m_readonly || AbsoluteClippingRect.getArea() <= 0 ||
 			!AbsoluteClippingRect.isPointInside(p))
 		return -1;
 
