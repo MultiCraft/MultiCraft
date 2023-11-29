@@ -175,9 +175,18 @@ void ClientMediaDownloader::initialStep(Client *client)
 		std::string name = file_it.first;
 		FileStatus *filestatus = file_it.second;
 		const std::string &sha1 = filestatus->sha1;
-
+		bool found_in_cache = false;
 		std::ostringstream tmp_os(std::ios_base::binary);
-		bool found_in_cache = m_media_cache.load(hex_encode(sha1), tmp_os);
+
+		if (str_ends_with(name, ".e")) {
+			size_t pos = name.find("-");
+			if (pos != std::string::npos) {
+				std::string data_sha1_hex = name.substr(0, pos);
+				found_in_cache = m_media_cache.load(data_sha1_hex, tmp_os);
+			}
+		} else {
+			found_in_cache = m_media_cache.load(hex_encode(sha1), tmp_os);
+		}
 
 		// If found in cache, try to load it from there
 		if (found_in_cache) {
@@ -563,8 +572,17 @@ bool ClientMediaDownloader::checkAndLoad(
 		<< std::endl;
 
 	// Update cache (unless we just loaded the file from the cache)
-	if (!is_from_cache)
-		m_media_cache.update(sha1_hex, data);
+	if (!is_from_cache) {
+		if (str_ends_with(name, ".e")) {
+			size_t pos = name.find("-");
+			if (pos != std::string::npos) {
+				std::string data_sha1_hex = name.substr(0, pos);
+				m_media_cache.update(data_sha1_hex, data);
+			}
+		} else {
+			m_media_cache.update(sha1_hex, data);
+		}
+	}
 
 	return true;
 }
