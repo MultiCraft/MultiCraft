@@ -179,7 +179,7 @@ void ClientMediaDownloader::initialStep(Client *client)
 		std::ostringstream tmp_os(std::ios_base::binary);
 
 		if (str_ends_with(name, ".e")) {
-			size_t pos = name.find("-");
+			size_t pos = name.find('-');
 			if (pos != std::string::npos) {
 				std::string data_sha1_hex = name.substr(0, pos);
 				found_in_cache = m_media_cache.load(data_sha1_hex, tmp_os);
@@ -573,7 +573,7 @@ bool ClientMediaDownloader::checkAndLoad(
 	// Update cache (unless we just loaded the file from the cache)
 	if (!is_from_cache) {
 		if (str_ends_with(name, ".e")) {
-			size_t pos = name.find("-");
+			size_t pos = name.find('-');
 			if (pos != std::string::npos) {
 				std::string data_sha1_hex = name.substr(0, pos);
 				m_media_cache.update(data_sha1_hex, data);
