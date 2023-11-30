@@ -187,7 +187,6 @@ void ClientMediaDownloader::initialStep(Client *client)
 		} else {
 			found_in_cache = m_media_cache.load(hex_encode(sha1), tmp_os);
 		}
-
 		// If found in cache, try to load it from there
 		if (found_in_cache) {
 			bool success = checkAndLoad(name, sha1,
@@ -546,7 +545,7 @@ bool ClientMediaDownloader::checkAndLoad(
 	}
 
 	// Check that received file matches announced checksum
-	if (data_sha1 != sha1) {
+	if (data_sha1 != sha1 && !is_from_cache) {
 		std::string data_sha1_hex = hex_encode(data_sha1);
 		infostream << "Client: "
 			<< cached_or_received_uc << " media file "
