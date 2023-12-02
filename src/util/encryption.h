@@ -46,6 +46,19 @@ public:
 		std::string filename;
 		std::string data;
 
+		void setSalt(uint8_t new_salt[SHA256_DIGEST_LENGTH])
+		{
+			memcpy(salt, new_salt, SHA256_DIGEST_LENGTH);
+		}
+
+		void setSalt(std::string new_salt)
+		{
+			std::string resized_salt = new_salt;
+			resized_salt.resize(SHA256_DIGEST_LENGTH, '0');
+
+			setSalt((uint8_t *)&resized_salt[0]);
+		}
+
 		void toString(std::string &raw_data)
 		{
 			uint64_t data_size = data.size();
@@ -126,4 +139,6 @@ public:
 	static bool decrypt(EncryptedData &encrypted_data, std::string &data);
 	static void setKey(uint8_t new_key[32]);
 	static void setKey(std::string new_key);
+	static void setSalt(uint8_t new_salt[SHA256_DIGEST_LENGTH]);
+	static void setSalt(std::string new_salt);
 };
