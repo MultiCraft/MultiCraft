@@ -64,7 +64,7 @@ bool Encryption::encrypt(const std::string &data, EncryptedData &encrypted_data)
 	encrypted_data.data.clear();
 	encrypted_data.data.reserve(data_size);
 
-	//generateSalt(encrypted_data.salt, salt_size);
+	// generateSalt(encrypted_data.salt, salt_size);
 
 	chacha_ctx ctx[1];
 	chacha_keysetup(ctx, key, 256);
