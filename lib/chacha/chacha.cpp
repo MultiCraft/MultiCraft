@@ -55,8 +55,8 @@ salsa20_wordtobyte(uint8_t output[64], const uint32_t input[16])
   for (i = 0;i < 16;++i) U32TO8_LITTLE(output + 4 * i,x[i]);
 }
 
-static const char sigma[16] = "expand 32byte k";
-static const char tau[16] = "expand 16byte k";
+static const char sigma[16] = {'e', 'x', 'p', 'a', 'n', 'd', ' ', '3', '2', '-', 'b', 'y', 't', 'e', ' ', 'k'};
+static const char tau[16] = {'e', 'x', 'p', 'a', 'n', 'd', ' ', '1', '6', '-', 'b', 'y', 't', 'e', ' ', 'k'};
 
 void
 chacha_keysetup(chacha_ctx *x, const uint8_t *k, uint32_t kbits)
