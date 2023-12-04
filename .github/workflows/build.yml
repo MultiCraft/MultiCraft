@@ -260,8 +260,8 @@ jobs:
     name: VS 2022 ${{ matrix.config.arch }}-${{ matrix.type }}
     runs-on: windows-2022
     env:
-      VCPKG_VERSION: af2287382b1991dbdcb7e5112d236f3323b9dd7a
-#                    2022.03.10
+      VCPKG_VERSION: a42af01b72c28a8e1d7b48107b33e4f286a55ef6
+#                    2023.11.20
       vcpkg_packages: irrlicht zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp
     strategy:
       fail-fast: false
