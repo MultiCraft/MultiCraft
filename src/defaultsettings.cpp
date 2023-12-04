@@ -236,7 +236,7 @@ void set_default_settings()
 	settings->setDefault("gui_scaling", "1.0");
 	settings->setDefault("gui_scaling_filter", "false");
 	settings->setDefault("gui_scaling_filter_txr2img", "true");
-	settings->setDefault("desynchronize_mapblock_texture_animation", "true");
+	settings->setDefault("desynchronize_mapblock_texture_animation", "false");
 	settings->setDefault("hud_hotbar_max_width", "1.0");
 	settings->setDefault("hud_move_upwards", "0");
 	settings->setDefault("round_screen", "0");
