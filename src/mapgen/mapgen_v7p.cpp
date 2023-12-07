@@ -53,6 +53,20 @@ MapgenV7P::MapgenV7P(MapgenV7PParams *params, EmergeParams *emerge)
 {
 	spflags = params->spflags;
 
+	// Initialise some values to hardcoded defaults
+	cave_width         = 0.09;
+	large_cave_depth   = -33;
+	small_cave_num_min = 0;
+	small_cave_num_max = 0;
+	large_cave_num_min = 0;
+	large_cave_num_max = 2;
+	large_cave_flooded = 0.5;
+	cavern_limit       = -256;
+	cavern_taper       = 256;
+	cavern_threshold   = 0.7;
+	dungeon_ymin       = -31000;
+	dungeon_ymax       = 31000;
+
 	// Average of mgv6 small caves count
 	small_caves_count = 6 * csize.X * csize.Z * MAP_BLOCKSIZE / 50000;
 
@@ -75,6 +89,13 @@ MapgenV7P::MapgenV7P(MapgenV7PParams *params, EmergeParams *emerge)
 		noise_ridge_uwater = new Noise(&params->np_ridge_uwater, seed, csize.X, csize.Z);
 		noise_ridge        = new Noise(&params->np_ridge,        seed, csize.X, csize.Z);
 	}
+
+	// 3D noise, 1 down overgeneration
+	MapgenBasic::np_cave1    = NoiseParams(0.0, 12.0, v3f(61.0, 61.0, 61.0), 52534, 3, 0.5, 2.0);
+	MapgenBasic::np_cave2    = NoiseParams(0.0, 12.0, v3f(67.0, 67.0, 67.0), 10325, 3, 0.5, 2.0);
+	MapgenBasic::np_cavern   = NoiseParams(0.0, 1.0, v3f(384.0, 128.0, 384.0), 723, 5, 0.63, 2.0);
+	// 3D noise
+	MapgenBasic::np_dungeons = NoiseParams(0.9, 0.5, v3f(500.0, 500.0, 500.0), 0, 2, 0.8, 2.0);
 
 	// Resolve additional nodes
 	c_bedrock = ndef->getId("mapgen_bedrock");
