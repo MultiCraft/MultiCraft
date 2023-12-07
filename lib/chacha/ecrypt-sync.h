@@ -10,6 +10,10 @@
 #ifndef ECRYPT_SYNC
 #define ECRYPT_SYNC
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "ecrypt-portable.h"
 
 /* ------------------------------------------------------------------------- */
@@ -283,6 +287,10 @@ void ECRYPT_keystream_blocks(
 
 #if (ECRYPT_VARIANT > ECRYPT_MAXVARIANT)
 #error this variant does not exist
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 /* ------------------------------------------------------------------------- */

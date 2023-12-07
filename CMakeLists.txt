@@ -207,6 +207,7 @@ endif()
 find_package(GMP REQUIRED)
 find_package(Json REQUIRED)
 find_package(Lua REQUIRED)
+add_subdirectory(lib/chacha)
 add_subdirectory(lib/luautf8)
 add_subdirectory(lib/luachacha)
 
