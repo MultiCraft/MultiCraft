@@ -265,7 +265,7 @@ void RenderingEngine::setupTopLevelXorgWindow(const std::string &name)
 	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	SDL_Window *window = reinterpret_cast<SDL_Window *>(exposedData.OpenGLSDL.Window);
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
@@ -470,7 +470,7 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	SDL_Window *window = reinterpret_cast<SDL_Window *>(exposedData.OpenGLSDL.Window);
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
@@ -735,7 +735,7 @@ static float calcDisplayDensity(irr::video::IVideoDriver *driver)
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
 
-	SDL_Window *window = reinterpret_cast<SDL_Window *>(exposedData.OpenGLSDL.Window);
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
 	SDL_SysWMinfo info;
 	SDL_VERSION(&info.version);
