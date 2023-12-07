@@ -138,13 +138,13 @@
 		8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2728B810AD009FCF4D /* CoreVideo.framework */; };
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
-		849D0848278AC1B200471354 /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0846278AC1B200471354 /* chacha.c */; };
 		84A1F9BB252E617D00000717 /* scripting_mainmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */; };
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
 		84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974228CA1291004E8CEC /* GameController.framework */; };
 		84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974428CA129C004E8CEC /* CoreHaptics.framework */; };
 		84C2AB5328DA7776001968EE /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C2AB5228DA7770001968EE /* libpng.a */; };
+		84C9A9592B228D9A00909EFF /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 84C9A9562B228D9A00909EFF /* chacha.c */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
 		84E33D882A7BBEE900609F77 /* wrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 84E33D872A7BBEE900609F77 /* wrapper.m */; };
 		84F20D5925D52790009562A9 /* static_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5525D52790009562A9 /* static_text.cpp */; };
@@ -570,12 +570,7 @@
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
 		8495BD2728B810AD009FCF4D /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
-		849D0841278AC1B200471354 /* ecrypt-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-config.h"; path = "../../../lib/luachacha/ecrypt-config.h"; sourceTree = "<group>"; };
-		849D0842278AC1B200471354 /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../lib/luachacha/ecrypt-sync.h"; sourceTree = "<group>"; };
-		849D0843278AC1B200471354 /* ecrypt-portable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-portable.h"; path = "../../../lib/luachacha/ecrypt-portable.h"; sourceTree = "<group>"; };
-		849D0844278AC1B200471354 /* ecrypt-machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-machine.h"; path = "../../../lib/luachacha/ecrypt-machine.h"; sourceTree = "<group>"; };
 		849D0845278AC1B200471354 /* lchacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lchacha.c; path = ../../../lib/luachacha/lchacha.c; sourceTree = "<group>"; };
-		849D0846278AC1B200471354 /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/luachacha/chacha.c; sourceTree = "<group>"; };
 		84A1F9A7252E616A00000717 /* mutex_auto_lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mutex_auto_lock.h; path = ../../../src/threading/mutex_auto_lock.h; sourceTree = "<group>"; };
 		84A1F9A8252E616A00000717 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = event.cpp; path = ../../../src/threading/event.cpp; sourceTree = "<group>"; };
 		84A1F9AE252E616B00000717 /* event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event.h; path = ../../../src/threading/event.h; sourceTree = "<group>"; };
@@ -591,6 +586,11 @@
 		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		84C2AB5228DA7770001968EE /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../deps/libpng/libpng.a; sourceTree = "<group>"; };
+		84C9A9532B228D9A00909EFF /* ecrypt-portable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-portable.h"; path = "../../../lib/chacha/ecrypt-portable.h"; sourceTree = "<group>"; };
+		84C9A9542B228D9A00909EFF /* ecrypt-config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-config.h"; path = "../../../lib/chacha/ecrypt-config.h"; sourceTree = "<group>"; };
+		84C9A9552B228D9A00909EFF /* ecrypt-machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-machine.h"; path = "../../../lib/chacha/ecrypt-machine.h"; sourceTree = "<group>"; };
+		84C9A9562B228D9A00909EFF /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/chacha/chacha.c; sourceTree = "<group>"; };
+		84C9A9572B228D9A00909EFF /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../lib/chacha/ecrypt-sync.h"; sourceTree = "<group>"; };
 		84E33D862A7BBEC100609F77 /* wrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wrapper.h; sourceTree = "<group>"; };
 		84E33D872A7BBEE900609F77 /* wrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = wrapper.m; sourceTree = "<group>"; };
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/libintl.a; sourceTree = "<group>"; };
@@ -1499,11 +1499,6 @@
 		849D0840278AC1A300471354 /* luachacha */ = {
 			isa = PBXGroup;
 			children = (
-				849D0846278AC1B200471354 /* chacha.c */,
-				849D0841278AC1B200471354 /* ecrypt-config.h */,
-				849D0844278AC1B200471354 /* ecrypt-machine.h */,
-				849D0843278AC1B200471354 /* ecrypt-portable.h */,
-				849D0842278AC1B200471354 /* ecrypt-sync.h */,
 				849D0845278AC1B200471354 /* lchacha.c */,
 			);
 			name = luachacha;
@@ -1645,9 +1640,23 @@
 			name = lua_api;
 			sourceTree = "<group>";
 		};
+		84C9A9512B228D9A00909EFF /* chacha */ = {
+			isa = PBXGroup;
+			children = (
+				84C9A9532B228D9A00909EFF /* ecrypt-portable.h */,
+				84C9A9542B228D9A00909EFF /* ecrypt-config.h */,
+				84C9A9552B228D9A00909EFF /* ecrypt-machine.h */,
+				84C9A9562B228D9A00909EFF /* chacha.c */,
+				84C9A9572B228D9A00909EFF /* ecrypt-sync.h */,
+			);
+			name = chacha;
+			path = ..;
+			sourceTree = "<group>";
+		};
 		84D4D9082A93707F00CACCC7 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				84C9A9512B228D9A00909EFF /* chacha */,
 				8458610424B13BD40040BA4F /* gmp */,
 				8458610824B13BF10040BA4F /* jsoncpp */,
 				849D0840278AC1A300471354 /* luachacha */,
@@ -1900,7 +1909,6 @@
 				84F20E5125D5283F009562A9 /* serverinventorymgr.cpp in Sources */,
 				84135C2525D526D700CA4DCF /* imagefilters.cpp in Sources */,
 				84135C1325D526D700CA4DCF /* clientlauncher.cpp in Sources */,
-				849D0848278AC1B200471354 /* chacha.c in Sources */,
 				84F20EB025D528D7009562A9 /* subgames.cpp in Sources */,
 				84135B7825D5264B00CA4DCF /* clientiface.cpp in Sources */,
 				84135C1725D526D700CA4DCF /* mesh.cpp in Sources */,
@@ -2014,6 +2022,7 @@
 				84E33D882A7BBEE900609F77 /* wrapper.m in Sources */,
 				84F20E3225D5282A009562A9 /* l_nodetimer.cpp in Sources */,
 				84135B7325D5264B00CA4DCF /* inventorymanager.cpp in Sources */,
+				84C9A9592B228D9A00909EFF /* chacha.c in Sources */,
 				84135C1825D526D700CA4DCF /* filecache.cpp in Sources */,
 				84F20E3425D5282A009562A9 /* l_settings.cpp in Sources */,
 				84F20EB125D528D7009562A9 /* packages.cpp in Sources */,
