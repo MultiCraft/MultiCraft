@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #else
 #include "threading/thread.h"
 #endif
-#include "connection.h"
+#include "mt_connection.h"
 
 namespace con
 {
