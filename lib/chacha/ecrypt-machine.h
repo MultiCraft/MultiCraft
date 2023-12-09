@@ -7,6 +7,8 @@
  * turned on) before deciding to edit this file.
  */
 
+#pragma once
+
 /* ------------------------------------------------------------------------- */
 
 #if (defined(ECRYPT_DEFAULT_ROT) && !defined(ECRYPT_MACHINE_ROT))
