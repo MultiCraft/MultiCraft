@@ -243,14 +243,14 @@ LOCAL_SRC_FILES += ../../lib/gmp/mini-gmp.c
 # JSONCPP
 LOCAL_SRC_FILES += ../../lib/jsoncpp/jsoncpp.cpp
 
+# ChaCha Lib
+LOCAL_SRC_FILES += $(wildcard ../../lib/chacha/*.c)
+
 # Lua UTF-8 Lib
 LOCAL_SRC_FILES += ../../lib/luautf8/lutf8lib.c
 
 # Lua ChaCha Lib
 LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
-
-# ChaCha Lib
-LOCAL_SRC_FILES += $(wildcard ../../lib/chacha/*.c)
 
 LOCAL_STATIC_LIBRARIES += \
 	Curl mbedTLS mbedx509 mbedcrypto \
