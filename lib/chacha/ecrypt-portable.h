@@ -17,8 +17,7 @@
  * editing 'ecrypt-machine.h'.
  */
 
-#ifndef ECRYPT_PORTABLE
-#define ECRYPT_PORTABLE
+#pragma once
 
 #include "ecrypt-config.h"
 
@@ -299,5 +298,3 @@ typedef unsigned I64T u64;
 #include "ecrypt-machine.h"
 
 /* ------------------------------------------------------------------------- */
-
-#endif

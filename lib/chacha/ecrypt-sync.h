@@ -7,8 +7,11 @@
  * *** Please only edit parts marked with "[edit]". ***
  */
 
-#ifndef ECRYPT_SYNC
-#define ECRYPT_SYNC
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "ecrypt-portable.h"
 
@@ -285,6 +288,8 @@ void ECRYPT_keystream_blocks(
 #error this variant does not exist
 #endif
 
-/* ------------------------------------------------------------------------- */
-
+#ifdef __cplusplus
+}
 #endif
+
+/* ------------------------------------------------------------------------- */

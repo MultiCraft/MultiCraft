@@ -108,6 +108,7 @@ LOCAL_C_INCLUDES := \
 	../../src/script                               \
 	../../lib/gmp                                  \
 	../../lib/jsoncpp                              \
+	../../lib/chacha                               \
 	deps/freetype/include                          \
 	deps/gettext/include                           \
 	deps/irrlicht/include                          \
@@ -241,6 +242,9 @@ LOCAL_SRC_FILES += ../../lib/gmp/mini-gmp.c
 
 # JSONCPP
 LOCAL_SRC_FILES += ../../lib/jsoncpp/jsoncpp.cpp
+
+# ChaCha Lib
+LOCAL_SRC_FILES += $(wildcard ../../lib/chacha/*.c)
 
 # Lua UTF-8 Lib
 LOCAL_SRC_FILES += ../../lib/luautf8/lutf8lib.c
