@@ -19,9 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "chacha.h"
+#include "ecrypt-sync.h"
 #include "util/sha2.h"
 
+#include <cstdint>
 #include <cstring>
 #include <string>
 

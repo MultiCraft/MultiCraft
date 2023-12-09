@@ -58,7 +58,7 @@ void Encryption::hmacFinal(SHA256_CTX *ctx, const uint8_t *key, uint8_t *hash)
 
 bool Encryption::encrypt(const std::string &data, EncryptedData &encrypted_data)
 {
-	static uint8_t buffer[2][CHACHA_BLOCKLENGTH * 1024];
+	static uint8_t buffer[2][ECRYPT_BLOCKLENGTH * 1024];
 	size_t data_size = data.size();
 
 	encrypted_data.data.clear();
@@ -66,9 +66,9 @@ bool Encryption::encrypt(const std::string &data, EncryptedData &encrypted_data)
 
 	// generateSalt(encrypted_data.salt, salt_size);
 
-	chacha_ctx ctx[1];
-	chacha_keysetup(ctx, key, 256);
-	chacha_ivsetup(ctx, encrypted_data.salt);
+	ECRYPT_ctx ctx[1];
+	ECRYPT_keysetup(ctx, key, 256, 0);
+	ECRYPT_ivsetup(ctx, encrypted_data.salt, 0);
 
 	SHA256_CTX hmac[1];
 	hmacInit(hmac, key);
@@ -82,7 +82,7 @@ bool Encryption::encrypt(const std::string &data, EncryptedData &encrypted_data)
 
 		memcpy(buffer[0], &data[i], z);
 		SHA256_Update(hmac, buffer[0], z);
-		chacha_encrypt(ctx, buffer[0], buffer[1], z);
+		ECRYPT_encrypt_bytes(ctx, buffer[0], buffer[1], z, 8);
 
 		encrypted_data.data.append((char *)buffer[1], z);
 	}
@@ -94,15 +94,15 @@ bool Encryption::encrypt(const std::string &data, EncryptedData &encrypted_data)
 
 bool Encryption::decrypt(EncryptedData &encrypted_data, std::string &data)
 {
-	static uint8_t buffer[2][CHACHA_BLOCKLENGTH * 1024];
+	static uint8_t buffer[2][ECRYPT_BLOCKLENGTH * 1024];
 	size_t data_size = encrypted_data.data.size();
 
 	data.clear();
 	data.reserve(data_size);
 
-	chacha_ctx ctx[1];
-	chacha_keysetup(ctx, key, 256);
-	chacha_ivsetup(ctx, encrypted_data.salt);
+	ECRYPT_ctx ctx[1];
+	ECRYPT_keysetup(ctx, key, 256, 0);
+	ECRYPT_ivsetup(ctx, encrypted_data.salt, 0);
 
 	SHA256_CTX hmac[1];
 	hmacInit(hmac, key);
@@ -115,7 +115,7 @@ bool Encryption::decrypt(EncryptedData &encrypted_data, std::string &data)
 			z = sizeof(buffer[0]);
 
 		memcpy(buffer[0], &(encrypted_data.data)[i], z);
-		chacha_encrypt(ctx, buffer[0], buffer[1], z);
+		ECRYPT_encrypt_bytes(ctx, buffer[0], buffer[1], z, 8);
 		SHA256_Update(hmac, buffer[1], z);
 
 		data.append((char *)buffer[1], z);
