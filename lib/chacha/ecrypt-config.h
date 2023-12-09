@@ -2,8 +2,7 @@
 
 /* *** Normally, it should not be necessary to edit this file. *** */
 
-#ifndef ECRYPT_CONFIG
-#define ECRYPT_CONFIG
+#pragma once
 
 /* ------------------------------------------------------------------------- */
 
@@ -268,5 +267,3 @@
 #endif
 
 /* ------------------------------------------------------------------------- */
-
-#endif

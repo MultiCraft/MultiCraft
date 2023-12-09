@@ -250,7 +250,7 @@ LOCAL_SRC_FILES += ../../lib/luautf8/lutf8lib.c
 LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
 
 # ChaCha Lib
-LOCAL_SRC_FILES += $(wildcard ../../lib/chacha/*.cpp)
+LOCAL_SRC_FILES += $(wildcard ../../lib/chacha/*.c)
 
 LOCAL_STATIC_LIBRARIES += \
 	Curl mbedTLS mbedx509 mbedcrypto \
