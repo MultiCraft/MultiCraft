@@ -88,11 +88,6 @@ function menudata.init_tabs()
 	menudata.worldlist:add_sort_mechanism("alphabetic", sort_worlds_alphabetic)
 	menudata.worldlist:set_sortmode("alphabetic")
 
-	if not core.settings:get("menu_last_game") then
-		local default_game = core.settings:get("default_game") or "default"
-		core.settings:set("menu_last_game", default_game)
-	end
-
 	mm_texture.init()
 
 	-- Create main tabview

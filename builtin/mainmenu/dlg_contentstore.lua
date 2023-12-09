@@ -562,8 +562,7 @@ function store.load()
 		end
 	end
 
-	local timeout = tonumber(core.settings:get("curl_file_download_timeout"))
-	local response = http.fetch_sync({ url = url, timeout = timeout })
+	local response = http.fetch_sync({ url = url })
 	if not response.succeeded then
 		return
 	end

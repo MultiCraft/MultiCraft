@@ -36,7 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/sound.h"
 #include "client/tile.h"
 #include "network/clientopcodes.h"
-#include "network/connection.h"
+#include "network/mt_connection.h"
 #include "script/scripting_client.h"
 #include "util/serialize.h"
 #include "util/srp.h"

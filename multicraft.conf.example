@@ -861,7 +861,7 @@
 
 #    Whether node texture animations should be desynchronized per mapblock.
 #    type: bool
-# desynchronize_mapblock_texture_animation = true
+# desynchronize_mapblock_texture_animation = false
 
 #    Maximum proportion of current window to be used for hotbar.
 #    Useful if there's something to be displayed right or left of hotbar.

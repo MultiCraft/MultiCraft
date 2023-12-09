@@ -283,7 +283,7 @@ src/network/clientopcodes.cpp
 src/network/clientopcodes.h
 src/network/clientpackethandler.cpp
 src/network/connection.cpp
-src/network/connection.h
+src/network/mt_connection.h
 src/network/connectionthreads.cpp
 src/network/networkpacket.cpp
 src/network/networkprotocol.h

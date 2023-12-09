@@ -605,7 +605,7 @@
 		84F20D9225D527C4009562A9 /* networkpacket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = networkpacket.h; path = ../../../src/network/networkpacket.h; sourceTree = "<group>"; };
 		84F20D9325D527C4009562A9 /* serverpackethandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = serverpackethandler.cpp; path = ../../../src/network/serverpackethandler.cpp; sourceTree = "<group>"; };
 		84F20D9425D527C4009562A9 /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = socket.h; path = ../../../src/network/socket.h; sourceTree = "<group>"; };
-		84F20D9525D527C4009562A9 /* connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = connection.h; path = ../../../src/network/connection.h; sourceTree = "<group>"; };
+		84F20D9525D527C4009562A9 /* mt_connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mt_connection.h; path = ../../../src/network/mt_connection.h; sourceTree = "<group>"; };
 		84F20D9625D527C4009562A9 /* socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = socket.cpp; path = ../../../src/network/socket.cpp; sourceTree = "<group>"; };
 		84F20D9725D527C5009562A9 /* clientopcodes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = clientopcodes.cpp; path = ../../../src/network/clientopcodes.cpp; sourceTree = "<group>"; };
 		84F20D9825D527C5009562A9 /* connectionthreads.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = connectionthreads.h; path = ../../../src/network/connectionthreads.h; sourceTree = "<group>"; };
@@ -1386,7 +1386,7 @@
 				84F20D9125D527C4009562A9 /* clientopcodes.h */,
 				84F20DA025D527C5009562A9 /* clientpackethandler.cpp */,
 				84F20D9925D527C5009562A9 /* connection.cpp */,
-				84F20D9525D527C4009562A9 /* connection.h */,
+				84F20D9525D527C4009562A9 /* mt_connection.h */,
 				84F20D9D25D527C5009562A9 /* connectionthreads.cpp */,
 				84F20D9825D527C5009562A9 /* connectionthreads.h */,
 				84F20D8F25D527C4009562A9 /* networkexceptions.h */,
