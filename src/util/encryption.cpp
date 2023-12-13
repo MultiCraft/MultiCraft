@@ -115,7 +115,7 @@ bool Encryption::decrypt(EncryptedData &encrypted_data, std::string &data)
 			z = sizeof(buffer[0]);
 
 		memcpy(buffer[0], &(encrypted_data.data)[i], z);
-		ECRYPT_encrypt_bytes(ctx, buffer[0], buffer[1], z, 8);
+		ECRYPT_encrypt_bytes(ctx, buffer[0], buffer[1], z, 20);
 		SHA256_Update(hmac, buffer[1], z);
 
 		data.append((char *)buffer[1], z);
