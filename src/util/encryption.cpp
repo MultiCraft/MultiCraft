@@ -82,7 +82,7 @@ bool Encryption::encrypt(const std::string &data, EncryptedData &encrypted_data)
 
 		memcpy(buffer[0], &data[i], z);
 		SHA256_Update(hmac, buffer[0], z);
-		ECRYPT_encrypt_bytes(ctx, buffer[0], buffer[1], z, 8);
+		ECRYPT_encrypt_bytes(ctx, buffer[0], buffer[1], z, 20);
 
 		encrypted_data.data.append((char *)buffer[1], z);
 	}
