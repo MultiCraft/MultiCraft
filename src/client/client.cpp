@@ -686,19 +686,18 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 		if (!success)
 			return false;
 
-		size_t pos1 = 0;
-		size_t pos2 = filename.rfind('-');
+		std::string real_filename = name;
 
-		if (pos2 != std::string::npos)
-			pos2 = filename.rfind('-', pos2 - 1);
+		size_t pos = real_filename.rfind('-');
 
-		if (pos1 != std::string::npos && pos2 != std::string::npos && pos2 > pos1) {
-			std::string real_filename = filename.substr(pos1, pos2 - pos1);
-			loadMedia(decrypted_data, real_filename, from_media_push);
-			return true;
+		if (pos != std::string::npos)
+			pos = real_filename.rfind('-', pos - 1);
+
+		if (pos != std::string::npos) {
+			real_filename = real_filename.substr(0, pos);
 		}
 
-		return false;
+		return loadMedia(decrypted_data, real_filename, from_media_push);
 	}
 #endif
 
