@@ -33,4 +33,6 @@ object ApiLevelHelper {
 	fun isPie() = isGreaterOrEqual(P)
 
 	fun isAndroid12() = isGreaterOrEqual(S)
+
+	fun isAndroid14() = isGreaterOrEqual(UPSIDE_DOWN_CAKE)
 }
