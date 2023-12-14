@@ -681,7 +681,10 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 			return false;
 
 		std::string decrypted_data;
-		Encryption::decrypt(encrypted_data, decrypted_data);
+		success = Encryption::decrypt(encrypted_data, decrypted_data);
+
+		if (!success)
+			return false;
 
 		size_t pos1 = 0;
 		size_t pos2 = filename.rfind('-');
