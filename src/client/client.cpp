@@ -34,6 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/tile.h"
 #include "util/auth.h"
 #include "util/directiontables.h"
+#include "util/encryption.h"
 #include "util/pointedthing.h"
 #include "util/serialize.h"
 #include "util/string.h"
@@ -659,6 +660,47 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 {
 	std::string name;
 
+#if defined(__ANDROID__) || defined(__APPLE__)
+	const char *enc_ext[] = {
+		".e",
+		NULL
+	};
+
+	name = removeStringEnd(filename, enc_ext);
+	if (!name.empty()) {
+#ifdef OFFICIAL
+		static std::string secret_key = porting::getSecretKey(SIGN_KEY);
+#else
+		static std::string secret_key = porting::getSecretKey("");
+#endif
+		Encryption::setKey(secret_key);
+		Encryption::EncryptedData encrypted_data;
+		bool success = encrypted_data.fromString(data);
+
+		if (!success)
+			return false;
+
+		std::string decrypted_data;
+		success = Encryption::decrypt(encrypted_data, decrypted_data);
+
+		if (!success)
+			return false;
+
+		std::string real_filename = name;
+
+		size_t pos = real_filename.rfind('-');
+
+		if (pos != std::string::npos)
+			pos = real_filename.rfind('-', pos - 1);
+
+		if (pos != std::string::npos) {
+			real_filename = real_filename.substr(0, pos);
+		}
+
+		return loadMedia(decrypted_data, real_filename, from_media_push);
+	}
+#endif
+
 	const char *image_ext[] = {
 		".png", ".jpg", ".bmp", ".tga",
 		".pcx", ".ppm", ".psd", ".wal", ".rgb",
@@ -1054,14 +1096,23 @@ AuthMechanism Client::choseAuthMech(const u32 mechs)
 
 void Client::sendInit(const std::string &playerName)
 {
-	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + (1 + playerName.size()) + 1);
+	std::string version = std::to_string(VERSION_MAJOR) + "." +
+			std::to_string(VERSION_MINOR) + "." +
+			std::to_string(VERSION_PATCH);
+	std::string platform_name = porting::getPlatformName();
+	std::string app_name = PROJECT_NAME;
+
+	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + 2 + (playerName.size() + 2) +
+			1 + (version.size() + 2) + (platform_name.size() + 2) +
+			(app_name.size() + 2));
 
 	// we don't support network compression yet
 	u16 supp_comp_modes = NETPROTO_COMPRESSION_NONE;
 
 	pkt << (u8) SER_FMT_VER_HIGHEST_READ << (u16) supp_comp_modes;
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
-	pkt << playerName << (u8) 1;
+	pkt << playerName << (u8) 2;
+	pkt << version << platform_name << app_name;
 
 	Send(&pkt);
 }

@@ -2588,6 +2588,7 @@ bool Server::addMediaFile(const std::string &filename,
 		".x", ".b3d", ".md2", ".obj",
 		// Custom translation file format
 		".tr",
+		".e",
 		NULL
 	};
 	if (removeStringEnd(filename, supported_ext).empty()) {

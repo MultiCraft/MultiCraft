@@ -767,6 +767,8 @@ bool ContentFeatures::textureAlphaCheck(ITextureSource *tsrc, const TileDef *til
 
 		// Load the texture and see if there's any transparent pixels
 		video::ITexture *texture = tsrc->getTexture(tiles[i].name);
+		if (!texture)
+			continue;
 		video::IImage *image = driver->createImage(texture,
 			core::position2d<s32>(0, 0), texture->getOriginalSize());
 		if (!image)
