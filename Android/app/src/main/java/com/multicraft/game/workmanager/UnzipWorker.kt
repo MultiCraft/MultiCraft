@@ -57,9 +57,7 @@ class UnzipWorker(private val appContext: Context, workerParams: WorkerParameter
 			.build()
 		return if (isAndroid14())
 			ForegroundInfo(
-				NOTIFICATION_ID,
-				notification,
-				FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+				NOTIFICATION_ID, notification, FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
 			) else
 			ForegroundInfo(NOTIFICATION_ID, notification)
 	}
