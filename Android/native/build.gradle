@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'de.undercouch.download'
 
 android {
-	compileSdkVersion 34
+	compileSdk 34
 	ndkVersion '25.2.9519653'
 	defaultConfig {
 		minSdkVersion 21
