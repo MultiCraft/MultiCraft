@@ -2699,6 +2699,8 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 	for (const auto &i : m_media) {
 		if (str_ends_with(i.first, ".tr") && !str_ends_with(i.first, lang_suffix))
 			continue;
+		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
+			continue;
 		// Skip dummy entries on 5.0+ clients
 		if (protocol_version >= 37 && i.second.sha1_digest.empty())
 			continue;
@@ -2709,6 +2711,8 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 
 	for (const auto &i : m_media) {
 		if (str_ends_with(i.first, ".tr") && !str_ends_with(i.first, lang_suffix))
+			continue;
+		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
 		if (protocol_version >= 37 && i.second.sha1_digest.empty())
 			continue;
