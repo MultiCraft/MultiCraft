@@ -57,6 +57,10 @@ private:
 	GUIScrollBar *m_scrollbar;
 	OrientationEnum m_orientation;
 	f32 m_scrollfactor;
+	
+	bool m_swipe_started;
+	int m_swipe_start_y;
+	float m_swipe_pos;
 
 	void updateScrolling();
 };
