@@ -933,17 +933,17 @@ bool GUITable::OnEvent(const SEvent &event)
 			}
 		}
 		else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
-			if (!m_swipe_started && m_swipe_start_y != -1 && 
+			if (!m_swipe_started && m_swipe_start_y != -1 &&
 					std::abs(m_swipe_start_y - event.MouseInput.Y) > 10) {
 				m_swipe_started = true;
 				Environment->setFocus(this);
 			}
-			
+
 			if (m_swipe_started) {
-	
+
 				s32 totalheight = m_rowheight * m_visible_rows.size();
 				float scale = (float)(totalheight - AbsoluteRect.getHeight()) / (m_scrollbar->getMax() - m_scrollbar->getMin());
-	
+
 				m_swipe_pos = (float)(m_swipe_start_y - event.MouseInput.Y) * scale;
 				m_scrollbar->setPos((int)m_swipe_pos);
 

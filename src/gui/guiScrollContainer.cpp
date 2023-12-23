@@ -56,7 +56,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 
 		return retval;
 	}
-	
+
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 			m_swipe_start_y = event.MouseInput.Y - m_scrollbar->getPos() * m_scrollfactor;
@@ -69,16 +69,16 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			}
 		}
 		else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
-			if (!m_swipe_started && m_orientation == VERTICAL && m_swipe_start_y != -1 && 
+			if (!m_swipe_started && m_orientation == VERTICAL && m_swipe_start_y != -1 &&
 					std::abs(m_swipe_start_y - event.MouseInput.Y) > 10) {
 				m_swipe_started = true;
 				Environment->setFocus(this);
 			}
-			
+
 			if (m_swipe_started) {
 				m_swipe_pos = (float)(event.MouseInput.Y - m_swipe_start_y) / m_scrollfactor;
 				m_scrollbar->setPos((int)m_swipe_pos);
-				
+
 				SEvent e;
 				e.EventType = EET_GUI_EVENT;
 				e.GUIEvent.Caller = m_scrollbar;

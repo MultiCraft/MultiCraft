@@ -4166,27 +4166,27 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 		gui::IGUIElement *hovered =
 			Environment->getRootGUIElement()->getElementFromPoint(
 				core::position2d<s32>(x, y));
-				
+
 		if (hovered && isMyChild(hovered)) {
 			IGUIElement *element = hovered->getParent();
-			
+
 			do {
-				if (element && 
+				if (element &&
 						(element->getType() == gui::EGUIET_CUSTOM_SCROLLCONTAINER ||
 						element->getType() == gui::EGUIET_CUSTOM_GUITABLE)) {
 					bool result = element->OnEvent(event);
-					
+
 					if (result)
 						return true;
-						
+
 					break;
 				}
-				
+
 				element = element->getParent();
 			} while (element);
 		}
 	}
-	
+
 	// Mouse wheel and move events: send to hovered element instead of focused
 	if (event.EventType == EET_MOUSE_INPUT_EVENT &&
 			(event.MouseInput.Event == EMIE_MOUSE_WHEEL ||
