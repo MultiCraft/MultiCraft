@@ -4171,7 +4171,9 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 			IGUIElement *element = hovered->getParent();
 			
 			do {
-				if (element && element->getType() == gui::EGUIET_CUSTOM_SCROLLCONTAINER) {
+				if (element && 
+						(element->getType() == gui::EGUIET_CUSTOM_SCROLLCONTAINER ||
+						element->getType() == gui::EGUIET_CUSTOM_GUITABLE)) {
 					bool result = element->OnEvent(event);
 					
 					if (result)
