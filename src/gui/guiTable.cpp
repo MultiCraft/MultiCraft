@@ -41,6 +41,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GUITable
 */
 
+bool GUITable::m_swipe_started = false;
+int GUITable::m_swipe_start_y = -1;
+float GUITable::m_swipe_pos = 0;
+
 GUITable::GUITable(gui::IGUIEnvironment *env,
 		gui::IGUIElement* parent, s32 id,
 		core::rect<s32> rectangle,
@@ -87,10 +91,6 @@ GUITable::GUITable(gui::IGUIEnvironment *env,
 			relative_rect.LowerRightCorner.X-width,relative_rect.UpperLeftCorner.Y,
 			relative_rect.LowerRightCorner.X,relative_rect.LowerRightCorner.Y
 			));
-
-	m_swipe_started = false;
-	m_swipe_start_y = -1;
-	m_swipe_pos = 0;
 }
 
 GUITable::~GUITable()

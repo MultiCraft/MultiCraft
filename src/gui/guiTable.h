@@ -274,7 +274,7 @@ protected:
 
 private:
 
-	bool m_swipe_started;
-	int m_swipe_start_y;
-	float m_swipe_pos;
+	static bool m_swipe_started;
+	static int m_swipe_start_y;
+	static float m_swipe_pos;
 };
