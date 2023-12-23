@@ -58,6 +58,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 		return retval;
 	}
 
+#ifdef HAVE_TOUCHSCREENGUI
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 			m_swipe_start_y = event.MouseInput.Y -
@@ -96,6 +97,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			}
 		}
 	}
+#endif
 
 	return IGUIElement::OnEvent(event);
 }

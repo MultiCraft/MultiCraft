@@ -4158,6 +4158,7 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 		}
 	}
 
+#ifdef HAVE_TOUCHSCREENGUI
 	// If element is inside scroll container then send it to scroll container
 	// first so that it can handle swipe gesture
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
@@ -4186,6 +4187,7 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 			} while (element);
 		}
 	}
+#endif
 
 	// Mouse wheel and move events: send to hovered element instead of focused
 	if (event.EventType == EET_MOUSE_INPUT_EVENT &&

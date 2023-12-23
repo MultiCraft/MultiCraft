@@ -919,6 +919,7 @@ bool GUITable::OnEvent(const SEvent &event)
 				return false;
 		}
 
+#ifdef HAVE_TOUCHSCREENGUI
 		// Handle swipe gesture
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 			s32 totalheight = m_rowheight * m_visible_rows.size();
@@ -950,6 +951,7 @@ bool GUITable::OnEvent(const SEvent &event)
 				return true;
 			}
 		}
+#endif
 
 		if (event.MouseInput.isLeftPressed() &&
 				(isPointInside(p) ||
