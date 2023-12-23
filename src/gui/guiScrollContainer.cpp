@@ -22,7 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 		gui::IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
 		const std::string &orientation, f32 scrollfactor) :
-		gui::IGUIElement(gui::EGUIET_CUSTOM_SCROLLCONTAINER, env, parent, id, rectangle),
+		gui::IGUIElement(gui::EGUIET_CUSTOM_SCROLLCONTAINER, env, parent, id,
+				rectangle),
 		m_scrollbar(nullptr), m_scrollfactor(scrollfactor)
 {
 	if (orientation == "vertical")
@@ -59,24 +60,27 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-			m_swipe_start_y = event.MouseInput.Y - m_scrollbar->getPos() * m_scrollfactor;
-		}
-		else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
+			m_swipe_start_y = event.MouseInput.Y -
+					  m_scrollbar->getPos() * m_scrollfactor;
+		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
 			m_swipe_start_y = -1;
 			if (m_swipe_started) {
 				m_swipe_started = false;
 				return true;
 			}
-		}
-		else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
-			if (!m_swipe_started && m_orientation == VERTICAL && m_swipe_start_y != -1 &&
-					std::abs(m_swipe_start_y - event.MouseInput.Y) > 10) {
+		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
+			if (!m_swipe_started && m_orientation == VERTICAL &&
+					m_swipe_start_y != -1 &&
+					std::abs(m_swipe_start_y - event.MouseInput.Y) >
+							10) {
 				m_swipe_started = true;
 				Environment->setFocus(this);
 			}
 
 			if (m_swipe_started) {
-				m_swipe_pos = (float)(event.MouseInput.Y - m_swipe_start_y) / m_scrollfactor;
+				m_swipe_pos = (float)(event.MouseInput.Y -
+							      m_swipe_start_y) /
+					      m_scrollfactor;
 				m_scrollbar->setPos((int)m_swipe_pos);
 
 				SEvent e;
