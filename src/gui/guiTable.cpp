@@ -922,28 +922,28 @@ bool GUITable::OnEvent(const SEvent &event)
 		// Handle swipe gesture
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 			s32 totalheight = m_rowheight * m_visible_rows.size();
-			float scale = (float)(totalheight - AbsoluteRect.getHeight()) / (m_scrollbar->getMax() - m_scrollbar->getMin());
+			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
+					(m_scrollbar->getMax() - m_scrollbar->getMin());
 			m_swipe_start_y = event.MouseInput.Y + m_scrollbar->getPos() / scale;
-		}
-		else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
+		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
 			m_swipe_start_y = -1;
 			if (m_swipe_started) {
 				m_swipe_started = false;
 				return true;
 			}
-		}
-		else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
+		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
+			double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+			s32 totalheight = m_rowheight * m_visible_rows.size();
+			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
+					(m_scrollbar->getMax() - m_scrollbar->getMin());
+
 			if (!m_swipe_started && m_swipe_start_y != -1 &&
-					std::abs(m_swipe_start_y - event.MouseInput.Y) > 10) {
+					std::abs(m_swipe_start_y - event.MouseInput.Y - m_scrollbar->getPos() / scale) > 0.1 * screen_dpi) {
 				m_swipe_started = true;
 				Environment->setFocus(this);
 			}
 
 			if (m_swipe_started) {
-
-				s32 totalheight = m_rowheight * m_visible_rows.size();
-				float scale = (float)(totalheight - AbsoluteRect.getHeight()) / (m_scrollbar->getMax() - m_scrollbar->getMin());
-
 				m_swipe_pos = (float)(m_swipe_start_y - event.MouseInput.Y) * scale;
 				m_scrollbar->setPos((int)m_swipe_pos);
 

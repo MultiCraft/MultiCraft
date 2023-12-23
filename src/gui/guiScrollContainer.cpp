@@ -69,10 +69,12 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 				return true;
 			}
 		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
+			double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+
 			if (!m_swipe_started && m_orientation == VERTICAL &&
 					m_swipe_start_y != -1 &&
-					std::abs(m_swipe_start_y - event.MouseInput.Y) >
-							10) {
+					std::abs(m_swipe_start_y - event.MouseInput.Y + m_scrollbar->getPos() * m_scrollfactor) >
+							0.1 * screen_dpi) {
 				m_swipe_started = true;
 				Environment->setFocus(this);
 			}
