@@ -74,7 +74,9 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 
 			if (!m_swipe_started && m_orientation == VERTICAL &&
 					m_swipe_start_y != -1 &&
-					std::abs(m_swipe_start_y - event.MouseInput.Y + m_scrollbar->getPos() * m_scrollfactor) >
+					std::abs(m_swipe_start_y - event.MouseInput.Y +
+							m_scrollbar->getPos() *
+									m_scrollfactor) >
 							0.1 * screen_dpi) {
 				m_swipe_started = true;
 				Environment->setFocus(this);
