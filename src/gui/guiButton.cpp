@@ -175,6 +175,14 @@ bool GUIButton::OnEvent(const SEvent& event)
 		}
 		break;
 	case EET_GUI_EVENT:
+		if (event.GUIEvent.Caller && event.GUIEvent.Caller->getParent() == this) {
+			if (event.GUIEvent.EventType == EGET_ELEMENT_FOCUS_LOST)
+			{
+				if (!IsPushButton)
+					setPressed(false);
+				FocusTime = (u32)porting::getTimeMs();
+			}
+		}
 		if (event.GUIEvent.Caller == this)
 		{
 			if (event.GUIEvent.EventType == EGET_ELEMENT_FOCUS_LOST)
