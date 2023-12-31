@@ -48,6 +48,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <X11/Xatom.h>
 #endif
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include <SDL.h>
+#include <SDL_syswm.h>
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #include <winuser.h>
@@ -259,7 +264,23 @@ void RenderingEngine::setupTopLevelXorgWindow(const std::string &name)
 #ifdef XORG_USED
 	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+	SDL_SysWMinfo info;
+	SDL_VERSION(&info.version);
+	SDL_GetWindowWMInfo(window, &info);
+
+	if (info.subsystem != SDL_SYSWM_X11)
+		return;
+
+	Display *x11_dpl = info.info.x11.display;
+	Window x11_win = info.info.x11.window;
+#else
 	Display *x11_dpl = reinterpret_cast<Display *>(exposedData.OpenGLLinux.X11Display);
+	Window x11_win = reinterpret_cast<Window>(exposedData.OpenGLLinux.X11Window);
+#endif
+
 	if (x11_dpl == NULL) {
 		warningstream << "Client: Could not find X11 Display in ExposedVideoData"
 			<< std::endl;
@@ -269,9 +290,6 @@ void RenderingEngine::setupTopLevelXorgWindow(const std::string &name)
 	verbosestream << "Client: Configuring X11-specific top level"
 		<< " window properties"
 		<< std::endl;
-
-
-	Window x11_win = reinterpret_cast<Window>(exposedData.OpenGLLinux.X11Window);
 
 	// Set application name and class hints. For now name and class are the same.
 	XClassHint *classhint = XAllocClassHint();
@@ -449,9 +467,26 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 	img->drop();
 	icon_f->drop();
 
-	const video::SExposedVideoData &video_data = driver->getExposedVideoData();
+	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
 
-	Display *x11_dpl = (Display *)video_data.OpenGLLinux.X11Display;
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+	SDL_SysWMinfo info;
+	SDL_VERSION(&info.version);
+	SDL_GetWindowWMInfo(window, &info);
+
+	if (info.subsystem != SDL_SYSWM_X11) {
+		delete[] icon_buffer;
+		return false;
+	}
+
+	Display *x11_dpl = info.info.x11.display;
+	Window x11_win = info.info.x11.window;
+#else
+	Display *x11_dpl = (Display *)exposedData.OpenGLLinux.X11Display;
+	Window x11_win = (Window)exposedData.OpenGLLinux.X11Window;
+#endif
 
 	if (x11_dpl == NULL) {
 		warningstream << "Could not find x11 display for setting its icon."
@@ -459,8 +494,6 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 		delete[] icon_buffer;
 		return false;
 	}
-
-	Window x11_win = (Window)video_data.OpenGLLinux.X11Window;
 
 	Atom net_wm_icon = XInternAtom(x11_dpl, "_NET_WM_ICON", False);
 	Atom cardinal = XInternAtom(x11_dpl, "CARDINAL", False);
@@ -697,8 +730,21 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 #if !defined(__ANDROID__) && !defined(__IOS__)
 #if defined(XORG_USED)
 
-static float calcDisplayDensity()
+static float calcDisplayDensity(irr::video::IVideoDriver *driver)
 {
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+	SDL_SysWMinfo info;
+	SDL_VERSION(&info.version);
+	SDL_GetWindowWMInfo(window, &info);
+
+	if (info.subsystem != SDL_SYSWM_X11)
+		return g_settings->getFloat("screen_dpi") / 96.0;
+#endif
+
 	const char *current_display = getenv("DISPLAY");
 
 	if (current_display != NULL) {
@@ -726,7 +772,7 @@ static float calcDisplayDensity()
 
 float RenderingEngine::getDisplayDensity()
 {
-	static float cached_display_density = calcDisplayDensity();
+	static float cached_display_density = calcDisplayDensity(get_video_driver());
 	return cached_display_density * g_settings->getFloat("display_density_factor");
 }
 
