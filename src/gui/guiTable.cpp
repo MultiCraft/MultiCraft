@@ -883,7 +883,6 @@ bool GUITable::OnEvent(const SEvent &event)
 			return true;
 		}
 	}
-
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
 		core::position2d<s32> p(event.MouseInput.X, event.MouseInput.Y);
 
