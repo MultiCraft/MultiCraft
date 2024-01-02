@@ -84,6 +84,10 @@
 			android:exported="false"
 			android:screenOrientation="sensorLandscape"
 			android:theme="@style/CustomDialog" />
+
+		<service
+			android:name="androidx.work.impl.foreground.SystemForegroundService"
+			android:foregroundServiceType="shortService" />
 	</application>
 
 </manifest>

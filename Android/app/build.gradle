@@ -2,8 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 android {
-	compileSdkVersion 34
-	buildToolsVersion '34.0.0'
+	compileSdk 34
 	ndkVersion '25.2.9519653'
 	defaultConfig {
 		applicationId 'com.multicraft.game'
@@ -61,6 +60,7 @@ android {
 
 	buildFeatures {
 		viewBinding true
+		buildConfig true
 	}
 	namespace = "com.multicraft.game"
 }
@@ -125,8 +125,8 @@ dependencies {
 	/* Third-party libraries */
 	implementation 'androidx.appcompat:appcompat:1.6.1'
 	implementation 'androidx.appcompat:appcompat-resources:1.6.1'
-	implementation("androidx.browser:browser:1.6.0")
+	implementation 'androidx.browser:browser:1.7.0'
 	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.2'
-	implementation 'androidx.work:work-runtime-ktx:2.8.1'
-	implementation 'com.google.android.material:material:1.10.0'
+	implementation 'androidx.work:work-runtime-ktx:2.9.0'
+	implementation 'com.google.android.material:material:1.11.0'
 }

@@ -24,10 +24,12 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
 import androidx.core.app.NotificationCompat
 import androidx.work.*
 import com.multicraft.game.MainActivity.Companion.NO_SPACE_LEFT
 import com.multicraft.game.R
+import com.multicraft.game.helpers.ApiLevelHelper.isAndroid14
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.copyInputStreamToFile
 import java.io.File
@@ -53,7 +55,9 @@ class UnzipWorker(private val appContext: Context, workerParams: WorkerParameter
 			.setContentText(appContext.getString(R.string.notification_description))
 			.setSmallIcon(R.drawable.update)
 			.build()
-		return ForegroundInfo(NOTIFICATION_ID, notification)
+		return if (isAndroid14())
+			ForegroundInfo(NOTIFICATION_ID, notification, FOREGROUND_SERVICE_TYPE_SHORT_SERVICE) else
+			ForegroundInfo(NOTIFICATION_ID, notification)
 	}
 
 	override suspend fun doWork(): Result {
