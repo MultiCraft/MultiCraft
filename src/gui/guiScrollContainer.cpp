@@ -19,15 +19,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "guiScrollContainer.h"
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 		gui::IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
 		const std::string &orientation, f32 scrollfactor) :
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 		gui::IGUIElement(gui::EGUIET_CUSTOM_SCROLLCONTAINER, env, parent, id, rectangle),
-#else
-		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
-#endif
 		m_scrollbar(nullptr), m_scrollfactor(scrollfactor)
+#else
+GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
+		gui::IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
+		const std::string &orientation, f32 scrollfactor) :
+		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
+		m_scrollbar(nullptr), m_scrollfactor(scrollfactor)
+#else
 {
 	if (orientation == "vertical")
 		m_orientation = VERTICAL;
