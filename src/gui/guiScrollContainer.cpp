@@ -31,7 +31,7 @@ GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 		const std::string &orientation, f32 scrollfactor) :
 		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
 		m_scrollbar(nullptr), m_scrollfactor(scrollfactor)
-#else
+#endif
 {
 	if (orientation == "vertical")
 		m_orientation = VERTICAL;

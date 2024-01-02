@@ -45,13 +45,17 @@ bool GUITable::m_swipe_started = false;
 int GUITable::m_swipe_start_y = -1;
 float GUITable::m_swipe_pos = 0;
 
-GUITable::GUITable(gui::IGUIEnvironment *env,
-		gui::IGUIElement* parent, s32 id,
-		core::rect<s32> rectangle,
-		ISimpleTextureSource *tsrc
-):
-	gui::IGUIElement(gui::EGUIET_CUSTOM_GUITABLE, env, parent, id, rectangle),
-	m_tsrc(tsrc)
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
+		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
+		gui::IGUIElement(gui::EGUIET_CUSTOM_GUITABLE, env, parent, id, rectangle),
+		m_tsrc(tsrc)
+#else
+GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
+		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
+		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
+		m_tsrc(tsrc)
+#endif
 {
 	assert(tsrc != NULL);
 
