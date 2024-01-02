@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-SDL2_VERSION=release-2.28.4
+SDL2_VERSION=release-2.28.5
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps

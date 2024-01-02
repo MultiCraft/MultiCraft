@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -131,7 +131,6 @@
 		8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8488539E28DA4851004AD90F /* libjpeg.a */; };
 		848920FD29984994001CB194 /* sdl_semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FA29984994001CB194 /* sdl_semaphore.cpp */; };
 		848920FE29984994001CB194 /* sdl_thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FB29984994001CB194 /* sdl_thread.cpp */; };
-		848ADEF427BD68AE001C60F3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 848ADEF627BD68AE001C60F3 /* Localizable.strings */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
 		8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL2.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
@@ -147,6 +146,8 @@
 		84C9A9592B228D9A00909EFF /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 84C9A9562B228D9A00909EFF /* chacha.c */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
 		84E33D882A7BBEE900609F77 /* wrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 84E33D872A7BBEE900609F77 /* wrapper.m */; };
+		84F0B4D72B44C800000D8546 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 84F0B4D62B44C800000D8546 /* Localizable.xcstrings */; };
+		84F0B4DA2B44CAEE000D8546 /* encryption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F0B4D92B44CAEE000D8546 /* encryption.cpp */; };
 		84F20D5925D52790009562A9 /* static_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5525D52790009562A9 /* static_text.cpp */; };
 		84F20D5A25D52790009562A9 /* CGUITTFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5725D52790009562A9 /* CGUITTFont.cpp */; };
 		84F20DA225D527C5009562A9 /* serverpackethandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D9325D527C4009562A9 /* serverpackethandler.cpp */; };
@@ -286,7 +287,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		840A686F2989C8B400ADE329 /* nb */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nb; path = nb.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84135AC625D5261C00CA4DCF /* craftdef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = craftdef.cpp; path = ../../../src/craftdef.cpp; sourceTree = "<group>"; };
 		84135AC725D5261C00CA4DCF /* modchannels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modchannels.cpp; path = ../../../src/modchannels.cpp; sourceTree = "<group>"; };
 		84135AC825D5261C00CA4DCF /* nodemetadata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nodemetadata.cpp; path = ../../../src/nodemetadata.cpp; sourceTree = "<group>"; };
@@ -511,14 +511,10 @@
 		841AD8B028D0DE3D0042E335 /* libogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libogg.a; path = ../deps/libogg/libogg.a; sourceTree = "<group>"; };
 		841AD8B428D0E2340042E335 /* libvorbis.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbis.a; path = ../deps/libvorbis/libvorbis.a; sourceTree = "<group>"; };
 		841AD8B828D0E2E40042E335 /* libvorbisfile.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisfile.a; path = ../deps/libvorbis/libvorbisfile.a; sourceTree = "<group>"; };
-		8425D3702837D89300753F0E /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
-		8425D3712837D89600753F0E /* id */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = id; path = id.lproj/Localizable.strings; sourceTree = "<group>"; };
-		8425FC862A275920008569EE /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84287CA4291ED0F000E30F96 /* locale */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locale; path = ../../assets/locale; sourceTree = "<group>"; };
 		84287CA5291ED0F000E30F96 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../assets/fonts; sourceTree = "<group>"; };
 		844436EE28DA80C100662A9D /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../deps/freetype/libfreetype.a; sourceTree = "<group>"; };
 		8453A49D24DB22F00087ECF9 /* client */ = {isa = PBXFileReference; lastKnownFileType = folder; name = client; path = ../../../client; sourceTree = "<group>"; };
-		8457C2C52848DB7300D69304 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		845856A924B1322C0040BA4F /* MultiCraft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultiCraft.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		845856B224B1322D0040BA4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		845856B724B1322D0040BA4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -536,7 +532,6 @@
 		8458617724B1BF2D0040BA4F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		8458617B24B1C3BB0040BA4F /* builtin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = builtin; path = ../../../builtin; sourceTree = "<group>"; };
 		8458617C24B1C3BB0040BA4F /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../../../textures; sourceTree = "<group>"; };
-		8459C49F2932552500083C86 /* sl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sl; path = sl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		846F883A27A596F9007B6210 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = ../deps/luajit/libluajit.a; sourceTree = "<group>"; };
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
 		847C6D4A25D6F483008F5FC8 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = ../../../lib/luautf8/lutf8lib.c; sourceTree = "<group>"; };
@@ -545,26 +540,6 @@
 		848920FA29984994001CB194 /* sdl_semaphore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_semaphore.cpp; path = ../../../src/threading/sdl_semaphore.cpp; sourceTree = "<group>"; };
 		848920FB29984994001CB194 /* sdl_thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_thread.cpp; path = ../../../src/threading/sdl_thread.cpp; sourceTree = "<group>"; };
 		848920FC29984994001CB194 /* sdl_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sdl_thread.h; path = ../../../src/threading/sdl_thread.h; sourceTree = "<group>"; };
-		848ADEF527BD68AE001C60F3 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADEF827BD6904001C60F3 /* bg */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = bg; path = bg.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADEF927BD695E001C60F3 /* cs */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = cs; path = cs.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADEFA27BD6965001C60F3 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADEFB27BD6970001C60F3 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = nl.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADEFC27BD6976001C60F3 /* et */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = et; path = et.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADEFD27BD697C001C60F3 /* fi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fi; path = fi.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADEFE27BD697F001C60F3 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADEFF27BD6983001C60F3 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0027BD6987001C60F3 /* hu */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hu; path = hu.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0127BD698B001C60F3 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0227BD6995001C60F3 /* lv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = lv; path = lv.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0327BD699F001C60F3 /* lt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = lt; path = lt.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0427BD69A6001C60F3 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0527BD69B4001C60F3 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0627BD69BB001C60F3 /* ro */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ro; path = ro.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0727BD69BF001C60F3 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0827BD69C3001C60F3 /* sk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sk; path = sk.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0927BD69C8001C60F3 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
-		848ADF0A27BD69CB001C60F3 /* sv */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = sv; path = sv.lproj/Localizable.strings; sourceTree = "<group>"; };
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		8495BD1528B80B00009FCF4D /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../deps/SDL2/libSDL2.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
@@ -580,9 +555,6 @@
 		84A1F9B8252E617D00000717 /* scripting_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_client.cpp; path = ../../../src/script/scripting_client.cpp; sourceTree = "<group>"; };
 		84A1F9B9252E617D00000717 /* scripting_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_server.cpp; path = ../../../src/script/scripting_server.cpp; sourceTree = "<group>"; };
 		84A1F9BA252E617D00000717 /* scripting_server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_server.h; path = ../../../src/script/scripting_server.h; sourceTree = "<group>"; };
-		84A636C327C67F01005B4503 /* el */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = el; path = el.lproj/Localizable.strings; sourceTree = "<group>"; };
-		84AABAF72822C3F000A89340 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Localizable.strings; sourceTree = "<group>"; };
-		84AABAF82822C3FC00A89340 /* vi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = vi; path = vi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		84C2AB5228DA7770001968EE /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../deps/libpng/libpng.a; sourceTree = "<group>"; };
@@ -594,6 +566,9 @@
 		84E33D862A7BBEC100609F77 /* wrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wrapper.h; sourceTree = "<group>"; };
 		84E33D872A7BBEE900609F77 /* wrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = wrapper.m; sourceTree = "<group>"; };
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/libintl.a; sourceTree = "<group>"; };
+		84F0B4D62B44C800000D8546 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		84F0B4D82B44CAEE000D8546 /* encryption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = encryption.h; path = ../../../src/util/encryption.h; sourceTree = "<group>"; };
+		84F0B4D92B44CAEE000D8546 /* encryption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = encryption.cpp; path = ../../../src/util/encryption.cpp; sourceTree = "<group>"; };
 		84F20D5425D52790009562A9 /* irrUString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrUString.h; path = ../../../src/irrlicht_changes/irrUString.h; sourceTree = "<group>"; };
 		84F20D5525D52790009562A9 /* static_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = static_text.cpp; path = ../../../src/irrlicht_changes/static_text.cpp; sourceTree = "<group>"; };
 		84F20D5625D52790009562A9 /* static_text.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = static_text.h; path = ../../../src/irrlicht_changes/static_text.h; sourceTree = "<group>"; };
@@ -1082,7 +1057,7 @@
 				845856B224B1322D0040BA4F /* Assets.xcassets */,
 				845856B724B1322D0040BA4F /* Info.plist */,
 				845856BA24B1322D0040BA4F /* MultiCraft.entitlements */,
-				848ADEF627BD68AE001C60F3 /* Localizable.strings */,
+				84F0B4D62B44C800000D8546 /* Localizable.xcstrings */,
 				84E33D852A7BBEA200609F77 /* Supporting Files */,
 				84585CD524B138F50040BA4F /* src */,
 				84D4D9082A93707F00CACCC7 /* lib */,
@@ -1432,6 +1407,8 @@
 				84F20E7725D52868009562A9 /* container.h */,
 				84F20E7D25D52868009562A9 /* directiontables.cpp */,
 				84F20E6A25D52867009562A9 /* directiontables.h */,
+				84F0B4D92B44CAEE000D8546 /* encryption.cpp */,
+				84F0B4D82B44CAEE000D8546 /* encryption.h */,
 				84F20E6E25D52867009562A9 /* enriched_string.cpp */,
 				84F20E7625D52868009562A9 /* enriched_string.h */,
 				84F20E7C25D52868009562A9 /* hex.h */,
@@ -1742,7 +1719,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
@@ -1751,7 +1728,7 @@
 				};
 			};
 			buildConfigurationList = 845856A424B1322C0040BA4F /* Build configuration list for PBXProject "MultiCraft" */;
-			compatibilityVersion = "Xcode 14.0";
+			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1785,6 +1762,7 @@
 				ja,
 				nb,
 				ar,
+				th,
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			productRefGroup = 845856AA24B1322C0040BA4F /* Products */;
@@ -1803,11 +1781,11 @@
 			files = (
 				8458617F24B1C3BC0040BA4F /* builtin in Resources */,
 				8453A49E24DB22F00087ECF9 /* client in Resources */,
+				84F0B4D72B44C800000D8546 /* Localizable.xcstrings in Resources */,
 				8458618024B1C3BC0040BA4F /* textures in Resources */,
 				84287CA7291ED0F000E30F96 /* fonts in Resources */,
 				84287CA6291ED0F000E30F96 /* locale in Resources */,
 				845856B324B1322D0040BA4F /* Assets.xcassets in Resources */,
-				848ADEF427BD68AE001C60F3 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1896,6 +1874,7 @@
 				84F20F4025D52975009562A9 /* mg_biome.cpp in Sources */,
 				84F20EC825D528EC009562A9 /* database-dummy.cpp in Sources */,
 				84135B7B25D5264C00CA4DCF /* player.cpp in Sources */,
+				84F0B4DA2B44CAEE000D8546 /* encryption.cpp in Sources */,
 				84135C1225D526D700CA4DCF /* mesh_generator_thread.cpp in Sources */,
 				84135B6925D5264B00CA4DCF /* httpfetch.cpp in Sources */,
 				84F20EC625D528EC009562A9 /* database-leveldb.cpp in Sources */,
@@ -2066,50 +2045,12 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXVariantGroup section */
-		848ADEF627BD68AE001C60F3 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				848ADEF527BD68AE001C60F3 /* en */,
-				848ADEF827BD6904001C60F3 /* bg */,
-				848ADEF927BD695E001C60F3 /* cs */,
-				848ADEFA27BD6965001C60F3 /* da */,
-				848ADEFB27BD6970001C60F3 /* nl */,
-				848ADEFC27BD6976001C60F3 /* et */,
-				848ADEFD27BD697C001C60F3 /* fi */,
-				848ADEFE27BD697F001C60F3 /* fr */,
-				848ADEFF27BD6983001C60F3 /* de */,
-				84A636C327C67F01005B4503 /* el */,
-				848ADF0027BD6987001C60F3 /* hu */,
-				848ADF0127BD698B001C60F3 /* it */,
-				848ADF0227BD6995001C60F3 /* lv */,
-				848ADF0327BD699F001C60F3 /* lt */,
-				848ADF0427BD69A6001C60F3 /* pl */,
-				848ADF0527BD69B4001C60F3 /* pt */,
-				848ADF0627BD69BB001C60F3 /* ro */,
-				848ADF0727BD69BF001C60F3 /* ru */,
-				8459C49F2932552500083C86 /* sl */,
-				848ADF0827BD69C3001C60F3 /* sk */,
-				848ADF0927BD69C8001C60F3 /* es */,
-				848ADF0A27BD69CB001C60F3 /* sv */,
-				84AABAF72822C3F000A89340 /* uk */,
-				84AABAF82822C3FC00A89340 /* vi */,
-				8425D3702837D89300753F0E /* tr */,
-				8425D3712837D89600753F0E /* id */,
-				8457C2C52848DB7300D69304 /* ja */,
-				840A686F2989C8B400ADE329 /* nb */,
-				8425FC862A275920008569EE /* ar */,
-			);
-			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
 		845856BB24B1322D0040BA4F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_ENABLE_MODULES = YES;
@@ -2130,7 +2071,8 @@
 				GCC_UNROLL_LOOPS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"$(inherited)",
@@ -2149,6 +2091,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
 				CLANG_ENABLE_MODULES = YES;
@@ -2166,7 +2109,8 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LLVM_LTO = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-fdata-sections",
@@ -2189,7 +2133,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2232,7 +2176,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 MultiCraft Studio OÜ. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 2.0.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2250,6 +2194,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Debug;
 		};
@@ -2261,7 +2206,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 30;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2305,7 +2250,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2023 MultiCraft Studio OÜ. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 2.0.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -2323,6 +2268,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
 		};
