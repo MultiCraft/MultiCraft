@@ -41,13 +41,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GUITable
 */
 
-GUITable::GUITable(gui::IGUIEnvironment *env,
-		gui::IGUIElement* parent, s32 id,
-		core::rect<s32> rectangle,
-		ISimpleTextureSource *tsrc
-):
-	gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
-	m_tsrc(tsrc)
+bool GUITable::m_swipe_started = false;
+int GUITable::m_swipe_start_y = -1;
+float GUITable::m_swipe_pos = 0;
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
+		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
+		gui::IGUIElement(gui::EGUIET_CUSTOM_GUITABLE, env, parent, id, rectangle),
+		m_tsrc(tsrc)
+#else
+GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
+		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
+		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
+		m_tsrc(tsrc)
+#endif
 {
 	assert(tsrc != NULL);
 
@@ -902,13 +910,53 @@ bool GUITable::OnEvent(const SEvent &event)
 		// Update tooltip
 		setToolTipText(cell ? m_strings[cell->tooltip_index].c_str() : L"");
 
-		// Fix for #1567/#1806:
-		// IGUIScrollBar passes double click events to its parent,
-		// which we don't want. Detect this case and discard the event
-		if (event.MouseInput.Event != EMIE_MOUSE_MOVED &&
-				m_scrollbar->isVisible() &&
-				m_scrollbar->isPointInside(p))
-			return true;
+		if (m_scrollbar->isVisible() && m_scrollbar->isPointInside(p)) {
+			// Fix for #1567/#1806:
+			// IGUIScrollBar passes double click events to its parent,
+			// which we don't want. Detect this case and discard the event
+			if (event.MouseInput.Event >= EMIE_LMOUSE_DOUBLE_CLICK &&
+					event.MouseInput.Event <= EMIE_MMOUSE_TRIPLE_CLICK)
+				return true;
+			// Ignore other events so that it can be handled by scrollbar
+			else
+				return false;
+		}
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+		// Handle swipe gesture
+		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
+			s32 totalheight = m_rowheight * m_visible_rows.size();
+			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
+					(m_scrollbar->getMax() - m_scrollbar->getMin());
+			m_swipe_start_y = event.MouseInput.Y + m_scrollbar->getPos() / scale;
+		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
+			m_swipe_start_y = -1;
+			if (m_swipe_started) {
+				m_swipe_started = false;
+				return true;
+			}
+		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
+			double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+			s32 totalheight = m_rowheight * m_visible_rows.size();
+			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
+					(m_scrollbar->getMax() - m_scrollbar->getMin());
+
+			if (!m_swipe_started && m_swipe_start_y != -1 &&
+					std::abs(m_swipe_start_y - event.MouseInput.Y - m_scrollbar->getPos() / scale) > 0.1 * screen_dpi) {
+				m_swipe_started = true;
+				Environment->setFocus(this);
+			}
+
+			if (m_swipe_started) {
+				m_swipe_pos = (float)(m_swipe_start_y - event.MouseInput.Y) * scale;
+				m_scrollbar->setPos((int)m_swipe_pos);
+
+				return true;
+			}
+		}
+#endif
+#endif
 
 		if (event.MouseInput.isLeftPressed() &&
 				(isPointInside(p) ||
