@@ -918,6 +918,7 @@ bool GUITable::OnEvent(const SEvent &event)
 				return false;
 		}
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #ifdef HAVE_TOUCHSCREENGUI
 		// Handle swipe gesture
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
@@ -950,6 +951,7 @@ bool GUITable::OnEvent(const SEvent &event)
 				return true;
 			}
 		}
+#endif
 #endif
 
 		if (event.MouseInput.isLeftPressed() &&

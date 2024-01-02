@@ -58,6 +58,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 		return retval;
 	}
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #ifdef HAVE_TOUCHSCREENGUI
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
@@ -99,6 +100,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			}
 		}
 	}
+#endif
 #endif
 
 	return IGUIElement::OnEvent(event);
