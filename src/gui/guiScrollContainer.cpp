@@ -23,7 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 		gui::IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
 		const std::string &orientation, f32 scrollfactor) :
-		gui::IGUIElement(gui::EGUIET_CUSTOM_SCROLLCONTAINER, env, parent, id, rectangle),
+		gui::IGUIElement(gui::EGUIET_CUSTOM_SCROLLCONTAINER, env, parent, id,
+				rectangle),
 		m_scrollbar(nullptr), m_scrollfactor(scrollfactor)
 #else
 GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
