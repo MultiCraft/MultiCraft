@@ -4157,21 +4157,55 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 			}
 		}
 	}
-	// Mouse wheel and move events: send to hovered element instead of focused
-	if (event.EventType == EET_MOUSE_INPUT_EVENT &&
-			(event.MouseInput.Event == EMIE_MOUSE_WHEEL ||
-			(event.MouseInput.Event == EMIE_MOUSE_MOVED &&
-			event.MouseInput.ButtonStates == 0))) {
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	// If element is inside scroll container then send it to scroll container
+	// first so that it can handle swipe gesture
+	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
 		s32 x = event.MouseInput.X;
 		s32 y = event.MouseInput.Y;
 		gui::IGUIElement *hovered =
 			Environment->getRootGUIElement()->getElementFromPoint(
 				core::position2d<s32>(x, y));
+
 		if (hovered && isMyChild(hovered)) {
-			hovered->OnEvent(event);
-			return event.MouseInput.Event == EMIE_MOUSE_WHEEL;
+			IGUIElement *element = hovered->getParent();
+
+			do {
+				if (element &&
+						(element->getType() == gui::EGUIET_CUSTOM_SCROLLCONTAINER ||
+						element->getType() == gui::EGUIET_CUSTOM_GUITABLE)) {
+					bool result = element->OnEvent(event);
+
+					if (result)
+						return true;
+
+					break;
+				}
+
+				element = element->getParent();
+			} while (element);
 		}
 	}
+#endif
+#endif
+
+	// Mouse wheel and move events: send to hovered element instead of focused
+	if (event.EventType == EET_MOUSE_INPUT_EVENT &&
+			(event.MouseInput.Event == EMIE_MOUSE_WHEEL ||
+			(event.MouseInput.Event == EMIE_MOUSE_MOVED &&
+			event.MouseInput.ButtonStates == 0))) {
+ 		s32 x = event.MouseInput.X;
+ 		s32 y = event.MouseInput.Y;
+ 		gui::IGUIElement *hovered =
+ 			Environment->getRootGUIElement()->getElementFromPoint(
+ 				core::position2d<s32>(x, y));
+ 		if (hovered && isMyChild(hovered)) {
+			hovered->OnEvent(event);
+			return event.MouseInput.Event == EMIE_MOUSE_WHEEL;
+ 		}
+ 	}
 
 	if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
 		/* TODO add a check like:
