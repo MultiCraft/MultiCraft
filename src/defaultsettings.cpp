@@ -382,7 +382,6 @@ void set_default_settings()
 	settings->setDefault("ipv6_server", "false");
 	settings->setDefault("max_packets_per_iteration","1024");
 	settings->setDefault("port", "40000");
-	settings->setDefault("enable_protocol_compat", "true");
 	settings->setDefault("strict_protocol_version_checking", "false");
 	settings->setDefault("player_transfer_distance", "0");
 	settings->setDefault("max_simultaneous_block_sends_per_client", "40");

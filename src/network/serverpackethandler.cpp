@@ -143,10 +143,9 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 
 	client->net_proto_version = net_proto_version;
 
-	const u16 server_proto_ver_min = g_settings->getBool("enable_protocol_compat") ? SERVER_PROTOCOL_VERSION_MIN : SERVER_PROTOCOL_VERSION_MIN_NOCOMPAT;
 	if ((g_settings->getBool("strict_protocol_version_checking") &&
 			net_proto_version != LATEST_PROTOCOL_VERSION) ||
-			net_proto_version < server_proto_ver_min ||
+			net_proto_version < SERVER_PROTOCOL_VERSION_MIN ||
 			net_proto_version > SERVER_PROTOCOL_VERSION_MAX) {
 		actionstream << "Server: A mismatched client tried to connect from " <<
 			addr_s << " proto_max=" << (int)max_net_proto_version << std::endl;
