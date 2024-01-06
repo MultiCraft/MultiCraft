@@ -732,11 +732,3 @@ inline irr::core::stringw utf8_to_stringw(const std::string &input)
  * 2. Remove 'unsafe' characters from the name by replacing them with '_'
  */
 std::string sanitizeDirName(const std::string &str, const std::string &optional_prefix);
-
-
-/**
-* @param formspec The version 1 formspec string
- * @param prepend The formspec prepend
- * @return A copy of \p formspec with \p prepend added if possible.
- */
-std::string insert_formspec_prepend(const std::string &formspec, const std::string &prepend);

@@ -937,36 +937,3 @@ std::string sanitizeDirName(const std::string &str, const std::string &optional_
 
 	return wide_to_utf8(safe_name);
 }
-
-std::string insert_formspec_prepend(const std::string &formspec, const std::string &prepend) {
-	size_t pos = 0;
-	size_t pos2;
-	while ((pos2 = formspec.find('[', pos)) != std::string::npos) {
-		const std::string element_type = trim(formspec.substr(pos, pos2 - pos));
-
-		// If a no_prepend[] is found then don't insert the prepend
-		if (element_type == "no_prepend")
-			return formspec;
-
-		// Insert the prepend before this element if it isn't size, position,
-		// or anchor.
-		if (element_type != "size" && element_type != "position" &&
-				element_type != "anchor") {
-			break;
-		}
-
-		// Search for the closing ] and continue iterating
-		// Valid size, position, and anchor elements only have numbers so
-		// escaping doesn't have to be accounted for here.
-		pos = formspec.find(']', pos2);
-		if (pos == std::string::npos)
-			return formspec;
-		pos++;
-	}
-
-	// Make a copy of the const string and insert the formspec prepend in the
-	// correct location.
-	std::string prepended_fs = formspec;
-	prepended_fs.insert(pos, prepend);
-	return prepended_fs;
-}

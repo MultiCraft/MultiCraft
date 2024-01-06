@@ -250,14 +250,6 @@ inline v3s32 readV3S32(const u8 *data)
 	return p;
 }
 
-inline v2f readV2F1000(const u8 *data)
-{
-	v2f p;
-	p.X = readF1000(&data[0]);
-	p.Y = readF1000(&data[4]);
-	return p;
-}
-
 inline v3f readV3F1000(const u8 *data)
 {
 	v3f p;
@@ -365,12 +357,6 @@ inline void writeV3S32(u8 *data, v3s32 p)
 	writeS32(&data[8], p.Z);
 }
 
-inline void writeV2F1000(u8 *data, v2f p)
-{
-	writeF1000(&data[0], p.X);
-	writeF1000(&data[4], p.Y);
-}
-
 inline void writeV3F1000(u8 *data, v3f p)
 {
 	writeF1000(&data[0], p.X);
@@ -425,7 +411,6 @@ MAKE_STREAM_READ_FXN(v2s16, V2S16,    4);
 MAKE_STREAM_READ_FXN(v3s16, V3S16,    6);
 MAKE_STREAM_READ_FXN(v2s32, V2S32,    8);
 MAKE_STREAM_READ_FXN(v3s32, V3S32,   12);
-MAKE_STREAM_READ_FXN(v2f,   V2F1000,  8);
 MAKE_STREAM_READ_FXN(v3f,   V3F1000, 12);
 MAKE_STREAM_READ_FXN(v2f,   V2F32,    8);
 MAKE_STREAM_READ_FXN(v3f,   V3F32,   12);
@@ -445,46 +430,10 @@ MAKE_STREAM_WRITE_FXN(v2s16, V2S16,    4);
 MAKE_STREAM_WRITE_FXN(v3s16, V3S16,    6);
 MAKE_STREAM_WRITE_FXN(v2s32, V2S32,    8);
 MAKE_STREAM_WRITE_FXN(v3s32, V3S32,   12);
-MAKE_STREAM_WRITE_FXN(v2f,   V2F1000,  8);
 MAKE_STREAM_WRITE_FXN(v3f,   V3F1000, 12);
 MAKE_STREAM_WRITE_FXN(v2f,   V2F32,    8);
 MAKE_STREAM_WRITE_FXN(v3f,   V3F32,   12);
 MAKE_STREAM_WRITE_FXN(video::SColor, ARGB8, 4);
-
-// Make float functions
-#define MAKE_FLOAT_FXNS(T, N)                        \
-	inline T read ## N(u8 *data, const u16 protocol_version) \
-	{                                                \
-		if (protocol_version > 36)                   \
-			return read ## N ## 32(data);            \
-		else                                         \
-			return read ## N ## 1000(data);          \
-	}                                                \
-	inline T read ## N(std::istream &is, const u16 protocol_version) \
-	{                                                \
-		if (protocol_version > 36)                   \
-			return read ## N ## 32(is);              \
-		else                                         \
-			return read ## N ## 1000(is);            \
-	}                                                \
-	inline void write ## N(u8 *data, T val, const u16 protocol_version) \
-	{                                                \
-		if (protocol_version > 36)                   \
-			write ## N ## 32(data, val);             \
-		else                                         \
-			write ## N ## 1000(data, val);           \
-	}                                                \
-	inline void write ## N(std::ostream &os, T val, const u16 protocol_version) \
-	{                                                \
-		if (protocol_version > 36)                   \
-			write ## N ## 32(os, val);               \
-		else                                         \
-			write ## N ## 1000(os, val);             \
-	}
-
-MAKE_FLOAT_FXNS(f32, F);
-MAKE_FLOAT_FXNS(v2f, V2F);
-MAKE_FLOAT_FXNS(v3f, V3F);
 
 ////
 //// More serialization stuff

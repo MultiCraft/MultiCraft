@@ -21,27 +21,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void TileAnimationParams::serialize(std::ostream &os, u8 tiledef_version) const
 {
-	if (tiledef_version < 3 && type != TAT_VERTICAL_FRAMES) {
-		writeU8(os, TAT_NONE);
-		writeU16(os, 1);
-		writeU16(os, 1);
-		writeF1000(os, 1.0f);
-		return;
-	}
-
 	writeU8(os, type);
-
-	// Approximate protocol version
-	const u16 protocol_version = tiledef_version >= 6 ? 37 : 32;
-
 	if (type == TAT_VERTICAL_FRAMES) {
 		writeU16(os, vertical_frames.aspect_w);
 		writeU16(os, vertical_frames.aspect_h);
-		writeF(os, vertical_frames.length, protocol_version);
+		writeF32(os, vertical_frames.length);
 	} else if (type == TAT_SHEET_2D) {
 		writeU8(os, sheet_2d.frames_w);
 		writeU8(os, sheet_2d.frames_h);
-		writeF(os, sheet_2d.frame_length, protocol_version);
+		writeF32(os, sheet_2d.frame_length);
 	}
 }
 

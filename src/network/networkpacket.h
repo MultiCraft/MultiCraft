@@ -44,7 +44,6 @@ public:
 	u16 getCommand() { return m_command; }
 	const u32 getRemainingBytes() const { return m_datasize - m_read_offset; }
 	const char *getRemainingString() { return getString(m_read_offset); }
-	u16 getProtocolVersion() const { return m_protocol_version; }
 
 	// Returns a c-string without copying.
 	// A better name for this would be getRawString()

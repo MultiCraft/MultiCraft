@@ -728,8 +728,8 @@ void ClientInterface::sendToAllCompat(NetworkPacket *pkt, NetworkPacket *legacyp
 		} else if (client->net_proto_version != 0) {
 			pkt_to_send = legacypkt;
 		} else {
-			// This will happen if a client is connecting when sendToAllCompat
-			// is called, this can safely be ignored.
+			warningstream << "Client with unhandled version to handle: '"
+				<< client->net_proto_version << "'";
 			continue;
 		}
 
@@ -737,34 +737,6 @@ void ClientInterface::sendToAllCompat(NetworkPacket *pkt, NetworkPacket *legacyp
 			clientCommandFactoryTable[pkt_to_send->getCommand()].channel,
 			pkt_to_send,
 			clientCommandFactoryTable[pkt_to_send->getCommand()].reliable);
-	}
-}
-
-void ClientInterface::oldSendToAll(NetworkPacket *pkt)
-{
-	RecursiveMutexAutoLock clientslock(m_clients_mutex);
-	for (auto &client_it : m_clients) {
-		RemoteClient *client = client_it.second;
-
-		if (client->net_proto_version != 0 && client->net_proto_version < 37) {
-			m_con->Send(client->peer_id,
-				clientCommandFactoryTable[pkt->getCommand()].channel, pkt,
-				clientCommandFactoryTable[pkt->getCommand()].reliable);
-			}
-	}
-}
-
-void ClientInterface::newSendToAll(NetworkPacket *pkt)
-{
-	RecursiveMutexAutoLock clientslock(m_clients_mutex);
-	for (auto &client_it : m_clients) {
-		RemoteClient *client = client_it.second;
-
-		if (client->net_proto_version > 36) {
-			m_con->Send(client->peer_id,
-				clientCommandFactoryTable[pkt->getCommand()].channel, pkt,
-				clientCommandFactoryTable[pkt->getCommand()].reliable);
-			}
 	}
 }
 

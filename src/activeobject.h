@@ -44,18 +44,15 @@ enum ActiveObjectType {
 
 struct ActiveObjectMessage
 {
-	ActiveObjectMessage(u16 id_, bool reliable_ = true,
-			const std::string &data_ = "", const std::string legacy_ = "") :
+	ActiveObjectMessage(u16 id_, bool reliable_=true, const std::string &data_ = "") :
 		id(id_),
 		reliable(reliable_),
-		datastring(data_),
-		legacystring(legacy_)
+		datastring(data_)
 	{}
 
 	u16 id;
 	bool reliable;
 	std::string datastring;
-	std::string legacystring;
 };
 
 enum ActiveObjectCommand {

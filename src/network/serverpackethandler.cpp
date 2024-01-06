@@ -326,7 +326,7 @@ void Server::handleCommand_Init2(NetworkPacket* pkt)
 	sendDetachedInventories(peer_id, false);
 
 	// Send player movement settings
-	SendMovement(peer_id, protocol_version);
+	SendMovement(peer_id);
 
 	// Send time of day
 	u16 time = m_env->getTimeOfDay();
@@ -458,7 +458,7 @@ void Server::handleCommand_GotBlocks(NetworkPacket* pkt)
 void Server::process_PlayerPos(RemotePlayer *player, PlayerSAO *playersao,
 	NetworkPacket *pkt)
 {
-	if (pkt->getRemainingBytes() < 12 + 12 + 4 + 4)
+	if (pkt->getRemainingBytes() < 12 + 12 + 4 + 4 + 4 + 1 + 1)
 		return;
 
 	v3s32 ps, ss;
@@ -478,14 +478,10 @@ void Server::process_PlayerPos(RemotePlayer *player, PlayerSAO *playersao,
 	f32 fov = 0;
 	u8 wanted_range = 0;
 
-	if (pkt->getRemainingBytes() >= 4)
-		*pkt >> keyPressed;
-	if (pkt->getRemainingBytes() >= 1) {
-		*pkt >> f32fov;
-		fov = (f32)f32fov / 80.0f;
-		if (pkt->getRemainingBytes() >= 1)
-			*pkt >> wanted_range;
-	}
+	*pkt >> keyPressed;
+	*pkt >> f32fov;
+	fov = (f32)f32fov / 80.0f;
+	*pkt >> wanted_range;
 
 	v3f position((f32)ps.X / 100.0f, (f32)ps.Y / 100.0f, (f32)ps.Z / 100.0f);
 	v3f speed((f32)ss.X / 100.0f, (f32)ss.Y / 100.0f, (f32)ss.Z / 100.0f);
@@ -789,6 +785,9 @@ void Server::handleCommand_ChatMessage(NetworkPacket* pkt)
 
 void Server::handleCommand_Damage(NetworkPacket* pkt)
 {
+	u16 damage;
+
+	*pkt >> damage;
 
 	session_t peer_id = pkt->getPeerId();
 	RemotePlayer *player = m_env->getPlayer(peer_id);
@@ -799,17 +798,6 @@ void Server::handleCommand_Damage(NetworkPacket* pkt)
 			peer_id << " disconnecting peer!" << std::endl;
 		DisconnectPeer(peer_id);
 		return;
-	}
-
-	u16 damage;
-
-	// Minetest 0.4 uses 8-bit integers for damage.
-	if (player->protocol_version >= 37) {
-		*pkt >> damage;
-	} else {
-		u8 raw_damage;
-		*pkt >> raw_damage;
-		damage = raw_damage;
 	}
 
 	PlayerSAO *playersao = player->getPlayerSAO();
