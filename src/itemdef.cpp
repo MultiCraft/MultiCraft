@@ -134,7 +134,7 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 	os << serializeString16(description);
 	os << serializeString16(inventory_image);
 	os << serializeString16(wield_image);
-	writeV3F(os, wield_scale, protocol_version);
+	writeV3F32(os, wield_scale);
 	writeS16(os, stack_max);
 	writeU8(os, usable);
 	writeU8(os, liquids_pointable);
