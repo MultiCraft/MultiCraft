@@ -728,8 +728,8 @@ void ClientInterface::sendToAllCompat(NetworkPacket *pkt, NetworkPacket *legacyp
 		} else if (client->net_proto_version != 0) {
 			pkt_to_send = legacypkt;
 		} else {
-			warningstream << "Client with unhandled version to handle: '"
-				<< client->net_proto_version << "'";
+			// This will happen if a client is connecting when sendToAllCompat
+			// is called, this can safely be ignored.
 			continue;
 		}
 
