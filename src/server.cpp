@@ -418,17 +418,6 @@ void Server::init()
 
 	m_modmgr->loadMods(m_script);
 
-	// m_compat_player_models is used to prevent constant re-parsing of the
-	// setting
-	std::string player_models = g_settings->get("compat_player_model");
-	player_models.erase(std::remove_if(player_models.begin(),
-			player_models.end(), static_cast<int(*)(int)>(&std::isspace)),
-			player_models.end());
-	if (player_models.empty() || isSingleplayer())
-		FATAL_ERROR_IF(!m_compat_player_models.empty(), "Compat player models list not empty");
-	else
-		m_compat_player_models = str_split(player_models, ',');
-
 	// Read Textures and calculate sha1 sums
 	fillMediaCache();
 
@@ -2434,76 +2423,6 @@ bool Server::SendBlock(session_t peer_id, const v3s16 &blockpos)
 	return true;
 }
 
-// Hacks because I don't want to make duplicate read/write functions for little
-// endian numbers.
-u32 readU32_le(std::istream &is) {
-	char buf[4] = {0};
-	is.read(buf, sizeof(buf));
-	std::reverse(buf, buf + sizeof(buf));
-	return readU32((u8 *)buf);
-}
-
-v3f readV3F32_le(std::istream &is) {
-	char buf[12] = {0};
-	is.read(buf, sizeof(buf));
-	std::reverse(buf, buf + 4);
-	std::reverse(buf + 4, buf + 8);
-	std::reverse(buf + 8, buf + 12);
-	return readV3F32((u8 *)buf);
-}
-
-void writeV3F32_le(std::ostream &os, v3f pos) {
-	char buf[12];
-	writeV3F32((u8 *)buf, pos);
-	std::reverse(buf, buf + 4);
-	std::reverse(buf + 4, buf + 8);
-	std::reverse(buf + 8, buf + 12);
-	os.write(buf, sizeof(buf));
-}
-
-// Converts MT 5+ player models into MT 0.4 compatible models
-std::string makeCompatPlayerModel(std::string b3d) {
-	std::stringstream ss(b3d);
-
-	// ss.read(4) != "BB3D"
-	const u32 header = readU32_le(ss);
-	if (header != 0x44334242) {
-		warningstream << "Invalid B3D header in player model: " << header << std::endl;
-		return "";
-	}
-
-	readU32(ss); // Length
-	readU32(ss); // Version
-
-	// Look for the node
-	while (ss.good()) {
-		const u32 name = readU32_le(ss);
-		const u32 length = readU32_le(ss);
-
-		// name != "NODE"
-		if (name != 0x45444f4e) {
-			ss.ignore(length);
-			continue;
-		}
-
-		// Node name
-		ss.ignore(length, '\x00');
-
-		// Node position
-		std::streampos p = ss.tellg();
-		const v3f offset_pos = readV3F32_le(ss) - v3f(0, BS, 0);
-
-		// Write the new position back to the stringstream
-		ss.seekp(p);
-		writeV3F32_le(ss, offset_pos);
-
-		return ss.str();
-	}
-
-	warningstream << "Could not find base position in B3D file" << std::endl;
-	return "";
-}
-
 bool Server::addMediaFile(const std::string &filename,
 	const std::string &filepath, std::string *filedata_to,
 	std::string *digest_to)
@@ -2558,32 +2477,6 @@ bool Server::addMediaFile(const std::string &filename,
 	// Put in list
 	m_media[filename] = MediaInfo(filepath, sha1_base64);
 
-	// Add a compatibility model if required
-	if (isCompatPlayerModel(filename)) {
-		// Offset the mesh
-		const std::string filedata_compat = makeCompatPlayerModel(filedata);
-		if (filedata_compat != "") {
-			SHA1 sha1;
-			sha1.addBytes(filedata_compat.c_str(), filedata_compat.length());
-			unsigned char *digest = sha1.getDigest();
-			std::string sha1_base64 = base64_encode(digest, 20);
-			free(digest);
-
-			// If the original model is being sent then rename the
-			// compatibility one so it doesn't conflict. The renamed model is
-			// used in player_sao.cpp if the setting is enabled.
-			std::string fn_compat = filename;
-			if (g_settings->getBool("compat_send_original_model")) {
-				fn_compat = "_mc_compat_" + fn_compat;
-
-				// Add a dummy m_media entry
-				m_media[fn_compat] = MediaInfo("", "");
-			}
-
-			m_compat_media[fn_compat] = InMemoryMediaInfo(filedata_compat, sha1_base64);
-		}
-	}
-
 	if (filedata_to)
 		*filedata_to = std::move(filedata);
 	return true;
@@ -2598,6 +2491,8 @@ void Server::fillMediaCache()
 	// The paths are ordered in descending priority
 	fs::GetRecursiveDirs(paths, porting::path_user + DIR_DELIM + "textures" + DIR_DELIM + "server");
 	fs::GetRecursiveDirs(paths, m_gamespec.path + DIR_DELIM + "textures");
+	fs::GetRecursiveDirs(paths, porting::path_share + DIR_DELIM + "builtin" +
+		DIR_DELIM + "game" + DIR_DELIM + "models");
 	m_modmgr->getModsMediaPaths(paths);
 
 	// Collect media file information from paths into cache
@@ -2622,8 +2517,6 @@ void Server::fillMediaCache()
 
 void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_code)
 {
-	const u16 protocol_version = m_clients.getProtocolVersion(peer_id);
-
 	// Make packet
 	NetworkPacket pkt(TOCLIENT_ANNOUNCE_MEDIA, 0, peer_id);
 
@@ -2635,9 +2528,6 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
-		// Skip dummy entries on 5.0+ clients
-		if (protocol_version >= 37 && i.second.sha1_digest.empty())
-			continue;
 		media_sent++;
 	}
 
@@ -2648,18 +2538,8 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
-		if (protocol_version >= 37 && i.second.sha1_digest.empty())
-			continue;
 
-		pkt << i.first;
-
-		if (protocol_version < 37 &&
-				m_compat_media.find(i.first) != m_compat_media.end()) {
-			pkt << m_compat_media[i.first].sha1_digest;
-		} else {
-			FATAL_ERROR_IF(i.second.sha1_digest.empty(), "Attempt to send dummy media");
-			pkt << i.second.sha1_digest;
-		}
+		pkt << i.first << i.second.sha1_digest;
 	}
 
 	pkt << g_settings->get("remote_media");
@@ -2702,7 +2582,6 @@ void Server::sendRequestedMedia(session_t peer_id,
 
 	u32 file_size_bunch_total = 0;
 
-	const u16 protocol_version = m_clients.getProtocolVersion(peer_id);
 	for (const std::string &name : tosend) {
 		if (m_media.find(name) == m_media.end()) {
 			errorstream<<"Server::sendRequestedMedia(): Client asked for "
@@ -2712,20 +2591,6 @@ void Server::sendRequestedMedia(session_t peer_id,
 
 		//TODO get path + name
 		std::string tpath = m_media[name].path;
-
-		// Use compatibility media on older clients
-		if (protocol_version < 37 &&
-				m_compat_media.find(name) != m_compat_media.end()) {
-			file_bunches[file_bunches.size()-1].emplace_back(name, tpath,
-					m_compat_media[name].data);
-			continue;
-		}
-
-		if (tpath.empty()) {
-			errorstream<<"Server::sendRequestedMedia(): New client asked for "
-					<<"compatibility media file \""<<(name)<<"\""<<std::endl;
-			continue;
-		}
 
 		// Read data
 		std::ifstream fis(tpath.c_str(), std::ios_base::binary);

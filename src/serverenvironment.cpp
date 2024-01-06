@@ -469,9 +469,6 @@ ServerEnvironment::ServerEnvironment(ServerMap *map,
 
 	m_player_database = openPlayerDatabase(player_backend_name, path_world, conf);
 	m_auth_database = openAuthDatabase(auth_backend_name, path_world, conf);
-
-	m_compat_send_original_model = !server->getCompatPlayerModels().empty() &&
-			g_settings->getBool("compat_send_original_model");
 }
 
 ServerEnvironment::~ServerEnvironment()
@@ -908,7 +905,7 @@ public:
 			for (ActiveABM &aabm : *m_aabms[c]) {
 				if ((p.Y < aabm.min_y) || (p.Y > aabm.max_y))
 					continue;
-
+				
 				if (myrand() % aabm.chance != 0)
 					continue;
 
@@ -2408,9 +2405,4 @@ bool ServerEnvironment::migrateAuthDatabase(
 		return false;
 	}
 	return true;
-}
-
-const bool ServerEnvironment::isCompatPlayerModel(const std::string &model_name)
-{
-	return m_server->isCompatPlayerModel(model_name);
 }
