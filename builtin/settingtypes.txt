@@ -1352,6 +1352,7 @@ server_side_occlusion_culling (Server side occlusion culling) bool true
 #    LOOKUP_NODES_LIMIT: 16 (limits get_node call client-side to
 #    csm_restriction_noderange)
 #    READ_PLAYERINFO: 32 (disable get_player_names call client-side)
+#    THIRD_PARTY_MODS: 64 (disable loading third-party CSMs)
 csm_restriction_flags (Client side modding restrictions) int 62
 
 #   If the CSM restriction for node range is enabled, get_node calls are limited
