@@ -271,7 +271,7 @@ void GameUI::updateChatSize()
 	s32 chat_y = 5;
 
 	if (m_flags.show_hud) {
-		if (m_flags.show_minimal_debug)
+		if (m_flags.show_minimal_debug || m_flags.show_minimap)
 			chat_y += g_fontengine->getLineHeight();
 		if (m_flags.show_basic_debug)
 			chat_y += g_fontengine->getLineHeight();
