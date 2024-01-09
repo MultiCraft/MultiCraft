@@ -16,7 +16,7 @@ the arrow buttons where there is insufficient space.
 
 GUIScrollBar::GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s32 id,
 		core::rect<s32> rectangle, bool horizontal, bool auto_scale) :
-		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
+		IGUIElement(EGUIET_CUSTOM_SCROLLBAR, environment, parent, id, rectangle),
 		up_button(nullptr), down_button(nullptr), bg_image(nullptr),
 		slider_image(nullptr), slider_top_image(nullptr),
 		slider_bottom_image(nullptr), is_dragging(false), is_horizontal(horizontal),
