@@ -4175,7 +4175,8 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 			if (element->getType() != gui::EGUIET_SCROLL_BAR &&
 					element->getType() != gui::EGUIET_CUSTOM_SCROLLBAR &&
 					element->getType() != gui::EGUIET_CUSTOM_SCROLLCONTAINER &&
-					element->getType() != gui::EGUIET_CUSTOM_GUITABLE)
+					element->getType() != gui::EGUIET_CUSTOM_GUITABLE &&
+					element->getType() != gui::EGUIET_CUSTOM_HYPERTEXT)
 			{
 				while (element) {
 					element = element->getParent();
@@ -4188,7 +4189,8 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 						break;		
 					
 					if (element->getType() == gui::EGUIET_CUSTOM_SCROLLCONTAINER ||
-							element->getType() == gui::EGUIET_CUSTOM_GUITABLE) {
+							element->getType() == gui::EGUIET_CUSTOM_GUITABLE ||
+							element->getType() == gui::EGUIET_CUSTOM_HYPERTEXT) {
 						bool result = element->OnEvent(event);
 	
 						if (result)
