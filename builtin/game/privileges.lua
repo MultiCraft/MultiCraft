@@ -97,7 +97,6 @@ core.register_privilege("rollback", {
 core.register_privilege("debug", {
 	description = "Allows enabling various debug options that may affect gameplay",
 	give_to_singleplayer = false,
-	give_to_admin = true,
 })
 
 core.register_can_bypass_userlimit(function(name, ip)

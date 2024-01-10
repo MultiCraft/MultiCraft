@@ -729,6 +729,7 @@ protected:
 	bool handleCallbacks();
 	void processQueues();
 	void updateProfilers(const RunStats &stats, const FpsControl &draw_times, f32 dtime);
+	void updateDebugState();
 	void updateStats(RunStats *stats, const FpsControl &draw_times, f32 dtime);
 	void updateProfilerGraphs(ProfilerGraph *graph);
 
@@ -765,7 +766,7 @@ protected:
 	void processClientEvents(CameraOrientation *cam);
 	void updateCamera(u32 busy_time, f32 dtime);
 	void updateSound(f32 dtime);
-	void processPlayerInteraction(f32 dtime, bool show_hud, bool show_debug);
+	void processPlayerInteraction(f32 dtime, bool show_hud);
 	/*!
 	 * Returns the object or node the player is pointing at.
 	 * Also updates the selected thing in the Hud.
@@ -1174,10 +1175,10 @@ void Game::run()
 		updatePlayerControl(cam_view);
 		step(&dtime);
 		processClientEvents(&cam_view_target);
+		updateDebugState();
 		updateCamera(draw_times.busy_time, dtime);
 		updateSound(dtime);
-		processPlayerInteraction(dtime, m_game_ui->m_flags.show_hud,
-			m_game_ui->m_flags.show_debug);
+		processPlayerInteraction(dtime, m_game_ui->m_flags.show_hud);
 		updateFrame(&graph, &stats, dtime, cam_view);
 		updateProfilerGraphs(&graph);
 
@@ -1781,6 +1782,22 @@ void Game::processQueues()
 	shader_src->processQueue();
 }
 
+void Game::updateDebugState()
+{
+	LocalPlayer *player = client->getEnv().getLocalPlayer();
+	bool has_debug = client->checkPrivilege("debug");
+	bool has_basic_debug = has_debug || (player->hud_flags & HUD_FLAG_BASIC_DEBUG);
+
+	if (m_game_ui->m_flags.show_basic_debug) {
+		if (!has_basic_debug)
+			m_game_ui->m_flags.show_basic_debug = false;
+	} else if (m_game_ui->m_flags.show_minimal_debug) {
+		if (has_basic_debug)
+			m_game_ui->m_flags.show_basic_debug = true;
+	}
+	if (!has_debug)
+		draw_control->show_wireframe = false;
+}
 
 void Game::updateProfilers(const RunStats &stats, const FpsControl &draw_times,
 		f32 dtime)
@@ -2337,27 +2354,44 @@ void Game::toggleFog()
 
 void Game::toggleDebug()
 {
-	// Initial / 4x toggle: Chat only
-	// 1x toggle: Debug text with chat
+	LocalPlayer *player = client->getEnv().getLocalPlayer();
+	bool has_debug = client->checkPrivilege("debug");
+	bool has_basic_debug = has_debug || (player->hud_flags & HUD_FLAG_BASIC_DEBUG);
+	// Initial: No debug info
+	// 1x toggle: Debug text
 	// 2x toggle: Debug text with profiler graph
-	// 3x toggle: Debug text and wireframe
-	if (!m_game_ui->m_flags.show_debug) {
-		m_game_ui->m_flags.show_debug = true;
+	// 3x toggle: Debug text and wireframe (needs "debug" priv)
+	// Next toggle: Back to initial
+	//
+	// The debug text can be in 2 modes: minimal and basic.
+	// * Minimal: Only technical client info that not gameplay-relevant
+	// * Basic: Info that might give gameplay advantage, e.g. pos, angle
+	// Basic mode is used when player has the debug HUD flag set,
+	// otherwise the Minimal mode is used.
+	if (!m_game_ui->m_flags.show_minimal_debug) {
+		m_game_ui->m_flags.show_minimal_debug = true;
+		if (has_basic_debug)
+			m_game_ui->m_flags.show_basic_debug = true;
 		m_game_ui->m_flags.show_profiler_graph = false;
 		draw_control->show_wireframe = false;
 		m_game_ui->showTranslatedStatusText("Debug info shown");
 	} else if (!m_game_ui->m_flags.show_profiler_graph && !draw_control->show_wireframe) {
+		if (has_basic_debug)
+			m_game_ui->m_flags.show_basic_debug = true;
 		m_game_ui->m_flags.show_profiler_graph = true;
 		m_game_ui->showTranslatedStatusText("Profiler graph shown");
 	} else if (!draw_control->show_wireframe && client->checkPrivilege("debug")) {
+		if (has_basic_debug)
+			m_game_ui->m_flags.show_basic_debug = true;
 		m_game_ui->m_flags.show_profiler_graph = false;
 		draw_control->show_wireframe = true;
 		m_game_ui->showTranslatedStatusText("Wireframe shown");
 	} else {
-		m_game_ui->m_flags.show_debug = false;
+		m_game_ui->m_flags.show_minimal_debug = false;
+		m_game_ui->m_flags.show_basic_debug = false;
 		m_game_ui->m_flags.show_profiler_graph = false;
 		draw_control->show_wireframe = false;
-		if (client->checkPrivilege("debug")) {
+		if (has_debug) {
 			m_game_ui->showTranslatedStatusText("Debug info, profiler graph, and wireframe hidden");
 		} else {
 			m_game_ui->showTranslatedStatusText("Debug info and profiler graph hidden");
@@ -3124,7 +3158,7 @@ void Game::updateSound(f32 dtime)
 }
 
 
-void Game::processPlayerInteraction(f32 dtime, bool show_hud, bool show_debug)
+void Game::processPlayerInteraction(f32 dtime, bool show_hud)
 {
 	LocalPlayer *player = client->getEnv().getLocalPlayer();
 
@@ -3242,7 +3276,9 @@ void Game::processPlayerInteraction(f32 dtime, bool show_hud, bool show_debug)
 		handlePointingAtNode(pointed, selected_item, hand_item, dtime);
 	} else if (pointed.type == POINTEDTHING_OBJECT) {
 		v3f player_position  = player->getPosition();
-		handlePointingAtObject(pointed, tool_item, player_position, show_debug);
+		bool basic_debug_allowed = client->checkPrivilege("debug") || (player->hud_flags & HUD_FLAG_BASIC_DEBUG);
+		handlePointingAtObject(pointed, tool_item, player_position,
+				m_game_ui->m_flags.show_basic_debug && basic_debug_allowed);
 	} else if (isKeyDown(KeyType::DIG)) {
 		// When button is held down in air, show continuous animation
 		runData.punching = true;
