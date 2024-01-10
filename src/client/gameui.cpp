@@ -147,13 +147,13 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		os << std::setprecision(1) << std::fixed
 			<< "X: " << (player_position.X / BS)
 			<< ", Y: " << (player_position.Y / BS)
-			<< ", Z: " << (player_position.Z / BS);
+			<< ", Z: " << (player_position.Z / BS)
+			<< " | yaw: " << (wrapDegrees_0_360(cam.camera_yaw)) << "° "
+			<< yawToDirectionString(cam.camera_yaw)
+			<< " | pitch: " << (-wrapDegrees_180(cam.camera_pitch)) << "°";
 
 		if (m_flags.show_basic_debug) {
-			os << " | yaw: " << (wrapDegrees_0_360(cam.camera_yaw)) << "° "
-				<< yawToDirectionString(cam.camera_yaw)
-				<< " | pitch: " << (-wrapDegrees_180(cam.camera_pitch)) << "°"
-				<< " | seed: " << ((u64)client->getMapSeed());
+			os << " | seed: " << ((u64)client->getMapSeed());
 
 			if (pointed_old.type == POINTEDTHING_NODE) {
 				ClientMap &map = client->getEnv().getClientMap();
