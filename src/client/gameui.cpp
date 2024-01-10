@@ -141,25 +141,29 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 	m_guitext->setVisible(m_flags.show_hud && (m_flags.show_minimal_debug || m_flags.show_minimap));
 
 	// Basic debug text also shows info that might give a gameplay advantage
-	if (m_flags.show_basic_debug) {
+	const bool show_pos = m_flags.show_basic_debug || (m_flags.show_minimal_debug && m_flags.show_minimap);
+	if (show_pos) {
 		std::ostringstream os(std::ios_base::binary);
 		os << std::setprecision(1) << std::fixed
 			<< "X: " << (player_position.X / BS)
 			<< ", Y: " << (player_position.Y / BS)
-			<< ", Z: " << (player_position.Z / BS)
-			<< " | yaw: " << (wrapDegrees_0_360(cam.camera_yaw)) << "° "
-			<< yawToDirectionString(cam.camera_yaw)
-			<< " | pitch: " << (-wrapDegrees_180(cam.camera_pitch)) << "°"
-			<< " | seed: " << ((u64)client->getMapSeed());
+			<< ", Z: " << (player_position.Z / BS);
 
-		if (pointed_old.type == POINTEDTHING_NODE) {
-			ClientMap &map = client->getEnv().getClientMap();
-			const NodeDefManager *nodedef = client->getNodeDefManager();
-			MapNode n = map.getNode(pointed_old.node_undersurface);
+		if (m_flags.show_basic_debug) {
+			os << " | yaw: " << (wrapDegrees_0_360(cam.camera_yaw)) << "° "
+				<< yawToDirectionString(cam.camera_yaw)
+				<< " | pitch: " << (-wrapDegrees_180(cam.camera_pitch)) << "°"
+				<< " | seed: " << ((u64)client->getMapSeed());
 
-			if (n.getContent() != CONTENT_IGNORE && nodedef->get(n).name != "unknown") {
-				os << ", pointed: " << nodedef->get(n).name
-					<< ", param2: " << (u64) n.getParam2();
+			if (pointed_old.type == POINTEDTHING_NODE) {
+				ClientMap &map = client->getEnv().getClientMap();
+				const NodeDefManager *nodedef = client->getNodeDefManager();
+				MapNode n = map.getNode(pointed_old.node_undersurface);
+
+				if (n.getContent() != CONTENT_IGNORE && nodedef->get(n).name != "unknown") {
+					os << ", pointed: " << nodedef->get(n).name
+						<< ", param2: " << (u64) n.getParam2();
+				}
 			}
 		}
 
@@ -171,7 +175,7 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		));
 	}
 
-	m_guitext2->setVisible(m_flags.show_basic_debug && m_flags.show_hud);
+	m_guitext2->setVisible(m_flags.show_hud && show_pos);
 
 	setStaticText(m_guitext_info, m_infotext.c_str());
 	m_guitext_info->setVisible(m_flags.show_hud && g_menumgr.menuCount() == 0);
@@ -273,7 +277,7 @@ void GameUI::updateChatSize()
 	if (m_flags.show_hud) {
 		if (m_flags.show_minimal_debug || m_flags.show_minimap)
 			chat_y += g_fontengine->getLineHeight();
-		if (m_flags.show_basic_debug)
+		if (m_flags.show_basic_debug || (m_flags.show_minimal_debug && m_flags.show_minimap))
 			chat_y += g_fontengine->getLineHeight();
 	}
 
