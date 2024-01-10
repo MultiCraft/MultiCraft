@@ -995,12 +995,21 @@ void TextDrawer::draw(const core::rect<s32> &clip_rect,
 // GUIHyperText - The formated text area formspec item
 
 //! constructor
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 		IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
 		Client *client, ISimpleTextureSource *tsrc, const StyleSpec &style) :
 		IGUIElement(EGUIET_CUSTOM_HYPERTEXT, environment, parent, id, rectangle),
 		m_client(client), m_vscrollbar(nullptr),
 		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
+#else
+GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
+		IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
+		Client *client, ISimpleTextureSource *tsrc, const StyleSpec &style) :
+		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
+		m_client(client), m_vscrollbar(nullptr),
+		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
+#endif
 {
 
 #ifdef _DEBUG
