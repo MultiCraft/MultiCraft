@@ -1164,7 +1164,6 @@ void Game::run()
 		m_game_ui->clearInfoText();
 		hud->resizeHotbar();
 
-
 		updateProfilers(stats, draw_times, dtime);
 		processUserInput(dtime);
 		// Update camera before player movement to avoid camera lag of one frame
