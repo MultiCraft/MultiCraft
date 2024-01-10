@@ -4171,7 +4171,7 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 
 		if (hovered && isMyChild(hovered)) {
 			IGUIElement *element = hovered;
-			
+
 			if (element->getType() != gui::EGUIET_SCROLL_BAR &&
 					element->getType() != gui::EGUIET_CUSTOM_SCROLLBAR &&
 					element->getType() != gui::EGUIET_EDIT_BOX &&
@@ -4181,26 +4181,26 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 			{
 				while (element) {
 					element = element->getParent();
-					
+
 					if (!element)
 						break;
-						
+
 					if (element->getType() == gui::EGUIET_SCROLL_BAR ||
 							element->getType() == gui::EGUIET_CUSTOM_SCROLLBAR ||
 							element->getType() == gui::EGUIET_EDIT_BOX)
-						break;		
-					
+						break;
+
 					if (element->getType() == gui::EGUIET_CUSTOM_SCROLLCONTAINER ||
 							element->getType() == gui::EGUIET_CUSTOM_GUITABLE ||
 							element->getType() == gui::EGUIET_CUSTOM_HYPERTEXT) {
 						bool result = element->OnEvent(event);
-	
+
 						if (result)
 							return true;
-	
+
 						break;
 					}
-	
+
 				}
 			}
 		}
