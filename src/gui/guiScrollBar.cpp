@@ -14,6 +14,18 @@ the arrow buttons where there is insufficient space.
 #include <IGUIButton.h>
 #include <IGUIImage.h>
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+GUIScrollBar::GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s32 id,
+		core::rect<s32> rectangle, bool horizontal, bool auto_scale) :
+		IGUIElement(EGUIET_CUSTOM_SCROLLBAR, environment, parent, id, rectangle),
+		up_button(nullptr), down_button(nullptr), bg_image(nullptr),
+		slider_image(nullptr), slider_top_image(nullptr),
+		slider_bottom_image(nullptr), is_dragging(false), is_horizontal(horizontal),
+		is_auto_scaling(auto_scale), dragged_by_slider(false),
+		tray_clicked(false), scroll_pos(0), draw_center(0), thumb_size(0),
+		min_pos(0), max_pos(100), small_step(10), large_step(50),
+		drag_offset(0), page_size(100), border_size(0)
+#else
 GUIScrollBar::GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s32 id,
 		core::rect<s32> rectangle, bool horizontal, bool auto_scale) :
 		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
@@ -24,6 +36,7 @@ GUIScrollBar::GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s3
 		tray_clicked(false), scroll_pos(0), draw_center(0), thumb_size(0),
 		min_pos(0), max_pos(100), small_step(10), large_step(50),
 		drag_offset(0), page_size(100), border_size(0)
+#endif
 {
 	refreshControls();
 	setNotClipped(false);

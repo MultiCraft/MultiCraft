@@ -227,4 +227,8 @@ protected:
 
 	ParsedText::Element *getElementAt(s32 X, s32 Y);
 	void checkHover(s32 X, s32 Y);
+
+	bool m_swipe_started;
+	int m_swipe_start_y;
+	float m_swipe_pos;
 };
