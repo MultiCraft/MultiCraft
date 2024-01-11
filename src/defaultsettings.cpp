@@ -609,7 +609,7 @@ void set_default_settings()
 	} else {
 		// high settings
 		settings->setDefault("client_mapblock_limit", "500");
-		settings->setDefault("viewing_range", "125");
+		settings->setDefault("viewing_range", "120");
 		settings->setDefault("active_object_send_range_blocks", "4");
 		settings->setDefault("max_block_generate_distance", "5");
 

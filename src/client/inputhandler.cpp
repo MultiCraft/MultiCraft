@@ -194,7 +194,6 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 #ifdef __IOS__
 	} else if (event.EventType == irr::EET_APPLICATION_EVENT) {
 		int AppEvent = event.ApplicationEvent.EventType;
-		ioswrap_events(AppEvent);
 		if (AppEvent == irr::EAET_WILL_PAUSE)
 			external_pause_game();
 		return true;
