@@ -4080,7 +4080,11 @@ void GUIFormSpecMenu::acceptInput(FormspecQuitMode quitmode)
 					// without rtti support in Irrlicht
 					IGUIElement *element = getElementFromId(s.fid, true);
 					GUIScrollBar *e = nullptr;
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+					if (element && element->getType() == gui::EGUIET_CUSTOM_SCROLLBAR)
+#else
 					if (element && element->getType() == gui::EGUIET_ELEMENT)
+#endif
 						e = static_cast<GUIScrollBar *>(element);
 
 					if (e) {
