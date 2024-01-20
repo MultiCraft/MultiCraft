@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/serialize.h"
 #include "util/sha1.h"
 #include "util/string.h"
+#include <sstream>
 
 static std::string getMediaCacheDir()
 {
@@ -41,7 +42,16 @@ bool clientMediaUpdateCache(const std::string &raw_hash, const std::string &file
 	std::string sha1_hex = hex_encode(raw_hash);
 	if (!media_cache.exists(sha1_hex))
 		return media_cache.update(sha1_hex, filedata);
-	return true;
+	return false;
+}
+
+bool clientMediaUpdateCacheCopy(const std::string &raw_hash, const std::string &path)
+{
+	FileCache media_cache(getMediaCacheDir());
+	std::string sha1_hex = hex_encode(raw_hash);
+	if (!media_cache.exists(sha1_hex))
+		return media_cache.updateCopyFile(sha1_hex, path);
+	return false;
 }
 
 /*
@@ -194,17 +204,6 @@ void ClientMediaDownloader::initialStep(Client *client)
 	}
 
 	assert(m_uncached_received_count == 0);
-
-	// Create the media cache dir if we are likely to write to it
-	if (m_uncached_count != 0) {
-		bool did = fs::CreateAllDirs(getMediaCacheDir());
-		if (!did) {
-			errorstream << "Client: "
-				<< "Could not create media cache directory: "
-				<< getMediaCacheDir()
-				<< std::endl;
-		}
-	}
 
 	// If we found all files in the cache, report this fact to the server.
 	// If the server reported no remote servers, immediately start

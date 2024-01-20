@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "irrlichttypes.h"
 #include "filecache.h"
-#include <ostream>
 #include <map>
 #include <set>
 #include <vector>
@@ -34,9 +33,14 @@ struct HTTPFetchResult;
 #define MTHASHSET_FILE_NAME "index.mth"
 
 // Store file into media cache (unless it exists already)
-// Validating the hash is responsibility of the caller
+// Caller should check the hash.
+// return true if something was updated
 bool clientMediaUpdateCache(const std::string &raw_hash,
 	const std::string &filedata);
+
+// Copy file on disk(!) into media cache (unless it exists already)
+bool clientMediaUpdateCacheCopy(const std::string &raw_hash,
+	const std::string &path);
 
 class ClientMediaDownloader
 {
