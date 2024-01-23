@@ -30,6 +30,9 @@ sqlite3_version=3.41.2
 luajit_version=20230221
 leveldb_version=1.23
 zlib_version=1.2.13
+sdl_version=2.28.5
+jpeg_version=3.0.0
+png_version=1.6.40
 
 mkdir -p $packagedir
 mkdir -p $libdir
@@ -37,8 +40,8 @@ mkdir -p $libdir
 cd $builddir
 
 # Get stuff
-[ -e $packagedir/irrlicht-$irrlicht_version.zip ] || wget http://minetest.kitsunemimi.pw/irrlicht-$irrlicht_version-win64.zip \
-	-c -O $packagedir/irrlicht-$irrlicht_version.zip
+# [ -e $packagedir/irrlicht-$irrlicht_version.zip ] || wget http://minetest.kitsunemimi.pw/irrlicht-$irrlicht_version-win64.zip \
+#	-c -O $packagedir/irrlicht-$irrlicht_version.zip
 [ -e $packagedir/zlib-$zlib_version.zip ] || wget http://minetest.kitsunemimi.pw/zlib-$zlib_version-win64.zip \
 	-c -O $packagedir/zlib-$zlib_version.zip
 [ -e $packagedir/libogg-$ogg_version.zip ] || wget http://minetest.kitsunemimi.pw/libogg-$ogg_version-win64.zip \
@@ -59,11 +62,13 @@ cd $builddir
 	-c -O $packagedir/libleveldb-$leveldb_version.zip
 [ -e $packagedir/openal_stripped.zip ] || wget http://minetest.kitsunemimi.pw/openal_stripped64.zip \
 	-c -O $packagedir/openal_stripped.zip
+[ -e $packagedir/SDL2-devel-$sdl_version-mingw.zip ] || wget https://github.com/libsdl-org/SDL/releases/download/release-$sdl_version/SDL2-devel-$sdl_version-mingw.zip \
+	-c -O $packagedir/SDL2-devel-$sdl_version-mingw.zip
 
 
 # Extract stuff
 cd $libdir
-[ -d irrlicht ] || unzip -o $packagedir/irrlicht-$irrlicht_version.zip -d irrlicht
+# [ -d irrlicht ] || unzip -o $packagedir/irrlicht-$irrlicht_version.zip -d irrlicht
 [ -d zlib ] || unzip -o $packagedir/zlib-$zlib_version.zip -d zlib
 [ -d libogg ] || unzip -o $packagedir/libogg-$ogg_version.zip -d libogg
 [ -d libvorbis ] || unzip -o $packagedir/libvorbis-$vorbis_version.zip -d libvorbis
@@ -74,6 +79,79 @@ cd $libdir
 [ -d openal_stripped ] || unzip -o $packagedir/openal_stripped.zip
 [ -d luajit ] || unzip -o $packagedir/luajit-$luajit_version.zip -d luajit
 [ -d leveldb ] || unzip -o $packagedir/libleveldb-$leveldb_version.zip -d leveldb
+[ -d SDL2 ] || (unzip -o $packagedir/SDL2-devel-$sdl_version-mingw.zip SDL2-$sdl_version/x86_64-w64-mingw32/* -d SDL2 && mv SDL2/SDL2-$sdl_version/x86_64-w64-mingw32/* SDL2)
+
+# Get libjpeg
+if [ ! -d libjpeg ]; then
+	wget https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-$jpeg_version.tar.gz
+	tar -xzf libjpeg-turbo-$jpeg_version.tar.gz
+	mv libjpeg-turbo-$jpeg_version libjpeg
+	rm libjpeg-turbo-$jpeg_version.tar.gz
+	mkdir libjpeg/build
+	cd libjpeg/build
+
+	cmake .. \
+		-DCMAKE_TOOLCHAIN_FILE=$toolchain_file \
+		-DCMAKE_SYSTEM_PROCESSOR=AMD64 \
+		-DCMAKE_INSTALL_PREFIX=/tmp \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DENABLE_SHARED=OFF \
+		-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
+	
+	cmake --build . -j$(nproc)
+	
+	cd -
+fi
+
+# Get libpng
+if [ ! -d libpng ]; then
+	wget https://download.sourceforge.net/libpng/libpng-$png_version.tar.gz
+	tar -xzf libpng-$png_version.tar.gz
+	mv libpng-$png_version libpng
+	rm libpng-$png_version.tar.gz
+	mkdir libpng/build
+	cd libpng/build
+	
+	cmake .. \
+		-DCMAKE_TOOLCHAIN_FILE=$toolchain_file \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DPNG_SHARED=OFF \
+		-DPNG_TESTS=OFF \
+		-DPNG_EXECUTABLES=OFF \
+		-DPNG_BUILD_ZLIB=ON \
+		-DZLIB_INCLUDE_DIRS="$libdir/zlib/include" \
+		-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
+	
+	cmake --build . -j$(nproc)
+	
+	cd -
+fi
+
+# Get irrlicht
+if [ ! -d irrlicht ]; then
+	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
+	
+	cd irrlicht/source/Irrlicht
+
+	CC="x86_64-w64-mingw32-gcc" \
+	CXX="x86_64-w64-mingw32-g++" \
+	CPPFLAGS="$CPPFLAGS \
+		-DCMAKE_TOOLCHAIN_FILE=$toolchain_file \
+		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
+		-DNO_IRR_COMPILE_WITH_OGLES2_ \
+		-DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
+		-I/usr/x86_64-w64-mingw32/include \
+		-I$libdir/SDL2/include/SDL2 \
+		-I$libdir/zlib/include \
+		-I$libdir/libjpeg \
+		-I$libdir/libjpeg/build \
+		-I$libdir/libpng \
+		-I$libdir/libpng/build" \
+	CXXFLAGS="$CXXFLAGS -std=gnu++17" \
+	make staticlib_win32 -j$(nproc) NDEBUG=1
+	
+	cd -
+fi
 
 # Get minetest
 cd $builddir
@@ -108,13 +186,32 @@ cmake .. \
 	-DENABLE_FREETYPE=1 \
 	-DENABLE_LEVELDB=1 \
 	\
+	-DUSE_STATIC_BUILD=1 \
+	-DUSE_SDL=1 \
+	-DSDL2_LIBRARIES="$libdir/SDL2/lib/libSDL2.a" \
+	-DSDL2_INCLUDE_DIRS="$libdir/SDL2/include/SDL2" \
+	\
+	-DCMAKE_C_FLAGS=" \
+		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
+		-DNO_IRR_COMPILE_WITH_OGLES2_ \
+		-DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
+		-D_IRR_STATIC_LIB_" \
+	-DCMAKE_CXX_FLAGS=" \
+		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
+		-DNO_IRR_COMPILE_WITH_OGLES2_ \
+		-DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
+		-D_IRR_STATIC_LIB_" \
 	-DIRRLICHT_INCLUDE_DIR=$libdir/irrlicht/include \
-	-DIRRLICHT_LIBRARY=$libdir/irrlicht/lib/Win64-gcc/libIrrlicht.dll.a \
-	-DIRRLICHT_DLL=$libdir/irrlicht/bin/Win64-gcc/Irrlicht.dll \
+	-DIRRLICHT_LIBRARY=$libdir/irrlicht/lib/Win32-gcc/libIrrlicht.a \
 	\
 	-DZLIB_INCLUDE_DIR=$libdir/zlib/include \
-	-DZLIB_LIBRARIES=$libdir/zlib/lib/libz.dll.a \
-	-DZLIB_DLL=$libdir/zlib/bin/zlib1.dll \
+	-DZLIB_LIBRARIES=$libdir/zlib/lib/libz.a \
+	\
+	-DPNG_INCLUDE_DIR="$libdir/libpng/include" \
+	-DPNG_LIBRARIES="$libdir/libpng/build/libpng16.a" \
+	\
+	-DJPEG_INCLUDE_DIR="$libdir/libjpeg/include" \
+	-DJPEG_LIBRARIES="$libdir/libjpeg/build/libjpeg.a" \
 	\
 	-DLUA_INCLUDE_DIR=$libdir/luajit/include \
 	-DLUA_LIBRARY=$libdir/luajit/libluajit.a \
