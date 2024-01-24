@@ -418,17 +418,6 @@ void Server::init()
 
 	m_modmgr->loadMods(m_script);
 
-	// m_compat_player_models is used to prevent constant re-parsing of the
-	// setting
-	std::string player_models = g_settings->get("compat_player_model");
-	player_models.erase(std::remove_if(player_models.begin(),
-			player_models.end(), static_cast<int(*)(int)>(&std::isspace)),
-			player_models.end());
-	if (player_models.empty() || isSingleplayer())
-		FATAL_ERROR_IF(!m_compat_player_models.empty(), "Compat player models list not empty");
-	else
-		m_compat_player_models = str_split(player_models, ',');
-
 	// Read Textures and calculate sha1 sums
 	fillMediaCache();
 
@@ -823,11 +812,7 @@ void Server::AsyncRunStep(bool initial_step)
 					// u16 id
 					// std::string data
 					buffer.append(idbuf, sizeof(idbuf));
-					if (client->net_proto_version >= 37 ||
-							aom.legacystring.empty())
-						buffer.append(serializeString16(aom.datastring));
-					else
-						buffer.append(serializeString16(aom.legacystring));
+					buffer.append(serializeString16(aom.datastring));
 				}
 			}
 			/*
@@ -1198,9 +1183,6 @@ void Server::ProcessData(NetworkPacket *pkt)
 			return;
 		}
 
-		RemoteClient *client = getClient(peer_id);
-		if (client)
-			pkt->setProtocolVersion(client->net_proto_version);
 		handleCommand(pkt);
 	} catch (SendFailedException &e) {
 		errorstream << "Server::ProcessData(): SendFailedException: "
@@ -1208,7 +1190,7 @@ void Server::ProcessData(NetworkPacket *pkt)
 				<< std::endl;
 	} catch (PacketError &e) {
 		actionstream << "Server::ProcessData(): PacketError: "
-				<< "what=" << e.what() << ", command=" << pkt->getCommand() // TODO: REMOVE COMMAND=
+				<< "what=" << e.what()
 				<< std::endl;
 	}
 }
@@ -1343,11 +1325,11 @@ void Server::Send(session_t peer_id, NetworkPacket *pkt)
 		clientCommandFactoryTable[pkt->getCommand()].reliable);
 }
 
-void Server::SendMovement(session_t peer_id, u16 protocol_version)
+void Server::SendMovement(session_t peer_id)
 {
 	std::ostringstream os(std::ios_base::binary);
 
-	NetworkPacket pkt(TOCLIENT_MOVEMENT, 12 * sizeof(float), peer_id, protocol_version);
+	NetworkPacket pkt(TOCLIENT_MOVEMENT, 12 * sizeof(float), peer_id);
 
 	pkt << g_settings->getFloat("movement_acceleration_default");
 	pkt << g_settings->getFloat("movement_acceleration_air");
@@ -1382,13 +1364,7 @@ void Server::SendPlayerHPOrDie(PlayerSAO *playersao, const PlayerHPChangeReason 
 void Server::SendHP(session_t peer_id, u16 hp)
 {
 	NetworkPacket pkt(TOCLIENT_HP, 1, peer_id);
-	// Minetest 0.4 uses 8-bit integers for HPP.
-	if (m_clients.getProtocolVersion(peer_id) >= 37) {
-		pkt << hp;
-	} else {
-		u8 raw_hp = hp & 0xFF;
-		pkt << raw_hp;
-	}
+	pkt << hp;
 	Send(&pkt);
 }
 
@@ -1500,9 +1476,6 @@ void Server::SendInventory(PlayerSAO *sao, bool incremental)
 
 void Server::SendChatMessage(session_t peer_id, const ChatMessage &message)
 {
-	NetworkPacket legacypkt(TOCLIENT_CHAT_MESSAGE_OLD, 0, peer_id);
-	legacypkt << message.message;
-
 	NetworkPacket pkt(TOCLIENT_CHAT_MESSAGE, 0, peer_id);
 	u8 version = 1;
 	u8 type = message.type;
@@ -1514,12 +1487,9 @@ void Server::SendChatMessage(session_t peer_id, const ChatMessage &message)
 		if (!player)
 			return;
 
-		if (player->protocol_version < 35)
-			Send(&legacypkt);
-		else
-			Send(&pkt);
+		Send(&pkt);
 	} else {
-		m_clients.sendToAllCompat(&pkt, &legacypkt, 35);
+		m_clients.sendToAll(&pkt);
 	}
 }
 
@@ -1537,11 +1507,7 @@ void Server::SendShowFormspecMessage(session_t peer_id, const std::string &forms
 		pkt.putLongString("");
 	} else {
 		m_formspec_state_data[peer_id] = formname;
-		RemotePlayer *player = m_env->getPlayer(peer_id);
-		if (player && player->protocol_version < 37)
-			pkt.putLongString(insert_formspec_prepend(formspec, player->formspec_prepend));
-		else
-			pkt.putLongString(formspec);
+		pkt.putLongString(formspec);
 	}
 	pkt << formname;
 
@@ -1579,7 +1545,7 @@ void Server::SendSpawnParticle(session_t peer_id, u16 protocol_version,
 	}
 	assert(protocol_version != 0);
 
-	NetworkPacket pkt(TOCLIENT_SPAWN_PARTICLE, 0, peer_id, protocol_version);
+	NetworkPacket pkt(TOCLIENT_SPAWN_PARTICLE, 0, peer_id);
 
 	{
 		// NetworkPacket and iostreams are incompatible...
@@ -1626,7 +1592,7 @@ void Server::SendAddParticleSpawner(session_t peer_id, u16 protocol_version,
 	}
 	assert(protocol_version != 0);
 
-	NetworkPacket pkt(TOCLIENT_ADD_PARTICLESPAWNER, 100, peer_id, protocol_version);
+	NetworkPacket pkt(TOCLIENT_ADD_PARTICLESPAWNER, 100, peer_id);
 
 	pkt << p.amount << p.time << p.minpos << p.maxpos << p.minvel
 		<< p.maxvel << p.minacc << p.maxacc << p.minexptime << p.maxexptime
@@ -1661,7 +1627,7 @@ void Server::SendDeleteParticleSpawner(session_t peer_id, u32 id)
 
 void Server::SendHUDAdd(session_t peer_id, u32 id, HudElement *form)
 {
-	NetworkPacket pkt(TOCLIENT_HUDADD, 0 , peer_id, m_clients.getProtocolVersion(peer_id));
+	NetworkPacket pkt(TOCLIENT_HUDADD, 0 , peer_id);
 
 	pkt << id << (u8) form->type << form->pos << form->name << form->scale
 			<< form->text << form->number << form->item << form->dir
@@ -1680,7 +1646,7 @@ void Server::SendHUDRemove(session_t peer_id, u32 id)
 
 void Server::SendHUDChange(session_t peer_id, u32 id, HudElementStat stat, void *value)
 {
-	NetworkPacket pkt(TOCLIENT_HUDCHANGE, 0, peer_id, m_clients.getProtocolVersion(peer_id));
+	NetworkPacket pkt(TOCLIENT_HUDCHANGE, 0, peer_id);
 	pkt << id << (u8) stat;
 
 	switch (stat) {
@@ -1792,8 +1758,7 @@ void Server::SendSetStars(session_t peer_id, const StarParams &params)
 
 void Server::SendCloudParams(session_t peer_id, const CloudParams &params)
 {
-	NetworkPacket pkt(TOCLIENT_CLOUD_PARAMS, 0, peer_id,
-		m_clients.getProtocolVersion(peer_id));
+	NetworkPacket pkt(TOCLIENT_CLOUD_PARAMS, 0, peer_id);
 	pkt << params.density << params.color_bright << params.color_ambient
 			<< params.height << params.thickness << params.speed;
 	Send(&pkt);
@@ -1812,20 +1777,15 @@ void Server::SendOverrideDayNightRatio(session_t peer_id, bool do_override,
 
 void Server::SendTimeOfDay(session_t peer_id, u16 time, f32 time_speed)
 {
-	if (peer_id != PEER_ID_INEXISTENT) {
-		NetworkPacket pkt(TOCLIENT_TIME_OF_DAY, 0, peer_id,
-			m_clients.getProtocolVersion(peer_id));
-		pkt << time << time_speed;
-
-		Send(&pkt);
-		return;
-	}
-
-	NetworkPacket pkt(TOCLIENT_TIME_OF_DAY, 0, peer_id, 37);
-	NetworkPacket legacypkt(TOCLIENT_TIME_OF_DAY, 0, peer_id, 32);
+	NetworkPacket pkt(TOCLIENT_TIME_OF_DAY, 0, peer_id);
 	pkt << time << time_speed;
-	legacypkt << time << time_speed;
-	m_clients.sendToAllCompat(&pkt, &legacypkt, 37);
+
+	if (peer_id == PEER_ID_INEXISTENT) {
+		m_clients.sendToAll(&pkt);
+	}
+	else {
+		Send(&pkt);
+	}
 }
 
 void Server::SendPlayerHP(session_t peer_id)
@@ -1858,7 +1818,7 @@ void Server::SendMovePlayer(session_t peer_id)
 	// Send attachment updates instantly to the client prior updating position
 	sao->sendOutdatedData();
 
-	NetworkPacket pkt(TOCLIENT_MOVE_PLAYER, sizeof(v3f) + sizeof(f32) * 2, peer_id, player->protocol_version);
+	NetworkPacket pkt(TOCLIENT_MOVE_PLAYER, sizeof(v3f) + sizeof(f32) * 2, peer_id);
 	pkt << sao->getBasePosition() << sao->getLookPitch() << sao->getRotation().Y;
 
 	{
@@ -1887,7 +1847,7 @@ void Server::SendLocalPlayerAnimations(session_t peer_id, v2s32 animation_frames
 		f32 animation_speed)
 {
 	NetworkPacket pkt(TOCLIENT_LOCAL_PLAYER_ANIMATIONS, 0,
-		peer_id, m_clients.getProtocolVersion(peer_id));
+		peer_id);
 
 	pkt << animation_frames[0] << animation_frames[1] << animation_frames[2]
 			<< animation_frames[3] << animation_speed;
@@ -1897,7 +1857,7 @@ void Server::SendLocalPlayerAnimations(session_t peer_id, v2s32 animation_frames
 
 void Server::SendEyeOffset(session_t peer_id, v3f first, v3f third)
 {
-	NetworkPacket pkt(TOCLIENT_EYE_OFFSET, 0, peer_id, m_clients.getProtocolVersion(peer_id));
+	NetworkPacket pkt(TOCLIENT_EYE_OFFSET, 0, peer_id);
 	pkt << first << third;
 	Send(&pkt);
 }
@@ -1930,11 +1890,7 @@ void Server::SendPlayerInventoryFormspec(session_t peer_id)
 		return;
 
 	NetworkPacket pkt(TOCLIENT_INVENTORY_FORMSPEC, 0, peer_id);
-	if (player->protocol_version < 37)
-		pkt.putLongString(insert_formspec_prepend(player->inventory_formspec,
-			player->formspec_prepend));
-	else
-		pkt.putLongString(player->inventory_formspec);
+	pkt.putLongString(player->inventory_formspec);
 
 	Send(&pkt);
 }
@@ -1945,10 +1901,6 @@ void Server::SendPlayerFormspecPrepend(session_t peer_id)
 	assert(player);
 	if (player->getPeerId() == PEER_ID_INEXISTENT)
 		return;
-	if (player->protocol_version < 37) {
-		SendPlayerInventoryFormspec(peer_id);
-		return;
-	}
 
 	NetworkPacket pkt(TOCLIENT_FORMSPEC_PREPEND, 0, peer_id);
 	pkt << player->formspec_prepend;
@@ -2069,10 +2021,6 @@ void Server::SendActiveObjectMessages(session_t peer_id, const std::string &data
 
 void Server::SendCSMRestrictionFlags(session_t peer_id)
 {
-	const u16 protocol_version = m_clients.getProtocolVersion(peer_id);
-	if (protocol_version < 35 && protocol_version != 0)
-		return;
-
 	NetworkPacket pkt(TOCLIENT_CSM_RESTRICTION_FLAGS,
 		sizeof(m_csm_restriction_flags) + sizeof(m_csm_restriction_noderange), peer_id);
 	pkt << m_csm_restriction_flags << m_csm_restriction_noderange;
@@ -2164,29 +2112,17 @@ s32 Server::playSound(const SimpleSoundSpec &spec,
 
 	float gain = params.gain * spec.gain;
 	NetworkPacket pkt(TOCLIENT_PLAY_SOUND, 0);
-	NetworkPacket legacypkt(TOCLIENT_PLAY_SOUND, 0, PEER_ID_INEXISTENT, 32);
 	pkt << id << spec.name << gain
 			<< (u8) params.type << pos << params.object
 			<< params.loop << params.fade << params.pitch
 			<< ephemeral;
-	legacypkt << id << spec.name << gain
-			<< (u8) params.type << pos << params.object
-			<< params.loop << params.fade;
 
 	bool as_reliable = !ephemeral;
-	bool play_sound = gain > 0;
 
 	for (const u16 dst_client : dst_clients) {
-		const u16 protocol_version = m_clients.getProtocolVersion(dst_client);
-		if (!play_sound && protocol_version < 32)
-			continue;
 		if (psound)
 			psound->clients.insert(dst_client);
-
-		if (protocol_version >= 37)
-			m_clients.send(dst_client, 0, &pkt, as_reliable);
-		else
-			m_clients.send(dst_client, 0, &legacypkt, as_reliable);
+		m_clients.send(dst_client, 0, &pkt, as_reliable);
 	}
 	return id;
 }
@@ -2347,13 +2283,6 @@ void Server::sendMetadataChanged(const std::list<v3s16> &meta_updates, float far
 		if (!client)
 			continue;
 
-		if (client->net_proto_version < 37) {
-			for (const v3s16 &pos : meta_updates) {
-				client->SetBlockNotSent(getNodeBlockPos(pos));
-			}
-			continue;
-		}
-
 		ServerActiveObject *player = m_env->getActiveObject(i);
 		v3f player_pos = player ? player->getBasePosition() : v3f();
 
@@ -2400,13 +2329,7 @@ void Server::SendBlockNoLock(session_t peer_id, MapBlock *block, u8 ver,
 	*/
 	thread_local const int net_compression_level = rangelim(g_settings->getS16("map_compression_level_net"), -1, 9);
 	std::ostringstream os(std::ios_base::binary);
-
-	RemotePlayer *player = m_env->getPlayer(peer_id);
-	if (player && player->protocol_version < 37)
-		block->serialize(os, ver, false, net_compression_level,
-			player->formspec_prepend);
-	else
-		block->serialize(os, ver, false, net_compression_level);
+	block->serialize(os, ver, false, net_compression_level);
 	block->serializeNetworkSpecific(os);
 	std::string s = os.str();
 
@@ -2500,76 +2423,6 @@ bool Server::SendBlock(session_t peer_id, const v3s16 &blockpos)
 	return true;
 }
 
-// Hacks because I don't want to make duplicate read/write functions for little
-// endian numbers.
-u32 readU32_le(std::istream &is) {
-	char buf[4] = {0};
-	is.read(buf, sizeof(buf));
-	std::reverse(buf, buf + sizeof(buf));
-	return readU32((u8 *)buf);
-}
-
-v3f readV3F32_le(std::istream &is) {
-	char buf[12] = {0};
-	is.read(buf, sizeof(buf));
-	std::reverse(buf, buf + 4);
-	std::reverse(buf + 4, buf + 8);
-	std::reverse(buf + 8, buf + 12);
-	return readV3F32((u8 *)buf);
-}
-
-void writeV3F32_le(std::ostream &os, v3f pos) {
-	char buf[12];
-	writeV3F32((u8 *)buf, pos);
-	std::reverse(buf, buf + 4);
-	std::reverse(buf + 4, buf + 8);
-	std::reverse(buf + 8, buf + 12);
-	os.write(buf, sizeof(buf));
-}
-
-// Converts MT 5+ player models into MT 0.4 compatible models
-std::string makeCompatPlayerModel(std::string b3d) {
-	std::stringstream ss(b3d);
-
-	// ss.read(4) != "BB3D"
-	const u32 header = readU32_le(ss);
-	if (header != 0x44334242) {
-		warningstream << "Invalid B3D header in player model: " << header << std::endl;
-		return "";
-	}
-
-	readU32(ss); // Length
-	readU32(ss); // Version
-
-	// Look for the node
-	while (ss.good()) {
-		const u32 name = readU32_le(ss);
-		const u32 length = readU32_le(ss);
-
-		// name != "NODE"
-		if (name != 0x45444f4e) {
-			ss.ignore(length);
-			continue;
-		}
-
-		// Node name
-		ss.ignore(length, '\x00');
-
-		// Node position
-		std::streampos p = ss.tellg();
-		const v3f offset_pos = readV3F32_le(ss) - v3f(0, BS, 0);
-
-		// Write the new position back to the stringstream
-		ss.seekp(p);
-		writeV3F32_le(ss, offset_pos);
-
-		return ss.str();
-	}
-
-	warningstream << "Could not find base position in B3D file" << std::endl;
-	return "";
-}
-
 bool Server::addMediaFile(const std::string &filename,
 	const std::string &filepath, std::string *filedata_to,
 	std::string *digest_to)
@@ -2624,32 +2477,6 @@ bool Server::addMediaFile(const std::string &filename,
 	// Put in list
 	m_media[filename] = MediaInfo(filepath, sha1_base64);
 
-	// Add a compatibility model if required
-	if (isCompatPlayerModel(filename)) {
-		// Offset the mesh
-		const std::string filedata_compat = makeCompatPlayerModel(filedata);
-		if (filedata_compat != "") {
-			SHA1 sha1;
-			sha1.addBytes(filedata_compat.c_str(), filedata_compat.length());
-			unsigned char *digest = sha1.getDigest();
-			std::string sha1_base64 = base64_encode(digest, 20);
-			free(digest);
-
-			// If the original model is being sent then rename the
-			// compatibility one so it doesn't conflict. The renamed model is
-			// used in player_sao.cpp if the setting is enabled.
-			std::string fn_compat = filename;
-			if (g_settings->getBool("compat_send_original_model")) {
-				fn_compat = "_mc_compat_" + fn_compat;
-
-				// Add a dummy m_media entry
-				m_media[fn_compat] = MediaInfo("", "");
-			}
-
-			m_compat_media[fn_compat] = InMemoryMediaInfo(filedata_compat, sha1_base64);
-		}
-	}
-
 	if (filedata_to)
 		*filedata_to = std::move(filedata);
 	return true;
@@ -2664,6 +2491,8 @@ void Server::fillMediaCache()
 	// The paths are ordered in descending priority
 	fs::GetRecursiveDirs(paths, porting::path_user + DIR_DELIM + "textures" + DIR_DELIM + "server");
 	fs::GetRecursiveDirs(paths, m_gamespec.path + DIR_DELIM + "textures");
+	fs::GetRecursiveDirs(paths, porting::path_share + DIR_DELIM + "builtin" +
+		DIR_DELIM + "game" + DIR_DELIM + "models");
 	m_modmgr->getModsMediaPaths(paths);
 
 	// Collect media file information from paths into cache
@@ -2688,8 +2517,6 @@ void Server::fillMediaCache()
 
 void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_code)
 {
-	const u16 protocol_version = m_clients.getProtocolVersion(peer_id);
-
 	// Make packet
 	NetworkPacket pkt(TOCLIENT_ANNOUNCE_MEDIA, 0, peer_id);
 
@@ -2701,9 +2528,6 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
-		// Skip dummy entries on 5.0+ clients
-		if (protocol_version >= 37 && i.second.sha1_digest.empty())
-			continue;
 		media_sent++;
 	}
 
@@ -2714,18 +2538,8 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
-		if (protocol_version >= 37 && i.second.sha1_digest.empty())
-			continue;
 
-		pkt << i.first;
-
-		if (protocol_version < 37 &&
-				m_compat_media.find(i.first) != m_compat_media.end()) {
-			pkt << m_compat_media[i.first].sha1_digest;
-		} else {
-			FATAL_ERROR_IF(i.second.sha1_digest.empty(), "Attempt to send dummy media");
-			pkt << i.second.sha1_digest;
-		}
+		pkt << i.first << i.second.sha1_digest;
 	}
 
 	pkt << g_settings->get("remote_media");
@@ -2768,7 +2582,6 @@ void Server::sendRequestedMedia(session_t peer_id,
 
 	u32 file_size_bunch_total = 0;
 
-	const u16 protocol_version = m_clients.getProtocolVersion(peer_id);
 	for (const std::string &name : tosend) {
 		if (m_media.find(name) == m_media.end()) {
 			errorstream<<"Server::sendRequestedMedia(): Client asked for "
@@ -2778,20 +2591,6 @@ void Server::sendRequestedMedia(session_t peer_id,
 
 		//TODO get path + name
 		std::string tpath = m_media[name].path;
-
-		// Use compatibility media on older clients
-		if (protocol_version < 37 &&
-				m_compat_media.find(name) != m_compat_media.end()) {
-			file_bunches[file_bunches.size()-1].emplace_back(name, tpath,
-					m_compat_media[name].data);
-			continue;
-		}
-
-		if (tpath.empty()) {
-			errorstream<<"Server::sendRequestedMedia(): New client asked for "
-					<<"compatibility media file \""<<(name)<<"\""<<std::endl;
-			continue;
-		}
 
 		// Read data
 		std::ifstream fis(tpath.c_str(), std::ios_base::binary);
@@ -2886,9 +2685,7 @@ void Server::SendMinimapModes(session_t peer_id,
 void Server::sendDetachedInventory(Inventory *inventory, const std::string &name, session_t peer_id)
 {
 	NetworkPacket pkt(TOCLIENT_DETACHED_INVENTORY, 0, peer_id);
-	NetworkPacket legacy_pkt(TOCLIENT_DETACHED_INVENTORY, 0, peer_id);
 	pkt << name;
-	legacy_pkt << name;
 
 	if (!inventory) {
 		pkt << false; // Remove inventory
@@ -2903,25 +2700,12 @@ void Server::sendDetachedInventory(Inventory *inventory, const std::string &name
 		const std::string &os_str = os.str();
 		pkt << static_cast<u16>(os_str.size()); // HACK: to keep compatibility with 5.0.0 clients
 		pkt.putRawString(os_str);
-		legacy_pkt.putRawString(os_str);
 	}
 
-	if (peer_id == PEER_ID_INEXISTENT) {
-		m_clients.newSendToAll(&pkt);
-		if (inventory)
-			m_clients.oldSendToAll(&legacy_pkt);
-	} else {
-		RemoteClient *client = getClientNoEx(peer_id, CS_Created);
-		if (!client) {
-			warningstream << "Could not get client in sendDetachedInventory!"
-				<< std::endl;
-		}
-
-		if (!client || client->net_proto_version >= 37)
-			Send(&pkt);
-		else if (inventory)
-			Send(&legacy_pkt);
-	}
+	if (peer_id == PEER_ID_INEXISTENT)
+		m_clients.sendToAll(&pkt);
+	else
+		Send(&pkt);
 }
 
 void Server::sendDetachedInventories(session_t peer_id, bool incremental)
@@ -3015,7 +2799,7 @@ void Server::acceptAuth(session_t peer_id, bool forSudoMode)
 	if (!forSudoMode) {
 		RemoteClient* client = getClient(peer_id, CS_Invalid);
 
-		NetworkPacket resp_pkt(TOCLIENT_AUTH_ACCEPT, 1 + 6 + 8 + 4, peer_id, client->net_proto_version);
+		NetworkPacket resp_pkt(TOCLIENT_AUTH_ACCEPT, 1 + 6 + 8 + 4, peer_id);
 
 		// Right now, the auth mechs don't change between login and sudo mode.
 		u32 sudo_auth_mechs = client->allowed_auth_mechs;

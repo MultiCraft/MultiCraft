@@ -99,34 +99,24 @@ void UnitSAO::sendOutdatedData()
 	if (!m_animation_sent) {
 		m_animation_sent = true;
 		m_animation_speed_sent = true;
-		m_messages_out.emplace(getId(), true,
-			generateUpdateAnimationCommand(37),
-			generateUpdateAnimationCommand(32));
+		m_messages_out.emplace(getId(), true, generateUpdateAnimationCommand());
 	} else if (!m_animation_speed_sent) {
 		// Animation speed is also sent when 'm_animation_sent == false'
 		m_animation_speed_sent = true;
-		m_messages_out.emplace(getId(), true,
-			generateUpdateAnimationSpeedCommand(),
-			// MT 0.4 has no update animation speed command
-			generateUpdateAnimationCommand(32));
+		m_messages_out.emplace(getId(), true, generateUpdateAnimationSpeedCommand());
 	}
 
 	if (!m_bone_position_sent) {
 		m_bone_position_sent = true;
 		for (const auto &bone_pos : m_bone_position) {
-			std::string str = generateUpdateBonePositionCommand(
-				bone_pos.first, bone_pos.second.X, bone_pos.second.Y, 37);
-			std::string legacy_str = generateUpdateBonePositionCommand(
-				bone_pos.first, bone_pos.second.X, bone_pos.second.Y, 32);
-			m_messages_out.emplace(getId(), true, str, legacy_str);
+			m_messages_out.emplace(getId(), true, generateUpdateBonePositionCommand(
+				bone_pos.first, bone_pos.second.X, bone_pos.second.Y));
 		}
 	}
 
 	if (!m_attachment_sent) {
 		m_attachment_sent = true;
-		m_messages_out.emplace(getId(), true,
-			generateUpdateAttachmentCommand(37),
-			generateUpdateAttachmentCommand(32));
+		m_messages_out.emplace(getId(), true, generateUpdateAttachmentCommand());
 	}
 }
 // clang-format on
@@ -247,7 +237,7 @@ void UnitSAO::notifyObjectPropertiesModified()
 	m_properties_sent = false;
 }
 
-std::string UnitSAO::generateUpdateAttachmentCommand(const u16 protocol_version) const
+std::string UnitSAO::generateUpdateAttachmentCommand() const
 {
 	std::ostringstream os(std::ios::binary);
 	// command
@@ -255,38 +245,22 @@ std::string UnitSAO::generateUpdateAttachmentCommand(const u16 protocol_version)
 	// parameters
 	writeS16(os, m_attachment_parent_id);
 	os << serializeString16(m_attachment_bone);
-
-	// Add/remove offsets to compensate for MT 0.4
-	if (protocol_version >= 37) {
-		writeV3F32(os, m_attachment_position);
-	} else {
-		v3f compat_attachment_position = m_attachment_position;
-		if (getType() == ACTIVEOBJECT_TYPE_PLAYER) {
-			compat_attachment_position.Y += BS;
-		} else {
-			ServerActiveObject *p =
-					m_env->getActiveObject(m_attachment_parent_id);
-			if (p && p->getType() == ACTIVEOBJECT_TYPE_PLAYER)
-				compat_attachment_position.Y -= BS;
-		}
-		writeV3F1000(os, compat_attachment_position);
-	}
-
-	writeV3F(os, m_attachment_rotation, protocol_version);
+	writeV3F32(os, m_attachment_position);
+	writeV3F32(os, m_attachment_rotation);
 	writeU8(os, m_force_visible);
 	return os.str();
 }
 
-std::string UnitSAO::generateUpdateBonePositionCommand(const std::string &bone,
-		const v3f &position, const v3f &rotation, const u16 protocol_version)
+std::string UnitSAO::generateUpdateBonePositionCommand(
+		const std::string &bone, const v3f &position, const v3f &rotation)
 {
 	std::ostringstream os(std::ios::binary);
 	// command
 	writeU8(os, AO_CMD_SET_BONE_POSITION);
 	// parameters
 	os << serializeString16(bone);
-	writeV3F(os, position, protocol_version);
-	writeV3F(os, rotation, protocol_version);
+	writeV3F32(os, position);
+	writeV3F32(os, rotation);
 	return os.str();
 }
 
@@ -300,15 +274,15 @@ std::string UnitSAO::generateUpdateAnimationSpeedCommand() const
 	return os.str();
 }
 
-std::string UnitSAO::generateUpdateAnimationCommand(const u16 protocol_version) const
+std::string UnitSAO::generateUpdateAnimationCommand() const
 {
 	std::ostringstream os(std::ios::binary);
 	// command
 	writeU8(os, AO_CMD_SET_ANIMATION);
 	// parameters
-	writeV2F(os, m_animation_range, protocol_version);
-	writeF(os, m_animation_speed, protocol_version);
-	writeF(os, m_animation_blend, protocol_version);
+	writeV2F32(os, m_animation_range);
+	writeF32(os, m_animation_speed);
+	writeF32(os, m_animation_blend);
 	// these are sent inverted so we get true when the server sends nothing
 	writeU8(os, !m_animation_loop);
 	return os.str();
@@ -328,38 +302,33 @@ std::string UnitSAO::generateUpdateArmorGroupsCommand() const
 
 std::string UnitSAO::generateUpdatePositionCommand(const v3f &position,
 		const v3f &velocity, const v3f &acceleration, const v3f &rotation,
-		bool do_interpolate, bool is_movement_end, f32 update_interval,
-		const u16 protocol_version)
+		bool do_interpolate, bool is_movement_end, f32 update_interval)
 {
 	std::ostringstream os(std::ios::binary);
 	// command
 	writeU8(os, AO_CMD_UPDATE_POSITION);
 	// pos
-	writeV3F(os, position, protocol_version);
+	writeV3F32(os, position);
 	// velocity
-	writeV3F(os, velocity, protocol_version);
+	writeV3F32(os, velocity);
 	// acceleration
-	writeV3F(os, acceleration, protocol_version);
+	writeV3F32(os, acceleration);
 	// rotation
-	if (protocol_version >= 37)
-		writeV3F32(os, rotation);
-	else
-		writeF1000(os, rotation.Y);
+	writeV3F32(os, rotation);
 	// do_interpolate
 	writeU8(os, do_interpolate);
 	// is_end_position (for interpolation)
 	writeU8(os, is_movement_end);
 	// update_interval (for interpolation)
-	writeF(os, update_interval, protocol_version);
+	writeF32(os, update_interval);
 	return os.str();
 }
 
-std::string UnitSAO::generateSetPropertiesCommand(
-		const ObjectProperties &prop, const u16 protocol_version) const
+std::string UnitSAO::generateSetPropertiesCommand(const ObjectProperties &prop) const
 {
 	std::ostringstream os(std::ios::binary);
 	writeU8(os, AO_CMD_SET_PROPERTIES);
-	prop.serialize(os, protocol_version);
+	prop.serialize(os);
 	return os.str();
 }
 
@@ -373,19 +342,7 @@ std::string UnitSAO::generatePunchCommand(u16 result_hp) const
 	return os.str();
 }
 
-std::string UnitSAO::generateLegacyPunchCommand(u16 result_hp) const
-{
-	std::ostringstream os(std::ios::binary);
-	// command
-	writeU8(os, AO_CMD_PUNCHED);
-	// result_hp
-	writeU16(os, result_hp);
-	return os.str();
-}
-
 void UnitSAO::sendPunchCommand()
 {
-	const u16 result_hp = getHP();
-	m_messages_out.emplace(getId(), true, generatePunchCommand(result_hp),
-			generateLegacyPunchCommand(result_hp));
+	m_messages_out.emplace(getId(), true, generatePunchCommand(getHP()));
 }

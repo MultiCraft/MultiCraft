@@ -740,34 +740,6 @@ void ClientInterface::sendToAllCompat(NetworkPacket *pkt, NetworkPacket *legacyp
 	}
 }
 
-void ClientInterface::oldSendToAll(NetworkPacket *pkt)
-{
-	RecursiveMutexAutoLock clientslock(m_clients_mutex);
-	for (auto &client_it : m_clients) {
-		RemoteClient *client = client_it.second;
-
-		if (client->net_proto_version != 0 && client->net_proto_version < 37) {
-			m_con->Send(client->peer_id,
-				clientCommandFactoryTable[pkt->getCommand()].channel, pkt,
-				clientCommandFactoryTable[pkt->getCommand()].reliable);
-			}
-	}
-}
-
-void ClientInterface::newSendToAll(NetworkPacket *pkt)
-{
-	RecursiveMutexAutoLock clientslock(m_clients_mutex);
-	for (auto &client_it : m_clients) {
-		RemoteClient *client = client_it.second;
-
-		if (client->net_proto_version > 36) {
-			m_con->Send(client->peer_id,
-				clientCommandFactoryTable[pkt->getCommand()].channel, pkt,
-				clientCommandFactoryTable[pkt->getCommand()].reliable);
-			}
-	}
-}
-
 RemoteClient* ClientInterface::getClientNoEx(session_t peer_id, ClientState state_min)
 {
 	RecursiveMutexAutoLock clientslock(m_clients_mutex);

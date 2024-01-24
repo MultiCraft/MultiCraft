@@ -40,12 +40,6 @@ struct SimpleSoundSpec
 	void serialize(std::ostream &os, u8 cf_version) const
 	{
 		os << serializeString16(name);
-		if (cf_version < 13) {
-			writeF1000(os, gain);
-			if (cf_version > 10)
-				writeF1000(os, pitch);
-			return;
-		}
 		writeF32(os, gain);
 		writeF32(os, pitch);
 		writeF32(os, fade);

@@ -128,18 +128,13 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 {
 	// protocol_version >= 37
 	u8 version = 6;
-
-	// protocol_version < 37
-	if (protocol_version < 37)
-		version = 3;
-
 	writeU8(os, version);
 	writeU8(os, type);
 	os << serializeString16(name);
 	os << serializeString16(description);
 	os << serializeString16(inventory_image);
 	os << serializeString16(wield_image);
-	writeV3F(os, wield_scale, protocol_version);
+	writeV3F32(os, wield_scale);
 	writeS16(os, stack_max);
 	writeU8(os, usable);
 	writeU8(os, liquids_pointable);
@@ -160,25 +155,13 @@ void ItemDefinition::serialize(std::ostream &os, u16 protocol_version) const
 
 	os << serializeString16(node_placement_prediction);
 
-	if (version == 3) {
-		os << serializeString16(sound_place.name);
-		writeF1000(os, sound_place.gain);
-		writeF1000(os, range);
-		os << serializeString16(sound_place_failed.name);
-		writeF1000(os, sound_place_failed.gain);
-	} else {
-		// Version from ContentFeatures::serialize to keep in sync
-		sound_place.serialize(os, CONTENTFEATURES_VERSION);
-		sound_place_failed.serialize(os, CONTENTFEATURES_VERSION);
-		writeF32(os, range);
-	}
+	// Version from ContentFeatures::serialize to keep in sync
+	sound_place.serialize(os, CONTENTFEATURES_VERSION);
+	sound_place_failed.serialize(os, CONTENTFEATURES_VERSION);
 
+	writeF32(os, range);
 	os << serializeString16(palette_image);
 	writeARGB8(os, color);
-
-	if (version == 3)
-		return;
-
 	os << serializeString16(inventory_overlay);
 	os << serializeString16(wield_overlay);
 

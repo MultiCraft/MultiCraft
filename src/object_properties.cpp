@@ -116,90 +116,44 @@ bool ObjectProperties::validate()
 	return ret;
 }
 
-void ObjectProperties::serialize(std::ostream &os, u16 protocol_version) const
+void ObjectProperties::serialize(std::ostream &os) const
 {
-	if (protocol_version > 36)
-		writeU8(os, 4); // PROTOCOL_VERSION >= 37
-	else
-		writeU8(os, 1);
+	writeU8(os, 4); // PROTOCOL_VERSION >= 37
 	writeU16(os, hp_max);
 	writeU8(os, physical);
-	writeF(os, 0.f, protocol_version); // Removed property (weight)
-	if (protocol_version > 36) {
-		writeV3F32(os, collisionbox.MinEdge);
-		writeV3F32(os, collisionbox.MaxEdge);
-		writeV3F32(os, selectionbox.MinEdge);
-		writeV3F32(os, selectionbox.MaxEdge);
-		writeU8(os, pointable);
-	} else if (pointable) {
-		writeV3F1000(os, selectionbox.MinEdge);
-		writeV3F1000(os, selectionbox.MaxEdge);
-	} else {
-		// A hack to emulate unpointable objects
-		for (u8 i = 0; i < 6; i++)
-			writeF1000(os, 0);
+	writeF32(os, 0.f); // Removed property (weight)
+	writeV3F32(os, collisionbox.MinEdge);
+	writeV3F32(os, collisionbox.MaxEdge);
+	writeV3F32(os, selectionbox.MinEdge);
+	writeV3F32(os, selectionbox.MaxEdge);
+	writeU8(os, pointable);
+	os << serializeString16(visual);
+	writeV3F32(os, visual_size);
+	writeU16(os, textures.size());
+	for (const std::string &texture : textures) {
+		os << serializeString16(texture);
 	}
-
-	// The "wielditem" type isn't exactly the same as "item", however this
-	// is the most similar compatible option
-	if (visual == "item" && protocol_version < 37)
-		os << serializeString16("wielditem");
-	else
-		os << serializeString16(visual);
-
-	if (protocol_version > 36) {
-		writeV3F32(os, visual_size);
-	} else {
-		writeF1000(os, visual_size.X);
-		writeF1000(os, visual_size.Y);
-	}
-
-	// MT 0.4.15 and below don't have the wield_item property and expect
-	// wield_item to be in textures[0].
-	if (protocol_version < 37 && (visual == "item" || visual == "wielditem") &&
-			!wield_item.empty()) {
-		writeU16(os, 1);
-		// MT 0.4.15 and below only expect the item name, if anything else
-		// (such as an item count or metadata) is sent then older clients will
-		// show the object as an unknown item.
-		const size_t pos = wield_item.find(' ');
-		if (pos == std::string::npos)
-			os << serializeString16(wield_item);
-		else
-			os << serializeString16(wield_item.substr(0, pos));
-	} else {
-		writeU16(os, textures.size());
-		for (const std::string &texture : textures) {
-			os << serializeString16(texture);
-		}
-	}
-
 	writeV2S16(os, spritediv);
 	writeV2S16(os, initial_sprite_basepos);
 	writeU8(os, is_visible);
 	writeU8(os, makes_footstep_sound);
-	writeF(os, automatic_rotate, protocol_version);
+	writeF32(os, automatic_rotate);
 	os << serializeString16(mesh);
 	writeU16(os, colors.size());
 	for (video::SColor color : colors) {
 		writeARGB8(os, color);
 	}
 	writeU8(os, collideWithObjects);
-	writeF(os, stepheight, protocol_version);
+	writeF32(os, stepheight);
 	writeU8(os, automatic_face_movement_dir);
-	writeF(os, automatic_face_movement_dir_offset, protocol_version);
+	writeF32(os, automatic_face_movement_dir_offset);
 	writeU8(os, backface_culling);
 	os << serializeString16(nametag);
 	writeARGB8(os, nametag_color);
-	writeF(os, automatic_face_movement_max_rotation_per_sec, protocol_version);
+	writeF32(os, automatic_face_movement_max_rotation_per_sec);
 	os << serializeString16(infotext);
 	os << serializeString16(wield_item);
 	writeS8(os, glow);
-
-	// Everything after this can use writeF32().
-	if (protocol_version < 37)
-		return;
-
 	writeU16(os, breath_max);
 	writeF32(os, eye_height);
 	writeF32(os, zoom_fov);

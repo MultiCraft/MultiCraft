@@ -480,8 +480,6 @@ public:
 	/* send to all clients */
 	void sendToAll(NetworkPacket *pkt);
 	void sendToAllCompat(NetworkPacket *pkt, NetworkPacket *legacypkt, u16 min_proto_ver);
-	void oldSendToAll(NetworkPacket *pkt);
-	void newSendToAll(NetworkPacket *pkt);
 
 	/* delete a client */
 	void DeleteClient(session_t peer_id);

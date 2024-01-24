@@ -74,13 +74,7 @@ void NodeBox::reset()
 void NodeBox::serialize(std::ostream &os, u16 protocol_version) const
 {
 	// Protocol >= 36
-	u8 version;
-	if (protocol_version >= 36)
-		version = 6;
-	else if (protocol_version >= 27)
-		version = 3;
-	else
-		version = 2;
+	const u8 version = 6;
 	writeU8(os, version);
 
 	switch (type) {
@@ -90,38 +84,28 @@ void NodeBox::serialize(std::ostream &os, u16 protocol_version) const
 
 		writeU16(os, fixed.size());
 		for (const aabb3f &nodebox : fixed) {
-			writeV3F(os, nodebox.MinEdge, protocol_version);
-			writeV3F(os, nodebox.MaxEdge, protocol_version);
+			writeV3F32(os, nodebox.MinEdge);
+			writeV3F32(os, nodebox.MaxEdge);
 		}
 		break;
 	case NODEBOX_WALLMOUNTED:
 		writeU8(os, type);
 
-		writeV3F(os, wall_top.MinEdge, protocol_version);
-		writeV3F(os, wall_top.MaxEdge, protocol_version);
-		writeV3F(os, wall_bottom.MinEdge, protocol_version);
-		writeV3F(os, wall_bottom.MaxEdge, protocol_version);
-		writeV3F(os, wall_side.MinEdge, protocol_version);
-		writeV3F(os, wall_side.MaxEdge, protocol_version);
+		writeV3F32(os, wall_top.MinEdge);
+		writeV3F32(os, wall_top.MaxEdge);
+		writeV3F32(os, wall_bottom.MinEdge);
+		writeV3F32(os, wall_bottom.MaxEdge);
+		writeV3F32(os, wall_side.MinEdge);
+		writeV3F32(os, wall_side.MaxEdge);
 		break;
 	case NODEBOX_CONNECTED:
-		if (version <= 2) {
-			// send old clients nodes that can't be walked through
-			// to prevent abuse
-			writeU8(os, NODEBOX_FIXED);
-
-			writeU16(os, 1);
-			writeV3F1000(os, v3f(-BS/2, -BS/2, -BS/2));
-			writeV3F1000(os, v3f(BS/2, BS/2, BS/2));
-			break;
-		}
 		writeU8(os, type);
 
 #define WRITEBOX(box) \
 		writeU16(os, (box).size()); \
 		for (const aabb3f &i: (box)) { \
-			writeV3F(os, i.MinEdge, protocol_version); \
-			writeV3F(os, i.MaxEdge, protocol_version); \
+			writeV3F32(os, i.MinEdge); \
+			writeV3F32(os, i.MaxEdge); \
 		};
 
 		WRITEBOX(fixed);
@@ -131,17 +115,14 @@ void NodeBox::serialize(std::ostream &os, u16 protocol_version) const
 		WRITEBOX(connect_left);
 		WRITEBOX(connect_back);
 		WRITEBOX(connect_right);
-
-		if (version > 5) {
-			WRITEBOX(disconnected_top);
-			WRITEBOX(disconnected_bottom);
-			WRITEBOX(disconnected_front);
-			WRITEBOX(disconnected_left);
-			WRITEBOX(disconnected_back);
-			WRITEBOX(disconnected_right);
-			WRITEBOX(disconnected);
-			WRITEBOX(disconnected_sides);
-		}
+		WRITEBOX(disconnected_top);
+		WRITEBOX(disconnected_bottom);
+		WRITEBOX(disconnected_front);
+		WRITEBOX(disconnected_left);
+		WRITEBOX(disconnected_back);
+		WRITEBOX(disconnected_right);
+		WRITEBOX(disconnected);
+		WRITEBOX(disconnected_sides);
 		break;
 	default:
 		writeU8(os, type);
@@ -222,41 +203,12 @@ void NodeBox::deSerialize(std::istream &is)
 
 void TileDef::serialize(std::ostream &os, u16 protocol_version) const
 {
-	u8 version;
-	if (protocol_version >= 37)
-		version = 6;
-	else if (protocol_version >= 30)
-		version = 4;
-	else if (protocol_version >= 29)
-		version = 3;
-	else if (protocol_version >= 26)
-		version = 2;
-	else
-		version = 1;
-
+	// protocol_version >= 36
+	u8 version = 6;
 	writeU8(os, version);
 
 	os << serializeString16(name);
 	animation.serialize(os, version);
-
-	// Compatibility with Minetest 0.4.
-	if (version < 6) {
-		writeU8(os, backface_culling);
-		if (version < 2)
-			return;
-		writeU8(os, tileable_horizontal);
-		writeU8(os, tileable_vertical);
-		if (version < 3)
-		 	return;
-		writeU8(os, has_color);
-		if (has_color) {
-			writeU8(os, color.getRed());
-			writeU8(os, color.getGreen());
-			writeU8(os, color.getBlue());
-		}
-		return;
-	}
-
 	bool has_scale = scale > 0;
 	u16 flags = 0;
 	if (backface_culling)
@@ -480,14 +432,7 @@ u8 ContentFeatures::getAlphaForLegacy() const
 
 void ContentFeatures::serialize(std::ostream &os, u16 protocol_version) const
 {
-	if (protocol_version < 31) {
-		serializeOld(os, protocol_version);
-		return;
-	}
-
-	u8 version = CONTENTFEATURES_VERSION;
-	if (protocol_version < 37)
-		version = 10;
+	const u8 version = CONTENTFEATURES_VERSION;
 	writeU8(os, version);
 
 	// general
@@ -503,7 +448,7 @@ void ContentFeatures::serialize(std::ostream &os, u16 protocol_version) const
 	// visual
 	writeU8(os, drawtype);
 	os << serializeString16(mesh);
-	writeF(os, visual_scale, protocol_version);
+	writeF32(os, visual_scale);
 	writeU8(os, 6);
 	for (const TileDef &td : tiledef)
 		td.serialize(os, protocol_version);
@@ -1037,105 +982,6 @@ void ContentFeatures::updateTextures(ITextureSource *tsrc, IShaderSource *shdsrc
 	}
 }
 #endif
-
-//// Serialization of old ContentFeatures formats
-void ContentFeatures::serializeOld(std::ostream &os, u16 protocol_version) const
-{
-	u8 compatible_param_type_2 = param_type_2;
-	if ((protocol_version < 28)
-			&& (compatible_param_type_2 == CPT2_MESHOPTIONS))
-		compatible_param_type_2 = CPT2_NONE;
-	else if (protocol_version < 30) {
-		if (compatible_param_type_2 == CPT2_COLOR)
-			compatible_param_type_2 = CPT2_NONE;
-		else if (compatible_param_type_2 == CPT2_COLORED_FACEDIR)
-			compatible_param_type_2 = CPT2_FACEDIR;
-		else if (compatible_param_type_2 == CPT2_COLORED_WALLMOUNTED)
-			compatible_param_type_2 = CPT2_WALLMOUNTED;
-	}
-
-	float compatible_visual_scale = visual_scale;
-	if (protocol_version < 30 && drawtype == NDT_PLANTLIKE)
-		compatible_visual_scale = sqrt(visual_scale);
-
-	TileDef compatible_tiles[6];
-	for (u8 i = 0; i < 6; i++) {
-		compatible_tiles[i] = tiledef[i];
-		if (tiledef_overlay[i].name != "") {
-			std::stringstream s;
-			s << "(" << tiledef[i].name << ")^(" << tiledef_overlay[i].name
-				<< ")";
-			compatible_tiles[i].name = s.str();
-		}
-	}
-
-	// Protocol >= 24
-	if (protocol_version < 31) {
-		const u8 version = protocol_version < 27 ? 7 : 8;
-		writeU8(os, version);
-
-		os << serializeString16(name);
-		writeU16(os, groups.size());
-		for (ItemGroupList::const_iterator i = groups.begin();
-				i != groups.end(); ++i) {
-			os << serializeString16(i->first);
-			writeS16(os, i->second);
-		}
-		writeU8(os, drawtype);
-		writeF1000(os, compatible_visual_scale);
-		writeU8(os, 6);
-		for (u32 i = 0; i < 6; i++)
-			compatible_tiles[i].serialize(os, protocol_version);
-		writeU8(os, CF_SPECIAL_COUNT);
-		for (u32 i = 0; i < CF_SPECIAL_COUNT; i++)
-			tiledef_special[i].serialize(os, protocol_version);
-		writeU8(os, alpha);
-		writeU8(os, post_effect_color.getAlpha());
-		writeU8(os, post_effect_color.getRed());
-		writeU8(os, post_effect_color.getGreen());
-		writeU8(os, post_effect_color.getBlue());
-		writeU8(os, param_type);
-		writeU8(os, compatible_param_type_2);
-		writeU8(os, is_ground_content);
-		writeU8(os, light_propagates);
-		writeU8(os, sunlight_propagates);
-		writeU8(os, walkable);
-		writeU8(os, pointable);
-		writeU8(os, diggable);
-		writeU8(os, climbable);
-		writeU8(os, buildable_to);
-		os << serializeString16(""); // legacy: used to be metadata_name
-		writeU8(os, liquid_type);
-		os << serializeString16(liquid_alternative_flowing);
-		os << serializeString16(liquid_alternative_source);
-		writeU8(os, liquid_viscosity);
-		writeU8(os, liquid_renewable);
-		writeU8(os, light_source);
-		writeU32(os, damage_per_second);
-		node_box.serialize(os, protocol_version);
-		selection_box.serialize(os, protocol_version);
-		writeU8(os, legacy_facedir_simple);
-		writeU8(os, legacy_wallmounted);
-		sound_footstep.serialize(os, version);
-		sound_dig.serialize(os, version);
-		sound_dug.serialize(os, version);
-		writeU8(os, rightclickable);
-		writeU8(os, drowning);
-		writeU8(os, leveled);
-		writeU8(os, liquid_range);
-		writeU8(os, waving);
-		os << serializeString16(mesh);
-		collision_box.serialize(os, protocol_version);
-		writeU8(os, floodable);
-		writeU16(os, connects_to_ids.size());
-		for (u16 connects_to_id : connects_to_ids)
-			writeU16(os, connects_to_id);
-		writeU8(os, connect_sides);
-	} else {
-		throw SerializationError("ContentFeatures::serialize(): "
-			"Unsupported version requested");
-	}
-}
 
 /*
 	NodeDefManager

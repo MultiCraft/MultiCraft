@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "constants.h"
 #include "object_properties.h"
 #include "serveractiveobject.h"
 
@@ -80,19 +79,16 @@ public:
 	void sendOutdatedData();
 
 	// Update packets
-	std::string generateUpdateAttachmentCommand(const u16 protocol_version) const;
+	std::string generateUpdateAttachmentCommand() const;
 	std::string generateUpdateAnimationSpeedCommand() const;
-	std::string generateUpdateAnimationCommand(const u16 protocol_version) const;
+	std::string generateUpdateAnimationCommand() const;
 	std::string generateUpdateArmorGroupsCommand() const;
 	static std::string generateUpdatePositionCommand(const v3f &position,
 			const v3f &velocity, const v3f &acceleration, const v3f &rotation,
-			bool do_interpolate, bool is_movement_end, f32 update_interval,
-			const u16 protocol_version);
-	std::string generateSetPropertiesCommand(
-			const ObjectProperties &prop, const u16 protocol_version) const;
+			bool do_interpolate, bool is_movement_end, f32 update_interval);
+	std::string generateSetPropertiesCommand(const ObjectProperties &prop) const;
 	static std::string generateUpdateBonePositionCommand(const std::string &bone,
-			const v3f &position, const v3f &rotation,
-			const u16 protocol_version);
+			const v3f &position, const v3f &rotation);
 	void sendPunchCommand();
 
 protected:
@@ -116,7 +112,6 @@ private:
 	void onDetach(int parent_id);
 
 	std::string generatePunchCommand(u16 result_hp) const;
-	std::string generateLegacyPunchCommand(u16 result_hp) const;
 
 	// Armor groups
 	bool m_armor_groups_sent = false;
