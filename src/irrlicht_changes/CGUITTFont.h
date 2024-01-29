@@ -330,6 +330,8 @@ namespace gui
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
+			bool load(const io::path& filename, const u32 size, const bool antialias, const bool transparency);
+
 		protected:
 			bool use_monochrome;
 			bool use_transparency;
@@ -348,7 +350,6 @@ namespace gui
 			static scene::SMesh  shared_plane_;
 
 			CGUITTFont(IGUIEnvironment *env);
-			bool load(const io::path& filename, const u32 size, const bool antialias, const bool transparency);
 			void reset_images();
 			void update_glyph_pages() const;
 			void update_load_flags()
@@ -376,7 +377,8 @@ namespace gui
 			gui::IGUIEnvironment* Environment;
 			video::IVideoDriver* Driver;
 			io::path filename;
-			FT_Face tt_face;
+			std::vector<FT_Face> tt_faces;
+			std::vector<int> tt_offsets;
 			FT_Size_Metrics font_metrics;
 			FT_Int32 load_flags;
 

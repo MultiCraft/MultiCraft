@@ -304,6 +304,7 @@ void set_default_settings()
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
 	std::string MultiCraftFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf");
+	std::string MultiCraftEmojiFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftEmojiFont.ttf");
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
@@ -326,6 +327,11 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_italic", MultiCraftFont);
 	settings->setDefault("mono_font_path_bold", MultiCraftFont);
 	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
+
+	settings->setDefault("emoji_font_path", MultiCraftEmojiFont);
+	settings->setDefault("emoji_font_path_italic", MultiCraftEmojiFont);
+	settings->setDefault("emoji_font_path_bold", MultiCraftEmojiFont);
+	settings->setDefault("emoji_font_path_bold_italic", MultiCraftEmojiFont);
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallbackFull.ttf"));
