@@ -313,7 +313,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 		g_settings->get("fallback_font_path"),
 		Settings::getLayer(SL_DEFAULTS)->get(setting_prefix + "font_path")
 	};
-	
+
 	std::string emoji_font_path = g_settings->get("emoji_font_path");
 
 #if USE_FREETYPE
@@ -323,7 +323,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				font_shadow_alpha);
 
 		if (font) {
-			font->load(emoji_font_path.c_str(), size, true, true);
+			font->loadAdditionalFont(emoji_font_path.c_str());
 			return font;
 		}
 

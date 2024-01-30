@@ -308,14 +308,13 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	io::IFileSystem* filesystem = Environment->getFileSystem();
 	irr::ILogger* logger = (Device != 0 ? Device->getLogger() : 0);
 
-	if (tt_faces.size() == 0) {
-		this->size = size;
-		this->filename = filename;
+	this->size = size;
+	this->filenames.push_back(filename);
 
-		// Update the font loading flags when the font is first loaded.
-		this->use_monochrome = !antialias;
-		this->use_transparency = transparency;
-	}
+	// Update the font loading flags when the font is first loaded.
+	this->use_monochrome = !antialias;
+	this->use_transparency = transparency;
+
 	update_load_flags();
 
 	// Log.
@@ -380,17 +379,11 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 		face->grab();
 	}
 
-	// Allocate our glyphs.
-	if (tt_faces.size() == 0) {
-		Glyphs.clear();
-	}
-
-	size_t old_glyph_size = Glyphs.size();
-
 	// Store our face.
 	tt_faces.push_back(face->face);
-	tt_offsets.push_back(old_glyph_size);
+	tt_offsets.push_back(Glyphs.size());
 
+	// Allocate our glyphs.
 	for (FT_Long i = 0; i < face->face->num_glyphs; i++)
 	{
 		SGUITTGlyph glyph;
@@ -420,6 +413,11 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	return true;
 }
 
+bool CGUITTFont::loadAdditionalFont(const io::path& filename)
+{
+	return load(filename, size, !use_monochrome, use_transparency);
+}
+
 CGUITTFont::~CGUITTFont()
 {
 	// Delete the glyphs and glyph pages.
@@ -427,21 +425,23 @@ CGUITTFont::~CGUITTFont()
 	CGUITTAssistDelete::Delete(Glyphs);
 	//Glyphs.clear();
 
-	// We aren't using this face anymore.
-	core::map<io::path, SGUITTFace*>::Node* n = c_faces.find(filename);
-	if (n)
-	{
-		SGUITTFace* f = n->getValue();
-
-		// Drop our face.  If this was the last face, the destructor will clean up.
-		if (f->drop())
-			c_faces.remove(filename);
-
-		// If there are no more faces referenced by FreeType, clean up.
-		if (c_faces.size() == 0)
+	for (auto filename : filenames) {
+		// We aren't using this face anymore.
+		core::map<io::path, SGUITTFace*>::Node* n = c_faces.find(filename);
+		if (n)
 		{
-			FT_Done_FreeType(c_library);
-			c_libraryLoaded = false;
+			SGUITTFace* f = n->getValue();
+
+			// Drop our face.  If this was the last face, the destructor will clean up.
+			if (f->drop())
+				c_faces.remove(filename);
+
+			// If there are no more faces referenced by FreeType, clean up.
+			if (c_faces.size() == 0)
+			{
+				FT_Done_FreeType(c_library);
+				c_libraryLoaded = false;
+			}
 		}
 	}
 
@@ -824,24 +824,22 @@ u32 CGUITTFont::getGlyphIndexByChar(wchar_t c) const
 u32 CGUITTFont::getGlyphIndexByChar(uchar32_t c) const
 {
 	// Get the glyph.
-	FT_Face tt_face;
+	FT_Face tt_face = tt_faces[0];
 	u32 glyph = 0;
 	int tt_offset = 0;
 	for (size_t i = 0; i < tt_faces.size(); i++) {
-		tt_face = tt_faces[i];
-		tt_offset = tt_offsets[i];
-		glyph = FT_Get_Char_Index(tt_face, c);
+		glyph = FT_Get_Char_Index(tt_faces[i], c);
 
-		if (glyph != 0)
+		if (glyph != 0) {
+			tt_face = tt_faces[i];
+			tt_offset = tt_offsets[i];
 			break;
+		}
 	}
 
 	// Check for a valid glyph.  If it is invalid, attempt to use the replacement character.
-	if (glyph == 0) {
-		tt_face = tt_faces[0];
-		tt_offset = 0;
+	if (glyph == 0)
 		glyph = FT_Get_Char_Index(tt_face, core::unicode::UTF_REPLACEMENT_CHARACTER);
-	}
 
 	// If our glyph is already loaded, don't bother doing any batch loading code.
 	if (glyph != 0 && Glyphs[tt_offset + glyph - 1].isLoaded)
@@ -953,7 +951,9 @@ core::vector2di CGUITTFont::getKerning(const uchar32_t thisLetter, const uchar32
 
 	// Set the size of the face.
 	// This is because we cache faces and the face may have been set to a different size.
-	FT_Set_Pixel_Sizes(tt_faces[0], 0, size);
+	for (auto tt_face : tt_faces) {
+		FT_Set_Pixel_Sizes(tt_face, 0, size);
+	}
 
 	core::vector2di ret(GlobalKerningWidth, GlobalKerningHeight);
 
