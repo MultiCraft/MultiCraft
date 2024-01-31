@@ -874,6 +874,18 @@ u32 CGUITTFont::getGlyphIndexByChar(uchar32_t c) const
 	return glyph + tt_offset;
 }
 
+s32 CGUITTFont::getFaceIndexByChar(uchar32_t c) const
+{
+	for (size_t i = 0; i < tt_faces.size(); i++) {
+		u32 glyph = FT_Get_Char_Index(tt_faces[i], c);
+
+		if (glyph != 0)
+			return i;
+	}
+
+	return -1;
+}
+
 s32 CGUITTFont::getCharacterFromPos(const wchar_t* text, s32 pixel_x) const
 {
 	return getCharacterFromPos(core::ustring(text), pixel_x);
@@ -957,16 +969,30 @@ core::vector2di CGUITTFont::getKerning(const uchar32_t thisLetter, const uchar32
 
 	core::vector2di ret(GlobalKerningWidth, GlobalKerningHeight);
 
+	// Use global kerning if chars come from two different faces
+	s32 first_face_index = getFaceIndexByChar(previousLetter);
+	s32 second_face_index = getFaceIndexByChar(thisLetter);
+	if (first_face_index != -1 && second_face_index != -1 &&
+			first_face_index != second_face_index) {
+		return ret;
+	}
+
+	u32 face_index = 0;
+	if (first_face_index != -1)
+		face_index = first_face_index;
+	else if (second_face_index != -1)
+		face_index = second_face_index;
+
 	// If we don't have kerning, no point in continuing.
-	if (!FT_HAS_KERNING(tt_faces[0]))
+	if (!FT_HAS_KERNING(tt_faces[face_index]))
 		return ret;
 
 	// Get the kerning information.
 	FT_Vector v;
-	FT_Get_Kerning(tt_faces[0], getGlyphIndexByChar(previousLetter), getGlyphIndexByChar(thisLetter), FT_KERNING_DEFAULT, &v);
+	FT_Get_Kerning(tt_faces[face_index], getGlyphIndexByChar(previousLetter), getGlyphIndexByChar(thisLetter), FT_KERNING_DEFAULT, &v);
 
 	// If we have a scalable font, the return value will be in font points.
-	if (FT_IS_SCALABLE(tt_faces[0]))
+	if (FT_IS_SCALABLE(tt_faces[face_index]))
 	{
 		// Font points, so divide by 64.
 		ret.X += (v.x / 64);

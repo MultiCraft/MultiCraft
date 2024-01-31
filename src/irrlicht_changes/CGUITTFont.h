@@ -368,6 +368,7 @@ namespace gui
 			u32 getHeightFromCharacter(uchar32_t c) const;
 			u32 getGlyphIndexByChar(wchar_t c) const;
 			u32 getGlyphIndexByChar(uchar32_t c) const;
+			s32 getFaceIndexByChar(uchar32_t c) const;
 			core::vector2di getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const;
 			core::vector2di getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const;
 			core::dimension2d<u32> getDimensionUntilEndOfLine(const wchar_t* p) const;
