@@ -385,7 +385,7 @@ namespace gui
 			FT_Int32 load_flags;
 
 			mutable core::array<CGUITTGlyphPage*> Glyph_Pages;
-			mutable core::array<SGUITTGlyph> Glyphs;
+			mutable core::array<SGUITTGlyph*> Glyphs;
 
 			s32 GlobalKerningWidth;
 			s32 GlobalKerningHeight;
