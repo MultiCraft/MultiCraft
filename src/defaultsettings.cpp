@@ -304,7 +304,7 @@ void set_default_settings()
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
 	std::string MultiCraftFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf");
-	std::string MultiCraftEmojiFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftEmojiFont.ttf");
+	std::string MultiCraftEmojiFont = porting::getDataPath("fonts" DIR_DELIM "NotoEmoji-Regular.ttf");
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
