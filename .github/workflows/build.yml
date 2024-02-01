@@ -299,14 +299,14 @@ jobs:
 
       - name: Irrlicht
         run: |
-          git clone --depth 1 -b cmake https://github.com/deveee/Irrlicht irrlicht
+          git clone --depth 1 -b cmake https://github.com/MoNTE48/Irrlicht irrlicht
           cd irrlicht
           cmake ${{matrix.config.generator}}  `
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
           -DCMAKE_BUILD_TYPE=Release .
           cmake --build . -j --config Release
           cd ..
-          
+
       - name: CMake
         run: |
           cmake ${{matrix.config.generator}}  `
