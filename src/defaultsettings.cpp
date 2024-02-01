@@ -329,9 +329,6 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
 
 	settings->setDefault("emoji_font_path", MultiCraftEmojiFont);
-	settings->setDefault("emoji_font_path_italic", MultiCraftEmojiFont);
-	settings->setDefault("emoji_font_path_bold", MultiCraftEmojiFont);
-	settings->setDefault("emoji_font_path_bold_italic", MultiCraftEmojiFont);
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallbackFull.ttf"));
