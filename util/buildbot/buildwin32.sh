@@ -41,7 +41,7 @@ leveldb_version=1.23
 zlib_version=1.2.13
 sdl_version=2.28.5
 jpeg_version=3.0.1
-png_version=1.6.42
+png_version=1.6.41
 
 mkdir -p $packagedir
 mkdir -p $libdir
