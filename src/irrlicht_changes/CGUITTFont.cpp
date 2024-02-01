@@ -307,14 +307,12 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 
 	io::IFileSystem* filesystem = Environment->getFileSystem();
 	irr::ILogger* logger = (Device != 0 ? Device->getLogger() : 0);
-
 	this->size = size;
 	this->filenames.push_back(filename);
 
 	// Update the font loading flags when the font is first loaded.
 	this->use_monochrome = !antialias;
 	this->use_transparency = transparency;
-
 	update_load_flags();
 
 	// Log.
