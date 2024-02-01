@@ -40,8 +40,8 @@ luajit_version=20230221
 leveldb_version=1.23
 zlib_version=1.2.13
 sdl_version=2.28.5
-jpeg_version=3.0.0
-png_version=1.6.40
+jpeg_version=3.0.1
+png_version=1.6.42
 
 mkdir -p $packagedir
 mkdir -p $libdir
@@ -105,9 +105,9 @@ if [ ! -d libjpeg ]; then
 		-DCMAKE_BUILD_TYPE=Release \
 		-DENABLE_SHARED=OFF \
 		-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
-	
+
 	cmake --build . -j$(nproc)
-	
+
 	cd -
 fi
 
@@ -119,7 +119,7 @@ if [ ! -d libpng ]; then
 	rm libpng-$png_version.tar.gz
 	mkdir libpng/build
 	cd libpng/build
-	
+
 	cmake .. \
 		-DCMAKE_TOOLCHAIN_FILE=$toolchain_file \
 		-DCMAKE_BUILD_TYPE=Release \
@@ -129,16 +129,16 @@ if [ ! -d libpng ]; then
 		-DPNG_BUILD_ZLIB=ON \
 		-DZLIB_INCLUDE_DIRS="$libdir/zlib/include" \
 		-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
-	
+
 	cmake --build . -j$(nproc)
-	
+
 	cd -
 fi
 
 # Get irrlicht
 if [ ! -d irrlicht ]; then
 	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
-	
+
 	cd irrlicht/source/Irrlicht
 
 	CC="i686-w64-mingw32-gcc" \
@@ -157,7 +157,7 @@ if [ ! -d irrlicht ]; then
 		-I$libdir/libpng/build" \
 	CXXFLAGS="$CXXFLAGS -std=gnu++17" \
 	make staticlib_win32 -j$(nproc) NDEBUG=1
-	
+
 	cd -
 fi
 
