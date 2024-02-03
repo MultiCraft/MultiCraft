@@ -106,7 +106,7 @@ namespace gui
 	class CGUITTGlyphPage
 	{
 		public:
-			CGUITTGlyphPage(video::IVideoDriver* Driver, const io::path& texture_name) :texture(0), available_slots(0), used_slots(0), dirty(false), driver(Driver), name(texture_name) {}
+			CGUITTGlyphPage(video::IVideoDriver* Driver, const io::path& texture_name) :texture(0), used_width(0), used_height(0), line_height(0), dirty(false), driver(Driver), name(texture_name) {}
 			~CGUITTGlyphPage()
 			{
 				if (texture)
@@ -193,8 +193,9 @@ namespace gui
 			}
 
 			video::ITexture* texture;
-			u32 available_slots;
-			u32 used_slots;
+			u32 used_width;
+			u32 used_height;
+			u32 line_height;
 			bool dirty;
 
 			core::array<core::vector2di> render_positions;

@@ -177,8 +177,16 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 	// Try to get the last page with available slots.
 	CGUITTGlyphPage* page = parent->getLastGlyphPage();
 
+	if (page) {
+		if (page->used_width + bits.width > page->texture->getOriginalSize().Width) {
+			page->used_width = 0;
+			page->used_height += page->line_height;
+			page->line_height = 0;
+		}
+	}
+
 	// If we need to make a new page, do that now.
-	if (!page)
+	if (!page || page->used_height + font_size > page->texture->getOriginalSize().Height)
 	{
 		page = parent->createGlyphPage(bits.pixel_mode);
 		if (!page)
@@ -187,17 +195,14 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 	}
 
 	glyph_page = parent->getLastGlyphPageIndex();
-	u32 texture_side_length = page->texture->getOriginalSize().Width;
-	core::vector2di page_position(
-		(page->used_slots % (texture_side_length / font_size)) * font_size,
-		(page->used_slots / (texture_side_length / font_size)) * font_size
-		);
+	
+	core::vector2di page_position(page->used_width, page->used_height);
 	source_rect.UpperLeftCorner = page_position;
 	source_rect.LowerRightCorner = core::vector2di(page_position.X + bits.width, page_position.Y + bits.rows);
 
 	page->dirty = true;
-	++page->used_slots;
-	--page->available_slots;
+	page->used_width += bits.width;
+	page->line_height = std::max(page->line_height, bits.rows);
 
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
 	surface = createGlyphImage(bits, driver);
@@ -479,16 +484,10 @@ void CGUITTFont::update_glyph_pages() const
 
 CGUITTGlyphPage* CGUITTFont::getLastGlyphPage() const
 {
-	CGUITTGlyphPage* page = 0;
 	if (Glyph_Pages.empty())
 		return 0;
 	else
-	{
-		page = Glyph_Pages[getLastGlyphPageIndex()];
-		if (page->available_slots == 0)
-			page = 0;
-	}
-	return page;
+		return Glyph_Pages[getLastGlyphPageIndex()];
 }
 
 CGUITTGlyphPage* CGUITTFont::createGlyphPage(const u8& pixel_mode)
@@ -535,8 +534,6 @@ CGUITTGlyphPage* CGUITTFont::createGlyphPage(const u8& pixel_mode)
 
 	if (page)
 	{
-		// Determine the number of glyph slots on the page and add it to the list of pages.
-		page->available_slots = (page_texture_size.Width / size) * (page_texture_size.Height / size);
 		Glyph_Pages.push_back(page);
 	}
 	return page;
