@@ -987,7 +987,8 @@ void ServerEnvironment::activateBlock(MapBlock *block, u32 additional_dtime)
 			<<stamp<<", game time: "<<m_game_time<<std::endl;*/
 
 	// Remove stored static objects if clearObjects was called since block's timestamp
-	if (stamp == BLOCK_TIMESTAMP_UNDEFINED || stamp < m_last_clear_objects_time) {
+	// Note that non-generated blocks may still have stored static objects
+	if (stamp != BLOCK_TIMESTAMP_UNDEFINED && stamp < m_last_clear_objects_time) {
 		block->m_static_objects.m_stored.clear();
 		// do not set changed flag to avoid unnecessary mapblock writes
 	}
@@ -1788,11 +1789,6 @@ u16 ServerEnvironment::addActiveObjectRaw(ServerActiveObject *object,
 		return 0;
 	}
 
-	// Register reference in scripting api (must be done before post-init)
-	m_script->addObjectReference(object);
-	// Post-initialize object
-	object->addedToEnvironment(dtime_s);
-
 	// Add static data to block
 	if (object->isStaticAllowed()) {
 		// Add static object to active static list of the block
@@ -1811,11 +1807,19 @@ u16 ServerEnvironment::addActiveObjectRaw(ServerActiveObject *object,
 					MOD_REASON_ADD_ACTIVE_OBJECT_RAW);
 		} else {
 			v3s16 p = floatToInt(objectpos, BS);
-			errorstream<<"ServerEnvironment::addActiveObjectRaw(): "
-				<<"could not emerge block for storing id="<<object->getId()
-				<<" statically (pos="<<PP(p)<<")"<<std::endl;
+			errorstream << "ServerEnvironment::addActiveObjectRaw(): "
+				<< "could not emerge block " << PP(p) << " for storing id="
+				<< object->getId() << " statically" << std::endl;
+			// clean in case of error
+			m_ao_manager.removeObject(object->getId());
+			return 0;
 		}
 	}
+
+	// Register reference in scripting api (must be done before post-init)
+	m_script->addObjectReference(object);
+	// Post-initialize object
+	object->addedToEnvironment(dtime_s);
 
 	return object->getId();
 }
