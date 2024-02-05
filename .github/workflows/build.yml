@@ -299,7 +299,7 @@ jobs:
 
       - name: Irrlicht
         run: |
-          git clone --depth 1 -b cmake https://github.com/MoNTE48/Irrlicht irrlicht
+          git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
           cd irrlicht
           cmake ${{matrix.config.generator}}  `
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
