@@ -41,7 +41,7 @@ leveldb_version=1.23
 zlib_version=1.2.13
 sdl_version=2.28.5
 jpeg_version=3.0.1
-png_version=1.6.41
+png_version=1.6.42
 
 mkdir -p $packagedir
 mkdir -p $libdir
@@ -126,8 +126,9 @@ if [ ! -d libpng ]; then
 		-DPNG_SHARED=OFF \
 		-DPNG_TESTS=OFF \
 		-DPNG_EXECUTABLES=OFF \
-		-DPNG_BUILD_ZLIB=ON \
-		-DZLIB_INCLUDE_DIRS="$libdir/zlib/include" \
+		-DZLIB_ROOT="$libdir/zlib" \
+		-DZLIB_LIBRARY="$libdir/zlib/lib/libz.a" \
+		-DZLIB_INCLUDE_DIR="$libdir/zlib/include" \
 		-DCMAKE_C_FLAGS_RELEASE="$CFLAGS"
 
 	cmake --build . -j$(nproc)
