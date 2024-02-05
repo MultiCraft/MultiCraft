@@ -111,14 +111,14 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT ||
 			event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
-		if (g_settings->getBool("enable_joysticks")) {
+		if (g_settings->getBool("enable_joysticks") && sdl_game_controller) {
 			sdl_game_controller->translateEvent(event);
 			input->setCursorVisible(sdl_game_controller->isCursorVisible());
 		}
 	} else if ((event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
 			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
 			event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
-		if (!sdl_game_controller->isFakeEvent() &&
+		if (sdl_game_controller && !sdl_game_controller->isFakeEvent() &&
 				sdl_game_controller->isActive()) {
 			sdl_game_controller->setActive(false);
 			input->setCursorVisible(sdl_game_controller->isCursorVisible());
@@ -133,7 +133,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 			m_touchscreengui->show();
 	} else if ((event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
 			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
-			sdl_game_controller->isActive()) {
+			(sdl_game_controller && sdl_game_controller->isActive())) {
 		TouchScreenGUI::setActive(false);
 		if (m_touchscreengui && !isMenuActive())
 			m_touchscreengui->hide();
@@ -204,7 +204,10 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		if (event.JoystickEvent != joystick_we_listen_for)
 			return false;
 		*/
-		return joystick->handleEvent(event.JoystickEvent);
+		if (joystick)
+			return joystick->handleEvent(event.JoystickEvent);
+		else
+			return true;
 	} else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
 		// Handle mouse events
 		KeyPress key;
