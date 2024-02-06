@@ -57,6 +57,7 @@ jobs:
         run: |
           source ./util/ci/common.sh
           install_linux_deps g++-10
+          build_linux_deps
 
       - name: Build
         run: |
@@ -100,6 +101,7 @@ jobs:
         run: |
           source ./util/ci/common.sh
           install_linux_deps clang-11 valgrind libluajit-5.1-dev
+          build_linux_deps
 
       - name: Build
         run: |
@@ -262,7 +264,7 @@ jobs:
     env:
       VCPKG_VERSION: a42af01b72c28a8e1d7b48107b33e4f286a55ef6
 #                    2023.11.20
-      vcpkg_packages: irrlicht zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp
+      vcpkg_packages: zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp libpng libjpeg-turbo sdl2
     strategy:
       fail-fast: false
       matrix:
@@ -295,12 +297,27 @@ jobs:
           vcpkgGitCommitId: ${{ env.VCPKG_VERSION }}
           vcpkgTriplet: ${{ matrix.config.vcpkg_triplet }}
 
+      - name: Irrlicht
+        run: |
+          git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
+          cd irrlicht
+          cmake ${{matrix.config.generator}}  `
+          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
+          -DCMAKE_BUILD_TYPE=Release .
+          cmake --build . -j --config Release
+          cd ..
+
       - name: CMake
         run: |
           cmake ${{matrix.config.generator}}  `
           -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
           -DCMAKE_BUILD_TYPE=Release  `
           -DENABLE_POSTGRESQL=OFF  `
+          -DUSE_SDL=1  `
+          -DIRRLICHT_LIBRARY="${{ github.workspace }}\irrlicht\Release\irrlicht.lib"  `
+          -DIRRLICHT_INCLUDE_DIR="${{ github.workspace }}\irrlicht\include"  `
+          -DCMAKE_C_FLAGS="-DNO_IRR_COMPILE_WITH_OGLES2_ -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ -DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ -D_IRR_STATIC_LIB_"  `
+          -DCMAKE_CXX_FLAGS="-DNO_IRR_COMPILE_WITH_OGLES2_ -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ -DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ -D_IRR_STATIC_LIB_"  `
           -DRUN_IN_PLACE=${{ contains(matrix.type, 'portable') }} .
 
       - name: Build

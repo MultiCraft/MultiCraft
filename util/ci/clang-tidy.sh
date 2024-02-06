@@ -3,6 +3,8 @@
 mkdir -p cmakebuild
 cd cmakebuild
 cmake -DCMAKE_BUILD_TYPE=Debug \
+	-DUSE_SDL=ON \
+	-DIRRLICHT_SOURCE_DIR="../deps/Irrlicht" \
 	-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 	-DRUN_IN_PLACE=TRUE \
 	-DENABLE_{GETTEXT,SOUND}=FALSE \
