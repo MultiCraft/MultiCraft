@@ -604,6 +604,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 	u32 n;
 	uchar32_t previousChar = 0;
 	core::ustring::const_iterator iter(utext);
+	u32 charPos = 0; // Position in Unicode characters (not UTF-16)
 	while (!iter.atEnd())
 	{
 		uchar32_t currentChar = *iter;
@@ -613,8 +614,10 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 		if (currentChar == L'\r') // Mac or Windows breaks
 		{
 			lineBreak = true;
-			if (*(iter + 1) == (uchar32_t)'\n') 	// Windows line breaks.
+			if (*(iter + 1) == (uchar32_t)'\n') { 	// Windows line breaks.
 				currentChar = *(++iter);
+				++charPos;
+			}
 		}
 		else if (currentChar == (uchar32_t)'\n') // Unix breaks
 		{
@@ -630,6 +633,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 			if (hcenter)
 				offset.X += (position.getWidth() - textDimension.Width) >> 1;
 			++iter;
+			++charPos;
 			continue;
 		}
 
@@ -649,8 +653,12 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 			CGUITTGlyphPage* const page = Glyph_Pages[glyph->glyph_page];
 			page->render_positions.push_back(core::position2di(offset.X + offx, offset.Y + offy));
 			page->render_source_rects.push_back(glyph->source_rect);
-			if (iter.getPos() < colors.size())
-				page->render_colors.push_back(colors[iter.getPos()]);
+
+			// If wchar_t is 32-bit then use charPos instead
+			u32 iterPos = sizeof(wchar_t) == 4 ? charPos : iter.getPos();
+
+			if (iterPos < colors.size())
+				page->render_colors.push_back(colors[iterPos]);
 			else
 				page->render_colors.push_back(video::SColor(255,255,255,255));
 			Render_Map.set(glyph->glyph_page, page);
@@ -659,6 +667,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 
 		previousChar = currentChar;
 		++iter;
+		++charPos;
 	}
 
 	// Draw now.
