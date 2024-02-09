@@ -392,7 +392,7 @@ void GUIChatConsole::drawText()
 					real_mark_end.fragment < line.fragments.size()) {
 				fragment_last_id = real_mark_end.fragment;
 			}
-			
+
 			ChatFormattedFragment fragment_first = line.fragments[fragment_first_id];
 			ChatFormattedFragment fragment_last = line.fragments[fragment_last_id];
 
@@ -400,7 +400,7 @@ void GUIChatConsole::drawText()
 			for (unsigned int i = 0; i < fragment_first_id; i++) {
 				x_begin += m_font->getDimension(line.fragments[i].text.c_str()).Width;
 			}
-			
+
 			s32 x_end = (line.fragments[0].column + 1) * m_fontsize.X;
 			for (unsigned int i = 0; i <= fragment_last_id; i++) {
 				x_end += m_font->getDimension(line.fragments[i].text.c_str()).Width;
@@ -475,7 +475,7 @@ void GUIChatConsole::drawPrompt()
 
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring prompt_text = prompt.getVisiblePortion();
-	std::replace_if(prompt_text.begin(), prompt_text.end(), 
+	std::replace_if(prompt_text.begin(), prompt_text.end(),
 			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
 
 	ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
@@ -1048,18 +1048,18 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		{
 			if (prompt.getLine().size() > 0) {
 				ChatPrompt& prompt = m_chat_backend->getPrompt();
-	
+
 				m_mark_begin.reset();
 				m_mark_begin.selection_type = ChatSelection::SELECTION_PROMPT;
 				m_mark_begin.scroll = 0;
 				m_mark_begin.character = 0;
-	
+
 				m_mark_end.reset();
 				m_mark_end.selection_type = ChatSelection::SELECTION_PROMPT;
 				m_mark_end.scroll = 0;
 				m_mark_end.character = prompt.getLine().size() - 1;
 				m_mark_end.x_max = true;
-	
+
 				prompt.cursorOperation(
 					ChatPrompt::CURSOROP_MOVE,
 					ChatPrompt::CURSOROP_DIR_RIGHT,
