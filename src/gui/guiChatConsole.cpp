@@ -374,34 +374,43 @@ void GUIChatConsole::drawText()
 		s32 scroll_pos = buf.getScrollPos();
 		ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 		ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+
 		if (real_mark_begin != real_mark_end &&
 				real_mark_begin.selection_type == ChatSelection::SELECTION_HISTORY &&
 				real_mark_end.selection_type == ChatSelection::SELECTION_HISTORY &&
 				(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll &&
 				(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll) {
-			ChatFormattedFragment fragment_first = line.fragments[0];
 
+			unsigned int fragment_first_id = 0;
 			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll &&
 					real_mark_begin.fragment < line.fragments.size()) {
-				fragment_first = line.fragments[real_mark_begin.fragment];
+				fragment_first_id = real_mark_begin.fragment;
 			}
 
-			ChatFormattedFragment fragment_last = line.fragments[line.fragments.size() - 1];
-
+			unsigned int fragment_last_id = line.fragments.size() - 1;
 			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
 					real_mark_end.fragment < line.fragments.size()) {
-				fragment_last = line.fragments[real_mark_end.fragment];
+				fragment_last_id = real_mark_end.fragment;
 			}
+			
+			ChatFormattedFragment fragment_first = line.fragments[fragment_first_id];
+			ChatFormattedFragment fragment_last = line.fragments[fragment_last_id];
 
-			s32 x_begin = (fragment_first.column + 1) * m_fontsize.X;
-			s32 text_size = m_font->getDimension(fragment_last.text.c_str()).Width;
-			s32 x_end = (fragment_last.column + 1) * m_fontsize.X + text_size;
+			s32 x_begin = (line.fragments[0].column + 1) * m_fontsize.X;
+			for (unsigned int i = 0; i < fragment_first_id; i++) {
+				x_begin += m_font->getDimension(line.fragments[i].text.c_str()).Width;
+			}
+			
+			s32 x_end = (line.fragments[0].column + 1) * m_fontsize.X;
+			for (unsigned int i = 0; i <= fragment_last_id; i++) {
+				x_end += m_font->getDimension(line.fragments[i].text.c_str()).Width;
+			}
 
 			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll) {
 				irr::core::stringw text = fragment_first.text.c_str();
 				text = text.subString(0, real_mark_begin.character);
 				s32 text_size = m_font->getDimension(text.c_str()).Width;
-				x_begin = (fragment_first.column + 1) * m_fontsize.X + text_size;
+				x_begin += text_size;
 
 				if (real_mark_begin.x_max)
 					x_begin = x_end;
@@ -411,9 +420,10 @@ void GUIChatConsole::drawText()
 					(real_mark_end.character < fragment_last.text.size()) &&
 					!real_mark_end.x_max) {
 				irr::core::stringw text = fragment_last.text.c_str();
-				text = text.subString(0, real_mark_end.character);
 				s32 text_size = m_font->getDimension(text.c_str()).Width;
-				x_end = (fragment_last.column + 1) * m_fontsize.X + text_size;
+				text = text.subString(0, real_mark_end.character);
+				text_size -= m_font->getDimension(text.c_str()).Width;
+				x_end -= text_size;
 			}
 
 			core::rect<s32> destrect(x_begin, y, x_end, y + m_fontsize.Y);
@@ -422,10 +432,11 @@ void GUIChatConsole::drawText()
 			driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
 		}
 
+		s32 x = (line.fragments[0].column + 1) * m_fontsize.X;
 		for (const ChatFormattedFragment &fragment : line.fragments) {
-			s32 x = (fragment.column + 1) * m_fontsize.X;
-			core::rect<s32> destrect(
-				x, y, x + m_fontsize.X * fragment.text.size(), y + m_fontsize.Y);
+			s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
+			core::rect<s32> destrect(x, y, x + text_size, y + m_fontsize.Y);
+			x += text_size;
 
 #if USE_FREETYPE
 			if (m_font->getType() == irr::gui::EGFT_CUSTOM) {
@@ -599,8 +610,10 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	const ChatFormattedFragment &fragment_first = line.fragments[0];
 	const ChatFormattedFragment &fragment_last = line.fragments[line.fragments.size() - 1];
 	s32 x_min = (fragment_first.column + 1) * m_fontsize.X;
-	s32 text_size = m_font->getDimension(fragment_last.text.c_str()).Width;
-	s32 x_max = (fragment_last.column + 1) * m_fontsize.X + text_size;
+	s32 x_max = x_min;
+	for (const ChatFormattedFragment &fragment : line.fragments) {
+		x_max += m_font->getDimension(fragment.text.c_str()).Width;
+	}
 
 	if (x < x_min) {
 		x = x_min;
@@ -609,22 +622,22 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 		selection.x_max = true;
 	}
 
+	s32 fragment_x = x_min;
 	for (unsigned int i = 0; i < line.fragments.size(); i++) {
 		const ChatFormattedFragment &fragment = line.fragments[i];
-		s32 fragment_x = (fragment.column + 1) * m_fontsize.X;
+		s32 current_fragment_x = fragment_x;
+		s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
+		fragment_x += text_size;
 
-		if (x < fragment_x)
+		if (x < current_fragment_x)
 			continue;
 
 		if (i < line.fragments.size() - 1) {
-			const ChatFormattedFragment &fragment_next = line.fragments[i + 1];
-			s32 fragment_next_x = (fragment_next.column + 1) * m_fontsize.X;
-
-			if (x >= fragment_next_x)
+			if (x >= fragment_x)
 				continue;
 		}
 
-		s32 index = m_font->getCharacterFromPos(fragment.text.c_str(), x - fragment_x);
+		s32 index = m_font->getCharacterFromPos(fragment.text.c_str(), x - current_fragment_x);
 
 		selection.fragment = i;
 		selection.character = index > -1 ? index : fragment.text.size() - 1;
