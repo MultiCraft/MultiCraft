@@ -3125,8 +3125,10 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	}
 
 	// Update m_tooltip_append_itemname depending on debug privilege
-	m_tooltip_append_itemname = m_client->checkPrivilege("debug") ?
-		g_settings->getBool("tooltip_append_itemname") : false;
+	if (m_client != nullptr) {
+		m_tooltip_append_itemname = m_client->checkPrivilege("debug") ?
+			g_settings->getBool("tooltip_append_itemname") : false;
+	}
 
 	parserData mydata;
 
