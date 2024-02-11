@@ -629,6 +629,13 @@ void set_default_settings()
 		settings->setDefault("enable_shaders", "false");
 	}
 
+	// Prefer ogles2 on an Intel platform
+	std::string arch = porting::getCpuArchitecture();
+	if (arch == "x86" || arch == "x86_64") {
+		settings->setDefault("video_driver", "ogles2");
+		settings->setDefault("enable_shaders", "true");
+	}
+
 	v2u32 window_size = RenderingEngine::getDisplaySize();
 	if (window_size.X > 0) {
 		float x_inches = window_size.X / (160.f * RenderingEngine::getDisplayDensity());

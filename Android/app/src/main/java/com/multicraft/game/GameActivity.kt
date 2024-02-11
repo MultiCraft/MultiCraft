@@ -304,4 +304,9 @@ class GameActivity : SDLActivity() {
 	fun getRoundScreen(): Int {
 		return radius
 	}
+
+	@Suppress("unused")
+	fun getCpuArchitecture(): String {
+		return System.getProperty("os.arch") ?: "null"
+	}
 }
