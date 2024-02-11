@@ -106,7 +106,7 @@ namespace gui
 	class CGUITTGlyphPage
 	{
 		public:
-			CGUITTGlyphPage(video::IVideoDriver* Driver, const io::path& texture_name) :texture(0), available_slots(0), used_slots(0), dirty(false), driver(Driver), name(texture_name) {}
+			CGUITTGlyphPage(video::IVideoDriver* Driver, const io::path& texture_name) :texture(0), used_width(0), used_height(0), line_height(0), dirty(false), driver(Driver), name(texture_name) {}
 			~CGUITTGlyphPage()
 			{
 				if (texture)
@@ -193,8 +193,9 @@ namespace gui
 			}
 
 			video::ITexture* texture;
-			u32 available_slots;
-			u32 used_slots;
+			u32 used_width;
+			u32 used_height;
+			u32 line_height;
 			bool dirty;
 
 			core::array<core::vector2di> render_positions;
@@ -330,6 +331,8 @@ namespace gui
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
+			bool loadAdditionalFont(const io::path& filename);
+
 		protected:
 			bool use_monochrome;
 			bool use_transparency;
@@ -366,6 +369,7 @@ namespace gui
 			u32 getHeightFromCharacter(uchar32_t c) const;
 			u32 getGlyphIndexByChar(wchar_t c) const;
 			u32 getGlyphIndexByChar(uchar32_t c) const;
+			s32 getFaceIndexByChar(uchar32_t c) const;
 			core::vector2di getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const;
 			core::vector2di getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const;
 			core::dimension2d<u32> getDimensionUntilEndOfLine(const wchar_t* p) const;
@@ -375,13 +379,14 @@ namespace gui
 			irr::IrrlichtDevice* Device;
 			gui::IGUIEnvironment* Environment;
 			video::IVideoDriver* Driver;
-			io::path filename;
-			FT_Face tt_face;
+			std::vector<io::path> filenames;
+			std::vector<FT_Face> tt_faces;
+			std::vector<int> tt_offsets;
 			FT_Size_Metrics font_metrics;
 			FT_Int32 load_flags;
 
 			mutable core::array<CGUITTGlyphPage*> Glyph_Pages;
-			mutable core::array<SGUITTGlyph> Glyphs;
+			mutable core::array<SGUITTGlyph*> Glyphs;
 
 			s32 GlobalKerningWidth;
 			s32 GlobalKerningHeight;

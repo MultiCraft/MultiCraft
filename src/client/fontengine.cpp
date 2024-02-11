@@ -314,14 +314,18 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 		Settings::getLayer(SL_DEFAULTS)->get(setting_prefix + "font_path")
 	};
 
+	std::string emoji_font_path = g_settings->get("emoji_font_path");
+
 #if USE_FREETYPE
 	for (const std::string &font_path : fallback_settings) {
-		irr::gui::IGUIFont *font = gui::CGUITTFont::createTTFont(m_env,
+		irr::gui::CGUITTFont *font = gui::CGUITTFont::createTTFont(m_env,
 				font_path.c_str(), size, true, true, font_shadow,
 				font_shadow_alpha);
 
-		if (font)
+		if (font) {
+			font->loadAdditionalFont(emoji_font_path.c_str());
 			return font;
+		}
 
 		errorstream << "FontEngine: Cannot load '" << font_path <<
 				"'. Trying to fall back to another path." << std::endl;
