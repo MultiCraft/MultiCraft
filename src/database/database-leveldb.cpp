@@ -45,6 +45,8 @@ Database_LevelDB::Database_LevelDB(const std::string &savedir)
 {
 	leveldb::Options options;
 	options.create_if_missing = true;
+	options.max_open_files = 10000;
+	options.write_buffer_size = 16 * 1024 * 1024;
 	leveldb::Status status = leveldb::DB::Open(options,
 		savedir + DIR_DELIM + "map.db", &m_database);
 	ENSURE_STATUS_OK(status);
