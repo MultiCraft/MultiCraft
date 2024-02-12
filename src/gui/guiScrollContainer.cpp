@@ -70,7 +70,8 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 #ifdef HAVE_TOUCHSCREENGUI
 	if (event.EventType == EET_MOUSE_INPUT_EVENT && m_scrollbar) {
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-			if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y))) {
+			if (isPointInside(core::position2d<s32>(
+					    event.MouseInput.X, event.MouseInput.Y))) {
 				m_swipe_start_y = event.MouseInput.Y -
 						  m_scrollbar->getPos() * m_scrollfactor;
 			}
