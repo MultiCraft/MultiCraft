@@ -922,8 +922,7 @@ bool GUITable::OnEvent(const SEvent &event)
 				return false;
 		}
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#ifdef HAVE_TOUCHSCREENGUI
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
 		// Handle swipe gesture
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 			if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y))) {
@@ -958,11 +957,16 @@ bool GUITable::OnEvent(const SEvent &event)
 			}
 		}
 #endif
-#endif
 
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+		if (isPointInside(p) && (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP ||
+				event.MouseInput.Event == EMIE_LMOUSE_DOUBLE_CLICK ||
+				event.MouseInput.Event == EMIE_LMOUSE_TRIPLE_CLICK)) {
+#else
 		if (event.MouseInput.isLeftPressed() &&
 				(isPointInside(p) ||
 				 event.MouseInput.Event == EMIE_MOUSE_MOVED)) {
+#endif
 			s32 sel_column = 0;
 			bool sel_doubleclick = (event.MouseInput.Event
 					== EMIE_LMOUSE_DOUBLE_CLICK);
@@ -971,7 +975,11 @@ bool GUITable::OnEvent(const SEvent &event)
 			// For certain events (left click), report column
 			// Also open/close subtrees when the +/- is clicked
 			if (cell && (
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+					event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP ||
+#else
 					event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ||
+#endif
 					event.MouseInput.Event == EMIE_LMOUSE_DOUBLE_CLICK ||
 					event.MouseInput.Event == EMIE_LMOUSE_TRIPLE_CLICK)) {
 				sel_column = cell->reported_column;
@@ -980,7 +988,11 @@ bool GUITable::OnEvent(const SEvent &event)
 			}
 
 			if (plusminus_clicked) {
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+				if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
+#else
 				if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
+#endif
 					toggleVisibleTree(row_i, 0, false);
 				}
 			}
