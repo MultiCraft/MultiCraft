@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
 	return retval;
 }
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(_MSC_VER)
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		LPSTR lpCmdLine, int nCmdShow)
 {

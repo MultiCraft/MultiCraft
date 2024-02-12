@@ -393,6 +393,26 @@ int getRoundScreen()
 	return radius;
 }
 
+std::string getCpuArchitecture()
+{
+	static std::string arch = [](){
+		jmethodID getArch = jnienv->GetMethodID(activityClass,
+				"getCpuArchitecture", "()Ljava/lang/String;");
+
+		FATAL_ERROR_IF(getArch == nullptr,
+			"porting::getCpuArchitecture unable to find Java getCpuArchitecture method");
+
+		jstring javaString = (jstring) jnienv->CallObjectMethod(activityObj, getArch);
+		const char *str = jnienv->GetStringUTFChars(javaString, nullptr);
+		std::string cppStr(str);
+		jnienv->ReleaseStringUTFChars(javaString, str);
+
+		return cppStr;
+	}();
+
+	return arch;
+}
+
 std::string getSecretKey(const std::string &key)
 {
 	jmethodID getKey = jnienv->GetMethodID(activityClass,

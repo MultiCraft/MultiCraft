@@ -42,7 +42,7 @@ if(USE_SDL)
 	endif()
 	if (SDL2_FOUND)
 		message(STATUS "SDL2 found.")
-		include_directories(${SDL2_INCLUDE_DIR})
+		include_directories(${SDL2_INCLUDE_DIRS})
 	else()
 		message(FATAL_ERROR "SDL2 not found.")
 	endif()
@@ -268,6 +268,12 @@ endif()
 add_definitions(-DUSE_CMAKE_CONFIG_H)
 
 if(WIN32)
+	# Irrlicht with SDL needs external libjpeg/libpng
+	if(MSVC AND BUILD_CLIENT AND USE_SDL)
+		find_package(JPEG REQUIRED)
+		find_package(PNG REQUIRED)
+	endif()
+
 	# Windows
 	if(MSVC) # MSVC Specifics
 		set(PLATFORM_LIBS dbghelp.lib ${PLATFORM_LIBS})
@@ -692,6 +698,21 @@ if(BUILD_SERVER)
 		)
 	endif()
 
+	if(USE_SDL)
+		target_link_libraries(
+			${PROJECT_NAME}server
+			${SDL2_LIBRARIES}
+		)
+		if(USE_STATIC_BUILD AND WIN32)
+			target_link_libraries(
+				${PROJECT_NAME}server
+				winmm
+				imm32
+				setupapi
+				opengl32
+			)
+		endif()
+	endif()
 	if (USE_GETTEXT)
 		target_link_libraries(${PROJECT_NAME}server ${GETTEXT_LIBRARY})
 	endif()
@@ -930,7 +951,7 @@ if(BUILD_CLIENT)
 
 	if(WIN32)
 		if(NOT VCPKG_APPLOCAL_DEPS)
-			if(DEFINED IRRLICHT_DLL)
+			if(IRRLICHT_DLL)
 				install(FILES ${IRRLICHT_DLL} DESTINATION ${BINDIR})
 			endif()
 			if(USE_GETTEXT)

@@ -327,6 +327,8 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold", MultiCraftFont);
 	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
 
+	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "NotoEmoji.ttf"));
+
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallbackFull.ttf"));
 #else
@@ -625,6 +627,13 @@ void set_default_settings()
 	} else {
 		settings->setDefault("video_driver", "ogles1");
 		settings->setDefault("enable_shaders", "false");
+	}
+
+	// Prefer ogles2 on an Intel platform
+	std::string arch = porting::getCpuArchitecture();
+	if (arch == "x86" || arch == "x86_64") {
+		settings->setDefault("video_driver", "ogles2");
+		settings->setDefault("enable_shaders", "true");
 	}
 
 	v2u32 window_size = RenderingEngine::getDisplaySize();
