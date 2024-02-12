@@ -1102,10 +1102,12 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 #ifdef HAVE_TOUCHSCREENGUI
 	// Handle swipe gesture
 	if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-		s32 totalheight = m_drawer.getHeight();
-		float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
-				(m_vscrollbar->getMax() - m_vscrollbar->getMin());
-		m_swipe_start_y = event.MouseInput.Y + m_vscrollbar->getPos() / scale;
+		if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y))) {
+			s32 totalheight = m_drawer.getHeight();
+			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
+					(m_vscrollbar->getMax() - m_vscrollbar->getMin());
+			m_swipe_start_y = event.MouseInput.Y + m_vscrollbar->getPos() / scale;
+		}
 	} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
 		m_swipe_start_y = -1;
 		if (m_swipe_started) {
