@@ -603,6 +603,11 @@ end
 function core.item_eat(hp_change, replace_with_item)
 	return function(itemstack, user, pointed_thing)  -- closure
 		if user then
+			if user:is_player() and pointed_thing.type == "object" then
+				pointed_thing.ref:right_click(user)
+				return user:get_wielded_item()
+			end
+
 			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		end
 	end
