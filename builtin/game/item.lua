@@ -563,9 +563,9 @@ function core.item_drop(itemstack, dropper, pos)
 	-- environment failed
 end
 
-function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
+function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
 	for _, callback in pairs(core.registered_on_item_eats) do
-		local result = callback(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
+		local result = callback(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		if result then
 			return result
 		end
@@ -629,7 +629,7 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 	return itemstack
 end
 
-function core.item_eat(hp_change, replace_with_item, poison)
+function core.item_eat(hp_change, replace_with_item)
 	return function(itemstack, user, pointed_thing)  -- closure
 		if user then
 			if user:is_player() and pointed_thing.type == "object" then
@@ -637,7 +637,7 @@ function core.item_eat(hp_change, replace_with_item, poison)
 				return user:get_wielded_item()
 			end
 
-			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
+			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		end
 	end
 end
