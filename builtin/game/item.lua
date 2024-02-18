@@ -563,21 +563,16 @@ function core.item_drop(itemstack, dropper, pos)
 	-- environment failed
 end
 
-local enable_hunger = core.settings:get_bool("enable_damage") and core.settings:get_bool("enable_hunger")
 function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
 	for _, callback in pairs(core.registered_on_item_eats) do
-		local result = callback(hp_change, replace_with_item, itemstack, user, pointed_thing)
+		local result = callback(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
 		if result then
 			return result
 		end
 	end
 	local def = itemstack:get_definition()
 	if itemstack:take_item() ~= nil then
-		if enable_hunger then
-			hunger.item_eat(hp_change, user, poison)
-		else
-			user:set_hp(user:get_hp() + hp_change)
-		end
+		user:set_hp(user:get_hp() + hp_change)
 
 		local pos = user:get_pos()
 		if not core.is_valid_pos(pos) then
