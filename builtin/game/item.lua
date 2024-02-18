@@ -591,7 +591,7 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 					inv:add_item("main", replace_with_item)
 				else
 					local pos = user:get_pos()
-					pos.y = math.floor(pos.y + 0.5)
+					pos.y = floor(pos.y + 0.5)
 					core.add_item(pos, replace_with_item)
 				end
 			end
