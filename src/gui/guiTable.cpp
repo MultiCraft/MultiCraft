@@ -41,10 +41,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	GUITable
 */
 
-bool GUITable::m_swipe_started = false;
-int GUITable::m_swipe_start_y = -1;
-float GUITable::m_swipe_pos = 0;
-
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
 		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
@@ -95,6 +91,10 @@ GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
 			relative_rect.LowerRightCorner.X-width,relative_rect.UpperLeftCorner.Y,
 			relative_rect.LowerRightCorner.X,relative_rect.LowerRightCorner.Y
 			));
+
+	m_swipe_started = false;
+	m_swipe_start_y = -1;
+	m_swipe_pos = 0;
 }
 
 GUITable::~GUITable()
@@ -922,14 +922,15 @@ bool GUITable::OnEvent(const SEvent &event)
 				return false;
 		}
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#ifdef HAVE_TOUCHSCREENGUI
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
 		// Handle swipe gesture
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-			s32 totalheight = m_rowheight * m_visible_rows.size();
-			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
-					(m_scrollbar->getMax() - m_scrollbar->getMin());
-			m_swipe_start_y = event.MouseInput.Y + m_scrollbar->getPos() / scale;
+			if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y))) {
+				s32 totalheight = m_rowheight * m_visible_rows.size();
+				float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
+						(m_scrollbar->getMax() - m_scrollbar->getMin());
+				m_swipe_start_y = event.MouseInput.Y + m_scrollbar->getPos() / scale;
+			}
 		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
 			m_swipe_start_y = -1;
 			if (m_swipe_started) {
@@ -956,11 +957,16 @@ bool GUITable::OnEvent(const SEvent &event)
 			}
 		}
 #endif
-#endif
 
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+		if (isPointInside(p) && (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP ||
+				event.MouseInput.Event == EMIE_LMOUSE_DOUBLE_CLICK ||
+				event.MouseInput.Event == EMIE_LMOUSE_TRIPLE_CLICK)) {
+#else
 		if (event.MouseInput.isLeftPressed() &&
 				(isPointInside(p) ||
 				 event.MouseInput.Event == EMIE_MOUSE_MOVED)) {
+#endif
 			s32 sel_column = 0;
 			bool sel_doubleclick = (event.MouseInput.Event
 					== EMIE_LMOUSE_DOUBLE_CLICK);
@@ -969,7 +975,11 @@ bool GUITable::OnEvent(const SEvent &event)
 			// For certain events (left click), report column
 			// Also open/close subtrees when the +/- is clicked
 			if (cell && (
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+					event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP ||
+#else
 					event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ||
+#endif
 					event.MouseInput.Event == EMIE_LMOUSE_DOUBLE_CLICK ||
 					event.MouseInput.Event == EMIE_LMOUSE_TRIPLE_CLICK)) {
 				sel_column = cell->reported_column;
@@ -978,7 +988,11 @@ bool GUITable::OnEvent(const SEvent &event)
 			}
 
 			if (plusminus_clicked) {
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+				if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
+#else
 				if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
+#endif
 					toggleVisibleTree(row_i, 0, false);
 				}
 			}
