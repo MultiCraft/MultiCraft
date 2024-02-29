@@ -563,8 +563,7 @@ function core.item_drop(itemstack, dropper, pos)
 	-- environment failed
 end
 
-local enable_hunger = core.settings:get_bool("enable_damage") and core.settings:get_bool("enable_hunger")
-function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
+function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
 	for _, callback in pairs(core.registered_on_item_eats) do
 		local result = callback(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		if result then
@@ -573,48 +572,14 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 	end
 	local def = itemstack:get_definition()
 	if itemstack:take_item() ~= nil then
-		if enable_hunger then
-			hunger.item_eat(hp_change, user, poison)
-		else
-			user:set_hp(user:get_hp() + hp_change)
-		end
-
-		local pos = user:get_pos()
-		if not core.is_valid_pos(pos) then
-			return itemstack
-		end
+		user:set_hp(user:get_hp() + hp_change)
 
 		if def and def.sound and def.sound.eat then
 			core.sound_play(def.sound.eat, {
-				pos = pos,
+				pos = user:get_pos(),
 				max_hear_distance = 16
 			}, true)
-		else
-			core.sound_play("player_eat", {
-				pos = pos,
-				max_hear_distance = 16,
-				gain = 0.3
-			}, true)
 		end
-
-		local dir = user:get_look_dir()
-		local ppos = {x = pos.x, y = pos.y + 1.3, z = pos.z}
-		core.add_particlespawner({
-			amount = 20,
-			time = 0.1,
-			minpos = ppos,
-			maxpos = ppos,
-			minvel = {x = dir.x - 1, y = 2, z = dir.z - 1},
-			maxvel = {x = dir.x + 1, y = 2, z = dir.z + 1},
-			minacc = {x = 0, y = -5, z = 0},
-			maxacc = {x = 0, y = -9, z = 0},
-			minexptime = 1,
-			maxexptime = 1,
-			minsize = 1,
-			maxsize = 1,
-			vertical = false,
-			texture = def.inventory_image
-		})
 
 		if replace_with_item then
 			if itemstack:is_empty() then
@@ -625,7 +590,8 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 				if inv and inv:room_for_item("main", {name=replace_with_item}) then
 					inv:add_item("main", replace_with_item)
 				else
-					pos.y = pos.y + 0.5
+					local pos = user:get_pos()
+					pos.y = floor(pos.y + 0.5)
 					core.add_item(pos, replace_with_item)
 				end
 			end
@@ -634,7 +600,7 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 	return itemstack
 end
 
-function core.item_eat(hp_change, replace_with_item, poison)
+function core.item_eat(hp_change, replace_with_item)
 	return function(itemstack, user, pointed_thing)  -- closure
 		if user then
 			if user:is_player() and pointed_thing.type == "object" then
@@ -642,7 +608,7 @@ function core.item_eat(hp_change, replace_with_item, poison)
 				return user:get_wielded_item()
 			end
 
-			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
+			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		end
 	end
 end
