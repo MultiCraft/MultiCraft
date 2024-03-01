@@ -1789,6 +1789,12 @@ u16 ServerEnvironment::addActiveObjectRaw(ServerActiveObject *object,
 		return 0;
 	}
 
+	// Register reference in scripting api (must be done before post-init)
+	m_script->addObjectReference(object);
+	// Post-initialize object
+	// Note that this can change the value of isStaticAllowed() in case of LuaEntitySAO
+	object->addedToEnvironment(dtime_s);
+
 	// Add static data to block
 	if (object->isStaticAllowed()) {
 		// Add static object to active static list of the block
@@ -1811,15 +1817,15 @@ u16 ServerEnvironment::addActiveObjectRaw(ServerActiveObject *object,
 				<< "could not emerge block " << PP(p) << " for storing id="
 				<< object->getId() << " statically" << std::endl;
 			// clean in case of error
+			object->markForRemoval();
+			object->removingFromEnvironment();
+			m_script->removeObjectReference(object);
 			m_ao_manager.removeObject(object->getId());
 			return 0;
 		}
 	}
 
-	// Register reference in scripting api (must be done before post-init)
-	m_script->addObjectReference(object);
-	// Post-initialize object
-	object->addedToEnvironment(dtime_s);
+	assert(object->m_static_exists == object->isStaticAllowed());
 
 	return object->getId();
 }
