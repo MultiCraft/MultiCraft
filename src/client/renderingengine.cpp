@@ -521,7 +521,7 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 */
 void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		gui::IGUIEnvironment *guienv, ITextureSource *tsrc, float dtime,
-		int percent, bool clouds)
+		int percent)
 {
 #ifdef __IOS__
 		if (m_device->isWindowMinimized())
@@ -541,22 +541,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 			guienv->addStaticText(text.c_str(), textrect, false, false);
 	guitext->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_UPPERLEFT);
 
-	bool cloud_menu_background = clouds && g_settings->getBool("menu_clouds");
-	if (cloud_menu_background) {
-		g_menuclouds->step(dtime * 3);
-		g_menuclouds->render();
-		get_video_driver()->beginScene(
-				true, true, video::SColor(255, 140, 186, 250));
-		g_menucloudsmgr->drawAll();
-	} else {
-		get_video_driver()->beginScene(true, true, video::SColor(255, 0, 0, 0));
-		video::ITexture *background_image = tsrc->getTexture("bg.png");
-
-		v2u32 screensize = driver->getScreenSize();
-		get_video_driver()->draw2DImage(background_image,
-			irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
-			irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
-	}
+	_draw_load_bg(guienv, tsrc, dtime);
 
 	// draw progress bar
 	if ((percent >= 0) && (percent <= 100)) {
@@ -631,28 +616,58 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 	Draws the menu scene including (optional) cloud background.
 */
 void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
-		ITextureSource *tsrc, float dtime, bool clouds)
+		ITextureSource *tsrc, float dtime)
 {
-	bool cloud_menu_background = clouds && g_settings->getBool("menu_clouds");
-	if (cloud_menu_background) {
-		g_menuclouds->step(dtime * 3);
-		g_menuclouds->render();
-		get_video_driver()->beginScene(
-				true, true, video::SColor(255, 140, 186, 250));
-		g_menucloudsmgr->drawAll();
-	} else {
-		get_video_driver()->beginScene(true, true, video::SColor(255, 0, 0, 0));
-		video::ITexture *background_image = tsrc->getTexture("bg.png");
-
-		v2u32 screensize = driver->getScreenSize();
-		get_video_driver()->draw2DImage(background_image,
-			irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
-			irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
-	}
-
+	_draw_load_bg(guienv, tsrc, dtime);
 	guienv->drawAll();
 	get_video_driver()->endScene();
 }
+
+/*
+	Draws the cloud background used by draw_load_screen and draw_menu_scene
+*/
+
+void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
+									ITextureSource *tsrc, float dtime)
+{
+	const bool cloud_menu_background = m_load_bg_clouds && g_settings->getBool("menu_clouds");
+	if (cloud_menu_background) {
+		g_menuclouds->step(dtime * 3);
+		g_menuclouds->render();
+		driver->beginScene(
+				true, true, video::SColor(255, 140, 186, 250));
+		g_menucloudsmgr->drawAll();
+	}
+
+	const v2u32 screensize = driver->getScreenSize();
+	video::ITexture *texture = m_load_bg_texture.empty() ? nullptr : driver->getTexture(m_load_bg_texture.c_str());
+	if (texture == nullptr) {
+		if (!cloud_menu_background) {
+			driver->beginScene(true, true, video::SColor(255, 0, 0, 0));
+			video::ITexture *background_image = tsrc->getTexture("bg.png");
+
+			driver->draw2DImage(background_image,
+				irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
+				irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
+		}
+		return;
+	}
+
+	const v2u32 sourcesize = texture->getOriginalSize();
+
+	/* Draw background texture */
+	float aspectRatioScreen = (float) screensize.X / screensize.Y;
+	float aspectRatioSource = (float) sourcesize.X / sourcesize.Y;
+
+	int sourceX = aspectRatioSource > aspectRatioScreen ? (sourcesize.X - sourcesize.Y * aspectRatioScreen) / 2 : 0;
+	int sourceY = aspectRatioSource < aspectRatioScreen ? (sourcesize.Y - sourcesize.X / aspectRatioScreen) / 2 : 0;
+
+	draw2DImageFilterScaled(driver, texture,
+			core::rect<s32>(0, 0, screensize.X, screensize.Y),
+			core::rect<s32>(sourceX, sourceY, sourcesize.X - sourceX, sourcesize.Y - sourceY),
+			NULL, NULL, true);
+}
+
 
 std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
 {

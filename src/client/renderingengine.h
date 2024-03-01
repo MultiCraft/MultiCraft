@@ -106,17 +106,17 @@ public:
 
 	inline static void draw_load_screen(const std::wstring &text,
 			gui::IGUIEnvironment *guienv, ITextureSource *tsrc,
-			float dtime = 0, int percent = 0, bool clouds = false)
+			float dtime = 0, int percent = 0)
 	{
 		s_singleton->_draw_load_screen(
-				text, guienv, tsrc, dtime, percent, clouds);
+				text, guienv, tsrc, dtime, percent);
 	}
 
 	inline static void draw_menu_scene(
 			gui::IGUIEnvironment *guienv, ITextureSource *tsrc,
-			float dtime, bool clouds = false)
+			float dtime)
 	{
-		s_singleton->_draw_menu_scene(guienv, tsrc, dtime, clouds);
+		s_singleton->_draw_menu_scene(guienv, tsrc, dtime);
 	}
 
 	inline static void draw_scene(video::SColor skycolor, bool show_hud,
@@ -142,14 +142,23 @@ public:
 	static std::vector<core::vector3d<u32>> getSupportedVideoModes();
 	static std::vector<irr::video::E_DRIVER_TYPE> getSupportedVideoDrivers();
 
+	static void setLoadScreenBackground(const bool clouds, const std::string texture)
+	{
+		if (s_singleton) {
+			s_singleton->m_load_bg_clouds = clouds;
+			s_singleton->m_load_bg_texture = texture;
+		}
+	}
+
 private:
 	void _draw_load_screen(const std::wstring &text, gui::IGUIEnvironment *guienv,
-			ITextureSource *tsrc, float dtime = 0, int percent = 0,
-			bool clouds = false);
+			ITextureSource *tsrc, float dtime = 0, int percent = 0);
 
 	void _draw_menu_scene(gui::IGUIEnvironment *guienv,
-			ITextureSource *tsrc, float dtime = 0,
-			bool clouds = false);
+			ITextureSource *tsrc, float dtime = 0);
+
+	void _draw_load_bg(gui::IGUIEnvironment *guienv,
+			ITextureSource *tsrc, float dtime = 0);
 
 	void _draw_scene(video::SColor skycolor, bool show_hud, bool show_minimap,
 			bool draw_wield_tool, bool draw_crosshair);
@@ -162,4 +171,7 @@ private:
 	irr::IrrlichtDevice *m_device = nullptr;
 	irr::video::IVideoDriver *driver;
 	static RenderingEngine *s_singleton;
+
+	bool m_load_bg_clouds = false;
+	std::string m_load_bg_texture = "";
 };

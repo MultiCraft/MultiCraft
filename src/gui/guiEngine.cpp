@@ -214,6 +214,12 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 		handleMainMenuLuaError(e.what());
 	}
 
+	// Update the load screen background texture
+	const texture_layer layer = m_clouds_enabled ? TEX_LAYER_OVERLAY : TEX_LAYER_BACKGROUND;
+	const video::ITexture* texture = m_textures[layer].texture;
+	RenderingEngine::setLoadScreenBackground(m_clouds_enabled,
+			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "");
+
 	m_menu->quitMenu();
 	m_menu->drop();
 	m_menu = NULL;

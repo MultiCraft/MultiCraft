@@ -796,8 +796,7 @@ protected:
 	// Misc
 	void limitFps(FpsControl *fps_timings, f32 *dtime);
 
-	void showOverlayMessage(const char *msg, float dtime, int percent,
-			bool draw_clouds = false);
+	void showOverlayMessage(const char *msg, float dtime, int percent);
 
 	static void settingChangedCallback(const std::string &setting_name, void *data);
 	void readSettings();
@@ -4234,11 +4233,10 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 #endif
 }
 
-void Game::showOverlayMessage(const char *msg, float dtime, int percent, bool draw_clouds)
+void Game::showOverlayMessage(const char *msg, float dtime, int percent)
 {
 	const wchar_t *wmsg = wgettext(msg);
-	RenderingEngine::draw_load_screen(wmsg, guienv, texture_src, dtime, percent,
-		draw_clouds);
+	RenderingEngine::draw_load_screen(wmsg, guienv, texture_src, dtime, percent);
 	delete[] wmsg;
 }
 
