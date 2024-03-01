@@ -637,13 +637,14 @@ void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 		driver->beginScene(
 				true, true, video::SColor(255, 140, 186, 250));
 		g_menucloudsmgr->drawAll();
+	} else {
+		driver->beginScene(true, true, video::SColor(255, 0, 0, 0));
 	}
 
 	const v2u32 screensize = driver->getScreenSize();
 	video::ITexture *texture = m_load_bg_texture.empty() ? nullptr : driver->getTexture(m_load_bg_texture.c_str());
 	if (texture == nullptr) {
 		if (!cloud_menu_background) {
-			driver->beginScene(true, true, video::SColor(255, 0, 0, 0));
 			video::ITexture *background_image = tsrc->getTexture("bg.png");
 
 			driver->draw2DImage(background_image,
