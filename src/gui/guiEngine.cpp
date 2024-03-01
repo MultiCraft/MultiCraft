@@ -136,7 +136,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 		bool &kill) :
 	m_parent(parent),
 	m_menumanager(menumgr),
-	m_smgr(RenderingEngine::get_scene_manager()),
+	m_smgr(g_menucloudsmgr),
 	m_data(data),
 	m_kill(kill)
 {
@@ -380,14 +380,15 @@ GUIEngine::~GUIEngine()
 
 	delete m_texture_source;
 
-	if (m_cloud.clouds)
-		m_cloud.clouds->drop();
+	// m_cloud.clouds is g_menuclouds and is dropped elsewhere
+	// if (m_cloud.clouds)
+	// 	m_cloud.clouds->drop();
 }
 
 /******************************************************************************/
 void GUIEngine::cloudInit()
 {
-	m_cloud.clouds = new Clouds(m_smgr, -1, rand());
+	m_cloud.clouds = g_menuclouds;
 	m_cloud.clouds->setHeight(100.0f);
 	m_cloud.clouds->update(v3f(0, 0, 0), video::SColor(255,240,240,255));
 
