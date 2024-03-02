@@ -277,7 +277,7 @@ void GUIEngine::run()
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
 
-	static const video::SColor sky_color(255, 140, 186, 250);
+	static const video::SColor sky_color(255, 5, 155, 245);
 
 	// Reset fog color
 	{
@@ -389,8 +389,8 @@ GUIEngine::~GUIEngine()
 void GUIEngine::cloudInit()
 {
 	m_cloud.clouds = g_menuclouds;
-	m_cloud.clouds->setHeight(100.0f);
-	m_cloud.clouds->update(v3f(0, 0, 0), video::SColor(255,240,240,255));
+//	m_cloud.clouds->setHeight(100.0f); // 120 is default value
+//	m_cloud.clouds->update(v3f(0, 0, 0), video::SColor(255,240,240,255));
 
 	m_cloud.camera = m_smgr->addCameraSceneNode(0,
 				v3f(0,0,0), v3f(0, 60, 100));

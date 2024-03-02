@@ -630,7 +630,7 @@ void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
 void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 									ITextureSource *tsrc, float dtime)
 {
-	driver->beginScene(true, true, video::SColor(255, 140, 186, 250));
+	driver->beginScene(true, true, video::SColor(255, 5, 155, 245));
 
 	const bool cloud_menu_background = m_load_bg_clouds && g_settings->getBool("menu_clouds");
 	if (cloud_menu_background) {
@@ -666,7 +666,6 @@ void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 			core::rect<s32>(sourceX, sourceY, sourcesize.X - sourceX, sourcesize.Y - sourceY),
 			NULL, NULL, true);
 }
-
 
 std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
 {
