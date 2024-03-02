@@ -630,15 +630,13 @@ void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
 void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 									ITextureSource *tsrc, float dtime)
 {
+	driver->beginScene(true, true, video::SColor(255, 140, 186, 250));
+
 	const bool cloud_menu_background = m_load_bg_clouds && g_settings->getBool("menu_clouds");
 	if (cloud_menu_background) {
 		g_menuclouds->step(dtime * 3);
 		g_menuclouds->render();
-		driver->beginScene(
-				true, true, video::SColor(255, 140, 186, 250));
 		g_menucloudsmgr->drawAll();
-	} else {
-		driver->beginScene(true, true, video::SColor(255, 0, 0, 0));
 	}
 
 	const v2u32 screensize = driver->getScreenSize();
