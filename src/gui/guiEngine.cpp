@@ -136,7 +136,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 		bool &kill) :
 	m_parent(parent),
 	m_menumanager(menumgr),
-	m_smgr(RenderingEngine::get_scene_manager()),
+	m_smgr(g_menucloudsmgr),
 	m_data(data),
 	m_kill(kill)
 {
@@ -214,6 +214,12 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 		handleMainMenuLuaError(e.what());
 	}
 
+	// Update the load screen background texture
+	const texture_layer layer = m_clouds_enabled ? TEX_LAYER_OVERLAY : TEX_LAYER_BACKGROUND;
+	const video::ITexture* texture = m_textures[layer].texture;
+	RenderingEngine::setLoadScreenBackground(m_clouds_enabled,
+			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "");
+
 	m_menu->quitMenu();
 	m_menu->drop();
 	m_menu = NULL;
@@ -271,7 +277,7 @@ void GUIEngine::run()
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
 
-	static const video::SColor sky_color(255, 140, 186, 250);
+	static const video::SColor sky_color(255, 5, 155, 245);
 
 	// Reset fog color
 	{
@@ -374,16 +380,17 @@ GUIEngine::~GUIEngine()
 
 	delete m_texture_source;
 
-	if (m_cloud.clouds)
-		m_cloud.clouds->drop();
+	// m_cloud.clouds is g_menuclouds and is dropped elsewhere
+	// if (m_cloud.clouds)
+	// 	m_cloud.clouds->drop();
 }
 
 /******************************************************************************/
 void GUIEngine::cloudInit()
 {
-	m_cloud.clouds = new Clouds(m_smgr, -1, rand());
-	m_cloud.clouds->setHeight(100.0f);
-	m_cloud.clouds->update(v3f(0, 0, 0), video::SColor(255,240,240,255));
+	m_cloud.clouds = g_menuclouds;
+//	m_cloud.clouds->setHeight(100.0f); // 120 is default value
+//	m_cloud.clouds->update(v3f(0, 0, 0), video::SColor(255,240,240,255));
 
 	m_cloud.camera = m_smgr->addCameraSceneNode(0,
 				v3f(0,0,0), v3f(0, 60, 100));
