@@ -510,6 +510,7 @@ void Server::process_PlayerPos(RemotePlayer *player, PlayerSAO *playersao,
 	player->control.dig   = (keyPressed & (0x1 << 7));
 	player->control.place = (keyPressed & (0x1 << 8));
 	player->control.zoom  = (keyPressed & (0x1 << 9));
+	player->control.tabb  = (keyPressed & (0x1 << 10));
 
 	if (playersao->checkMovementCheat()) {
 		// Call callbacks

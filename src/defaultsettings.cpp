@@ -159,6 +159,8 @@ void set_default_settings()
 	settings->setDefault("keymap_quicktune_dec", "KEY_NEXT");
 	settings->setDefault("keymap_quicktune_inc", "KEY_PRIOR");
 
+	settings->setDefault("keymap_tabb", "KEY_TAB");
+
 	// Visuals
 #ifdef NDEBUG
 	settings->setDefault("show_debug", "false");

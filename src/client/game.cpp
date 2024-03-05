@@ -2563,6 +2563,7 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		isKeyDown(KeyType::SPECIAL1),
 		isKeyDown(KeyType::SNEAK),
 		isKeyDown(KeyType::ZOOM),
+		isKeyDown(KeyType::TABB),
 		isKeyDown(KeyType::DIG),
 		isKeyDown(KeyType::PLACE),
 		cam.camera_pitch,
@@ -2586,7 +2587,8 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 			( (u32)(isKeyDown(KeyType::SNEAK)                         & 0x1) << 6) |
 			( (u32)(isKeyDown(KeyType::DIG)                           & 0x1) << 7) |
 			( (u32)(isKeyDown(KeyType::PLACE)                         & 0x1) << 8) |
-			( (u32)(isKeyDown(KeyType::ZOOM)                          & 0x1) << 9)
+			( (u32)(isKeyDown(KeyType::ZOOM)                          & 0x1) << 9) |
+			( (u32)(isKeyDown(KeyType::TABB)                          & 0x1) << 10)
 		);
 
 	LocalPlayer *player = client->getEnv().getLocalPlayer();
