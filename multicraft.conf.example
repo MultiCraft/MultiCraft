@@ -449,6 +449,11 @@
 #    type: key
 # keymap_slot32 =
 
+#    Key for use by mods.
+#    See http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3
+#    type: key
+# keymap_tabb = KEY_TAB
+
 #    Key for toggling the display of the HUD.
 #    See http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3
 #    type: key
