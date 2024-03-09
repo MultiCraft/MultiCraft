@@ -76,6 +76,8 @@ public:
 		QUICKTUNE_INC,
 		QUICKTUNE_DEC,
 
+		TABB,
+
 		// hotbar
 		SLOT_1,
 		SLOT_2,

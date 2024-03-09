@@ -408,6 +408,10 @@ keymap_slot31 (Hotbar slot 31 key) key
 #    See http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3
 keymap_slot32 (Hotbar slot 32 key) key
 
+#    Key for use by mods.
+#    See http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3
+keymap_tabb (Tab key) key KEY_TAB
+
 #    Key for toggling the display of the HUD.
 #    See http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3
 keymap_toggle_hud (HUD toggle key) key KEY_F1
