@@ -494,7 +494,7 @@ int ModApiUtil::l_sha1(lua_State *L)
 int ModApiUtil::l_upgrade(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-#if defined(__ANDROID__) || defined(__IOS__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 	const std::string item_name = luaL_checkstring(L, 1);
 	porting::upgrade(item_name);
 	lua_pushboolean(L, true);

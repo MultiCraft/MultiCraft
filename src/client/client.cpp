@@ -670,7 +670,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 
 	name = removeStringEnd(filename, enc_ext);
 	if (!name.empty()) {
-#ifdef OFFICIAL
+#ifdef SIGN_KEY
 		static std::string secret_key = porting::getSecretKey(SIGN_KEY);
 #else
 		static std::string secret_key = porting::getSecretKey("");

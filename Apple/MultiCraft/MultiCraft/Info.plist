@@ -28,5 +28,7 @@
 	<true/>
 	<key>NSSupportsSuddenTermination</key>
 	<true/>
+	<key>ATSApplicationFontsPath</key>
+	<string>fonts</string>
 </dict>
 </plist>

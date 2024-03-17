@@ -19,7 +19,8 @@ do
 	echo "Building LuaJIT for $ARCH"
 	make amalg -j \
 		TARGET_FLAGS="$OSX_FLAGS -fno-fast-math -Wno-overriding-t-option -arch $ARCH"
-	cp src/libluajit.a templib_$ARCH.a
+	cp -v src/libluajit.a templib_$ARCH.a
+	cp -v src/luajit.h luajit.h.tmp
 	make clean
 done
 
@@ -29,7 +30,7 @@ rm templib_*.a
 
 mkdir -p ../luajit/include
 cp -v src/*.h ../luajit/include
-cp -v ../luajit/include/luajit_rolling.h ../luajit/include/luajit.h
+cp -v luajit.h.tmp ../luajit/include/luajit.h
 cp -v libluajit.a ../luajit
 
 echo "LuaJIT build successful"

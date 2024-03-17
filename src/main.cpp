@@ -119,7 +119,7 @@ FileLogOutput file_log_output;
 
 static OptionList allowed_options;
 
-#if defined(__ANDROID__) || defined(__IOS__)
+#ifdef __ANDROID__
 int real_main(int argc, char *argv[])
 #else
 int main(int argc, char *argv[])
@@ -160,6 +160,8 @@ int main(int argc, char *argv[])
 
 #ifdef __ANDROID__
 	porting::initAndroid();
+#elif __APPLE__
+	init_apple();
 #endif
 	porting::initializePaths();
 
