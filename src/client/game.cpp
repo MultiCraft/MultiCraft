@@ -1463,7 +1463,7 @@ bool Game::initGui()
 
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui) {
-		g_touchscreengui->init(texture_src);
+		g_touchscreengui->init(texture_src, simple_singleplayer_mode);
 		if (g_touchscreengui->isActive())
 			g_touchscreengui->show();
 	}

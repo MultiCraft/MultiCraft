@@ -49,6 +49,7 @@ typedef enum
 	range_id,
 	camera_id,
 	chat_id,
+	tab_id,
 	after_last_element_id,
 	// settings_starter_id,
 	// rare_controls_starter_id,
@@ -105,7 +106,7 @@ struct button_info
 	std::vector<const char *> textures;
 };
 
-class AutoHideButtonBar
+/*class AutoHideButtonBar
 {
 public:
 	AutoHideButtonBar(IrrlichtDevice *device, IEventReceiver *receiver);
@@ -121,8 +122,8 @@ public:
 			const char *btn_image);
 
 	// add toggle button to be shown
-	/*void addToggleButton(touch_gui_button_id id, const wchar_t *caption,
-			const char *btn_image_1, const char *btn_image_2);*/
+	void addToggleButton(touch_gui_button_id id, const wchar_t *caption,
+			const char *btn_image_1, const char *btn_image_2);
 
 	// detect settings bar button events
 	bool isButton(const SEvent &event);
@@ -161,7 +162,7 @@ private:
 	float m_timeout_value = 3.0f;
 	bool m_initialized = false;
 	autohide_button_bar_dir m_dir = AHBB_Dir_Right_Left;
-};
+};*/
 
 class TouchScreenGUI
 {
@@ -171,7 +172,7 @@ public:
 
 	void translateEvent(const SEvent &event);
 
-	void init(ISimpleTextureSource *tsrc);
+	void init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode);
 
 	double getYawChange()
 	{
@@ -227,6 +228,7 @@ private:
 	std::map<size_t, irr::EKEY_CODE> m_hud_ids;
 	bool m_visible = true; // is the gui visible
 	bool m_buttons_initialized = false;
+	bool m_simple_singleplayer_mode = false;
 
 	// value in degree
 	double m_camera_yaw_change = 0.0;
@@ -275,7 +277,8 @@ private:
 	// initialize a button
 	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 			const std::wstring &caption, bool immediate_release,
-			float repeat_delay = BUTTON_REPEAT_DELAY);
+			float repeat_delay = BUTTON_REPEAT_DELAY,
+			const char *texture = "");
 
 	// initialize a joystick button
 	std::shared_ptr<button_info> initJoystickButton(touch_gui_button_id id,
@@ -328,10 +331,10 @@ private:
 	key_event m_key_events[2];
 
 	// settings bar
-	AutoHideButtonBar m_settingsbar;
+	// AutoHideButtonBar m_settingsbar;
 
 	// rare controls bar
-	AutoHideButtonBar m_rarecontrolsbar;
+	// AutoHideButtonBar m_rarecontrolsbar;
 
 	// device active state
 	static bool m_active;

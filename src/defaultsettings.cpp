@@ -655,7 +655,7 @@ void set_default_settings()
 			g_settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 5.5 && x_inches <= 6.5) {
 			// 7" tablets
-			g_settings->setDefault("hud_scaling", "0.9");
+			g_settings->setDefault("hud_scaling", "0.85");
 			g_settings->setDefault("selectionbox_width", "6");
 		}
 

@@ -49,7 +49,8 @@ const char *button_imagenames[] = {
 	"minimap_btn.png",
 	"rangeview_btn.png",
 	"camera_btn.png",
-	"chat_btn.png"
+	"chat_btn.png",
+	"tab_btn.png"
 };
 
 const char *joystick_imagenames[] = {
@@ -113,6 +114,9 @@ static irr::EKEY_CODE id2keycode(touch_gui_button_id id)
 		case chat_id:
 			key = "chat";
 			break;
+		case tab_id:
+			key = "tabb";
+			break;
 		case camera_id:
 			key = "camera_mode";
 			break;
@@ -154,7 +158,7 @@ static void load_button_texture(const button_info *btn, const char *path,
 	}
 }
 
-AutoHideButtonBar::AutoHideButtonBar(IrrlichtDevice *device,
+/*AutoHideButtonBar::AutoHideButtonBar(IrrlichtDevice *device,
 		IEventReceiver *receiver) :
 			m_driver(device->getVideoDriver()),
 			m_guienv(device->getGUIEnvironment()),
@@ -269,7 +273,7 @@ void AutoHideButtonBar::addButton(touch_gui_button_id button_id,
 	m_buttons.push_back(btn);
 }
 
-/*void AutoHideButtonBar::addToggleButton(touch_gui_button_id button_id,
+void AutoHideButtonBar::addToggleButton(touch_gui_button_id button_id,
 		const wchar_t *caption, const char *btn_image_1,
 		const char *btn_image_2)
 {
@@ -278,7 +282,7 @@ void AutoHideButtonBar::addButton(touch_gui_button_id button_id,
 	btn->togglable = 1;
 	btn->textures.push_back(btn_image_1);
 	btn->textures.push_back(btn_image_2);
-}*/
+}
 
 bool AutoHideButtonBar::isButton(const SEvent &event)
 {
@@ -416,16 +420,16 @@ void AutoHideButtonBar::show()
 		m_starter.guibutton->setVisible(true);
 		m_starter.guibutton->setEnabled(true);
 	}
-}
+}*/
 
 bool TouchScreenGUI::m_active = true;
 
 TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device, IEventReceiver *receiver):
 	m_device(device),
 	m_guienv(device->getGUIEnvironment()),
-	m_receiver(receiver),
+	m_receiver(receiver)/*,
 	m_settingsbar(device, receiver),
-	m_rarecontrolsbar(device, receiver)
+	m_rarecontrolsbar(device, receiver)*/
 {
 	for (auto &button : m_buttons) {
 		button.guibutton     = nullptr;
@@ -443,7 +447,7 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device, IEventReceiver *receiver)
 }
 
 void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_rect,
-		const std::wstring &caption, bool immediate_release, float repeat_delay)
+		const std::wstring &caption, bool immediate_release, float repeat_delay, const char *texture)
 {
 	button_info *btn       = &m_buttons[id];
 	btn->guibutton         = m_guienv->addButton(button_rect, nullptr, id, caption.c_str());
@@ -455,7 +459,8 @@ void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_
 	btn->immediate_release = immediate_release;
 	btn->ids.clear();
 
-	load_button_texture(btn, button_imagenames[id], button_rect,
+	const char *image = strcmp(texture, "") == 0 ? button_imagenames[id] : texture;
+	load_button_texture(btn, image, button_rect,
 			m_texturesource, m_device->getVideoDriver());
 }
 
@@ -551,6 +556,11 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 				0,
 				m_screensize.X,
 				button_size);
+	case tab_id:
+		return rect<s32>(m_screensize.X - button_size * 1.25,
+				button_size,
+				m_screensize.X,
+				button_size * 2);
 	default:
 		return rect<s32>(0, 0, 0, 0);
 	}
@@ -594,11 +604,12 @@ void TouchScreenGUI::updateButtons()
 	}
 }
 
-void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
+void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode)
 {
 	assert(tsrc);
 
 	m_texturesource = tsrc;
+	m_simple_singleplayer_mode = simple_singleplayer_mode;
 
 	/* Init joystick display "button"
 	 * Joystick is placed on bottom left of screen.
@@ -680,8 +691,17 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc)
 	// init camera button [4]
 	initButton(camera_id, getButtonRect(camera_id), L"camera", false);
 
-	// init chat button
-	initButton(chat_id, getButtonRect(chat_id), L"Chat", false);
+
+	if (m_simple_singleplayer_mode) {
+		// init chat button
+		initButton(chat_id, getButtonRect(chat_id), L"Chat", false, BUTTON_REPEAT_DELAY, "chat_btn.png");
+	} else {
+		// init chat button
+		initButton(chat_id, getButtonRect(chat_id), L"Chat", false, BUTTON_REPEAT_DELAY, "chat_mp_btn.png");
+
+		// init tab button
+		initButton(tab_id, getButtonRect(tab_id), L"Tab", false);
+	}
 
 	m_buttons_initialized = true;
 }
@@ -951,10 +971,10 @@ void TouchScreenGUI::translateEvent(const SEvent &event)
 			//m_settingsbar.deactivate();
 			//m_rarecontrolsbar.deactivate();
 			// already handled in isHUDButton()
-		} else if (m_settingsbar.isButton(event)) {
+		//} else if (m_settingsbar.isButton(event)) {
 			//m_rarecontrolsbar.deactivate();
 			// already handled in isSettingsBarButton()
-		} else if (m_rarecontrolsbar.isButton(event)) {
+		//} else if (m_rarecontrolsbar.isButton(event)) {
 			//m_settingsbar.deactivate();
 			// already handled in isSettingsBarButton()
 		} else {
