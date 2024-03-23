@@ -42,6 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "filesys.h"
 #include "gameparams.h"
 #include "gettext.h"
+#include "gui/guiButton.h"
 #include "gui/guiChatConsole.h"
 #include "gui/guiConfirmRegistration.h"
 #include "gui/guiFormSpecMenu.h"
@@ -671,6 +672,61 @@ class Game;
 struct ClientEventHandler
 {
 	void (Game::*handler)(ClientEvent *, CameraOrientation *);
+};
+
+const int ID_cancelButton = 1000;
+
+class LoadScreenEventReceiver : public MyEventReceiver
+{
+private:
+	bool *m_connection_aborted;
+
+public:
+	LoadScreenEventReceiver(bool *connection_aborted) {
+		m_connection_aborted = connection_aborted;
+	}
+
+	virtual bool OnEvent(const SEvent &event) {
+
+		if (event.EventType == EET_TOUCH_INPUT_EVENT) {
+			if (event.TouchInput.touchedCount == 1) {
+				if (event.TouchInput.Event == ETIE_PRESSED_DOWN ||
+						event.TouchInput.Event == ETIE_LEFT_UP ||
+						event.TouchInput.Event == ETIE_MOVED) {
+
+					SEvent mouse_event = {};
+					mouse_event.EventType = EET_MOUSE_INPUT_EVENT;
+					mouse_event.MouseInput.X = event.TouchInput.X;
+					mouse_event.MouseInput.Y = event.TouchInput.Y;
+					if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
+						mouse_event.MouseInput.Event = EMIE_LMOUSE_PRESSED_DOWN;
+						mouse_event.MouseInput.ButtonStates = EMBSM_LEFT;
+					} else if (event.TouchInput.Event == ETIE_MOVED) {
+						mouse_event.MouseInput.Event = EMIE_MOUSE_MOVED;
+						mouse_event.MouseInput.ButtonStates = EMBSM_LEFT;
+					} else if (event.TouchInput.Event == ETIE_LEFT_UP) {
+						mouse_event.MouseInput.Event = EMIE_LMOUSE_LEFT_UP;
+						mouse_event.MouseInput.ButtonStates = 0;
+					}
+
+					IrrlichtDevice* device = RenderingEngine::get_raw_device();
+					device->postEventFromUser(mouse_event);
+					return true;
+				}
+			}
+		}
+
+		if (event.EventType == EET_GUI_EVENT) {
+			if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
+				if (event.GUIEvent.Caller->getID() == ID_cancelButton) {
+					*m_connection_aborted = true;
+					return true;
+				}
+			}
+		}
+
+		return MyEventReceiver::OnEvent(event);
+	}
 };
 
 /****************************************************************************
@@ -1354,9 +1410,18 @@ bool Game::createClient(const GameStartData &start_data)
 	if (!draw_control)
 		return false;
 
-	bool could_connect, connect_aborted;
-	if (!connectToServer(start_data, &could_connect, &connect_aborted))
+	bool could_connect = false;
+	bool connect_aborted = false;
+
+	IEventReceiver *old_event_receiver = device->getEventReceiver();
+	IEventReceiver *load_screen_event_receiver = new LoadScreenEventReceiver(&connect_aborted);
+	device->setEventReceiver(load_screen_event_receiver);
+
+	if (!connectToServer(start_data, &could_connect, &connect_aborted)) {
+		device->setEventReceiver(old_event_receiver);
+		delete load_screen_event_receiver;
 		return false;
+	}
 
 	if (!could_connect) {
 		if (error_message->empty() && !connect_aborted) {
@@ -1364,6 +1429,8 @@ bool Game::createClient(const GameStartData &start_data)
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
 		}
+		device->setEventReceiver(old_event_receiver);
+		delete load_screen_event_receiver;
 		return false;
 	}
 
@@ -1377,8 +1444,13 @@ bool Game::createClient(const GameStartData &start_data)
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
 		}
+		device->setEventReceiver(old_event_receiver);
+		delete load_screen_event_receiver;
 		return false;
 	}
+
+	device->setEventReceiver(old_event_receiver);
+	delete load_screen_event_receiver;
 
 	auto *scsf = new GameGlobalShaderConstantSetterFactory(
 			&runData.disable_fog, &runData.fog_range, client);
@@ -1476,8 +1548,6 @@ bool Game::initGui()
 bool Game::connectToServer(const GameStartData &start_data,
 		bool *connect_ok, bool *connection_aborted)
 {
-	*connect_ok = false;	// Let's not be overly optimistic
-	*connection_aborted = false;
 	bool local_server_mode = false;
 
 	showOverlayMessage(N_("Resolving address..."), 0, 15);
@@ -1533,6 +1603,25 @@ bool Game::connectToServer(const GameStartData &start_data,
 
 	bool result = true;
 
+	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
+	float density = RenderingEngine::getDisplayDensity();
+	float gui_scaling = g_settings->getFloat("gui_scaling");
+	float scale = density * gui_scaling;
+
+	int btn_w = 192 * scale;
+	int btn_h = 64 * scale;
+	int btn_margin = 32 * scale;
+	int btn_pos_x = screensize.X - btn_w - btn_margin;
+	int btn_pos_y = screensize.Y - btn_h - btn_margin;
+	core::rect<s32> rect = core::rect<s32>(btn_pos_x, btn_pos_y, btn_pos_x + btn_w, btn_pos_y + btn_h);
+	const wchar_t* text = wgettext("Cancel");
+
+	GUIButton *cancel_button = GUIButton::addButton(guienv, rect, texture_src, nullptr, ID_cancelButton, text);
+	cancel_button->setStyles(StyleSpec::getButtonStyle());
+	cancel_button->setAlignment(gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT);
+
+	delete[] text;
+
 	try {
 		input->clear();
 
@@ -1577,6 +1666,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			if (client->m_is_registration_confirmation_state) {
+				cancel_button->setVisible(false);
 				if (registration_confirmation_shown) {
 					// Keep drawing the GUI
 					ITextureSource *tsrc = client->getTextureSource();
@@ -1588,6 +1678,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 						   connection_aborted, texture_src))->drop();
 				}
 			} else {
+				cancel_button->setVisible(true);
 				wait_time += dtime;
 				// Only time out if we aren't waiting for the server we started
 				if (!start_data.address.empty() && wait_time > 15) {
@@ -1606,6 +1697,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 		return false;
 	}
 
+	cancel_button->remove();
 	return result;
 }
 
@@ -1617,6 +1709,23 @@ bool Game::getServerContent(bool *aborted)
 	f32 dtime; // in seconds
 
 	fps_control.last_time = RenderingEngine::get_timer_time();
+
+	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
+	float density = RenderingEngine::getDisplayDensity();
+	float gui_scaling = g_settings->getFloat("gui_scaling");
+	float scale = density * gui_scaling;
+
+	int btn_w = 192 * scale;
+	int btn_h = 64 * scale;
+	int btn_margin = 32 * scale;
+	int btn_pos_x = screensize.X - btn_w - btn_margin;
+	int btn_pos_y = screensize.Y - btn_h - btn_margin;
+	core::rect<s32> rect = core::rect<s32>(btn_pos_x, btn_pos_y, btn_pos_x + btn_w, btn_pos_y + btn_h);
+	const wchar_t* text = wgettext("Cancel");
+
+	GUIButton *cancel_button = GUIButton::addButton(guienv, rect, texture_src, nullptr, ID_cancelButton, text);
+	cancel_button->setStyles(StyleSpec::getButtonStyle());
+	cancel_button->setAlignment(gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT);
 
 	bool result = true;
 	while ((result = RenderingEngine::run())) {
@@ -1636,16 +1745,26 @@ bool Game::getServerContent(bool *aborted)
 		}
 
 		// Error conditions
-		if (!checkConnection())
+		if (!checkConnection()) {
+			cancel_button->remove();
 			return false;
+		}
 
 		if (client->getState() < LC_Init) {
+			cancel_button->remove();
 			*error_message = "Client disconnected";
 			errorstream << *error_message << std::endl;
 			return false;
 		}
 
+		if (*aborted) {
+			cancel_button->remove();
+			infostream << "Connect aborted [Escape]" << std::endl;
+			return false;
+		}
+
 		if (input->cancelPressed()) {
+			cancel_button->remove();
 			*aborted = true;
 			infostream << "Connect aborted [Escape]" << std::endl;
 			return false;
@@ -1695,6 +1814,7 @@ bool Game::getServerContent(bool *aborted)
 		}
 	}
 
+	cancel_button->remove();
 	return result;
 }
 
