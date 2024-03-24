@@ -676,14 +676,17 @@ struct ClientEventHandler
 
 const int ID_cancelButton = 1000;
 
-class LoadScreenEventReceiver : public MyEventReceiver
+class LoadScreenEventReceiver : public IEventReceiver
 {
 private:
 	bool *m_connection_aborted;
+	IEventReceiver *m_default_event_receiver;
 
 public:
-	LoadScreenEventReceiver(bool *connection_aborted) {
+	LoadScreenEventReceiver(bool *connection_aborted, 
+			IEventReceiver *default_event_receiver) {
 		m_connection_aborted = connection_aborted;
+		m_default_event_receiver = default_event_receiver;
 	}
 
 	virtual bool OnEvent(const SEvent &event) {
@@ -725,7 +728,7 @@ public:
 			}
 		}
 
-		return MyEventReceiver::OnEvent(event);
+		return m_default_event_receiver->OnEvent(event);
 	}
 };
 
@@ -1414,7 +1417,7 @@ bool Game::createClient(const GameStartData &start_data)
 	bool connect_aborted = false;
 
 	IEventReceiver *old_event_receiver = device->getEventReceiver();
-	IEventReceiver *load_screen_event_receiver = new LoadScreenEventReceiver(&connect_aborted);
+	IEventReceiver *load_screen_event_receiver = new LoadScreenEventReceiver(&connect_aborted, old_event_receiver);
 	device->setEventReceiver(load_screen_event_receiver);
 
 	if (!connectToServer(start_data, &could_connect, &connect_aborted)) {
@@ -1610,9 +1613,8 @@ bool Game::connectToServer(const GameStartData &start_data,
 
 	int btn_w = 192 * scale;
 	int btn_h = 64 * scale;
-	int btn_margin = 32 * scale;
-	int btn_pos_x = screensize.X - btn_w - btn_margin;
-	int btn_pos_y = screensize.Y - btn_h - btn_margin;
+	int btn_pos_x = (screensize.X - btn_w) / 2;
+	int btn_pos_y = screensize.Y / 2 + 64 * scale;
 	core::rect<s32> rect = core::rect<s32>(btn_pos_x, btn_pos_y, btn_pos_x + btn_w, btn_pos_y + btn_h);
 	const wchar_t* text = wgettext("Cancel");
 
@@ -1717,9 +1719,8 @@ bool Game::getServerContent(bool *aborted)
 
 	int btn_w = 192 * scale;
 	int btn_h = 64 * scale;
-	int btn_margin = 32 * scale;
-	int btn_pos_x = screensize.X - btn_w - btn_margin;
-	int btn_pos_y = screensize.Y - btn_h - btn_margin;
+	int btn_pos_x = (screensize.X - btn_w) / 2;
+	int btn_pos_y = screensize.Y / 2 + 64 * scale;
 	core::rect<s32> rect = core::rect<s32>(btn_pos_x, btn_pos_y, btn_pos_x + btn_w, btn_pos_y + btn_h);
 	const wchar_t* text = wgettext("Cancel");
 
