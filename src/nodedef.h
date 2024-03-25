@@ -661,9 +661,9 @@ public:
 	 * total ContentFeatures.
 	 * @param progress_cbk_args passed to the callback function
 	 */
-	void updateTextures(IGameDef *gamedef,
+	bool updateTextures(IGameDef *gamedef,
 		void (*progress_cbk)(void *progress_args, u32 progress, u32 max_progress),
-		void *progress_cbk_args);
+		void *progress_cbk_args, bool *connect_aborted);
 
 	/*!
 	 * Writes the content of this manager to the given output stream.
