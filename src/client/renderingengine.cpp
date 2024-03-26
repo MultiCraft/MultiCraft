@@ -667,6 +667,17 @@ void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 			NULL, NULL, true);
 }
 
+void RenderingEngine::_draw_load_cleanup()
+{
+	if (!m_load_bg_texture.empty()) {
+		video::ITexture *texture = driver->getTexture(m_load_bg_texture.c_str());
+
+		if (texture) {
+			driver->removeTexture(texture);
+		}
+	}
+}
+
 std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
 {
 	IrrlichtDevice *nulldevice = createDevice(video::EDT_NULL);
