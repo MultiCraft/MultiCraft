@@ -1417,6 +1417,8 @@ int ObjectRef::l_get_player_control(lua_State *L)
 	lua_setfield(L, -2, "RMB");
 	lua_pushboolean(L, control.zoom);
 	lua_setfield(L, -2, "zoom");
+	lua_pushboolean(L, control.tabb);
+	lua_setfield(L, -2, "tabb");
 	return 1;
 }
 

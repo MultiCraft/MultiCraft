@@ -35,41 +35,36 @@ common_update_cached_supp_proto()
 
 --------------------------------------------------------------------------------
 local function render_client_count(n)
-	if     n > 999 then return '999'
+	if     n > 99 then return '99+'
 	elseif n >= 0 then return tostring(n)
 	else return '?' end
 end
 
+local function configure_selected_world_params(idx)
+	local worldconfig = pkgmgr.get_worldconfig(menudata.worldlist:get_list()[idx].path)
+	if worldconfig.creative_mode then
+		core.settings:set("creative_mode", worldconfig.creative_mode)
+	end
+	if worldconfig.enable_damage then
+		core.settings:set("enable_damage", worldconfig.enable_damage)
+	end
+end
+
 --------------------------------------------------------------------------------
-function image_column(tooltip)
+function image_column(tooltip, flagname)
 	return "image,tooltip=" .. core.formspec_escape(tooltip) .. "," ..
 		"0=" .. core.formspec_escape(defaulttexturedir .. "blank.png") .. "," ..
-		"1=" .. core.formspec_escape(defaulttexturedir .. "server_flags_favorite.png") .. "," ..
-		"2=" .. core.formspec_escape(defaulttexturedir .. "server_flags_mc.png") .. "," ..
-		"3=" .. core.formspec_escape(defaulttexturedir .. "server_flags_mt.png") .. "," ..
-		"4=" .. core.formspec_escape(defaulttexturedir .. "server_flags_damage.png") .. "," ..
-		"5=" .. core.formspec_escape(defaulttexturedir .. "server_flags_creative.png") .. "," ..
-		"6=" .. core.formspec_escape(defaulttexturedir .. "server_flags_pvp.png") .. "," ..
-		"14=" .. core.formspec_escape(defaulttexturedir .. "server_ping_4.png") .. "," ..
-		"13=" .. core.formspec_escape(defaulttexturedir .. "server_ping_3.png") .. "," ..
-		"12=" .. core.formspec_escape(defaulttexturedir .. "server_ping_2.png") .. "," ..
-		"11=" .. core.formspec_escape(defaulttexturedir .. "server_ping_1.png")
+		"1=" .. core.formspec_escape(defaulttexturedir ..
+			(flagname and "server_flags_" .. flagname .. ".png" or "blank.png")) .. "," ..
+		"2=" .. core.formspec_escape(defaulttexturedir .. "server_ping_4.png") .. "," ..
+		"3=" .. core.formspec_escape(defaulttexturedir .. "server_ping_3.png") .. "," ..
+		"4=" .. core.formspec_escape(defaulttexturedir .. "server_ping_2.png") .. "," ..
+		"5=" .. core.formspec_escape(defaulttexturedir .. "server_ping_1.png")
 end
 
 
 --------------------------------------------------------------------------------
 function render_serverlist_row(spec, is_favorite)
-	if not spec then
-		spec = {}
-	end
-
-	-- Get information from non_mobile_servers.
-	if is_favorite and not spec.proto_min and spec.address and spec.port and
-			serverlistmgr.non_mobile_servers then
-		local id = ("%s:%s"):format(spec.address, spec.port)
-		spec = serverlistmgr.non_mobile_servers[id] or spec
-	end
-
 	local text = ""
 	if spec.name then
 		text = text .. core.formspec_escape(spec.name:trim())
@@ -85,25 +80,23 @@ function render_serverlist_row(spec, is_favorite)
 	local details
 	if is_favorite then
 		details = "1,"
-	elseif spec.server_id == "multicraft" then
-		details = "2,"
 	else
-		details = "3,"
+		details = "0,"
 	end
 
-	if spec.lag then
-		local lag = spec.lag * 1000
-		if lag <= 100 then
-			details = details .. "14,"
-		elseif lag <= 150 then
-			details = details .. "13,"
-		elseif lag <= 250 then
-			details = details .. "12,"
+	if spec.ping then
+		local ping = spec.ping * 1000
+		if ping <= 50 then
+			details = details .. "2,"
+		elseif ping <= 100 then
+			details = details .. "3,"
+		elseif ping <= 250 then
+			details = details .. "4,"
 		else
-			details = details .. "11,"
+			details = details .. "5,"
 		end
 	else
-		details = details .. "11,"
+		details = details .. "0,"
 	end
 
 	if spec.clients and spec.clients_max then
@@ -112,12 +105,12 @@ function render_serverlist_row(spec, is_favorite)
 		-- Choose a color depending on how many clients are connected
 		-- (relatively to clients_max)
 		local clients_color
-		if     grey_out               then clients_color = '#aaaaaa'
-		elseif spec.clients    == 0   then clients_color = ''        -- 0 players: default/white
+		if     grey_out		      then clients_color = '#aaaaaa'
+		elseif spec.clients == 0      then clients_color = ''        -- 0 players: default/white
 		elseif clients_percent <= 60  then clients_color = '#a1e587' -- 0-60%: green
 		elseif clients_percent <= 90  then clients_color = '#ffdc97' -- 60-90%: yellow
 		elseif clients_percent == 100 then clients_color = '#dd5b5b' -- full server: red (darker)
-		else                               clients_color = '#ffba97' -- 90-100%: orange
+		else				   clients_color = '#ffba97' -- 90-100%: orange
 		end
 
 		details = details .. clients_color .. ',' ..
@@ -131,11 +124,19 @@ function render_serverlist_row(spec, is_favorite)
 	end
 
 	if spec.creative then
-		details = details .. "5,"
-	elseif spec.pvp then
-		details = details .. "6,"
-	elseif spec.damage then
-		details = details .. "4,"
+		details = details .. "1,"
+	else
+		details = details .. "0,"
+	end
+
+	if spec.damage then
+		details = details .. "1,"
+	else
+		details = details .. "0,"
+	end
+
+	if spec.pvp then
+		details = details .. "1,"
 	else
 		details = details .. "0,"
 	end
@@ -158,26 +159,16 @@ end
 
 --------------------------------------------------------------------------------
 function menu_render_worldlist()
-	local retval = {}
+	local retval = ""
+	local current_worldlist = menudata.worldlist:get_list()
 
-	local creative = core.settings:get_bool("creative_mode", false)
-	local damage = core.settings:get_bool("enable_damage", true)
-
-	for _, world in ipairs(menudata.worldlist:get_list()) do
-		if world.creative_mode == nil or world.enable_damage == nil then
-			-- There's a built-in menu_worldmt function that can read from
-			-- world.mt but it would read from the file once for each setting
-			-- read
-			local world_conf = Settings(world.path .. DIR_DELIM .. "world.mt")
-			world.creative_mode = world_conf:get_bool("creative_mode", creative)
-			world.enable_damage = world_conf:get_bool("enable_damage", damage)
-		end
-
-		retval[#retval + 1] = world.creative_mode and "5" or "4"
-		retval[#retval + 1] = core.formspec_escape(world.name)
+	for i, v in ipairs(current_worldlist) do
+		if retval ~= "" then retval = retval .. "," end
+		retval = retval .. core.formspec_escape(v.name) ..
+				" \\[" .. core.formspec_escape(v.gameid) .. "\\]"
 	end
 
-	return table.concat(retval, ",")
+	return retval
 end
 
 --------------------------------------------------------------------------------
@@ -191,6 +182,7 @@ function menu_handle_key_up_down(fields, textlist, settingname)
 			newidx = oldidx + 1
 		end
 		core.settings:set(settingname, menudata.worldlist:get_raw_index(newidx))
+		configure_selected_world_params(newidx)
 		return true
 	end
 	return false
@@ -268,6 +260,18 @@ function menu_worldmt(selected, setting, value)
 		end
 	else
 		return nil
+	end
+end
+
+function menu_worldmt_legacy(selected)
+	local modes_names = {"creative_mode", "enable_damage", "server_announce"}
+	for _, mode_name in pairs(modes_names) do
+		local mode_val = menu_worldmt(selected, mode_name)
+		if mode_val then
+			core.settings:set(mode_name, mode_val)
+		else
+			menu_worldmt(selected, mode_name, core.settings:get(mode_name))
+		end
 	end
 end
 --------------------------------------------------------------------------------

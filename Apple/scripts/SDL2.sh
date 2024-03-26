@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-SDL2_VERSION=release-2.28.5
+SDL2_VERSION=release-2.30.1
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
@@ -22,7 +22,7 @@ rm -rf SDL2
 cd SDL2-src
 
 xcodebuild build \
-	 ARCHS="$OSX_ARCHES" \
+	 ARCHS="$OSX_ARCHES" ONLY_ACTIVE_ARCH=NO \
 	-project Xcode/SDL/SDL.xcodeproj \
 	-configuration Release \
 	-scheme "Static Library"

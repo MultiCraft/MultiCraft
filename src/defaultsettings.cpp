@@ -159,6 +159,8 @@ void set_default_settings()
 	settings->setDefault("keymap_quicktune_dec", "KEY_NEXT");
 	settings->setDefault("keymap_quicktune_inc", "KEY_PRIOR");
 
+	settings->setDefault("keymap_tabb", "KEY_TAB");
+
 	// Visuals
 #ifdef NDEBUG
 	settings->setDefault("show_debug", "false");
@@ -653,7 +655,7 @@ void set_default_settings()
 			g_settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 5.5 && x_inches <= 6.5) {
 			// 7" tablets
-			g_settings->setDefault("hud_scaling", "0.9");
+			g_settings->setDefault("hud_scaling", "0.85");
 			g_settings->setDefault("selectionbox_width", "6");
 		}
 

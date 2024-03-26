@@ -854,8 +854,7 @@ protected:
 	// Misc
 	void limitFps(FpsControl *fps_timings, f32 *dtime);
 
-	void showOverlayMessage(const char *msg, float dtime, int percent,
-			bool draw_clouds = false);
+	void showOverlayMessage(const char *msg, float dtime, int percent);
 
 	static void settingChangedCallback(const std::string &setting_name, void *data);
 	void readSettings();
@@ -1540,7 +1539,7 @@ bool Game::initGui()
 
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui) {
-		g_touchscreengui->init(texture_src);
+		g_touchscreengui->init(texture_src, simple_singleplayer_mode);
 		if (g_touchscreengui->isActive())
 			g_touchscreengui->show();
 	}
@@ -2691,6 +2690,7 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		isKeyDown(KeyType::SPECIAL1),
 		isKeyDown(KeyType::SNEAK),
 		isKeyDown(KeyType::ZOOM),
+		isKeyDown(KeyType::TABB),
 		isKeyDown(KeyType::DIG),
 		isKeyDown(KeyType::PLACE),
 		cam.camera_pitch,
@@ -2714,7 +2714,8 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 			( (u32)(isKeyDown(KeyType::SNEAK)                         & 0x1) << 6) |
 			( (u32)(isKeyDown(KeyType::DIG)                           & 0x1) << 7) |
 			( (u32)(isKeyDown(KeyType::PLACE)                         & 0x1) << 8) |
-			( (u32)(isKeyDown(KeyType::ZOOM)                          & 0x1) << 9)
+			( (u32)(isKeyDown(KeyType::ZOOM)                          & 0x1) << 9) |
+			( (u32)(isKeyDown(KeyType::TABB)                          & 0x1) << 10)
 		);
 
 	LocalPlayer *player = client->getEnv().getLocalPlayer();
@@ -4361,11 +4362,10 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 #endif
 }
 
-void Game::showOverlayMessage(const char *msg, float dtime, int percent, bool draw_clouds)
+void Game::showOverlayMessage(const char *msg, float dtime, int percent)
 {
 	const wchar_t *wmsg = wgettext(msg);
-	RenderingEngine::draw_load_screen(wmsg, guienv, texture_src, dtime, percent,
-		draw_clouds);
+	RenderingEngine::draw_load_screen(wmsg, guienv, texture_src, dtime, percent);
 	delete[] wmsg;
 }
 

@@ -22,9 +22,10 @@ local function buttonbar_formspec(self)
 		return ""
 	end
 
-	local formspec = string.format("background9[%f,%f;%f,%f;%sside_menu_left.png;false;30]",
-			self.pos.x, self.pos.y - 0.1, self.size.x + 0.025, self.size.y + 0.35,
-			defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc)
+	local formspec = "style_type[box;noclip=true]" ..
+			string.format("box[%f,%f;%f,%f;%s]",
+			self.pos.x,self.pos.y ,self.size.x,self.size.y,self.bgcolor) ..
+		"style_type[box;noclip=false]"
 
 	for i=self.startbutton,#self.buttons,1 do
 		local btn_name = self.buttons[i].name
@@ -51,29 +52,17 @@ local function buttonbar_formspec(self)
 			(self.orientation == "horizontal" and
 			(btn_pos.x + self.btn_size <= self.pos.x + self.size.x)) then
 
-			local button = self.buttons[i]
+		local borders="true"
 
-			local borders="true"
+		if self.buttons[i].image ~= nil then
+			borders="false"
+		end
 
-			if button.image ~= nil then
-				borders="false"
-			end
-
-			if button.cdb then
-				formspec = formspec ..
-					btn_style(btn_name) ..
-					("image_button[%f,%f;%f,%f;%s;%s;%s;true;%s]tooltip[%s;%s]"):format(
-						btn_pos.x + 0.1, btn_pos.y + 0.1, self.btn_size - 0.2, self.btn_size - 0.2,
-						defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "btn_download.png",
-						btn_name, button.caption,
-						borders, btn_name, button.tooltip)
-			else
-				formspec = formspec ..
-					("image_button[%f,%f;%f,%f;%s;%s;%s;true;%s]tooltip[%s;%s]"):format(
-						btn_pos.x, btn_pos.y, self.btn_size, self.btn_size,
-						button.image, btn_name, button.caption,
-						borders, btn_name, button.tooltip)
-			end
+		formspec = formspec ..
+			string.format("image_button[%f,%f;%f,%f;%s;%s;%s;true;%s]tooltip[%s;%s]",
+					btn_pos.x, btn_pos.y, self.btn_size, self.btn_size,
+					self.buttons[i].image, btn_name, self.buttons[i].caption,
+					borders, btn_name, self.buttons[i].tooltip)
 		else
 			--print("end of displayable buttons: orientation: " .. self.orientation)
 			--print( "button_end: " .. (btn_pos.y + self.btn_size - (self.btn_size * 0.05)))
@@ -84,55 +73,39 @@ local function buttonbar_formspec(self)
 
 	if (self.have_move_buttons) then
 		local btn_dec_pos = {}
+		btn_dec_pos.x = self.pos.x + (self.btn_size * 0.05)
+		btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
 		local btn_inc_pos = {}
 		local btn_size = {}
 
 		if self.orientation == "horizontal" then
 			btn_size.x = 0.5
 			btn_size.y = self.btn_size
-			btn_dec_pos.x = self.pos.x + (self.btn_size * 0.05)
-			btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
 			btn_inc_pos.x = self.pos.x + self.size.x - 0.5
 			btn_inc_pos.y = self.pos.y + (self.btn_size * 0.05)
 		else
 			btn_size.x = self.btn_size
-			btn_size.y = self.btn_size * 0.5
-			btn_dec_pos.x = self.pos.x + (self.btn_size * 0.05)
-			btn_dec_pos.y = self.pos.y + (self.btn_size * 0.05)
+			btn_size.y = 0.5
 			btn_inc_pos.x = self.pos.x + (self.btn_size * 0.05)
-			btn_inc_pos.y = self.pos.y + self.size.y - (self.btn_size * 0.45)
+			btn_inc_pos.y = self.pos.y + self.size.y - 0.5
 		end
 
-		if self.orientation == "horizontal" then
-			local text_dec = "<"
-			local text_inc = ">"
+		local text_dec = "<"
+		local text_inc = ">"
+		if self.orientation == "vertical" then
+			text_dec = "^"
+			text_inc = "v"
+		end
 
-			formspec = formspec ..
-				("image_button[%f,%f;%f,%f;;btnbar_dec_%s;%s;true;true]"):format(
+		formspec = formspec ..
+			string.format("image_button[%f,%f;%f,%f;;btnbar_dec_%s;%s;true;true]",
 					btn_dec_pos.x, btn_dec_pos.y, btn_size.x, btn_size.y,
 					self.name, text_dec)
 
-			formspec = formspec ..
-				("image_button[%f,%f;%f,%f;;btnbar_inc_%s;%s;true;true]"):format(
+		formspec = formspec ..
+			string.format("image_button[%f,%f;%f,%f;;btnbar_inc_%s;%s;true;true]",
 					btn_inc_pos.x, btn_inc_pos.y, btn_size.x, btn_size.y,
-					self.name, text_inc)
-		else
-			local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
-
-			formspec = formspec ..
-				"style[btnbar_dec_" .. self.name .. ";bgimg=" .. tpath ..
-					"btn_up.png;bgimg_hovered=" .. tpath .. "btn_up_hover.png]" ..
-				("image_button[%f,%f;%f,%f;;btnbar_dec_%s;;true;false]"):format(
-					btn_dec_pos.x, btn_dec_pos.y, btn_size.x, btn_size.y,
-					self.name)
-
-			formspec = formspec ..
-				"style[btnbar_inc_" .. self.name .. ";bgimg=" .. tpath ..
-					"btn_down.png;bgimg_hovered=" .. tpath .. "btn_down_hover.png]" ..
-				("image_button[%f,%f;%f,%f;;btnbar_inc_%s;;true;false]"):format(
-					btn_inc_pos.x, btn_inc_pos.y, btn_size.x, btn_size.y,
-					self.name)
-		end
+					 self.name, text_inc)
 	end
 
 	return formspec
@@ -141,7 +114,7 @@ end
 local function buttonbar_buttonhandler(self, fields)
 
 	if fields["btnbar_inc_" .. self.name] ~= nil and
-		self.startbutton < #self.buttons - 4 then
+		self.startbutton < #self.buttons then
 
 		self.startbutton = self.startbutton + 1
 		return true
@@ -169,7 +142,7 @@ local buttonbar_metatable = {
 
 	delete = function(self) ui.delete(self) end,
 
-	add_button = function(self, name, caption, image, tooltip, cdb)
+	add_button = function(self, name, caption, image, tooltip)
 			if caption == nil then caption = "" end
 			if image == nil then image = "" end
 			if tooltip == nil then tooltip = "" end
@@ -178,8 +151,7 @@ local buttonbar_metatable = {
 				name = name,
 				caption = caption,
 				image = image,
-				tooltip = tooltip,
-				cdb = cdb
+				tooltip = tooltip
 			}
 			if self.orientation == "horizontal" then
 				if ( (self.btn_size * #self.buttons) + (self.btn_size * 0.05 *2)
@@ -217,8 +189,8 @@ function buttonbar_create(name, cbf_buttonhandler, pos, orientation, size)
 	local self = {}
 	self.name = name
 	self.type = "addon"
-	self.bgcolor = "#759ddabf"
-	self.pos = pos
+	self.bgcolor = "#000000"
+	self.pos = {x = pos.x + 1, y = pos.y + 1}
 	self.size = size
 	self.orientation = orientation
 	self.startbutton = 1
