@@ -344,7 +344,7 @@ public:
 
 	float mediaReceiveProgress();
 
-	void afterContentReceived();
+	bool afterContentReceived(bool *connect_aborted);
 
 	float getRTT();
 	float getCurRate();
