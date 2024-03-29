@@ -680,12 +680,15 @@ class LoadScreenEventReceiver : public IEventReceiver
 {
 private:
 	bool *m_connection_aborted;
+	GUIButton *m_cancel_button;
 	IEventReceiver *m_default_event_receiver;
 
 public:
 	LoadScreenEventReceiver(bool *connection_aborted,
+			GUIButton *cancel_button,
 			IEventReceiver *default_event_receiver) {
 		m_connection_aborted = connection_aborted;
+		m_cancel_button = cancel_button;
 		m_default_event_receiver = default_event_receiver;
 	}
 
@@ -712,9 +715,7 @@ public:
 						mouse_event.MouseInput.ButtonStates = 0;
 					}
 
-					IrrlichtDevice* device = RenderingEngine::get_raw_device();
-					device->postEventFromUser(mouse_event);
-					return true;
+					m_cancel_button->OnEvent(mouse_event);
 				}
 			}
 		}
@@ -1550,11 +1551,6 @@ bool Game::initGui()
 
 void Game::initCancelButton()
 {
-	m_old_event_receiver = device->getEventReceiver();
-	m_load_screen_event_receiver =  new LoadScreenEventReceiver(
-			&m_connect_aborted, m_old_event_receiver);
-	device->setEventReceiver(m_load_screen_event_receiver);
-
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
 	float density = RenderingEngine::getDisplayDensity();
 	float gui_scaling = g_settings->getFloat("gui_scaling");
@@ -1575,6 +1571,11 @@ void Game::initCancelButton()
 			gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT);
 
 	delete[] text;
+
+	m_old_event_receiver = device->getEventReceiver();
+	m_load_screen_event_receiver =  new LoadScreenEventReceiver(
+			&m_connect_aborted, m_cancel_button, m_old_event_receiver);
+	device->setEventReceiver(m_load_screen_event_receiver);
 }
 
 void Game::removeCancelButton()
