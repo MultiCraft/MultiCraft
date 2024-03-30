@@ -112,6 +112,11 @@ public:
 				text, guienv, tsrc, dtime, percent);
 	}
 
+	inline static void draw_load_cleanup()
+	{
+		s_singleton->_draw_load_cleanup();
+	}
+
 	inline static void draw_menu_scene(
 			gui::IGUIEnvironment *guienv, ITextureSource *tsrc,
 			float dtime)
@@ -162,6 +167,8 @@ private:
 
 	void _draw_scene(video::SColor skycolor, bool show_hud, bool show_minimap,
 			bool draw_wield_tool, bool draw_crosshair);
+
+	void _draw_load_cleanup();
 
 	void _initialize(Client *client, Hud *hud);
 

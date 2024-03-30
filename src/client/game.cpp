@@ -1209,6 +1209,8 @@ void Game::shutdown()
 
 	showOverlayMessage(N_("Shutting down..."), 0, 100);
 
+	RenderingEngine::draw_load_cleanup();
+
 	if (clouds)
 		clouds->drop();
 
@@ -1385,6 +1387,8 @@ bool Game::createClient(const GameStartData &start_data)
 
 	// Update cached textures, meshes and materials
 	client->afterContentReceived();
+
+	RenderingEngine::draw_load_cleanup();
 
 	/* Camera
 	 */
