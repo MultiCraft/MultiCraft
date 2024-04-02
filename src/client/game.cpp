@@ -1326,7 +1326,8 @@ bool Game::init(
 {
 	texture_src = createTextureSource();
 
-	initCancelButton();
+	if (!simple_singleplayer_mode)
+		initCancelButton();
 
 	showOverlayMessage(N_("Loading..."), 0, 0);
 
