@@ -344,6 +344,7 @@ public:
 
 	float mediaReceiveProgress();
 
+	void drawLoadScreen(const std::wstring &text, float dtime, int percent);
 	bool afterContentReceived(bool *connect_aborted);
 
 	float getRTT();
