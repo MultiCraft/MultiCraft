@@ -63,9 +63,7 @@ Particle::Particle(
 	v2f texpos,
 	v2f texsize,
 	video::SColor color
-):
-	scene::ISceneNode(RenderingEngine::get_scene_manager()->getRootSceneNode(),
-		RenderingEngine::get_scene_manager())
+)
 {
 	// Misc
 	m_gamedef = gamedef;
@@ -103,7 +101,6 @@ Particle::Particle(
 	// Irrlicht stuff
 	const float c = p.size / 2;
 	m_collisionbox = aabb3f(-c, -c, -c, c, c, c);
-	this->setAutomaticCulling(scene::EAC_OFF);
 
 	// Init lighting
 	updateLight();
@@ -112,24 +109,21 @@ Particle::Particle(
 	updateVertices();
 }
 
-void Particle::OnRegisterSceneNode()
+Particle::~Particle()
 {
-	if (IsVisible)
-		SceneManager->registerNodeForRendering(this, scene::ESNRP_TRANSPARENT_EFFECT);
-
-	ISceneNode::OnRegisterSceneNode();
+	if (m_buffer)
+		m_buffer->release(m_index);
 }
 
-void Particle::render()
+bool Particle::attachToBuffer(ParticleBuffer *buffer)
 {
-	video::IVideoDriver *driver = SceneManager->getVideoDriver();
-	driver->setMaterial(m_material);
-	driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
+	auto index = buffer->allocate();
+	if (!index.has_value())
+		return false;
 
-	u16 indices[] = {0,1,2, 2,3,0};
-	driver->drawVertexPrimitiveList(m_vertices, 4,
-			indices, 2, video::EVT_STANDARD,
-			scene::EPT_TRIANGLES, video::EIT_16BIT);
+	m_index = index.value();
+	m_buffer = buffer;
+	return true;
 }
 
 void Particle::step(float dtime)
@@ -198,6 +192,10 @@ void Particle::updateLight()
 
 void Particle::updateVertices()
 {
+	if (!m_buffer)
+		return;
+
+	video::S3DVertex *m_vertices = m_buffer->getVertices(m_index);
 	f32 tx0, tx1, ty0, ty1;
 
 	if (m_animation.type != TAT_NONE) {
@@ -229,7 +227,8 @@ void Particle::updateVertices()
 		0, 0, 0, 0, m_color, tx0, ty0);
 
 	v3s16 camera_offset = m_env->getCameraOffset();
-	for (video::S3DVertex &vertex : m_vertices) {
+	for (u16 i = 0; i < 4; i++) {
+		video::S3DVertex &vertex = m_vertices[i];
 		if (m_vertical) {
 			v3f ppos = m_player->getPosition()/BS;
 			vertex.Pos.rotateXZBy(std::atan2(ppos.Z - m_pos.Z, ppos.X - m_pos.X) /
@@ -238,7 +237,6 @@ void Particle::updateVertices()
 			vertex.Pos.rotateYZBy(m_player->getPitch());
 			vertex.Pos.rotateXZBy(m_player->getYaw());
 		}
-		m_box.addInternalPoint(vertex.Pos);
 		vertex.Pos += m_pos*BS - intToFloat(camera_offset, BS);
 	}
 }
@@ -390,6 +388,111 @@ void ParticleSpawner::step(float dtime, ClientEnvironment *env)
 	ParticleManager
 */
 
+/*
+	ParticleBuffer
+*/
+
+static constexpr u16 quad_indices[] = { 0, 1, 2, 2, 3, 0 };
+
+ParticleBuffer::ParticleBuffer(ClientEnvironment *env,
+	const video::SMaterial &material
+):
+	scene::ISceneNode(RenderingEngine::get_scene_manager()->getRootSceneNode(),
+		RenderingEngine::get_scene_manager()),
+	m_mesh_buffer(make_irr<scene::SMeshBuffer>())
+{
+	m_mesh_buffer->getMaterial() = material;
+}
+
+std::optional<u16> ParticleBuffer::allocate()
+{
+	m_usage_timer = 0;
+
+	if (!m_free_list.empty()) {
+		const u16 index = m_free_list.back();
+		m_free_list.pop_back();
+		auto *vertices = static_cast<video::S3DVertex *>(
+			m_mesh_buffer->getVertices());
+		u16 *indices = m_mesh_buffer->getIndices();
+		// reset vertices, because they are only written in Particle::step()
+		for (u16 i = 0; i < 4; i++)
+			vertices[4 * index + i] = video::S3DVertex();
+		for (u16 i = 0; i < 6; i++)
+			indices[6 * index + i] = 4 * index + quad_indices[i];
+		return index;
+	}
+
+	if (m_count >= MAX_PARTICLES_PER_BUFFER)
+		return std::nullopt;
+
+	// The buffer never shrinks, ParticleManager drops it once it falls idle
+	video::S3DVertex vertices[4] = {};
+	m_mesh_buffer->append(vertices, 4, quad_indices, 6);
+	return m_count++;
+}
+
+void ParticleBuffer::release(u16 index)
+{
+	assert(index < m_count);
+	u16 *indices = m_mesh_buffer->getIndices();
+	for (u16 i = 0; i < 6; i++)
+		indices[6 * index + i] = 0;
+	m_free_list.push_back(index);
+}
+
+video::S3DVertex *ParticleBuffer::getVertices(u16 index)
+{
+	if (index >= m_count)
+		return nullptr;
+	m_bounding_box_dirty = true;
+	return &static_cast<video::S3DVertex *>(m_mesh_buffer->getVertices())[4 * index];
+}
+
+void ParticleBuffer::OnRegisterSceneNode()
+{
+	if (IsVisible)
+		SceneManager->registerNodeForRendering(this,
+			scene::ESNRP_TRANSPARENT_EFFECT);
+
+	scene::ISceneNode::OnRegisterSceneNode();
+}
+
+const aabb3f &ParticleBuffer::getBoundingBox() const
+{
+	if (!m_bounding_box_dirty)
+		return m_mesh_buffer->BoundingBox;
+
+	aabb3f box;
+	for (u16 i = 0; i < m_count; i++) {
+		// a zeroed index marks a slot nobody is using
+		static_assert(quad_indices[1] != 0);
+		if (m_mesh_buffer->getIndices()[6 * i + 1] == 0)
+			continue;
+
+		for (u16 j = 0; j < 4; j++)
+			box.addInternalPoint(m_mesh_buffer->getPosition(i * 4 + j));
+	}
+
+	m_mesh_buffer->BoundingBox = box;
+	m_bounding_box_dirty = false;
+	return m_mesh_buffer->BoundingBox;
+}
+
+void ParticleBuffer::render()
+{
+	if (isEmpty())
+		return;
+
+	video::IVideoDriver *driver = SceneManager->getVideoDriver();
+	driver->setTransform(video::ETS_WORLD, core::IdentityMatrix);
+	driver->setMaterial(m_mesh_buffer->getMaterial());
+	driver->drawMeshBuffer(m_mesh_buffer.get());
+}
+
+/*
+	ParticleManager
+*/
+
 ParticleManager::ParticleManager(ClientEnvironment *env) :
 	m_env(env)
 {}
@@ -403,6 +506,27 @@ void ParticleManager::step(float dtime)
 {
 	stepParticles (dtime);
 	stepSpawners (dtime);
+	stepBuffers (dtime);
+}
+
+void ParticleManager::stepBuffers(float dtime)
+{
+	constexpr float INTERVAL = 0.5f;
+	if (!m_buffer_gc.step(dtime, INTERVAL))
+		return;
+
+	for (size_t i = 0; i < m_particle_buffers.size();) {
+		auto &buffer = m_particle_buffers[i];
+		buffer->m_usage_timer += INTERVAL;
+		if (buffer->isEmpty() && buffer->m_usage_timer > 5.0f) {
+			buffer->remove();
+			buffer = std::move(m_particle_buffers.back());
+			m_particle_buffers.pop_back();
+		} else {
+			i++;
+		}
+	}
+
 }
 
 void ParticleManager::stepSpawners(float dtime)
@@ -424,7 +548,6 @@ void ParticleManager::stepParticles(float dtime)
 	MutexAutoLock lock(m_particle_list_lock);
 	for (auto i = m_particles.begin(); i != m_particles.end();) {
 		if ((*i)->get_expired()) {
-			(*i)->remove();
 			delete *i;
 			i = m_particles.erase(i);
 		} else {
@@ -445,7 +568,6 @@ void ParticleManager::clearAll()
 
 	for(auto i = m_particles.begin(); i != m_particles.end();)
 	{
-		(*i)->remove();
 		delete *i;
 		i = m_particles.erase(i);
 	}
@@ -617,10 +739,40 @@ void ParticleManager::addNodeParticle(IGameDef *gamedef,
 	addParticle(toadd);
 }
 
-void ParticleManager::addParticle(Particle *toadd)
+bool ParticleManager::addParticle(Particle *toadd)
 {
 	MutexAutoLock lock(m_particle_list_lock);
+
+	const video::SMaterial &material = toadd->getParticleMaterial();
+	ParticleBuffer *found = nullptr;
+
+	// shortcut for the common case of many particles of one kind in a row
+	if (!m_particles.empty()) {
+		Particle *last = m_particles.back();
+		if (last->getBuffer() && last->getBuffer()->getMaterial(0) == material)
+			found = last->getBuffer();
+	}
+	if (!found) {
+		for (auto &buffer : m_particle_buffers) {
+			if (buffer->getMaterial(0) == material) {
+				found = buffer.get();
+				break;
+			}
+		}
+	}
+	if (!found) {
+		auto created = make_irr<ParticleBuffer>(m_env, material);
+		found = created.get();
+		m_particle_buffers.push_back(std::move(created));
+	}
+
+	if (!toadd->attachToBuffer(found)) {
+		delete toadd;
+		return false;
+	}
+
 	m_particles.push_back(toadd);
+	return true;
 }
 
 

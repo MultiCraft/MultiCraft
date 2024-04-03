@@ -20,7 +20,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include <iostream>
+#include <optional>
+#include <vector>
 #include "irrlichttypes_extrabloated.h"
+#include "irr_ptr.h"
+#include "util/numeric.h"
 #include "client/tile.h"
 #include "localplayer.h"
 #include "../particles.h"
@@ -31,7 +35,9 @@ class ClientEnvironment;
 struct MapNode;
 struct ContentFeatures;
 
-class Particle : public scene::ISceneNode
+class ParticleBuffer;
+
+class Particle
 {
 	public:
 	Particle(
@@ -44,25 +50,12 @@ class Particle : public scene::ISceneNode
 		v2f texsize,
 		video::SColor color
 	);
-	~Particle() = default;
+	~Particle();
 
-	virtual const aabb3f &getBoundingBox() const
-	{
-		return m_box;
-	}
+	const video::SMaterial &getParticleMaterial() const { return m_material; }
 
-	virtual u32 getMaterialCount() const
-	{
-		return 1;
-	}
-
-	virtual video::SMaterial& getMaterial(u32 i)
-	{
-		return m_material;
-	}
-
-	virtual void OnRegisterSceneNode();
-	virtual void render();
+	ParticleBuffer *getBuffer() const { return m_buffer; }
+	bool attachToBuffer(ParticleBuffer *buffer);
 
 	void step(float dtime);
 
@@ -73,13 +66,14 @@ private:
 	void updateLight();
 	void updateVertices();
 
-	video::S3DVertex m_vertices[4];
+	ParticleBuffer *m_buffer = nullptr;
+	u16 m_index; // index in m_buffer
+
 	float m_time = 0.0f;
 	float m_expiration;
 
 	ClientEnvironment *m_env;
 	IGameDef *m_gamedef;
-	aabb3f m_box;
 	aabb3f m_collisionbox;
 	video::SMaterial m_material;
 	v2f m_texpos;
@@ -102,6 +96,52 @@ private:
 	float m_animation_time = 0.0f;
 	int m_animation_frame = 0;
 	u8 m_glow;
+};
+
+//! Holds the quads of every particle sharing one material, so a whole group is
+//! drawn by a single call instead of one call per particle
+class ParticleBuffer : public scene::ISceneNode
+{
+	friend class ParticleManager;
+public:
+	ParticleBuffer(ClientEnvironment *env, const video::SMaterial &material);
+
+	// for pointer stability
+	DISABLE_CLASS_COPY(ParticleBuffer)
+
+	//! Reserves one more slot for a particle (4 vertices, 6 indices)
+	std::optional<u16> allocate();
+	//! Frees the particle at `index`
+	void release(u16 index);
+
+	//! @return video::S3DVertex[4]
+	video::S3DVertex *getVertices(u16 index);
+
+	inline bool isEmpty() const {
+		return m_free_list.size() == m_count;
+	}
+
+	virtual video::SMaterial &getMaterial(u32 num) {
+		return m_mesh_buffer->getMaterial();
+	}
+	virtual u32 getMaterialCount() const { return 1; }
+
+	virtual const aabb3f &getBoundingBox() const;
+	virtual void render();
+	virtual void OnRegisterSceneNode();
+
+	// we have 16-bit indices
+	static constexpr u16 MAX_PARTICLES_PER_BUFFER = 16000;
+
+private:
+	irr_ptr<scene::SMeshBuffer> m_mesh_buffer;
+	// unused (e.g. expired) particle indices for re-use
+	std::vector<u16> m_free_list;
+	// for automatic deletion when unused for a while, reset on allocate()
+	float m_usage_timer = 0;
+	// total count of contained particles
+	u16 m_count = 0;
+	mutable bool m_bounding_box_dirty = true;
 };
 
 class ParticleSpawner
@@ -173,7 +213,7 @@ protected:
 		ParticleParameters &p, video::ITexture **texture, v2f &texpos,
 		v2f &texsize, video::SColor *color, u8 tilenum = 0);
 
-	void addParticle(Particle* toadd);
+	bool addParticle(Particle* toadd);
 
 private:
 	void addParticleSpawner(u64 id, ParticleSpawner *toadd);
@@ -181,6 +221,7 @@ private:
 
 	void stepParticles(float dtime);
 	void stepSpawners(float dtime);
+	void stepBuffers(float dtime);
 
 	void clearAll();
 
@@ -190,7 +231,10 @@ private:
 	// for server sent spawners.
 	u64 m_next_particle_spawner_id = U32_MAX + 1;
 
+	std::vector<irr_ptr<ParticleBuffer>> m_particle_buffers;
+
 	ClientEnvironment* m_env;
+	IntervalLimiter m_buffer_gc;
 	std::mutex m_particle_list_lock;
 	std::mutex m_spawner_list_lock;
 };
