@@ -1553,14 +1553,31 @@ bool Game::initGui()
 void Game::initCancelButton()
 {
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
-	float density = RenderingEngine::getDisplayDensity();
-	float gui_scaling = g_settings->getFloat("gui_scaling");
-	float scale = density * gui_scaling;
+	double gui_scaling = g_settings->getFloat("gui_scaling");
 
-	int btn_w = 192 * scale;
-	int btn_h = 64 * scale;
+	v2u32 padded_screensize = screensize;
+#if !defined(__ANDROID__) && !defined(__IOS__)
+	padded_screensize.X *= 0.9f;
+	padded_screensize.Y *= 0.9f;
+#endif
+
+#ifdef HAVE_TOUCHSCREENGUI
+	// In Android, the preferred imgsize should be larger to accommodate the
+	// smaller screensize.
+	double prefer_imgsize = padded_screensize.Y / 10 * gui_scaling;
+
+	// Try to fit 13 coordinates on large tablets.
+	if (RenderingEngine::isTablet())
+		prefer_imgsize = padded_screensize.Y / 13 * gui_scaling;
+#else
+	// Desktop computers have more space, so try to fit 15 coordinates.
+	double prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
+#endif
+
+	int btn_w = 4.75 * prefer_imgsize;
+	int btn_h = 0.9 * prefer_imgsize;
 	int btn_pos_x = (screensize.X - btn_w) / 2;
-	int btn_pos_y = screensize.Y / 2 + 64 * scale;
+	int btn_pos_y = screensize.Y / 2 + 0.9 * prefer_imgsize;
 	core::rect<s32> rect = core::rect<s32>(btn_pos_x, btn_pos_y,
 			btn_pos_x + btn_w, btn_pos_y + btn_h);
 	const wchar_t* text = wgettext("Cancel");
