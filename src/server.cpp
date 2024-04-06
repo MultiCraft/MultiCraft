@@ -3914,3 +3914,14 @@ Translations *Server::getTranslationLanguage(const std::string &lang_code)
 
 	return translations;
 }
+
+std::unordered_map<std::string, std::string> Server::getMediaList()
+{
+	MutexAutoLock env_lock(m_env_mutex);
+
+	std::unordered_map<std::string, std::string> ret;
+	for (auto &it : m_media) {
+		ret.emplace(base64_decode(it.second.sha1_digest), it.second.path);
+	}
+	return ret;
+}
