@@ -680,15 +680,15 @@ const int ID_cancelButton = 1000;
 class LoadScreenEventReceiver : public IEventReceiver
 {
 private:
-	bool *m_connection_aborted;
+	bool *m_connect_aborted;
 	GUIButton *m_cancel_button;
 	IEventReceiver *m_default_event_receiver;
 
 public:
-	LoadScreenEventReceiver(bool *connection_aborted,
+	LoadScreenEventReceiver(bool *connect_aborted,
 			GUIButton *cancel_button,
 			IEventReceiver *default_event_receiver) {
-		m_connection_aborted = connection_aborted;
+		m_connect_aborted = connect_aborted;
 		m_cancel_button = cancel_button;
 		m_default_event_receiver = default_event_receiver;
 	}
@@ -724,7 +724,7 @@ public:
 		if (event.EventType == EET_GUI_EVENT) {
 			if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
 				if (event.GUIEvent.Caller->getID() == ID_cancelButton) {
-					*m_connection_aborted = true;
+					*m_connect_aborted = true;
 					return true;
 				}
 			}
@@ -1427,7 +1427,7 @@ void Game::copyServerClientCache()
 {
 	// It would be possible to let the client directly read the media files
 	// from where the server knows they are. But aside from being more complicated
-	// it would also *not* fill the media cache and cause slower joining of 
+	// it would also *not* fill the media cache and cause slower joining of
 	// remote servers.
 	// (Imagine that you launch a game once locally and then connect to a server.)
 
@@ -1483,7 +1483,7 @@ bool Game::createClient(const GameStartData &start_data)
 	shader_src->addShaderConstantSetterFactory(scsf);
 
 	// Update cached textures, meshes and materials
-	if (!client->afterContentReceived(&m_connect_aborted)) {
+	if (!client->afterContentReceived()) {
 		infostream << "Connect aborted [Escape]" << std::endl;
 		return false;
 	}
@@ -1683,6 +1683,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 			connect_address.isIPv6(), m_game_ui.get());
 
 	client->m_simple_singleplayer_mode = simple_singleplayer_mode;
+	client->m_connect_aborted = &m_connect_aborted;
 
 	infostream << "Connecting to server at ";
 	connect_address.print(&infostream);

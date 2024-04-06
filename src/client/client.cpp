@@ -1779,9 +1779,14 @@ float Client::mediaReceiveProgress()
 	return 1.0; // downloader only exists when not yet done
 }
 
-void Client::drawLoadScreen(const std::wstring &text, float dtime, int percent) {
-	RenderingEngine::run();
+bool Client::drawLoadScreen(const std::wstring &text, float dtime, int percent) {
+	bool result = RenderingEngine::run();
+
+	if (!result || *m_connect_aborted)
+		return false;
+
 	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, percent);
+	return true;
 }
 
 typedef struct TextureUpdateArgs {
@@ -1816,7 +1821,7 @@ void texture_update_progress(void *args, u32 progress, u32 max_progress)
 		}
 }
 
-bool Client::afterContentReceived(bool *connect_aborted)
+bool Client::afterContentReceived()
 {
 	infostream<<"Client::afterContentReceived() started"<<std::endl;
 	assert(m_itemdef_received); // pre-condition
@@ -1838,7 +1843,7 @@ bool Client::afterContentReceived(bool *connect_aborted)
 
 	bool result = RenderingEngine::run();
 
-	if (!result || *connect_aborted)
+	if (!result || *m_connect_aborted)
 		return false;
 
 	// Rebuild shaders
@@ -1850,7 +1855,7 @@ bool Client::afterContentReceived(bool *connect_aborted)
 
 	result = RenderingEngine::run();
 
-	if (!result || *connect_aborted)
+	if (!result || *m_connect_aborted)
 		return false;
 
 	// Update node aliases
@@ -1869,7 +1874,7 @@ bool Client::afterContentReceived(bool *connect_aborted)
 
 	result = RenderingEngine::run();
 
-	if (!result || *connect_aborted)
+	if (!result || *m_connect_aborted)
 		return false;
 
 	// Update node textures and assign shaders to each tile
@@ -1880,10 +1885,10 @@ bool Client::afterContentReceived(bool *connect_aborted)
 	tu_args.last_percent = 0;
 	tu_args.text_base =  wgettext("Initializing nodes");
 	tu_args.tsrc = m_tsrc;
-	result = m_nodedef->updateTextures(this, texture_update_progress, &tu_args, connect_aborted);
+	result = m_nodedef->updateTextures(this, texture_update_progress, &tu_args);
 	delete[] tu_args.text_base;
 
-	if (!result || *connect_aborted)
+	if (!result || *m_connect_aborted)
 		return false;
 
 	// Start mesh update thread after setting up content definitions

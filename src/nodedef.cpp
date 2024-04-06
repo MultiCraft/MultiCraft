@@ -1433,7 +1433,7 @@ void NodeDefManager::applyTextureOverrides(const std::vector<TextureOverride> &o
 
 bool NodeDefManager::updateTextures(IGameDef *gamedef,
 	void (*progress_callback)(void *progress_args, u32 progress, u32 max_progress),
-	void *progress_callback_args, bool *connect_aborted)
+	void *progress_callback_args)
 {
 #ifndef SERVER
 	infostream << "NodeDefManager::updateTextures(): Updating "
@@ -1456,7 +1456,7 @@ bool NodeDefManager::updateTextures(IGameDef *gamedef,
 
 		bool result = RenderingEngine::run();
 
-		if (!result || *connect_aborted)
+		if (!result || *(client->m_connect_aborted))
 			return false;
 	}
 

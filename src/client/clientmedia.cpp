@@ -211,7 +211,11 @@ void ClientMediaDownloader::initialStep(Client *client)
 		u64 cur_time = porting::getTimeMs();
 		u64 dtime = porting::getDeltaMs(last_time, cur_time);
 		if (dtime >= chunk_time_ms) {
-			client->drawLoadScreen(loading_text, dtime / 1000.0f, 30);
+			bool result = client->drawLoadScreen(loading_text, dtime / 1000.0f, 30);
+
+			if (!result)
+				break;
+
 			last_time = cur_time;
 		}
 	}
