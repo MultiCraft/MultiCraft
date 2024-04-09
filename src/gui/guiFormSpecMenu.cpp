@@ -543,10 +543,17 @@ void GUIFormSpecMenu::parseList(parserData *data, const std::string &element)
 		video::ITexture *bgimg_pressed = style.getTexture(StyleSpec::BGIMG_PRESSED, m_tsrc, nullptr);
 		core::rect<s32> bgimg_middle = style.getRect(StyleSpec::BGIMG_MIDDLE, core::rect<s32>());
 
+		video::ITexture *fgimg = style.getTexture(StyleSpec::FGIMG, m_tsrc, nullptr);
+		video::ITexture *fgimg_hovered = style.getTexture(StyleSpec::FGIMG_HOVERED, m_tsrc, nullptr);
+		video::ITexture *fgimg_pressed = style.getTexture(StyleSpec::FGIMG_PRESSED, m_tsrc, nullptr);
+		core::rect<s32> fgimg_middle = style.getRect(StyleSpec::FGIMG_MIDDLE, core::rect<s32>());
+		bool fgimg_when_full = style.getBool(StyleSpec::FGIMG_WHEN_FULL, false);
+
 		GUIInventoryList *e = new GUIInventoryList(Environment, data->current_parent,
 				spec.fid, rect, m_invmgr, loc, listname, geom, start_i,
 				v2s32(slot_size.X, slot_size.Y), slot_spacing, bgimg, bgimg_hovered,
-				bgimg_pressed, bgimg_middle, this, data->inventorylist_options, m_font);
+				bgimg_pressed, bgimg_middle, fgimg_when_full, fgimg, fgimg_hovered, fgimg_pressed,
+				fgimg_middle, this, data->inventorylist_options, m_font);
 
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
 

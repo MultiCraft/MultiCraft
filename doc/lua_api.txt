@@ -2917,6 +2917,11 @@ Some types may inherit styles from parent types.
     * bgimg_hovered - hovered slot background image.
     * bgimg_pressed - pressed slot background image.
     * bgimg_middle - Makes the bgimg textures render in 9-sliced mode and defines the middle rect.
+    * fgimg - slot foreground image. Only visible when slot is empty. Defaults to none.
+    * fgimg_hovered - hovered slot foreground image.
+    * fgimg_pressed - pressed slot foreground image.
+    * fgimg_middle - Makes the fgimg textures render in 9-sliced mode and defines the middle rect.
+    * fgimg_when_full - When true, makes fgimg appear when an item is in the slot instead of when the slot is empty. Defaults to false. Intended to be used to make compatibility with older versions easier.
 * image_button (additional properties)
     * fgimg - standard image. Defaults to none.
     * fgimg_hovered - image when hovered. Defaults to fgimg when not provided.
