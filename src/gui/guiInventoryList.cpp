@@ -38,6 +38,11 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	video::ITexture* slotbg_h_texture,
 	video::ITexture* slotbg_p_texture,
 	const core::rect<s32> &slotbg_middle,
+	const bool fgimg_when_full,
+	video::ITexture* slotfg_n_texture,
+	video::ITexture* slotfg_h_texture,
+	video::ITexture* slotfg_p_texture,
+	const core::rect<s32> &slotfg_middle,
 	GUIFormSpecMenu *fs_menu,
 	const Options &options,
 	gui::IGUIFont *font) :
@@ -53,6 +58,11 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	m_slotbg_h_texture(slotbg_h_texture),
 	m_slotbg_p_texture(slotbg_p_texture),
 	m_slotbg_middle(slotbg_middle),
+	m_fgimg_when_full(fgimg_when_full),
+	m_slotfg_n_texture(slotfg_n_texture),
+	m_slotfg_h_texture(slotfg_h_texture),
+	m_slotfg_p_texture(slotfg_p_texture),
+	m_slotfg_middle(slotfg_middle),
 	m_fs_menu(fs_menu),
 	m_options(options),
 	m_font(font),
@@ -60,6 +70,33 @@ GUIInventoryList::GUIInventoryList(gui::IGUIEnvironment *env,
 	m_pressed(false),
 	m_already_warned(false)
 {
+}
+
+void GUIInventoryList::drawSlotBg(const core::rect<s32> rect,
+		const bool hovering, video::ITexture* normal,
+		video::ITexture* hovered, video::ITexture* pressed,
+		const core::rect<s32> middle)
+{
+	video::ITexture *texture = normal;
+	if (hovering) {
+		if (m_pressed && pressed)
+			texture = pressed;
+		else if (hovered)
+			texture = hovered;
+	}
+
+	video::IVideoDriver *driver = Environment->getVideoDriver();
+	core::rect<s32> srcrect(core::position2d<s32>(0, 0),
+							core::dimension2di(texture->getOriginalSize()));
+	if (middle.getArea() == 0) {
+		const video::SColor color(255, 255, 255, 255);
+		const video::SColor colors[] = {color, color, color, color};
+		draw2DImageFilterScaled(driver, texture, rect, srcrect,
+								&AbsoluteClippingRect, colors, true);
+	} else {
+		draw2DImage9Slice(driver, texture, rect, srcrect, middle,
+						  &AbsoluteClippingRect);
+	}
 }
 
 void GUIInventoryList::draw()
@@ -120,25 +157,8 @@ void GUIInventoryList::draw()
 
 		// layer 0
 		if (m_slotbg_n_texture) {
-			video::ITexture *texture = m_slotbg_n_texture;
-			if (hovering) {
-				if (m_pressed && m_slotbg_p_texture)
-					texture = m_slotbg_p_texture;
-				else if (m_slotbg_h_texture)
-					texture = m_slotbg_h_texture;
-			}
-
-			core::rect<s32> srcrect(core::position2d<s32>(0, 0),
-									core::dimension2di(texture->getOriginalSize()));
-			if (m_slotbg_middle.getArea() == 0) {
-				const video::SColor color(255, 255, 255, 255);
-				const video::SColor colors[] = {color, color, color, color};
-				draw2DImageFilterScaled(driver, texture, rect, srcrect,
-					&AbsoluteClippingRect, colors, true);
-			} else {
-				draw2DImage9Slice(driver, texture, rect, srcrect, m_slotbg_middle,
-					&AbsoluteClippingRect);
-			}
+			drawSlotBg(rect, hovering, m_slotbg_n_texture, m_slotbg_h_texture,
+				m_slotbg_p_texture, m_slotbg_middle);
 		} else {
 			if (hovering) {
 				driver->draw2DRectangle(m_options.slotbg_h, rect, &AbsoluteClippingRect);
@@ -175,6 +195,12 @@ void GUIInventoryList::draw()
 		if (selected)
 			item.takeItem(m_fs_menu->getSelectedAmount());
 
+		if (m_slotfg_n_texture && m_fgimg_when_full != item.empty()) {
+			drawSlotBg(rect, hovering, m_slotfg_n_texture, m_slotfg_h_texture,
+				m_slotfg_p_texture, m_slotfg_middle);
+		}
+
+		// layer 2
 		if (!item.empty()) {
 			// Draw item stack
 			drawItemStack(driver, m_font, item, rect, &AbsoluteClippingRect,

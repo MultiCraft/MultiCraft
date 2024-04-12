@@ -48,6 +48,7 @@ public:
 		FGIMG_HOVERED, // Note: Deprecated property
 		FGIMG_MIDDLE,
 		FGIMG_PRESSED, // Note: Deprecated property
+		FGIMG_WHEN_FULL,
 		ALPHA,
 		CONTENT_OFFSET,
 		PADDING,
@@ -139,6 +140,8 @@ public:
 			return FGIMG_MIDDLE;
 		} else if (name == "fgimg_pressed") {
 			return FGIMG_PRESSED;
+		} else if (name == "fgimg_when_full") {
+			return FGIMG_WHEN_FULL;
 		} else if (name == "alpha") {
 			return ALPHA;
 		} else if (name == "content_offset") {
