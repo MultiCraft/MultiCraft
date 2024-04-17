@@ -180,7 +180,7 @@ void ClientMediaDownloader::step(Client *client)
 
 void ClientMediaDownloader::initialStep(Client *client)
 {
-	std::wstring loading_text = wgettext("Media...");
+	const wchar_t *loading_text = wgettext("Media...");
 	// Tradeoff between responsiveness during media loading and media loading speed
 	const u64 chunk_time_ms = 33;
 	u64 last_time = porting::getTimeMs();
@@ -216,6 +216,7 @@ void ClientMediaDownloader::initialStep(Client *client)
 		}
 	}
 
+	delete[] loading_text;
 	assert(m_uncached_received_count == 0);
 
 	// If we found all files in the cache, report this fact to the server.
