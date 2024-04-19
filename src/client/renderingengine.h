@@ -138,6 +138,8 @@ public:
 
 	inline static void finalize() { s_singleton->_finalize(); }
 
+	inline static void clear_irrlicht_texture_cache() { s_singleton->_clear_irrlicht_texture_cache(); }
+
 	static bool run()
 	{
 		sanity_check(s_singleton && s_singleton->m_device);
@@ -173,6 +175,8 @@ private:
 	void _initialize(Client *client, Hud *hud);
 
 	void _finalize();
+
+	void _clear_irrlicht_texture_cache();
 
 	std::unique_ptr<RenderingCore> core;
 	irr::IrrlichtDevice *m_device = nullptr;

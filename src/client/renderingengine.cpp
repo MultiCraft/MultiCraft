@@ -730,6 +730,29 @@ void RenderingEngine::_finalize()
 	core.reset();
 }
 
+void RenderingEngine::_clear_irrlicht_texture_cache()
+{
+	for (u32 i = 0; i < driver->getTextureCount(); i++) {
+		irr::video::ITexture *texture = driver->getTextureByIndex(i);
+
+		if (texture) {
+			std::string filename = texture->getName().getPath().c_str();
+
+			const char *image_ext[] = {
+				".png", ".jpg", ".bmp", ".tga",
+				".pcx", ".ppm", ".psd", ".wal", ".rgb",
+				NULL
+			};
+
+			std::string name = removeStringEnd(filename, image_ext);
+
+			if (!name.empty()) {
+				driver->removeTexture(texture);
+			}
+		}
+	}
+}
+
 void RenderingEngine::_draw_scene(video::SColor skycolor, bool show_hud,
 		bool show_minimap, bool draw_wield_tool, bool draw_crosshair)
 {

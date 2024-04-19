@@ -257,6 +257,8 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 				break;
 			}
 
+			RenderingEngine::clear_irrlicht_texture_cache();
+
 			RenderingEngine::get_video_driver()->setTextureCreationFlag(
 					video::ETCF_CREATE_MIP_MAPS, g_settings->getBool("mip_map"));
 
