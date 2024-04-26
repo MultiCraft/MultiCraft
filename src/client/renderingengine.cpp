@@ -180,6 +180,7 @@ RenderingEngine::~RenderingEngine()
 {
 	core.reset();
 	m_device->closeDevice();
+	m_device->drop();
 	s_singleton = nullptr;
 }
 
