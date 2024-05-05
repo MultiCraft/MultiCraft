@@ -494,8 +494,12 @@ void set_default_settings()
 	settings->setDefault("display_density_factor", "1");
 
 #ifndef SERVER
-	settings->setDefault("device_is_tablet", std::to_string(RenderingEngine::isTablet()));
+	bool isTablet = RenderingEngine::isTablet();
+	settings->setDefault("device_is_tablet", std::to_string(isTablet));
 #endif
+
+	float memoryMax = porting::getTotalSystemMemory() / 1024;
+	settings->setDefault("convert_to_16bit", std::to_string(memoryMax <= 2));
 
 	// Altered settings for macOS
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
@@ -538,15 +542,13 @@ void set_default_settings()
 	settings->setDefault("autosave_screensize", "false");
 	settings->setDefault("recent_chat_messages", "6");
 
-	if (RenderingEngine::isTablet()) {
+	if (isTablet) {
 		settings->setDefault("recent_chat_messages", "8");
 		settings->setDefault("console_message_height", "0.4");
 	}
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
 #ifdef __ANDROID__
-	float memoryMax = porting::getTotalSystemMemory() / 1024;
-
 	if (memoryMax < 2) {
 		// minimal settings for less than 2GB RAM
 #elif __IOS__

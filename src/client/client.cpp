@@ -137,6 +137,7 @@ Client::Client(
 	m_round_screen = g_settings->getU16("round_screen");
 	m_hud_scaling = g_settings->getFloat("hud_scaling");
 	m_inv_item_anim_enabled = g_settings->getBool("inventory_items_animations");
+	m_convert_to_16bit = g_settings->getBool("convert_to_16bit");
 }
 
 void Client::loadMods()
@@ -735,8 +736,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 		}
 
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
-		float memoryMax = porting::getTotalSystemMemory() / 1024;
-		if (memoryMax <= 2) {
+		if (getConvertTo16bitEnabled()) {
 			irr::video::ECOLOR_FORMAT format = img->getColorFormat();
 			irr::video::ECOLOR_FORMAT new_format = irr::video::ECF_UNKNOWN;
 
