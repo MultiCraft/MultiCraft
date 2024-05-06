@@ -762,7 +762,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 				}
 			}
 
-			s32 max_texture_size = g_settings->getS32("max_texture_size");
+			u32 max_texture_size = g_settings->getU32("max_texture_size");
 
 			if (max_texture_size > 0) {
 				if (new_dimensions.Width > max_texture_size &&
@@ -774,7 +774,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 				}
 			}
 
-			s32 decrease_texture_size = g_settings->getS32("decrease_texture_size");
+			u32 decrease_texture_size = g_settings->getU32("decrease_texture_size");
 
 			if (decrease_texture_size > 0) {
 				if (new_dimensions.Width > decrease_texture_size &&
