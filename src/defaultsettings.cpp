@@ -537,11 +537,15 @@ void set_default_settings()
 	// Convert textures for media files to 16 bit format
 	settings->setDefault("convert_to_16bit", "false");
 
+	// Allow the irrlicht driver to keep a copy of the texture in memory
+	settings->setDefault("allow_memory_copy", "true");
+
 	float memoryMax = porting::getTotalSystemMemory() / 1024;
 	if (memoryMax <= 2) {
 		settings->setDefault("max_texture_size", "256");
 		settings->setDefault("decrease_texture_size", "64");
 		settings->setDefault("convert_to_16bit", "true");
+		settings->setDefault("allow_memory_copy", "false");
 	}
 
 	// Mobile Platform
