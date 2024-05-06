@@ -542,8 +542,8 @@ void set_default_settings()
 
 	float memoryMax = porting::getTotalSystemMemory() / 1024;
 	if (memoryMax <= 2) {
-		settings->setDefault("max_texture_size", "256");
-		settings->setDefault("decrease_texture_size", "64");
+		//settings->setDefault("max_texture_size", "256");
+		//settings->setDefault("decrease_texture_size", "64");
 		settings->setDefault("convert_to_16bit", "true");
 		settings->setDefault("allow_memory_copy", "false");
 	}
