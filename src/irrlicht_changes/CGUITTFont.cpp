@@ -30,6 +30,7 @@
 */
 
 #include <irrlicht.h>
+#include <cstring>
 #include <iostream>
 #include "CGUITTFont.h"
 
@@ -148,7 +149,25 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Bitmap& bits, video::IVide
 			image->unlock();
 			break;
 		}
+		case FT_PIXEL_MODE_BGRA:
+		{
+			texture_size = d.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
+			image = driver->createImage(video::ECF_A8R8G8B8, texture_size);
+			image->fill(video::SColor(0, 255, 255, 255));
+
+			const u32 image_pitch = image->getPitch();
+			u8* image_data = (u8*)image->lock();
+			u8* glyph_data = bits.buffer;
+			for (s32 y = 0; y < (s32)bits.rows; ++y)
+			{
+				std::memcpy((void*)(&image_data[y * image_pitch]), glyph_data, bits.width * 4);
+				glyph_data += bits.pitch;
+			}
+			image->unlock();
+			break;
+		}
 		default:
+
 			// TODO: error message?
 			return 0;
 	}
@@ -168,6 +187,11 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 		return;
 
 	FT_GlyphSlot glyph = face->glyph;
+
+	if (FT_HAS_COLOR(face)) {
+		FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
+	}
+
 	FT_Bitmap bits = glyph->bitmap;
 
 	// Setup the glyph information here:
@@ -872,7 +896,13 @@ u32 CGUITTFont::getGlyphIndexByChar(uchar32_t c) const
 			SGUITTGlyph* glyph = Glyphs[tt_offset + char_index - 1];
 			if (!glyph->isLoaded)
 			{
-				glyph->preload(char_index, tt_face, Driver, size, load_flags);
+				FT_Int32 flags = load_flags;
+				if (FT_HAS_COLOR(tt_face))
+					flags |= FT_LOAD_COLOR;
+				else
+					flags |= FT_LOAD_RENDER;
+				    
+				glyph->preload(char_index, tt_face, Driver, size, flags);
 				Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
 			}
 		}

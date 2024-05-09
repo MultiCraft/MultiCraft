@@ -329,7 +329,7 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold", MultiCraftFont);
 	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
 
-	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "NotoEmoji.ttf"));
+	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "SegoeUIEmoji.ttf"));
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallbackFull.ttf"));

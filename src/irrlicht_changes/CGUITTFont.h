@@ -357,7 +357,7 @@ namespace gui
 			void update_load_flags()
 			{
 				// Set up our loading flags.
-				load_flags = FT_LOAD_DEFAULT | FT_LOAD_RENDER;
+				load_flags = FT_LOAD_DEFAULT;
 				if (!useHinting()) load_flags |= FT_LOAD_NO_HINTING;
 				if (!useAutoHinting()) load_flags |= FT_LOAD_NO_AUTOHINT;
 				if (useMonochrome()) load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_TARGET_MONO;
