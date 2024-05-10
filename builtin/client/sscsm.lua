@@ -227,6 +227,15 @@ do
 			key ~= "password"
 	end
 
+	-- Modifying settings is dangerous, only allow changing a few settings that
+	-- are guaranteed to be safe.
+	local set_bool_allowed = {
+		free_move = true,
+		pitch_move = true,
+		fast_move = true,
+		noclip = true,
+	}
+
 	t.settings = {
 		get = function(_, key)
 			if setting_safe(key) then
@@ -238,6 +247,12 @@ do
 				return core_settings:get_bool(key, default)
 			end
 		end,
+
+		set_bool = function(_, key, value)
+			if set_bool_allowed[key] then
+				core.settings:set_bool(key, value and true or false)
+			end
+		end
 	}
 
 	env:set_copy("minetest", t)
