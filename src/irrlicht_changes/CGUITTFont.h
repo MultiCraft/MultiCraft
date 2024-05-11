@@ -77,7 +77,7 @@ namespace gui
 		void unload();
 
 		//! Creates the IImage object from the FT_Bitmap.
-		video::IImage* createGlyphImage(const FT_Bitmap& bits, video::IVideoDriver* driver) const;
+		video::IImage* createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const;
 
 		//! If true, the glyph has been loaded.
 		bool isLoaded;

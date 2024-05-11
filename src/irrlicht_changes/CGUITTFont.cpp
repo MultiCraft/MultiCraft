@@ -80,7 +80,7 @@ inline void checkFontBitmapSize(const FT_Bitmap &bits)
 	}
 }
 
-video::IImage* SGUITTGlyph::createGlyphImage(const FT_Bitmap& bits, video::IVideoDriver* driver) const
+video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const
 {
 	// Make sure our casts to s32 in the loops below will not cause problems
 	checkFontBitmapSize(bits);
@@ -164,6 +164,21 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Bitmap& bits, video::IVide
 				glyph_data += bits.pitch;
 			}
 			image->unlock();
+			
+			int font_size = parent->getFontSize();
+			
+			if (face->num_fixed_sizes > 0 && face->available_sizes[0].height > font_size) {
+				float scale = (float)font_size / face->available_sizes[0].height;
+				
+				core::dimension2du d_new(bits.width * scale + 1, bits.rows * scale + 1);
+				core::dimension2du texture_size_new = d_new.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
+				
+				irr::video::IImage* scaled_img = driver->createImage(video::ECF_A8R8G8B8, texture_size_new);
+				image->copyToScaling(scaled_img);
+				image->drop();
+				image = scaled_img;
+			}
+			
 			break;
 		}
 		default:
@@ -178,9 +193,16 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 {
 	if (isLoaded) return;
 
+	float scale = 1.0f;
+
 	// Set the size of the glyph.
 	FT_Set_Pixel_Sizes(face, 0, font_size);
 
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+		scale = (float)font_size / face->available_sizes[0].height;
+		FT_Select_Size(face, 0);
+	}
+	
 	// Attempt to load the glyph.
 	if (FT_Load_Glyph(face, char_index, loadFlags) != FT_Err_Ok)
 		// TODO: error message?
@@ -188,7 +210,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 
 	FT_GlyphSlot glyph = face->glyph;
 
-	if (FT_HAS_COLOR(face)) {
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
 		FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
 	}
 
@@ -196,13 +218,15 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 
 	// Setup the glyph information here:
 	advance = glyph->advance;
-	offset = core::vector2di(glyph->bitmap_left, glyph->bitmap_top);
+	advance.x *= scale;
+	advance.y *= scale;
+	offset = core::vector2di(glyph->bitmap_left * scale, glyph->bitmap_top * scale);
 
 	// Try to get the last page with available slots.
 	CGUITTGlyphPage* page = parent->getLastGlyphPage();
 
 	if (page) {
-		if (page->used_width + bits.width > page->texture->getOriginalSize().Width) {
+		if (page->used_width + bits.width * scale > page->texture->getOriginalSize().Width) {
 			page->used_width = 0;
 			page->used_height += page->line_height;
 			page->line_height = 0;
@@ -222,14 +246,14 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 	
 	core::vector2di page_position(page->used_width, page->used_height);
 	source_rect.UpperLeftCorner = page_position;
-	source_rect.LowerRightCorner = core::vector2di(page_position.X + bits.width, page_position.Y + bits.rows);
+	source_rect.LowerRightCorner = core::vector2di(page_position.X + bits.width * scale, page_position.Y + bits.rows * scale);
 
 	page->dirty = true;
-	page->used_width += bits.width;
-	page->line_height = std::max(page->line_height, bits.rows);
+	page->used_width += bits.width * scale;
+	page->line_height = std::max(page->line_height, (u32)(bits.rows * scale));
 
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
-	surface = createGlyphImage(bits, driver);
+	surface = createGlyphImage(face, bits, driver);
 
 	// Set our glyph as loaded.
 	isLoaded = true;
