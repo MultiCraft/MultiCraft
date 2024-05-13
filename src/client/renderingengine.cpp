@@ -162,6 +162,9 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 #endif
 	driver = m_device->getVideoDriver();
 
+	bool allow_memory_copy = g_settings->getBool("allow_memory_copy");
+	driver->setTextureCreationFlag(irr::video::ETCF_ALLOW_MEMORY_COPY, allow_memory_copy);
+
 	s_singleton = this;
 
 	auto skin = createSkin(m_device->getGUIEnvironment(),

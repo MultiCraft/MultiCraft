@@ -527,6 +527,27 @@ void set_default_settings()
 	settings->setDefault("fast_move", "true");
 #endif
 
+	// Set max texture size for media files loaded in game. 0 = no limit
+	settings->setDefault("max_texture_size", "0");
+
+	// Decrease texture size for media files that are larger than specified
+	// value. 0 = disabled
+	settings->setDefault("decrease_texture_size", "0");
+
+	// Convert textures for media files to 16 bit format
+	settings->setDefault("convert_to_16bit", "false");
+
+	// Allow the irrlicht driver to keep a copy of the texture in memory
+	settings->setDefault("allow_memory_copy", "true");
+
+	float memoryMax = porting::getTotalSystemMemory() / 1024;
+	if (memoryMax <= 2) {
+		//settings->setDefault("max_texture_size", "256");
+		//settings->setDefault("decrease_texture_size", "64");
+		settings->setDefault("convert_to_16bit", "true");
+		settings->setDefault("allow_memory_copy", "false");
+	}
+
 	// Mobile Platform
 #if defined(__ANDROID__) || defined(__IOS__)
 	settings->setDefault("fullscreen", "true");
@@ -545,8 +566,6 @@ void set_default_settings()
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
 #ifdef __ANDROID__
-	float memoryMax = porting::getTotalSystemMemory() / 1024;
-
 	if (memoryMax < 2) {
 		// minimal settings for less than 2GB RAM
 #elif __IOS__

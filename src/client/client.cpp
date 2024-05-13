@@ -735,38 +735,69 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 		}
 
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
-		float memoryMax = porting::getTotalSystemMemory() / 1024;
-		if (memoryMax <= 2) {
 			irr::video::ECOLOR_FORMAT format = img->getColorFormat();
-			irr::video::ECOLOR_FORMAT new_format = irr::video::ECF_UNKNOWN;
+			irr::video::ECOLOR_FORMAT new_format = format;
 
-			if (format == irr::video::ECF_R8G8B8) {
-				new_format = irr::video::ECF_R5G6B5;
-			} else if (format == irr::video::ECF_A8R8G8B8) {
-				bool can_convert = true;
+			core::dimension2du dimensions = img->getDimension();
+			core::dimension2du new_dimensions = dimensions;
 
-				u32 data_size = img->getImageDataSizeInBytes();
-				u8 *data = (u8*) img->getData();
-				for (u32 i = 0; i < data_size; i += 4) {
-					u8 alpha = data[i + 3];
-					if (alpha > 0 && alpha < 255) {
-						can_convert = false;
-						break;
+			if (g_settings->getBool("convert_to_16bit")) {
+				if (format == irr::video::ECF_R8G8B8) {
+					new_format = irr::video::ECF_R5G6B5;
+				} else if (format == irr::video::ECF_A8R8G8B8) {
+					bool can_convert = true;
+
+					u32 data_size = img->getImageDataSizeInBytes();
+					u8 *data = (u8*) img->getData();
+					for (u32 i = 0; i < data_size; i += 4) {
+						u8 alpha = data[i + 3];
+						if (alpha > 0 && alpha < 255) {
+							can_convert = false;
+							break;
+						}
 					}
-				}
 
-				if (can_convert)
-					new_format = irr::video::ECF_A1R5G5B5;
+					if (can_convert)
+						new_format = irr::video::ECF_A1R5G5B5;
+				}
 			}
 
-			if (new_format != irr::video::ECF_UNKNOWN) {
-				core::dimension2du dimensions = img->getDimension();
-				irr::video::IImage* converted_img = vdrv->createImage(new_format, dimensions);
-				img->copyTo(converted_img, core::position2d<s32>(0, 0));
+			u32 max_texture_size = g_settings->getU32("max_texture_size");
+
+			if (max_texture_size > 0) {
+				if (new_dimensions.Width > max_texture_size &&
+						new_dimensions.Height > max_texture_size) {
+					float scale = (float)max_texture_size /
+							std::min(new_dimensions.Width, new_dimensions.Height);
+					new_dimensions.Width *= scale;
+					new_dimensions.Height *= scale;
+				}
+			}
+
+			u32 decrease_texture_size = g_settings->getU32("decrease_texture_size");
+
+			if (decrease_texture_size > 0) {
+				if (new_dimensions.Width > decrease_texture_size &&
+						new_dimensions.Height > decrease_texture_size) {
+					// Make sure that texture size is not smaller than
+					// decrease_texture_size. For larger texture use scale = 0.5
+					// so that the size is still POT.
+					float scale = (float)decrease_texture_size /
+							std::min(new_dimensions.Width, new_dimensions.Height);
+					if (scale < 0.5f)
+						scale = 0.5f;
+					new_dimensions.Width *= scale;
+					new_dimensions.Height *= scale;
+				}
+			}
+
+			if (new_format != format || dimensions != new_dimensions) {
+				irr::video::IImage* converted_img =
+						vdrv->createImage(new_format, new_dimensions);
+				img->copyToScaling(converted_img);
 				img->drop();
 				img = converted_img;
 			}
-		}
 #endif
 
 		m_tsrc->insertSourceImage(filename, img);
