@@ -151,7 +151,14 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 		}
 		case FT_PIXEL_MODE_BGRA:
 		{
-			texture_size = d.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
+			int font_size = parent->getFontSize();
+			bool needs_scaling = (face->num_fixed_sizes > 0 && face->available_sizes[0].height > font_size);
+
+			if (needs_scaling)
+				texture_size = d;
+			else
+				texture_size = d.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
+
 			image = driver->createImage(video::ECF_A8R8G8B8, texture_size);
 			image->fill(video::SColor(0, 255, 255, 255));
 
@@ -165,16 +172,14 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 			}
 			image->unlock();
 			
-			int font_size = parent->getFontSize();
-			
-			if (face->num_fixed_sizes > 0 && face->available_sizes[0].height > font_size) {
+			if (needs_scaling) {
 				float scale = (float)font_size / face->available_sizes[0].height;
 				
 				core::dimension2du d_new(bits.width * scale + 1, bits.rows * scale + 1);
 				core::dimension2du texture_size_new = d_new.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
 				
 				irr::video::IImage* scaled_img = driver->createImage(video::ECF_A8R8G8B8, texture_size_new);
-				image->copyToScaling(scaled_img);
+				image->copyToScalingBoxFilter(scaled_img);
 				image->drop();
 				image = scaled_img;
 			}
@@ -199,7 +204,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 	FT_Set_Pixel_Sizes(face, 0, font_size);
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-		scale = (float)font_size / face->available_sizes[0].height;
+		scale = std::min((float)font_size / face->available_sizes[0].height, 1.0f);
 		FT_Select_Size(face, 0);
 	}
 	
