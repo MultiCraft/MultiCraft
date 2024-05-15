@@ -97,6 +97,10 @@ GUIChatConsole::GUIChatConsole(
 	m_fontsize.X = MYMAX(m_fontsize.X, 1);
 	m_fontsize.Y = MYMAX(m_fontsize.Y, 1);
 
+#ifdef __IOS__
+	m_round_screen_offset = g_settings->getU16("round_screen");
+#endif
+
 	createVScrollBar();
 
 	// set default cursor options
@@ -251,7 +255,7 @@ void GUIChatConsole::draw()
 
 void GUIChatConsole::reformatConsole()
 {
-	s32 cols = (m_screensize.X - m_scrollbar_width) / m_fontsize.X - 2; // make room for a margin (looks better)
+	s32 cols = (m_screensize.X - 2 * m_round_screen_offset - m_scrollbar_width) / m_fontsize.X - 2; // make room for a margin (looks better)
 	s32 rows = m_desired_height / m_fontsize.Y - 1; // make room for the input prompt
 	if (cols <= 0 || rows <= 0)
 		cols = rows = 0;
@@ -272,7 +276,8 @@ void GUIChatConsole::recalculateConsolePosition()
 	DesiredRect = rect;
 	recalculateAbsolutePosition(true);
 
-	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width, 0, m_screensize.X, m_height);
+	u32 scrollbar_x = m_screensize.X - m_round_screen_offset;
+	irr::core::rect<s32> scrollbarrect(scrollbar_x - m_scrollbar_width, 0, scrollbar_x, m_height);
 	m_vscrollbar->setRelativePosition(scrollbarrect);
 }
 
@@ -396,12 +401,12 @@ void GUIChatConsole::drawText()
 			ChatFormattedFragment fragment_first = line.fragments[fragment_first_id];
 			ChatFormattedFragment fragment_last = line.fragments[fragment_last_id];
 
-			s32 x_begin = (line.fragments[0].column + 1) * m_fontsize.X;
+			s32 x_begin = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
 			for (unsigned int i = 0; i < fragment_first_id; i++) {
 				x_begin += m_font->getDimension(line.fragments[i].text.c_str()).Width;
 			}
 
-			s32 x_end = (line.fragments[0].column + 1) * m_fontsize.X;
+			s32 x_end = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
 			for (unsigned int i = 0; i <= fragment_last_id; i++) {
 				x_end += m_font->getDimension(line.fragments[i].text.c_str()).Width;
 			}
@@ -432,7 +437,7 @@ void GUIChatConsole::drawText()
 			driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
 		}
 
-		s32 x = (line.fragments[0].column + 1) * m_fontsize.X;
+		s32 x = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
 		for (const ChatFormattedFragment &fragment : line.fragments) {
 			s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
 			core::rect<s32> destrect(x, y, x + text_size, y + m_fontsize.Y);
@@ -486,7 +491,7 @@ void GUIChatConsole::drawPrompt()
 		real_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
 		std::wstring begin_text = L"]";
 		int begin_text_size = m_font->getDimension(begin_text.c_str()).Width;
-		int text_pos = m_fontsize.X + begin_text_size;
+		int text_pos = m_fontsize.X + begin_text_size + m_round_screen_offset;
 
 		s32 x_begin = text_pos;
 		s32 text_size = m_font->getDimension(prompt_text.c_str()).Width;
@@ -522,7 +527,9 @@ void GUIChatConsole::drawPrompt()
 	}
 
 	core::rect<s32> destrect(
-		m_fontsize.X, y, prompt_text.size() * m_fontsize.X, y + m_fontsize.Y);
+			m_fontsize.X + m_round_screen_offset, y, 
+			prompt_text.size() * m_fontsize.X + m_round_screen_offset, 
+			y + m_fontsize.Y);
 	m_font->draw(
 		prompt_text.c_str(),
 		destrect,
@@ -540,7 +547,8 @@ void GUIChatConsole::drawPrompt()
 			s32 cursor_len = prompt.getCursorLength();
 			video::IVideoDriver* driver = Environment->getVideoDriver();
 			std::wstring text = prompt_text.substr(0, cursor_pos);
-			s32 x = m_font->getDimension(text.c_str()).Width + m_fontsize.X;
+			s32 x = m_font->getDimension(
+					text.c_str()).Width + m_fontsize.X + m_round_screen_offset;
 
 			core::rect<s32> destrect(
 				x,
@@ -609,7 +617,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 
 	const ChatFormattedFragment &fragment_first = line.fragments[0];
 	const ChatFormattedFragment &fragment_last = line.fragments[line.fragments.size() - 1];
-	s32 x_min = (fragment_first.column + 1) * m_fontsize.X;
+	s32 x_min = (fragment_first.column + 1) * m_fontsize.X + m_round_screen_offset;
 	s32 x_max = x_min;
 	for (const ChatFormattedFragment &fragment : line.fragments) {
 		x_max += m_font->getDimension(fragment.text.c_str()).Width;
@@ -665,7 +673,7 @@ ChatSelection GUIChatConsole::getPromptCursorPos(s32 x, s32 y)
 
 	std::wstring begin_text = L"]";
 	int begin_text_size = m_font->getDimension(begin_text.c_str()).Width;
-	int text_pos = m_fontsize.X + begin_text_size;
+	int text_pos = m_fontsize.X + begin_text_size + m_round_screen_offset;
 	int pos = m_font->getCharacterFromPos(text.c_str(), x - text_pos);
 
 	if (pos == -1) {
@@ -1215,26 +1223,28 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			m_chat_backend->scroll(rows);
 			m_vscrollbar->setPos(m_vscrollbar->getPos() + rows);
 		} else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-			u32 row = m_chat_backend->getConsoleBuffer().getRows();
-			s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
-
-			if (event.MouseInput.Y >= prompt_y) {
-				m_prompt_marking = true;
-				if (event.MouseInput.Shift) {
-					if (m_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
-							m_mark_end.selection_type != ChatSelection::SELECTION_PROMPT) {
-						m_mark_begin = getCurrentPromptCursorPos();
-						m_mark_end = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
+			if (event.MouseInput.X <= m_screensize.X - m_round_screen_offset) {
+				u32 row = m_chat_backend->getConsoleBuffer().getRows();
+				s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
+	
+				if (event.MouseInput.Y >= prompt_y) {
+					m_prompt_marking = true;
+					if (event.MouseInput.Shift) {
+						if (m_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
+								m_mark_end.selection_type != ChatSelection::SELECTION_PROMPT) {
+							m_mark_begin = getCurrentPromptCursorPos();
+							m_mark_end = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
+						}
+					} else {
+						m_mark_begin = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
+						m_mark_end = m_mark_begin;
 					}
+					movePromptCursor(event.MouseInput.X, event.MouseInput.Y);
 				} else {
-					m_mark_begin = getPromptCursorPos(event.MouseInput.X, event.MouseInput.Y);
+					m_history_marking = true;
+					m_mark_begin = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
 					m_mark_end = m_mark_begin;
 				}
-				movePromptCursor(event.MouseInput.X, event.MouseInput.Y);
-			} else {
-				m_history_marking = true;
-				m_mark_begin = getCursorPos(event.MouseInput.X, event.MouseInput.Y);
-				m_mark_end = m_mark_begin;
 			}
 		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
 			if (m_prompt_marking) {
@@ -1270,38 +1280,40 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 #ifdef HAVE_TOUCHSCREENGUI
 	else if (event.EventType == EET_TOUCH_INPUT_EVENT) {
 		if (event.TouchInput.Event == irr::ETIE_PRESSED_DOWN) {
-			m_history_marking = false;
-			m_prompt_marking = false;
-			m_long_press = false;
-
-			u32 row = m_chat_backend->getConsoleBuffer().getRows();
-			s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
-
-			ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
-			ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
-
-			if (event.TouchInput.Y >= prompt_y) {
-
-				m_cursor_press_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
-
-				if (real_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
-						real_mark_end.selection_type != ChatSelection::SELECTION_PROMPT ||
-						m_cursor_press_pos < real_mark_begin ||
-						m_cursor_press_pos > real_mark_end) {
-					m_mark_begin = m_cursor_press_pos;
-					m_mark_end = m_cursor_press_pos;
-					m_prompt_marking = true;
-				}
-			} else {
-				m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-
-				if (real_mark_begin.selection_type != ChatSelection::SELECTION_HISTORY ||
-						real_mark_end.selection_type != ChatSelection::SELECTION_HISTORY ||
-						m_cursor_press_pos < real_mark_begin ||
-						m_cursor_press_pos > real_mark_end) {
-					m_mark_begin = m_cursor_press_pos;
-					m_mark_end = m_cursor_press_pos;
-					m_history_marking = true;
+			if (event.TouchInput.X <= m_screensize.X - m_round_screen_offset) {
+				m_history_marking = false;
+				m_prompt_marking = false;
+				m_long_press = false;
+	
+				u32 row = m_chat_backend->getConsoleBuffer().getRows();
+				s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
+	
+				ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
+				ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
+	
+				if (event.TouchInput.Y >= prompt_y) {
+	
+					m_cursor_press_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
+	
+					if (real_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
+							real_mark_end.selection_type != ChatSelection::SELECTION_PROMPT ||
+							m_cursor_press_pos < real_mark_begin ||
+							m_cursor_press_pos > real_mark_end) {
+						m_mark_begin = m_cursor_press_pos;
+						m_mark_end = m_cursor_press_pos;
+						m_prompt_marking = true;
+					}
+				} else {
+					m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
+	
+					if (real_mark_begin.selection_type != ChatSelection::SELECTION_HISTORY ||
+							real_mark_end.selection_type != ChatSelection::SELECTION_HISTORY ||
+							m_cursor_press_pos < real_mark_begin ||
+							m_cursor_press_pos > real_mark_end) {
+						m_mark_begin = m_cursor_press_pos;
+						m_mark_end = m_cursor_press_pos;
+						m_history_marking = true;
+					}
 				}
 			}
 
@@ -1354,25 +1366,27 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			}
 
 		} else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
-			if (!m_history_marking && ! m_prompt_marking) {
-				m_long_press = true;
-				if (m_mark_begin != m_mark_end) {
-					irr::core::stringc text;
-					if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
-							m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
-						text = getPromptSelectedText();
-					} else if (m_mark_begin.selection_type == ChatSelection::SELECTION_HISTORY &&
-							m_mark_end.selection_type == ChatSelection::SELECTION_HISTORY) {
-						text = getSelectedText();
-					}
-					Environment->getOSOperator()->copyToClipboard(text.c_str());
+			if (event.TouchInput.X <= m_screensize.X - m_round_screen_offset) {
+				if (!m_history_marking && ! m_prompt_marking) {
+					m_long_press = true;
+					if (m_mark_begin != m_mark_end) {
+						irr::core::stringc text;
+						if (m_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
+								m_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
+							text = getPromptSelectedText();
+						} else if (m_mark_begin.selection_type == ChatSelection::SELECTION_HISTORY &&
+								m_mark_end.selection_type == ChatSelection::SELECTION_HISTORY) {
+							text = getSelectedText();
+						}
+						Environment->getOSOperator()->copyToClipboard(text.c_str());
 #ifdef __ANDROID__
-					SDL_AndroidShowToast(
-							"Copied to clipboard", 2,
-							-1, 0, 0);
+						SDL_AndroidShowToast(
+								"Copied to clipboard", 2,
+								-1, 0, 0);
 #elif __IOS__
-					porting::showToast("Copied to clipboard");
+						porting::showToast("Copied to clipboard");
 #endif
+					}
 				}
 			}
 		}
@@ -1410,8 +1424,9 @@ void GUIChatConsole::createVScrollBar()
 	m_scrollbar_width = skin ? skin->getSize(gui::EGDS_SCROLLBAR_SIZE) : 16;
 	m_scrollbar_width *= 2;
 
-	irr::core::rect<s32> scrollbarrect(m_screensize.X - m_scrollbar_width,
-			0, m_screensize.X, m_height);
+	u32 scrollbar_x = m_screensize.X - m_round_screen_offset;
+	irr::core::rect<s32> scrollbarrect(scrollbar_x - m_scrollbar_width,
+			0, scrollbar_x, m_height);
 	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
 			scrollbarrect, false, true);
 
