@@ -171,23 +171,22 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 				glyph_data += bits.pitch;
 			}
 			image->unlock();
-			
+
 			if (needs_scaling) {
 				float scale = (float)font_size / face->available_sizes[0].height;
-				
+
 				core::dimension2du d_new(bits.width * scale + 1, bits.rows * scale + 1);
 				core::dimension2du texture_size_new = d_new.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
-				
+
 				irr::video::IImage* scaled_img = driver->createImage(video::ECF_A8R8G8B8, texture_size_new);
 				image->copyToScalingBoxFilter(scaled_img);
 				image->drop();
 				image = scaled_img;
 			}
-			
+
 			break;
 		}
 		default:
-
 			// TODO: error message?
 			return 0;
 	}
@@ -207,7 +206,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 		scale = std::min((float)font_size / face->available_sizes[0].height, 1.0f);
 		FT_Select_Size(face, 0);
 	}
-	
+
 	// Attempt to load the glyph.
 	if (FT_Load_Glyph(face, char_index, loadFlags) != FT_Err_Ok)
 		// TODO: error message?
@@ -248,7 +247,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 	}
 
 	glyph_page = parent->getLastGlyphPageIndex();
-	
+
 	core::vector2di page_position(page->used_width, page->used_height);
 	source_rect.UpperLeftCorner = page_position;
 	source_rect.LowerRightCorner = core::vector2di(page_position.X + bits.width * scale, page_position.Y + bits.rows * scale);
@@ -261,7 +260,8 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 	surface = createGlyphImage(face, bits, driver);
 
 	// Set our glyph as loaded.
-	isLoaded = true;
+	if (surface)
+		isLoaded = true;
 }
 
 void SGUITTGlyph::unload()
@@ -885,16 +885,31 @@ u32 CGUITTFont::getGlyphIndexByChar(wchar_t c) const
 
 u32 CGUITTFont::getGlyphIndexByChar(uchar32_t c) const
 {
+	// If our glyph is already loaded, don't bother doing any batch loading code.
+	for (size_t i = 0; i < tt_faces.size(); i++) {
+		u32 glyph = FT_Get_Char_Index(tt_faces[i], c);
+		int tt_offset = tt_offsets[i];
+
+		if (glyph != 0 && Glyphs[tt_offset + glyph - 1]->isLoaded) {
+			return glyph + tt_offset;
+		}
+	}
+
+	size_t current_face = 0;
+
+begin:
+
 	// Get the glyph.
 	FT_Face tt_face = tt_faces[0];
 	u32 glyph = 0;
 	int tt_offset = 0;
-	for (size_t i = 0; i < tt_faces.size(); i++) {
+	for (size_t i = current_face; i < tt_faces.size(); i++) {
 		glyph = FT_Get_Char_Index(tt_faces[i], c);
 
 		if (glyph != 0) {
 			tt_face = tt_faces[i];
 			tt_offset = tt_offsets[i];
+			current_face = i;
 			break;
 		}
 	}
@@ -902,10 +917,6 @@ u32 CGUITTFont::getGlyphIndexByChar(uchar32_t c) const
 	// Check for a valid glyph.  If it is invalid, attempt to use the replacement character.
 	if (glyph == 0)
 		glyph = FT_Get_Char_Index(tt_face, core::unicode::UTF_REPLACEMENT_CHARACTER);
-
-	// If our glyph is already loaded, don't bother doing any batch loading code.
-	if (glyph != 0 && Glyphs[tt_offset + glyph - 1]->isLoaded)
-		return glyph + tt_offset;
 
 	// Determine our batch loading positions.
 	u32 half_size = (batch_load_size / 2);
@@ -930,8 +941,14 @@ u32 CGUITTFont::getGlyphIndexByChar(uchar32_t c) const
 					flags |= FT_LOAD_COLOR;
 				else
 					flags |= FT_LOAD_RENDER;
-				    
+
 				glyph->preload(char_index, tt_face, Driver, size, flags);
+
+				if (!glyph->isLoaded) {
+					current_face++;
+					goto begin;
+				}
+
 				Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
 			}
 		}
