@@ -91,14 +91,17 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 {
 	sanity_check(!s_singleton);
 
+	const u16 screen_min_w = 640;
+	const u16 screen_min_h = 480;
+
 	// Resolution selection
 	bool fullscreen = g_settings->getBool("fullscreen");
 #if defined(__ANDROID__) || defined(__IOS__)
 	u16 screen_w = 0;
 	u16 screen_h = 0;
  #else
-	u16 screen_w = g_settings->getU16("screen_w");
-	u16 screen_h = g_settings->getU16("screen_h");
+	u16 screen_w = std::max(g_settings->getU16("screen_w"), screen_min_w);
+	u16 screen_h = std::max(g_settings->getU16("screen_h"), screen_min_h);
  #endif
 
 	// bpp, fsaa, vsync
@@ -161,6 +164,12 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 			std::string(RenderingEngine::getVideoDriverName(driverType)) + "\".").c_str());
 #endif
 	driver = m_device->getVideoDriver();
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
+	SDL_SetWindowMinimumSize(window, screen_min_w, screen_min_h);
+#endif
 
 	s_singleton = this;
 
