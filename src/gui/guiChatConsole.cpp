@@ -97,7 +97,7 @@ GUIChatConsole::GUIChatConsole(
 	m_fontsize.X = MYMAX(m_fontsize.X, 1);
 	m_fontsize.Y = MYMAX(m_fontsize.Y, 1);
 
-#ifdef __IOS__
+#if defined(__ANDROID__) || defined(__IOS__)
 	m_round_screen_offset = g_settings->getU16("round_screen");
 #endif
 
@@ -527,8 +527,8 @@ void GUIChatConsole::drawPrompt()
 	}
 
 	core::rect<s32> destrect(
-			m_fontsize.X + m_round_screen_offset, y, 
-			prompt_text.size() * m_fontsize.X + m_round_screen_offset, 
+			m_fontsize.X + m_round_screen_offset, y,
+			prompt_text.size() * m_fontsize.X + m_round_screen_offset,
 			y + m_fontsize.Y);
 	m_font->draw(
 		prompt_text.c_str(),
@@ -1226,7 +1226,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			if (event.MouseInput.X <= m_screensize.X - m_round_screen_offset) {
 				u32 row = m_chat_backend->getConsoleBuffer().getRows();
 				s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
-	
+
 				if (event.MouseInput.Y >= prompt_y) {
 					m_prompt_marking = true;
 					if (event.MouseInput.Shift) {
@@ -1284,17 +1284,17 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				m_history_marking = false;
 				m_prompt_marking = false;
 				m_long_press = false;
-	
+
 				u32 row = m_chat_backend->getConsoleBuffer().getRows();
 				s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
-	
+
 				ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 				ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
-	
+
 				if (event.TouchInput.Y >= prompt_y) {
-	
+
 					m_cursor_press_pos = getPromptCursorPos(event.TouchInput.X, event.TouchInput.Y);
-	
+
 					if (real_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
 							real_mark_end.selection_type != ChatSelection::SELECTION_PROMPT ||
 							m_cursor_press_pos < real_mark_begin ||
@@ -1305,7 +1305,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 					}
 				} else {
 					m_cursor_press_pos = getCursorPos(event.TouchInput.X, event.TouchInput.Y);
-	
+
 					if (real_mark_begin.selection_type != ChatSelection::SELECTION_HISTORY ||
 							real_mark_end.selection_type != ChatSelection::SELECTION_HISTORY ||
 							m_cursor_press_pos < real_mark_begin ||
