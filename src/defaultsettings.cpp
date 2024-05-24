@@ -330,12 +330,13 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
 
 	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "NotoEmoji.ttf"));
+	settings->setDefault("emoji_color_font_path", "");
+	settings->setDefault("emoji_color_legacy_font_path", "");
 #if defined(__ANDROID__)
 	settings->setDefault("emoji_color_font_path", "/system/fonts/NotoColorEmoji.ttf");
+	settings->setDefault("emoji_color_legacy_font_path", "/system/fonts/NotoColorEmojiLegacy.ttf");
 #elif defined(__linux__)
 	settings->setDefault("emoji_color_font_path", "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf");
-#else
-	settings->setDefault("emoji_color_font_path", "");
 #endif
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)

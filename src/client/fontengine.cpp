@@ -316,6 +316,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 
 	std::string emoji_font_path = g_settings->get("emoji_font_path");
 	std::string emoji_color_font_path = g_settings->get("emoji_color_font_path");
+	std::string emoji_color_legacy_font_path = g_settings->get("emoji_color_legacy_font_path");
 
 #if USE_FREETYPE
 	for (const std::string &font_path : fallback_settings) {
@@ -324,7 +325,11 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				font_shadow_alpha);
 
 		if (font) {
-			if (!emoji_color_font_path.empty())
+			if (!emoji_color_legacy_font_path.empty() &&
+					fs::PathExists(emoji_color_legacy_font_path))
+				font->loadAdditionalFont(emoji_color_legacy_font_path.c_str());
+			else if (!emoji_color_font_path.empty() &&
+					fs::PathExists(emoji_color_font_path))
 				font->loadAdditionalFont(emoji_color_font_path.c_str());
 			font->loadAdditionalFont(emoji_font_path.c_str());
 			return font;
