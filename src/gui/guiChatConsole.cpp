@@ -1223,7 +1223,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			m_chat_backend->scroll(rows);
 			m_vscrollbar->setPos(m_vscrollbar->getPos() + rows);
 		} else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-			if (event.MouseInput.X <= m_screensize.X - m_round_screen_offset) {
+			if (event.MouseInput.X <= m_screensize.X - m_round_screen_offset &&
+					event.MouseInput.X >= m_round_screen_offset) {
 				u32 row = m_chat_backend->getConsoleBuffer().getRows();
 				s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
 
@@ -1280,7 +1281,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 #ifdef HAVE_TOUCHSCREENGUI
 	else if (event.EventType == EET_TOUCH_INPUT_EVENT) {
 		if (event.TouchInput.Event == irr::ETIE_PRESSED_DOWN) {
-			if (event.TouchInput.X <= m_screensize.X - m_round_screen_offset) {
+			if (event.TouchInput.X <= m_screensize.X - m_round_screen_offset &&
+					event.TouchInput.X >= m_round_screen_offset) {
 				m_history_marking = false;
 				m_prompt_marking = false;
 				m_long_press = false;
@@ -1366,7 +1368,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			}
 
 		} else if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
-			if (event.TouchInput.X <= m_screensize.X - m_round_screen_offset) {
+			if (event.TouchInput.X <= m_screensize.X - m_round_screen_offset &&
+					event.TouchInput.X >= m_round_screen_offset) {
 				if (!m_history_marking && ! m_prompt_marking) {
 					m_long_press = true;
 					if (m_mark_begin != m_mark_end) {
