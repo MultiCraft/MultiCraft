@@ -728,7 +728,7 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 		spec.ftype = f_ScrollBar;
 		spec.send  = true;
 		GUIScrollBar *e = new GUIScrollBar(Environment, data->current_parent,
-				spec.fid, rect, is_horizontal, true);
+				spec.fid, rect, is_horizontal, true, m_sound_manager);
 
 		auto style = getDefaultStyleForElement("scrollbar", name);
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
@@ -751,10 +751,10 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 
 		std::vector<video::ITexture *> itextures;
 
-		if (textures.empty()) {
-			// Fall back to the scrollbar textures specified in style[]
-			e->setStyle(style, m_tsrc);
-		} else {
+		e->setStyle(style, m_tsrc);
+
+		if (!textures.empty()) {
+			// Legacy texture support
 			for (u32 i = 0; i < textures.size(); ++i)
 				itextures.push_back(m_tsrc->getTexture(textures[i]));
 
@@ -1303,7 +1303,7 @@ void GUIFormSpecMenu::parseTable(parserData* data, const std::string &element)
 
 		//now really show table
 		GUITable *e = new GUITable(Environment, data->current_parent, spec.fid,
-				rect, m_tsrc);
+				rect, m_tsrc, m_sound_manager);
 
 		if (spec.fname == m_focused_element) {
 			Environment->setFocus(e);
@@ -1380,7 +1380,7 @@ void GUIFormSpecMenu::parseTextList(parserData* data, const std::string &element
 
 		//now really show list
 		GUITable *e = new GUITable(Environment, data->current_parent, spec.fid,
-				rect, m_tsrc);
+				rect, m_tsrc, m_sound_manager);
 
 		if (spec.fname == m_focused_element) {
 			Environment->setFocus(e);
@@ -1628,7 +1628,8 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 #else
 		if (is_multiline) {
 			box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
-					data->current_parent, spec.fid, rect, is_editable, !is_editable);
+					data->current_parent, spec.fid, rect, is_editable, !is_editable,
+					m_sound_manager);
 			e = box;
 		} else if (is_editable) {
 			e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
@@ -1869,7 +1870,8 @@ void GUIFormSpecMenu::parseHyperText(parserData *data, const std::string &elemen
 	spec.sound = style.get(StyleSpec::Property::SOUND, "");
 
 	GUIHyperText *e = new GUIHyperText(spec.flabel.c_str(), Environment,
-			data->current_parent, spec.fid, rect, m_client, m_tsrc, style);
+			data->current_parent, spec.fid, rect, m_client, m_tsrc, style,
+			m_sound_manager);
 	e->drop();
 
 	m_fields.push_back(spec);

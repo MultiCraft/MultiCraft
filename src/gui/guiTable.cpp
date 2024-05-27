@@ -43,12 +43,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
-		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
+		core::rect<s32> rectangle, ISimpleTextureSource *tsrc,
+		ISoundManager *sound_manager) :
 		gui::IGUIElement(gui::EGUIET_CUSTOM_GUITABLE, env, parent, id, rectangle),
 		m_tsrc(tsrc)
 #else
 GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
-		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
+		core::rect<s32> rectangle, ISimpleTextureSource *tsrc,
+		ISoundManager *sound_manager) :
 		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
 		m_tsrc(tsrc)
 #endif
@@ -70,7 +72,7 @@ GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
 					0,
 					RelativeRect.getWidth(),
 					RelativeRect.getHeight()),
-			false, true);
+			false, true, sound_manager);
 	m_scrollbar->setSubElement(true);
 	m_scrollbar->setTabStop(false);
 	m_scrollbar->setAlignment(gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT,

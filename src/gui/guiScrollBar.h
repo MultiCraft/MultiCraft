@@ -17,6 +17,8 @@ the arrow buttons where there is insufficient space.
 #include "StyleSpec.h"
 #include <vector>
 
+class ISoundManager;
+
 using namespace irr;
 using namespace gui;
 
@@ -24,7 +26,8 @@ class GUIScrollBar : public IGUIElement
 {
 public:
 	GUIScrollBar(IGUIEnvironment *environment, IGUIElement *parent, s32 id,
-			core::rect<s32> rectangle, bool horizontal, bool auto_scale);
+			core::rect<s32> rectangle, bool horizontal, bool auto_scale,
+			ISoundManager *sound_manager = nullptr);
 
 	enum ArrowVisibility
 	{
@@ -88,4 +91,7 @@ private:
 
 	core::rect<s32> slider_rect;
 	video::SColor current_icon_color;
+
+	ISoundManager *m_sound_manager;
+	std::string m_sound;
 };

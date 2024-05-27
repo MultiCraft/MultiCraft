@@ -25,9 +25,10 @@ numerical
 //! constructor
 GUIEditBoxWithScrollBar::GUIEditBoxWithScrollBar(const wchar_t* text, bool border,
 	IGUIEnvironment* environment, IGUIElement* parent, s32 id,
-	const core::rect<s32>& rectangle, bool writable, bool has_vscrollbar)
+	const core::rect<s32>& rectangle, bool writable, bool has_vscrollbar,
+	ISoundManager *sound_manager)
 	: GUIEditBox(environment, parent, id, rectangle, border, writable),
-	m_background(true), m_bg_color_used(false)
+	m_background(true), m_bg_color_used(false), m_sound_manager(sound_manager)
 {
 #ifdef _DEBUG
 	setDebugName("GUIEditBoxWithScrollBar");
@@ -628,7 +629,7 @@ void GUIEditBoxWithScrollBar::createVScrollBar()
 	irr::core::rect<s32> scrollbarrect = m_frame_rect;
 	scrollbarrect.UpperLeftCorner.X += m_frame_rect.getWidth() - m_scrollbar_width;
 	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
-			scrollbarrect, false, true);
+			scrollbarrect, false, true, m_sound_manager);
 
 	m_vscrollbar->setVisible(false);
 	m_vscrollbar->setSmallStep(1);
