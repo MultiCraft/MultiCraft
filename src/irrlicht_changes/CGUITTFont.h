@@ -79,11 +79,17 @@ namespace gui
 		//! Creates the IImage object from the FT_Bitmap.
 		video::IImage* createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const;
 
+		//! Get index of best size for bitmap fonts
+		u32 getBestFixedSizeIndex(FT_Face face, u32 font_size);
+
 		//! If true, the glyph has been loaded.
 		bool isLoaded;
 
 		//! The page the glyph is on.
 		u32 glyph_page;
+
+		//! Index of best size for bitmap fonts
+		u32 best_fixed_size_index;
 
 		//! The source rectangle for the glyph.
 		core::recti source_rect;

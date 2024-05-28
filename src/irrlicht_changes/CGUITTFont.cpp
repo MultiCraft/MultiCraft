@@ -80,6 +80,23 @@ inline void checkFontBitmapSize(const FT_Bitmap &bits)
 	}
 }
 
+u32 SGUITTGlyph::getBestFixedSizeIndex(FT_Face face, u32 font_size)
+{
+	u32 index = 0;
+	u32 last_font_size =0;
+
+	for (u32 i = 0; i < face->num_fixed_sizes; i++) {
+		u32 current_size = face->available_sizes[i].height;
+
+		if (current_size > last_font_size) {
+			last_font_size = current_size;
+			index = i;
+		}
+	}
+
+	return index;
+}
+
 video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const
 {
 	// Make sure our casts to s32 in the loops below will not cause problems
@@ -152,7 +169,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 		case FT_PIXEL_MODE_BGRA:
 		{
 			int font_size = parent->getFontSize();
-			bool needs_scaling = (face->num_fixed_sizes > 0 && face->available_sizes[0].height > font_size);
+			bool needs_scaling = (face->num_fixed_sizes > 0 && face->available_sizes[best_fixed_size_index].height > font_size);
 
 			if (needs_scaling)
 				texture_size = d;
@@ -173,7 +190,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 			image->unlock();
 
 			if (needs_scaling) {
-				float scale = (float)font_size / face->available_sizes[0].height;
+				float scale = (float)font_size / face->available_sizes[best_fixed_size_index].height;
 
 				core::dimension2du d_new(bits.width * scale + 1, bits.rows * scale + 1);
 				core::dimension2du texture_size_new = d_new.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
@@ -203,8 +220,9 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 	FT_Set_Pixel_Sizes(face, 0, font_size);
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-		scale = std::min((float)font_size / face->available_sizes[0].height, 1.0f);
-		FT_Select_Size(face, 0);
+		best_fixed_size_index = getBestFixedSizeIndex(face, font_size);
+		scale = std::min((float)font_size / face->available_sizes[best_fixed_size_index].height, 1.0f);
+		FT_Select_Size(face, best_fixed_size_index);
 	}
 
 	// Attempt to load the glyph.
