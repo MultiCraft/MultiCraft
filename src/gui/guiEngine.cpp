@@ -353,6 +353,12 @@ void GUIEngine::run()
 
 		m_script->step();
 
+		// Update sound volume
+		// Note when rebasing onto MT 5.9.0+: This code can be removed since
+		// sound_volume_control() will do this
+		m_sound_manager->setListenerGain(g_settings->getBool("mute_sound") ? 0.0f :
+				rangelim(g_settings->getFloat("sound_volume"), 0.0f, 1.0f));
+
 #if defined(__ANDROID__) || defined(__IOS__)
 		m_menu->getTouchUIInput();
 #endif
