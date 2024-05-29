@@ -70,6 +70,11 @@ static void dump_start_data(const GameStartData &data)
 
 ClientLauncher::~ClientLauncher()
 {
+	RenderingEngine *rendering_engine = RenderingEngine::get_instance();
+
+	if (rendering_engine && rendering_engine->get_raw_device())
+		rendering_engine->get_raw_device()->setEventReceiver(nullptr);
+
 	delete receiver;
 
 	delete input;
@@ -77,7 +82,7 @@ ClientLauncher::~ClientLauncher()
 	delete g_fontengine;
 	delete g_gamecallback;
 
-	delete RenderingEngine::get_instance();
+	delete rendering_engine;
 
 #if USE_SOUND
 	deleteSoundManagerSingleton(g_sound_manager_singleton);
