@@ -329,16 +329,15 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold", MultiCraftFont);
 	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
 
-	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "NotoEmoji.ttf"));
-	settings->setDefault("emoji_color_font_path", "");
-	settings->setDefault("emoji_color_legacy_font_path", "");
+	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "OpenMoji-color-glyf_colr_0.ttf"));
 #if defined(__ANDROID__)
-	settings->setDefault("emoji_color_font_path", "/system/fonts/NotoColorEmoji.ttf");
-	settings->setDefault("emoji_color_legacy_font_path", "/system/fonts/NotoColorEmojiLegacy.ttf");
+	settings->setDefault("emoji_font_system_paths", "/system/fonts/NotoColorEmojiLegacy.ttf,/system/fonts/NotoColorEmoji.ttf");
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	settings->setDefault("emoji_color_font_path", "/System/Library/Fonts/Apple Color Emoji.ttc");
+	settings->setDefault("emoji_font_system_paths", "/System/Library/Fonts/Apple Color Emoji.ttc");
 #elif defined(__linux__)
-	settings->setDefault("emoji_color_font_path", "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf");
+	settings->setDefault("emoji_font_system_paths", "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf");
+#else
+	settings->setDefault("emoji_font_system_paths", "");
 #endif
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)

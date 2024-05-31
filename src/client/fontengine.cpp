@@ -315,8 +315,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	};
 
 	std::string emoji_font_path = g_settings->get("emoji_font_path");
-	std::string emoji_color_font_path = g_settings->get("emoji_color_font_path");
-	std::string emoji_color_legacy_font_path = g_settings->get("emoji_color_legacy_font_path");
+	std::string emoji_font_system_paths = g_settings->get("emoji_font_system_paths");
 
 #if USE_FREETYPE
 	for (const std::string &font_path : fallback_settings) {
@@ -325,12 +324,18 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				font_shadow_alpha);
 
 		if (font) {
-			if (!emoji_color_legacy_font_path.empty() &&
-					fs::PathExists(emoji_color_legacy_font_path))
-				font->loadAdditionalFont(emoji_color_legacy_font_path.c_str());
-			else if (!emoji_color_font_path.empty() &&
-					fs::PathExists(emoji_color_font_path))
-				font->loadAdditionalFont(emoji_color_font_path.c_str());
+			std::vector<std::string> emoji_paths = split(emoji_font_system_path, ',');
+
+			// Load first available system emoji font
+			for (std::string path : emoji_paths) {
+				if (!path.empty() && fs::PathExists(path)) {
+					bool success = font->loadAdditionalFont(path.c_str());
+					if (success)
+						break;
+				}
+			}
+
+			// Always load fallback emoji font
 			font->loadAdditionalFont(emoji_font_path.c_str());
 			return font;
 		}
@@ -338,7 +343,6 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 		errorstream << "FontEngine: Cannot load '" << font_path <<
 				"'. Trying to fall back to another path." << std::endl;
 	}
-
 
 	// give up
 	errorstream << "MultiCraft can not continue without a valid font. "
