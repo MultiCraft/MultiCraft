@@ -324,7 +324,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				font_shadow_alpha);
 
 		if (font) {
-			std::vector<std::string> emoji_paths = split(emoji_font_system_path, ',');
+			std::vector<std::string> emoji_paths = split(emoji_font_system_paths, ',');
 
 			// Load first available system emoji font
 			for (std::string path : emoji_paths) {
