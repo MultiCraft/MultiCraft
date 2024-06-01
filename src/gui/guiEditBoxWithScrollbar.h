@@ -7,6 +7,8 @@
 
 #include "guiEditBox.h"
 
+class ISoundManager;
+
 class GUIEditBoxWithScrollBar : public GUIEditBox
 {
 public:
@@ -14,7 +16,7 @@ public:
 	//! constructor
 	GUIEditBoxWithScrollBar(const wchar_t* text, bool border, IGUIEnvironment* environment,
 		IGUIElement* parent, s32 id, const core::rect<s32>& rectangle,
-		bool writable = true, bool has_vscrollbar = true);
+		bool writable = true, bool has_vscrollbar = true, ISoundManager *m_sound_manager = nullptr);
 
 	//! destructor
 	virtual ~GUIEditBoxWithScrollBar() {}
@@ -62,6 +64,7 @@ protected:
 
 	bool m_bg_color_used;
 	video::SColor m_bg_color;
+	ISoundManager *m_sound_manager;
 };
 
 

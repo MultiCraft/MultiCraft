@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "StyleSpec.h"
 
 class ISimpleTextureSource;
+class ISoundManager;
 
 /*
 	A table GUI element for GUIFormSpecMenu.
@@ -92,7 +93,8 @@ public:
 	GUITable(gui::IGUIEnvironment *env,
 			gui::IGUIElement *parent, s32 id,
 			core::rect<s32> rectangle,
-			ISimpleTextureSource *tsrc);
+			ISimpleTextureSource *tsrc,
+			ISoundManager *sound_manager);
 
 	virtual ~GUITable();
 

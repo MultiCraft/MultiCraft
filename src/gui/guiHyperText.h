@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 using namespace irr;
 
 class ISimpleTextureSource;
+class ISoundManager;
 class Client;
 
 #if USE_FREETYPE
@@ -202,7 +203,8 @@ public:
 	GUIHyperText(const wchar_t *text, gui::IGUIEnvironment *environment,
 			gui::IGUIElement *parent, s32 id,
 			const core::rect<s32> &rectangle, Client *client,
-			ISimpleTextureSource *tsrc, const StyleSpec &style);
+			ISimpleTextureSource *tsrc, const StyleSpec &style,
+			ISoundManager *sound_manager);
 
 	//! destructor
 	virtual ~GUIHyperText();
