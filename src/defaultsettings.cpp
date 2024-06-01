@@ -329,7 +329,7 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold", MultiCraftFont);
 	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
 
-	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "OpenMoji-color-glyf_colr_0.ttf"));
+	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf"));
 #if defined(__ANDROID__)
 	settings->setDefault("emoji_font_system_paths", "/system/fonts/NotoColorEmojiLegacy.ttf,/system/fonts/NotoColorEmoji.ttf");
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
