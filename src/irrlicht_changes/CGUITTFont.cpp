@@ -278,8 +278,10 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 	surface = createGlyphImage(face, bits, driver);
 
 	// Set our glyph as loaded.
-	if (surface)
+	if (surface) {
+		isColor = FT_HAS_COLOR(face);
 		isLoaded = true;
+	}
 }
 
 void SGUITTGlyph::unload()
@@ -462,6 +464,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	{
 		SGUITTGlyph* glyph = new SGUITTGlyph();
 		glyph->isLoaded = false;
+		glyph->isColor = false;
 		glyph->glyph_page = 0;
 		glyph->source_rect = core::recti();
 		glyph->offset = core::vector2di();
@@ -728,7 +731,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 			// If wchar_t is 32-bit then use charPos instead
 			u32 iterPos = sizeof(wchar_t) == 4 ? charPos : iter.getPos();
 
-			if (iterPos < colors.size())
+			if (!glyph->isColor && iterPos < colors.size())
 				page->render_colors.push_back(colors[iterPos]);
 			else
 				page->render_colors.push_back(video::SColor(255,255,255,255));

@@ -85,6 +85,9 @@ namespace gui
 		//! If true, the glyph has been loaded.
 		bool isLoaded;
 
+		//! If true, the glyph has been loaded from color font.
+		bool isColor;
+
 		//! The page the glyph is on.
 		u32 glyph_page;
 
