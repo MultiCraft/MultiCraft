@@ -43,6 +43,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "filesys.h"
 #include "gameparams.h"
 #include "gettext.h"
+#include "gui/guiButton.h"
 #include "gui/guiChatConsole.h"
 #include "gui/guiConfirmRegistration.h"
 #include "gui/guiFormSpecMenu.h"
@@ -674,6 +675,65 @@ struct ClientEventHandler
 	void (Game::*handler)(ClientEvent *, CameraOrientation *);
 };
 
+const int ID_cancelButton = 1000;
+
+class LoadScreenEventReceiver : public IEventReceiver
+{
+private:
+	bool *m_connect_aborted;
+	GUIButton *m_cancel_button;
+	IEventReceiver *m_default_event_receiver;
+
+public:
+	LoadScreenEventReceiver(bool *connect_aborted,
+			GUIButton *cancel_button,
+			IEventReceiver *default_event_receiver) {
+		m_connect_aborted = connect_aborted;
+		m_cancel_button = cancel_button;
+		m_default_event_receiver = default_event_receiver;
+	}
+
+	virtual bool OnEvent(const SEvent &event) {
+
+		if (event.EventType == EET_TOUCH_INPUT_EVENT) {
+			if (event.TouchInput.touchedCount == 1) {
+				if (event.TouchInput.Event == ETIE_PRESSED_DOWN ||
+						event.TouchInput.Event == ETIE_LEFT_UP ||
+						event.TouchInput.Event == ETIE_MOVED) {
+
+					SEvent mouse_event = {};
+					mouse_event.EventType = EET_MOUSE_INPUT_EVENT;
+					mouse_event.MouseInput.X = event.TouchInput.X;
+					mouse_event.MouseInput.Y = event.TouchInput.Y;
+					if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
+						mouse_event.MouseInput.Event = EMIE_LMOUSE_PRESSED_DOWN;
+						mouse_event.MouseInput.ButtonStates = EMBSM_LEFT;
+					} else if (event.TouchInput.Event == ETIE_MOVED) {
+						mouse_event.MouseInput.Event = EMIE_MOUSE_MOVED;
+						mouse_event.MouseInput.ButtonStates = EMBSM_LEFT;
+					} else if (event.TouchInput.Event == ETIE_LEFT_UP) {
+						mouse_event.MouseInput.Event = EMIE_LMOUSE_LEFT_UP;
+						mouse_event.MouseInput.ButtonStates = 0;
+					}
+
+					m_cancel_button->OnEvent(mouse_event);
+				}
+			}
+		}
+
+		if (event.EventType == EET_GUI_EVENT) {
+			if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
+				if (event.GUIEvent.Caller->getID() == ID_cancelButton) {
+					*m_connect_aborted = true;
+					return true;
+				}
+			}
+		}
+
+		return m_default_event_receiver->OnEvent(event);
+	}
+};
+
 /****************************************************************************
  THE GAME
  ****************************************************************************/
@@ -720,9 +780,8 @@ protected:
 	bool initGui();
 
 	// Client connection
-	bool connectToServer(const GameStartData &start_data,
-			bool *connect_ok, bool *aborted);
-	bool getServerContent(bool *aborted);
+	bool connectToServer(const GameStartData &start_data, bool *connect_ok);
+	bool getServerContent();
 
 	// Main loop
 
@@ -837,6 +896,9 @@ private:
 
 	void pauseAnimation();
 	void resumeAnimation();
+
+	void initCancelButton();
+	void removeCancelButton();
 
 	// ClientEvent handlers
 	void handleClientEvent_None(ClientEvent *event, CameraOrientation *cam);
@@ -956,6 +1018,11 @@ private:
 #ifdef HAVE_TOUCHSCREENGUI
 	bool m_cache_touchtarget;
 #endif
+
+	bool m_connect_aborted = false;
+	GUIButton *m_cancel_button = nullptr;
+	IEventReceiver *m_old_event_receiver = nullptr;
+	IEventReceiver *m_load_screen_event_receiver = nullptr;
 };
 
 Game::Game() :
@@ -1195,6 +1262,8 @@ void Game::run()
 
 void Game::shutdown()
 {
+	removeCancelButton();
+
 	RenderingEngine::finalize();
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR <= 8
 	if (g_settings->get("3d_mode") == "pageflip") {
@@ -1260,6 +1329,9 @@ bool Game::init(
 		const SubgameSpec &gamespec)
 {
 	texture_src = createTextureSource();
+
+	if (!simple_singleplayer_mode)
+		initCancelButton();
 
 	showOverlayMessage(N_("Loading..."), 0, 0);
 
@@ -1355,7 +1427,7 @@ void Game::copyServerClientCache()
 {
 	// It would be possible to let the client directly read the media files
 	// from where the server knows they are. But aside from being more complicated
-	// it would also *not* fill the media cache and cause slower joining of 
+	// it would also *not* fill the media cache and cause slower joining of
 	// remote servers.
 	// (Imagine that you launch a game once locally and then connect to a server.)
 
@@ -1373,18 +1445,19 @@ void Game::copyServerClientCache()
 
 bool Game::createClient(const GameStartData &start_data)
 {
+	bool could_connect = false;
+
 	showOverlayMessage(N_("Creating client..."), 0, 10);
 
 	draw_control = new MapDrawControl;
 	if (!draw_control)
 		return false;
 
-	bool could_connect, connect_aborted;
-	if (!connectToServer(start_data, &could_connect, &connect_aborted))
+	if (!connectToServer(start_data, &could_connect))
 		return false;
 
 	if (!could_connect) {
-		if (error_message->empty() && !connect_aborted) {
+		if (error_message->empty() && !m_connect_aborted) {
 			// Should not happen if error messages are set properly
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
@@ -1396,8 +1469,8 @@ bool Game::createClient(const GameStartData &start_data)
 	porting::notifyServerConnect(!simple_singleplayer_mode);
 #endif
 
-	if (!getServerContent(&connect_aborted)) {
-		if (error_message->empty() && !connect_aborted) {
+	if (!getServerContent()) {
+		if (error_message->empty() && !m_connect_aborted) {
 			// Should not happen if error messages are set properly
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
@@ -1410,7 +1483,12 @@ bool Game::createClient(const GameStartData &start_data)
 	shader_src->addShaderConstantSetterFactory(scsf);
 
 	// Update cached textures, meshes and materials
-	client->afterContentReceived();
+	if (!client->afterContentReceived()) {
+		infostream << "Connect aborted [Escape]" << std::endl;
+		return false;
+	}
+
+	removeCancelButton();
 
 	RenderingEngine::draw_load_cleanup();
 
@@ -1500,11 +1578,70 @@ bool Game::initGui()
 	return true;
 }
 
-bool Game::connectToServer(const GameStartData &start_data,
-		bool *connect_ok, bool *connection_aborted)
+void Game::initCancelButton()
 {
-	*connect_ok = false;	// Let's not be overly optimistic
-	*connection_aborted = false;
+	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
+	double gui_scaling = g_settings->getFloat("gui_scaling");
+
+	v2u32 padded_screensize = screensize;
+#if !defined(__ANDROID__) && !defined(__IOS__)
+	padded_screensize.X *= 0.9f;
+	padded_screensize.Y *= 0.9f;
+#endif
+
+#ifdef HAVE_TOUCHSCREENGUI
+	// In Android, the preferred imgsize should be larger to accommodate the
+	// smaller screensize.
+	double prefer_imgsize = padded_screensize.Y / 10 * gui_scaling;
+
+	// Try to fit 13 coordinates on large tablets.
+	if (RenderingEngine::isTablet())
+		prefer_imgsize = padded_screensize.Y / 13 * gui_scaling;
+#else
+	// Desktop computers have more space, so try to fit 15 coordinates.
+	double prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
+#endif
+
+	int btn_w = 4.75 * prefer_imgsize;
+	int btn_h = 0.9 * prefer_imgsize;
+	int btn_pos_x = (screensize.X - btn_w) / 2;
+	int btn_pos_y = screensize.Y / 2 + 0.9 * prefer_imgsize;
+	core::rect<s32> rect = core::rect<s32>(btn_pos_x, btn_pos_y,
+			btn_pos_x + btn_w, btn_pos_y + btn_h);
+	const wchar_t* text = wgettext("Cancel");
+
+	m_cancel_button = GUIButton::addButton(guienv, rect, texture_src,
+			nullptr, ID_cancelButton, text);
+	m_cancel_button->setStyles(StyleSpec::getButtonStyle());
+	m_cancel_button->setAlignment(gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT,
+			gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT);
+
+	delete[] text;
+
+	m_old_event_receiver = device->getEventReceiver();
+	m_load_screen_event_receiver =  new LoadScreenEventReceiver(
+			&m_connect_aborted, m_cancel_button, m_old_event_receiver);
+	device->setEventReceiver(m_load_screen_event_receiver);
+}
+
+void Game::removeCancelButton()
+{
+	if (m_cancel_button) {
+		m_cancel_button->remove();
+		m_cancel_button = nullptr;
+	}
+
+	if (m_old_event_receiver) {
+		device->setEventReceiver(m_old_event_receiver);
+		m_old_event_receiver = nullptr;
+	}
+
+	delete m_load_screen_event_receiver;
+	m_load_screen_event_receiver = nullptr;
+}
+
+bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
+{
 	bool local_server_mode = false;
 
 	showOverlayMessage(N_("Resolving address..."), 0, 15);
@@ -1546,6 +1683,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			connect_address.isIPv6(), m_game_ui.get());
 
 	client->m_simple_singleplayer_mode = simple_singleplayer_mode;
+	client->m_connect_aborted = &m_connect_aborted;
 
 	infostream << "Connecting to server at ";
 	connect_address.print(&infostream);
@@ -1586,7 +1724,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			// Break conditions
-			if (*connection_aborted)
+			if (m_connect_aborted)
 				break;
 
 			if (client->accessDenied()) {
@@ -1598,12 +1736,14 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			if (input->cancelPressed()) {
-				*connection_aborted = true;
+				m_connect_aborted = true;
 				infostream << "Connect aborted [Escape]" << std::endl;
 				break;
 			}
 
 			if (client->m_is_registration_confirmation_state) {
+				if (m_cancel_button)
+					m_cancel_button->setVisible(false);
 				if (registration_confirmation_shown) {
 					// Keep drawing the GUI
 					ITextureSource *tsrc = client->getTextureSource();
@@ -1612,9 +1752,11 @@ bool Game::connectToServer(const GameStartData &start_data,
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
 						   &g_menumgr, client, start_data.name, start_data.password,
-						   connection_aborted, texture_src))->drop();
+						   &m_connect_aborted, texture_src))->drop();
 				}
 			} else {
+				if (m_cancel_button)
+					m_cancel_button->setVisible(true);
 				wait_time += dtime;
 				// Only time out if we aren't waiting for the server we started
 				if (!start_data.address.empty() && wait_time > 15) {
@@ -1636,7 +1778,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 	return result;
 }
 
-bool Game::getServerContent(bool *aborted)
+bool Game::getServerContent()
 {
 	input->clear();
 
@@ -1672,8 +1814,13 @@ bool Game::getServerContent(bool *aborted)
 			return false;
 		}
 
+		if (m_connect_aborted) {
+			infostream << "Connect aborted [Escape]" << std::endl;
+			return false;
+		}
+
 		if (input->cancelPressed()) {
-			*aborted = true;
+			m_connect_aborted = true;
 			infostream << "Connect aborted [Escape]" << std::endl;
 			return false;
 		}
