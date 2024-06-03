@@ -645,20 +645,20 @@ void set_default_settings()
 		float x_inches = window_size.X / (160.f * RenderingEngine::getDisplayDensity());
 		if (x_inches <= 3.7) {
 			// small 4" phones
-			g_settings->setDefault("hud_scaling", "0.55");
-			g_settings->setDefault("touch_sensitivity", "0.3");
+			settings->setDefault("hud_scaling", "0.55");
+			settings->setDefault("touch_sensitivity", "0.3");
 		} else if (x_inches > 3.7 && x_inches <= 4.5) {
 			// medium phones
-			g_settings->setDefault("hud_scaling", "0.6");
-			g_settings->setDefault("selectionbox_width", "6");
+			settings->setDefault("hud_scaling", "0.6");
+			settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 4.5 && x_inches <= 5.5) {
 			// large 6" phones
-			g_settings->setDefault("hud_scaling", "0.7");
-			g_settings->setDefault("selectionbox_width", "6");
+			settings->setDefault("hud_scaling", "0.7");
+			settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 5.5 && x_inches <= 6.5) {
 			// 7" tablets
-			g_settings->setDefault("hud_scaling", "0.85");
-			g_settings->setDefault("selectionbox_width", "6");
+			settings->setDefault("hud_scaling", "0.85");
+			settings->setDefault("selectionbox_width", "6");
 		}
 
 		if (x_inches <= 4.5) {

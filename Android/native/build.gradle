@@ -52,7 +52,7 @@ android {
 def buildDirectory = layout.buildDirectory.get().asFile
 
 tasks.register('downloadDeps', Download) {
-	def VERSION = "14042024"
+	def VERSION = "30052024"
 	src "https://github.com/MultiCraft/deps_android/releases/download/$VERSION/deps_android.zip"
 	dest new File(buildDirectory, 'deps.zip')
 	overwrite false
