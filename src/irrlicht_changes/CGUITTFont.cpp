@@ -168,8 +168,8 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 		}
 		case FT_PIXEL_MODE_BGRA:
 		{
-			int font_size = parent->getFontSize();
-			bool needs_scaling = (face->num_fixed_sizes > 0 && face->available_sizes[best_fixed_size_index].height > font_size);
+			u32 font_size = parent->getFontSize();
+			bool needs_scaling = (face->num_fixed_sizes > 0 && bits.rows > font_size);
 
 			if (needs_scaling)
 				texture_size = d;
@@ -190,7 +190,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 			image->unlock();
 
 			if (needs_scaling) {
-				float scale = (float)font_size / face->available_sizes[best_fixed_size_index].height;
+				float scale = (float)font_size / bits.rows;
 
 				core::dimension2du d_new(bits.width * scale + 1, bits.rows * scale + 1);
 				core::dimension2du texture_size_new = d_new.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
@@ -221,7 +221,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		best_fixed_size_index = getBestFixedSizeIndex(face, font_size);
-		scale = std::min((float)font_size / face->available_sizes[best_fixed_size_index].height, 1.0f);
 		FT_Select_Size(face, best_fixed_size_index);
 	}
 
@@ -238,6 +237,10 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 
 	FT_Bitmap bits = glyph->bitmap;
 
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0 && bits.rows > font_size) {
+		scale = std::min((float)font_size / bits.rows, 1.0f);
+	}
+	
 	// Setup the glyph information here:
 	advance = glyph->advance;
 	advance.x *= scale;
