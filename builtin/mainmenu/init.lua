@@ -57,8 +57,6 @@ tabs.credits  = dofile(menupath .. DIR_DELIM .. "tab_credits.lua")
 tabs.local_game = dofile(menupath .. DIR_DELIM .. "tab_local.lua")
 tabs.play_online = dofile(menupath .. DIR_DELIM .. "tab_online.lua")
 
-local func = loadfile(basepath .. DIR_DELIM .. "hosting" .. DIR_DELIM .. "init.lua")
-
 --------------------------------------------------------------------------------
 local function main_event_handler(tabview, event)
 	if event == "MenuQuit" and PLATFORM ~= "iOS" then
@@ -127,9 +125,6 @@ function menudata.init_tabs()
 
 	tv_main:set_autosave_tab(true)
 	tv_main:add(tabs.local_game)
-	if func then
-		func(tv_main)
-	end
 	tv_main:add(tabs.play_online)
 
 	tv_main:add(tabs.content)
