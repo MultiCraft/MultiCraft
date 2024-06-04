@@ -334,8 +334,6 @@ void set_default_settings()
 	settings->setDefault("emoji_font_system_paths", "/system/fonts/NotoColorEmojiLegacy.ttf,/system/fonts/NotoColorEmoji.ttf");
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	settings->setDefault("emoji_font_system_paths", "/System/Library/Fonts/Apple Color Emoji.ttc");
-#elif defined(__linux__)
-	settings->setDefault("emoji_font_system_paths", "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf");
 #else
 	settings->setDefault("emoji_font_system_paths", "");
 #endif

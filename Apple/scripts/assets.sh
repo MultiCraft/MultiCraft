@@ -16,5 +16,5 @@ then
 	cp ../fonts/*.ttf $DEST/fonts/
 else
 	cp ../fonts/MultiCraftFont.ttf $DEST/fonts/
-	cp ../fonts/NotoEmoji.ttf $DEST/fonts/
+	cp ../fonts/OpenMoji.ttf $DEST/fonts/
 fi

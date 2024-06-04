@@ -344,6 +344,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				"'. Trying to fall back to another path." << std::endl;
 	}
 
+
 	// give up
 	errorstream << "MultiCraft can not continue without a valid font. "
 			"Please correct the 'font_path' setting or install the font "
