@@ -325,18 +325,21 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 
 		if (font) {
 			std::vector<std::string> emoji_paths = split(emoji_font_system_paths, ',');
+			bool success = false;
 
 			// Load first available system emoji font
 			for (std::string path : emoji_paths) {
 				if (!path.empty() && fs::PathExists(path)) {
-					bool success = font->loadAdditionalFont(path.c_str());
+					success = font->loadAdditionalFont(path.c_str());
 					if (success)
 						break;
 				}
 			}
 
-			// Always load fallback emoji font
-			font->loadAdditionalFont(emoji_font_path.c_str());
+			// Load fallback emoji font if system fonts are not available
+			if (!success)
+				font->loadAdditionalFont(emoji_font_path.c_str());
+
 			return font;
 		}
 
