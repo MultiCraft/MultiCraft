@@ -192,13 +192,21 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 			if (needs_scaling) {
 				float scale = (float)font_size / bits.rows;
 
-				core::dimension2du d_new(bits.width * scale + 1, bits.rows * scale + 1);
-				core::dimension2du texture_size_new = d_new.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
+				core::dimension2du d_new(bits.width * scale, bits.rows * scale);
 
-				irr::video::IImage* scaled_img = driver->createImage(video::ECF_A8R8G8B8, texture_size_new);
+				irr::video::IImage* scaled_img = driver->createImage(video::ECF_A8R8G8B8, d_new);
 				image->copyToScalingBoxFilter(scaled_img);
 				image->drop();
 				image = scaled_img;
+				
+				core::dimension2du d_new_optimal = d_new.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
+				
+				if (d_new != d_new_optimal) {
+					irr::video::IImage* scaled_optimal = driver->createImage(video::ECF_A8R8G8B8, d_new_optimal);
+					image->copyTo(scaled_optimal, core::position2di(0, 0));
+					image->drop();
+					image = scaled_optimal;
+				}
 			}
 
 			break;
