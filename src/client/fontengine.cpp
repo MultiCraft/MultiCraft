@@ -330,7 +330,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 			// Load first available system emoji font
 			for (std::string path : emoji_paths) {
 				if (!path.empty() && fs::PathExists(path)) {
-					success = font->loadAdditionalFont(path.c_str());
+					success = font->loadAdditionalFont(path.c_str(), true);
 					if (success)
 						break;
 				}
@@ -338,7 +338,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 
 			// Load fallback emoji font if system fonts are not available
 			if (!success)
-				font->loadAdditionalFont(emoji_font_path.c_str());
+				font->loadAdditionalFont(emoji_font_path.c_str(), true);
 
 			return font;
 		}

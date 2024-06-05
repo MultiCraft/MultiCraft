@@ -79,9 +79,6 @@ namespace gui
 		//! Creates the IImage object from the FT_Bitmap.
 		video::IImage* createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const;
 
-		//! Get index of best size for bitmap fonts
-		u32 getBestFixedSizeIndex(FT_Face face, u32 font_size);
-
 		//! If true, the glyph has been loaded.
 		bool isLoaded;
 
@@ -340,7 +337,9 @@ namespace gui
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
-			bool loadAdditionalFont(const io::path& filename);
+			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false);
+
+			bool testEmojiFont(const io::path& filename);
 
 		protected:
 			bool use_monochrome;

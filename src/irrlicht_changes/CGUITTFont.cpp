@@ -80,7 +80,7 @@ inline void checkFontBitmapSize(const FT_Bitmap &bits)
 	}
 }
 
-u32 SGUITTGlyph::getBestFixedSizeIndex(FT_Face face, u32 font_size)
+u32 getBestFixedSizeIndex(FT_Face face, u32 font_size)
 {
 	u32 index = 0;
 	u32 last_font_size =0;
@@ -502,9 +502,88 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	return true;
 }
 
-bool CGUITTFont::loadAdditionalFont(const io::path& filename)
+bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font)
 {
-	return load(filename, size, !use_monochrome, use_transparency);
+	bool success = load(filename, size, !use_monochrome, use_transparency);
+
+	if (!success || !is_emoji_font)
+		return success;
+
+	success = testEmojiFont(filename);
+
+	if (!success) {
+		filenames.pop_back();
+		tt_faces.pop_back();
+		tt_offsets.pop_back();
+
+		core::map<io::path, SGUITTFace*>::Node *node = c_faces.find(filename);
+		if (node) {
+			SGUITTFace *face = node->getValue();
+			if (face->drop())
+				c_faces.remove(filename);
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+bool CGUITTFont::testEmojiFont(const io::path& filename)
+{
+	FT_Face face = nullptr;
+
+	for (size_t i = 0; i < filenames.size(); i++) {
+		if (filenames[i] == filename) {
+			face = tt_faces[i];
+			break;
+		}
+	}
+
+	if (!face)
+		return false;
+
+	uchar32_t smile = 0x1F600;
+	u32 char_index = FT_Get_Char_Index(face, smile);
+
+	if (char_index == 0)
+		return false;
+
+	FT_Int32 flags = load_flags;
+	if (FT_HAS_COLOR(face))
+		flags |= FT_LOAD_COLOR;
+	else
+		flags |= FT_LOAD_RENDER;
+
+	FT_Set_Pixel_Sizes(face, 0, size);
+
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+		u32 best_fixed_size_index = getBestFixedSizeIndex(face, size);
+		FT_Select_Size(face, best_fixed_size_index);
+	}
+
+	if (FT_Load_Glyph(face, char_index, flags) != FT_Err_Ok)
+		return false;
+
+	FT_GlyphSlot glyph = face->glyph;
+
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
+		FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
+	}
+
+	FT_Bitmap bits = glyph->bitmap;
+
+	if (bits.rows < 1 || bits.width < 1)
+		return false;
+
+	if (FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_BGRA)
+		return false;
+
+	if (!FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_MONO &&
+			bits.pixel_mode != FT_PIXEL_MODE_GRAY)
+		return false;
+
+	return true;
 }
 
 CGUITTFont::~CGUITTFont()
@@ -977,7 +1056,7 @@ begin:
 
 				glyph->preload(char_index, tt_face, Driver, size, flags);
 
-				if (!glyph->isLoaded) {
+				if (!glyph->isLoaded && current_face < tt_faces.size()) {
 					current_face++;
 					goto begin;
 				}
