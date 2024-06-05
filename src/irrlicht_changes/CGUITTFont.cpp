@@ -198,9 +198,9 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 				image->copyToScalingBoxFilter(scaled_img);
 				image->drop();
 				image = scaled_img;
-				
+
 				core::dimension2du d_new_optimal = d_new.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
-				
+
 				if (d_new != d_new_optimal) {
 					irr::video::IImage* scaled_optimal = driver->createImage(video::ECF_A8R8G8B8, d_new_optimal);
 					image->copyTo(scaled_optimal, core::position2di(0, 0));
@@ -317,14 +317,13 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env, const io::path& filen
 	}
 
 	CGUITTFont* font = new CGUITTFont(env);
-	bool ret = font->load(filename, size, antialias, transparency);
+	bool ret = font->load(filename, size, antialias, transparency, shadow);
 	if (!ret)
 	{
 		font->drop();
 		return 0;
 	}
 
-	font->shadow_offset = shadow;
 	font->shadow_alpha = shadow_alpha;
 
 	return font;
@@ -341,7 +340,7 @@ CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device, const io::path& fil
 
 	CGUITTFont* font = new CGUITTFont(device->getGUIEnvironment());
 	font->Device = device;
-	bool ret = font->load(filename, size, antialias, transparency);
+	bool ret = font->load(filename, size, antialias, transparency, false);
 	if (!ret)
 	{
 		font->drop();
@@ -387,7 +386,7 @@ batch_load_size(1), Device(0), Environment(env), Driver(0), GlobalKerningWidth(0
 	Glyphs.set_free_when_destroyed(false);
 }
 
-bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antialias, const bool transparency)
+bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antialias, const bool transparency, const u32 shadow)
 {
 	// Some sanity checks.
 	if (Environment == 0 || Driver == 0) return false;
@@ -478,6 +477,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	// Store our face.
 	tt_faces.push_back(face->face);
 	tt_offsets.push_back(Glyphs.size());
+	shadow_offsets.push_back(shadow);
 
 	// Allocate our glyphs.
 	for (FT_Long i = 0; i < face->face->num_glyphs; i++)
@@ -488,6 +488,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 		glyph->glyph_page = 0;
 		glyph->source_rect = core::recti();
 		glyph->offset = core::vector2di();
+		glyph->shadow_offset = 0;
 		glyph->advance = FT_Vector();
 		glyph->surface = 0;
 		glyph->parent = this;
@@ -510,9 +511,9 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	return true;
 }
 
-bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font)
+bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font, const u32 shadow)
 {
-	bool success = load(filename, size, !use_monochrome, use_transparency);
+	bool success = load(filename, size, !use_monochrome, use_transparency, shadow);
 
 	if (!success || !is_emoji_font)
 		return success;
@@ -749,6 +750,8 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 		Glyph_Pages[i]->render_positions.clear();
 		Glyph_Pages[i]->render_source_rects.clear();
 		Glyph_Pages[i]->render_colors.clear();
+		Glyph_Pages[i]->shadow_positions.clear();
+		Glyph_Pages[i]->shadow_source_rects.clear();
 	}
 
 	// Set up some variables.
@@ -827,6 +830,13 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 			page->render_positions.push_back(core::position2di(offset.X + offx, offset.Y + offy));
 			page->render_source_rects.push_back(glyph->source_rect);
 
+			if (glyph->shadow_offset) {
+				page->shadow_positions.push_back(core::position2di(
+						offset.X + offx + glyph->shadow_offset,
+						offset.Y + offy + glyph->shadow_offset));
+				page->shadow_source_rects.push_back(glyph->source_rect);
+			}
+
 			// If wchar_t is 32-bit then use charPos instead
 			u32 iterPos = sizeof(wchar_t) == 4 ? charPos : iter.getPos();
 
@@ -854,12 +864,8 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 
 		CGUITTGlyphPage* page = n->getValue();
 
-		if (shadow_offset) {
-			for (size_t i = 0; i < page->render_positions.size(); ++i)
-				page->render_positions[i] += core::vector2di(shadow_offset, shadow_offset);
-			Driver->draw2DImageBatch(page->texture, page->render_positions, page->render_source_rects, clip, video::SColor(shadow_alpha,0,0,0), true);
-			for (size_t i = 0; i < page->render_positions.size(); ++i)
-				page->render_positions[i] -= core::vector2di(shadow_offset, shadow_offset);
+		if (!page->shadow_positions.empty()) {
+			Driver->draw2DImageBatch(page->texture, page->shadow_positions, page->shadow_source_rects, clip, video::SColor(shadow_alpha,0,0,0), true);
 		}
 		// render runs of matching color in batch
 		size_t ibegin;
@@ -1023,12 +1029,14 @@ begin:
 	FT_Face tt_face = tt_faces[0];
 	u32 glyph = 0;
 	int tt_offset = 0;
+	u32 shadow_offset = shadow_offsets[0];
 	for (size_t i = current_face; i < tt_faces.size(); i++) {
 		glyph = FT_Get_Char_Index(tt_faces[i], c);
 
 		if (glyph != 0) {
 			tt_face = tt_faces[i];
 			tt_offset = tt_offsets[i];
+			shadow_offset = shadow_offsets[i];
 			current_face = i;
 			break;
 		}
@@ -1069,6 +1077,7 @@ begin:
 					goto begin;
 				}
 
+				glyph->shadow_offset = shadow_offset;
 				Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
 			}
 		}

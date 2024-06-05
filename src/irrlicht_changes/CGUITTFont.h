@@ -61,7 +61,7 @@ namespace gui
 	struct SGUITTGlyph
 	{
 		//! Constructor.
-		SGUITTGlyph() : isLoaded(false), glyph_page(0), surface(0), parent(0) {}
+		SGUITTGlyph() : isLoaded(false), isColor(false), glyph_page(0), best_fixed_size_index(0), shadow_offset(0), surface(0), parent(0) {}
 
 		//! Destructor.
 		~SGUITTGlyph() { unload(); }
@@ -96,6 +96,9 @@ namespace gui
 
 		//! The offset of glyph when drawn.
 		core::vector2di offset;
+
+		//! The shadow offset of glyph
+		u32 shadow_offset;
 
 		//! Glyph advance information.
 		FT_Vector advance;
@@ -207,6 +210,8 @@ namespace gui
 			core::array<core::vector2di> render_positions;
 			core::array<core::recti> render_source_rects;
 			core::array<video::SColor> render_colors;
+			core::array<core::vector2di> shadow_positions;
+			core::array<core::recti> shadow_source_rects;
 
 		private:
 			core::array<const SGUITTGlyph*> glyph_to_be_paged;
@@ -337,7 +342,7 @@ namespace gui
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
-			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false);
+			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
 
 			bool testEmojiFont(const io::path& filename);
 
@@ -359,7 +364,7 @@ namespace gui
 			static scene::SMesh  shared_plane_;
 
 			CGUITTFont(IGUIEnvironment *env);
-			bool load(const io::path& filename, const u32 size, const bool antialias, const bool transparency);
+			bool load(const io::path& filename, const u32 size, const bool antialias, const bool transparency, const u32 shadow);
 			void reset_images();
 			void update_glyph_pages() const;
 			void update_load_flags()
@@ -399,7 +404,7 @@ namespace gui
 			s32 GlobalKerningWidth;
 			s32 GlobalKerningHeight;
 			core::ustring Invisible;
-			u32 shadow_offset;
+			std::vector<u32> shadow_offsets;
 			u32 shadow_alpha;
 	};
 
