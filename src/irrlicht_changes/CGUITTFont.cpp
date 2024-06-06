@@ -524,6 +524,7 @@ bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font
 		filenames.pop_back();
 		tt_faces.pop_back();
 		tt_offsets.pop_back();
+		shadow_offsets.pop_back();
 
 		core::map<io::path, SGUITTFace*>::Node *node = c_faces.find(filename);
 		if (node) {
