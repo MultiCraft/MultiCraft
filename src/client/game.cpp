@@ -2185,7 +2185,10 @@ void Game::openInventory()
 
 void Game::openConsole(float scale, const wchar_t *line)
 {
+#if !defined(__ANDROID__) && !defined(__IOS__)
+	// to avoid adding an extra setting
 	assert(scale > 0.0f && scale <= 1.0f);
+#endif
 
 	if (gui_chat_console->isOpenInhibited())
 		return;
@@ -2194,11 +2197,10 @@ void Game::openConsole(float scale, const wchar_t *line)
 	if (porting::isInputDialogActive())
 		return;
 
-	if (!porting::hasRealKeyboard()) {
+	if (!porting::hasRealKeyboard())
 		porting::showInputDialog("", "", 2, "chat");
-	}
 
-	if (!RenderingEngine::isTablet())
+	if (g_settings->getFloat("console_message_height") == 0.0f)
 		return;
 #endif
 

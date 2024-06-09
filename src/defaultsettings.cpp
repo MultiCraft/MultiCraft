@@ -545,6 +545,8 @@ void set_default_settings()
 	if (isTablet) {
 		settings->setDefault("recent_chat_messages", "8");
 		settings->setDefault("console_message_height", "0.4");
+	} else {
+		settings->setDefault("console_message_height", "0.3");
 	}
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
@@ -647,10 +649,12 @@ void set_default_settings()
 			// small 4" phones
 			settings->setDefault("hud_scaling", "0.55");
 			settings->setDefault("touch_sensitivity", "0.3");
+			settings->setDefault("console_message_height", "0");
 		} else if (x_inches > 3.7 && x_inches <= 4.5) {
 			// medium phones
 			settings->setDefault("hud_scaling", "0.6");
 			settings->setDefault("selectionbox_width", "6");
+			settings->setDefault("console_message_height", "0");
 		} else if (x_inches > 4.5 && x_inches <= 5.5) {
 			// large 6" phones
 			settings->setDefault("hud_scaling", "0.7");
@@ -692,10 +696,12 @@ void set_default_settings()
 		// 4" iPhone and iPod Touch
 		settings->setDefault("hud_scaling", "0.55");
 		settings->setDefault("touch_sensitivity", "0.33");
+		settings->setDefault("console_message_height", "0");
 	} else if SDVersion4and7Inch {
 		// 4.7" iPhone
 		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("touch_sensitivity", "0.27");
+		settings->setDefault("console_message_height", "0");
 	} else if SDVersion5and5Inch {
 		// 5.5" iPhone Plus
 		settings->setDefault("hud_scaling", "0.6");
