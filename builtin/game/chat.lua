@@ -404,7 +404,7 @@ core.register_chatcommand("auth_reload", {
 
 core.register_chatcommand("remove_player", {
 	params = "<name>",
-	description = "Remove a player's data",
+	description = "Remove a player's authentication and data",
 	privs = {server=true},
 	func = function(name, param)
 		local toname = param
@@ -413,9 +413,12 @@ core.register_chatcommand("remove_player", {
 		end
 
 		local rc = core.remove_player(toname)
+		if rc == 0 or rc == 1 then
+			minetest.remove_player_auth(toname)
+		end
 
 		if rc == 0 then
-			core.log("action", name .. " removed player data of " .. toname .. ".")
+			core.log("action", name .. " removed player authentication and data of " .. toname .. ".")
 			return true, "Player \"" .. toname .. "\" removed."
 		elseif rc == 1 then
 			return true, "No such player \"" .. toname .. "\" to remove."
