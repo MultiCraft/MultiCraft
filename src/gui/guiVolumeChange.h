@@ -24,13 +24,15 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <string>
 
 class ISimpleTextureSource;
+class ISoundManager;
 
 class GUIVolumeChange : public GUIModalMenu
 {
 public:
 	GUIVolumeChange(gui::IGUIEnvironment* env,
 			gui::IGUIElement* parent, s32 id,
-			IMenuManager *menumgr, ISimpleTextureSource *tsrc);
+			IMenuManager *menumgr, ISimpleTextureSource *tsrc,
+			ISoundManager *m_sound_manager);
 	~GUIVolumeChange();
 
 	void removeChildren();
@@ -53,5 +55,6 @@ private:
 	void saveSettingsAndQuit();
 
 	ISimpleTextureSource *m_tsrc;
+	ISoundManager *m_sound_manager;
 	video::SColor m_fullscreen_bgcolor;
 };
