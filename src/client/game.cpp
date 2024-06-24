@@ -1612,7 +1612,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
 						   &g_menumgr, client, start_data.name, start_data.password,
-						   connection_aborted, texture_src))->drop();
+						   connection_aborted, texture_src, sound))->drop();
 				}
 			} else {
 				wait_time += dtime;

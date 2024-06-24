@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "guiConfirmRegistration.h"
 #include "client/client.h"
+#include "client/sound.h"
 #include "filesys.h"
 #include "guiBackgroundImage.h"
 #include "guiButton.h"
@@ -29,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <IGUIStaticText.h>
 #include <IGUIFont.h>
 #include "porting.h"
+#include "settings.h"
 
 #if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
 	#include "intlGUIEditBox.h"
@@ -56,10 +58,11 @@ const int ID_confirmPasswordBg = 268;
 GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 		gui::IGUIElement *parent, s32 id, IMenuManager *menumgr, Client *client,
 		const std::string &playername, const std::string &password,
-		bool *aborted, ISimpleTextureSource *tsrc) :
+		bool *aborted, ISimpleTextureSource *tsrc,
+		ISoundManager *sound_manager) :
 		GUIModalMenu(env, parent, id, menumgr),
 		m_client(client), m_playername(playername), m_password(password),
-		m_aborted(aborted), m_tsrc(tsrc)
+		m_aborted(aborted), m_tsrc(tsrc), m_sound_manager(sound_manager)
 {
 #ifdef HAVE_TOUCHSCREENGUI
 	m_touchscreen_visible = false;
@@ -284,6 +287,10 @@ bool GUIConfirmRegistration::OnEvent(const SEvent &event)
 			return true;
 		}
 	} else if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
+		const std::string sound = g_settings->get("btn_press_sound");
+		if (!sound.empty())
+			m_sound_manager->playSound(sound, false, 1.0f);
+
 		switch (event.GUIEvent.Caller->getID()) {
 		case ID_confirm:
 			acceptInput();

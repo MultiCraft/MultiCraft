@@ -32,7 +32,7 @@ public:
 	GUIVolumeChange(gui::IGUIEnvironment* env,
 			gui::IGUIElement* parent, s32 id,
 			IMenuManager *menumgr, ISimpleTextureSource *tsrc,
-			ISoundManager *m_sound_manager);
+			ISoundManager *sound_manager);
 	~GUIVolumeChange();
 
 	void removeChildren();
