@@ -226,7 +226,7 @@ end
 --------------------------------------------------------------------------------
 return {
 	name = "content",
-	caption = "", -- fgettext("Content"),
+	caption = fgettext("Content"),
 	cbf_formspec = get_formspec,
 	cbf_button_handler = handle_buttons,
 	on_change = pkgmgr.update_gamelist

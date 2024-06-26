@@ -71,57 +71,6 @@ local function add_tab(self,tab)
 end
 
 --------------------------------------------------------------------------------
-local function add_side_button(self, btn)
-	if btn.pos then
-		table.insert(self.side_buttons, btn.pos, btn)
-	else
-		self.side_buttons[#self.side_buttons + 1] = btn
-	end
-end
-
---------------------------------------------------------------------------------
-local tpath = defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc
-local function add_side_menu(self, fs, selected_tab, x, fs_h, darken)
-	if #self.side_buttons == 0 then return end
-
-	local side_menu_h = #self.side_buttons * 1.41 + 0.14
-	local bg_y = fs_h / 2 - side_menu_h / 2
-	fs[#fs + 1] = fmt("image[%s,%s;1.15,%s;%sside_menu.png;30]", x, bg_y, side_menu_h, tpath)
-
-	for i, btn in ipairs(self.side_buttons) do
-		local y = bg_y - 1.31 + 1.41 * i
-		if i > 1 then
-			fs[#fs + 1] = fmt("image[%s,%s;0.9,0.06;%sside_menu_divider.png]", x + 0.1, y - 0.06, tpath)
-		end
-
-		local btn_name = self.name .. "_side_" .. i
-		fs[#fs + 1] = fmt("style[%s;bgimg=", btn_name)
-
-		local tab_name = btn.tab_name or btn.tab_name_selected
-		local texture_prefix = btn.texture_prefix or tab_name
-		if tab_name and tab_name == selected_tab then
-			fs[#fs + 1] = btn.texture_selected or tpath .. texture_prefix .. "_menu_selected.png"
-		else
-			fs[#fs + 1] = btn.texture or tpath .. texture_prefix .. "_menu.png"
-			fs[#fs + 1] = ";bgimg_hovered="
-			fs[#fs + 1] = btn.texture_hover or tpath .. texture_prefix .. "_menu_hover.png"
-		end
-		fs[#fs + 1] = "]"
-
-		fs[#fs + 1] = fmt("image_button[%s,%s;1,1.35;;%s;;true;false]", x + 0.09, y, btn_name)
-		fs[#fs + 1] = fmt("tooltip[%s;%s]", btn_name, btn.tooltip)
-	end
-
-	if darken then
-		fs[#fs + 1] = fmt("style[cancel;bgimg=%sside_menu_darken.png;bgimg_middle=30]", tpath)
-		fs[#fs + 1] = fmt("image_button[%s,%s;1.15,%s;;cancel;;true;false]", x, bg_y, side_menu_h)
-
-		-- Reset "cancel" button styling
-		fs[#fs + 1] = "style[cancel;bgimg=;bgimg_middle=]"
-	end
-end
-
---------------------------------------------------------------------------------
 local function add_button_header(self, fs, fs_w)
 	local visible_tabs = {}
 	for _, tab in ipairs(self.tablist) do
@@ -149,8 +98,8 @@ local function add_button_header(self, fs, fs_w)
 end
 
 --------------------------------------------------------------------------------
-local function get_formspec(self, popup_w, popup_h, popup_fs)
-	if (self.hidden or (self.parent and self.parent.hidden)) and not popup_fs then
+local function get_formspec(self)
+	if (self.hidden or (self.parent and self.parent.hidden)) then
 		return ""
 	end
 
@@ -194,29 +143,6 @@ local function get_formspec(self, popup_w, popup_h, popup_fs)
 		-- Make sure that real_coordinates is enabled
 		fs[#fs + 1] = "real_coordinates[true]"
 		fs[#fs + 1] = "container_end[]"
-
-		-- Darken background
-		if popup_fs then
-			-- This styling gets reset in add_side_menu
-			fs[#fs + 1] = fmt("style[cancel;bgimg=%sbg_darken.png;bgimg_middle=32]", tpath)
-			fs[#fs + 1] = fmt("image_button[1.25,0;%s,%s;;cancel;;false;false]",
-				w, h + 1.15)
-		end
-
-		-- Add the side menu after the darkened background
-		add_side_menu(self, fs, current_tab.name, w + 1.175, h + 1.15, popup_fs)
-
-		-- Draw the popup
-		if popup_fs then
-			fs[#fs + 1] = fmt("container[%s,%s]", (w + 2.5 - popup_w) / 2,
-				(h + 1.15 - popup_h) / 2)
-			fs[#fs + 1] = fmt("style[popup_bg;bgimg=%sbg_common.png;bgimg_middle=32]",
-				defaulttexturedir_esc)
-			fs[#fs + 1] = fmt("image_button[0,0;%s,%s;;popup_bg;;false;false]",
-				popup_w, popup_h)
-			fs[#fs + 1] = popup_fs
-			fs[#fs + 1] = "container_end[]"
-		end
 
 		-- Disable real_coordinates again in case there are other UI elements
 		-- (like the game switcher in buttonbar.lua)
@@ -318,18 +244,9 @@ local function handle_tab_buttons(self, fields)
 	local name_prefix_len = #name_prefix
 	for field in pairs(fields) do
 		if field:sub(1, name_prefix_len) == name_prefix then
-			if field:sub(name_prefix_len + 1, name_prefix_len + 5) == "side_" then
-				local btn = self.side_buttons[tonumber(field:sub(name_prefix_len + 6))]
-				if btn.tab_name then
-					set_tab_by_name(self, btn.tab_name)
-				else
-					btn.on_click(self)
-				end
-			else
-				local index = tonumber(field:sub(name_prefix_len + 1))
-				if math.abs(self.last_tab_index) == index then return false end
-				switch_to_tab(self, index)
-			end
+			local index = tonumber(field:sub(name_prefix_len + 1))
+			if math.abs(self.last_tab_index) == index then return false end
+			switch_to_tab(self, index)
 			return true
 		end
 	end
@@ -397,7 +314,6 @@ local tabview_metatable = {
 			function(self,handler) self.glb_evt_handler = handler end,
 	set_fixed_size =
 			function(self,state) self.fixed_size = state end,
-	add_side_button = add_side_button,
 	handle_tab_buttons = handle_tab_buttons
 }
 
@@ -421,7 +337,6 @@ function tabview_create(name, size, tabheaderpos)
 	self.current_tab    = nil
 	self.last_tab_index = 1
 	self.tablist        = {}
-	self.side_buttons   = {}
 
 	self.autosave_tab   = false
 

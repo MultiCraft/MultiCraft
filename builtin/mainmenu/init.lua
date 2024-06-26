@@ -91,38 +91,6 @@ function menudata.init_tabs()
 	-- Create main tabview
 	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0.1, y = 0})
 
-	tv_main:add_side_button({
-		tooltip = fgettext("Browse online content"),
-		tab_name_selected = "content",
-		is_open_cdb = true,
-		on_click = function(this)
-			-- Show the content tab if no hidden games are installed
-			for _, game in ipairs(pkgmgr.games) do
-				if not game.hidden then
-					this:set_tab("content")
-					return
-				end
-			end
-
-			-- Otherwise open the store dialog
-			local dialog = create_store_dlg("game")
-			dialog:set_parent(this)
-			this:hide()
-			dialog:show()
-		end,
-	})
-
-	tv_main:add_side_button({
-		tooltip = fgettext("Settings"),
-		tab_name = "settings",
-	})
-
-	tv_main:add_side_button({
-		tooltip = fgettext("Credits"),
-		tab_name = "credits",
-		texture_prefix = "authors"
-	})
-
 	tv_main:set_autosave_tab(true)
 	tv_main:add(tabs.local_game)
 	tv_main:add(tabs.play_online)
