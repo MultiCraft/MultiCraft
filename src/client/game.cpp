@@ -1612,7 +1612,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
 						   &g_menumgr, client, start_data.name, start_data.password,
-						   connection_aborted, texture_src))->drop();
+						   connection_aborted, texture_src, sound))->drop();
 				}
 			} else {
 				wait_time += dtime;
@@ -1783,13 +1783,13 @@ inline bool Game::handleCallbacks()
 
 	if (g_gamecallback->changevolume_requested) {
 		(new GUIVolumeChange(guienv, guiroot, -1,
-				     &g_menumgr, texture_src))->drop();
+				     &g_menumgr, texture_src, sound))->drop();
 		g_gamecallback->changevolume_requested = false;
 	}
 
 	if (g_gamecallback->keyconfig_requested) {
 		(new GUIKeyChangeMenu(guienv, guiroot, -1,
-				      &g_menumgr, texture_src))->drop();
+				      &g_menumgr, texture_src, sound))->drop();
 		g_gamecallback->keyconfig_requested = false;
 	}
 
@@ -4435,6 +4435,8 @@ void Game::showPauseMenu()
 #endif
 	const bool high_dpi = RenderingEngine::isHighDpi();
 	const std::string x2 = high_dpi ? ".x2" : "";
+	std::string sound_name = g_settings->get("btn_press_sound");
+	str_formspec_escape(sound_name);
 	std::ostringstream os;
 
 	os << "formspec_version[1]" << SIZE_TAG
@@ -4442,7 +4444,8 @@ void Game::showPauseMenu()
 		<< "bgcolor[#00000060;true]"
 
 		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2 <<
-			".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << "]"
+			".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") <<
+			";sound=" << sound_name << "]"
 		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
 		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
 
@@ -4537,6 +4540,9 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 
 	const bool high_dpi = RenderingEngine::isHighDpi();
 	const std::string x2 = high_dpi ? ".x2" : "";
+	std::string sound_name = g_settings->get("btn_press_sound");
+	str_formspec_escape(sound_name);
+
 	std::ostringstream os;
 	os << "formspec_version[5]"
 		<< "size[10.5,7.5]"
@@ -4547,7 +4553,8 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
 		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
 		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2
-			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << "]"
+			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << ";"
+			<< "sound=" << sound_name << "]"
 		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
 		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
 		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"

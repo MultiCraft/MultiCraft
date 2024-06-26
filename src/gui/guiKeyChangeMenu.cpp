@@ -38,6 +38,7 @@
 
 #include "mainmenumanager.h"  // for g_gamecallback
 #include "client/renderingengine.h"
+#include "client/sound.h"
 
 #define KMaxButtonPerColumns 12
 
@@ -89,9 +90,10 @@ enum
 
 GUIKeyChangeMenu::GUIKeyChangeMenu(gui::IGUIEnvironment* env,
 		gui::IGUIElement* parent, s32 id, IMenuManager *menumgr,
-		ISimpleTextureSource *tsrc, bool main_menu) :
+		ISimpleTextureSource *tsrc, ISoundManager *sound_manager,
+		bool main_menu) :
 		GUIModalMenu(env, parent, id, menumgr),
-		m_tsrc(tsrc),
+		m_tsrc(tsrc), m_sound_manager(sound_manager),
 		m_main_menu(main_menu)
 {
 	init_keys();
@@ -430,6 +432,13 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 				// Returning true disables focus change
 				return true;
 			}
+		}
+		if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED ||
+				event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED)
+		{
+			const std::string sound = g_settings->get("btn_press_sound");
+			if (!sound.empty())
+				m_sound_manager->playSound(sound, false, 1.0f);
 		}
 		if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED)
 		{
