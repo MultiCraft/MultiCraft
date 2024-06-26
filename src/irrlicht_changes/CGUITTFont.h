@@ -61,7 +61,7 @@ namespace gui
 	struct SGUITTGlyph
 	{
 		//! Constructor.
-		SGUITTGlyph() : isLoaded(false), glyph_page(0), surface(0), parent(0) {}
+		SGUITTGlyph() : isLoaded(false), isColor(false), glyph_page(0), best_fixed_size_index(0), shadow_offset(0), surface(0), parent(0) {}
 
 		//! Destructor.
 		~SGUITTGlyph() { unload(); }
@@ -77,19 +77,28 @@ namespace gui
 		void unload();
 
 		//! Creates the IImage object from the FT_Bitmap.
-		video::IImage* createGlyphImage(const FT_Bitmap& bits, video::IVideoDriver* driver) const;
+		video::IImage* createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const;
 
 		//! If true, the glyph has been loaded.
 		bool isLoaded;
 
+		//! If true, the glyph has been loaded from color font.
+		bool isColor;
+
 		//! The page the glyph is on.
 		u32 glyph_page;
+
+		//! Index of best size for bitmap fonts
+		u32 best_fixed_size_index;
 
 		//! The source rectangle for the glyph.
 		core::recti source_rect;
 
 		//! The offset of glyph when drawn.
 		core::vector2di offset;
+
+		//! The shadow offset of glyph
+		u32 shadow_offset;
 
 		//! Glyph advance information.
 		FT_Vector advance;
@@ -201,6 +210,8 @@ namespace gui
 			core::array<core::vector2di> render_positions;
 			core::array<core::recti> render_source_rects;
 			core::array<video::SColor> render_colors;
+			core::array<core::vector2di> shadow_positions;
+			core::array<core::recti> shadow_source_rects;
 
 		private:
 			core::array<const SGUITTGlyph*> glyph_to_be_paged;
@@ -331,7 +342,9 @@ namespace gui
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
-			bool loadAdditionalFont(const io::path& filename);
+			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
+
+			bool testEmojiFont(const io::path& filename);
 
 		protected:
 			bool use_monochrome;
@@ -351,13 +364,13 @@ namespace gui
 			static scene::SMesh  shared_plane_;
 
 			CGUITTFont(IGUIEnvironment *env);
-			bool load(const io::path& filename, const u32 size, const bool antialias, const bool transparency);
+			bool load(const io::path& filename, const u32 size, const bool antialias, const bool transparency, const u32 shadow);
 			void reset_images();
 			void update_glyph_pages() const;
 			void update_load_flags()
 			{
 				// Set up our loading flags.
-				load_flags = FT_LOAD_DEFAULT | FT_LOAD_RENDER;
+				load_flags = FT_LOAD_DEFAULT;
 				if (!useHinting()) load_flags |= FT_LOAD_NO_HINTING;
 				if (!useAutoHinting()) load_flags |= FT_LOAD_NO_AUTOHINT;
 				if (useMonochrome()) load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_TARGET_MONO;
@@ -391,7 +404,7 @@ namespace gui
 			s32 GlobalKerningWidth;
 			s32 GlobalKerningHeight;
 			core::ustring Invisible;
-			u32 shadow_offset;
+			std::vector<u32> shadow_offsets;
 			u32 shadow_alpha;
 	};
 
