@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/keycode.h"
 #include "settings.h"
 #include "porting.h"
+#include "client/guiscalingfilter.h"
 #include "client/tile.h"
 #include "client/fontengine.h"
 #include "log.h"
@@ -341,14 +342,16 @@ void GUIChatConsole::drawBackground()
 	video::IVideoDriver* driver = Environment->getVideoDriver();
 	if (m_background != NULL)
 	{
-		core::rect<s32> sourcerect(0, -m_height, m_screensize.X, 0);
-		driver->draw2DImage(
+		core::rect<s32> srcrect(core::position2d<s32>(0, 0),
+								core::dimension2di(m_background->getOriginalSize()));
+
+		draw2DImage9Slice(
+			driver,
 			m_background,
-			v2s32(0, 0),
-			sourcerect,
-			&AbsoluteClippingRect,
-			m_background_color,
-			false);
+			core::rect<s32>(0, 0, m_screensize.X, m_height),
+			srcrect,
+			core::rect<s32>(16, 16, -16, -16),
+			&AbsoluteClippingRect);
 	}
 	else
 	{
