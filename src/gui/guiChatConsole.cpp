@@ -348,7 +348,7 @@ void GUIChatConsole::drawBackground()
 		draw2DImage9Slice(
 			driver,
 			m_background,
-			core::rect<s32>(0, 0, m_screensize.X, m_height),
+			core::rect<s32>(0, 0, m_screensize.X, m_height + 16),
 			srcrect,
 			core::rect<s32>(16, 16, -16, -16),
 			&AbsoluteClippingRect);
