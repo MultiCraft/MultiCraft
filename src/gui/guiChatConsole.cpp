@@ -256,10 +256,14 @@ void GUIChatConsole::draw()
 
 void GUIChatConsole::reformatConsole()
 {
-	s32 cols = (m_screensize.X - 2 * m_round_screen_offset - m_scrollbar_width) / m_fontsize.X - 2; // make room for a margin (looks better)
-	s32 rows = m_desired_height / m_fontsize.Y - 1; // make room for the input prompt
+	s32 cols = (m_screensize.X - 2 * m_round_screen_offset - m_scrollbar_width) / m_fontsize.X - 3; // make room for a margin (looks better)
+	s32 rows = (m_desired_height - m_fontsize.X * 2) / m_fontsize.Y - 1; // make room for the input prompt
 	if (cols <= 0 || rows <= 0)
 		cols = rows = 0;
+
+	// Make m_desired_height match with lines
+	m_desired_height = m_fontsize.X * 2 + m_fontsize.Y * (rows + 1);
+
 	recalculateConsolePosition();
 	m_chat_backend->reformat(cols, rows);
 
@@ -277,8 +281,9 @@ void GUIChatConsole::recalculateConsolePosition()
 	DesiredRect = rect;
 	recalculateAbsolutePosition(true);
 
-	u32 scrollbar_x = m_screensize.X - m_round_screen_offset;
-	irr::core::rect<s32> scrollbarrect(scrollbar_x - m_scrollbar_width, 0, scrollbar_x, m_height);
+	u32 scrollbar_x = m_screensize.X - m_round_screen_offset - m_fontsize.X;
+	irr::core::rect<s32> scrollbarrect(scrollbar_x - m_scrollbar_width,
+			m_fontsize.X, scrollbar_x, m_height - m_fontsize.X);
 	m_vscrollbar->setRelativePosition(scrollbarrect);
 }
 
@@ -348,7 +353,7 @@ void GUIChatConsole::drawBackground()
 		draw2DImage9Slice(
 			driver,
 			m_background,
-			core::rect<s32>(0, 0, m_screensize.X, m_height + 16),
+			core::rect<s32>(0, 0, m_screensize.X, m_height),
 			srcrect,
 			core::rect<s32>(16, 16, -16, -16),
 			&AbsoluteClippingRect);
@@ -375,7 +380,7 @@ void GUIChatConsole::drawText()
 			continue;
 
 		s32 line_height = m_fontsize.Y;
-		s32 y = row * line_height + m_height - m_desired_height;
+		s32 y = row * line_height + m_height - m_desired_height + m_fontsize.X;
 		if (y + line_height < 0)
 			continue;
 
@@ -479,7 +484,7 @@ void GUIChatConsole::drawPrompt()
 
 	u32 row = m_chat_backend->getConsoleBuffer().getRows();
 	s32 line_height = m_fontsize.Y;
-	s32 y = row * line_height + m_height - m_desired_height;
+	s32 y = row * line_height + m_height - m_desired_height + m_fontsize.X;
 
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring prompt_text = prompt.getVisiblePortion();
@@ -1430,9 +1435,9 @@ void GUIChatConsole::createVScrollBar()
 	m_scrollbar_width = skin ? skin->getSize(gui::EGDS_SCROLLBAR_SIZE) : 16;
 	m_scrollbar_width *= 2;
 
-	u32 scrollbar_x = m_screensize.X - m_round_screen_offset;
+	u32 scrollbar_x = m_screensize.X - m_round_screen_offset - m_fontsize.X;
 	irr::core::rect<s32> scrollbarrect(scrollbar_x - m_scrollbar_width,
-			0, scrollbar_x, m_height);
+			m_fontsize.X, scrollbar_x, m_height - m_fontsize.X);
 	m_vscrollbar = new GUIScrollBar(Environment, getParent(), -1,
 			scrollbarrect, false, true);
 
