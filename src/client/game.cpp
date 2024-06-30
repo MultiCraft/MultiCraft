@@ -2085,6 +2085,9 @@ void Game::processKeyInput()
 		quicktune->inc();
 	} else if (wasKeyDown(KeyType::QUICKTUNE_DEC)) {
 		quicktune->dec();
+	} else if (wasKeyDown(KeyType::TABB)) {
+		if (client->modsLoaded())
+			client->getScript()->on_tab();
 	}
 
 	if (!isKeyDown(KeyType::JUMP) && runData.reset_jump_timer) {
