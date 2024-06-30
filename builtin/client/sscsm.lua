@@ -119,7 +119,7 @@ do
 			"register_on_placenode", "register_on_item_use",
 			"register_on_modchannel_message", "register_on_modchannel_signal",
 			"register_on_inventory_open", "register_on_sending_chat_message",
-			"register_on_receiving_chat_message"}) do
+			"register_on_receiving_chat_message", "register_on_tab"}) do
 		safe_funcs[core[k]] = wrap(k)
 	end
 end
@@ -209,7 +209,7 @@ do
 			"register_on_modchannel_message", "register_on_modchannel_signal",
 			"register_on_placenode", "register_on_punchnode",
 			"register_on_receiving_chat_message",
-			"register_on_sending_chat_message", "rgba",
+			"register_on_sending_chat_message", "register_on_tab", "rgba",
 			"run_server_chatcommand", "send_chat_message", "send_respawn",
 			"serialize", "sha1", "show_formspec", "sound_play", "sound_stop",
 			"string_to_area", "string_to_pos", "string_to_privs",
