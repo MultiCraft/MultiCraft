@@ -446,14 +446,12 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				const video::SColor color(255, 255, 255, 255);
 				const video::SColor colors[] = {color, color, color, color};
 				core::dimension2di imgsize(texture->getOriginalSize());
-				v2s32 dstsize(imgsize.Width * e->scale.X,
-				              imgsize.Height * e->scale.Y);
+				v2s32 dstsize(imgsize.Width * e->scale.X * m_scale_factor,
+				              imgsize.Height * e->scale.Y * m_scale_factor);
 				if (e->scale.X < 0)
 					dstsize.X = m_screensize.X * (e->scale.X * -0.01);
 				if (e->scale.Y < 0)
 					dstsize.Y = m_screensize.Y * (e->scale.Y * -0.01);
-				dstsize.X *= m_scale_factor;
-				dstsize.Y *= m_scale_factor;
 				v2s32 offset((e->align.X - 1.0) * dstsize.X / 2,
 				             (e->align.Y - 1.0) * dstsize.Y / 2);
 
