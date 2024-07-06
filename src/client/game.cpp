@@ -1434,11 +1434,13 @@ bool Game::createClient(const GameStartData &start_data)
 
 	/* Pre-calculated values
 	 */
-#ifndef HAVE_TOUCHSCREENGUI
 	video::ITexture *t = texture_src->getTexture("crack_anylength.png");
-#else
-	video::ITexture *t = texture_src->getTexture("crack_anylength_touch.png");
+
+#ifdef HAVE_TOUCHSCREENGUI
+	if (texture_src->isKnownSourceImage("crack_anylength_touch.png"))
+		t = texture_src->getTexture("crack_anylength_touch.png");
 #endif
+
 	if (t) {
 		v2u32 size = t->getOriginalSize();
 		crack_animation_length = size.Y / size.X;
