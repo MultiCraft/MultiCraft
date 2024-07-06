@@ -177,7 +177,8 @@ local function get_formspec(data)
 			fgettext("Enable all") .. "]"
 	end
 	return retval ..
-		"background9[5.6,0.85;5.8,6;" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
+		"background9[5.6,0.85;5.8,6;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc ..
+			"worldlist_bg.png;false;40]" ..
 		"tablecolumns[color;tree;text]" ..
 		"tableoptions[background=#0000;border=false]" ..
 		scrollbar_style("world_config_modlist") ..

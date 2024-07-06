@@ -340,7 +340,8 @@ local function create_world_formspec(dialogdata)
 		":;".. current_seed .. "]" ..
 
 		"label[0.43,4.3;" .. fgettext("Game") .. ":]" ..
-		"background9[0.37,4.5;7.28," .. gamelist_height .. ";" .. defaulttexturedir_esc .. "worldlist_bg.png;false;40]" ..
+		"background9[0.37,4.5;7.28," .. gamelist_height .. ";" ..
+			defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc .. "worldlist_bg.png;false;40]" ..
 		"textlist[0.47,4.6;7.08,".. gamelist_height - 0.2 .. ";games;" ..
 			pkgmgr.gamelist() .. ";" .. gameidx .. ";true]" ..
 		"container[0.37,5.8]" ..

@@ -18,20 +18,21 @@ Copyright (C) 2010-2012 celeron55, Perttu Ahola <celeron55@gmail.com>
 MultiCraft Development Team:
   textures/base/pack/gui/*.png
   textures/base/pack/attention.png
+  textures/base/pack/aux_btn.png
   textures/base/pack/bg_common.png
   textures/base/pack/btn_play.png
   textures/base/pack/btn_play_hover.png
   textures/base/pack/camera_btn.png
   textures/base/pack/chat_btn.png
+  textures/base/pack/clear.png
   textures/base/pack/crack_anylength_touch.png
-  textures/base/pack/creative_bg.png
   textures/base/pack/cursor.png
+  textures/base/pack/end_icon.png
   textures/base/pack/error_screenshot.png
   textures/base/pack/desc_bg.png
   textures/base/pack/down_btn.png
   textures/base/pack/drop_btn.png
   textures/base/pack/escape_btn.png
-  textures/base/pack/hunger_*.png
   textures/base/pack/inventory_btn.png
   textures/base/pack/joystick_*.png
   textures/base/pack/jump_btn.png
@@ -40,34 +41,22 @@ MultiCraft Development Team:
   textures/base/pack/minimap_btn.png
   textures/base/pack/minimap_mask_*.png
   textures/base/pack/minimap_overlay_*.png
+  textures/base/pack/next_icon.png
   textures/base/pack/player_marker.png
+  textures/base/pack/prev_icon.png
   textures/base/pack/progress_bar.png
   textures/base/pack/progress_bar_*.png
   textures/base/pack/rangeview_btn.png
   textures/base/pack/refresh.png
-  textures/base/pack/server_flags_creative.png
-  textures/base/pack/server_flags_damage.png
-  textures/base/pack/server_flags_favorite.png
-  textures/base/pack/server_flags_mc.png
-  textures/base/pack/server_flags_mt.png
-  textures/base/pack/server_flags_pvp.png
+  textures/base/pack/server_flags_*.png
   textures/base/pack/server_ping_*.png
-  textures/base/pack/switch_local_*.png
+  textures/base/pack/start_icon.png
+  textures/base/pack/tab_btn.png
   textures/base/pack/trash.png
   textures/base/pack/trash_pressed.png
-  textures/base/pack/worldlist_bg.png
 
 ShadowNinja:
   textures/base/pack/smoke_puff.png
-
-paramat:
-  textures/base/pack/next_icon.png
-  textures/base/pack/prev_icon.png
-  textures/base/pack/clear.png
-
-rubenwardy, paramat:
-  textures/base/pack/start_icon.png
-  textures/base/pack/end_icon.png
 
 erlehmann:
   misc/minetest-icon-24x24.png

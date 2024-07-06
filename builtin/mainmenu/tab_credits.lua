@@ -131,7 +131,7 @@ return {
 			btn_style("privacy") ..
 			"image_button[9.5,0.6;2.6,0.85;;privacy;Privacy Policy;true;false]" ..
 
-			"background9[0,1.5;12,4.2;" .. defaulttexturedir_esc ..
+			"background9[0,1.5;12,4.2;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc ..
 				"worldlist_bg.png;false;40]" ..
 			"tablecolumns[color;text]" ..
 			"tableoptions[background=#0000;highlight=#00000000;border=false]" ..

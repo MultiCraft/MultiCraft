@@ -74,7 +74,7 @@ function ui.update()
 			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 			"set_focus[btn_reconnect_yes;true]",
 			"textarea[0.6,0.5;12.8,0.6;;;", fgettext("The server has requested a reconnect:"), "]",
-			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc,
+			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc,
 				"worldlist_bg.png;false;40]",
 			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
 			btn_style("btn_reconnect_yes") ..
@@ -114,7 +114,7 @@ function ui.update()
 			"bgcolor[#0000]",
 			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
 			"textarea[0.6,0.5;12.8,0.6;;;", error_title, "]",
-			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc,
+			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc,
 				"worldlist_bg.png;false;40]",
 			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
 			restart_btn
