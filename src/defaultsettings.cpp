@@ -330,7 +330,12 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold", MultiCraftFont);
 	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
 
-	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "NotoEmoji.ttf"));
+	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf"));
+#if defined(__ANDROID__)
+	settings->setDefault("emoji_font_system_paths", "/system/fonts/SamsungColorEmoji.ttf,/system/fonts/NotoColorEmojiLegacy.ttf,/system/fonts/NotoColorEmoji.ttf");
+#else
+	settings->setDefault("emoji_font_system_paths", "");
+#endif
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallbackFull.ttf"));
