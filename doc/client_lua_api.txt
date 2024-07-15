@@ -734,6 +734,8 @@ Call these functions only at load time!
     * Called when the local player open inventory
     * Newest functions are called first
     * If any function returns true, inventory doesn't open
+* `minetest.register_on_tab(function())`
+    * Called when tab key pressed
 ### Sounds
 * `minetest.sound_play(spec, parameters)`: returns a handle
     * `spec` is a `SimpleSoundSpec`
