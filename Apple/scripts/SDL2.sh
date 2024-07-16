@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-SDL2_VERSION=release-2.30.1
+SDL2_VERSION=release-2.30.5
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
@@ -37,5 +37,6 @@ BUILD_FOLDER=$(xcodebuild \
 mkdir -p ../SDL2
 cp -v "${BUILD_FOLDER}/libSDL2.a" ../SDL2
 cp -rv include ../SDL2
+rm -rf ${BUILD_FOLDER}
 
 echo "SDL2 build successful"

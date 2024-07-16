@@ -52,6 +52,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#include "gui/touchscreengui.h"
 #endif
 
+#ifdef __APPLE__
+	#include <MultiCraft-Swift.h>
+#endif
+
 // for version information only
 extern "C" {
 #if USE_LUAJIT
@@ -160,8 +164,10 @@ int main(int argc, char *argv[])
 
 #ifdef __ANDROID__
 	porting::initAndroid();
-#elif __APPLE__
+#elif __IOS__
 	init_apple();
+#elif __APPLE__
+	MultiCraft::initApple();
 #endif
 	porting::initializePaths();
 

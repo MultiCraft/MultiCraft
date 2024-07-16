@@ -114,6 +114,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if defined(__APPLE__)
 	#include <mach-o/dyld.h>
 	#include <CoreFoundation/CoreFoundation.h>
+	#include <MultiCraft-Swift.h>
 #endif
 
 #ifndef _WIN32 // Posix
@@ -126,7 +127,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#endif
 #endif
 
-#if defined(__APPLE__)
+#if defined(__IOS__)
 	#include "wrapper.h"
 #endif
 

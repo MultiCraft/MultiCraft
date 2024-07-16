@@ -723,7 +723,7 @@ static bool open_uri(const std::string &uri)
 	return true;
 #elif defined(__APPLE__)
 #ifdef __IOS__
-	ioswrap_open_url(uri.c_str());
+	MultiCraft::openURL(uri.c_str());
 	return true;
 #else
 	const char *argv[] = {"open", uri.c_str(), NULL};
@@ -749,17 +749,18 @@ bool open_url(const std::string &url)
 #if defined(__APPLE__)
 void upgrade(const std::string &item)
 {
-	get_upgrade(item.c_str());
+	MultiCraft::getUpgrade(item.c_str());
 }
 
 std::string getSecretKey(const std::string &key)
 {
-	return std::string(get_secret_key(key.c_str()));
+	return std::string(MultiCraft::getSecretKey(key.c_str()));
 }
 
+//extern "C" float swiftScreenScale();
 float getScreenScale()
 {
-	static const float retval = get_screen_scale();
+	static const float retval = MultiCraft::getScreenScale();
 	return retval;
 }
 #endif

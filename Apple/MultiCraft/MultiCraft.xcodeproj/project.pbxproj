@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		62A571452B5836BA00A166A3 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA5291ED0F000E30F96 /* fonts */; };
+		62CAE0BF2B4F025100EDD46F /* AppLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CAE0B32B4F025100EDD46F /* AppLogic.swift */; };
 		84135B5F25D5264B00CA4DCF /* craftdef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC625D5261C00CA4DCF /* craftdef.cpp */; };
 		84135B6025D5264B00CA4DCF /* modchannels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC725D5261C00CA4DCF /* modchannels.cpp */; };
 		84135B6125D5264B00CA4DCF /* nodemetadata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC825D5261C00CA4DCF /* nodemetadata.cpp */; };
@@ -116,7 +117,6 @@
 		844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844436EE28DA80C100662A9D /* libfreetype.a */; };
 		84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617724B1BF2D0040BA4F /* AppKit.framework */; };
 		84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0024B1347B0040BA4F /* Foundation.framework */; };
-		84463B9324B258B00099DFBD /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617524B1BF280040BA4F /* IOKit.framework */; };
 		8453A49E24DB22F00087ECF9 /* client in Resources */ = {isa = PBXBuildFile; fileRef = 8453A49D24DB22F00087ECF9 /* client */; };
 		845856B324B1322D0040BA4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 845856B224B1322D0040BA4F /* Assets.xcassets */; };
 		84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0624B1348B0040BA4F /* libcurl.tbd */; };
@@ -134,7 +134,6 @@
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
 		8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL2.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
-		8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2728B810AD009FCF4D /* CoreVideo.framework */; };
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
 		84A1F9BB252E617D00000717 /* scripting_mainmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */; };
@@ -145,7 +144,6 @@
 		84C2AB5328DA7776001968EE /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C2AB5228DA7770001968EE /* libpng.a */; };
 		84C9A9592B228D9A00909EFF /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 84C9A9562B228D9A00909EFF /* chacha.c */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
-		84E33D882A7BBEE900609F77 /* wrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 84E33D872A7BBEE900609F77 /* wrapper.m */; };
 		84F0B4D72B44C800000D8546 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 84F0B4D62B44C800000D8546 /* Localizable.xcstrings */; };
 		84F0B4DA2B44CAEE000D8546 /* encryption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F0B4D92B44CAEE000D8546 /* encryption.cpp */; };
 		84F20D5925D52790009562A9 /* static_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5525D52790009562A9 /* static_text.cpp */; };
@@ -287,6 +285,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		62CAE0B32B4F025100EDD46F /* AppLogic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppLogic.swift; sourceTree = "<group>"; };
 		84135AC625D5261C00CA4DCF /* craftdef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = craftdef.cpp; path = ../../../src/craftdef.cpp; sourceTree = "<group>"; };
 		84135AC725D5261C00CA4DCF /* modchannels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modchannels.cpp; path = ../../../src/modchannels.cpp; sourceTree = "<group>"; };
 		84135AC825D5261C00CA4DCF /* nodemetadata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nodemetadata.cpp; path = ../../../src/nodemetadata.cpp; sourceTree = "<group>"; };
@@ -528,7 +527,6 @@
 		8458610924B13BF90040BA4F /* jsoncpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jsoncpp.cpp; path = ../../../lib/jsoncpp/jsoncpp.cpp; sourceTree = "<group>"; };
 		8458610B24B13C090040BA4F /* json.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = json.h; path = ../../../lib/jsoncpp/json/json.h; sourceTree = "<group>"; };
 		8458616724B1B7990040BA4F /* libIrrlicht.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIrrlicht.a; path = ../deps/irrlicht/libIrrlicht.a; sourceTree = "<group>"; };
-		8458617524B1BF280040BA4F /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		8458617724B1BF2D0040BA4F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		8458617B24B1C3BB0040BA4F /* builtin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = builtin; path = ../../../builtin; sourceTree = "<group>"; };
 		8458617C24B1C3BB0040BA4F /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../../../textures; sourceTree = "<group>"; };
@@ -543,7 +541,6 @@
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		8495BD1528B80B00009FCF4D /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../deps/SDL2/libSDL2.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
-		8495BD2728B810AD009FCF4D /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		849D0845278AC1B200471354 /* lchacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lchacha.c; path = ../../../lib/luachacha/lchacha.c; sourceTree = "<group>"; };
 		84A1F9A7252E616A00000717 /* mutex_auto_lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mutex_auto_lock.h; path = ../../../src/threading/mutex_auto_lock.h; sourceTree = "<group>"; };
@@ -563,8 +560,6 @@
 		84C9A9552B228D9A00909EFF /* ecrypt-machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-machine.h"; path = "../../../lib/chacha/ecrypt-machine.h"; sourceTree = "<group>"; };
 		84C9A9562B228D9A00909EFF /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/chacha/chacha.c; sourceTree = "<group>"; };
 		84C9A9572B228D9A00909EFF /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../lib/chacha/ecrypt-sync.h"; sourceTree = "<group>"; };
-		84E33D862A7BBEC100609F77 /* wrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = wrapper.h; sourceTree = "<group>"; };
-		84E33D872A7BBEE900609F77 /* wrapper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = wrapper.m; sourceTree = "<group>"; };
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/libintl.a; sourceTree = "<group>"; };
 		84F0B4D62B44C800000D8546 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		84F0B4D82B44CAEE000D8546 /* encryption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = encryption.h; path = ../../../src/util/encryption.h; sourceTree = "<group>"; };
@@ -867,11 +862,9 @@
 				8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */,
 				841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */,
 				84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */,
-				8495BD2828B810AD009FCF4D /* CoreVideo.framework in Frameworks */,
 				8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */,
 				84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */,
 				84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */,
-				84463B9324B258B00099DFBD /* IOKit.framework in Frameworks */,
 				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
 				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
 				84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */,
@@ -1072,11 +1065,9 @@
 				8495BD2928B81170009FCF4D /* Carbon.framework */,
 				841AD8AE28D0D6A40042E335 /* CoreAudio.framework */,
 				84BE974428CA129C004E8CEC /* CoreHaptics.framework */,
-				8495BD2728B810AD009FCF4D /* CoreVideo.framework */,
 				8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */,
 				84585C0024B1347B0040BA4F /* Foundation.framework */,
 				84BE974228CA1291004E8CEC /* GameController.framework */,
-				8458617524B1BF280040BA4F /* IOKit.framework */,
 				84585C0424B134850040BA4F /* OpenGL.framework */,
 				84585C0624B1348B0040BA4F /* libcurl.tbd */,
 				844436EE28DA80C100662A9D /* libfreetype.a */,
@@ -1448,7 +1439,6 @@
 				8458610624B13BDF0040BA4F /* mini-gmp.h */,
 			);
 			name = gmp;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		8458610824B13BF10040BA4F /* jsoncpp */ = {
@@ -1458,17 +1448,15 @@
 				8458610924B13BF90040BA4F /* jsoncpp.cpp */,
 			);
 			name = jsoncpp;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		8473ED5825C053D00053293B /* luautf8 */ = {
 			isa = PBXGroup;
 			children = (
-				847C6D4925D6F483008F5FC8 /* unidata.h */,
 				847C6D4A25D6F483008F5FC8 /* lutf8lib.c */,
+				847C6D4925D6F483008F5FC8 /* unidata.h */,
 			);
 			name = luautf8;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		849D0840278AC1A300471354 /* luachacha */ = {
@@ -1477,7 +1465,6 @@
 				849D0845278AC1B200471354 /* lchacha.c */,
 			);
 			name = luachacha;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		84A1F9A5252E615B00000717 /* threading */ = {
@@ -1618,14 +1605,13 @@
 		84C9A9512B228D9A00909EFF /* chacha */ = {
 			isa = PBXGroup;
 			children = (
-				84C9A9532B228D9A00909EFF /* ecrypt-portable.h */,
+				84C9A9562B228D9A00909EFF /* chacha.c */,
 				84C9A9542B228D9A00909EFF /* ecrypt-config.h */,
 				84C9A9552B228D9A00909EFF /* ecrypt-machine.h */,
-				84C9A9562B228D9A00909EFF /* chacha.c */,
+				84C9A9532B228D9A00909EFF /* ecrypt-portable.h */,
 				84C9A9572B228D9A00909EFF /* ecrypt-sync.h */,
 			);
 			name = chacha;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		84D4D9082A93707F00CACCC7 /* lib */ = {
@@ -1637,14 +1623,13 @@
 				849D0840278AC1A300471354 /* luachacha */,
 				8473ED5825C053D00053293B /* luautf8 */,
 			);
-			path = lib;
+			name = lib;
 			sourceTree = "<group>";
 		};
 		84E33D852A7BBEA200609F77 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				84E33D862A7BBEC100609F77 /* wrapper.h */,
-				84E33D872A7BBEE900609F77 /* wrapper.m */,
+				62CAE0B32B4F025100EDD46F /* AppLogic.swift */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1859,6 +1844,7 @@
 				84F20F4C25D52975009562A9 /* mapgen_fractal.cpp in Sources */,
 				84F20E8E25D52868009562A9 /* pointedthing.cpp in Sources */,
 				84F20EB325D528D7009562A9 /* content.cpp in Sources */,
+				62CAE0BF2B4F025100EDD46F /* AppLogic.swift in Sources */,
 				84135B9325D5264C00CA4DCF /* serverlist.cpp in Sources */,
 				84135B8F25D5264C00CA4DCF /* texture_override.cpp in Sources */,
 				84135B5F25D5264B00CA4DCF /* craftdef.cpp in Sources */,
@@ -2000,7 +1986,6 @@
 				84135B8825D5264C00CA4DCF /* gettext.cpp in Sources */,
 				84F20E8325D52868009562A9 /* metricsbackend.cpp in Sources */,
 				84135C2425D526D700CA4DCF /* content_mapblock.cpp in Sources */,
-				84E33D882A7BBEE900609F77 /* wrapper.m in Sources */,
 				84F20E3225D5282A009562A9 /* l_nodetimer.cpp in Sources */,
 				84135B7325D5264B00CA4DCF /* inventorymanager.cpp in Sources */,
 				84C9A9592B228D9A00909EFF /* chacha.c in Sources */,
@@ -2086,6 +2071,7 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -2125,6 +2111,7 @@
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -2151,7 +2138,6 @@
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"USE_SYSTEM_GMP=0",
-					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
 					"VERSION_PATCH=7",
@@ -2226,7 +2212,6 @@
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"USE_SYSTEM_GMP=0",
-					"ENABLE_UPDATE_CHECKER=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
 					"VERSION_PATCH=7",
