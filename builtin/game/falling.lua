@@ -416,6 +416,17 @@ core.register_entity(":__builtin:falling_node", {
 })
 
 local function convert_to_falling_node(pos, node)
+	-- Count how many active objects there already are
+	local object_count = 0
+	for _ in pairs(core.object_refs) do
+		object_count = object_count + 1
+	end
+
+	-- Don't add any more falling nodes if there are too many objects
+	if object_count > 31000 then
+		return false
+	end
+
 	local obj = core.add_entity(pos, "__builtin:falling_node")
 	if not obj then
 		return false
