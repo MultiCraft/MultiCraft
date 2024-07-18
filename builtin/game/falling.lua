@@ -422,7 +422,7 @@ function builtin_shared.too_many_objects()
 		object_count = object_count + 1
 	end
 
-	-- Don't add any more falling nodes if there are too many objects
+	-- Don't add any more objects if there are too many
 	return object_count > 31000
 end
 
