@@ -49,6 +49,10 @@ GUIButton::GUIButton(IGUIEnvironment* environment, IGUIElement* parent,
 	}
 	StaticText = gui::StaticText::add(Environment, Text.c_str(), core::rect<s32>(0,0,rectangle.getWidth(),rectangle.getHeight()), false, false, this, id);
 	StaticText->setTextAlignment(EGUIA_CENTER, EGUIA_CENTER);
+	if (StaticText->hasType(irr::gui::EGUIET_ENRICHED_STATIC_TEXT)) {
+		irr::gui::StaticText* stext = static_cast<irr::gui::StaticText*>(StaticText);
+		stext->setCenterEachLine(true);
+	}
 	// END PATCH
 }
 
