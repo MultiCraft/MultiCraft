@@ -25,7 +25,6 @@ MultiCraft Development Team:
   textures/base/pack/camera_btn.png
   textures/base/pack/chat_btn.png
   textures/base/pack/clear.png
-  textures/base/pack/crack_anylength_touch.png
   textures/base/pack/cursor.png
   textures/base/pack/end_icon.png
   textures/base/pack/error_screenshot.png
