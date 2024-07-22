@@ -415,7 +415,22 @@ core.register_entity(":__builtin:falling_node", {
 	end
 })
 
+function builtin_shared.too_many_objects()
+	-- Count how many active objects there already are
+	local object_count = 0
+	for _ in pairs(core.object_refs) do
+		object_count = object_count + 1
+	end
+
+	-- Don't add any more objects if there are too many
+	return object_count > 31000
+end
+
 local function convert_to_falling_node(pos, node)
+	if builtin_shared.too_many_objects() then
+		return false
+	end
+
 	local obj = core.add_entity(pos, "__builtin:falling_node")
 	if not obj then
 		return false

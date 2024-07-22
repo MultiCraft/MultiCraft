@@ -1,9 +1,16 @@
 -- Minetest: builtin/item_entity.lua
 
+local builtin_shared = ...
+
 local abs, min, floor, random, pi = math.abs, math.min, math.floor, math.random, math.pi
 local vadd, vnormalize = vector.add, vector.normalize
 
 function core.spawn_item(pos, item)
+	if builtin_shared.too_many_objects() then
+		-- Return one value (nil) for compatibility
+		return nil
+	end
+
 	-- Take item in any format
 	local stack = ItemStack(item)
 	local obj = core.add_entity(pos, "__builtin:item")
