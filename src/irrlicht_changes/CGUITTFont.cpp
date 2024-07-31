@@ -968,7 +968,9 @@ inline u32 CGUITTFont::getWidthFromCharacter(uchar32_t c) const
 		int w = Glyphs[n-1]->advance.x / 64;
 		return w;
 	}
-	if (c >= 0x2000)
+	if (c >= 0xFE00 && c <= 0xFE0F) // variation selectors
+		return 0;
+	else if (c >= 0x2000)
 		return (font_metrics.ascender / 64);
 	else return (font_metrics.ascender / 64) / 2;
 }
@@ -991,7 +993,9 @@ inline u32 CGUITTFont::getHeightFromCharacter(uchar32_t c) const
 		s32 height = (font_metrics.ascender / 64) - Glyphs[n-1]->offset.Y + Glyphs[n-1]->source_rect.getHeight();
 		return height;
 	}
-	if (c >= 0x2000)
+	if (c >= 0xFE00 && c <= 0xFE0F) // variation selectors
+		return 0;
+	else if (c >= 0x2000)
 		return (font_metrics.ascender / 64);
 	else return (font_metrics.ascender / 64) / 2;
 }
