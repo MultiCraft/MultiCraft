@@ -26,7 +26,6 @@ end
 
 local time_to_live = tonumber(core.settings:get("item_entity_ttl")) or 600
 local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
-local collection = core.settings:get_bool("item_collection", true)
 local water_flow = core.settings:get_bool("item_water_flow", true)
 
 -- Water flow functions, based on QwertyMine3 (WTFPL), and TenPlus1 (MIT) mods
@@ -396,57 +395,3 @@ core.register_entity(":__builtin:item", {
 		self.object:remove()
 	end,
 })
-
--- Item Collection
-if collection then
-	local function collect_items(player)
-		local ppos = player:get_pos()
-		ppos.y = ppos.y + 1.3
-		if not core.is_valid_pos(ppos) then
-			return
-		end
-
-		-- Detect
-		local objects = core.get_objects_inside_radius(ppos, 2)
-		for _, obj in ipairs(objects) do
-			local entity = obj:get_luaentity()
-			if entity and entity.name == "__builtin:item" and
-					not entity.collectioner and
-					entity.age and entity.age > 0.5 then
-				local item = ItemStack(entity.itemstring)
-				local inv = player:get_inventory()
-				if item:get_name() ~= "" and
-						inv and inv:room_for_item("main", item) then
-					-- Magnet
-					obj:move_to(ppos)
-					entity.collectioner = true
-
-					-- Collect
-					core.after(0.05, function()
-						core.sound_play("item_drop_pickup", {
-							pos = ppos,
-							max_hear_distance = 10,
-							gain = 0.2,
-							pitch = random(60, 100) / 100
-						}, true)
-						entity.itemstring = ""
-						obj:remove()
-						item = inv:add_item("main", item)
-						if not item:is_empty() then
-							core.item_drop(item, player, ppos)
-						end
-					end)
-				end
-			end
-		end
-	end
-
-	core.register_playerstep(function(_, playernames)
-		for _, name in ipairs(playernames) do
-			local player = core.get_player_by_name(name)
-			if player and player:is_player() and player:get_hp() > 0 then
-				collect_items(player)
-			end
-		end
-	end, core.is_singleplayer()) -- Force step in singlplayer mode only
-end
