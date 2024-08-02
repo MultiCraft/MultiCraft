@@ -2,7 +2,7 @@
 
 local builtin_shared = ...
 
-local abs, min, floor, random, pi = math.abs, math.min, math.floor, math.random, math.pi
+local abs, min, floor, pi = math.abs, math.min, math.floor, math.pi
 local vadd, vnormalize = vector.add, vector.normalize
 
 function core.spawn_item(pos, item)
