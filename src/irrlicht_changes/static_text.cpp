@@ -11,6 +11,7 @@
 #include <IVideoDriver.h>
 #include <rect.h>
 #include <SColor.h>
+#include <iostream>
 
 #if USE_FREETYPE
 	#include "CGUITTFont.h"
@@ -33,7 +34,7 @@ StaticText::StaticText(const EnrichedString &text, bool border,
 : IGUIStaticText(environment, parent, id, rectangle),
 	HAlign(EGUIA_UPPERLEFT), VAlign(EGUIA_UPPERLEFT),
 	Border(border), WordWrap(false), Background(background),
-	RestrainTextInside(true), RightToLeft(false),
+	RestrainTextInside(true), RightToLeft(false), CenterEachLine(false),
 	OverrideFont(0), LastBreakFont(0)
 {
 	#ifdef _DEBUG
@@ -86,8 +87,11 @@ void StaticText::draw()
 		core::rect<s32> r = frameRect;
 		s32 height_line = font->getDimension(L"A").Height + font->getKerningHeight();
 		s32 height_total = height_line * BrokenText.size();
-		if (VAlign == EGUIA_CENTER && WordWrap)
+		if (VAlign == EGUIA_CENTER && (WordWrap || CenterEachLine))
 		{
+			// Calculate the line height in the exact same way that it used to be
+			height_total = font->getDimension(ColoredText.c_str()).Height;
+			height_line -= 1; // Remove the 1px offset added by getDimension
 			r.UpperLeftCorner.Y = r.getCenter().Y - (height_total / 2);
 		}
 		else if (VAlign == EGUIA_LOWERRIGHT)
@@ -112,7 +116,7 @@ void StaticText::draw()
 			if (font->getType() == irr::gui::EGFT_CUSTOM) {
 				irr::gui::CGUITTFont *tmp = static_cast<irr::gui::CGUITTFont*>(font);
 				tmp->draw(str,
-					r, HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER,
+					r, HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
 					(RestrainTextInside ? &AbsoluteClippingRect : NULL));
 			} else
 #endif
@@ -120,7 +124,7 @@ void StaticText::draw()
 				// Draw non-colored text
 				font->draw(str.c_str(),
 					r, str.getDefaultColor(), // TODO: Implement colorization
-					HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER,
+					HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
 					(RestrainTextInside ? &AbsoluteClippingRect : NULL));
 			}
 
@@ -241,6 +245,12 @@ void StaticText::setTextAlignment(EGUI_ALIGNMENT horizontal, EGUI_ALIGNMENT vert
 }
 
 
+void StaticText::setCenterEachLine(const bool centerEachLine)
+{
+	CenterEachLine = centerEachLine;
+}
+
+
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR <= 7
 const video::SColor& StaticText::getOverrideColor() const
 #else
@@ -313,6 +323,14 @@ void StaticText::updateText()
 		setDrawBackground(false);
 
 	if (!WordWrap) {
+		if (VAlign == EGUIA_CENTER && CenterEachLine) {
+			size_t pos = 0;
+			while (pos < cText.size()) {
+				BrokenText.push_back(cText.getNextLine(&pos));
+			}
+			return;
+		}
+
 		BrokenText.push_back(cText);
 		return;
 	}
