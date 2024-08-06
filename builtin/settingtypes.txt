@@ -982,7 +982,7 @@ enable_remote_media_server (Connect to external media server) bool true
 enable_client_modding (Client modding) bool false
 
 #    URL to the server list displayed in the Multiplayer Tab.
-serverlist_url (Serverlist URL) string servers.multicraft.world
+serverlist_url (Serverlist URL) string servers.minetest.net
 
 #    File in client/serverlist/ that contains your favorite servers displayed in the
 #    Multiplayer Tab.
@@ -1039,10 +1039,7 @@ server_url (Server URL) string https://minetest.net
 server_announce (Announce server) bool false
 
 #    Announce to this serverlist.
-serverlist_url (Serverlist URL) string servers.multicraft.world
-
-#    Announce to MT serverlist.
-# announce_mt (Announce to MT) bool true
+serverlist_url (Serverlist URL) string servers.minetest.net
 
 #    Remove color codes from incoming chat messages
 #    Use this to stop players from being able to use color in their messages

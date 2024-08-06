@@ -1166,7 +1166,7 @@
 
 #    URL to the server list displayed in the Multiplayer Tab.
 #    type: string
-# serverlist_url = servers.multicraft.world
+# serverlist_url = servers.minetest.net
 
 #    File in client/serverlist/ that contains your favorite servers displayed in the
 #    Multiplayer Tab.
@@ -1224,11 +1224,7 @@
 
 #    Announce to this serverlist.
 #    type: string
-# serverlist_url = servers.multicraft.world
-
-#    Announce to MT serverlist.
-#    type: bool
-# announce_mt = true
+# serverlist_url = servers.minetest.net
 
 #    Remove color codes from incoming chat messages
 #    Use this to stop players from being able to use color in their messages
