@@ -956,8 +956,8 @@ int ModApiEnvMod::l_find_nodes_in_area(lua_State *L)
 		}
 
 		// last filter table is at top of stack
-		u32 i = filter.size() - 1;
-		do {
+		u32 i = filter.size();
+		while (i --> 0) {
 			if (idx[i] == 0) {
 				// No such node found -> drop the empty table
 				lua_pop(L, 1);
@@ -965,7 +965,7 @@ int ModApiEnvMod::l_find_nodes_in_area(lua_State *L)
 				// This node was found -> put table into the return table
 				lua_setfield(L, base, ndef->get(filter[i]).name.c_str());
 			}
-		} while (i-- != 0);
+		}
 
 		assert(lua_gettop(L) == base);
 		return 1;
