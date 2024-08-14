@@ -172,7 +172,7 @@ int ScriptApiBase::luaPanic(lua_State *L)
 {
 	std::ostringstream oss;
 	oss << "LUA PANIC: unprotected error in call to Lua API ("
-		<< readParam<std::string>(L, -1) << ")";
+		<< readParam<std::string>(L, -1) << ")\n" << script_get_backtrace(L);
 	FATAL_ERROR(oss.str().c_str());
 	// NOTREACHED
 	return 0;
