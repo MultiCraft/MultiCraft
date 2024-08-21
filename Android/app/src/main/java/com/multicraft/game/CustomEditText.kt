@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2023 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2023 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2024 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2024 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -25,7 +25,7 @@ import android.util.AttributeSet
 import android.view.KeyEvent
 import android.view.inputmethod.InputMethodManager
 
-class CustomEditText constructor(context: Context, attrs: AttributeSet) :
+class CustomEditText(context: Context, attrs: AttributeSet) :
 	com.google.android.material.textfield.TextInputEditText(context, attrs) {
 	override fun onKeyPreIme(keyCode: Int, event: KeyEvent): Boolean {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
