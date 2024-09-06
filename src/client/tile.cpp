@@ -534,7 +534,6 @@ public:
 
 	video::ITexture* getNormalTexture(const std::string &name);
 	video::SColor getTextureAverageColor(const std::string &name);
-	video::ITexture *getShaderFlagsTexture(bool normamap_present);
 
 	video::IImage* getTextureImage(const std::string &name)
 	{
@@ -2696,28 +2695,6 @@ video::SColor TextureSource::getTextureAverageColor(const std::string &name)
 	}
 	c.setAlpha(255);
 	return c;
-}
-
-
-video::ITexture *TextureSource::getShaderFlagsTexture(bool normalmap_present)
-{
-	std::string tname = "__shaderFlagsTexture";
-	tname += normalmap_present ? "1" : "0";
-
-	if (isKnownSourceImage(tname)) {
-		return getTexture(tname);
-	}
-
-	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
-	video::IImage *flags_image = driver->createImage(
-		video::ECF_A8R8G8B8, core::dimension2d<u32>(1, 1));
-	sanity_check(flags_image != NULL);
-	video::SColor c(255, normalmap_present ? 255 : 0, 0, 0);
-	flags_image->setPixel(0, 0, c);
-	insertSourceImage(tname, flags_image);
-	flags_image->drop();
-	return getTexture(tname);
-
 }
 
 std::vector<std::string> getTextureDirs()
