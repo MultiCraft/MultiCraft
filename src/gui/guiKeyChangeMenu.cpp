@@ -46,7 +46,8 @@ extern MainGameCallback *g_gamecallback;
 
 enum
 {
-	GUI_ID_BACK_BUTTON = 101, GUI_ID_ABORT_BUTTON, GUI_ID_SCROLL_BAR,
+	GUI_ID_BACK_BUTTON = 101, GUI_ID_ABORT_BUTTON, GUI_ID_RESET_BUTTON,
+	GUI_ID_SCROLL_BAR,
 	GUI_ID_BACKGROUND_IMG,
 	// buttons
 	GUI_ID_KEY_FORWARD_BUTTON,
@@ -277,6 +278,14 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	}
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
+		rect += topleft + v2s32(size.X - 165 * s, size.Y - 50 * s);
+		const wchar_t *text = wgettext("Reset");
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_RESET_BUTTON, text);
+		e->setStyles(styles);
+		delete[] text;
+	}
+	{
+		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
 		rect += topleft + v2s32(size.X / 2 + 15 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Cancel");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
@@ -337,6 +346,25 @@ bool GUIKeyChangeMenu::acceptInput()
 		g_settings->updateConfigFile(g_settings_path.c_str());
 
 	return true;
+}
+
+void GUIKeyChangeMenu::resetKeys()
+{
+	// Use getNames instead of key_settings so that keys not displayed in this
+	// menu get reset too.
+	for (const auto &name : g_settings->getNames()) {
+		if (str_starts_with(name, "keymap_"))
+			g_settings->remove(name);
+	}
+	g_settings->remove("aux1_descends");
+	g_settings->remove("doubletap_jump");
+	g_settings->remove("autojump");
+
+	// Save settings
+	clearKeyCache();
+	g_gamecallback->signalKeyConfigChange();
+	if (!g_settings_path.empty())
+		g_settings->updateConfigFile(g_settings_path.c_str());
 }
 
 bool GUIKeyChangeMenu::resetMenu()
@@ -449,6 +477,10 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 					quitMenu();
 					return true;
 				case GUI_ID_ABORT_BUTTON: //abort
+					quitMenu();
+					return true;
+				case GUI_ID_RESET_BUTTON:
+					resetKeys();
 					quitMenu();
 					return true;
 				default:
