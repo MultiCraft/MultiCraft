@@ -67,10 +67,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 // This represents an uninitialized or invalid format
 #define SER_FMT_VER_INVALID 255
+
 // Highest supported serialization version
+#if USE_ZSTD
 #define SER_FMT_VER_HIGHEST_READ 29
+#else
+#define SER_FMT_VER_HIGHEST_READ 28
+#endif
+
 // Saved on disk version
-#define SER_FMT_VER_HIGHEST_WRITE 29
+// Currently, we write with zlib even if zstd is supported to allow disabling
+// zstd or downgrading to a version that doesn't support it
+#define SER_FMT_VER_HIGHEST_WRITE 28
+
 // Lowest supported serialization version
 #define SER_FMT_VER_LOWEST_READ 0
 // Lowest serialization version for writing
@@ -90,9 +99,11 @@ void compressZlib(const u8 *data, size_t data_size, std::ostream &os, int level 
 void compressZlib(const std::string &data, std::ostream &os, int level = -1);
 void decompressZlib(std::istream &is, std::ostream &os, size_t limit = 0);
 
+#if USE_ZSTD
 void compressZstd(const u8 *data, size_t data_size, std::ostream &os, int level = 0);
 void compressZstd(const std::string &data, std::ostream &os, int level = 0);
 void decompressZstd(std::istream &is, std::ostream &os);
+#endif
 
 // These choose between zlib and a self-made one according to version
 void compress(const SharedBuffer<u8> &data, std::ostream &os, u8 version, int level = -1);

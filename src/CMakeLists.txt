@@ -298,7 +298,9 @@ if(WIN32)
 	# Dll's are automatically copied to the output directory by vcpkg when VCPKG_APPLOCAL_DEPS=ON
 	if(NOT VCPKG_APPLOCAL_DEPS)
 		find_file(ZLIB_DLL NAMES "zlib.dll" "zlib1.dll" DOC "Path to zlib.dll for installation (optional)")
-		find_file(ZSTD_DLL NAMES "zstd.dll" DOC "Path to zstd.dll for installation (optional)")
+		if(USE_ZSTD)
+			find_file(ZSTD_DLL NAMES "zstd.dll" DOC "Path to zstd.dll for installation (optional)")
+		endif()
 		if(ENABLE_SOUND)
 			set(OPENAL_DLL "" CACHE FILEPATH "Path to OpenAL32.dll for installation (optional)")
 			set(OGG_DLL "" CACHE FILEPATH "Path to libogg.dll for installation (optional)")
@@ -538,7 +540,6 @@ include_directories(
 	${PROJECT_SOURCE_DIR}
 	${IRRLICHT_INCLUDE_DIR}
 	${ZLIB_INCLUDE_DIR}
-	${ZSTD_INCLUDE_DIR}
 	${PNG_INCLUDE_DIR}
 	${SOUND_INCLUDE_DIRS}
 	${SQLITE3_INCLUDE_DIR}
@@ -549,6 +550,10 @@ include_directories(
 	${X11_INCLUDE_DIR}
 	${PROJECT_SOURCE_DIR}/script
 )
+
+if(USE_ZSTD)
+	include_directories(${ZSTD_INCLUDE_DIR})
+endif()
 
 if(USE_GETTEXT)
 	include_directories(${GETTEXT_INCLUDE_DIR})
@@ -572,7 +577,6 @@ if(BUILD_CLIENT)
 	target_link_libraries(
 		${PROJECT_NAME}
 		${ZLIB_LIBRARIES}
-		${ZSTD_LIBRARY}
 		${IRRLICHT_LIBRARY}
 		${JPEG_LIBRARIES}
 		${BZIP2_LIBRARIES}
@@ -594,6 +598,13 @@ if(BUILD_CLIENT)
 			# This is necessary for dynamic Lua modules
 			# to work when Lua is statically linked (issue #10806)
 			ENABLE_EXPORTS 1
+		)
+	endif()
+
+	if(USE_ZSTD)
+		target_link_libraries(
+			${PROJECT_NAME}
+			${ZSTD_LIBRARY}
 		)
 	endif()
 
@@ -686,7 +697,6 @@ if(BUILD_SERVER)
 	target_link_libraries(
 		${PROJECT_NAME}server
 		${ZLIB_LIBRARIES}
-		${ZSTD_LIBRARY}
 		${SQLITE3_LIBRARY}
 		${JSON_LIBRARY}
 		${LUA_LIBRARY}
@@ -703,6 +713,13 @@ if(BUILD_SERVER)
 			# This is necessary for dynamic Lua modules
 			# to work when Lua is statically linked (issue #10806)
 			ENABLE_EXPORTS 1
+		)
+	endif()
+
+	if(USE_ZSTD)
+		target_link_libraries(
+			${PROJECT_NAME}server
+			${ZSTD_LIBRARY}
 		)
 	endif()
 

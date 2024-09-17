@@ -22,7 +22,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/serialize.h"
 
 #include <zlib.h>
+#if USE_ZSTD
 #include <zstd.h>
+#endif
 
 /* report a zlib or i/o error */
 void zerr(int ret)
@@ -198,6 +200,7 @@ void decompressZlib(std::istream &is, std::ostream &os, size_t limit)
 	inflateEnd(&z);
 }
 
+#if USE_ZSTD
 struct ZSTD_Deleter {
 	void operator() (ZSTD_CStream* cstream) {
 		ZSTD_freeCStream(cstream);
@@ -296,14 +299,19 @@ void decompressZstd(std::istream &is, std::ostream &os)
 			throw SerializationError("decompressZstd: unget failed");
 	}
 }
+#endif
 
 void compress(u8 *data, u32 size, std::ostream &os, u8 version, int level)
 {
 	if(version >= 29)
 	{
+#if USE_ZSTD
 		// map the zlib levels [0,9] to [1,10]. -1 becomes 0 which indicates the default (currently 3)
 		compressZstd(data, size, os, level + 1);
 		return;
+#else
+		FATAL_ERROR("Zstd compression is not enabled");
+#endif
 	}
 
 	if(version >= 11)
@@ -361,8 +369,12 @@ void decompress(std::istream &is, std::ostream &os, u8 version)
 {
 	if(version >= 29)
 	{
+#if USE_ZSTD
 		decompressZstd(is, os);
 		return;
+#else
+		FATAL_ERROR("Zstd decompression is not enabled");
+#endif
 	}
 
 	if(version >= 11)
