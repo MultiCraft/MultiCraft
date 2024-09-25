@@ -1173,6 +1173,9 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 					}
 				}
 			}
+
+			if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y)))
+				return true;
 		}
 	}
 
