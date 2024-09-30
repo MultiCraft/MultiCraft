@@ -264,7 +264,7 @@ jobs:
     env:
       VCPKG_VERSION: a42af01b72c28a8e1d7b48107b33e4f286a55ef6
 #                    2023.11.20
-      vcpkg_packages: zlib curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp libpng libjpeg-turbo sdl2
+      vcpkg_packages: zlib zstd curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp libpng libjpeg-turbo sdl2
     strategy:
       fail-fast: false
       matrix:
