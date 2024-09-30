@@ -67,7 +67,7 @@ core.register_on_joinplayer(function(player)
 	--	end
 		local motd = core.settings:get("motd")
 		if motd ~= "" then
-			core.chat_send_player(player_name, "# Server: " .. motd)
+			core.chat_send_player(player_name, "Server: " .. motd)
 		end
 	end
 	core.send_join_message(player_name)
