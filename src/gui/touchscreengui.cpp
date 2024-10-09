@@ -401,6 +401,7 @@ void TouchScreenGUI::preprocessEvent(const SEvent &event)
 	s32 y = event.TouchInput.Y;
 
 	if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
+		m_events[id] = false;
 		bool overflow_btn_pressed = false;
 
 		for (auto button : m_buttons) {
@@ -453,7 +454,7 @@ void TouchScreenGUI::preprocessEvent(const SEvent &event)
 			toggleOverflowMenu();
 
 	} else if (event.TouchInput.Event == ETIE_LEFT_UP) {
-		m_events[id] = false;
+		m_events.erase(id);
 
 		for (auto button : m_buttons) {
 			if (m_overflow_open != button->overflow_menu)
@@ -721,9 +722,7 @@ void TouchScreenGUI::show()
 
 void TouchScreenGUI::reset()
 {
-	for (auto &event : m_events) {
-		event = false;
-	}
+	m_events.clear();
 
 	for (auto button : m_buttons) {
 		button->reset();

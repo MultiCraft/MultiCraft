@@ -25,7 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <IGUIEnvironment.h>
 #include <IrrlichtDevice.h>
 
-#include <array>
+#include <map>
 #include <vector>
 
 #include "client/tile.h"
@@ -36,7 +36,6 @@ using namespace irr::gui;
 
 #define MIN_DIG_TIME_MS 500
 #define MIN_PLACE_TIME_MS 50
-#define NUMBER_OF_TOUCHES 10
 
 typedef enum
 {
@@ -193,7 +192,7 @@ private:
 	bool m_visible = true;
 	bool m_buttons_initialized = false;
 
-	std::array<bool, NUMBER_OF_TOUCHES> m_events = {};
+	std::map<size_t, bool> m_events;
 	std::vector<hud_button_info> m_hud_buttons;
 	std::vector<button_info *> m_buttons;
 	joystick_info m_joystick;
