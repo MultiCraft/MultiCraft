@@ -61,7 +61,7 @@ struct KeyCache
 	InputHandler *handler;
 };
 
-class KeyList : private std::list<KeyPress>
+class KeyList : public std::list<KeyPress>
 {
 	typedef std::list<KeyPress> super;
 	typedef super::iterator iterator;

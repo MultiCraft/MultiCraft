@@ -268,7 +268,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 					video::ETCF_CREATE_MIP_MAPS, g_settings->getBool("mip_map"));
 
 #ifdef HAVE_TOUCHSCREENGUI
-			receiver->m_touchscreengui = new TouchScreenGUI(RenderingEngine::get_raw_device(), receiver);
+			receiver->m_touchscreengui = new TouchScreenGUI(RenderingEngine::get_raw_device());
 			g_touchscreengui = receiver->m_touchscreengui;
 #endif
 
