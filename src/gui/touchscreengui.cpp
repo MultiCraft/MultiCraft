@@ -559,7 +559,8 @@ void TouchScreenGUI::updateCamera(s32 x, s32 y)
 			(m_camera.x - x) * (m_camera.x - x) +
 			(m_camera.y - y) * (m_camera.y - y));
 
-	if ((distance > m_touchscreen_threshold) || m_camera.has_really_moved) {
+	if (!m_camera.dig && ((distance > m_touchscreen_threshold) || 
+			m_camera.has_really_moved)) {
 		m_camera.has_really_moved = true;
 
 		m_camera.yaw_change -= (x - m_camera.x) * m_touch_sensitivity;
