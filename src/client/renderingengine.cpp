@@ -738,17 +738,10 @@ void RenderingEngine::_clear_irrlicht_texture_cache()
 		if (texture) {
 			std::string filename = texture->getName().getPath().c_str();
 
-			const char *image_ext[] = {
-				".png", ".jpg", ".bmp", ".tga",
-				".pcx", ".ppm", ".psd", ".wal", ".rgb",
-				NULL
-			};
+			if ((filename.find("TTFontGlyphPage") == 0) || (filename == "#DefaultFont"))
+				continue;
 
-			std::string name = removeStringEnd(filename, image_ext);
-
-			if (!name.empty()) {
-				driver->removeTexture(texture);
-			}
+			driver->removeTexture(texture);
 		}
 	}
 }
