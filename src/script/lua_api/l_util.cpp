@@ -89,7 +89,7 @@ int ModApiUtil::l_get_us_time(lua_State *L)
 	return 1;
 }
 
-// parse_json(str[, nullvalue])
+// parse_json(str[, nullvalue, return_error])
 int ModApiUtil::l_parse_json(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
@@ -103,40 +103,41 @@ int ModApiUtil::l_parse_json(lua_State *L)
 		nullindex = lua_gettop(L);
 	}
 
-	Json::Value root;
+	bool return_error = lua_toboolean(L, 3);
+	const auto handle_error = [&](const char *errmsg) {
+		if (return_error) {
+			lua_pushnil(L);
+			lua_pushstring(L, errmsg);
+			return 2;
+		}
+		errorstream << "Failed to parse json data: " << errmsg << std::endl;
+		errorstream << "data: \"";
+		if (strlen(jsonstr) <= 100) {
+			errorstream << jsonstr << "\"";
+		} else {
+			std::string s = jsonstr;
+			errorstream << s.substr(0, 100) << "\"... (truncated)";
+		}
+		errorstream << std::endl;
+		lua_pushnil(L);
+		return 1;
+	};
 
+	Json::Value root;
 	{
 		std::istringstream stream(jsonstr);
 
 		Json::CharReaderBuilder builder;
 		builder.settings_["collectComments"] = false;
-		std::string errs;
-
-		if (!Json::parseFromStream(builder, stream, &root, &errs)) {
-			errorstream << "Failed to parse json data " << errs << std::endl;
-			size_t jlen = strlen(jsonstr);
-			if (jlen > 100) {
-				errorstream << "Data (" << jlen
-#ifdef NDEBUG
-					<< " bytes) not printed." << std::endl;
-#else
-					<< " bytes) printed to warningstream." << std::endl;
-				warningstream << "data: \"" << jsonstr << "\"" << std::endl;
-#endif
-			} else {
-				errorstream << "data: \"" << jsonstr << "\"" << std::endl;
-			}
-			lua_pushnil(L);
-			return 1;
-		}
+		const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+		std::string errmsg;
+		if (!Json::parseFromStream(builder, stream, &root, &errmsg))
+			return handle_error(errmsg.c_str());
 	}
 
-	if (!push_json_value(L, root, nullindex)) {
-		errorstream << "Failed to parse json data, "
-			<< "depth exceeds lua stack limit" << std::endl;
-		errorstream << "data: \"" << jsonstr << "\"" << std::endl;
-		lua_pushnil(L);
-	}
+	if (!push_json_value(L, root, nullindex))
+		return handle_error("depth exceeds lua stack limit");
+
 	return 1;
 }
 
