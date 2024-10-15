@@ -420,9 +420,9 @@ function core.item_place(itemstack, placer, pointed_thing, param2)
 	if pointed_thing.type == "node" and placer and
 			not placer:get_player_control().sneak then
 		local n = core.get_node(pointed_thing.under)
-		local nn = n.name
-		if core.registered_nodes[nn] and core.registered_nodes[nn].on_rightclick then
-			return core.registered_nodes[nn].on_rightclick(pointed_thing.under, n,
+		local ndef = core.registered_nodes[n.name]
+		if ndef and ndef.on_rightclick then
+			return ndef.on_rightclick(pointed_thing.under, n,
 					placer, itemstack, pointed_thing) or itemstack, nil
 		end
 	end
