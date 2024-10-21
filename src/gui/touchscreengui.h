@@ -219,6 +219,8 @@ private:
 
 	void setVisible(bool visible);
 	void reset();
+
+	void wakeUpInputhandler();
 };
 
 extern TouchScreenGUI *g_touchscreengui;

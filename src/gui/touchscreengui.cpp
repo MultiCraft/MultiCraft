@@ -665,7 +665,10 @@ void TouchScreenGUI::step(float dtime)
 
 	if (m_camera.event_id != -1 && (!m_camera.has_really_moved)) {
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
-		m_camera.dig = (delta > MIN_DIG_TIME_MS);
+		if (delta > MIN_DIG_TIME_MS) {
+			m_camera.dig = true;
+			wakeUpInputhandler();
+		}
 	}
 }
 
@@ -754,4 +757,14 @@ void TouchScreenGUI::reset()
 void TouchScreenGUI::handleReleaseAll()
 {
 	reset();
+}
+
+void TouchScreenGUI::wakeUpInputhandler()
+{
+	SEvent event;
+	memset(&event, 0, sizeof(SEvent));
+	event.EventType = EET_TOUCH_INPUT_EVENT;
+	event.TouchInput.Event = ETIE_COUNT;
+
+	m_device->postEventFromUser(event);
 }
