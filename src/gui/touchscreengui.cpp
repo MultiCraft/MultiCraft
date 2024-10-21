@@ -559,7 +559,7 @@ void TouchScreenGUI::updateCamera(s32 x, s32 y)
 			(m_camera.x - x) * (m_camera.x - x) +
 			(m_camera.y - y) * (m_camera.y - y));
 
-	if (!m_camera.dig && ((distance > m_touchscreen_threshold) || 
+	if (!m_camera.dig && ((distance > m_touchscreen_threshold) ||
 			m_camera.has_really_moved)) {
 		m_camera.has_really_moved = true;
 
@@ -600,6 +600,24 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 			hud_button.pressed = false;
 			return true;
 		}
+	}
+
+	if (m_joystick.move_sideward) {
+		std::string button_name = m_joystick.move_sideward < 0 ? "left" : "right";
+		std::string keyname = g_settings->get("keymap_" + button_name);
+		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
+
+		if (button_keycode == keycode)
+			return true;
+	}
+
+	if (m_joystick.move_forward) {
+		std::string button_name = m_joystick.move_forward < 0 ? "forward" : "backward";
+		std::string keyname = g_settings->get("keymap_" + button_name);
+		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
+
+		if (button_keycode == keycode)
+			return true;
 	}
 
 	if (m_camera.dig) {

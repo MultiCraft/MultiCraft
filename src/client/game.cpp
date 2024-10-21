@@ -2583,26 +2583,6 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 
 void Game::updatePlayerControl(const CameraOrientation &cam)
 {
-	s16 move_sideward = 0;
-	s16 move_forward = 0;
-
-#ifdef HAVE_TOUCHSCREENGUI
-	if (g_touchscreengui) {
-		move_sideward  = g_touchscreengui->getMoveSideward();
-		move_forward = g_touchscreengui->getMoveForward();
-	}
-#endif
-
-	if (move_sideward == 0 && move_forward == 0) {
-#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		move_sideward = input->sdl_game_controller.getMoveSideward();
-		move_forward = input->sdl_game_controller.getMoveForward();
-#else
-		move_sideward = input->joystick.getAxisWithoutDead(JA_SIDEWARD_MOVE);
-		move_forward = input->joystick.getAxisWithoutDead(JA_FORWARD_MOVE);
-#endif
-	}
-
 	//TimeTaker tt("update player control", NULL, PRECISION_NANO);
 
 	// DO NOT use the isKeyDown method for the forward, backward, left, right
@@ -2623,8 +2603,13 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 		isKeyDown(KeyType::PLACE),
 		cam.camera_pitch,
 		cam.camera_yaw,
-		move_sideward,
-		move_forward
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		input->sdl_game_controller.getMoveSideward(),
+		input->sdl_game_controller.getMoveForward()
+#else
+		input->joystick.getAxisWithoutDead(JA_SIDEWARD_MOVE),
+		input->joystick.getAxisWithoutDead(JA_FORWARD_MOVE)
+#endif
 	);
 
 	u32 keypress_bits = (
