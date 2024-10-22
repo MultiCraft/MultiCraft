@@ -1647,6 +1647,8 @@ void Client::handleCommand_MinimapModes(NetworkPacket *pkt)
 		m_minimap->setOrUseSavedModeIndex(mode);
 
 		// Update the separate (for some reason) show minimap value
-		showMinimap(m_minimap->getModeDef().type != MINIMAP_TYPE_OFF);
+		const u32 hud_flags = m_env.getLocalPlayer()->hud_flags;
+		if (hud_flags & HUD_FLAG_MINIMAP_VISIBLE)
+			showMinimap(m_minimap->getModeDef().type != MINIMAP_TYPE_OFF);
 	}
 }
