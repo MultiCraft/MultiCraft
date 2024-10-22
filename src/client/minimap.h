@@ -134,6 +134,7 @@ public:
 			std::string texture = "", u16 scale = 1);
 
 	void setModeIndex(size_t index);
+	void setOrUseSavedModeIndex(size_t index);
 	size_t getModeIndex() const { return m_current_mode_index; };
 	size_t getMaxModeIndex() const { return m_modes.size() - 1; };
 	void nextMode();

@@ -225,7 +225,7 @@ Minimap::Minimap(Client *client)
 	// Create object marker texture
 	data->object_marker_red = m_tsrc->getTexture("object_marker_red.png");
 
-	setModeIndex(0);
+	setOrUseSavedModeIndex(0);
 
 	// Create mesh buffer for minimap
 	m_meshbuffer = getMinimapMeshBuffer();
@@ -296,6 +296,15 @@ MinimapShape Minimap::getMinimapShape()
 	return MINIMAP_SHAPE_SQUARE;
 }
 
+std::string serializeMinimapMode(const MinimapModeDef &mode)
+{
+	// This string isn't intended to be human readable and is just used to
+	// compare the current minimap setting to the saved one
+	std::ostringstream os;
+	os << mode.type << '-' << mode.scan_height << '-' << mode.map_size << '-' << mode.scale;
+	return os.str();
+}
+
 void Minimap::setModeIndex(size_t index)
 {
 	MutexAutoLock lock(m_mutex);
@@ -312,6 +321,29 @@ void Minimap::setModeIndex(size_t index)
 
 	if (m_minimap_update_thread)
 		m_minimap_update_thread->deferUpdate();
+}
+
+void Minimap::setOrUseSavedModeIndex(size_t index)
+{
+	// Set the mode index
+	setModeIndex(index);
+
+	// If the server requested a specific minimap setting, don't touch it
+	if (data->mode.type != MINIMAP_TYPE_OFF)
+		return;
+
+	std::string savedMode;
+	if (!g_settings->getNoEx("minimap_mode", savedMode))
+		// No mode saved
+		return;
+
+	// If the saved mode setting matches, change the minimap mode
+	for (size_t i = 0; i < m_modes.size(); ++i) {
+		if (savedMode == serializeMinimapMode(m_modes[i])) {
+			setModeIndex(i);
+			break;
+		}
+	}
 }
 
 void Minimap::addMode(MinimapModeDef mode)
@@ -392,6 +424,12 @@ void Minimap::nextMode()
 		m_current_mode_index = 0;
 
 	setModeIndex(m_current_mode_index);
+
+	// Save the mode
+	if (data->mode.type == MINIMAP_TYPE_OFF)
+		g_settings->remove("minimap_mode");
+	else
+		g_settings->set("minimap_mode", serializeMinimapMode(data->mode));
 }
 
 void Minimap::setPos(v3s16 pos)

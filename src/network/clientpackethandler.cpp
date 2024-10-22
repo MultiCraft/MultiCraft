@@ -1643,6 +1643,10 @@ void Client::handleCommand_MinimapModes(NetworkPacket *pkt)
 			m_minimap->addMode(MinimapType(type), size, label, texture, scale);
 	}
 
-	if (m_minimap)
-		m_minimap->setModeIndex(mode);
+	if (m_minimap) {
+		m_minimap->setOrUseSavedModeIndex(mode);
+
+		// Update the separate (for some reason) show minimap value
+		showMinimap(m_minimap->getModeDef().type != MINIMAP_TYPE_OFF);
+	}
 }
