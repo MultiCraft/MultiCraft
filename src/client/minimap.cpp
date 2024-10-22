@@ -341,7 +341,15 @@ void Minimap::setOrUseSavedModeIndex(size_t index)
 	for (size_t i = 0; i < m_modes.size(); ++i) {
 		if (savedMode == serializeMinimapMode(m_modes[i])) {
 			setModeIndex(i);
-			break;
+			return;
+		}
+	}
+
+	// Preferred mode not available, use the first available mode
+	for (size_t i = 0; i < m_modes.size(); ++i) {
+		if (m_modes[i].type != MINIMAP_TYPE_OFF) {
+			setModeIndex(i);
+			return;
 		}
 	}
 }
