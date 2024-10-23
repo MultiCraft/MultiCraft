@@ -131,6 +131,7 @@ Client::Client(
 
 	if (g_settings->getBool("enable_minimap")) {
 		m_minimap = new Minimap(this);
+		showMinimap(m_minimap->getModeDef().type != MINIMAP_TYPE_OFF);
 	}
 
 	m_cache_save_interval = g_settings->getU16("server_map_save_interval");
