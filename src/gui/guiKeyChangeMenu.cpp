@@ -181,11 +181,8 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		core::rect<s32> rect(0, 0, 795 * s, 50 * s);
 		rect += topleft + v2s32(25 * s, 10 * s);
 		//gui::IGUIStaticText *t =
-#if !defined(__ANDROID__) && !defined(__IOS__)
-		const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
-#else
+		//const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
 		const wchar_t *text = wgettext("Change Keys");
-#endif
 		Environment->addStaticText(text,
 								   rect, false, true, this, -1);
 		delete[] text;
@@ -265,23 +262,12 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		offset += v2s32(0, 25);
 	}
 
-	const std::array<StyleSpec, StyleSpec::NUM_STATES> styles =
-			StyleSpec::getButtonStyle(texture_path);
-
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
 		rect += topleft + v2s32(size.X / 2 - 165 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Save");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON, text);
-		e->setStyles(styles);
-		delete[] text;
-	}
-	{
-		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
-		rect += topleft + v2s32(size.X - 165 * s, size.Y - 50 * s);
-		const wchar_t *text = wgettext("Reset");
-		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_RESET_BUTTON, text);
-		e->setStyles(styles);
+		e->setStyles(StyleSpec::getButtonStyle(texture_path, "green"));
 		delete[] text;
 	}
 	{
@@ -289,7 +275,15 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		rect += topleft + v2s32(size.X / 2 + 15 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Cancel");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
-		e->setStyles(styles);
+		e->setStyles(StyleSpec::getButtonStyle(texture_path, "red"));
+		delete[] text;
+	}
+	{
+		core::rect<s32> rect(0, 0, 200 * s, 35 * s);
+		rect += topleft + v2s32(size.X - 215 * s, size.Y - 50 * s);
+		const wchar_t *text = wgettext("Restore Default");
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_RESET_BUTTON, text);
+		e->setStyles(tyleSpec::getButtonStyle(texture_path));
 		delete[] text;
 	}
 }
