@@ -283,7 +283,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		rect += topleft + v2s32(size.X - 215 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Restore Default");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_RESET_BUTTON, text);
-		e->setStyles(tyleSpec::getButtonStyle(texture_path));
+		e->setStyles(StyleSpec::getButtonStyle(texture_path));
 		delete[] text;
 	}
 }
