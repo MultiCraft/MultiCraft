@@ -107,7 +107,7 @@ touch_sensitivity (Touch sensitivity) float 0.2
 aux1_descends (Special key for climbing/descending) bool false
 
 #    Double-tapping the jump key toggles fly mode.
-doubletap_jump (Double tap jump for fly) bool false
+doubletap_jump (Double tap jump for fly) bool true
 
 #    If disabled, "special" key is used to fly fast if both fly and fast mode are
 #    enabled.
