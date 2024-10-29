@@ -69,6 +69,8 @@ protected:
 private:
 	void init_keys();
 
+	void resetKeys();
+
 	bool resetMenu();
 
 	void add_key(int id, const wchar_t *button_name, const std::string &setting_name);
