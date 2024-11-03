@@ -17,7 +17,6 @@
 #cmakedefine01 RUN_IN_PLACE
 #cmakedefine01 DEVELOPMENT_BUILD
 #cmakedefine01 ENABLE_UPDATE_CHECKER
-#cmakedefine01 USE_ZSTD
 #cmakedefine01 USE_GETTEXT
 #cmakedefine01 USE_CURL
 #cmakedefine01 USE_SOUND
