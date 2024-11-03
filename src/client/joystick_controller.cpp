@@ -530,6 +530,14 @@ void SDLGameController::handleButtonInMenu(const SEvent &event)
 void SDLGameController::handlePlayerMovement(int x, int y)
 {
 	int deadzone = g_settings->getU16("joystick_deadzone");
+	int move_sideward_old = m_move_sideward;
+	int move_forward_old = m_move_forward;
+
+	SEvent translated_event;
+	translated_event.EventType = irr::EET_KEY_INPUT_EVENT;
+	translated_event.KeyInput.Char = 0;
+	translated_event.KeyInput.Shift = false;
+	translated_event.KeyInput.Control = false;
 
 	m_move_sideward = x;
 	if (m_move_sideward < deadzone && m_move_sideward > -deadzone)
@@ -537,11 +545,51 @@ void SDLGameController::handlePlayerMovement(int x, int y)
 	else
 		m_active = true;
 
+	if (m_move_sideward >= 0 && move_sideward_old < 0) {
+		translated_event.KeyInput.Key = getKeySetting("keymap_left").getKeyCode();
+		translated_event.KeyInput.PressedDown = false;
+		sendEvent(translated_event);
+	} else if (m_move_sideward <= 0 && move_sideward_old > 0) {
+		translated_event.KeyInput.Key = getKeySetting("keymap_right").getKeyCode();
+		translated_event.KeyInput.PressedDown = false;
+		sendEvent(translated_event);
+	}
+
+	if (m_move_sideward < 0 && move_sideward_old >= 0) {
+		translated_event.KeyInput.Key = getKeySetting("keymap_left").getKeyCode();
+		translated_event.KeyInput.PressedDown = true;
+		sendEvent(translated_event);
+	} else if (m_move_sideward > 0 && move_sideward_old <= 0) {
+		translated_event.KeyInput.Key = getKeySetting("keymap_right").getKeyCode();
+		translated_event.KeyInput.PressedDown = true;
+		sendEvent(translated_event);
+	}
+
 	m_move_forward = y;
 	if (m_move_forward < deadzone && m_move_forward > -deadzone)
 		m_move_forward = 0;
 	else
 		m_active = true;
+
+	if (m_move_forward >= 0 && move_forward_old < 0) {
+		translated_event.KeyInput.Key = getKeySetting("keymap_forward").getKeyCode();
+		translated_event.KeyInput.PressedDown = false;
+		sendEvent(translated_event);
+	} else if (m_move_forward <= 0 && move_forward_old > 0) {
+		translated_event.KeyInput.Key = getKeySetting("keymap_backward").getKeyCode();
+		translated_event.KeyInput.PressedDown = false;
+		sendEvent(translated_event);
+	}
+
+	if (m_move_forward < 0 && move_forward_old >= 0) {
+		translated_event.KeyInput.Key = getKeySetting("keymap_forward").getKeyCode();
+		translated_event.KeyInput.PressedDown = true;
+		sendEvent(translated_event);
+	} else if (m_move_forward > 0 && move_forward_old <= 0) {
+		translated_event.KeyInput.Key = getKeySetting("keymap_backward").getKeyCode();
+		translated_event.KeyInput.PressedDown = true;
+		sendEvent(translated_event);
+	}
 }
 
 void SDLGameController::handleCameraOrientation(int x, int y)
