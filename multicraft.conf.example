@@ -72,7 +72,7 @@
 
 #    Double-tapping the jump key toggles fly mode.
 #    type: bool
-# doubletap_jump = false
+# doubletap_jump = true
 
 #    If disabled, "special" key is used to fly fast if both fly and fast mode are
 #    enabled.

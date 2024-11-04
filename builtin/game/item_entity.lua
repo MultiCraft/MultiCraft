@@ -121,7 +121,7 @@ core.register_entity(":__builtin:item", {
 			automatic_rotate = pi * 0.5 * 0.15 / size,
 			wield_item = self.itemstring,
 			glow = glow,
-			infotext = core.registered_items[itemname].description
+			infotext = def and def.description or ""
 		})
 
 	end,
