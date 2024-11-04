@@ -49,6 +49,10 @@ if(USE_SDL)
 	endif()
 endif()
 
+if(USE_ZSTD)
+	add_definitions(-DUSE_ZSTD=1)
+endif()
+
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
 set(USE_CURL FALSE)
 
