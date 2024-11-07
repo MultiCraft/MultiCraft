@@ -53,7 +53,6 @@ endif()
 if(USE_ZSTD)
 	add_definitions(-DUSE_ZSTD=1)
 
-	# TODO: Is this needed? I don't know how cmake works
 	if(ZSTD_MAP_SAVING)
 		add_definitions(-DZSTD_MAP_SAVING=1)
 	endif()
