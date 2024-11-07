@@ -76,9 +76,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // Saved on disk version
-// Currently, we write with zlib even if zstd is supported to allow disabling
-// zstd or downgrading to a version that doesn't support it
+#if USE_ZSTD && ZSTD_MAP_SAVING
+#define SER_FMT_VER_HIGHEST_WRITE 29
+#else
 #define SER_FMT_VER_HIGHEST_WRITE 28
+#endif
 
 // Lowest supported serialization version
 #define SER_FMT_VER_LOWEST_READ 0
