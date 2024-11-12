@@ -32,7 +32,9 @@ if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 endif()
 
 option(USE_SDL "Use SDL2 for window management" FALSE)
+option(USE_ZSTD "Use Zstandard for MapBlock compression" TRUE)
 option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
+option(ZSTD_MAP_SAVING "Use Zstandard to save maps on disk" FALSE)
 
 if(USE_SDL)
 	if(NOT USE_STATIC_BUILD)
@@ -46,6 +48,16 @@ if(USE_SDL)
 	else()
 		message(FATAL_ERROR "SDL2 not found.")
 	endif()
+endif()
+
+if(USE_ZSTD)
+	add_definitions(-DUSE_ZSTD=1)
+
+	if(ZSTD_MAP_SAVING)
+		add_definitions(-DZSTD_MAP_SAVING=1)
+	endif()
+elseif (ZSTD_MAP_SAVING)
+	message(FATAL_ERROR "ZSTD_MAP_SAVING is enabled but USE_ZSTD is not.")
 endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
@@ -292,9 +304,13 @@ if(WIN32)
 	find_path(ZLIB_INCLUDE_DIR "zlib.h" DOC "Zlib include directory")
 	find_library(ZLIB_LIBRARIES "zlib" DOC "Path to zlib library")
 
+	find_path(ZSTD_INCLUDE_DIR "zstd.h" DOC "Zstd include directory")
+	find_library(ZSTD_LIBRARY "zstd" DOC "Path to zstd library")
+
 	# Dll's are automatically copied to the output directory by vcpkg when VCPKG_APPLOCAL_DEPS=ON
 	if(NOT VCPKG_APPLOCAL_DEPS)
 		find_file(ZLIB_DLL NAMES "zlib.dll" "zlib1.dll" DOC "Path to zlib.dll for installation (optional)")
+		find_file(ZSTD_DLL NAMES "zstd.dll" DOC "Path to zstd.dll for installation (optional)")
 		if(ENABLE_SOUND)
 			set(OPENAL_DLL "" CACHE FILEPATH "Path to OpenAL32.dll for installation (optional)")
 			set(OGG_DLL "" CACHE FILEPATH "Path to libogg.dll for installation (optional)")
@@ -342,6 +358,7 @@ else()
 	endif(BUILD_CLIENT)
 
 	find_package(ZLIB REQUIRED)
+	find_package(Zstd REQUIRED)
 	set(PLATFORM_LIBS -lpthread ${CMAKE_DL_LIBS})
 	if(APPLE)
 		set(PLATFORM_LIBS "-framework CoreFoundation" ${PLATFORM_LIBS})
@@ -533,6 +550,7 @@ include_directories(
 	${PROJECT_SOURCE_DIR}
 	${IRRLICHT_INCLUDE_DIR}
 	${ZLIB_INCLUDE_DIR}
+	${ZSTD_INCLUDE_DIR}
 	${PNG_INCLUDE_DIR}
 	${SOUND_INCLUDE_DIRS}
 	${SQLITE3_INCLUDE_DIR}
@@ -566,6 +584,7 @@ if(BUILD_CLIENT)
 	target_link_libraries(
 		${PROJECT_NAME}
 		${ZLIB_LIBRARIES}
+		${ZSTD_LIBRARY}
 		${IRRLICHT_LIBRARY}
 		${JPEG_LIBRARIES}
 		${BZIP2_LIBRARIES}
@@ -679,6 +698,7 @@ if(BUILD_SERVER)
 	target_link_libraries(
 		${PROJECT_NAME}server
 		${ZLIB_LIBRARIES}
+		${ZSTD_LIBRARY}
 		${SQLITE3_LIBRARY}
 		${JSON_LIBRARY}
 		${LUA_LIBRARY}
@@ -901,6 +921,9 @@ if(WIN32)
 		endif()
 		if(ZLIB_DLL)
 			install(FILES ${ZLIB_DLL} DESTINATION ${BINDIR})
+		endif()
+		if(ZSTD_DLL)
+			install(FILES ${ZSTD_DLL} DESTINATION ${BINDIR})
 		endif()
 		if(FREETYPE_DLL)
 			install(FILES ${FREETYPE_DLL} DESTINATION ${BINDIR})

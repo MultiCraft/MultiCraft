@@ -63,13 +63,25 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	26: Never written; read the same as 25
 	27: Added light spreading flags to blocks
 	28: Added "private" flag to NodeMetadata
+	29: Switched compression to zstd, a bit of reorganization
 */
 // This represents an uninitialized or invalid format
 #define SER_FMT_VER_INVALID 255
+
 // Highest supported serialization version
+#if USE_ZSTD
+#define SER_FMT_VER_HIGHEST_READ 29
+#else
 #define SER_FMT_VER_HIGHEST_READ 28
+#endif
+
 // Saved on disk version
+#if USE_ZSTD && ZSTD_MAP_SAVING
+#define SER_FMT_VER_HIGHEST_WRITE 29
+#else
 #define SER_FMT_VER_HIGHEST_WRITE 28
+#endif
+
 // Lowest supported serialization version
 #define SER_FMT_VER_LOWEST_READ 0
 // Lowest serialization version for writing
@@ -89,7 +101,14 @@ void compressZlib(const u8 *data, size_t data_size, std::ostream &os, int level 
 void compressZlib(const std::string &data, std::ostream &os, int level = -1);
 void decompressZlib(std::istream &is, std::ostream &os, size_t limit = 0);
 
+#if USE_ZSTD
+void compressZstd(const u8 *data, size_t data_size, std::ostream &os, int level = 0);
+void compressZstd(const std::string &data, std::ostream &os, int level = 0);
+void decompressZstd(std::istream &is, std::ostream &os);
+#endif
+
 // These choose between zlib and a self-made one according to version
-void compress(const SharedBuffer<u8> &data, std::ostream &os, u8 version);
-//void compress(const std::string &data, std::ostream &os, u8 version);
+void compress(const SharedBuffer<u8> &data, std::ostream &os, u8 version, int level = -1);
+void compress(const std::string &data, std::ostream &os, u8 version, int level = -1);
+void compress(u8 *data, u32 size, std::ostream &os, u8 version, int level = -1);
 void decompress(std::istream &is, std::ostream &os, u8 version);

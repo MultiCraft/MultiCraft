@@ -17,6 +17,7 @@
 #cmakedefine01 RUN_IN_PLACE
 #cmakedefine01 DEVELOPMENT_BUILD
 #cmakedefine01 ENABLE_UPDATE_CHECKER
+#cmakedefine01 USE_ZSTD
 #cmakedefine01 USE_GETTEXT
 #cmakedefine01 USE_CURL
 #cmakedefine01 USE_SOUND
@@ -30,6 +31,7 @@
 #cmakedefine01 USE_SPATIAL
 #cmakedefine01 USE_SYSTEM_GMP
 #cmakedefine01 USE_REDIS
+#cmakedefine01 ZSTD_MAP_SAVING
 #cmakedefine01 ENABLE_GLES
 #cmakedefine01 HAVE_ENDIAN_H
 #cmakedefine01 CURSES_HAVE_CURSES_H

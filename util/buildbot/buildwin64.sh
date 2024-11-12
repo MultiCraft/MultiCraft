@@ -33,6 +33,7 @@ zlib_version=1.2.13
 sdl_version=2.28.5
 jpeg_version=3.0.1
 png_version=1.6.42
+zstd_version=1.4.9
 
 mkdir -p $packagedir
 mkdir -p $libdir
@@ -44,6 +45,8 @@ cd $builddir
 #	-c -O $packagedir/irrlicht-$irrlicht_version.zip
 [ -e $packagedir/zlib-$zlib_version.zip ] || wget http://minetest.kitsunemimi.pw/zlib-$zlib_version-win64.zip \
 	-c -O $packagedir/zlib-$zlib_version.zip
+[ -e $packagedir/zstd-$zstd_version.zip ] || wget http://minetest.kitsunemimi.pw/zstd-$zstd_version-win64.zip \
+	-c -O $packagedir/zstd-$zstd_version.zip
 [ -e $packagedir/libogg-$ogg_version.zip ] || wget http://minetest.kitsunemimi.pw/libogg-$ogg_version-win64.zip \
 	-c -O $packagedir/libogg-$ogg_version.zip
 [ -e $packagedir/libvorbis-$vorbis_version.zip ] || wget http://minetest.kitsunemimi.pw/libvorbis-$vorbis_version-win64.zip \
@@ -70,6 +73,7 @@ cd $builddir
 cd $libdir
 # [ -d irrlicht ] || unzip -o $packagedir/irrlicht-$irrlicht_version.zip -d irrlicht
 [ -d zlib ] || unzip -o $packagedir/zlib-$zlib_version.zip -d zlib
+[ -d zstd ] || unzip -o $packagedir/zstd-$zstd_version.zip -d zstd
 [ -d libogg ] || unzip -o $packagedir/libogg-$ogg_version.zip -d libogg
 [ -d libvorbis ] || unzip -o $packagedir/libvorbis-$vorbis_version.zip -d libvorbis
 [ -d libcurl ] || unzip -o $packagedir/curl-$curl_version.zip -d libcurl
@@ -213,6 +217,10 @@ cmake .. \
 	\
 	-DJPEG_INCLUDE_DIR="$libdir/libjpeg/include" \
 	-DJPEG_LIBRARIES="$libdir/libjpeg/build/libjpeg.a" \
+	\
+	-DZSTD_INCLUDE_DIR=$libdir/zstd/include \
+	-DZSTD_LIBRARY=$libdir/zstd/lib/libzstd.dll.a \
+	-DZSTD_DLL=$libdir/zstd/bin/libzstd.dll \
 	\
 	-DLUA_INCLUDE_DIR=$libdir/luajit/include \
 	-DLUA_LIBRARY=$libdir/luajit/libluajit.a \
