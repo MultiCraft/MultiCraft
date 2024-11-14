@@ -143,7 +143,7 @@ public:
 	~TouchScreenGUI();
 
 	void init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode);
-	void preprocessEvent(const SEvent &event);
+	bool preprocessEvent(const SEvent &event);
 	bool isButtonPressed(irr::EKEY_CODE keycode);
 	bool immediateRelease(irr::EKEY_CODE keycode);
 
@@ -214,7 +214,7 @@ private:
 	void rebuildOverflowMenu();
 	void toggleOverflowMenu();
 
-	void moveJoystick(s32 x, s32 y);
+	bool moveJoystick(s32 x, s32 y);
 	void updateCamera(s32 x, s32 y);
 
 	void setVisible(bool visible);

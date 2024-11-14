@@ -385,17 +385,18 @@ void TouchScreenGUI::rebuildOverflowMenu()
 	}
 }
 
-void TouchScreenGUI::preprocessEvent(const SEvent &event)
+bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
 	if (!m_buttons_initialized)
-		return;
+		return false;
 
 	if (!m_visible)
-		return;
+		return false;
 
 	if (event.EventType != EET_TOUCH_INPUT_EVENT)
-		return;
+		return false;
 
+	bool result = false;
 	s32 id = (unsigned int)event.TouchInput.ID;
 	s32 x = event.TouchInput.X;
 	s32 y = event.TouchInput.Y;
@@ -453,6 +454,8 @@ void TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if (overflow_btn_pressed || (m_overflow_open && !m_events[id]))
 			toggleOverflowMenu();
 
+		result = true;
+
 	} else if (event.TouchInput.Event == ETIE_LEFT_UP) {
 		m_events.erase(id);
 
@@ -477,10 +480,13 @@ void TouchScreenGUI::preprocessEvent(const SEvent &event)
 			m_camera.place = place;
 		}
 
+		result = true;
+
 	} else if (event.TouchInput.Event == ETIE_MOVED) {
 		if (m_events[id]) {
 			if (m_joystick.event_id == id) {
-				moveJoystick(x, y);
+				if (moveJoystick(x, y))
+					result = true;
 			} else if (m_camera.event_id == id) {
 				updateCamera(x, y);
 			} else {
@@ -491,16 +497,23 @@ void TouchScreenGUI::preprocessEvent(const SEvent &event)
 					if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
 						button->pressed = true;
 						button->event_id = id;
+						result = true;
 					} else if (button->event_id == id) {
 						button->reset();
+						result = true;
 					}
 				}
 			}
 		}
+
+	} else if (event.TouchInput.Event == ETIE_COUNT) {
+		result = true;
 	}
+
+	return result;
 }
 
-void TouchScreenGUI::moveJoystick(s32 x, s32 y)
+bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 {
 	s32 dx = x - m_button_size * 5 / 2;
 	s32 dy = y - m_screensize.Y + m_button_size * 5 / 2;
@@ -525,6 +538,8 @@ void TouchScreenGUI::moveJoystick(s32 x, s32 y)
 	// rotate to make comparing easier
 	angle = fmod(angle + 180 + 22.5, 360);
 
+	bool old_move_sideward = m_joystick.move_sideward;
+	bool old_move_forward = m_joystick.move_forward;
 	m_joystick.move_sideward = 0;
 	m_joystick.move_forward = 0;
 
@@ -551,6 +566,12 @@ void TouchScreenGUI::moveJoystick(s32 x, s32 y)
 		m_joystick.move_forward = 32767;
 		m_joystick.move_sideward = -32768;
 	}
+
+	if (old_move_sideward != m_joystick.move_sideward ||
+			old_move_forward != m_joystick.move_forward)
+		return true;
+
+	return false;
 }
 
 void TouchScreenGUI::updateCamera(s32 x, s32 y)

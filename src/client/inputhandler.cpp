@@ -145,23 +145,25 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 #ifdef HAVE_TOUCHSCREENGUI
 	// Always send touch events to the touchscreen gui, so it has up-to-date information
 	if (m_touchscreengui && event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
-		m_touchscreengui->preprocessEvent(event);
+		bool result = m_touchscreengui->preprocessEvent(event);
 
-		for (auto key : keysListenedFor) {
-			irr::EKEY_CODE key_code = key.getKeyCode();
-			bool pressed = m_touchscreengui->isButtonPressed(key_code);
-			if (pressed) {
-				if (!IsKeyDown(key)) {
-					keyWasPressed.set(key);
-					keyIsDown.set(key);
-					keyWasDown.set(key);
+		if (result) {
+			for (auto key : keysListenedFor) {
+				irr::EKEY_CODE key_code = key.getKeyCode();
+				bool pressed = m_touchscreengui->isButtonPressed(key_code);
+				if (pressed) {
+					if (!IsKeyDown(key)) {
+						keyWasPressed.set(key);
+						keyIsDown.set(key);
+						keyWasDown.set(key);
+					}
 				}
-			}
-			if (!pressed || m_touchscreengui->immediateRelease(key_code)) {
-				if (IsKeyDown(key))
-					keyWasReleased.set(key);
+				if (!pressed || m_touchscreengui->immediateRelease(key_code)) {
+					if (IsKeyDown(key))
+						keyWasReleased.set(key);
 
-				keyIsDown.unset(key);
+					keyIsDown.unset(key);
+				}
 			}
 		}
 	}
