@@ -979,7 +979,7 @@ enable_remote_media_server (Connect to external media server) bool true
 
 #    Enable Lua modding support on client.
 #    This support is experimental and API can change.
-enable_client_modding (Client modding) bool false
+enable_client_modding (Client modding) bool true
 
 #    URL to the server list displayed in the Multiplayer Tab.
 serverlist_url (Serverlist URL) string servers.minetest.net
@@ -1349,7 +1349,7 @@ server_side_occlusion_culling (Server side occlusion culling) bool true
 #    csm_restriction_noderange)
 #    READ_PLAYERINFO: 32 (disable get_player_names call client-side)
 #    THIRD_PARTY_MODS: 256 (disable loading third-party CSMs)
-csm_restriction_flags (Client side modding restrictions) int 62
+csm_restriction_flags (Client side modding restrictions) int 60
 
 #   If the CSM restriction for node range is enabled, get_node calls are limited
 #   to this distance from the player to the node.
