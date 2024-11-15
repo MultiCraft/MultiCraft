@@ -459,6 +459,11 @@
 #    type: key
 # keymap_toggle_hud = KEY_F1
 
+#    Key for toggling the display of nametags.
+#    See http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3
+#    type: key
+# keymap_toggle_nametags = KEY_F7
+
 #    Key for toggling the display of chat.
 #    See http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3
 #    type: key
