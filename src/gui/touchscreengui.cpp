@@ -501,11 +501,16 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			} else if (m_camera.event_id == id) {
 				updateCamera(x, y);
 			} else {
+				bool overflow_btn_pressed = false;
+
 				for (auto button : m_buttons) {
 					if (m_overflow_open != button->overflow_menu)
 						continue;
 
 					if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
+						if (button->id == overflow_id)
+							overflow_btn_pressed = true;
+
 						button->pressed = true;
 						button->event_id = id;
 						result = true;
@@ -514,6 +519,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 						result = true;
 					}
 				}
+
+				if (overflow_btn_pressed)
+					toggleOverflowMenu();
 			}
 		}
 
