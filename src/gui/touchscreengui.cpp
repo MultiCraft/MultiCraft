@@ -47,13 +47,19 @@ const button_data buttons_data[] = {
 	{ "chat_btn.png", N_("Chat"), "chat" },
 	{ "tab_btn.png", N_("Tab"), "tabb" },
 	{ "overflow_btn.png", N_("Overflow menu"), "overflow" },
+	{ "chat_show_btn.png", N_("Toggle chat log"), "toggle_chat" },
+	{ "overflow_btn.png", N_("Toggle Nametags"), "toggle_nametags" },
+	{ "fast_btn.png", N_("Toggle fly"), "freemove" },
+	{ "fast_btn.png", N_("Toggle fast"), "fastmove" },
+	{ "noclip_btn.png", N_("Toggle noclip"), "noclip" },
 	{ "joystick_off.png", "", "" },
 	{ "joystick_bg.png", "", "" },
 	{ "joystick_center.png", "", "" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
-	chat_id, inventory_id, drop_id, camera_id, range_id, minimap_id
+	range_id, toggle_chat_id, toggle_nametags_id,
+	flymove_id, fastmove_id, noclip_id
 };
 
 TouchScreenGUI *g_touchscreengui = nullptr;
