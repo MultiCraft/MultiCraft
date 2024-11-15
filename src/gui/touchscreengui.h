@@ -202,6 +202,9 @@ private:
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
 
+	irr::EKEY_CODE m_keycode_dig;
+	irr::EKEY_CODE m_keycode_place;
+
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
 	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,

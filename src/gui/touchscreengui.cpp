@@ -68,6 +68,11 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	m_button_size = std::min(m_screensize.Y / 4.5f,
 			RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("hud_scaling") * 65.0f);
+
+	std::string keyname_dig = g_settings->get("keymap_dig");
+	m_keycode_dig = keyname_to_keycode(keyname_dig.c_str());
+	std::string keyname_place = g_settings->get("keymap_place");
+	m_keycode_place = keyname_to_keycode(keyname_place.c_str());
 }
 
 TouchScreenGUI::~TouchScreenGUI()
@@ -642,18 +647,12 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 	}
 
 	if (m_camera.dig) {
-		std::string keyname = g_settings->get("keymap_dig");
-		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
-
-		if (button_keycode == keycode)
+		if (m_keycode_dig == keycode)
 			return true;
 	}
 
 	if (m_camera.place) {
-		std::string keyname = g_settings->get("keymap_place");
-		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
-
-		if (button_keycode == keycode) {
+		if (m_keycode_place == keycode) {
 			m_camera.place = false;
 			return true;
 		}
@@ -664,10 +663,7 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 
 bool TouchScreenGUI::immediateRelease(irr::EKEY_CODE keycode)
 {
-	std::string keyname = g_settings->get("keymap_place");
-	irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
-
-	if (button_keycode == keycode)
+	if (m_keycode_place == keycode)
 		return true;
 
 	for (auto &hud_button : m_hud_buttons) {
