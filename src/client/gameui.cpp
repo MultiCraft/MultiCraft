@@ -344,7 +344,7 @@ void GameUI::toggleHud()
 void GameUI::toggleNametags()
 {
 	m_flags.show_nametags = !m_flags.show_nametags;
-	if (m_flags.show_hud)
+	if (m_flags.show_nametags)
 		showTranslatedStatusText("Nametags shown");
 	else
 		showTranslatedStatusText("Nametags hidden");
