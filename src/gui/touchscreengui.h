@@ -34,9 +34,6 @@ using namespace irr;
 using namespace irr::core;
 using namespace irr::gui;
 
-#define MIN_DIG_TIME_MS 500
-#define MIN_PLACE_TIME_MS 50
-
 typedef enum
 {
 	unknown_id = -1,

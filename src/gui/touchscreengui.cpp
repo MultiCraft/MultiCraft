@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "touchscreengui.h"
 #include "irrlichttypes.h"
-#include "log.h"
 #include "client/keycode.h"
 #include "settings.h"
 #include "gettext.h"
@@ -32,6 +31,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <ISceneCollisionManager.h>
 
 using namespace irr::core;
+
+#define MIN_DIG_TIME_MS 500
+#define MIN_PLACE_TIME_MS 50
+#define OVERFLOW_MENU_COLS 3
+#define OVERFLOW_MENU_ROWS 2
 
 const button_data buttons_data[] = {
 	{ "jump_btn.png", N_("Jump"), "jump" },
@@ -58,8 +62,8 @@ const button_data buttons_data[] = {
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
-	range_id, toggle_chat_id, toggle_nametags_id,
-	flymove_id, fastmove_id, noclip_id
+	flymove_id, fastmove_id, noclip_id,
+	range_id, toggle_chat_id, toggle_nametags_id
 };
 
 TouchScreenGUI *g_touchscreengui = nullptr;
@@ -163,9 +167,8 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, const char *path,
 		const rect<s32> &button_rect)
 {
-	u32 tid;
 	video::ITexture *texture = guiScalingImageButton(m_device->getVideoDriver(),
-			m_texturesource->getTexture(path, &tid), button_rect.getWidth(),
+			m_texturesource->getTexture(path, nullptr), button_rect.getWidth(),
 			button_rect.getHeight());
 
 	if (texture) {
@@ -362,12 +365,10 @@ void TouchScreenGUI::rebuildOverflowMenu()
 	recti rect(v2s32(0, 0), dimension2du(m_screensize));
 	m_overflow_bg->setRelativePosition(rect);
 
-	s32 cols = 4;
-	s32 rows = 3;
-	assert((s32)ARRLEN(overflow_buttons_id) <= cols * rows);
-
+	assert((s32)ARRLEN(overflow_buttons_id) <= OVERFLOW_MENU_COLS * OVERFLOW_MENU_ROWS);
 	v2s32 size(m_button_size, m_button_size);
-	v2s32 spacing(m_screensize.X / (cols + 1), m_screensize.Y / (rows + 1));
+	v2s32 spacing(m_screensize.X / (OVERFLOW_MENU_COLS + 1),
+			m_screensize.Y / (OVERFLOW_MENU_ROWS + 1));
 	v2s32 pos(spacing);
 
 	for (auto button : m_buttons) {
