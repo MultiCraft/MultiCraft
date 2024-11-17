@@ -11,8 +11,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
-"%100==4 ? 2 : 3;\n"
+"Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
+"n%100==4 ? 2 : 3;\n"
 "X-Generator: Weblate 4.3-dev\n"
 
 #: builtin/client/death_formspec.lua src/client/game.cpp
@@ -1508,6 +1508,14 @@ msgid "HUD shown"
 msgstr "HUD je prikazan"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 #, fuzzy
 msgid "Profiler hidden"
 msgstr "Profiler skrit"
@@ -1825,8 +1833,8 @@ msgstr ""
 "Prvič se boste prijavili v strežnik z imenom \"%s\".\n"
 "Če nadaljujete, bo na tem strežniku ustvarjen nov račun z vašimi prijavnimi "
 "podatki.\n"
-"Prosimo, znova vnesite svoje geslo in kliknite \"Registriraj in prijavi se"
-"\", da potrdite ustvarjanje računa ali kliknite \"Prekliči\" za prekinitev."
+"Prosimo, znova vnesite svoje geslo in kliknite \"Registriraj in prijavi "
+"se\", da potrdite ustvarjanje računa ali kliknite \"Prekliči\" za prekinitev."
 
 #: src/gui/guiFormSpecMenu.cpp
 msgid "Proceed"
@@ -1905,7 +1913,8 @@ msgid "Key already in use"
 msgstr "Tipka je že v uporabi"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Vloge tipk (če ta meni preneha delovati, odstranite nastavitve tipk iz "
 "datoteke multicraft.conf)"
@@ -4527,6 +4536,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5174,6 +5190,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
 msgstr ""
 
 #: src/settings_translation_file.cpp

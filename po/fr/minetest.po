@@ -1476,6 +1476,14 @@ msgid "HUD shown"
 msgstr "Interface affichée"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Profileur caché"
 
@@ -1867,7 +1875,8 @@ msgid "Key already in use"
 msgstr "Touche déjà utilisée"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr "Raccourcis clavier"
 
 #: src/gui/guiKeyChangeMenu.cpp
@@ -2446,10 +2455,10 @@ msgid ""
 "Increasing can reduce artifacting on weaker GPUs.\n"
 "0.1 = Default, 0.25 = Good value for weaker tablets."
 msgstr ""
-"Distance de la caméra 'près du plan de coupure' dans les nœuds, entre 0 et 0,"
-"25\n"
-"Ne fonctionne que sur les plateformes GLES. La plupart des utilisateurs n’"
-"auront pas besoin de changer cela.\n"
+"Distance de la caméra 'près du plan de coupure' dans les nœuds, entre 0 et "
+"0,25\n"
+"Ne fonctionne que sur les plateformes GLES. La plupart des utilisateurs "
+"n’auront pas besoin de changer cela.\n"
 "L’augmentation peut réduire les artefacts sur des GPUs plus faibles.\n"
 "0,1 = Défaut, 0,25 = Bonne valeur pour les tablettes plus faibles."
 
@@ -3913,8 +3922,8 @@ msgid ""
 "down and\n"
 "descending."
 msgstr ""
-"Si activé, la touche « spécial » est utilisée à la place de la touche « s’"
-"accroupir » pour monter ou descendre."
+"Si activé, la touche « spécial » est utilisée à la place de la touche « "
+"s’accroupir » pour monter ou descendre."
 
 #: src/settings_translation_file.cpp
 msgid ""
@@ -4005,7 +4014,8 @@ msgstr "Couleur de fond de la console du jeu (R,G,B)."
 
 #: src/settings_translation_file.cpp
 msgid "In-game chat console height, between 0.1 (10%) and 1.0 (100%)."
-msgstr "Hauteur de la console de tchat du jeu, entre 0.1 (10 %) et 1.0 (100 %)."
+msgstr ""
+"Hauteur de la console de tchat du jeu, entre 0.1 (10 %) et 1.0 (100 %)."
 
 #: src/settings_translation_file.cpp
 msgid "Inc. volume key"
@@ -4876,6 +4886,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5141,8 +5158,8 @@ msgstr "Script du menu principal"
 msgid ""
 "Make fog and sky colors depend on daytime (dawn/sunset) and view direction."
 msgstr ""
-"Rendre la couleur du brouillard et du ciel différents selon l'heure du jour ("
-"aube/crépuscule) et la direction du regard."
+"Rendre la couleur du brouillard et du ciel différents selon l'heure du jour "
+"(aube/crépuscule) et la direction du regard."
 
 #: src/settings_translation_file.cpp
 msgid "Makes DirectX work with LuaJIT. Disable if it causes troubles."
@@ -5636,6 +5653,10 @@ msgstr ""
 "joueurs se connectent."
 
 #: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr ""
+
+#: src/settings_translation_file.cpp
 msgid "Near plane"
 msgstr "Plan à proximité"
 
@@ -5701,8 +5722,8 @@ msgstr ""
 "ATTENTION : Augmenter le nombre de processus « emerge » accélère bien la\n"
 "création de terrain, mais cela peut nuire à la performance du jeu en "
 "interférant\n"
-"avec d’autres processus, en particulier en mode solo et/ou lors de l’"
-"exécution de\n"
+"avec d’autres processus, en particulier en mode solo et/ou lors de "
+"l’exécution de\n"
 "code Lua en mode « on_generated ». Pour beaucoup, le réglage optimal peut "
 "être « 1 »."
 

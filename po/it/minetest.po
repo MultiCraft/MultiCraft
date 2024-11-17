@@ -1472,6 +1472,14 @@ msgid "HUD shown"
 msgstr "HUD visibile"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Profiler nascosto"
 
@@ -1861,9 +1869,11 @@ msgid "Key already in use"
 msgstr "Tasto già usato"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Associamenti tasti. (Se questo menu si incasina, togli roba da multicraft.conf)"
+"Associamenti tasti. (Se questo menu si incasina, togli roba da multicraft."
+"conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"
@@ -4879,6 +4889,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5649,6 +5666,10 @@ msgid ""
 msgstr ""
 "Nome del server, da mostrare quando si connettono i giocatori e nell'elenco "
 "dei server."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"
@@ -6811,8 +6832,8 @@ msgid ""
 "enabled. Also the vertical distance over which humidity drops by 10 if\n"
 "'altitude_dry' is enabled."
 msgstr ""
-"La distanza verticale alla quale il calore crolla di 20 se \"altitude_chill"
-"\"\n"
+"La distanza verticale alla quale il calore crolla di 20 se "
+"\"altitude_chill\"\n"
 "è abilitata. È anche la distanza verticale su cui l'umidità crolla di 10\n"
 "se \"altitude_dry\" è abilitata."
 

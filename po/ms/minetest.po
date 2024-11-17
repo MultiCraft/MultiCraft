@@ -1473,6 +1473,14 @@ msgid "HUD shown"
 msgstr "Papar pandu (HUD) ditunjukkan"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Pembukah disembunyikan"
 
@@ -1862,7 +1870,8 @@ msgid "Key already in use"
 msgstr "Kekunci telah digunakan untuk fungsi lain"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Ikatan kekunci. (Jika menu ini berselerak, padam sesetengah benda dari fail "
 "multicraft.conf)"
@@ -4855,6 +4864,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5608,6 +5624,10 @@ msgid ""
 msgstr ""
 "Nama pelayan, untuk dipaparkan apabila pemain masuk dan juga dalam senarai "
 "pelayan."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

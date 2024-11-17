@@ -1499,6 +1499,14 @@ msgid "HUD shown"
 msgstr "HUD widoczny"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Profiler ukryty"
 
@@ -1806,9 +1814,8 @@ msgid ""
 "Please retype your password and click 'Register and Join' to confirm account "
 "creation, or click 'Cancel' to abort."
 msgstr ""
-"Próbujesz wejść na serwer o nazwie \"%s\" po raz pierwszy. Jeśli "
-"zdecydujesz się kontynuować, na serwerze zostanie utworzone nowe konto z "
-"Twoimi danymi.\n"
+"Próbujesz wejść na serwer o nazwie \"%s\" po raz pierwszy. Jeśli zdecydujesz "
+"się kontynuować, na serwerze zostanie utworzone nowe konto z Twoimi danymi.\n"
 "Wpisz ponownie hasło i wciśnij \"Zarejestruj się i Dołącz\" aby potwierdzić "
 "utworzenie konta lub wciśnij \"Anuluj\" aby przerwać ten proces."
 
@@ -1889,7 +1896,8 @@ msgid "Key already in use"
 msgstr "Klawisz już zdefiniowany"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Zdefiniowane klawisze. (Jeżeli to menu nie działa, usuń skonfigurowane "
 "klawisze z pliku multicraft.conf)"
@@ -3252,8 +3260,8 @@ msgid ""
 "the\n"
 "Multiplayer Tab."
 msgstr ""
-"Plik w kliencie (lista serwerów), który zawiera ulubione serwery wyświetlane "
-"\n"
+"Plik w kliencie (lista serwerów), który zawiera ulubione serwery "
+"wyświetlane \n"
 "w zakładce Trybu wieloosobowego."
 
 #: src/settings_translation_file.cpp
@@ -3280,8 +3288,8 @@ msgstr ""
 "przeźroczystymi sąsiadami,\n"
 "które optymalizatory PNG najczęściej odrzucają, co czasem powoduje "
 "ciemniejsze lub jaśniejsze\n"
-"krawędzie w przeźroczystych teksturach. Zastosuj ten filtr aby wyczyścić to "
-"\n"
+"krawędzie w przeźroczystych teksturach. Zastosuj ten filtr aby wyczyścić "
+"to \n"
 "w czasie ładowania tekstur."
 
 #: src/settings_translation_file.cpp
@@ -4955,6 +4963,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5727,6 +5742,10 @@ msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
 msgstr ""
 "Nazwa serwera, wyświetlana gdy gracze dołączają oraz na liście serwerów."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 #, fuzzy

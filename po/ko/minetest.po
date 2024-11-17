@@ -1475,6 +1475,14 @@ msgid "HUD shown"
 msgstr "HUD 보이기"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "프로파일러 숨기기"
 
@@ -1864,7 +1872,8 @@ msgid "Key already in use"
 msgstr "이미 사용하고 있는 키입니다"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Keybindings. (이 메뉴를 고정하려면 minetest.cof에서 stuff를 제거해야합니다.)"
 
@@ -4685,6 +4694,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5363,6 +5379,10 @@ msgstr ""
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
 msgstr "서버이름은 플레이어가 서버 리스트에 들어갈 때 나타납니다."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

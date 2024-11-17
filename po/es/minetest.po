@@ -1477,6 +1477,14 @@ msgid "HUD shown"
 msgstr "HUD mostrado"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Monitorización oculta"
 
@@ -1866,10 +1874,11 @@ msgid "Key already in use"
 msgstr "La tecla ya se está utilizando"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Combinaciones de teclas. (Si este menú da error, elimina líneas en multicraft."
-"conf)"
+"Combinaciones de teclas. (Si este menú da error, elimina líneas en "
+"multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"
@@ -3589,8 +3598,8 @@ msgid ""
 msgstr ""
 "Manejo de llamadas a la API de Lua en desuso:\n"
 "- none: no registrar llamadas en desuso.\n"
-"- log: imitar y registrar la pista de seguimiento de la llamada en desuso ("
-"predeterminado para la depuración).\n"
+"- log: imitar y registrar la pista de seguimiento de la llamada en desuso "
+"(predeterminado para la depuración).\n"
 "- error: abortar el uso de la llamada en desuso (sugerido para "
 "desarrolladores de mods)."
 
@@ -4887,6 +4896,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5073,8 +5089,8 @@ msgid ""
 "Only mapchunks completely within the mapgen limit are generated.\n"
 "Value is stored per-world."
 msgstr ""
-"Límite de la generación de mapa, en nodos, en todas las 6 direcciones desde ("
-"0, 0, 0).\n"
+"Límite de la generación de mapa, en nodos, en todas las 6 direcciones desde "
+"(0, 0, 0).\n"
 "Solo se generan fragmentos de mapa completamente dentro del límite de "
 "generación de mapas.\n"
 "Los valores se guardan por mundo."
@@ -5211,8 +5227,8 @@ msgid ""
 "to become shallower and occasionally dry.\n"
 "'altitude_dry': Reduces humidity with altitude."
 msgstr ""
-"Atributos de generación de mapas específicos del generador de mapas Valleys."
-"\n"
+"Atributos de generación de mapas específicos del generador de mapas "
+"Valleys.\n"
 "'altitude_chill': Reduce el calor con la altitud.\n"
 "'humid_rivers': Aumenta la humedad alrededor de ríos.\n"
 "'vary_river_depth': Si está activo, la baja humedad y alto calor causan que "
@@ -5630,6 +5646,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
 msgstr ""
 
 #: src/settings_translation_file.cpp

@@ -1476,6 +1476,14 @@ msgid "HUD shown"
 msgstr "हे॰अ॰डि॰ दिखाई देंगी"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "प्रोफाइलर नहीं दिखाई देगा"
 
@@ -1866,8 +1874,10 @@ msgid "Key already in use"
 msgstr "की पहले से इस्तेमाल में है"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
-msgstr "कीबोर्ड सेटिंग (अगर यह मेनू खराब हो जाए तो multicraft.conf से सब कुछ खाली कर दें)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgstr ""
+"कीबोर्ड सेटिंग (अगर यह मेनू खराब हो जाए तो multicraft.conf से सब कुछ खाली कर दें)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"
@@ -4375,6 +4385,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5021,6 +5038,10 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
 msgstr ""
 
 #: src/settings_translation_file.cpp

@@ -1459,6 +1459,14 @@ msgid "HUD shown"
 msgstr "HUD 已显示"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "性能分析图已隐藏"
 
@@ -1846,7 +1854,8 @@ msgid "Key already in use"
 msgstr "按键已被占用"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid ""
+"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr "键位配置。（如果这个菜单被弄乱，从 multicraft.conf 中删掉点东西）"
 
 #: src/gui/guiKeyChangeMenu.cpp
@@ -4768,6 +4777,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5503,6 +5519,10 @@ msgstr ""
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
 msgstr "服务器名称，将显示在提供给玩家的服务器列表。"
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"
