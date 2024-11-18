@@ -26,8 +26,6 @@ import android.os.Build.VERSION_CODES.*
 object ApiLevelHelper {
 	private fun isGreaterOrEqual(versionCode: Int) = SDK_INT >= versionCode
 
-	fun isMarshmallow() = isGreaterOrEqual(M)
-
 	fun isOreo() = isGreaterOrEqual(O)
 
 	fun isPie() = isGreaterOrEqual(P)

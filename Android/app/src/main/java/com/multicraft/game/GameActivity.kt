@@ -22,7 +22,7 @@ package com.multicraft.game
 
 import android.content.res.Configuration
 import android.net.Uri
-import android.os.*
+import android.os.Bundle
 import android.text.InputType
 import android.view.*
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
@@ -38,7 +38,6 @@ import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import org.libsdl.app.SDLActivity
-import java.util.*
 import kotlin.system.exitProcess
 
 class GameActivity : SDLActivity() {
