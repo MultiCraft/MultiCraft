@@ -40,7 +40,6 @@ typedef enum
 	jump_id = 0,
 	drop_id,
 	crunch_id,
-	// zoom_id,
 	special1_id,
 	inventory_id,
 	escape_id,
