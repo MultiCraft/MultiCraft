@@ -170,11 +170,10 @@ public:
 	void step(float dtime);
 	void hide();
 	void show();
+	void reset();
 
 	void resetHud();
 	void registerHudItem(s32 index, const rect<s32> &button_rect);
-
-	void handleReleaseAll();
 
 	static bool isActive() { return m_active; }
 	static void setActive(bool active) { m_active = active; }
@@ -222,7 +221,6 @@ private:
 	void updateCamera(s32 x, s32 y);
 
 	void setVisible(bool visible);
-	void reset();
 
 	void wakeUpInputhandler();
 };

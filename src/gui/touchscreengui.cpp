@@ -779,11 +779,6 @@ void TouchScreenGUI::reset()
 	m_camera.reset();
 }
 
-void TouchScreenGUI::handleReleaseAll()
-{
-	reset();
-}
-
 void TouchScreenGUI::wakeUpInputhandler()
 {
 	SEvent event;
