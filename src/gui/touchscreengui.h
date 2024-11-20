@@ -199,6 +199,7 @@ private:
 	camera_info m_camera;
 
 	bool m_overflow_open = false;
+	bool m_overflow_close_schedule = false;
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
 

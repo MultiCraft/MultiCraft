@@ -421,6 +421,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (button->id == overflow_id)
 					overflow_btn_pressed = true;
+
+				if (button->overflow_menu)
+					m_overflow_close_schedule = true;
 			}
 		}
 
@@ -688,6 +691,9 @@ void TouchScreenGUI::step(float dtime)
 {
 	updateButtons();
 
+	if (m_overflow_open && m_overflow_close_schedule)
+		toggleOverflowMenu();
+
 	if (m_camera.event_id != -1 && (!m_camera.has_really_moved)) {
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
@@ -748,6 +754,7 @@ void TouchScreenGUI::toggleOverflowMenu()
 {
 	reset();
 	m_overflow_open = !m_overflow_open;
+	m_overflow_close_schedule = false;
 	setVisible(m_visible);
 }
 
