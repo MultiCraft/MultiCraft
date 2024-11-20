@@ -2,7 +2,8 @@
 Copyright (C) 2014 sapier
 Copyright (C) 2018 srifqi, Muhammad Rifqi Priyo Susanto
 		<muhammadrifqipriyosusanto@gmail.com>
-Copyright (C) 2014-2022 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2014-2024 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023-2024 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -32,11 +33,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 using namespace irr::core;
 
-#define MIN_DIG_TIME_MS 500
-#define MIN_PLACE_TIME_MS 50
-#define OVERFLOW_MENU_COLS 3
-#define OVERFLOW_MENU_ROWS 2
-
 const button_data buttons_data[] = {
 	{ "jump_btn.png", N_("Jump"), "jump" },
 	{ "drop_btn.png", N_("Drop"), "drop" },
@@ -45,16 +41,16 @@ const button_data buttons_data[] = {
 	{ "inventory_btn.png", N_("Inventory"), "inventory" },
 	{ "escape_btn.png", N_("Exit"), "escape" },
 	{ "minimap_btn.png", N_("Toggle minimap"), "minimap" },
-	{ "rangeview_btn.png", N_("Range select"), "rangeselect" },
 	{ "camera_btn.png", N_("Change camera"), "camera_mode" },
+	{ "overflow_btn.png", N_("Overflow menu"), "overflow" },
 	{ "chat_btn.png", N_("Chat"), "chat" },
 	{ "tab_btn.png", N_("Tab"), "tabb" },
-	{ "overflow_btn.png", N_("Overflow menu"), "overflow" },
-	{ "chat_show_btn.png", N_("Toggle chat log"), "toggle_chat" },
-	{ "overflow_btn.png", N_("Toggle Nametags"), "toggle_nametags" },
-	{ "fast_btn.png", N_("Toggle fly"), "freemove" },
+	{ "fly_btn.png", N_("Toggle fly"), "freemove" },
 	{ "fast_btn.png", N_("Toggle fast"), "fastmove" },
 	{ "noclip_btn.png", N_("Toggle noclip"), "noclip" },
+	{ "rangeview_btn.png", N_("Range select"), "rangeselect" },
+	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat" },
+	{ "names_hide_btn.png", N_("Toggle HUD"), "toggle_nametags" }, // Toggle Nametags
 	{ "joystick_off.png", "", "" },
 	{ "joystick_bg.png", "", "" },
 	{ "joystick_center.png", "", "" },
@@ -136,7 +132,6 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	initButton(special1_id, getButtonRect(special1_id));
 	initButton(escape_id, getButtonRect(escape_id));
 	initButton(minimap_id, getButtonRect(minimap_id));
-	initButton(range_id, getButtonRect(range_id));
 	initButton(camera_id, getButtonRect(camera_id));
 
 	if (simple_singleplayer_mode) {
@@ -283,12 +278,12 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 				0,
 				m_screensize.X / 2,
 				m_button_size);
-	case range_id:
+	case camera_id:
 		return rect<s32>(m_screensize.X / 2,
 				0,
 				m_screensize.X / 2 + m_button_size,
 				m_button_size);
-	case camera_id:
+	case overflow_id:
 		return rect<s32>(m_screensize.X / 2 + m_button_size,
 				0,
 				m_screensize.X / 2 + m_button_size * 2,
@@ -303,11 +298,6 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 				m_button_size,
 				m_screensize.X,
 				m_button_size * 2);
-	case overflow_id:
-		return rect<s32>(m_screensize.X - m_button_size * 1.25,
-				m_button_size * 2,
-				m_screensize.X,
-				m_button_size * 3);
 	default:
 		return rect<s32>(0, 0, 0, 0);
 	}
@@ -358,10 +348,12 @@ void TouchScreenGUI::rebuildOverflowMenu()
 	recti rect(v2s32(0, 0), dimension2du(m_screensize));
 	m_overflow_bg->setRelativePosition(rect);
 
-	assert((s32)ARRLEN(overflow_buttons_id) <= OVERFLOW_MENU_COLS * OVERFLOW_MENU_ROWS);
+	s32 cols = 3;
+	s32 rows = (ARRLEN(overflow_buttons_id) + cols - 1) / cols;
+	assert((s32)ARRLEN(overflow_buttons_id) <= cols * rows);
 	v2s32 size(m_button_size, m_button_size);
-	v2s32 spacing(m_screensize.X / (OVERFLOW_MENU_COLS + 1),
-			m_screensize.Y / (OVERFLOW_MENU_ROWS + 1));
+	v2s32 spacing(m_screensize.X / (cols + 1),
+			m_screensize.Y / (rows + 1));
 	v2s32 pos(spacing);
 
 	for (auto button : m_buttons) {

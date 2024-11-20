@@ -1,6 +1,7 @@
 /*
 Copyright (C) 2014 sapier
-Copyright (C) 2014-2022 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2014-2024 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -34,6 +35,9 @@ using namespace irr;
 using namespace irr::core;
 using namespace irr::gui;
 
+#define MIN_DIG_TIME_MS 500
+#define MIN_PLACE_TIME_MS 50
+
 typedef enum
 {
 	unknown_id = -1,
@@ -44,16 +48,16 @@ typedef enum
 	inventory_id,
 	escape_id,
 	minimap_id,
-	range_id,
 	camera_id,
+	overflow_id,
 	chat_id,
 	tab_id,
-	overflow_id,
-	toggle_chat_id,
-	toggle_nametags_id,
 	flymove_id,
 	fastmove_id,
 	noclip_id,
+	range_id,
+	toggle_chat_id,
+	toggle_nametags_id,
 	joystick_off_id,
 	joystick_bg_id,
 	joystick_center_id,
