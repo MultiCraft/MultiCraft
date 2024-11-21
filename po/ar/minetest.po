@@ -1919,8 +1919,7 @@ msgid "Key already in use"
 msgstr "المفتاح مستخدم مسبقا"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 
 #: src/gui/guiKeyChangeMenu.cpp

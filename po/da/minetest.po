@@ -1925,8 +1925,7 @@ msgid "Key already in use"
 msgstr "Tast allerede i brug"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Tastebindinger. (Hvis denne menu fucker op, fjern elementer fra multicraft."
 "conf)"

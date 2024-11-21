@@ -1878,11 +1878,9 @@ msgid "Key already in use"
 msgstr "ککونچي تله دݢوناکن اونتوق فوڠسي لاٴين"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"ايکتن ککونچي. (جيک مينو اين برسليرق⹁ ڤادم سستڠه بندا دري فايل multicraft."
-"conf)"
+"ايکتن ککونچي. (جيک مينو اين برسليرق⹁ ڤادم سستڠه بندا دري فايل multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"
@@ -2669,8 +2667,8 @@ msgid ""
 msgstr ""
 "مڠاول ڤنجڠ کيترن سياڠ\\مالم.\n"
 "چونتوهڽ:\n"
-"72 اونتوق 20 مينيت⹁ 360 اونتوق 4 مينيت⹁ 1 اونتوق 24 جم⹁ 0 اونتوق "
-"سياڠ\\مالم\\لاٴين٢ ککل تيدق بروبه."
+"72 اونتوق 20 مينيت⹁ 360 اونتوق 4 مينيت⹁ 1 اونتوق 24 جم⹁ 0 اونتوق سياڠ\\مالم"
+"\\لاٴين٢ ککل تيدق بروبه."
 
 #: src/settings_translation_file.cpp
 msgid "Controls sinking speed in liquid."

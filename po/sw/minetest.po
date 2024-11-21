@@ -1972,10 +1972,8 @@ msgid "Key already in use"
 msgstr "Muhimu tayari katika matumizi"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
-msgstr ""
-"Keybindings. (Kama Menyu hii screws, Ondoa vitu kutoka multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgstr "Keybindings. (Kama Menyu hii screws, Ondoa vitu kutoka multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy

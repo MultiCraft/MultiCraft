@@ -1874,10 +1874,8 @@ msgid "Key already in use"
 msgstr "की पहले से इस्तेमाल में है"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
-msgstr ""
-"कीबोर्ड सेटिंग (अगर यह मेनू खराब हो जाए तो multicraft.conf से सब कुछ खाली कर दें)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgstr "कीबोर्ड सेटिंग (अगर यह मेनू खराब हो जाए तो multicraft.conf से सब कुछ खाली कर दें)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

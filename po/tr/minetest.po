@@ -1866,10 +1866,8 @@ msgid "Key already in use"
 msgstr "Tuş zaten kullanımda"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
-msgstr ""
-"Tuş ayaları. (Eğer bu menü çalışmaz ise, multicraft.conf 'tan kaldırın)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgstr "Tuş ayaları. (Eğer bu menü çalışmaz ise, multicraft.conf 'tan kaldırın)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

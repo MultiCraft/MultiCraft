@@ -1875,8 +1875,7 @@ msgid "Key already in use"
 msgstr "Klavo jam estas uzata"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Klavagordoj. (Se tiu menuo misfunkcias, forigu agordojn el multicraft.conf)"
 

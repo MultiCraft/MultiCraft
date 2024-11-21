@@ -1869,11 +1869,9 @@ msgid "Key already in use"
 msgstr "Tasto già usato"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Associamenti tasti. (Se questo menu si incasina, togli roba da multicraft."
-"conf)"
+"Associamenti tasti. (Se questo menu si incasina, togli roba da multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"
@@ -6832,8 +6830,8 @@ msgid ""
 "enabled. Also the vertical distance over which humidity drops by 10 if\n"
 "'altitude_dry' is enabled."
 msgstr ""
-"La distanza verticale alla quale il calore crolla di 20 se "
-"\"altitude_chill\"\n"
+"La distanza verticale alla quale il calore crolla di 20 se \"altitude_chill"
+"\"\n"
 "è abilitata. È anche la distanza verticale su cui l'umidità crolla di 10\n"
 "se \"altitude_dry\" è abilitata."
 

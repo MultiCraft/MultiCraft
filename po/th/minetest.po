@@ -1912,8 +1912,7 @@ msgid "Key already in use"
 msgstr "คีย์ใช้"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr "โหวต. (ถ้าเมนูนี้สกรูขึ้น เอาข้อมูลจาก multicraft.conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp

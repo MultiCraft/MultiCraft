@@ -1854,8 +1854,7 @@ msgid "Key already in use"
 msgstr "按键已被占用"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr "键位配置。（如果这个菜单被弄乱，从 multicraft.conf 中删掉点东西）"
 
 #: src/gui/guiKeyChangeMenu.cpp

@@ -1875,8 +1875,7 @@ msgid "Key already in use"
 msgstr "Toets is al in gebruik"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Sneltoetsen. (Als dit menu stuk gaat, verwijder dan instellingen uit "
 "multicraft.conf)"

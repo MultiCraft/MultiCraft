@@ -1963,11 +1963,10 @@ msgid "Key already in use"
 msgstr "La tecla s'està utilitzant"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Combinacions de tecles. (Si aquest menú espatlla, esborrar coses de "
-"multicraft.conf)"
+"Combinacions de tecles. (Si aquest menú espatlla, esborrar coses de multicraft."
+"conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy

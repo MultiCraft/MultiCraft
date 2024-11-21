@@ -1892,8 +1892,7 @@ msgid "Key already in use"
 msgstr "Klávesa je již používána"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Nastavení kláves (pokud toto menu je špatně naformátované, upravte nastavení "
 "v multicraft.conf)"

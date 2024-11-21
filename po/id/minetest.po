@@ -1868,8 +1868,7 @@ msgid "Key already in use"
 msgstr "Tombol telah terpakai"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Pengaturan tombol. (Jika menu ini kacau, hapus pengaturan kontrol dari "
 "multicraft.conf)"

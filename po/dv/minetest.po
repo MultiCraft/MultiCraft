@@ -1874,8 +1874,7 @@ msgid "Key already in use"
 msgstr ""
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr "ފިތްތައް. (މި މެނޫ މައްސަލަ ޖެހިއްޖެނަމަ multicraft.confއިން ތަކެތި ފުހެލައްވާ)"
 
 #: src/gui/guiKeyChangeMenu.cpp

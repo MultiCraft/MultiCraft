@@ -1870,8 +1870,7 @@ msgid "Key already in use"
 msgstr "Kekunci telah digunakan untuk fungsi lain"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Ikatan kekunci. (Jika menu ini berselerak, padam sesetengah benda dari fail "
 "multicraft.conf)"

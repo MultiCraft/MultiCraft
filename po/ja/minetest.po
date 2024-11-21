@@ -1864,11 +1864,10 @@ msgid "Key already in use"
 msgstr "キーが重複しています"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"キー設定です。 (このメニューで失敗する場合は multicraft.conf から該当する設定"
-"を削除してください)"
+"キー設定です。 (このメニューで失敗する場合は multicraft.conf から該当する設定を"
+"削除してください)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

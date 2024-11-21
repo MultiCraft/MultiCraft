@@ -1439,7 +1439,7 @@ msgid "Viewing range is at minimum: %d"
 msgstr "Vaate kaugus on vähim võimalik: %d"
 
 #: src/client/game.cpp
-#, fuzzy, c-format
+#, c-format, fuzzy
 msgid "Volume changed to %d%%"
 msgstr "helitugevus muutetud %d%%-ks"
 
@@ -1865,8 +1865,7 @@ msgid "Key already in use"
 msgstr "Nupp juba kasutuses"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Nupusätted. (Kui see menüü sassi läheb, siis kustuta asju failist multicraft."
 "conf)"

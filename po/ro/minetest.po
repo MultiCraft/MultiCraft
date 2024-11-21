@@ -1879,8 +1879,7 @@ msgid "Key already in use"
 msgstr "Tastă deja folosită"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Keybindings. (Dacă acest meniu apare, șterge lucrurile din multicraft.conf)"
 
@@ -2009,8 +2008,8 @@ msgid ""
 "circle."
 msgstr ""
 "(Android) Utilizați joystick-ul virtual pentru a declanșa butonul \"aux\".\n"
-"Dacă este activat, joystick-ul virtual va atinge, de asemenea, butonul "
-"\"aux\" atunci când este în afara cercului principal."
+"Dacă este activat, joystick-ul virtual va atinge, de asemenea, butonul \"aux"
+"\" atunci când este în afara cercului principal."
 
 #: src/settings_translation_file.cpp
 msgid ""

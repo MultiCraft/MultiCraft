@@ -1872,11 +1872,10 @@ msgid "Key already in use"
 msgstr "Essa tecla já está em uso"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
-"Teclas (se este menu estiver com problema, remova itens do arquivo "
-"multicraft.conf)"
+"Teclas (se este menu estiver com problema, remova itens do arquivo multicraft."
+"conf)"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Local command"

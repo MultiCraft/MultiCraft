@@ -1871,8 +1871,7 @@ msgid "Key already in use"
 msgstr "A gomb már használatban van"
 
 #: src/gui/guiKeyChangeMenu.cpp
-msgid ""
-"Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
+msgid "Keybindings. (If this menu screws up, remove stuff from multicraft.conf)"
 msgstr ""
 "Billentyűzetkiosztás. (Ha ez a menü összeomlik, távolíts el néhány dolgot a "
 "multicraft.conf-ból)"
