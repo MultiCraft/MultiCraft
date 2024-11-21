@@ -351,34 +351,35 @@ void TouchScreenGUI::rebuildOverflowMenu()
 	s32 cols = 3;
 	s32 rows = (ARRLEN(overflow_buttons_id) + cols - 1) / cols;
 	assert((s32)ARRLEN(overflow_buttons_id) <= cols * rows);
-	v2s32 size(m_button_size, m_button_size);
-	v2s32 spacing(m_screensize.X / (cols + 1),
-			m_screensize.Y / (rows + 1));
-	v2s32 pos(spacing);
+	v2s32 btn_size(m_button_size, m_button_size);
+	v2s32 edge_offset(m_screensize.X * 0.1f, m_screensize.Y * 0.1f);
+	v2s32 spacing((m_screensize.X - edge_offset.X * 2) / cols,
+			(m_screensize.Y - edge_offset.Y * 2) / rows);
+	v2s32 pos(edge_offset + spacing / 2);
 
 	for (auto button : m_buttons) {
 		if (!button->overflow_menu)
 			continue;
 
-		recti button_rect(pos - size / 2, dimension2du(size.X, size.Y));
-		if (button_rect.LowerRightCorner.X > (s32)m_screensize.X) {
-			pos.X = spacing.X;
-			pos.Y += spacing.Y;
-			button_rect = recti(pos - size / 2, dimension2du(size.X, size.Y));
-		}
-
-		button->guibutton->setRelativePosition(button_rect);
-
 		const wchar_t *str = wgettext(buttons_data[button->id].title);
 		IGUIFont *font = button->text->getActiveFont();
-		dimension2du dim = font->getDimension(str);
-		dim = dimension2du(dim.Width * 1.25f, dim.Height * 1.25f);
-		recti text_rect = recti(pos.X - dim.Width / 2, pos.Y + size.Y / 2,
-				pos.X + dim.Width / 2, pos.Y + size.Y / 2 + dim.Height);
-		button->text->setRelativePosition(text_rect);
+		dimension2du text_size = font->getDimension(str) * 5 / 4;
 		delete[] str;
 
+		recti button_rect(pos - btn_size / 2, dimension2du(btn_size.X, btn_size.Y));
+		button_rect -= v2s32(0, text_size.Height / 2);
+		button->guibutton->setRelativePosition(button_rect);
+
+		recti text_rect = recti(v2s32(pos.X - text_size.Width / 2,
+				pos.Y + btn_size.Y / 2 - text_size.Height / 2), text_size);
+		button->text->setRelativePosition(text_rect);
+
 		pos.X += spacing.X;
+
+		if (pos.X > (s32)m_screensize.X - edge_offset.X - btn_size.X / 2) {
+			pos.X = edge_offset.X + spacing.X / 2;
+			pos.Y += spacing.Y;
+		}
 	}
 }
 
