@@ -50,7 +50,9 @@ public:
 	static const char *getVideoDriverFriendlyName(irr::video::E_DRIVER_TYPE type);
 	static float getDisplayDensity();
 	static v2u32 getDisplaySize();
+#ifdef HAVE_TOUCHSCREENGUI
 	static bool isTablet();
+#endif
 	static bool isHighDpi();
 
 	bool setupTopLevelWindow(const std::string &name);

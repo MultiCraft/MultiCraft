@@ -498,7 +498,7 @@ void set_default_settings()
 	settings->setDefault("screen_dpi", "72");
 	settings->setDefault("display_density_factor", "1");
 
-#ifndef SERVER
+#ifdef HAVE_TOUCHSCREENGUI
 	bool isTablet = RenderingEngine::isTablet();
 	settings->setDefault("device_is_tablet", std::to_string(isTablet));
 #endif
