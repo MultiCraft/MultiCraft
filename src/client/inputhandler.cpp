@@ -142,6 +142,33 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 	}
 #endif
 
+#ifdef HAVE_TOUCHSCREENGUI
+	// Always send touch events to the touchscreen gui, so it has up-to-date information
+	if (m_touchscreengui && event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
+		bool result = m_touchscreengui->preprocessEvent(event);
+
+		if (result) {
+			for (auto key : keysListenedFor) {
+				irr::EKEY_CODE key_code = key.getKeyCode();
+				bool pressed = m_touchscreengui->isButtonPressed(key_code);
+				if (pressed) {
+					if (!IsKeyDown(key)) {
+						keyWasPressed.set(key);
+						keyIsDown.set(key);
+						keyWasDown.set(key);
+					}
+				}
+				if (!pressed || m_touchscreengui->immediateRelease(key_code)) {
+					if (IsKeyDown(key))
+						keyWasReleased.set(key);
+
+					keyIsDown.unset(key);
+				}
+			}
+		}
+	}
+#endif
+
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT)
 		return true;
@@ -185,13 +212,6 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 
 			return true;
 		}
-
-#ifdef HAVE_TOUCHSCREENGUI
-	} else if (m_touchscreengui && event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
-		// In case of touchscreengui, we have to handle different events
-		m_touchscreengui->translateEvent(event);
-		return true;
-#endif
 
 #ifdef __IOS__
 	} else if (event.EventType == irr::EET_APPLICATION_EVENT) {
