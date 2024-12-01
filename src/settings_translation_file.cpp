@@ -24,6 +24,8 @@ fake_function() {
 	gettext("Invert vertical mouse movement.");
 	gettext("Mouse sensitivity");
 	gettext("Mouse sensitivity multiplier.");
+	gettext("Touch sensitivity");
+	gettext("Touch sensitivity multiplier.");
 	gettext("Special key for climbing/descending");
 	gettext("If enabled, \"special\" key instead of \"sneak\" key is used for climbing down and\ndescending.");
 	gettext("Double tap jump for fly");
@@ -180,6 +182,8 @@ fake_function() {
 	gettext("Key for selecting the 31st hotbar slot.\nSee http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3");
 	gettext("Hotbar slot 32 key");
 	gettext("Key for selecting the 32nd hotbar slot.\nSee http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3");
+	gettext("Tab key");
+	gettext("Key for use by mods.\nSee http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3");
 	gettext("HUD toggle key");
 	gettext("Key for toggling the display of the HUD.\nSee http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3");
 	gettext("Chat toggle key");
@@ -316,6 +320,8 @@ fake_function() {
 	gettext("Strength of 3D mode parallax.");
 	gettext("Console height");
 	gettext("In-game chat console height, between 0.1 (10%) and 1.0 (100%).");
+	gettext("Console message height");
+	gettext("In-game chat message console height, between 0.1 (10%) and 1.0 (100%).");
 	gettext("Console color");
 	gettext("In-game chat console background color (R,G,B).");
 	gettext("Console alpha");
@@ -372,6 +378,8 @@ fake_function() {
 	gettext("World-aligned textures may be scaled to span several nodes. However,\nthe server may not send the scale you want, especially if you use\na specially-designed texture pack; with this option, the client tries\nto determine the scale automatically basing on the texture size.\nSee also texture_min_size.\nWarning: This option is EXPERIMENTAL!");
 	gettext("Show entity selection boxes");
 	gettext("Show entity selection boxes\nA restart is required after changing this.");
+	gettext("Transparency sorting");
+	gettext("Sort transparent materials from back to front for proper rendering\nNote: works on a per-chunk basis\nNote: different materials are sorted independently");
 	gettext("Menus");
 	gettext("Clouds in menu");
 	gettext("Use a cloud animation for the main menu background.");
@@ -426,6 +434,8 @@ fake_function() {
 	gettext("Advanced");
 	gettext("DPI");
 	gettext("Adjust dpi configuration to your screen (non X11/Android only) e.g. for 4k screens.");
+	gettext("Display Density Scaling Factor");
+	gettext("Adjust the detected display density, used for scaling UI elements.");
 	gettext("Enable console window");
 	gettext("Windows systems only: Start Minetest with the command line window in the background.\nContains the same information as the file debug.txt (default name).");
 	gettext("Sound");
@@ -464,6 +474,12 @@ fake_function() {
 	gettext("Maximum number of mapblocks for client to be kept in memory.\nSet to -1 for unlimited amount.");
 	gettext("Show debug info");
 	gettext("Whether to show the client debug info (has the same effect as hitting F5).");
+	gettext("Update information URL");
+	gettext("URL to JSON file which provides information about the newest MultiCraft release");
+	gettext("Last update check");
+	gettext("Unix timestamp (integer) of when the client last checked for an update\nSet this value to \"all\" to never check for updates.");
+	gettext("Last known version update");
+	gettext("Version number which was last seen during an update check.\n\nRepresentation: MMMIIIPPP, where M=Major, I=Minor, P=Patch\nEx: 5.5.0 is 005005000");
 	gettext("Server / Singleplayer");
 	gettext("Server name");
 	gettext("Name of the server, to be displayed when players join and in the serverlist.");
@@ -498,7 +514,7 @@ fake_function() {
 	gettext("Max. packets per iteration");
 	gettext("Maximum number of packets sent per send step, if you have a slow connection\ntry reducing it, but don't reduce it to a number below double of targeted\nclient number.");
 	gettext("Map Compression Level for Network Transfer");
-	gettext("ZLib compression level to use when sending mapblocks to the client.\n-1 - Zlib's default compression level\n0 - no compresson, fastest\n9 - best compression, slowest\n(levels 1-3 use Zlib's \"fast\" method, 4-9 use the normal method)");
+	gettext("Compression level to use when sending mapblocks to the client.\n-1 - use default compression level\n0 - least compresson, fastest\n9 - best compression, slowest");
 	gettext("Game");
 	gettext("Default game");
 	gettext("Default game when creating a new world.\nThis will be overridden when creating a world from the main menu.");
@@ -535,7 +551,7 @@ fake_function() {
 	gettext("Static spawnpoint");
 	gettext("If this is set, players will always (re)spawn at the given position.");
 	gettext("Disallow empty passwords");
-	gettext("If enabled, new players cannot join with an empty password.");
+	gettext("If enabled, players cannot join without a password or change theirs to an empty password.");
 	gettext("Disable anticheat");
 	gettext("If enabled, disable cheat prevention in multiplayer.");
 	gettext("Rollback recording");
@@ -607,7 +623,7 @@ fake_function() {
 	gettext("Synchronous SQLite");
 	gettext("See https://www.sqlite.org/pragma.html#pragma_synchronous");
 	gettext("Map Compression Level for Disk Storage");
-	gettext("ZLib compression level to use when saving mapblocks to disk.\n-1 - Zlib's default compression level\n0 - no compresson, fastest\n9 - best compression, slowest\n(levels 1-3 use Zlib's \"fast\" method, 4-9 use the normal method)");
+	gettext("Compression level to use when saving mapblocks to disk.\n-1 - use default compression level\n0 - least compresson, fastest\n9 - best compression, slowest");
 	gettext("Dedicated server step");
 	gettext("Length of a server tick and the interval at which objects are generally updated over\nnetwork.");
 	gettext("Active block management interval");
@@ -631,7 +647,7 @@ fake_function() {
 	gettext("Server side occlusion culling");
 	gettext("If enabled the server will perform map block occlusion culling based on\non the eye position of the player. This can reduce the number of blocks\nsent to the client 50-80%. The client will not longer receive most invisible\nso that the utility of noclip mode is reduced.");
 	gettext("Client side modding restrictions");
-	gettext("Restricts the access of certain client-side functions on servers.\nCombine the byteflags below to restrict client-side features, or set to 0\nfor no restrictions:\nLOAD_CLIENT_MODS: 1 (disable loading client-provided mods)\nCHAT_MESSAGES: 2 (disable send_chat_message call client-side)\nREAD_ITEMDEFS: 4 (disable get_item_def call client-side)\nREAD_NODEDEFS: 8 (disable get_node_def call client-side)\nLOOKUP_NODES_LIMIT: 16 (limits get_node call client-side to\ncsm_restriction_noderange)\nREAD_PLAYERINFO: 32 (disable get_player_names call client-side)");
+	gettext("Restricts the access of certain client-side functions on servers.\nCombine the byteflags below to restrict client-side features, or set to 0\nfor no restrictions:\nLOAD_CLIENT_MODS: 1 (disable loading client-provided mods)\nCHAT_MESSAGES: 2 (disable send_chat_message call client-side)\nREAD_ITEMDEFS: 4 (disable get_item_def call client-side)\nREAD_NODEDEFS: 8 (disable get_node_def call client-side)\nLOOKUP_NODES_LIMIT: 16 (limits get_node call client-side to\ncsm_restriction_noderange)\nREAD_PLAYERINFO: 32 (disable get_player_names call client-side)\nTHIRD_PARTY_MODS: 256 (disable loading third-party CSMs)");
 	gettext("Client side node lookup range restriction");
 	gettext("If the CSM restriction for node range is enabled, get_node calls are limited\nto this distance from the player to the node.");
 	gettext("Security");
