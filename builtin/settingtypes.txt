@@ -997,7 +997,7 @@ max_out_chat_queue_size (Maximum size of the out chat queue) int 20
 enable_register_confirmation (Enable register confirmation) bool true
 
 #    Timeout in seconds to use when connecting to a server.
-connect_timeout (Connect timeout) float 15 1 300
+connect_timeout (Connect timeout) float 15 1 120
 
 [*Advanced]
 
