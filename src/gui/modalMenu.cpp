@@ -62,6 +62,10 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 
 	m_doubleclickdetect[0].pos = v2s32(0, 0);
 	m_doubleclickdetect[1].pos = v2s32(0, 0);
+
+	m_pointer = v2s32(0, 0);
+	m_old_pointer = v2s32(0, 0);
+	m_zero_pointer = v2s32(0, 0);
 }
 // clang-format on
 
