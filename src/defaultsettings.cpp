@@ -75,6 +75,7 @@ void set_default_settings()
 	settings->setDefault("max_out_chat_queue_size", "20");
 	settings->setDefault("pause_on_lost_focus", "true");
 	settings->setDefault("enable_register_confirmation", "true");
+	settings->setDefault("connect_timeout", "15");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");

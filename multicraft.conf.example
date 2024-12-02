@@ -1183,6 +1183,10 @@
 #    type: bool
 # enable_register_confirmation = true
 
+#    Timeout in seconds to use when connecting to a server.
+#    type: float min: 1 max: 300
+# connect_timeout = 15
+
 ## Advanced
 
 #    Timeout for client to remove unused map data from memory.

@@ -1561,6 +1561,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 	*/
 
 	bool result = true;
+	const f32 connect_timeout = g_settings->getFloat("connect_timeout");
 
 	try {
 		input->clear();
@@ -1619,7 +1620,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			} else {
 				wait_time += dtime;
 				// Only time out if we aren't waiting for the server we started
-				if (!start_data.address.empty() && wait_time > 15) {
+				if (!start_data.address.empty() && wait_time > connect_timeout) {
 					*error_message = "Connection timed out.";
 					errorstream << *error_message << std::endl;
 					break;
