@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		62A571452B5836BA00A166A3 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA5291ED0F000E30F96 /* fonts */; };
-		62CAE0BF2B4F025100EDD46F /* AppLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62CAE0B32B4F025100EDD46F /* AppLogic.swift */; };
 		84135B5F25D5264B00CA4DCF /* craftdef.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC625D5261C00CA4DCF /* craftdef.cpp */; };
 		84135B6025D5264B00CA4DCF /* modchannels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC725D5261C00CA4DCF /* modchannels.cpp */; };
 		84135B6125D5264B00CA4DCF /* nodemetadata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135AC825D5261C00CA4DCF /* nodemetadata.cpp */; };
@@ -106,7 +104,6 @@
 		84135C2E25D526D700CA4DCF /* minimap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135C0A25D526D700CA4DCF /* minimap.cpp */; };
 		841AD8A528D0C1870042E335 /* libleveldb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8A428D0C1810042E335 /* libleveldb.a */; };
 		841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8A928D0CE7F0042E335 /* libopenal.a */; };
-		841AD8AD28D0D6920042E335 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8AC28D0D6920042E335 /* AudioUnit.framework */; };
 		841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8AE28D0D6A40042E335 /* CoreAudio.framework */; };
 		841AD8B128D0DE430042E335 /* libogg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B028D0DE3D0042E335 /* libogg.a */; };
 		841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B428D0E2340042E335 /* libvorbis.a */; };
@@ -114,6 +111,7 @@
 		841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0424B134850040BA4F /* OpenGL.framework */; };
 		841AD8BB28D12E980042E335 /* libintl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EEE5E62782728E00F61929 /* libintl.a */; };
 		84287CA6291ED0F000E30F96 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA4291ED0F000E30F96 /* locale */; };
+		84287CA7291ED0F000E30F96 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA5291ED0F000E30F96 /* fonts */; };
 		844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844436EE28DA80C100662A9D /* libfreetype.a */; };
 		84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617724B1BF2D0040BA4F /* AppKit.framework */; };
 		84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0024B1347B0040BA4F /* Foundation.framework */; };
@@ -126,6 +124,7 @@
 		8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458616724B1B7990040BA4F /* libIrrlicht.a */; };
 		8458617F24B1C3BC0040BA4F /* builtin in Resources */ = {isa = PBXBuildFile; fileRef = 8458617B24B1C3BB0040BA4F /* builtin */; };
 		8458618024B1C3BC0040BA4F /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 8458617C24B1C3BB0040BA4F /* textures */; };
+		8467285B2C45F27F00269215 /* AppLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846728512C45F27F00269215 /* AppLogic.swift */; };
 		846F883B27A59704007B6210 /* libluajit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 846F883A27A596F9007B6210 /* libluajit.a */; };
 		847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4A25D6F483008F5FC8 /* lutf8lib.c */; };
 		8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8488539E28DA4851004AD90F /* libjpeg.a */; };
@@ -139,12 +138,14 @@
 		84A1F9BB252E617D00000717 /* scripting_mainmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */; };
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
+		84BDEE612C471AD500A1571D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 84BDEE602C471AD500A1571D /* Localizable.xcstrings */; };
 		84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974228CA1291004E8CEC /* GameController.framework */; };
 		84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974428CA129C004E8CEC /* CoreHaptics.framework */; };
 		84C2AB5328DA7776001968EE /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C2AB5228DA7770001968EE /* libpng.a */; };
 		84C9A9592B228D9A00909EFF /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 84C9A9562B228D9A00909EFF /* chacha.c */; };
+		84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */ = {isa = PBXBuildFile; productRef = 84D1BF552CD7EFF10077DD47 /* libzstd */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
-		84F0B4D72B44C800000D8546 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 84F0B4D62B44C800000D8546 /* Localizable.xcstrings */; };
+		84EA1B952CA4BC8B00CDCE7C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */; };
 		84F0B4DA2B44CAEE000D8546 /* encryption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F0B4D92B44CAEE000D8546 /* encryption.cpp */; };
 		84F20D5925D52790009562A9 /* static_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5525D52790009562A9 /* static_text.cpp */; };
 		84F20D5A25D52790009562A9 /* CGUITTFont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5725D52790009562A9 /* CGUITTFont.cpp */; };
@@ -285,7 +286,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		62CAE0B32B4F025100EDD46F /* AppLogic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppLogic.swift; sourceTree = "<group>"; };
 		84135AC625D5261C00CA4DCF /* craftdef.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = craftdef.cpp; path = ../../../src/craftdef.cpp; sourceTree = "<group>"; };
 		84135AC725D5261C00CA4DCF /* modchannels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = modchannels.cpp; path = ../../../src/modchannels.cpp; sourceTree = "<group>"; };
 		84135AC825D5261C00CA4DCF /* nodemetadata.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = nodemetadata.cpp; path = ../../../src/nodemetadata.cpp; sourceTree = "<group>"; };
@@ -517,7 +517,6 @@
 		845856A924B1322C0040BA4F /* MultiCraft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultiCraft.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		845856B224B1322D0040BA4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		845856B724B1322D0040BA4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		845856BA24B1322D0040BA4F /* MultiCraft.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MultiCraft.entitlements; sourceTree = "<group>"; };
 		84585C0024B1347B0040BA4F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		84585C0424B134850040BA4F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		84585C0624B1348B0040BA4F /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
@@ -530,6 +529,7 @@
 		8458617724B1BF2D0040BA4F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		8458617B24B1C3BB0040BA4F /* builtin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = builtin; path = ../../../builtin; sourceTree = "<group>"; };
 		8458617C24B1C3BB0040BA4F /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../../../textures; sourceTree = "<group>"; };
+		846728512C45F27F00269215 /* AppLogic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppLogic.swift; sourceTree = "<group>"; };
 		846F883A27A596F9007B6210 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = ../deps/luajit/libluajit.a; sourceTree = "<group>"; };
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
 		847C6D4A25D6F483008F5FC8 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = ../../../lib/luautf8/lutf8lib.c; sourceTree = "<group>"; };
@@ -552,6 +552,8 @@
 		84A1F9B8252E617D00000717 /* scripting_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_client.cpp; path = ../../../src/script/scripting_client.cpp; sourceTree = "<group>"; };
 		84A1F9B9252E617D00000717 /* scripting_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_server.cpp; path = ../../../src/script/scripting_server.cpp; sourceTree = "<group>"; };
 		84A1F9BA252E617D00000717 /* scripting_server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_server.h; path = ../../../src/script/scripting_server.h; sourceTree = "<group>"; };
+		84BDEE602C471AD500A1571D /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; usesTabs = 1; };
+		84BDEE622C471AE500A1571D /* MultiCraft.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MultiCraft.entitlements; sourceTree = "<group>"; };
 		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		84C2AB5228DA7770001968EE /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../deps/libpng/libpng.a; sourceTree = "<group>"; };
@@ -560,8 +562,8 @@
 		84C9A9552B228D9A00909EFF /* ecrypt-machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-machine.h"; path = "../../../lib/chacha/ecrypt-machine.h"; sourceTree = "<group>"; };
 		84C9A9562B228D9A00909EFF /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/chacha/chacha.c; sourceTree = "<group>"; };
 		84C9A9572B228D9A00909EFF /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../lib/chacha/ecrypt-sync.h"; sourceTree = "<group>"; };
+		84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/libintl.a; sourceTree = "<group>"; };
-		84F0B4D62B44C800000D8546 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		84F0B4D82B44CAEE000D8546 /* encryption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = encryption.h; path = ../../../src/util/encryption.h; sourceTree = "<group>"; };
 		84F0B4D92B44CAEE000D8546 /* encryption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = encryption.cpp; path = ../../../src/util/encryption.cpp; sourceTree = "<group>"; };
 		84F20D5425D52790009562A9 /* irrUString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrUString.h; path = ../../../src/irrlicht_changes/irrUString.h; sourceTree = "<group>"; };
@@ -857,20 +859,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84EA1B952CA4BC8B00CDCE7C /* AudioToolbox.framework in Frameworks */,
 				84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */,
-				841AD8AD28D0D6920042E335 /* AudioUnit.framework in Frameworks */,
 				8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */,
 				841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */,
 				84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */,
 				8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */,
 				84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */,
 				84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */,
+				841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */,
+				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
 				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
-				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
 				84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */,
+				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
+				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
 				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
 				841AD8BB28D12E980042E335 /* libintl.a in Frameworks */,
-				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
 				841AD8A528D0C1870042E335 /* libleveldb.a in Frameworks */,
 				846F883B27A59704007B6210 /* libluajit.a in Frameworks */,
 				841AD8B128D0DE430042E335 /* libogg.a in Frameworks */,
@@ -879,7 +883,6 @@
 				8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */,
 				841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */,
 				841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */,
-				841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */,
 				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1048,8 +1051,8 @@
 				8458617C24B1C3BB0040BA4F /* textures */,
 				845856B224B1322D0040BA4F /* Assets.xcassets */,
 				845856B724B1322D0040BA4F /* Info.plist */,
-				845856BA24B1322D0040BA4F /* MultiCraft.entitlements */,
-				84F0B4D62B44C800000D8546 /* Localizable.xcstrings */,
+				84BDEE602C471AD500A1571D /* Localizable.xcstrings */,
+				84BDEE622C471AE500A1571D /* MultiCraft.entitlements */,
 				84E33D852A7BBEA200609F77 /* Supporting Files */,
 				84585CD524B138F50040BA4F /* src */,
 				84D4D9082A93707F00CACCC7 /* lib */,
@@ -1060,6 +1063,7 @@
 		84585BFF24B1347B0040BA4F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */,
 				8458617724B1BF2D0040BA4F /* AppKit.framework */,
 				841AD8AC28D0D6920042E335 /* AudioUnit.framework */,
 				8495BD2928B81170009FCF4D /* Carbon.framework */,
@@ -1629,7 +1633,7 @@
 		84E33D852A7BBEA200609F77 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				62CAE0B32B4F025100EDD46F /* AppLogic.swift */,
+				846728512C45F27F00269215 /* AppLogic.swift */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -1692,6 +1696,7 @@
 			);
 			name = MultiCraft;
 			packageProductDependencies = (
+				84D1BF552CD7EFF10077DD47 /* libzstd */,
 			);
 			productName = MultiCraft;
 			productReference = 845856A924B1322C0040BA4F /* MultiCraft.app */;
@@ -1704,12 +1709,11 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1530;
+				LastUpgradeCheck = 1540;
 				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
 						CreatedOnToolsVersion = 11.5;
-						LastSwiftMigration = 1500;
 					};
 				};
 			};
@@ -1718,7 +1722,6 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				Base,
 				en,
 				bg,
 				cs,
@@ -1737,6 +1740,7 @@
 				pt,
 				ro,
 				ru,
+				sl,
 				sk,
 				es,
 				sv,
@@ -1748,9 +1752,11 @@
 				nb,
 				ar,
 				th,
+				Base,
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			packageReferences = (
+				84D1BF522CD7EC430077DD47 /* XCRemoteSwiftPackageReference "zstd" */,
 			);
 			productRefGroup = 845856AA24B1322C0040BA4F /* Products */;
 			projectDirPath = "";
@@ -1768,11 +1774,11 @@
 			files = (
 				8458617F24B1C3BC0040BA4F /* builtin in Resources */,
 				8453A49E24DB22F00087ECF9 /* client in Resources */,
-				62A571452B5836BA00A166A3 /* fonts in Resources */,
-				84287CA6291ED0F000E30F96 /* locale in Resources */,
 				8458618024B1C3BC0040BA4F /* textures in Resources */,
+				84287CA7291ED0F000E30F96 /* fonts in Resources */,
+				84287CA6291ED0F000E30F96 /* locale in Resources */,
+				84BDEE612C471AD500A1571D /* Localizable.xcstrings in Resources */,
 				845856B324B1322D0040BA4F /* Assets.xcassets in Resources */,
-				84F0B4D72B44C800000D8546 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1791,6 +1797,7 @@
 				84135B6425D5264B00CA4DCF /* map_settings_manager.cpp in Sources */,
 				84F20F4425D52975009562A9 /* dungeongen.cpp in Sources */,
 				84F20E5425D5283F009562A9 /* activeobjectmgr.cpp in Sources */,
+				8467285B2C45F27F00269215 /* AppLogic.swift in Sources */,
 				84135B9E25D5264C00CA4DCF /* remoteplayer.cpp in Sources */,
 				84135C2025D526D700CA4DCF /* fontengine.cpp in Sources */,
 				84135B8425D5264C00CA4DCF /* chat.cpp in Sources */,
@@ -1844,7 +1851,6 @@
 				84F20F4C25D52975009562A9 /* mapgen_fractal.cpp in Sources */,
 				84F20E8E25D52868009562A9 /* pointedthing.cpp in Sources */,
 				84F20EB325D528D7009562A9 /* content.cpp in Sources */,
-				62CAE0BF2B4F025100EDD46F /* AppLogic.swift in Sources */,
 				84135B9325D5264C00CA4DCF /* serverlist.cpp in Sources */,
 				84135B8F25D5264C00CA4DCF /* texture_override.cpp in Sources */,
 				84135B5F25D5264B00CA4DCF /* craftdef.cpp in Sources */,
@@ -2050,10 +2056,6 @@
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 1;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(inherited)",
-					"DEBUG=1",
-				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_UNROLL_LOOPS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
@@ -2125,7 +2127,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2137,7 +2139,7 @@
 					"USE_FREETYPE=1",
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
-					"USE_SYSTEM_GMP=0",
+					"USE_ZSTD=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
 					"VERSION_PATCH=8",
@@ -2162,6 +2164,7 @@
 					"${SRCROOT}/../deps/libpng/include",
 					"${SRCROOT}/../deps/SDL2/include",
 					"${SRCROOT}/../deps/libvorbis/include",
+					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
@@ -2184,6 +2187,7 @@
 					"-L${SRCROOT}/../deps/SDL2",
 					"-L${SRCROOT}/../deps/libvorbis",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -2198,7 +2202,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 50;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2211,7 +2215,7 @@
 					"USE_FREETYPE=1",
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
-					"USE_SYSTEM_GMP=0",
+					"USE_ZSTD=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
 					"VERSION_PATCH=8",
@@ -2236,6 +2240,7 @@
 					"${SRCROOT}/../deps/libpng/include",
 					"${SRCROOT}/../deps/SDL2/include",
 					"${SRCROOT}/../deps/libvorbis/include",
+					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
@@ -2286,6 +2291,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		84D1BF522CD7EC430077DD47 /* XCRemoteSwiftPackageReference "zstd" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/facebook/zstd";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 1.5.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		84D1BF552CD7EFF10077DD47 /* libzstd */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84D1BF522CD7EC430077DD47 /* XCRemoteSwiftPackageReference "zstd" */;
+			productName = libzstd;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 845856A124B1322C0040BA4F /* Project object */;
 }
