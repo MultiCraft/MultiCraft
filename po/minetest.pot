@@ -1432,6 +1432,14 @@ msgid "HUD hidden"
 msgstr ""
 
 #: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
 #, c-format
 msgid "Profiler shown (page %d of %d)"
 msgstr ""
@@ -2848,6 +2856,17 @@ msgstr ""
 #: src/settings_translation_file.cpp
 msgid ""
 "Key for toggling the display of the HUD.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
+"Key for toggling the display of nametags.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
 msgstr ""

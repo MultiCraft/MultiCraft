@@ -2062,6 +2062,8 @@ void Game::processKeyInput()
 		client->makeScreenshot();
 	} else if (wasKeyDown(KeyType::TOGGLE_HUD)) {
 		m_game_ui->toggleHud();
+	} else if (wasKeyDown(KeyType::TOGGLE_NAMETAGS)) {
+		m_game_ui->toggleNametags();
 	} else if (wasKeyDown(KeyType::MINIMAP)) {
 		toggleMinimap(isKeyDown(KeyType::SNEAK));
 	} else if (wasKeyDown(KeyType::TOGGLE_CHAT)) {
@@ -4116,7 +4118,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	}
 
 	RenderingEngine::draw_scene(skycolor, m_game_ui->m_flags.show_hud,
-			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair);
+			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair, m_game_ui->m_flags.show_nametags);
 
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
 	mat.EnableFlags = 0;

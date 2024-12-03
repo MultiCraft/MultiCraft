@@ -61,6 +61,7 @@ public:
 		bool show_minimal_debug = false;
 		bool show_basic_debug = false;
 		bool show_profiler_graph = false;
+		bool show_nametags = true;
 	};
 
 	void init(Client *client);
@@ -95,6 +96,7 @@ public:
 
 	void toggleChat();
 	void toggleHud();
+	void toggleNametags();
 	void toggleProfiler();
 
 	GUIFormSpecMenu *&updateFormspec(const std::string &formname)
