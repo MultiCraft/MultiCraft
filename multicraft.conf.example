@@ -1187,6 +1187,10 @@
 #    type: float min: 1 max: 120
 # connect_timeout = 15
 
+#    Timeout in seconds to use when reconnecting to a server.
+#    type: float min: 1 max: 120
+# reconnect_timeout = 15
+
 ## Advanced
 
 #    Timeout for client to remove unused map data from memory.

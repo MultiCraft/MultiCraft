@@ -1561,7 +1561,9 @@ bool Game::connectToServer(const GameStartData &start_data,
 	*/
 
 	bool result = true;
-	const f32 connect_timeout = g_settings->getFloat("connect_timeout");
+	const f32 connect_timeout = start_data.reconnecting ?
+			g_settings->getFloat("reconnect_timeout") :
+			g_settings->getFloat("connect_timeout");
 
 	try {
 		input->clear();

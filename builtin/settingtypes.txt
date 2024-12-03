@@ -999,6 +999,9 @@ enable_register_confirmation (Enable register confirmation) bool true
 #    Timeout in seconds to use when connecting to a server.
 connect_timeout (Connect timeout) float 15 1 120
 
+#    Timeout in seconds to use when reconnecting to a server.
+reconnect_timeout (Connect timeout when reconnecting) float 15 1 120
+
 [*Advanced]
 
 #    Timeout for client to remove unused map data from memory.
