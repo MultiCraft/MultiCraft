@@ -38,7 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #include "version.h"
 #include "util/hex.h"
-#include "util/sha1.h"
+#include "util/hashing.h"
 #include <algorithm>
 
 #ifndef SERVER
@@ -316,7 +316,7 @@ int ModApiUtil::l_encode_base64(lua_State *L)
 	size_t size;
 	const char *data = luaL_checklstring(L, 1, &size);
 
-	std::string out = base64_encode((const unsigned char *)(data), size);
+	std::string out = base64_encode(data);
 
 	lua_pushlstring(L, out.data(), out.size());
 	return 1;
@@ -471,14 +471,7 @@ int ModApiUtil::l_sha1(lua_State *L)
 	bool hex = !lua_isboolean(L, 2) || !readParam<bool>(L, 2);
 
 	// Compute actual checksum of data
-	std::string data_sha1;
-	{
-		SHA1 ctx;
-		ctx.addBytes(data, size);
-		unsigned char *data_tmpdigest = ctx.getDigest();
-		data_sha1.assign((char*) data_tmpdigest, 20);
-		free(data_tmpdigest);
-	}
+	std::string data_sha1 = hashing::sha1(data);
 
 	if (hex) {
 		std::string sha1_hex = hex_encode(data_sha1);

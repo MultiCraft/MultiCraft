@@ -59,7 +59,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "defaultsettings.h"
 #include "server/mods.h"
 #include "util/base64.h"
-#include "util/sha1.h"
+#include "util/hashing.h"
 #include "util/hex.h"
 #include "database/database.h"
 #include "chatmessage.h"
@@ -2465,14 +2465,11 @@ bool Server::addMediaFile(const std::string &filename,
 		return false;
 	}
 
-	SHA1 sha1;
-	sha1.addBytes(filedata.c_str(), filedata.length());
-
-	unsigned char *digest = sha1.getDigest();
-	std::string sha1_base64 = base64_encode(digest, 20);
+	std::string sha1 = hashing::sha1(filedata);
+	std::string sha1_base64 = base64_encode(sha1);
+	std::string sha1_hex = hex_encode(sha1);
 	if (digest_to)
-		*digest_to = std::string((char*) digest, 20);
-	free(digest);
+		*digest_to = sha1;
 
 	// Put in list
 	m_media[filename] = MediaInfo(filepath, sha1_base64);

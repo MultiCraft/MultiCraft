@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string>
 #include "auth.h"
 #include "base64.h"
-#include "sha1.h"
+#include "util/hashing.h"
 #include "srp.h"
 #include "util/string.h"
 #include "debug.h"
@@ -38,11 +38,8 @@ std::string translate_password(const std::string &name,
 		return "";
 
 	std::string slt = name + password;
-	SHA1 sha1;
-	sha1.addBytes(slt.c_str(), slt.length());
-	unsigned char *digest = sha1.getDigest();
-	std::string pwd = base64_encode(digest, 20);
-	free(digest);
+	std::string digest = hashing::sha1(slt);
+	std::string pwd = base64_encode(digest);
 	return pwd;
 }
 
@@ -112,8 +109,8 @@ std::string encode_srp_verifier(const std::string &verifier,
 {
 	std::ostringstream ret_str;
 	ret_str << "#1#"
-		<< base64_encode((unsigned char *)salt.c_str(), salt.size()) << "#"
-		<< base64_encode((unsigned char *)verifier.c_str(), verifier.size());
+		<< base64_encode(salt) << "#"
+		<< base64_encode(verifier);
 	return ret_str.str();
 }
 
