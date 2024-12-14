@@ -49,6 +49,7 @@ enum
 	GUI_ID_BACK_BUTTON = 101, GUI_ID_ABORT_BUTTON, GUI_ID_RESET_BUTTON,
 	GUI_ID_SCROLL_BAR,
 	GUI_ID_BACKGROUND_IMG,
+	GUI_ID_ICON,
 	// buttons
 	GUI_ID_KEY_FORWARD_BUTTON,
 	GUI_ID_KEY_BACKWARD_BUTTON,
@@ -85,7 +86,6 @@ enum
 	GUI_ID_KEY_AUTOFWD_BUTTON,
 	// other
 	GUI_ID_CB_AUX1_DESCENDS,
-	GUI_ID_CB_DOUBLETAP_JUMP,
 	GUI_ID_CB_AUTOJUMP,
 };
 
@@ -177,16 +177,24 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 				texture, middle, m_tsrc, true);
 	}
 
+	// Icon
 	{
-		core::rect<s32> rect(0, 0, 795 * s, 50 * s);
-		rect += topleft + v2s32(25 * s, 10 * s);
-		//gui::IGUIStaticText *t =
+		const std::string texture = texture_path + "gui" DIR_DELIM "change_keys.png";
+		const core::rect<s32> rect(15 * s, 15 * s, 50 * s, 50 * s);
+		const core::rect<s32> middle(0, 0, 0, 0);
+		new GUIBackgroundImage(Environment, this, GUI_ID_ICON, rect,
+							   texture, middle, m_tsrc, false);
+	}
+
+	{
+		core::rect<s32> rect(0, 0, 795 * s, 35 * s);
+		rect += topleft + v2s32(60 * s, 15 * s);
 		//const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
 		const wchar_t *text = wgettext("Change Keys");
-		Environment->addStaticText(text,
+		gui::IGUIStaticText *t = Environment->addStaticText(text,
 								   rect, false, true, this, -1);
 		delete[] text;
-		//t->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_UPPERLEFT);
+		t->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
 	}
 
 	// Build buttons
@@ -227,21 +235,6 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 			const wchar_t *text = wgettext("\"Special\" = climb down");
 			Environment->addCheckBox(g_settings->getBool("aux1_descends"), rect, this,
 					GUI_ID_CB_AUX1_DESCENDS, text);
-			delete[] text;
-		}
-		offset += v2s32(0, 25 * s);
-	}
-
-	{
-		s32 option_x = offset.X;
-		s32 option_y = offset.Y + 5 * s;
-		u32 option_w = 300 * s;
-		{
-			core::rect<s32> rect(0, 0, option_w, 30 * s);
-			rect += topleft + v2s32(option_x, option_y);
-			const wchar_t *text = wgettext("Double tap \"jump\" to toggle fly");
-			Environment->addCheckBox(g_settings->getBool("doubletap_jump"), rect, this,
-					GUI_ID_CB_DOUBLETAP_JUMP, text);
 			delete[] text;
 		}
 		offset += v2s32(0, 25 * s);
@@ -320,11 +313,6 @@ bool GUIKeyChangeMenu::acceptInput()
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_AUX1_DESCENDS);
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
 			g_settings->setBool("aux1_descends", ((gui::IGUICheckBox*)e)->isChecked());
-	}
-	{
-		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_DOUBLETAP_JUMP);
-		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
-			g_settings->setBool("doubletap_jump", ((gui::IGUICheckBox*)e)->isChecked());
 	}
 	{
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_AUTOJUMP);
