@@ -28,7 +28,7 @@ std::string sha1(const std::string &data)
 	SHA1 sha1;
 	sha1.addBytes(data.c_str(), data.size());
 	unsigned char *digest = sha1.getDigest();
-	std::string ret(reinterpret_cast<char*>(digest), SHA1_DIGEST_SIZE);
+	std::string ret(reinterpret_cast<char *>(digest), SHA1_DIGEST_SIZE);
 	free(digest);
 	return ret;
 #endif
