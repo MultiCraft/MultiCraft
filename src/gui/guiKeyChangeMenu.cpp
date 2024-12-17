@@ -250,7 +250,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	// 		rect += topleft + v2s32(option_x, option_y);
 	// 		const wchar_t *text = wgettext("Double tap \"jump\" to toggle fly");
 	// 		Environment->addCheckBox(g_settings->getBool("doubletap_jump"), rect, this,
-	// 								 GUI_ID_CB_DOUBLETAP_JUMP, text);
+	// 				GUI_ID_CB_DOUBLETAP_JUMP, text);
 	// 		delete[] text;
 	// 	}
 	// 	offset += v2s32(0, 25 * s);
