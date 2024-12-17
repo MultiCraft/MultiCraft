@@ -2466,7 +2466,8 @@ bool Server::addMediaFile(const std::string &filename,
 	}
 
 	std::string sha1 = hashing::sha1(filedata);
-	std::string sha1_base64 = base64_encode(sha1);
+	std::string sha1_base64 = base64_encode(
+			reinterpret_cast<const unsigned char*>(sha1.data()), sha1.size());
 	std::string sha1_hex = hex_encode(sha1);
 	if (digest_to)
 		*digest_to = sha1;

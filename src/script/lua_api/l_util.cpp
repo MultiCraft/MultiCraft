@@ -316,7 +316,7 @@ int ModApiUtil::l_encode_base64(lua_State *L)
 	size_t size;
 	const char *data = luaL_checklstring(L, 1, &size);
 
-	std::string out = base64_encode(data);
+	std::string out = base64_encode((const unsigned char *)(data), size);
 
 	lua_pushlstring(L, out.data(), out.size());
 	return 1;
