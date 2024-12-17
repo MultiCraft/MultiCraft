@@ -48,18 +48,13 @@ LOCAL_SRC_FILES := deps/luajit/lib/$(APP_ABI)/libluajit.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := mbedTLS
-LOCAL_SRC_FILES := deps/mbedtls/lib/$(APP_ABI)/libmbedtls.a
+LOCAL_MODULE := libssl
+LOCAL_SRC_FILES := deps/openssl/lib/$(APP_ABI)/libssl.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := mbedx509
-LOCAL_SRC_FILES := deps/mbedtls/lib/$(APP_ABI)/libmbedx509.a
-include $(PREBUILT_STATIC_LIBRARY)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := mbedcrypto
-LOCAL_SRC_FILES := deps/mbedtls/lib/$(APP_ABI)/libmbedcrypto.a
+LOCAL_MODULE := libcrypto
+LOCAL_SRC_FILES := deps/openssl/lib/$(APP_ABI)/libcrypto.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -173,7 +168,6 @@ LOCAL_SRC_FILES := \
 	../../src/threading/event.cpp                  \
 	../../src/threading/sdl_semaphore.cpp          \
 	../../src/threading/sdl_thread.cpp             \
-	$(wildcard ../../src/util/*.c)                 \
 	$(wildcard ../../src/util/*.cpp)               \
 	../../src/ban.cpp                              \
 	../../src/chat.cpp                             \
@@ -253,7 +247,7 @@ LOCAL_SRC_FILES += ../../lib/luautf8/lutf8lib.c
 LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
 
 LOCAL_STATIC_LIBRARIES += \
-	Curl mbedTLS mbedx509 mbedcrypto \
+	Curl libssl libcrypto \
 	Freetype \
 	OpenAL \
 	Gettext \
