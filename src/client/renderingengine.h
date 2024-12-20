@@ -127,10 +127,10 @@ public:
 	}
 
 	inline static void draw_scene(video::SColor skycolor, bool show_hud,
-			bool show_minimap, bool draw_wield_tool, bool draw_crosshair)
+			bool show_minimap, bool draw_wield_tool, bool draw_crosshair, bool draw_nametags)
 	{
 		s_singleton->_draw_scene(skycolor, show_hud, show_minimap,
-				draw_wield_tool, draw_crosshair);
+				draw_wield_tool, draw_crosshair, draw_nametags);
 	}
 
 	inline static void initialize(Client *client, Hud *hud)
@@ -170,7 +170,7 @@ private:
 			ITextureSource *tsrc, float dtime = 0);
 
 	void _draw_scene(video::SColor skycolor, bool show_hud, bool show_minimap,
-			bool draw_wield_tool, bool draw_crosshair);
+			bool draw_wield_tool, bool draw_crosshair, bool draw_nametags);
 
 	void _draw_load_cleanup();
 
