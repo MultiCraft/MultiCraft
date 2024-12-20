@@ -348,7 +348,6 @@ void GameUI::toggleNametags()
 		showTranslatedStatusText("Nametags shown");
 	else
 		showTranslatedStatusText("Nametags hidden");
-	m_chat_text_needs_update = true;
 }
 
 void GameUI::toggleProfiler()
