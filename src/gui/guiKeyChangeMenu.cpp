@@ -252,8 +252,8 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 			Environment->addCheckBox(g_settings->getBool("doubletap_jump"), rect, this,
 					GUI_ID_CB_DOUBLETAP_JUMP, text);
 			delete[] text;
-	 	}
-	 	offset += v2s32(0, 25 * s);
+		}
+		offset += v2s32(0, 25 * s);
 	}*/
 
 	{
@@ -331,9 +331,9 @@ bool GUIKeyChangeMenu::acceptInput()
 			g_settings->setBool("aux1_descends", ((gui::IGUICheckBox*)e)->isChecked());
 	}
 	/*{
-	 	gui::IGUIElement *e = getElementFromId(GUI_ID_CB_DOUBLETAP_JUMP);
-	 	if(e && e->getType() == gui::EGUIET_CHECK_BOX)
-	 		g_settings->setBool("doubletap_jump", ((gui::IGUICheckBox*)e)->isChecked());
+		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_DOUBLETAP_JUMP);
+		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
+			g_settings->setBool("doubletap_jump", ((gui::IGUICheckBox*)e)->isChecked());
 	}*/
 	{
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_AUTOJUMP);
