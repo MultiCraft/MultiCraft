@@ -100,6 +100,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 	*/
 
 	init_args(start_data, cmd_args);
+	start_data.reconnecting = false;
 
 	// List video modes if requested
 	if (list_video_modes)
@@ -268,7 +269,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 					video::ETCF_CREATE_MIP_MAPS, g_settings->getBool("mip_map"));
 
 #ifdef HAVE_TOUCHSCREENGUI
-			receiver->m_touchscreengui = new TouchScreenGUI(RenderingEngine::get_raw_device(), receiver);
+			receiver->m_touchscreengui = new TouchScreenGUI(RenderingEngine::get_raw_device());
 			g_touchscreengui = receiver->m_touchscreengui;
 #endif
 
@@ -473,9 +474,11 @@ bool ClientLauncher::launch_game(std::string &error_message,
 
 		start_data.local_server = !menudata.simple_singleplayer_mode &&
 			start_data.address.empty();
+		start_data.reconnecting = menudata.do_reconnect;
 	} else {
 		start_data.local_server = !start_data.world_path.empty() &&
 			start_data.address.empty() && !start_data.name.empty();
+		start_data.reconnecting = false;
 	}
 
 	if (!RenderingEngine::run())

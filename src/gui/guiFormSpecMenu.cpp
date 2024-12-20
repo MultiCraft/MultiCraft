@@ -3792,6 +3792,11 @@ void GUIFormSpecMenu::drawMenu()
 		m_pointer = RenderingEngine::get_raw_device()->getCursorControl()->getPosition();
 	}
 
+	if (m_zero_pointer != AbsoluteClippingRect.UpperLeftCorner) {
+		m_zero_pointer = AbsoluteClippingRect.UpperLeftCorner;
+		m_pointer = m_zero_pointer;
+	}
+	
 	/*
 		Draw fields/buttons tooltips and update the mouse cursor
 	*/

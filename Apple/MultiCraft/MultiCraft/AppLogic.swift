@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 
 final class AppLogic: NSObject {
-	@objc static let shared = AppLogic()
+	static let shared = AppLogic()
 
 	public func initialize() {
 		Self.log(message: "[INIT] initialized")

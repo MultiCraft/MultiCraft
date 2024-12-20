@@ -24,19 +24,17 @@ import android.app.*
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.*
-import android.os.*
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.view.Window
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.*
-import com.multicraft.game.*
-import com.multicraft.game.databinding.*
+import com.multicraft.game.R
 import com.multicraft.game.dialogs.RestartDialog
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
-import com.multicraft.game.helpers.ApiLevelHelper.isMarshmallow
-import java.io.*
-import java.util.*
+import java.io.File
+import java.io.InputStream
 
 // Activity extensions
 fun Activity.finishApp(restart: Boolean) {
@@ -57,14 +55,9 @@ fun Activity.finishApp(restart: Boolean) {
 
 fun Activity.isConnected(): Boolean {
 	val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-	if (isMarshmallow()) {
-		val activeNetwork = cm.activeNetwork ?: return false
-		val capabilities = cm.getNetworkCapabilities(activeNetwork) ?: return false
-		return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-	} else @Suppress("DEPRECATION") {
-		val activeNetworkInfo = cm.activeNetworkInfo ?: return false
-		return activeNetworkInfo.isConnected
-	}
+	val activeNetwork = cm.activeNetwork ?: return false
+	val capabilities = cm.getNetworkCapabilities(activeNetwork) ?: return false
+	return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }
 
 fun AppCompatActivity.showRestartDialog(

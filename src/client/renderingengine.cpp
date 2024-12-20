@@ -897,6 +897,7 @@ v2u32 RenderingEngine::getDisplaySize()
 }
 #endif // __ANDROID__/__IOS__
 
+#ifdef HAVE_TOUCHSCREENGUI
 bool RenderingEngine::isTablet()
 {
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
@@ -906,6 +907,7 @@ bool RenderingEngine::isTablet()
 	return false;
 #endif
 }
+#endif
 
 bool RenderingEngine::isHighDpi()
 {

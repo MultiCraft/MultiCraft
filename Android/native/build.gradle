@@ -3,9 +3,9 @@ apply plugin: 'de.undercouch.download'
 
 android {
 	compileSdk 35
-	ndkVersion '26.3.11579264'
+	ndkVersion '27.2.12479018'
 	defaultConfig {
-		minSdkVersion 21
+		minSdkVersion 23
 		targetSdkVersion 35
 		externalNativeBuild {
 			ndkBuild {
@@ -52,8 +52,7 @@ android {
 def buildDirectory = layout.buildDirectory.get().asFile
 
 tasks.register('downloadDeps', Download) {
-	def VERSION = "20082024"
-	src "https://github.com/MultiCraft/deps_android/releases/download/$VERSION/deps_android.zip"
+	src "https://github.com/MultiCraft/deps_android/releases/latest/download/deps_android.zip"
 	dest new File(buildDirectory, 'deps.zip')
 	overwrite false
 }
