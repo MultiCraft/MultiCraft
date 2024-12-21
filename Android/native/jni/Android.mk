@@ -81,6 +81,7 @@ LOCAL_CFLAGS += \
 	-DUSE_SQLITE=0                                 \
 	-DUSE_LUAJIT=1                                 \
 	-DUSE_GETTEXT=1                                \
+	-DUSE_OPENSSL=1                                \
 	-DVERSION_MAJOR=${versionMajor}                \
 	-DVERSION_MINOR=${versionMinor}                \
 	-DVERSION_PATCH=${versionPatch}                \
@@ -114,6 +115,7 @@ LOCAL_C_INCLUDES := \
 	deps/libcurl/include                           \
 	deps/luajit/include                            \
 	deps/openal/include                            \
+	deps/openssl/include                           \
 	deps/vorbis/include
 
 LOCAL_SRC_FILES := \

@@ -22,7 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "noise.h"
 #include "settings.h"
 #include "mapgen/mapgen_v5.h"
-#include "util/sha1.h"
+#include "util/hashing.h"
 #include "map_settings_manager.h"
 
 class TestMapSettingsManager : public TestBase {
@@ -181,13 +181,10 @@ void TestMapSettingsManager::testMapSettingsManager()
 		0x78, 0x56, 0x95, 0x2d, 0xdc, 0x6a, 0xf7, 0x61, 0x36, 0x5f
 	};
 
-	SHA1 ctx;
 	std::string metafile_contents;
 	UASSERT(fs::ReadFile(test_mapmeta_path, metafile_contents));
-	ctx.addBytes(&metafile_contents[0], metafile_contents.size());
-	unsigned char *sha1_result = ctx.getDigest();
-	int resultdiff = memcmp(sha1_result, expected_contents_hash, 20);
-	free(sha1_result);
+	std::string sha1_result = hashing::sha1(metafile_contents);
+	int resultdiff = memcmp(sha1_result.data(), expected_contents_hash, 20);
 
 	UASSERT(!resultdiff);
 #endif
