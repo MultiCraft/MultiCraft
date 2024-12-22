@@ -527,8 +527,15 @@ void set_default_settings()
 		settings->setDefault("gui_scaling", "1.5");
 	}
 
+#ifdef __aarch64__
+	// Enable visual shader effects on M1
+	settings->setDefault("enable_waving_water", "true");
+	settings->setDefault("enable_waving_leaves", "true");
+	settings->setDefault("enable_waving_plants", "true");
+#else
 	// Shaders work but may reduce performance on iGPU
 	settings->setDefault("enable_shaders", "false");
+#endif
 #endif
 
 #ifdef HAVE_TOUCHSCREENGUI

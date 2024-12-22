@@ -25,7 +25,7 @@ public func getScreenScale() -> Float {
 }
 
 public func getUpgrade(key: UnsafePointer<CChar>) {
-	AppLogic.log(message: "[EVENT] got upgrade event: %s", object: key);
+	AppLogic.log(message: "[EVENT] got upgrade event: \(key)")
 }
 
 public func getSecretKey(key: UnsafePointer<CChar>) -> UnsafePointer<CChar> {

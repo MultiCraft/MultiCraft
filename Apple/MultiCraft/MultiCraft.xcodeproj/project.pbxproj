@@ -145,6 +145,7 @@
 		84C9A9592B228D9A00909EFF /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 84C9A9562B228D9A00909EFF /* chacha.c */; };
 		84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */ = {isa = PBXBuildFile; productRef = 84D1BF552CD7EFF10077DD47 /* libzstd */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
+		84E97FC72D1393F800C85934 /* hashing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E97FC52D1393F800C85934 /* hashing.cpp */; };
 		84EA1B952CA4BC8B00CDCE7C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */; };
 		84F0B4DA2B44CAEE000D8546 /* encryption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F0B4D92B44CAEE000D8546 /* encryption.cpp */; };
 		84F20D5925D52790009562A9 /* static_text.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20D5525D52790009562A9 /* static_text.cpp */; };
@@ -562,6 +563,8 @@
 		84C9A9552B228D9A00909EFF /* ecrypt-machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-machine.h"; path = "../../../lib/chacha/ecrypt-machine.h"; sourceTree = "<group>"; };
 		84C9A9562B228D9A00909EFF /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/chacha/chacha.c; sourceTree = "<group>"; };
 		84C9A9572B228D9A00909EFF /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../lib/chacha/ecrypt-sync.h"; sourceTree = "<group>"; };
+		84E97FC52D1393F800C85934 /* hashing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hashing.cpp; path = ../../../src/util/hashing.cpp; sourceTree = "<group>"; };
+		84E97FC62D1393F800C85934 /* hashing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hashing.h; path = ../../../src/util/hashing.h; sourceTree = "<group>"; };
 		84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/libintl.a; sourceTree = "<group>"; };
 		84F0B4D82B44CAEE000D8546 /* encryption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = encryption.h; path = ../../../src/util/encryption.h; sourceTree = "<group>"; };
@@ -1404,6 +1407,8 @@
 				84F0B4D82B44CAEE000D8546 /* encryption.h */,
 				84F20E6E25D52867009562A9 /* enriched_string.cpp */,
 				84F20E7625D52868009562A9 /* enriched_string.h */,
+				84E97FC52D1393F800C85934 /* hashing.cpp */,
+				84E97FC62D1393F800C85934 /* hashing.h */,
 				84F20E7C25D52868009562A9 /* hex.h */,
 				84F20E6625D52867009562A9 /* ieee_float.cpp */,
 				84F20E7925D52868009562A9 /* ieee_float.h */,
@@ -1791,6 +1796,7 @@
 			files = (
 				84F20DDF25D52812009562A9 /* s_player.cpp in Sources */,
 				84135C2125D526D700CA4DCF /* sound.cpp in Sources */,
+				84E97FC72D1393F800C85934 /* hashing.cpp in Sources */,
 				84135B8B25D5264C00CA4DCF /* noise.cpp in Sources */,
 				84F20E2A25D5282A009562A9 /* l_minimap.cpp in Sources */,
 				84F20F1825D52958009562A9 /* guiScrollContainer.cpp in Sources */,
