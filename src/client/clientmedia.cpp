@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "util/hex.h"
 #include "util/serialize.h"
-#include "util/sha1.h"
+#include "util/hashing.h"
 #include "util/string.h"
 #include <sstream>
 
@@ -543,14 +543,7 @@ bool ClientMediaDownloader::checkAndLoad(
 	std::string sha1_hex = hex_encode(sha1);
 
 	// Compute actual checksum of data
-	std::string data_sha1;
-	{
-		SHA1 data_sha1_calculator;
-		data_sha1_calculator.addBytes(data.c_str(), data.size());
-		unsigned char *data_tmpdigest = data_sha1_calculator.getDigest();
-		data_sha1.assign((char*) data_tmpdigest, 20);
-		free(data_tmpdigest);
-	}
+	std::string data_sha1 = hashing::sha1(data);
 
 	// Check that received file matches announced checksum
 	if (data_sha1 != sha1) {
