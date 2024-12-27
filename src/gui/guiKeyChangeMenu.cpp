@@ -146,6 +146,9 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	s *= 0.75f;
 #endif
 
+	// Save for "key already in use" message
+	m_pixel_scale = s;
+
 	// Make sure the GUI will fit on the screen
 	// The change keys GUI is 835x430 pixels (with a scaling of 1)
 	if (835 * s > screensize.X)
@@ -413,12 +416,15 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 		}
 
 		if (key_in_use && !this->key_used_text) {
-			core::rect<s32> rect(0, 0, 600, 40);
-			rect += v2s32(0, 0) + v2s32(25, 30);
+			v2s32 size = DesiredRect.getSize();
+
+			core::rect<s32> rect(0, 0, 600, 35 * m_pixel_scale);
+			rect += v2s32(0, 0) + v2s32(15 * m_pixel_scale, size.Y - 50 * m_pixel_scale);
 			const wchar_t *text = wgettext("Key already in use");
 			this->key_used_text = Environment->addStaticText(text,
 					rect, false, true, this, -1);
 			delete[] text;
+			this->key_used_text->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
 		} else if (!key_in_use && this->key_used_text) {
 			this->key_used_text->remove();
 			this->key_used_text = nullptr;
