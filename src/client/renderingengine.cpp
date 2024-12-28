@@ -96,13 +96,16 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 
 	// Resolution selection
 	bool fullscreen = g_settings->getBool("fullscreen");
-#if defined(__ANDROID__) || defined(__IOS__)
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	u16 screen_w = g_settings->getU16("screen_w");
+	u16 screen_h = g_settings->getU16("screen_h");
+#elif defined(__ANDROID__) || defined(__IOS__)
 	u16 screen_w = 0;
 	u16 screen_h = 0;
- #else
+#else
 	u16 screen_w = std::max(g_settings->getU16("screen_w"), screen_min_w);
 	u16 screen_h = std::max(g_settings->getU16("screen_h"), screen_min_h);
- #endif
+#endif
 
 	// bpp, fsaa, vsync
 	bool vsync = g_settings->getBool("vsync");
@@ -569,10 +572,15 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 					progress_img_bg->getSize();
 #if !defined(__ANDROID__) && !defined(__IOS__)
 			float density = RenderingEngine::getDisplayDensity();
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+			u32 imgW = rangelim(img_size.Width, 256, 1024) * density;
+			u32 imgH = rangelim(img_size.Height, 32, 128) * density;
+#else
 			float gui_scaling = g_settings->getFloat("gui_scaling");
 			float scale = density * gui_scaling;
 			u32 imgW = rangelim(img_size.Width, 256, 1024) * scale;
 			u32 imgH = rangelim(img_size.Height, 32, 128) * scale;
+#endif
 #else
 			float imgRatio = (float) img_size.Height / img_size.Width;
 			u32 imgW = screensize.X / 2;
@@ -865,7 +873,11 @@ float RenderingEngine::getDisplayDensity()
 
 float RenderingEngine::getDisplayDensity()
 {
+#ifdef __APPLE__
+	return (g_settings->getFloat("screen_dpi") / 72.0) * g_settings->getFloat("display_density_factor");
+#else
 	return (g_settings->getFloat("screen_dpi") / 96.0) * g_settings->getFloat("display_density_factor");
+#endif
 }
 
 #endif
@@ -912,7 +924,7 @@ bool RenderingEngine::isTablet()
 bool RenderingEngine::isHighDpi()
 {
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	return g_settings->getFloat("screen_dpi") / 72.0f >= 2;
+	return RenderingEngine::getDisplayDensity() >= 2;
 #elif defined(__IOS__)
 	float density = RenderingEngine::getDisplayDensity();
 	return isTablet() ? (density >= 2) : (density >= 3);

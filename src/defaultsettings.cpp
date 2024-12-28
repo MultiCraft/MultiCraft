@@ -517,13 +517,12 @@ void set_default_settings()
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 	settings->setDefault("vsync", "true");
 
-	int ScaleFactor = porting::getScreenScale();
-	settings->setDefault("screen_dpi", std::to_string(ScaleFactor * 72));
-	if (ScaleFactor >= 2) {
-		settings->setDefault("hud_scaling", "1.5");
+	float ScaleFactor = porting::getScreenScale();
+	settings->setDefault("display_density_factor", std::to_string(ScaleFactor));
+	if (ScaleFactor >= 2.0f) {
+		settings->setDefault("hud_scaling", "1.25");
 	} else {
 		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
-		settings->setDefault("hud_scaling", "1.25");
 		settings->setDefault("gui_scaling", "1.5");
 	}
 

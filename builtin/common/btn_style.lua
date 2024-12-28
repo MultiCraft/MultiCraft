@@ -6,13 +6,7 @@ local fmt = string.format
 local device_is_tablet = core.settings:get_bool("device_is_tablet", false)
 local screen_density = core.get_screen_info().density
 function is_high_dpi()
-	if PLATFORM == "OSX" then
-		return tonumber(core.settings:get("screen_dpi")) / 72 >= 2
-	elseif PLATFORM == "iOS" and device_is_tablet then
-		return screen_density >= 2
-	else
-		return screen_density >= 3
-	end
+	return screen_density >= ((PLATFORM == "OSX" or (PLATFORM == "iOS" and device_is_tablet)) and 2 or 3)
 end
 
 local DIR_DELIM_esc = core.formspec_escape(DIR_DELIM)
