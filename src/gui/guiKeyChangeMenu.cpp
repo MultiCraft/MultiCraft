@@ -146,7 +146,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	s *= 0.75f;
 #endif
 
-	// Save for "key already in use" message
+	// Save for Key already in use message
 	m_pixel_scale = s;
 
 	// Make sure the GUI will fit on the screen
@@ -496,6 +496,9 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 						ks->button->setText(text);
 						delete[] text;
 					}
+					if (this->key_used_text)
+						this->key_used_text->remove();
+						this->key_used_text = nullptr;
 					return true;
 				default:
 					resetMenu();
