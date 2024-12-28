@@ -424,6 +424,7 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 			this->key_used_text = Environment->addStaticText(text,
 					rect, false, true, this, -1);
 			delete[] text;
+			this->key_used_text->setOverrideColor(video::SColor(255, 255, 0, 0));
 			this->key_used_text->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
 		} else if (!key_in_use && this->key_used_text) {
 			this->key_used_text->remove();
@@ -490,7 +491,12 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 					return true;
 				case GUI_ID_RESET_BUTTON:
 					resetKeys();
-					quitMenu();
+					for (key_setting *ks : key_settings) {
+						ks->key = getKeySetting(ks->setting_name.c_str());
+						const wchar_t *text = wgettext(ks->key.name());
+						ks->button->setText(text);
+						delete[] text;
+					}
 					return true;
 				default:
 					resetMenu();
