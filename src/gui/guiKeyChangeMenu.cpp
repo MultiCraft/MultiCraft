@@ -49,6 +49,7 @@ enum
 	GUI_ID_BACK_BUTTON = 101, GUI_ID_ABORT_BUTTON, GUI_ID_RESET_BUTTON,
 	GUI_ID_SCROLL_BAR,
 	GUI_ID_BACKGROUND_IMG,
+	GUI_ID_ICON,
 	// buttons
 	GUI_ID_KEY_FORWARD_BUTTON,
 	GUI_ID_KEY_BACKWARD_BUTTON,
@@ -85,7 +86,7 @@ enum
 	GUI_ID_KEY_AUTOFWD_BUTTON,
 	// other
 	GUI_ID_CB_AUX1_DESCENDS,
-	GUI_ID_CB_DOUBLETAP_JUMP,
+	//GUI_ID_CB_DOUBLETAP_JUMP,
 	GUI_ID_CB_AUTOJUMP,
 };
 
@@ -145,6 +146,9 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	s *= 0.75f;
 #endif
 
+	// Save for Key already in use message
+	m_pixel_scale = s;
+
 	// Make sure the GUI will fit on the screen
 	// The change keys GUI is 835x430 pixels (with a scaling of 1)
 	if (835 * s > screensize.X)
@@ -177,16 +181,24 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 				texture, middle, m_tsrc, true);
 	}
 
+	// Icon
 	{
-		core::rect<s32> rect(0, 0, 795 * s, 50 * s);
-		rect += topleft + v2s32(25 * s, 10 * s);
-		//gui::IGUIStaticText *t =
+		const std::string texture = texture_path + "gui" DIR_DELIM "change_keys.png";
+		const core::rect<s32> rect(15 * s, 15 * s, 50 * s, 50 * s);
+		const core::rect<s32> middle(0, 0, 0, 0);
+		new GUIBackgroundImage(Environment, this, GUI_ID_ICON, rect,
+							   texture, middle, m_tsrc, false);
+	}
+
+	{
+		core::rect<s32> rect(0, 0, 795 * s, 35 * s);
+		rect += topleft + v2s32(60 * s, 15 * s);
 		//const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
 		const wchar_t *text = wgettext("Change Keys");
-		Environment->addStaticText(text,
+		gui::IGUIStaticText *t = Environment->addStaticText(text,
 								   rect, false, true, this, -1);
 		delete[] text;
-		//t->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_UPPERLEFT);
+		t->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
 	}
 
 	// Build buttons
@@ -232,7 +244,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		offset += v2s32(0, 25 * s);
 	}
 
-	{
+	/*{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
 		u32 option_w = 300 * s;
@@ -245,7 +257,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 			delete[] text;
 		}
 		offset += v2s32(0, 25 * s);
-	}
+	}*/
 
 	{
 		s32 option_x = offset.X;
@@ -321,11 +333,11 @@ bool GUIKeyChangeMenu::acceptInput()
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
 			g_settings->setBool("aux1_descends", ((gui::IGUICheckBox*)e)->isChecked());
 	}
-	{
+	/*{
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_DOUBLETAP_JUMP);
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
 			g_settings->setBool("doubletap_jump", ((gui::IGUICheckBox*)e)->isChecked());
-	}
+	}*/
 	{
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_AUTOJUMP);
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
@@ -404,12 +416,15 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 		}
 
 		if (key_in_use && !this->key_used_text) {
-			core::rect<s32> rect(0, 0, 600, 40);
-			rect += v2s32(0, 0) + v2s32(25, 30);
+			v2s32 size = DesiredRect.getSize();
+			core::rect<s32> rect(0, 0, 600, 35 * m_pixel_scale);
+			rect += v2s32(0, 0) + v2s32(15 * m_pixel_scale, size.Y - 50 * m_pixel_scale);
 			const wchar_t *text = wgettext("Key already in use");
 			this->key_used_text = Environment->addStaticText(text,
 					rect, false, true, this, -1);
 			delete[] text;
+			this->key_used_text->setOverrideColor(video::SColor(255, 255, 0, 0));
+			this->key_used_text->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
 		} else if (!key_in_use && this->key_used_text) {
 			this->key_used_text->remove();
 			this->key_used_text = nullptr;
@@ -475,7 +490,15 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 					return true;
 				case GUI_ID_RESET_BUTTON:
 					resetKeys();
-					quitMenu();
+					for (key_setting *ks : key_settings) {
+						ks->key = getKeySetting(ks->setting_name.c_str());
+						const wchar_t *text = wgettext(ks->key.name());
+						ks->button->setText(text);
+						delete[] text;
+					}
+					if (this->key_used_text)
+						this->key_used_text->remove();
+						this->key_used_text = nullptr;
 					return true;
 				default:
 					resetMenu();

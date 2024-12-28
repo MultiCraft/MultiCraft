@@ -83,6 +83,7 @@ private:
 	ISimpleTextureSource *m_tsrc;
 	ISoundManager *m_sound_manager;
 	bool m_main_menu = false;
+	float m_pixel_scale = 1.0f;
 
 	video::SColor m_fullscreen_bgcolor;
 };
