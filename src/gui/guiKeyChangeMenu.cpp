@@ -417,7 +417,6 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 
 		if (key_in_use && !this->key_used_text) {
 			v2s32 size = DesiredRect.getSize();
-
 			core::rect<s32> rect(0, 0, 600, 35 * m_pixel_scale);
 			rect += v2s32(0, 0) + v2s32(15 * m_pixel_scale, size.Y - 50 * m_pixel_scale);
 			const wchar_t *text = wgettext("Key already in use");
