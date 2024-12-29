@@ -266,16 +266,8 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 			if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
 				if (!m_mouse_marking) {
 					m_long_press = true;
-					bool success = onKeyControlC(event);
-#ifdef __ANDROID__
-					if (success)
-						SDL_AndroidShowToast(
-								"Copied to clipboard", 2,
-								-1, 0, 0);
-#elif __IOS__
-					if (success)
+					if (onKeyControlC(event))
 						porting::showToast("Copied to clipboard");
-#endif
 				}
 				return true;
 			}

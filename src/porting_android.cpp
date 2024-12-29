@@ -306,6 +306,11 @@ void notifyExitGame()
 		jnienv->ExceptionClear();
 }
 
+void showToast(const std::string &msg)
+{
+	SDL_AndroidShowToast(msg.c_str(), 1, -1, 0, 0);
+}
+
 float getScreenScale()
 {
 	static const float value = [](){

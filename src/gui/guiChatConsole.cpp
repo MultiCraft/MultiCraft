@@ -1382,11 +1382,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 							text = getSelectedText();
 						}
 						Environment->getOSOperator()->copyToClipboard(text.c_str());
-#ifdef __ANDROID__
-						SDL_AndroidShowToast(
-								"Copied to clipboard", 2,
-								-1, 0, 0);
-#elif __IOS__
+#if defined(__ANDROID__) || defined(__IOS__)
 						porting::showToast("Copied to clipboard");
 #endif
 					}

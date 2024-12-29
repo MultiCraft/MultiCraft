@@ -77,6 +77,11 @@ void notifyServerConnect(bool is_multiplayer);
 void notifyExitGame();
 
 /**
+ * display toast on the screen
+ */
+void showToast(const std::string &msg);
+
+/**
  * get screen density
  */
 float getScreenScale();
