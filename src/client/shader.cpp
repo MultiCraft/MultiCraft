@@ -603,14 +603,7 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 			)";
 	}
 
-	bool use_discard = use_gles;
-#if defined(__unix__) && !defined(__APPLE__)
-	// For renderers that should use discard instead of GL_ALPHA_TEST
-	const char* gl_renderer = (const char*)glGetString(GL_RENDERER);
-	if (strstr(gl_renderer, "GC7000"))
-		use_discard = true;
-#endif
-	if (use_discard && shaderinfo.base_material != video::EMT_SOLID)
+	if (use_gles && shaderinfo.base_material != video::EMT_SOLID)
 		shaders_header << "#define USE_DISCARD 1\n";
 
 #define PROVIDE(constant) shaders_header << "#define " #constant " " << (int)constant << "\n"
