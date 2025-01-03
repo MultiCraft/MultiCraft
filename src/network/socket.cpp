@@ -42,6 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #define LAST_SOCKET_ERR() WSAGetLastError()
+#define SOCKET_ERR_STR(e) itos(e)
 typedef SOCKET socket_t;
 typedef int socklen_t;
 #else
@@ -49,10 +50,11 @@ typedef int socklen_t;
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <fcntl.h>
-#include <netdb.h>
+#include <poll.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #define LAST_SOCKET_ERR() (errno)
+#define SOCKET_ERR_STR(e) strerror(e)
 typedef int socket_t;
 #endif
 
@@ -328,50 +330,44 @@ void UDPSocket::setTimeoutMs(int timeout_ms)
 
 bool UDPSocket::WaitData(int timeout_ms)
 {
-	fd_set readset;
-	int result;
+	timeout_ms = MYMAX(timeout_ms, 0);
 
-	// Initialize the set
-	FD_ZERO(&readset);
-	FD_SET(m_handle, &readset);
+#ifdef _WIN32
+	WSAPOLLFD pfd;
+	pfd.fd = m_handle;
+	pfd.events = POLLRDNORM;
 
-	// Initialize time out struct
-	struct timeval tv;
-	tv.tv_sec = 0;
-	tv.tv_usec = timeout_ms * 1000;
+	int result = WSAPoll(&pfd, 1, timeout_ms);
+#else
+	struct pollfd pfd;
+	pfd.fd = m_handle;
+	pfd.events = POLLIN;
 
-	// select()
-	result = select(m_handle + 1, &readset, NULL, NULL, &tv);
+	int result = poll(&pfd, 1, timeout_ms);
+#endif
 
-	if (result == 0)
-		return false;
+	if (result == 0) {
+		return false; // No data
+	} else if (result > 0) {
+		// There might be data
+		return pfd.revents != 0;
+	}
 
-	if (result < 0 && (errno == EINTR || errno == EBADF)) {
-		// N.B. select() fails when sockets are destroyed on Connection's dtor
-		// with EBADF.  Instead of doing tricky synchronization, allow this
+	// Error case
+	int e = LAST_SOCKET_ERR();
+
+#ifdef _WIN32
+	if (e == WSAEINTR || e == WSAEBADF) {
+#else
+	if (e == EINTR || e == EBADF) {
+#endif
+		// N.B. poll() fails when sockets are destroyed on Connection's dtor
+		// with EBADF. Instead of doing tricky synchronization, allow this
 		// thread to exit but don't throw an exception.
 		return false;
 	}
 
-	if (result < 0) {
-		dstream << m_handle << ": Select failed: " << strerror(errno)
-			<< std::endl;
+	dstream << (int)m_handle << ": poll failed: " << SOCKET_ERR_STR(e) << std::endl;
 
-#ifdef _WIN32
-		int e = WSAGetLastError();
-		dstream << (int)m_handle << ": WSAGetLastError()=" << e << std::endl;
-		if (e == 10004 /* WSAEINTR */ || e == 10009 /* WSAEBADF */) {
-			infostream << "Ignoring WSAEINTR/WSAEBADF." << std::endl;
-			return false;
-		}
-#endif
-
-		throw SocketException("Select failed");
-	} else if (!FD_ISSET(m_handle, &readset)) {
-		// No data
-		return false;
-	}
-
-	// There is data
-	return true;
+	throw SocketException("poll failed");
 }
