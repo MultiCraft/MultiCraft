@@ -4,8 +4,7 @@ local builtin_shared = ...
 
 local abs, atan2, cos, floor, max, sin, random =
 	math.abs, math.atan2, math.cos, math.floor, math.max, math.sin, math.random
-local vadd, vnew, vmultiply, vnormalize, vsubtract =
-	vector.add, vector.new, vector.multiply, vector.normalize, vector.subtract
+local vnew = vector.new
 local tcopy = table.copy
 
 local creative_mode = core.settings:get_bool("creative_mode")
@@ -436,96 +435,6 @@ end
 
 function core.item_secondary_use(itemstack, placer)
 	return itemstack
-end
-
-local function item_throw_step(entity, dtime)
-	entity.throw_timer = entity.throw_timer + dtime
-	if entity.throw_timer > 20 then
-		entity.object:remove()
-		return
-	end
-	if not entity.thrower then
-		return
-	end
-	local pos = entity.object:get_pos()
-	if not core.is_valid_pos(pos) then
-		entity.object:remove()
-		return
-	end
-	local hit_object
-	local dir = vnormalize(entity.object:get_velocity())
-	local pos2 = vadd(pos, vmultiply(dir, 3))
-	local _, node_pos = core.line_of_sight(pos, pos2)
-	if node_pos then
-		local def = core.get_node(node_pos)
-		if def then
-			pos = vsubtract(node_pos, vmultiply(dir, 1.5))
-			entity.object:move_to(pos)
-		else
-			node_pos = nil
-		end
-	end
-	local objs = core.get_objects_inside_radius(pos, 1.5)
-	for _, obj in pairs(objs) do
-		if obj:is_player() then
-			local name = obj:get_player_name()
-			if name ~= entity.thrower then
-				hit_object = obj
-				break
-			end
-		elseif obj:get_luaentity() ~= nil and
-				obj:get_luaentity().name ~= "__builtin:throwing_item" and
-				obj:get_luaentity().name ~= "__builtin:item" then
-			hit_object = obj
-			break
-		end
-	end
-	if hit_object or node_pos then
-		local player = core.get_player_by_name(entity.thrower)
-		entity.on_impact(player, pos, entity.throw_direction, hit_object)
-		entity.object:remove()
-	end
-end
-
-function core.item_throw(name, thrower, speed, accel, on_impact)
-	if not thrower or not thrower:is_player() then
-		return
-	end
-	local pos = thrower:get_pos()
-	if not core.is_valid_pos(pos) then
-		return
-	end
-	pos.y = pos.y + 1.5
-	local obj
-	local properties = {is_visible=true}
-	if core.registered_entities[name] then
-		obj = core.add_entity(pos, name)
-	elseif core.registered_items[name] then
-		obj = core.add_entity(pos, "__builtin:throwing_item")
-		properties.textures = {name}
-	else
-		return
-	end
-	if obj then
-		local ent = obj:get_luaentity()
-		if ent then
-			local s = speed or 19 -- default speed
-			local a = accel or -3 -- default acceleration
-			local dir = thrower:get_look_dir()
-			local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
-			ent.thrower = thrower:get_player_name()
-			ent.throw_timer = 0
-			ent.throw_direction = dir
-			ent.on_step = item_throw_step
-			ent.on_impact = on_impact and on_impact or function() end
-			obj:set_properties(properties)
-			obj:set_velocity({x=dir.x * s, y=dir.y * s, z=dir.z * s})
-			obj:set_acceleration({x=dir.x * a, y=-gravity, z=dir.z * a})
-			return obj
-		else
-			obj:remove()
-		end
-	end
 end
 
 function core.item_drop(itemstack, dropper, pos)

@@ -55,23 +55,6 @@ local function quick_flow(pos, node)
 	return vnormalize({x = x, y = 0, z = z})
 end
 
-core.register_entity(":__builtin:throwing_item", {
-	physical = false,
-	visual = "wielditem",
-	collisionbox = {0, 0, 0, 0, 0, 0},
-	textures = {""},
-	visual_size = {x = 0.4, y = 0.4},
-	is_visible = false,
-	on_activate = function(self, staticdata)
-		if staticdata == "expired" then
-			self.object:remove()
-		end
-	end,
-	get_staticdata = function()
-		return "expired"
-	end
-})
-
 core.register_entity(":__builtin:item", {
 	initial_properties = {
 		hp_max = 1,
