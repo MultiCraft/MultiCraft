@@ -1,15 +1,21 @@
-apply plugin: 'com.android.library'
-apply plugin: 'de.undercouch.download'
+plugins {
+	id 'com.android.library'
+	id 'de.undercouch.download'
+}
 
 android {
-	compileSdk 35
-	ndkVersion '27.2.12479018'
+	buildToolsVersion = "35.0.0"
+	compileSdk = 35
+	ndkVersion = "27.2.12479018"
+	namespace = "com.multicraft"
+
 	defaultConfig {
-		minSdkVersion 23
-		targetSdkVersion 35
+		minSdk = 23
+		targetSdk = 35
+
 		externalNativeBuild {
 			ndkBuild {
-				arguments '-j' + Runtime.getRuntime().availableProcessors(),
+				arguments "-j${Runtime.runtime.availableProcessors()}",
 						"--output-sync=none",
 						"versionMajor=${versionMajor}",
 						"versionMinor=${versionMinor}",
@@ -22,7 +28,7 @@ android {
 
 	externalNativeBuild {
 		ndkBuild {
-			path file('jni/Android.mk')
+			path "jni/Android.mk"
 		}
 	}
 
@@ -45,7 +51,6 @@ android {
 			}
 		}
 	}
-	namespace = "com.multicraft"
 }
 
 // get precompiled deps

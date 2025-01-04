@@ -1,15 +1,20 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
+plugins {
+	id 'com.android.application'
+	id 'kotlin-android'
+}
 
 android {
-	compileSdk 35
-	ndkVersion '27.2.12479018'
+	buildToolsVersion = "35.0.0"
+	compileSdk = 35
+	ndkVersion = "27.2.12479018"
+	namespace = "com.multicraft.game"
+
 	defaultConfig {
-		applicationId 'com.multicraft.game'
-		minSdkVersion 23
-		targetSdkVersion 35
-		versionName "${versionMajor}.${versionMinor}.${versionPatch}"
-		versionCode project.versionCode
+		applicationId = "com.multicraft.game"
+		minSdk = 23
+		targetSdk = 35
+		versionName = "${versionMajor}.${versionMinor}.${versionPatch}"
+		versionCode = project.versionCode
 	}
 
 	// load properties
@@ -52,17 +57,16 @@ android {
 	}
 
 	compileOptions {
-		sourceCompatibility JavaVersion.VERSION_17
-		targetCompatibility JavaVersion.VERSION_17
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility = JavaVersion.VERSION_17
 	}
 
 	kotlinOptions.jvmTarget = "17"
 
 	buildFeatures {
-		viewBinding true
-		buildConfig true
+		viewBinding = true
+		buildConfig = true
 	}
-	namespace = "com.multicraft.game"
 }
 
 import org.apache.tools.ant.taskdefs.condition.Os
