@@ -1473,11 +1473,11 @@ msgstr ""
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Nimesildid on peidetud"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Näidatud nimesildid"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5038,7 +5038,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Nametagide ümberlülitusklahv"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

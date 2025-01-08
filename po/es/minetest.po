@@ -1478,11 +1478,11 @@ msgstr "HUD mostrado"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Identificadores ocultos"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Placas de identificación"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5649,7 +5649,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Tecla de alternancia de etiquetas"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

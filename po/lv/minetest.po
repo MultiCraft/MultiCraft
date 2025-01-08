@@ -1488,11 +1488,11 @@ msgstr "Spēles saskarne parādīta"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Slēptas vārdu zīmes"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Parādītas vārdu birkas"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5048,7 +5048,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Pārslēgšanas taustiņš Nameetags"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

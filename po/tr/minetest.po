@@ -1470,11 +1470,11 @@ msgstr "HUD gösteriliyor"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "İsim etiketleri gizli"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "İsimlikler gösterilmektedir"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5592,7 +5592,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "İsim etiketleri geçiş tuşu"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

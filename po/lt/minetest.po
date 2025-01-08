@@ -1542,11 +1542,11 @@ msgstr ""
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Paslėptos vardų kortelės"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Parodytos vardų kortelės"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5156,7 +5156,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Vardų žymos perjungimo klavišas"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

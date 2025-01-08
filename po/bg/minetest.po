@@ -1451,11 +1451,11 @@ msgstr ""
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Скрити табелки с имена"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Показани табелки с имена"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -4998,7 +4998,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Ключ за превключване на имената"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

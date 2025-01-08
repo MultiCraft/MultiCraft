@@ -1481,11 +1481,11 @@ msgstr "HUD je zobrazený"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Skryté menovky"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Zobrazené menovky"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5606,7 +5606,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Prepínač menoviek"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

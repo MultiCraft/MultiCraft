@@ -1493,11 +1493,11 @@ msgstr "ผิวแสดง"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "ป้ายชื่อถูกซ่อนไว้"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "ป้ายชื่อที่แสดง"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5407,7 +5407,7 @@ msgstr "ชื่อของเซิร์ฟเวอร์ที่จะแ
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "ปุ่มสลับป้ายชื่อ"
 
 #: src/settings_translation_file.cpp
 #, fuzzy

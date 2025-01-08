@@ -1440,11 +1440,11 @@ msgstr ""
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Thẻ tên ẩn"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Thẻ tên được hiển thị"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -4987,7 +4987,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Phím chuyển đổi thẻ tên"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

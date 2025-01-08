@@ -1477,11 +1477,11 @@ msgstr "Interface affichée"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Porte-noms cachés"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Porte-noms illustrés"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5652,7 +5652,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Clé à bascule des badges"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

@@ -1474,11 +1474,11 @@ msgstr "الواجهة ظاهرة"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "علامات الأسماء مخفية"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "تم عرض علامات الأسماء"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5077,7 +5077,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "مفتاح تبديل الأسماء"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

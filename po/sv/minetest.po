@@ -1537,11 +1537,11 @@ msgstr ""
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Namnlappar dolda"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Namnlappar visas"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5194,7 +5194,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Namnskyltar växlar nyckel"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

@@ -1481,11 +1481,11 @@ msgstr "Позначки на екрані увімкнено"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Теги імен приховано"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Теги імен показано"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5099,7 +5099,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Перемикання тегів імен"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

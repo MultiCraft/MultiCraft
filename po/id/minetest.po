@@ -1472,11 +1472,11 @@ msgstr "HUD ditampilkan"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Tag nama disembunyikan"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Tag nama ditampilkan"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5590,7 +5590,7 @@ msgstr "Nama server, ditampilkan saat pemain bergabung dan pada daftar server."
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Tombol sakelar penanda nama"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

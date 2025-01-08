@@ -1500,11 +1500,11 @@ msgstr "HUD widoczny"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Identyfikatory ukryte"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Pokazano identyfikatory"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5745,7 +5745,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Klawisza przełączania nazw"
 
 #: src/settings_translation_file.cpp
 #, fuzzy

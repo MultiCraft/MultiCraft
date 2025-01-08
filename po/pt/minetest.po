@@ -1474,11 +1474,11 @@ msgstr "Interface mostrada"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Etiquetas de identificação ocultas"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Etiquetas de identificação apresentadas"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5635,7 +5635,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Tecla de alternância de nomes"
 
 #: src/settings_translation_file.cpp
 #, fuzzy

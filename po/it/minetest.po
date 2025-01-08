@@ -1473,11 +1473,11 @@ msgstr "HUD visibile"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Targhette nascoste"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Targhette mostrate"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5667,7 +5667,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Tasto di selezione dei nomi"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

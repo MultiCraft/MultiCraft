@@ -1433,11 +1433,11 @@ msgstr ""
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Κρυφές ετικέτες ονομάτων"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Εμφανίζονται ετικέτες ονομάτων"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -4980,7 +4980,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Πλήκτρο εναλλαγής ετικετών ονομάτων"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

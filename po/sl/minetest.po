@@ -1509,11 +1509,11 @@ msgstr "HUD je prikazan"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Skrite oznake z imeni"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Prikazane oznake z imeni"
 
 #: src/client/gameui.cpp
 #, fuzzy
@@ -5193,7 +5193,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Ključ za preklapljanje oznak imen"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

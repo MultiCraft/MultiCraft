@@ -1477,11 +1477,11 @@ msgstr "HUD getoond"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Naamkaartjes verborgen"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Naamkaartjes afgebeeld"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5671,7 +5671,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Knop voor naamlabels"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

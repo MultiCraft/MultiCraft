@@ -1475,11 +1475,11 @@ msgstr "Игровой интерфейс отображается"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Именные тэги скрыты"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Именные тэги отображаются"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5609,7 +5609,7 @@ msgstr "Имя сервера, отображаемое при входе и в 
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Клавиша переключения тэгов"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

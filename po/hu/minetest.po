@@ -1474,11 +1474,11 @@ msgstr "HUD megjelenítése"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Névtáblák elrejtve"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Névtáblák látható"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5540,7 +5540,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Névcímkék kapcsoló gomb"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

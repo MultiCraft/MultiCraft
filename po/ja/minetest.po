@@ -1467,11 +1467,11 @@ msgstr "HUD 表示"
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "名札を非表示"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "名札が表示されている"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5560,7 +5560,7 @@ msgstr "プレイヤーが参加したときにサーバ一覧に表示される
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "名札切り替えキー"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

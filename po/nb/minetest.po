@@ -1477,11 +1477,11 @@ msgstr ""
 
 #: src/client/gameui.cpp
 msgid "Nametags hidden"
-msgstr ""
+msgstr "Skjulte navneskilt"
 
 #: src/client/gameui.cpp
 msgid "Nametags shown"
-msgstr ""
+msgstr "Navneskilt vist"
 
 #: src/client/gameui.cpp
 msgid "Profiler hidden"
@@ -5321,7 +5321,7 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Nametags toggle key"
-msgstr ""
+msgstr "Skiftetast for navnelapper"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"
