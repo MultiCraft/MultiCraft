@@ -258,88 +258,88 @@ jobs:
           name: MultiCraft-msys2-mingw64
           path: ./MultiCraft.zip
 
-  msvc:
-    name: VS 2022 ${{ matrix.config.arch }}-${{ matrix.type }}
-    runs-on: windows-2022
-    env:
-      VCPKG_VERSION: a42af01b72c28a8e1d7b48107b33e4f286a55ef6
+#  msvc:
+#    name: VS 2022 ${{ matrix.config.arch }}-${{ matrix.type }}
+#    runs-on: windows-2022
+#    env:
+#      VCPKG_VERSION: a42af01b72c28a8e1d7b48107b33e4f286a55ef6
 #                    2023.11.20
-      vcpkg_packages: zlib zstd curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp libpng libjpeg-turbo sdl2
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {
-              arch: x86,
-              generator: "-G'Visual Studio 17 2022' -A Win32",
-              vcpkg_triplet: x86-windows
-            }
-          - {
-              arch: x64,
-              generator: "-G'Visual Studio 17 2022' -A x64",
-              vcpkg_triplet: x64-windows
-            }
-        type: [portable]
+#      vcpkg_packages: zlib zstd curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp libpng libjpeg-turbo sdl2
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        config:
+#          - {
+#              arch: x86,
+#              generator: "-G'Visual Studio 17 2022' -A Win32",
+#              vcpkg_triplet: x86-windows
+#            }
+#          - {
+#              arch: x64,
+#              generator: "-G'Visual Studio 17 2022' -A x64",
+#              vcpkg_triplet: x64-windows
+#            }
+#        type: [portable]
 #        type: [portable, installer]
 # The installer type is working, but disabled, to save runner jobs.
 # Enable it, when working on the installer.
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
 
-      - name: Restore from cache and run vcpkg
-        uses: lukka/run-vcpkg@v7
-        with:
-          vcpkgArguments: ${{env.vcpkg_packages}}
-          vcpkgDirectory: '${{ github.workspace }}\vcpkg'
-          appendedCacheKey: ${{ matrix.config.vcpkg_triplet }}
-          vcpkgGitCommitId: ${{ env.VCPKG_VERSION }}
-          vcpkgTriplet: ${{ matrix.config.vcpkg_triplet }}
+#      - name: Restore from cache and run vcpkg
+#        uses: lukka/run-vcpkg@v7
+#        with:
+#          vcpkgArguments: ${{env.vcpkg_packages}}
+#          vcpkgDirectory: '${{ github.workspace }}\vcpkg'
+#          appendedCacheKey: ${{ matrix.config.vcpkg_triplet }}
+#          vcpkgGitCommitId: ${{ env.VCPKG_VERSION }}
+#          vcpkgTriplet: ${{ matrix.config.vcpkg_triplet }}
 
-      - name: Irrlicht
-        run: |
-          git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
-          cd irrlicht
-          cmake ${{matrix.config.generator}}  `
-          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
-          -DCMAKE_BUILD_TYPE=Release .
-          cmake --build . -j --config Release
-          cd ..
+#      - name: Irrlicht
+#        run: |
+#          git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
+#          cd irrlicht
+#          cmake ${{matrix.config.generator}}  `
+#          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
+#          -DCMAKE_BUILD_TYPE=Release .
+#          cmake --build . -j --config Release
+#          cd ..
 
-      - name: CMake
-        run: |
-          cmake ${{matrix.config.generator}}  `
-          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
-          -DCMAKE_BUILD_TYPE=Release  `
-          -DENABLE_POSTGRESQL=OFF  `
-          -DUSE_SDL=1  `
-          -DIRRLICHT_LIBRARY="${{ github.workspace }}\irrlicht\Release\irrlicht.lib"  `
-          -DIRRLICHT_INCLUDE_DIR="${{ github.workspace }}\irrlicht\include"  `
-          -DCMAKE_C_FLAGS="-DNO_IRR_COMPILE_WITH_OGLES2_ -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ -DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ -D_IRR_STATIC_LIB_"  `
-          -DCMAKE_CXX_FLAGS="-DNO_IRR_COMPILE_WITH_OGLES2_ -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ -DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ -D_IRR_STATIC_LIB_"  `
-          -DRUN_IN_PLACE=${{ contains(matrix.type, 'portable') }} .
+#      - name: CMake
+#        run: |
+#          cmake ${{matrix.config.generator}}  `
+#          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `
+#          -DCMAKE_BUILD_TYPE=Release  `
+#          -DENABLE_POSTGRESQL=OFF  `
+#          -DUSE_SDL=1  `
+#          -DIRRLICHT_LIBRARY="${{ github.workspace }}\irrlicht\Release\irrlicht.lib"  `
+#          -DIRRLICHT_INCLUDE_DIR="${{ github.workspace }}\irrlicht\include"  `
+#          -DCMAKE_C_FLAGS="-DNO_IRR_COMPILE_WITH_OGLES2_ -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ -DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ -D_IRR_STATIC_LIB_"  `
+#          -DCMAKE_CXX_FLAGS="-DNO_IRR_COMPILE_WITH_OGLES2_ -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ -DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ -D_IRR_STATIC_LIB_"  `
+#          -DRUN_IN_PLACE=${{ contains(matrix.type, 'portable') }} .
 
-      - name: Build
-        run: cmake --build . --config Release
+#      - name: Build
+#        run: cmake --build . --config Release
 
-      - name: CPack
-        run: |
-          If ($env:TYPE -eq "installer")
-          {
-            cpack -G WIX -B "$env:GITHUB_WORKSPACE\Package"
-          }
-          ElseIf($env:TYPE -eq "portable")
-          {
-            cpack -G ZIP -B "$env:GITHUB_WORKSPACE\Package"
-          }
-        env:
-          TYPE: ${{matrix.type}}
+#      - name: CPack
+#        run: |
+#          If ($env:TYPE -eq "installer")
+#          {
+#            cpack -G WIX -B "$env:GITHUB_WORKSPACE\Package"
+#          }
+#          ElseIf($env:TYPE -eq "portable")
+#          {
+#            cpack -G ZIP -B "$env:GITHUB_WORKSPACE\Package"
+#          }
+#        env:
+#          TYPE: ${{matrix.type}}
 
-      - name: Package Clean
-        run: rm -r $env:GITHUB_WORKSPACE\Package\_CPack_Packages
+#      - name: Package Clean
+#        run: rm -r $env:GITHUB_WORKSPACE\Package\_CPack_Packages
 
-      - uses: actions/upload-artifact@v3
-        with:
-          name: MultiCraft-msvc-${{ matrix.config.arch }}-${{ matrix.type }}
-          path: .\Package\
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          name: MultiCraft-msvc-${{ matrix.config.arch }}-${{ matrix.type }}
+#          path: .\Package\
