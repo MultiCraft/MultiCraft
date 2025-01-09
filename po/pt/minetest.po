@@ -1473,6 +1473,14 @@ msgid "HUD shown"
 msgstr "Interface mostrada"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr "Etiquetas de identificação ocultas"
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr "Etiquetas de identificação apresentadas"
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Analisador ocultado"
 
@@ -4850,6 +4858,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5617,6 +5632,10 @@ msgid ""
 msgstr ""
 "Nome do servidor, a ser exibido quando os jogadores abrem a lista de "
 "servidores."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr "Tecla de alternância de nomes"
 
 #: src/settings_translation_file.cpp
 #, fuzzy

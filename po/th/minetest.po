@@ -1492,6 +1492,14 @@ msgid "HUD shown"
 msgstr "ผิวแสดง"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr "ป้ายชื่อถูกซ่อนไว้"
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr "ป้ายชื่อที่แสดง"
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "สร้างโปรไฟล์ซ่อน"
 
@@ -4697,6 +4705,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5389,6 +5404,10 @@ msgstr ""
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
 msgstr "ชื่อของเซิร์ฟเวอร์ที่จะแสดงเมื่อผู้เล่นเข้าร่วมและในรายการเซิร์ฟเวอร์."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr "ปุ่มสลับป้ายชื่อ"
 
 #: src/settings_translation_file.cpp
 #, fuzzy

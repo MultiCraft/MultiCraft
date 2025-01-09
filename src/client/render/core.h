@@ -36,6 +36,7 @@ protected:
 	bool show_minimap;
 	bool draw_wield_tool;
 	bool draw_crosshair;
+	bool draw_nametags;
 
 	IrrlichtDevice *device;
 	video::IVideoDriver *driver;
@@ -69,7 +70,7 @@ public:
 
 	void initialize();
 	void draw(video::SColor _skycolor, bool _show_hud, bool _show_minimap,
-			bool _draw_wield_tool, bool _draw_crosshair);
+			bool _draw_wield_tool, bool _draw_crosshair, bool draw_nametags);
 
 	inline v2u32 getVirtualSize() const { return virtual_size; }
 };

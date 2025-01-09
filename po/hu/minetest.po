@@ -1473,6 +1473,14 @@ msgid "HUD shown"
 msgstr "HUD megjelenítése"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr "Névtáblák elrejtve"
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr "Névtáblák látható"
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Profiler elrejtése"
 
@@ -4777,6 +4785,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5522,6 +5537,10 @@ msgid ""
 msgstr ""
 "A szerver neve, ami megjelenik a szerverlistában, és amikor a játékosok "
 "csatlakoznak."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr "Névcímkék kapcsoló gomb"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

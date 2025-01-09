@@ -755,9 +755,9 @@ void RenderingEngine::_clear_irrlicht_texture_cache()
 }
 
 void RenderingEngine::_draw_scene(video::SColor skycolor, bool show_hud,
-		bool show_minimap, bool draw_wield_tool, bool draw_crosshair)
+		bool show_minimap, bool draw_wield_tool, bool draw_crosshair, bool draw_nametags)
 {
-	core->draw(skycolor, show_hud, show_minimap, draw_wield_tool, draw_crosshair);
+	core->draw(skycolor, show_hud, show_minimap, draw_wield_tool, draw_crosshair, draw_nametags);
 }
 
 const char *RenderingEngine::getVideoDriverName(irr::video::E_DRIVER_TYPE type)

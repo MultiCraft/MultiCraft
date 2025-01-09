@@ -341,6 +341,15 @@ void GameUI::toggleHud()
 	m_chat_text_needs_update = true;
 }
 
+void GameUI::toggleNametags()
+{
+	m_flags.show_nametags = !m_flags.show_nametags;
+	if (m_flags.show_nametags)
+		showTranslatedStatusText("Nametags shown");
+	else
+		showTranslatedStatusText("Nametags hidden");
+}
+
 void GameUI::toggleProfiler()
 {
 	m_profiler_current_page = (m_profiler_current_page + 1) % (m_profiler_max_page + 1);

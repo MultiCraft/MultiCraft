@@ -1466,6 +1466,14 @@ msgid "HUD shown"
 msgstr "HUD 表示"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr "名札を非表示"
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr "名札が表示されている"
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "観測記録 非表示"
 
@@ -4805,6 +4813,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5542,6 +5557,10 @@ msgstr ""
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
 msgstr "プレイヤーが参加したときにサーバ一覧に表示されるサーバの名前。"
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr "名札切り替えキー"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

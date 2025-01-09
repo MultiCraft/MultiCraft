@@ -1476,6 +1476,14 @@ msgid "HUD shown"
 msgstr "Interface affichée"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr "Porte-noms cachés"
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr "Porte-noms illustrés"
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Profileur caché"
 
@@ -4876,6 +4884,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5634,6 +5649,10 @@ msgid ""
 msgstr ""
 "Nom du serveur, affiché sur liste des serveurs publics et lorsque les "
 "joueurs se connectent."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr "Clé à bascule des badges"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

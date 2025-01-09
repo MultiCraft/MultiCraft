@@ -1474,6 +1474,14 @@ msgid "HUD shown"
 msgstr "Игровой интерфейс отображается"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr "Именные тэги скрыты"
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr "Именные тэги отображаются"
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Профилировщик скрыт"
 
@@ -4835,6 +4843,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5591,6 +5606,10 @@ msgstr ""
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
 msgstr "Имя сервера, отображаемое при входе и в списке серверов."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr "Клавиша переключения тэгов"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

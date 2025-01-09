@@ -1471,6 +1471,14 @@ msgid "HUD shown"
 msgstr "HUD ditampilkan"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr "Tag nama disembunyikan"
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr "Tag nama ditampilkan"
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Profiler disembunyikan"
 
@@ -4824,6 +4832,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5572,6 +5587,10 @@ msgstr ""
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
 msgstr "Nama server, ditampilkan saat pemain bergabung dan pada daftar server."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr "Tombol sakelar penanda nama"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"
