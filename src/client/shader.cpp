@@ -428,8 +428,8 @@ u32 ShaderSource::getShaderIdDirect(const std::string &name,
 	// Check if already have such instance
 	for(u32 i=0; i<m_shaderinfo_cache.size(); i++){
 		ShaderInfo *info = &m_shaderinfo_cache[i];
-		if(info->name == name && info->material_type == material_type &&
-			info->drawtype == drawtype)
+		if(info->name == name && info->material_type == material_type /*&&
+			info->drawtype == drawtype*/)
 			return i;
 	}
 
@@ -646,7 +646,7 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 #undef PROVIDE
 
 	shaders_header << "#define MATERIAL_TYPE " << (int)material_type << "\n";
-	shaders_header << "#define DRAW_TYPE " << (int)drawtype << "\n";
+	//shaders_header << "#define DRAW_TYPE " << (int)drawtype << "\n";
 
 	bool enable_waving_water = g_settings->getBool("enable_waving_water");
 	shaders_header << "#define ENABLE_WAVING_WATER " << enable_waving_water << "\n";
