@@ -889,9 +889,6 @@ mono_font_path_bold (Bold monospace font path) filepath fonts/Cousine-Bold.ttf
 mono_font_path_italic (Italic monospace font path) filepath fonts/Cousine-Italic.ttf
 mono_font_path_bolditalic (Bold and italic monospace font path) filepath fonts/Cousine-BoldItalic.ttf
 
-#    Font size of the fallback font in point (pt).
-fallback_font_size (Fallback font size) int 15 1
-
 #    Shadow offset (in pixels) of the fallback font. If 0, then shadow will not be drawn.
 fallback_font_shadow (Fallback font shadow) int 1
 
