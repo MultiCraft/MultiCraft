@@ -1864,6 +1864,10 @@ msgid "Toggle HUD"
 msgstr ""
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Εναλλαγή ετικετών ονομάτων"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr ""
 

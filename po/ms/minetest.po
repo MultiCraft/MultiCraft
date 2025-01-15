@@ -1912,6 +1912,10 @@ msgid "Toggle HUD"
 msgstr "Togol papar pandu (HUD)"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Togol log sembang"
 

@@ -1913,6 +1913,10 @@ msgid "Toggle HUD"
 msgstr "HUD váltása"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Névtáblák váltása"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Csevegésnapló váltása"
 

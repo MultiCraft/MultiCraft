@@ -1910,6 +1910,10 @@ msgid "Toggle HUD"
 msgstr "Alih HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Alihkan label nama"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Alih log obrolan"
 

@@ -1871,6 +1871,10 @@ msgid "Toggle HUD"
 msgstr ""
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Chuyển đổi thẻ tên"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr ""
 

@@ -1935,6 +1935,10 @@ msgid "Toggle HUD"
 msgstr "切換 HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "切換聊天記錄"
 

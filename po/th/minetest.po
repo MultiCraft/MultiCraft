@@ -1952,6 +1952,10 @@ msgid "Toggle HUD"
 msgstr "สลับ HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "สลับป้ายชื่อ"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "บันทึกสนทนาสลับ"
 

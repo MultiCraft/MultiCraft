@@ -1968,6 +1968,10 @@ msgid "Toggle HUD"
 msgstr "Omstil flyvning"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Skift navneskilt"
+
+#: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"
 msgstr "Omstil hurtig"

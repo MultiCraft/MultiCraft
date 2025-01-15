@@ -1919,6 +1919,10 @@ msgid "Toggle HUD"
 msgstr "توݢول ڤاڤر ڤندو (HUD)"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "توݢول لوݢ سيمبڠ"
 

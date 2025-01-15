@@ -1916,6 +1916,10 @@ msgid "Toggle HUD"
 msgstr "Baskuligi travidan fasadon"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Baskuligi babilan protokolon"
 

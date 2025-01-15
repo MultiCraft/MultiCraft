@@ -1915,6 +1915,10 @@ msgid "Toggle HUD"
 msgstr "Interface"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Porte-noms à bascule"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Afficher le tchat"
 

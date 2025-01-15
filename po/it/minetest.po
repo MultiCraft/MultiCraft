@@ -1910,6 +1910,10 @@ msgid "Toggle HUD"
 msgstr "HUD sì/no"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Targhette con i nomi"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Log chat sì/no"
 

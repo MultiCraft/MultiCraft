@@ -1906,6 +1906,10 @@ msgid "Toggle HUD"
 msgstr "HUD'ı aç/kapa"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "İsim etiketlerini değiştir"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Sohbet günlüğünü aç/kapa"
 

@@ -1935,6 +1935,10 @@ msgid "Toggle HUD"
 msgstr "mu'e co'a jonai mo'u vofli"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"
 msgstr "mu'e co'a jonai mo'u sutra"

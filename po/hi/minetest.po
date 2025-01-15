@@ -1914,6 +1914,10 @@ msgid "Toggle HUD"
 msgstr "हे. अ. डि"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "बातें दिखना"
 

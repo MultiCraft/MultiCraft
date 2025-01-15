@@ -1975,6 +1975,10 @@ msgid "Toggle HUD"
 msgstr "Slå av/på flygläge"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Namnskyltar med bygel"
+
+#: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"
 msgstr "Slå av/på snabb"

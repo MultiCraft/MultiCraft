@@ -1909,6 +1909,10 @@ msgid "Toggle HUD"
 msgstr "Lülita HUD sisse/välja"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Numbrilehtede vahetamine"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Lülita vestluslogi sisse/välja"
 

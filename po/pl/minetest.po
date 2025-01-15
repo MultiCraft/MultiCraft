@@ -1939,6 +1939,10 @@ msgid "Toggle HUD"
 msgstr "Przełącz HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Przełączanie identyfikatorów"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Przełącz historię czatu"
 

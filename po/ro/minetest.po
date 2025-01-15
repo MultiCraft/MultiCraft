@@ -1920,6 +1920,10 @@ msgid "Toggle HUD"
 msgstr "Comutați HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Comutați etichetele de nume"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Comutați jurnalul de chat"
 

@@ -1959,6 +1959,10 @@ msgid "Toggle HUD"
 msgstr "بدّل عرض الواجهة"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "تبديل علامات الأسماء"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "بدّل عرض سجل المحادثة"
 

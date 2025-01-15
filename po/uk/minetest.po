@@ -1920,6 +1920,10 @@ msgid "Toggle HUD"
 msgstr "Увімкнути позначки на екрані"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Перемключити теги імен"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Увімкнути чат (журнал)"
 

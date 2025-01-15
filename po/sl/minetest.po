@@ -1955,6 +1955,10 @@ msgid "Toggle HUD"
 msgstr "Preklopi HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Preklopite oznake z imeni"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Preklopi beleženje pogovora"
 

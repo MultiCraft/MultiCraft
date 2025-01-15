@@ -1987,6 +1987,10 @@ msgid "Toggle HUD"
 msgstr "Įjungti skrydį"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Perjungti vardų etiketes"
+
+#: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"
 msgstr "Įjungti greitą"

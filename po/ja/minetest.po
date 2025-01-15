@@ -1906,6 +1906,10 @@ msgid "Toggle HUD"
 msgstr "HUD表示切替"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "名札を切り替える"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "チャット表示切替"
 

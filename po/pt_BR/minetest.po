@@ -1914,6 +1914,10 @@ msgid "Toggle HUD"
 msgstr "Ativar interface"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Ativar histórico de conversa"
 

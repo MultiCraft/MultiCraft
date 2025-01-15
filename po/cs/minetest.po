@@ -1934,6 +1934,10 @@ msgid "Toggle HUD"
 msgstr "Zapnout/Vypnout ovládací prvky"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Přepínání jmenovek"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Zapnout/Vypnout záznam chatu"
 

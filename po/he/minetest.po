@@ -1904,6 +1904,10 @@ msgid "Toggle HUD"
 msgstr "מתג מידע על מסך"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "מתג צא'ט לוג"
 

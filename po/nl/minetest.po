@@ -1917,6 +1917,10 @@ msgid "Toggle HUD"
 msgstr "Schakel HUD in/uit"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Naamplaatjes schakelen"
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Chatlogboek wisselen"
 

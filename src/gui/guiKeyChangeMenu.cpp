@@ -567,7 +567,7 @@ void GUIKeyChangeMenu::init_keys()
 	this->add_key(GUI_ID_KEY_CMD_BUTTON,       wgettext("Command"),          "keymap_cmd");
 	this->add_key(GUI_ID_KEY_CMD_LOCAL_BUTTON, wgettext("Local command"),    "keymap_cmd_local");
 	this->add_key(GUI_ID_KEY_HUD_BUTTON,       wgettext("Toggle HUD"),       "keymap_toggle_hud");
-	this->add_key(GUI_ID_KEY_NAMETAGS_BUTTON,  wgettext("Toggle Nametags"),  "keymap_toggle_nametags");
+	this->add_key(GUI_ID_KEY_NAMETAGS_BUTTON,  wgettext("Toggle nametags"),  "keymap_toggle_nametags");
 	this->add_key(GUI_ID_KEY_CHATLOG_BUTTON,   wgettext("Toggle chat log"),  "keymap_toggle_chat");
 	this->add_key(GUI_ID_KEY_FOG_BUTTON,       wgettext("Toggle fog"),       "keymap_toggle_fog");
 }

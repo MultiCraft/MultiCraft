@@ -1934,6 +1934,10 @@ msgid "Toggle HUD"
 msgstr "Slå av/på HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Slå av/på skravlerør"
 

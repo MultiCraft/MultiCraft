@@ -1894,6 +1894,10 @@ msgid "Toggle HUD"
 msgstr "启用/禁用HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "启用/禁用聊天记录"
 

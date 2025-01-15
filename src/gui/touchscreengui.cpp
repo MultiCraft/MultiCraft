@@ -50,7 +50,7 @@ const button_data buttons_data[] = {
 	{ "noclip_btn.png", N_("Toggle noclip"), "noclip" },
 	{ "rangeview_btn.png", N_("Range select"), "rangeselect" },
 	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat" },
-	{ "names_hide_btn.png", N_("Toggle HUD"), "toggle_hud" },
+	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags" },
 	{ "joystick_off.png", "", "" },
 	{ "joystick_bg.png", "", "" },
 	{ "joystick_center.png", "", "" },

@@ -2015,6 +2015,10 @@ msgid "Toggle HUD"
 msgstr "Togoa kuruka"
 
 #: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"
 msgstr "Togoa haraka"
