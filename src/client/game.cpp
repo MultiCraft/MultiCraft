@@ -1317,7 +1317,7 @@ bool Game::initSound()
 bool Game::createSingleplayerServer(const std::string &map_dir,
 		const SubgameSpec &gamespec, u16 port)
 {
-	showOverlayMessage(N_("Creating server..."), 0, 5);
+	showOverlayMessage(N_("Loading..."), 0, 5);
 
 	std::string bind_str = g_settings->get("bind_address");
 	Address bind_addr(0, 0, 0, 0, port);
