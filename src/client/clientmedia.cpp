@@ -40,18 +40,28 @@ static std::string getMediaCacheDir()
 bool clientMediaUpdateCache(const std::string &raw_hash, const std::string &filedata)
 {
 	FileCache media_cache(getMediaCacheDir());
-	std::string sha1_hex = hex_encode(raw_hash);
-	if (!media_cache.exists(sha1_hex))
-		return media_cache.update(sha1_hex, filedata);
+	std::string name = hex_encode(raw_hash);
+
+	if (filedata.rfind("ENC1", 0) == 0)
+		name += ".e";
+
+	if (!media_cache.exists(name))
+		return media_cache.update(name, filedata);
+
 	return false;
 }
 
 bool clientMediaUpdateCacheCopy(const std::string &raw_hash, const std::string &path)
 {
 	FileCache media_cache(getMediaCacheDir());
-	std::string sha1_hex = hex_encode(raw_hash);
-	if (!media_cache.exists(sha1_hex))
-		return media_cache.updateCopyFile(sha1_hex, path);
+	std::string name = hex_encode(raw_hash);
+
+	if (str_ends_with(path, ".e"))
+		name += ".e";
+
+	if (!media_cache.exists(name))
+		return media_cache.updateCopyFile(name, path);
+
 	return false;
 }
 
