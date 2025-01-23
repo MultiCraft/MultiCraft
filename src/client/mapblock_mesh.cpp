@@ -1019,7 +1019,8 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 	if (data->m_client->getMinimap()) {
 		m_minimap_mapblock = new MinimapMapblock;
 		m_minimap_mapblock->getMinimapNodes(
-			&data->m_vmanip, data->m_blockpos * MAP_BLOCKSIZE);
+			&data->m_vmanip, data->m_blockpos * MAP_BLOCKSIZE,
+			data->m_client->getNodeDefManager());
 	}
 
 	// 4-21ms for MAP_BLOCKSIZE=16  (NOTE: probably outdated)
