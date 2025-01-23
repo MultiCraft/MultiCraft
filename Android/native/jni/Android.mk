@@ -68,6 +68,11 @@ LOCAL_SRC_FILES := deps/vorbis/lib/$(APP_ABI)/libvorbis.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := zstd
+LOCAL_SRC_FILES := deps/zstd/lib/$(APP_ABI)/libzstd.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := MultiCraft
 
 LOCAL_CFLAGS += \
@@ -82,6 +87,8 @@ LOCAL_CFLAGS += \
 	-DUSE_LUAJIT=1                                 \
 	-DUSE_GETTEXT=1                                \
 	-DUSE_OPENSSL=1                                \
+	-DUSE_ZSTD=1                                   \
+	-DZSTD_MAP_SAVING=0                            \
 	-DVERSION_MAJOR=${versionMajor}                \
 	-DVERSION_MINOR=${versionMinor}                \
 	-DVERSION_PATCH=${versionPatch}                \
@@ -116,7 +123,8 @@ LOCAL_C_INCLUDES := \
 	deps/luajit/include                            \
 	deps/openal/include                            \
 	deps/openssl/include                           \
-	deps/vorbis/include
+	deps/vorbis/include                            \
+	deps/zstd/include
 
 LOCAL_SRC_FILES := \
 	$(wildcard ../../src/client/*.cpp)             \
@@ -256,7 +264,8 @@ LOCAL_STATIC_LIBRARIES += \
 	Irrlicht libpng libjpeg SDL2 \
 	LevelDB \
 	Vorbis \
-	LuaJIT
+	LuaJIT \
+	zstd
 
 LOCAL_STATIC_LIBRARIES += $(PROFILER_LIBS)
 
