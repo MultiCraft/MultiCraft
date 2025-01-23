@@ -224,7 +224,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
@@ -253,7 +253,7 @@ jobs:
           zip -r MultiCraft.zip MultiCraft
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: MultiCraft-msys2-mingw64
           path: ./MultiCraft.zip
@@ -339,7 +339,7 @@ jobs:
 #      - name: Package Clean
 #        run: rm -r $env:GITHUB_WORKSPACE\Package\_CPack_Packages
 
-#      - uses: actions/upload-artifact@v3
+#      - uses: actions/upload-artifact@v4
 #        with:
 #          name: MultiCraft-msvc-${{ matrix.config.arch }}-${{ matrix.type }}
 #          path: .\Package\
