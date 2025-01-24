@@ -175,7 +175,7 @@ local function init()
 					func = prototype[func_name],
 					mod = modname,
 					func_name = func_name,
-					label = prototype.label,
+					label = prototype.label or name,
 				}
 			end
 			orig_register_entity(name,prototype)
