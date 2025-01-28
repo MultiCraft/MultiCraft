@@ -9,24 +9,29 @@
 #include <vector>
 
 GUIAnimatedImage::GUIAnimatedImage(gui::IGUIEnvironment *env, gui::IGUIElement *parent,
-	s32 id, const core::rect<s32> &rectangle, ISimpleTextureSource *tsrc) :
+	s32 id, const core::rect<s32> &rectangle, ISimpleTextureSource *tsrc,
+	const bool cache_resize) :
 	gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
-	m_tsrc(tsrc)
+	m_tsrc(tsrc), m_cache_resize(cache_resize)
 {
 }
 
 void GUIAnimatedImage::draw()
 {
+	video::IVideoDriver *driver = Environment->getVideoDriver();
+
 	// Fill in m_texture when not clipped by a scroll container
 	if (m_texture == nullptr && m_tsrc != nullptr && !m_texture_name.empty()) {
 		m_texture = m_tsrc->getTexture(m_texture_name);
-		m_texture_name.clear();
+
+		if (m_cache_resize)
+			// TODO: Do I have to call ->grab or ->drop at some point?
+			m_texture = guiScalingImageButton(driver, m_texture,
+					AbsoluteRect.getWidth(), AbsoluteRect.getHeight());
 	}
 
 	if (m_texture == nullptr)
 		return;
-
-	video::IVideoDriver *driver = Environment->getVideoDriver();
 
 	core::dimension2d<u32> size = m_texture->getOriginalSize();
 
