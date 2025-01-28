@@ -10,7 +10,7 @@ class GUIAnimatedImage : public gui::IGUIElement {
 public:
 	GUIAnimatedImage(gui::IGUIEnvironment *env, gui::IGUIElement *parent,
 		s32 id, const core::rect<s32> &rectangle, ISimpleTextureSource *tsrc = nullptr,
-		const bool cache_resize = false);
+		const bool use_scaling_filter = false);
 
 	virtual void draw() override;
 
@@ -41,7 +41,7 @@ private:
 	ISimpleTextureSource *m_tsrc;
 	video::ITexture *m_texture = nullptr;
 	std::string m_texture_name = "";
-	bool m_cache_resize;
+	bool m_use_scaling_filter;
 
 	u64 m_global_time = 0;
 	s32 m_frame_idx = 0;

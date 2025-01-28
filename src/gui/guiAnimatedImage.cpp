@@ -10,9 +10,9 @@
 
 GUIAnimatedImage::GUIAnimatedImage(gui::IGUIEnvironment *env, gui::IGUIElement *parent,
 	s32 id, const core::rect<s32> &rectangle, ISimpleTextureSource *tsrc,
-	const bool cache_resize) :
+	const bool use_scaling_filter) :
 	gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
-	m_tsrc(tsrc), m_cache_resize(cache_resize)
+	m_tsrc(tsrc), m_use_scaling_filter(use_scaling_filter)
 {
 }
 
@@ -23,11 +23,6 @@ void GUIAnimatedImage::draw()
 	// Fill in m_texture when not clipped by a scroll container
 	if (m_texture == nullptr && m_tsrc != nullptr && !m_texture_name.empty()) {
 		m_texture = m_tsrc->getTexture(m_texture_name);
-
-		if (m_cache_resize)
-			// TODO: Do I have to call ->grab or ->drop at some point?
-			m_texture = guiScalingImageButton(driver, m_texture,
-					AbsoluteRect.getWidth(), AbsoluteRect.getHeight());
 	}
 
 	if (m_texture == nullptr)
@@ -49,10 +44,15 @@ void GUIAnimatedImage::draw()
 		const video::SColor color(255, 255, 255, 255);
 		const video::SColor colors[] = {color, color, color, color};
 
-		// Temporary fix for issue #12581 in 5.6.0.
-		// Use legacy image when not rendering 9-slice image because draw2DImage9Slice
-		// uses NNAA filter which causes visual artifacts when image uses alpha blending.
-		driver->draw2DImage(m_texture, AbsoluteRect, rect, cliprect, colors, true);
+		if (m_use_scaling_filter) {
+			draw2DImageFilterScaled(driver, m_texture, AbsoluteRect, rect, cliprect,
+				colors, true);
+		} else {
+			// Temporary fix for issue #12581 in 5.6.0.
+			// Use legacy image when not rendering 9-slice image because draw2DImage9Slice
+			// uses NNAA filter which causes visual artifacts when image uses alpha blending.
+			driver->draw2DImage(m_texture, AbsoluteRect, rect, cliprect, colors, true);
+		}
 	} else {
 		draw2DImage9Slice(driver, m_texture, AbsoluteRect, rect, m_middle, cliprect);
 	}
