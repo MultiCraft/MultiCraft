@@ -54,7 +54,7 @@ local function version_info_formspec(data)
 		%s
 		button[6,4.5;4,0.8;version_check_visit;%s]
 	]]):format(
-		defaulttexturedir_esc,
+		esc(defaulttexturedir),
 		esc(data.title),
 		esc(changes),
 		(style_exists and btn_style("version_check_remind", "yellow") or ""),
