@@ -909,9 +909,10 @@ end
 function pkgmgr.gamelist()
 	local retval = ""
 	if #pkgmgr.games > 0 then
-		for i = 1, #pkgmgr.games do
-			if retval ~= "" then retval = retval .. "," end
-			retval = retval .. core.formspec_escape(pkgmgr.games[i].name)
+		retval = retval .. core.formspec_escape(pkgmgr.games[1].name)
+
+		for i=2,#pkgmgr.games,1 do
+			retval = retval .. "," .. core.formspec_escape(pkgmgr.games[i].name)
 		end
 	end
 	return retval

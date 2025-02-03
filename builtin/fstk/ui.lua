@@ -56,9 +56,6 @@ end
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-local maintab = core.settings:get("maintab_LAST")
-local connect_time = tonumber(core.settings:get("connect_time")) or 0
-
 function ui.update()
 	ui.overridden = false
 	local formspec = {}
@@ -68,56 +65,33 @@ function ui.update()
 		local error_message = core.formspec_escape(
 				gamedata.errormessage or "<none available>")
 		formspec = {
-			"formspec_version[3]",
-			"size[14,8.25]",
-			"bgcolor[#0000]",
-			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
+			"size[14,8]",
+			"real_coordinates[true]",
 			"set_focus[btn_reconnect_yes;true]",
-			"textarea[0.6,0.5;12.8,0.6;;;", fgettext("The server has requested a reconnect:"), "]",
-			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc,
-				"worldlist_bg.png;false;40]",
-			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
-			btn_style("btn_reconnect_yes") ..
-			"button[2,6.725;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
-			btn_style("btn_reconnect_no") ..
-			"button[8,6.725;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]"
+			"box[0.5,1.2;13,5;#000]",
+			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
+				fgettext("The server has requested a reconnect:"), error_message),
+			"button[2,6.6;4,1;btn_reconnect_yes;" .. fgettext("Reconnect") .. "]",
+			"button[8,6.6;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]"
 		}
 		ui.overridden = true
 	elseif gamedata ~= nil and gamedata.errormessage ~= nil then
 		local error_message = core.formspec_escape(gamedata.errormessage)
 
 		local error_title
-		local mod_error = gamedata.errormessage:find("ModError") or gamedata.errormessage:find("LuaError")
-		if mod_error then
+		if string.find(gamedata.errormessage, "ModError") then
 			error_title = fgettext("An error occurred in a Lua script:")
 		else
 			error_title = fgettext("An error occurred:")
 		end
-		local restart_btn
-		if (maintab == "local" or maintab == "local_default") and mod_error and
-				core.get_us_time() - connect_time > 30 then
-			restart_btn =
-				btn_style("btn_reconnect_yes") ..
-				"button[2,6.725;4,1;btn_reconnect_yes;" .. fgettext("Restart") .. "]" ..
-				btn_style("btn_reconnect_no") ..
-				"button[8,6.725;4,1;btn_reconnect_no;" .. fgettext("Main menu") .. "]" ..
-				"set_focus[btn_reconnect_yes;true]"
-		else
-			restart_btn =
-				btn_style("btn_reconnect_no") ..
-				"button[5,6.725;4,1;btn_reconnect_no;" .. fgettext("OK") .. "]" ..
-				"set_focus[btn_reconnect_no;true]"
-		end
 		formspec = {
-			"formspec_version[3]",
-			"size[14,8.25]",
-			"bgcolor[#0000]",
-			"background9[0,0;0,0;", defaulttexturedir_esc, "bg_common.png;true;40]",
-			"textarea[0.6,0.5;12.8,0.6;;;", error_title, "]",
-			"background9[0.4,1.1;13.2,5.2;", defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc,
-				"worldlist_bg.png;false;40]",
-			"textarea[0.6,1.3;12.8,4.8;;;", error_message, "]",
-			restart_btn
+			"size[14,8]",
+			"real_coordinates[true]",
+			"set_focus[btn_error_confirm;true]",
+			"box[0.5,1.2;13,5;#000]",
+			("textarea[0.5,1.2;13,5;;%s;%s]"):format(
+				error_title, error_message),
+			"button[5,6.6;4,1;btn_error_confirm;" .. fgettext("OK") .. "]"
 		}
 		ui.overridden = true
 	else
@@ -197,18 +171,12 @@ end
 --------------------------------------------------------------------------------
 core.button_handler = function(fields)
 	if fields["btn_reconnect_yes"] then
-		if maintab == "local" or maintab == "local_default" then
-			gamedata.singleplayer = true
-			gamedata.selected_world =
-				tonumber(core.settings:get("mainmenu_last_selected_world"))
-		end
-		core.settings:set("connect_time", core.get_us_time())
 		gamedata.reconnect_requested = false
 		gamedata.errormessage = nil
 		gamedata.do_reconnect = true
 		core.start()
 		return
-	elseif fields["btn_reconnect_no"] then
+	elseif fields["btn_reconnect_no"] or fields["btn_error_confirm"] then
 		gamedata.errormessage = nil
 		gamedata.reconnect_requested = false
 		ui.update()
@@ -241,18 +209,4 @@ core.event_handler = function(event)
 		ui.update()
 		return
 	end
-end
-
---------------------------------------------------------------------------------
-if core.settings:get("just_reconnected") then
-	core.settings:remove("just_reconnected")
-elseif gamedata and gamedata.errormessage == "AsyncErr: Failed to bind socket (port already in use?)" and
-		(maintab == "local" or maintab == "local_default") and not core.settings:get_bool("enable_server") then
-	core.settings:set("just_reconnected", "true")
-	gamedata.singleplayer = true
-	gamedata.selected_world =
-		tonumber(core.settings:get("mainmenu_last_selected_world"))
-	gamedata.errormessage = nil
-	gamedata.do_reconnect = true
-	core.start()
 end
