@@ -603,8 +603,12 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 			)";
 	}
 
-	if (use_gles && shaderinfo.base_material != video::EMT_SOLID)
-		shaders_header << "#define USE_DISCARD 1\n";
+	if (use_gles) {
+		if (shaderinfo.base_material == video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF)
+			shaders_header << "#define USE_ALPHA_TEST_DISCARD 1\n";
+		else if (shaderinfo.base_material != video::EMT_SOLID)
+			shaders_header << "#define USE_DISCARD 1\n";
+	}
 
 #define PROVIDE(constant) shaders_header << "#define " #constant " " << (int)constant << "\n"
 
