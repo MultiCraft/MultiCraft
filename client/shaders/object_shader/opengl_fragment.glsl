@@ -71,6 +71,12 @@ void main(void)
 	}
 #endif
 
+#ifdef USE_ALPHA_TEST_DISCARD
+	if (base.a < 0.5) {
+		discard;
+	}
+#endif
+
 	color = base.rgb;
 
 	vec4 col = vec4(color.rgb, base.a);
