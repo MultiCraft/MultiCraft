@@ -43,7 +43,7 @@ typedef enum
 	unknown_id = -1,
 	jump_id = 0,
 	drop_id,
-	crunch_id,
+	sneak_id,
 	special1_id,
 	inventory_id,
 	escape_id,

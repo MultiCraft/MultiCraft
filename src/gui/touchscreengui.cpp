@@ -36,7 +36,7 @@ using namespace irr::core;
 const button_data buttons_data[] = {
 	{ "jump_btn.png", N_("Jump"), "jump" },
 	{ "drop_btn.png", N_("Drop"), "drop" },
-	{ "down_btn.png", N_("Sneak"), "sneak" },
+	{ "sneak_btn.png", N_("Sneak"), "sneak" },
 	{ "aux_btn.png", N_("Special"), "special1" },
 	{ "inventory_btn.png", N_("Inventory"), "inventory" },
 	{ "escape_btn.png", N_("Exit"), "escape" },
@@ -127,7 +127,7 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 
 	initButton(jump_id, getButtonRect(jump_id));
 	initButton(drop_id, getButtonRect(drop_id));
-	initButton(crunch_id, getButtonRect(crunch_id));
+	initButton(sneak_id, getButtonRect(sneak_id));
 	initButton(inventory_id, getButtonRect(inventory_id));
 	initButton(special1_id, getButtonRect(special1_id));
 	initButton(escape_id, getButtonRect(escape_id));
@@ -253,9 +253,9 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 				m_screensize.Y / 2 - m_button_size * 1.5,
 				m_screensize.X,
 				m_screensize.Y / 2 - m_button_size / 2);
-	case crunch_id:
+	case sneak_id:
 		return rect<s32>(m_screensize.X - m_button_size * 3.38,
-				m_screensize.Y - m_button_size * 0.75,
+				m_screensize.Y - m_button_size * 1.125,
 				m_screensize.X - m_button_size * 1.7,
 				m_screensize.Y);
 	case inventory_id:
