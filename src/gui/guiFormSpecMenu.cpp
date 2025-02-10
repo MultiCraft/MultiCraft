@@ -2871,7 +2871,9 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 	if (!data->explicit_size)
 		warningstream << "invalid use of model without a size[] element" << std::endl;
 
-	scene::IAnimatedMesh *mesh = m_client->getMesh(meshstr);
+	scene::ISceneManager *smgr = RenderingEngine::get_scene_manager();
+	scene::IAnimatedMesh *mesh = m_client == nullptr ? smgr->getMesh(meshstr.c_str()) :
+			m_client->getMesh(meshstr);
 
 	if (!mesh) {
 		errorstream << "Invalid model element: Unable to load mesh:"
@@ -2888,7 +2890,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 
 	core::rect<s32> rect(pos, pos + geom);
 
-	GUIScene *e = new GUIScene(Environment, RenderingEngine::get_scene_manager(),
+	GUIScene *e = new GUIScene(Environment, smgr,
 			data->current_parent, rect, spec.fid);
 
 	auto meshnode = e->setMesh(mesh);
