@@ -85,35 +85,6 @@ private:
 	GUIEngine *m_engine = nullptr;
 };
 
-/** GUIEngine specific implementation of ISimpleTextureSource */
-class MenuTextureSource : public ISimpleTextureSource
-{
-public:
-	/**
-	 * default constructor
-	 * @param driver the video driver to load textures from
-	 */
-	MenuTextureSource(video::IVideoDriver *driver) : m_driver(driver) {};
-
-	/**
-	 * destructor, removes all loaded textures
-	 */
-	virtual ~MenuTextureSource();
-
-	/**
-	 * get a texture, loading it if required
-	 * @param name path to the texture
-	 * @param id receives the texture ID, always 0 in this implementation
-	 */
-	video::ITexture *getTexture(const std::string &name, u32 *id = NULL);
-
-private:
-	/** driver to get textures from */
-	video::IVideoDriver *m_driver = nullptr;
-	/** set of texture names to delete */
-	std::set<std::string> m_to_delete;
-};
-
 /** GUIEngine specific implementation of OnDemandSoundFetcher */
 class MenuMusicFetcher: public OnDemandSoundFetcher
 {

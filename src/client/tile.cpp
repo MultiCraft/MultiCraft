@@ -202,6 +202,7 @@ struct TextureInfo
 class SourceImageCache
 {
 public:
+	SourceImageCache(bool main_menu) : m_main_menu(main_menu) {};
 	~SourceImageCache() {
 		for (auto &m_image : m_images) {
 			m_image.second->drop();
@@ -259,7 +260,7 @@ public:
 			return n->second;
 		}
 		video::IVideoDriver *driver = RenderingEngine::get_video_driver();
-		std::string path = getTexturePath(name);
+		std::string path = m_main_menu ? name : getTexturePath(name);
 		if (path.empty()) {
 			infostream<<"SourceImageCache::getOrLoad(): No path found for \""
 					<<name<<"\""<<std::endl;
@@ -277,6 +278,7 @@ public:
 	}
 private:
 	std::map<std::string, video::IImage*> m_images;
+	bool m_main_menu;
 };
 
 /*
@@ -286,7 +288,7 @@ private:
 class TextureSource : public IWritableTextureSource
 {
 public:
-	TextureSource();
+	TextureSource(bool main_menu);
 	virtual ~TextureSource();
 
 	/*
@@ -432,12 +434,12 @@ private:
 	bool m_setting_bilinear_filter;
 };
 
-IWritableTextureSource *createTextureSource()
+IWritableTextureSource *createTextureSource(bool main_menu)
 {
-	return new TextureSource();
+	return new TextureSource(main_menu);
 }
 
-TextureSource::TextureSource()
+TextureSource::TextureSource(bool main_menu) : m_sourcecache(SourceImageCache(main_menu))
 {
 	m_main_thread = std::this_thread::get_id();
 
