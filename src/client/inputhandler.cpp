@@ -274,6 +274,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		default: break;
 		}
 	} else if (event.EventType == irr::EET_LOG_TEXT_EVENT) {
+#ifndef NDEBUG
 		static const LogLevel irr_loglev_conv[] = {
 				LL_VERBOSE, // ELL_DEBUG
 				LL_INFO,    // ELL_INFORMATION
@@ -282,7 +283,6 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 				LL_NONE,    // ELL_NONE
 		};
 		assert(event.LogEvent.Level < ARRLEN(irr_loglev_conv));
-#ifndef NDEBUG
 		g_logger.log(irr_loglev_conv[event.LogEvent.Level],
 				std::string("Irrlicht: ") + event.LogEvent.Text);
 #endif

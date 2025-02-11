@@ -127,10 +127,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#endif
 #endif
 
-#if defined(__IOS__)
-	#include "wrapper.h"
-#endif
-
 namespace porting
 {
 

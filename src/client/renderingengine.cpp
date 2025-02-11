@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../gui/guiSkin.h"
 
 #if !defined(_WIN32) && !defined(__APPLE__) && !defined(__ANDROID__) && \
-		!defined(SERVER) && !defined(__HAIKU__) && !defined(__IOS__)
+		!defined(SERVER) && !defined(__HAIKU__)
 #define XORG_USED
 #endif
 #ifdef XORG_USED
@@ -584,11 +584,13 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 #else
 			float imgRatio = (float) img_size.Height / img_size.Width;
 			u32 imgW = screensize.X / 2;
+#if ENABLE_GLES && !defined(__APPLE__)
 			if (!hasNPotSupport()) {
 				imgW = npot2(imgW);
 				if (imgW > (screensize.X * 0.7) && imgW >= 1024)
 					imgW /= 2;
 			}
+#endif
 			u32 imgH = imgW * imgRatio;
 #endif
 			v2s32 img_pos((screensize.X - imgW) / 2,

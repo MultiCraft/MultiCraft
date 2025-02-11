@@ -608,7 +608,7 @@ u32 TextureSource::generateTexture(const std::string &name)
 	video::ITexture *tex = NULL;
 
 	if (img != NULL) {
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 		img = Align2Npot2(img, driver);
 #endif
 		// Create texture from resulting image
@@ -778,7 +778,7 @@ void TextureSource::rebuildImagesAndTextures()
 			continue; // Skip dummy entry
 
 		video::IImage *img = generateImage(ti.name);
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 		img = Align2Npot2(img, driver);
 #endif
 		// Create texture from resulting image
@@ -1015,9 +1015,9 @@ video::IImage* TextureSource::generateImage(const std::string &name)
 	return baseimg;
 }
 
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#ifndef __ANDROID__
 static inline u16 get_GL_major_version()
 {
 	const GLubyte *gl_version = glGetString(GL_VERSION);
@@ -1041,9 +1041,6 @@ bool hasNPotSupport()
 #else
 bool hasNPotSupport()
 {
-#ifdef __IOS__
-	return true; // Irrlicht cares about it on iOS
-#endif
 	static const std::string &driverstring = g_settings->get("video_driver");
 	return (driverstring != "ogles1"); // gles3 has NPot Support and used instead of gles2
 }
@@ -1111,7 +1108,7 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 	// Stuff starting with [ are special commands
 	if (part_of_name.empty() || part_of_name[0] != '[') {
 		video::IImage *image = m_sourcecache.getOrLoad(part_of_name);
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 		image = Align2Npot2(image, driver);
 #endif
 		if (image == NULL) {

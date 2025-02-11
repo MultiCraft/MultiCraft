@@ -352,8 +352,6 @@ void set_default_settings()
 	settings->setDefault("fallback_font_shadow_alpha", "128");
 
 	std::string font_size_str = std::to_string(TTF_DEFAULT_FONT_SIZE);
-
-	settings->setDefault("font_size", font_size_str); // fallback_font_size
 #else
 	settings->setDefault("freetype", "false");
 	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "mono_dejavu_sans"));
@@ -377,11 +375,11 @@ void set_default_settings()
 #endif
 
 	settings->setDefault("update_information_url", "https://updates.multicraft.world/app.json");
-	#if ENABLE_UPDATE_CHECKER
-		settings->setDefault("update_last_checked", "");
-	#else
-		settings->setDefault("update_last_checked", "disabled");
-	#endif
+#if ENABLE_UPDATE_CHECKER
+	settings->setDefault("update_last_checked", "");
+#else
+	settings->setDefault("update_last_checked", "disabled");
+#endif
 
 	// Server
 	settings->setDefault("disable_texture_packs", "false");

@@ -166,8 +166,6 @@ int main(int argc, char *argv[])
 
 #ifdef __ANDROID__
 	porting::initAndroid();
-#elif __IOS__
-	init_apple();
 #elif __APPLE__
 	MultiCraft::initApple();
 #endif
@@ -495,8 +493,7 @@ static bool create_userdata_path()
 {
 	bool success;
 #if defined(__ANDROID__) || defined(__IOS__)
-	if (fs::PathExists(porting::path_user))
-		success = true;
+	success = fs::PathExists(porting::path_user);
 #else
 	// Create user data directory
 	success = fs::CreateDir(porting::path_user);

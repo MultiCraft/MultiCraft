@@ -82,13 +82,6 @@ SubgameSpec findSubgame(const std::string &id)
 		find_paths.emplace_back(path, false);
 	}
 
-#ifdef __APPLE__
-	std::string path = porting::path_cache + DIR_DELIM + "games" + DIR_DELIM + id;
-	find_paths.emplace_back(path, false);
-	path.append("_game");
-	find_paths.emplace_back(path, false);
-#endif
-
 	std::string game_base = DIR_DELIM;
 	game_base = game_base.append("games").append(DIR_DELIM).append(id);
 	std::string game_suffixed = game_base + "_game";
@@ -188,9 +181,6 @@ std::set<std::string> getAvailableGameIds()
 	std::set<std::string> gamespaths;
 	gamespaths.insert(porting::path_share + DIR_DELIM + "games");
 	gamespaths.insert(porting::path_user + DIR_DELIM + "games");
-#ifdef __APPLE__
-	gamespaths.insert(porting::path_cache + DIR_DELIM + "games");
-#endif
 
 	Strfnd search_paths(getSubgamePathEnv());
 

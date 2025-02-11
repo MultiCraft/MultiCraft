@@ -28,7 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/numeric.h"
 #include "config.h"
 
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 #include <IVideoDriver.h>
 #endif
 
@@ -133,7 +133,7 @@ public:
 
 IWritableTextureSource *createTextureSource();
 
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 bool hasNPotSupport();
 video::IImage * Align2Npot2(video::IImage * image, irr::video::IVideoDriver* driver);
 #endif

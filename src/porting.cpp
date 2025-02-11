@@ -757,7 +757,6 @@ std::string getSecretKey(const std::string &key)
 	return std::string(MultiCraft::getSecretKey(key.c_str()));
 }
 
-//extern "C" float swiftScreenScale();
 float getScreenScale()
 {
 	static const float retval = MultiCraft::getScreenScale();

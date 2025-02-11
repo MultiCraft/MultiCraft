@@ -616,7 +616,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 		return selection;
 
 	const ChatFormattedFragment &fragment_first = line.fragments[0];
-	const ChatFormattedFragment &fragment_last = line.fragments[line.fragments.size() - 1];
+//	const ChatFormattedFragment &fragment_last = line.fragments[line.fragments.size() - 1];
 	s32 x_min = (fragment_first.column + 1) * m_fontsize.X + m_round_screen_offset;
 	s32 x_max = x_min;
 	for (const ChatFormattedFragment &fragment : line.fragments) {
@@ -1617,7 +1617,7 @@ bool GUIChatConsole::preprocessEvent(SEvent event)
 				event.TouchInput.Y <= m_height) {
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN &&
 					!porting::isInputDialogActive()) {
-				ChatPrompt& prompt = m_chat_backend->getPrompt();
+			//	ChatPrompt& prompt = m_chat_backend->getPrompt();
 				porting::showInputDialog("", "", 2, "chat");
 			}
 		}

@@ -40,7 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlicht_changes/static_text.h"
 #include "translation.h"
 
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 #include "client/tile.h"
 #endif
 
@@ -80,7 +80,7 @@ video::ITexture *MenuTextureSource::getTexture(const std::string &name, u32 *id)
 	if (name.empty())
 		return NULL;
 
-#if ENABLE_GLES
+#if ENABLE_GLES && !defined(__APPLE__)
 	if (hasNPotSupport())
 		return m_driver->getTexture(name.c_str());
 
