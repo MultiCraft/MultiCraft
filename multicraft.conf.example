@@ -1293,13 +1293,13 @@
 #    type: int
 # max_packets_per_iteration = 1024
 
-#    ZLib compression level to use when sending mapblocks to the client.
-#    -1 - Zlib's default compression level
-#    0 - no compresson, fastest
-#    9 - best compression, slowest
-#    (levels 1-3 use Zlib's "fast" method, 4-9 use the normal method)
-#    type: int min: -1 max: 9
-# map_compression_level_net = -1
+#    Zstd compression level to use when sending mapblocks to the client.
+#    0 - default compression level
+#    -1 - least compresson, fastest
+#    22 - best compression, slowest
+#    (levels 1-3 use "fast" method, 4-9 use the normal method)
+#    type: int min: -1 max: 22
+# map_compression_level_net = 0
 
 ## Game
 
@@ -1545,13 +1545,13 @@
 #    type: enum values: 0, 1, 2
 # sqlite_synchronous = 2
 
-#    ZLib compression level to use when saving mapblocks to disk.
-#    -1 - Zlib's default compression level
-#    0 - no compresson, fastest
+#    Zstd compression level to use when saving mapblocks to disk.
+#    0 - use default compression level
+#    -1 - least compresson, fastest
 #    9 - best compression, slowest
-#    (levels 1-3 use Zlib's "fast" method, 4-9 use the normal method)
-#    type: int min: -1 max: 9
-# map_compression_level_disk = 3
+#    (levels 1-3 use "fast" method, 4-9 use the normal method)
+#    type: int min: -1 max: 22
+# map_compression_level_disk = 0
 
 #    Length of a server tick and the interval at which objects are generally updated over
 #    network.
