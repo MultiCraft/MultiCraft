@@ -171,8 +171,16 @@ ScriptApiBase::~ScriptApiBase()
 int ScriptApiBase::luaPanic(lua_State *L)
 {
 	std::ostringstream oss;
-	oss << "LUA PANIC: unprotected error in call to Lua API ("
-		<< readParam<std::string>(L, -1) << ")";
+	oss << "LUA PANIC: unprotected error in call to Lua API.\n";
+
+	oss << "Error Message: " << readParam<std::string>(L, -1) << "\n";
+
+	oss << "Lua State: " << static_cast<const void*>(L) << "\n";
+
+	luaL_traceback(L, L, "Stack trace:", 1);
+	std::string traceback = readParam<std::string>(L, -1);
+	oss << traceback << "\n";
+
 	FATAL_ERROR(oss.str().c_str());
 	// NOTREACHED
 	return 0;
