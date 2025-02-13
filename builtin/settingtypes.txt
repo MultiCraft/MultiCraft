@@ -1099,8 +1099,8 @@ max_packets_per_iteration (Max. packets per iteration) int 1024
 #    Compression level to use when sending mapblocks to the client.
 #    -1 - use default compression level
 #     0 - least compresson, fastest
-#     9 - best compression, slowest
-map_compression_level_net (Map Compression Level for Network Transfer) int -1 -1 9
+#    22 - best compression, slowest
+map_compression_level_net (Map Compression Level for Network Transfer) int -1 -1 22
 
 [*Game]
 
@@ -1297,8 +1297,8 @@ sqlite_synchronous (Synchronous SQLite) enum 2 0,1,2
 #    Compression level to use when saving mapblocks to disk.
 #    -1 - use default compression level
 #     0 - least compresson, fastest
-#     9 - best compression, slowest
-map_compression_level_disk (Map Compression Level for Disk Storage) int -1 -1 9
+#    22 - best compression, slowest
+map_compression_level_disk (Map Compression Level for Disk Storage) int -1 -1 22
 
 #    Length of a server tick and the interval at which objects are generally updated over
 #    network.

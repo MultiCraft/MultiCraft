@@ -68,6 +68,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server/player_sao.h"
 #include "server/serverinventorymgr.h"
 #include "translation.h"
+#if USE_ZSTD
+#include <zstd.h>
+#endif
 
 class ClientNotFoundException : public BaseException
 {
@@ -2327,7 +2330,12 @@ void Server::SendBlockNoLock(session_t peer_id, MapBlock *block, u8 ver,
 	/*
 		Create a packet with the block in the right format
 	*/
+#if USE_ZSTD
+	thread_local const int net_compression_level = m_simple_singleplayer_mode ? ZSTD_minCLevel() :
+			rangelim(g_settings->getS16("map_compression_level_net"), ZSTD_minCLevel(), ZSTD_maxCLevel());
+#else
 	thread_local const int net_compression_level = rangelim(g_settings->getS16("map_compression_level_net"), -1, 9);
+#endif
 	std::ostringstream os(std::ios_base::binary);
 	block->serialize(os, ver, false, net_compression_level);
 	block->serializeNetworkSpecific(os);
