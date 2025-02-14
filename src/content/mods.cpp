@@ -288,7 +288,7 @@ void ModConfiguration::addModsFromConfig(
 			if (load_mod_names.count(mod.name) != 0)
 				addon_mods.push_back(mod);
 			else
-				conf.setBool("load_mod_" + mod.name, false);
+				conf.remove("load_mod_" + mod.name);
 		}
 	}
 	conf.updateConfigFile(settings_path.c_str());
