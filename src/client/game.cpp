@@ -4326,7 +4326,8 @@ void Game::pauseGame()
 	if (g_menumgr.pausesGame() || !hud)
 		return;
 #ifdef HAVE_TOUCHSCREENGUI
-	g_touchscreengui->reset();
+	if (g_touchscreengui)
+		g_touchscreengui->reset();
 #endif
 	showPauseMenu();
 	runData.pause_game_timer = 0;

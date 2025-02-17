@@ -99,9 +99,12 @@ struct joystick_info
 
 	void reset(bool visible)
 	{
-		button_off->setVisible(visible);
-		button_bg->setVisible(false);
-		button_center->setVisible(false);
+		if (button_off)
+			button_off->setVisible(visible);
+		if (button_bg)
+			button_bg->setVisible(false);
+		if (button_center)
+			button_center->setVisible(false);
 		move_sideward = 0;
 		move_forward = 0;
 		pressed = false;
