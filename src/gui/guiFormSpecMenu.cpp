@@ -74,6 +74,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <SDL.h>
 #endif
 
+#ifdef __IOS__
+#import "wrapper.h"
+#endif
+
 #define MY_CHECKPOS(a,b)													\
 	if (v_pos.size() != 2) {												\
 		errorstream<< "Invalid pos for element " << a << " specified: \""	\
@@ -3410,9 +3414,16 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 			// smaller screensize.
 			double prefer_imgsize = padded_screensize.Y / 10 * gui_scaling;
 
-			// Try to fit 13 coordinates on large tablets.
-			if (RenderingEngine::isTablet())
+			// Try to fit 13 coordinates on tablets.
+			if (RenderingEngine::isTablet()) {
 				prefer_imgsize = padded_screensize.Y / 13 * gui_scaling;
+
+#ifdef __IOS__
+				// Prefer Desktop size on large tablets.
+				if (!Device7and9Inch && !Device8and3Inch && !Device10and5Inch)
+					prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
+#endif
+			}
 #else
 			// Desktop computers have more space, so try to fit 15 coordinates.
 			double prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
