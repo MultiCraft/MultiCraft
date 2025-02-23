@@ -54,7 +54,6 @@
 		84135B9125D5264C00CA4DCF /* tileanimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3525D5264000CA4DCF /* tileanimation.cpp */; };
 		84135B9225D5264C00CA4DCF /* pathfinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3725D5264100CA4DCF /* pathfinder.cpp */; };
 		84135B9325D5264C00CA4DCF /* serverlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3825D5264100CA4DCF /* serverlist.cpp */; };
-		84135B9425D5264C00CA4DCF /* ban.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3925D5264100CA4DCF /* ban.cpp */; };
 		84135B9525D5264C00CA4DCF /* hud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3A25D5264200CA4DCF /* hud.cpp */; };
 		84135B9625D5264C00CA4DCF /* map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3E25D5264300CA4DCF /* map.cpp */; };
 		84135B9825D5264C00CA4DCF /* light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B4325D5264400CA4DCF /* light.cpp */; };
@@ -349,7 +348,6 @@
 		84135B0525D5262E00CA4DCF /* translation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = translation.cpp; path = ../../../src/translation.cpp; sourceTree = "<group>"; };
 		84135B0625D5262E00CA4DCF /* chat_interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chat_interface.h; path = ../../../src/chat_interface.h; sourceTree = "<group>"; };
 		84135B0725D5262F00CA4DCF /* voxel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = voxel.cpp; path = ../../../src/voxel.cpp; sourceTree = "<group>"; };
-		84135B0825D5262F00CA4DCF /* ban.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ban.h; path = ../../../src/ban.h; sourceTree = "<group>"; };
 		84135B0925D5262F00CA4DCF /* version.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = version.cpp; path = ../../../src/version.cpp; sourceTree = "<group>"; };
 		84135B0A25D5263000CA4DCF /* remoteplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = remoteplayer.h; path = ../../../src/remoteplayer.h; sourceTree = "<group>"; };
 		84135B0B25D5263000CA4DCF /* gettime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gettime.h; path = ../../../src/gettime.h; sourceTree = "<group>"; };
@@ -394,7 +392,6 @@
 		84135B3625D5264000CA4DCF /* nodedef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nodedef.h; path = ../../../src/nodedef.h; sourceTree = "<group>"; };
 		84135B3725D5264100CA4DCF /* pathfinder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pathfinder.cpp; path = ../../../src/pathfinder.cpp; sourceTree = "<group>"; };
 		84135B3825D5264100CA4DCF /* serverlist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = serverlist.cpp; path = ../../../src/serverlist.cpp; sourceTree = "<group>"; };
-		84135B3925D5264100CA4DCF /* ban.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ban.cpp; path = ../../../src/ban.cpp; sourceTree = "<group>"; };
 		84135B3A25D5264200CA4DCF /* hud.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hud.cpp; path = ../../../src/hud.cpp; sourceTree = "<group>"; };
 		84135B3B25D5264200CA4DCF /* object_properties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = object_properties.h; path = ../../../src/object_properties.h; sourceTree = "<group>"; };
 		84135B3C25D5264200CA4DCF /* itemdef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = itemdef.h; path = ../../../src/itemdef.h; sourceTree = "<group>"; };
@@ -1111,8 +1108,6 @@
 				8458602F24B13A020040BA4F /* util */,
 				84135AF225D5262500CA4DCF /* activeobject.h */,
 				84135AF825D5262800CA4DCF /* activeobjectmgr.h */,
-				84135B3925D5264100CA4DCF /* ban.cpp */,
-				84135B0825D5262F00CA4DCF /* ban.h */,
 				84135B0625D5262E00CA4DCF /* chat_interface.h */,
 				84135B1325D5263400CA4DCF /* chat.cpp */,
 				84135AC925D5261C00CA4DCF /* chat.h */,
@@ -1985,7 +1980,6 @@
 				84F20DDA25D52812009562A9 /* s_item.cpp in Sources */,
 				84F20F1525D52958009562A9 /* guiButtonImage.cpp in Sources */,
 				84135C0C25D526D700CA4DCF /* game.cpp in Sources */,
-				84135B9425D5264C00CA4DCF /* ban.cpp in Sources */,
 				84F20E3825D5282A009562A9 /* l_itemstackmeta.cpp in Sources */,
 				84F20F0725D52958009562A9 /* guiSkin.cpp in Sources */,
 				84F20DE025D52812009562A9 /* s_base.cpp in Sources */,

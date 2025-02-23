@@ -50,7 +50,9 @@ struct ChatInterface;
 class IWritableItemDefManager;
 class NodeDefManager;
 class IWritableCraftDefManager;
+#if BAN_MANAGER
 class BanManager;
+#endif
 class EventManager;
 class Inventory;
 class ModChannelMgr;
@@ -557,8 +559,10 @@ private:
 	// server connection
 	std::shared_ptr<con::Connection> m_con;
 
+#if BAN_MANAGER
 	// Ban checking
 	BanManager *m_banmanager = nullptr;
+#endif
 
 	// Rollback manager (behind m_env_mutex)
 	IRollbackManager *m_rollback = nullptr;
