@@ -55,8 +55,6 @@ void GUIButtonImage::setFromStyle(const StyleSpec &style)
 {
 	GUIButton::setFromStyle(style);
 
-	video::IVideoDriver *driver = Environment->getVideoDriver();
-
 	if (style.isNotDefault(StyleSpec::FGIMG)) {
 		const std::string texture_name = style.get(StyleSpec::FGIMG, "");
 
