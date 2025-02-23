@@ -18,8 +18,6 @@
 
 mm_texture = {}
 
-local small_screen = (PLATFORM == "Android" or PLATFORM == "iOS") and not core.settings:get_bool("device_is_tablet")
-
 --------------------------------------------------------------------------------
 function mm_texture.init()
 	mm_texture.defaulttexturedir = core.get_texturepath() .. DIR_DELIM .. "base" ..
@@ -60,16 +58,14 @@ function mm_texture.reset()
 	core.set_clouds(false)
 
 	mm_texture.set_generic("footer")
-	if not small_screen then
-		mm_texture.set_generic("header")
-	end
+	mm_texture.set_generic("header")
 
 	if not have_bg then
-	--	if core.settings:get_bool("menu_clouds") then
-	--		core.set_clouds(true)
-	--	else
+		if core.settings:get_bool("menu_clouds") then
+			core.set_clouds(true)
+		else
 			mm_texture.set_dirt_bg()
-	--	end
+		end
 	end
 end
 
@@ -91,6 +87,7 @@ function mm_texture.update_game(gamedetails)
 	core.set_clouds(false)
 
 	if not have_bg then
+
 		if core.settings:get_bool("menu_clouds") then
 			core.set_clouds(true)
 		else
@@ -99,9 +96,7 @@ function mm_texture.update_game(gamedetails)
 	end
 
 	mm_texture.set_game("footer",gamedetails)
-	if not small_screen then
-		mm_texture.set_game("header",gamedetails)
-	end
+	mm_texture.set_game("header",gamedetails)
 
 	mm_texture.gameid = gamedetails.id
 end
@@ -177,5 +172,14 @@ function mm_texture.set_game(identifier, gamedetails)
 end
 
 function mm_texture.set_dirt_bg()
-	core.set_background("background", defaulttexturedir .. "bg.png", true, 256)
+	if mm_texture.texturepack ~= nil then
+		local path = mm_texture.texturepack .. DIR_DELIM .."default_dirt.png"
+		if core.set_background("background", path, true, 128) then
+			return true
+		end
+	end
+
+	-- Use universal fallback texture in textures/base/pack
+	local minimalpath = defaulttexturedir .. "menu_bg.png"
+	core.set_background("background", minimalpath, true, 128)
 end

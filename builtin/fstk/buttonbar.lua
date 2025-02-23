@@ -22,10 +22,8 @@ local function buttonbar_formspec(self)
 		return ""
 	end
 
-	local formspec = "style_type[box;noclip=true]" ..
-			string.format("box[%f,%f;%f,%f;%s]",
-			self.pos.x,self.pos.y ,self.size.x,self.size.y,self.bgcolor) ..
-		"style_type[box;noclip=false]"
+	local formspec = string.format("box[%f,%f;%f,%f;%s]",
+			self.pos.x,self.pos.y ,self.size.x,self.size.y,self.bgcolor)
 
 	for i=self.startbutton,#self.buttons,1 do
 		local btn_name = self.buttons[i].name
@@ -190,7 +188,7 @@ function buttonbar_create(name, cbf_buttonhandler, pos, orientation, size)
 	self.name = name
 	self.type = "addon"
 	self.bgcolor = "#000000"
-	self.pos = {x = pos.x + 1, y = pos.y + 1}
+	self.pos = pos
 	self.size = size
 	self.orientation = orientation
 	self.startbutton = 1

@@ -25,11 +25,8 @@ local menupath = core.get_mainmenu_path()
 local basepath = core.get_builtin_path()
 defaulttexturedir = core.get_texturepath_share() .. DIR_DELIM .. "base" ..
 					DIR_DELIM .. "pack" .. DIR_DELIM
-defaulttexturedir_esc = core.formspec_escape(defaulttexturedir)
-DIR_DELIM_esc = core.formspec_escape(DIR_DELIM) -- for use in formspecs only
 
 dofile(basepath .. "common" .. DIR_DELIM .. "filterlist.lua")
-dofile(basepath .. "common" .. DIR_DELIM .. "btn_style.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "buttonbar.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "dialog.lua")
 dofile(basepath .. "fstk" .. DIR_DELIM .. "tabview.lua")
@@ -66,7 +63,7 @@ local function main_event_handler(tabview, event)
 end
 
 --------------------------------------------------------------------------------
-function menudata.init_tabs()
+local function init_globals()
 	-- Init gamedata
 	gamedata.worldindex = 0
 
@@ -86,10 +83,15 @@ function menudata.init_tabs()
 	menudata.worldlist:add_sort_mechanism("alphabetic", sort_worlds_alphabetic)
 	menudata.worldlist:set_sortmode("alphabetic")
 
+	if not core.settings:get("menu_last_game") then
+		local default_game = core.settings:get("default_game") or "minetest"
+		core.settings:set("menu_last_game", default_game)
+	end
+
 	mm_texture.init()
 
 	-- Create main tabview
-	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0.1, y = 0})
+	local tv_main = tabview_create("maintab", {x = 12, y = 5.4}, {x = 0, y = 0})
 
 	tv_main:set_autosave_tab(true)
 	tv_main:add(tabs.local_game)
@@ -105,11 +107,6 @@ function menudata.init_tabs()
 	local last_tab = core.settings:get("maintab_LAST")
 	if last_tab and tv_main.current_tab ~= last_tab then
 		tv_main:set_tab(last_tab)
-	end
-
-	if last_tab ~= "local" then
-		core.set_clouds(false)
-		mm_texture.set_dirt_bg()
 	end
 
 	-- In case the folder of the last selected game has been deleted,
@@ -128,7 +125,7 @@ function menudata.init_tabs()
 
 	ui.update()
 
---	core.sound_play("main_menu", true)
+	core.sound_play("main_menu", true)
 end
 
-menudata.init_tabs()
+init_globals()

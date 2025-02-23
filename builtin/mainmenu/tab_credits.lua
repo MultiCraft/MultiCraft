@@ -104,11 +104,10 @@ local previous_contributors = {
 	"Jeija <jeija@mesecons.net> [HTTP, particles]",
 }
 
-local esc = core.formspec_escape
 local function buildCreditList(source)
 	local ret = {}
 	for i = 1, #source do
-		ret[i] = esc(source[i])
+		ret[i] = core.formspec_escape(source[i])
 	end
 	return table.concat(ret, ",,")
 end
@@ -117,26 +116,21 @@ return {
 	name = "credits",
 	caption = fgettext("Credits"),
 	cbf_formspec = function(tabview, name, tabdata)
+		local logofile = defaulttexturedir .. "logo.png"
 		local version = core.get_version()
-		local logofile = defaulttexturedir_esc .. "logo.png"
-		local fs = "image[-0.25,-0.3;2,2;" .. logofile .. "]" ..
-			"label[1.3,-0.25;" ..
+		local fs = "image[-0.16,-0.3;2,2;" .. core.formspec_escape(logofile) .. "]" ..
+			"style[label_button;border=false]" ..
+			"label[1.4,-0.25;" ..
 			"MultiCraft Open Source, ver. " .. version.string .. "\n" ..
 			"Copyright (C) 2014–" .. os.date("%Y") .. " MultiCraft Development Team\n" ..
 			"License: GNU LGPLv3.0+ and CC BY-SA 4.0\n" ..
 			"Created and Powered by Minetest Engine, ver. 5.4.1]" ..
-
-			btn_style("homepage") ..
-			"image_button[9.5,-0.2;2.6,0.85;;homepage;Home Page;true;false]" ..
-			btn_style("privacy") ..
-			"image_button[9.5,0.6;2.6,0.85;;privacy;Privacy Policy;true;false]" ..
-
-			"background9[0,1.5;12,4.2;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc ..
-				"worldlist_bg.png;false;40]" ..
+			"button[9.4,-0.2;2.6,0.85;homepage;Home Page]" ..
+			"button[9.4,0.6;2.6,0.85;privacy;Privacy Policy]" ..
+			"box[0,1.5;11.79,4.05;#999999]" ..
 			"tablecolumns[color;text]" ..
-			"tableoptions[background=#0000;highlight=#00000000;border=false]" ..
-			scrollbar_style("list_credits") ..
-			"table[0,1.5;11.75,4.05;list_credits;" ..
+			"tableoptions[background=#00000000;highlight=#00000000;border=false]" ..
+			"table[0,1.5;11.79,4.05;list_credits;" ..
 			"#FFFF00," .. fgettext("Core Developers") .. " (MultiCraft),," ..
 			buildCreditList(multicraft_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Core Developers") .. " (Minetest Engine),," ..
@@ -146,7 +140,8 @@ return {
 			"#FFFF00," .. fgettext("Previous Core Developers") ..",," ..
 			buildCreditList(previous_core_developers) .. ",,," ..
 			"#FFFF00," .. fgettext("Previous Contributors") .. ",," ..
-			buildCreditList(previous_contributors) .. ";1]"
+			buildCreditList(previous_contributors) .. "," ..
+			";1]"
 
 	--[[if PLATFORM ~= "Android" then
 			fs = fs .. "tooltip[userdata;" ..

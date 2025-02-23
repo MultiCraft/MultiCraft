@@ -27,6 +27,12 @@ local function order_server_list(list)
 			res[#res + 1] = fav
 		end
 	end
+	for i = 1, #list do
+		local fav = list[i]
+		if not is_server_protocol_compat(fav.proto_min, fav.proto_max) then
+			res[#res + 1] = fav
+		end
+	end
 	return res
 end
 
@@ -101,9 +107,7 @@ local function save_favorites(favorites)
 		core.settings:set("serverlist_file", filename:sub(1, #filename - 4) .. ".json")
 	end
 
-	if not core.create_dir(get_favorites_path(true)) then
-		core.log("error", "Failed to create favorites path")
-	end
+	assert(core.create_dir(get_favorites_path(true)))
 	core.safe_file_write(get_favorites_path(), core.write_json(favorites))
 end
 
@@ -225,10 +229,6 @@ end
 
 --------------------------------------------------------------------------------
 function serverlistmgr.add_favorite(new_favorite)
-	if new_favorite.address == nil or new_favorite.port == nil then
-		return
-	end
-
 	assert(type(new_favorite.port) == "number")
 
 	-- Whitelist favorite keys

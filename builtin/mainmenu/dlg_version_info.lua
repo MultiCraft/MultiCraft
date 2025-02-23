@@ -30,6 +30,7 @@ local LANG = core.settings:get("language")
 if not (LANG and (LANG ~= "")) then LANG = os.getenv("LANG") end
 if not (LANG and (LANG ~= "")) then LANG = "en" end
 
+local style_exists = core.global_exists("btn_style")
 local function version_info_formspec(data)
 	local changes = data.changes
 
@@ -47,20 +48,18 @@ local function version_info_formspec(data)
 		image[4.9,0;2.5,2.5;%slogo.png]
 		style[msg;content_offset=0]
 		image_button[1,2;10,0.8;;msg;%s;false;false]
-		%s
 		hypertext[1.3,2.6;10,2;;<center>%s</center>]
 		%s
 		button[2,4.5;4,0.8;version_check_remind;%s]
 		%s
 		button[6,4.5;4,0.8;version_check_visit;%s]
 	]]):format(
-		defaulttexturedir_esc,
+		esc(defaulttexturedir),
 		esc(data.title),
-		scrollbar_style("hypertext", true),
 		esc(changes),
-		btn_style("version_check_remind", "yellow"),
+		(style_exists and btn_style("version_check_remind", "yellow") or ""),
 		fgettext("Cancel"),
-		btn_style("version_check_visit", "green"),
+		(style_exists and btn_style("version_check_visit", "green") or ""),
 		fgettext("Update")
 	) -- "Remind me later", "Update now"
 end

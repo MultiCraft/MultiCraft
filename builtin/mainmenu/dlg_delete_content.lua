@@ -18,25 +18,15 @@
 --------------------------------------------------------------------------------
 
 local function delete_content_formspec(dialogdata)
-	local title = dialogdata.content.title or dialogdata.content.name
-	local retval = {
-		"real_coordinates[true]",
-		"image[6.5,0.8;2.5,2.5;", defaulttexturedir_esc, "attention.png]",
+	local retval =
+		"size[11.5,4.5,true]" ..
+		"label[2,2;" ..
+		fgettext("Are you sure you want to delete \"$1\"?", dialogdata.content.name) .. "]"..
+		"style[dlg_delete_content_confirm;bgcolor=red]" ..
+		"button[3.25,3.5;2.5,0.5;dlg_delete_content_confirm;" .. fgettext("Delete") .. "]" ..
+		"button[5.75,3.5;2.5,0.5;dlg_delete_content_cancel;" .. fgettext("Cancel") .. "]"
 
-		"style[msg;content_offset=0]",
-		"image_button[1,3.5;13.5,0.8;;msg;",
-			fgettext("Are you sure you want to delete \"$1\"?", title), ";false;false]",
-
-		btn_style("dlg_delete_content_confirm", "red"),
-		"image_button[4.1,5.3;3.5,0.8;;dlg_delete_content_confirm;",
-			fgettext("Delete"), ";true;false]",
-
-		btn_style("dlg_delete_content_cancel"),
-		"image_button[7.9,5.3;3.5,0.8;;dlg_delete_content_cancel;",
-			fgettext("Cancel"), ";true;false]",
-	}
-
-	return table.concat(retval)
+	return retval
 end
 
 --------------------------------------------------------------------------------
@@ -76,20 +66,10 @@ end
 function create_delete_content_dlg(content)
 	assert(content.name)
 
-	if content.type == "game" then
-		for _, world in ipairs(menudata.worldlist:get_raw_list()) do
-			if world.gameid == content.id then
-				return messagebox("dlg_delete_content",
-					fgettext("You cannot delete this game!") .. "\n" ..
-					fgettext("You have worlds that use it."))
-			end
-		end
-	end
-
 	local retval = dialog_create("dlg_delete_content",
 					delete_content_formspec,
 					delete_content_buttonhandler,
-					nil, true)
+					nil)
 	retval.data.content = content
 	return retval
 end

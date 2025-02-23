@@ -69,11 +69,9 @@ local function get_formspec(data)
 	local mod = data.list:get_list()[data.selected_mod] or {name = ""}
 
 	local retval =
-		"size[11.5,7.5]" ..
-		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. defaulttexturedir_esc .. "bg_common.png;true;40]" ..
-		"background9[0.05,0.05;5.3,6.8;" .. defaulttexturedir_esc .. "desc_bg.png;false;32]" ..
-		"label[0.1,0;" .. fgettext("World:") .. " " .. data.worldspec.name .. "]"
+		"size[11.5,7.5,true]" ..
+		"label[0.5,0;" .. fgettext("World:") .. "]" ..
+		"label[1.75,0;" .. data.worldspec.name .. "]"
 
 	if mod.is_modpack or mod.type == "game" then
 		local info = core.formspec_escape(
@@ -86,103 +84,88 @@ local function get_formspec(data)
 			end
 		end
 		retval = retval ..
-			"textarea[0.4,0.8;5.2,6.8;;" ..
-				fgettext("Information:") .. ";" .. info .. "]"
+			"textarea[0.25,0.7;5.75,7.2;;" .. info .. ";]"
 	else
 		local hard_deps, soft_deps = pkgmgr.get_dependencies(mod.path)
 		local hard_deps_str = table.concat(hard_deps, ",")
 		local soft_deps_str = table.concat(soft_deps, ",")
 
 		retval = retval ..
-			"label[0.1,0.7;" .. fgettext("Mod:") .. " " .. mod.name .. "]"
+			"label[0,0.7;" .. fgettext("Mod:") .. "]" ..
+			"label[0.75,0.7;" .. mod.name .. "]"
 
 		if hard_deps_str == "" then
 			if soft_deps_str == "" then
 				retval = retval ..
-					"label[0.1,1.25;" ..
+					"label[0,1.25;" ..
 					fgettext("No (optional) dependencies") .. "]"
 			else
 				retval = retval ..
-					"label[0.1,1.25;" .. fgettext("No hard dependencies") ..
+					"label[0,1.25;" .. fgettext("No hard dependencies") ..
 					"]" ..
-					"label[0.1,1.75;" .. fgettext("Optional dependencies:") ..
+					"label[0,1.75;" .. fgettext("Optional dependencies:") ..
 					"]" ..
-					"textlist[0.1,2.25;5,4;world_config_optdepends;" ..
+					"textlist[0,2.25;5,4;world_config_optdepends;" ..
 					soft_deps_str .. ";0]"
 			end
 		else
 			if soft_deps_str == "" then
 				retval = retval ..
-					"label[0.1,1.25;" .. fgettext("Dependencies:") .. "]" ..
-					"textlist[0.1,1.75;5,4;world_config_depends;" ..
+					"label[0,1.25;" .. fgettext("Dependencies:") .. "]" ..
+					"textlist[0,1.75;5,4;world_config_depends;" ..
 					hard_deps_str .. ";0]" ..
-					"label[0.1,6;" .. fgettext("No optional dependencies") .. "]"
+					"label[0,6;" .. fgettext("No optional dependencies") .. "]"
 			else
 				retval = retval ..
-					"label[0.1,1.25;" .. fgettext("Dependencies:") .. "]" ..
-					"textlist[0.1,1.75;5,2.125;world_config_depends;" ..
+					"label[0,1.25;" .. fgettext("Dependencies:") .. "]" ..
+					"textlist[0,1.75;5,2.125;world_config_depends;" ..
 					hard_deps_str .. ";0]" ..
-					"label[0.1,3.9;" .. fgettext("Optional dependencies:") ..
+					"label[0,3.9;" .. fgettext("Optional dependencies:") ..
 					"]" ..
-					"textlist[0.1,4.375;5,1.8;world_config_optdepends;" ..
+					"textlist[0,4.375;5,1.8;world_config_optdepends;" ..
 					soft_deps_str .. ";0]"
 			end
 		end
 	end
 
 	retval = retval ..
-		btn_style("btn_config_world_save", "green") ..
-		"button[5.5,7.1;3,0.5;btn_config_world_save;" ..
+		"button[3.25,7;2.5,0.5;btn_config_world_save;" ..
 		fgettext("Save") .. "]" ..
-		btn_style("btn_config_world_cancel") ..
-		"button[8.5,7.1;3,0.5;btn_config_world_cancel;" ..
+		"button[5.75,7;2.5,0.5;btn_config_world_cancel;" ..
 		fgettext("Cancel") .. "]" ..
-		btn_style("btn_config_world_cdb") ..
-		"button[-0.05,7.1;5.5,0.5;btn_config_world_cdb;" ..
-		fgettext("Find More Mods") .. "]" ..
-		"image[0.09,7.05;0.6,0.6;" .. defaulttexturedir_esc .. "gui" ..
-		DIR_DELIM_esc .. "btn_download.png]"
+		"button[9,7;2.5,0.5;btn_config_world_cdb;" ..
+		fgettext("Find More Mods") .. "]"
 
 	if mod.name ~= "" and not mod.is_game_content then
 		if mod.is_modpack then
 
 			if pkgmgr.is_modpack_entirely_enabled(data, mod.name) then
 				retval = retval ..
-					btn_style("btn_mod_disable", "yellow") ..
-					"button[5.5,0.025;3.3,0.5;btn_mod_disable;" ..
+					"button[5.5,0.125;3,0.5;btn_mp_disable;" ..
 					fgettext("Disable modpack") .. "]"
 			else
 				retval = retval ..
-					btn_style("btn_mod_enable", "green") ..
-					"button[5.5,0.025;3.3,0.5;btn_mod_enable;" ..
+					"button[5.5,0.125;3,0.5;btn_mp_enable;" ..
 					fgettext("Enable modpack") .. "]"
 			end
 		else
 			retval = retval ..
-				"real_coordinates[true]" ..
-				checkbox(7.3, 0.64, mod.enabled and "btn_mod_disable" or "btn_mod_enable",
-					fgettext("Enabled"), mod.enabled) ..
-				"real_coordinates[false]"
+				"checkbox[5.5,-0.125;cb_mod_enable;" .. fgettext("enabled") ..
+				";" .. tostring(mod.enabled) .. "]"
 		end
 	end
 	if enabled_all then
 		retval = retval ..
-			btn_style("btn_disable_all_mods", "yellow") ..
-			"button[8.8,0.025;2.695,0.5;btn_disable_all_mods;" ..
+			"button[8.95,0.125;2.5,0.5;btn_disable_all_mods;" ..
 			fgettext("Disable all") .. "]"
 	else
 		retval = retval ..
-			btn_style("btn_enable_all_mods", "green") ..
-			"button[8.8,0.025;2.695,0.5;btn_enable_all_mods;" ..
+			"button[8.95,0.125;2.5,0.5;btn_enable_all_mods;" ..
 			fgettext("Enable all") .. "]"
 	end
 	return retval ..
-		"background9[5.6,0.85;5.8,6;" .. defaulttexturedir_esc .. "gui" .. DIR_DELIM_esc ..
-			"worldlist_bg.png;false;40]" ..
 		"tablecolumns[color;tree;text]" ..
-		"tableoptions[background=#0000;border=false]" ..
-		scrollbar_style("world_config_modlist") ..
-		"table[5.58,0.84;5.59,5.82;world_config_modlist;" ..
+		"table[5.5,0.75;5.75,6;world_config_modlist;" ..
 		pkgmgr.render_packagelist(data.list) .. ";" .. data.selected_mod .."]"
 end
 
@@ -204,9 +187,14 @@ local function handle_buttons(this, fields)
 		return true
 	end
 
-	if fields.btn_mod_enable ~= nil or
-			fields.btn_mod_disable then
-		pkgmgr.enable_mod(this, fields.btn_mod_enable ~= nil)
+	if fields.cb_mod_enable ~= nil then
+		pkgmgr.enable_mod(this, core.is_yes(fields.cb_mod_enable))
+		return true
+	end
+
+	if fields.btn_mp_enable ~= nil or
+			fields.btn_mp_disable then
+		pkgmgr.enable_mod(this, fields.btn_mp_enable ~= nil)
 		return true
 	end
 

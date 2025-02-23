@@ -26,9 +26,6 @@
 -- element.getFormspec() returns formspec of tabview                          --
 --------------------------------------------------------------------------------
 
-local fmt = string.format
-local tconcat = table.concat
-
 --------------------------------------------------------------------------------
 local function add_tab(self,tab)
 	assert(tab.size == nil or (type(tab.size) == table and
@@ -49,20 +46,9 @@ local function add_tab(self,tab)
 		tabdata = {},
 	}
 
-	-- Hidden tabs have a negative index
-	local i
-	if tab.hidden then
-		newtab.tabdata.hidden = true
-		i = -1
-		while self.tablist[i] do
-			i = i - 1
-		end
-	else
-		i = #self.tablist + 1
-	end
-	self.tablist[i] = newtab
+	self.tablist[#self.tablist + 1] = newtab
 
-	if self.last_tab_index == i then
+	if self.last_tab_index == #self.tablist then
 		self.current_tab = tab.name
 		if tab.on_activate ~= nil then
 			tab.on_activate(nil,tab.name)
@@ -71,88 +57,30 @@ local function add_tab(self,tab)
 end
 
 --------------------------------------------------------------------------------
-local function add_button_header(self, fs, fs_w)
-	local visible_tabs = {}
-	for _, tab in ipairs(self.tablist) do
-		if not tab.hidden and tab.caption ~= "" then
-			visible_tabs[#visible_tabs + 1] = tab
-		end
-	end
-
-	local x = 1.5
-	local w = (fs_w - 0.53) / #visible_tabs
-	for i = 1, #visible_tabs do
-		local caption = visible_tabs[i].caption
-		local side = i == 1 and "left" or (i < #visible_tabs and "middle" or "right")
-		local btn_name = self.name .. "_" .. i
-		if i == math.abs(self.last_tab_index) then
-			side = side .. "_pressed"
-		end
-
-		fs[#fs + 1] = btn_style(btn_name, side)
-		fs[#fs + 1] = fmt("style[%s;content_offset=0;font_size=+1]", btn_name)
-		fs[#fs + 1] = fmt("image_button[%s,0.25;%s,0.9;;%s;%s;true;false]",
-			x, w + 0.03, btn_name, caption)
-		x = x + w
-	end
-end
-
---------------------------------------------------------------------------------
 local function get_formspec(self)
-	if (self.hidden or (self.parent and self.parent.hidden)) then
-		return ""
-	end
+	local formspec = ""
 
-	local fs = {}
+	if not self.hidden and (self.parent == nil or not self.parent.hidden) then
 
-	local current_tab = self.tablist[self.last_tab_index]
-	local content, prepend_override = current_tab.get_formspec(self,
-		current_tab.name, current_tab.tabdata, current_tab.size)
-	local real_coords = current_tab.formspec_version and current_tab.formspec_version > 1
-	local w, h
-	if prepend_override then
-		fs[#fs + 1] = prepend_override
-	elseif not self.parent then
-		fs[#fs + 1] = "formspec_version[4]"
-
-		local s = current_tab.tabsize or self
-		w, h = s.width, s.height
-		if not real_coords then
-			w = w * 1.25 + 0.6
-			h = h * 1.15 + 0.9
+		if self.parent == nil then
+			local tsize = self.tablist[self.last_tab_index].tabsize or
+					{width=self.width, height=self.height}
+			formspec = formspec ..
+					string.format("size[%f,%f,%s]",tsize.width,tsize.height,
+						dump(self.fixed_size))
 		end
-		fs[#fs + 1] = fmt("size[%s,%s]", w + 2.5, h + 1.15)
-
-		-- Background
-		fs[#fs + 1] = "bgcolor[;neither]"
-		fs[#fs + 1] = "listcolors[#000;#000;#000;#dff6f5;#302c2e]"
-		fs[#fs + 1] = fmt("background9[1.25,0;%s,%s;%sbg_common.png;false;32]",
-			w, h + 1.15, defaulttexturedir_esc)
-
-		add_button_header(self, fs, w)
-
-		-- This container isn't ideal for real_coordinates formspecs but
-		-- keeps compatibility with existing code
-		fs[#fs + 1] = "container[1,1]"
-		fs[#fs + 1] = "real_coordinates[false]"
+		formspec = formspec .. self:tab_header()
+		formspec = formspec ..
+				self.tablist[self.last_tab_index].get_formspec(
+					self,
+					self.tablist[self.last_tab_index].name,
+					self.tablist[self.last_tab_index].tabdata,
+					self.tablist[self.last_tab_index].tabsize
+					)
 	end
-
-	fs[#fs + 1] = content
-
-	if not prepend_override and not self.parent then
-		-- Make sure that real_coordinates is enabled
-		fs[#fs + 1] = "real_coordinates[true]"
-		fs[#fs + 1] = "container_end[]"
-
-		-- Disable real_coordinates again in case there are other UI elements
-		-- (like the game switcher in buttonbar.lua)
-		fs[#fs + 1] = "real_coordinates[false]"
-	end
-
-	return tconcat(fs)
+	return formspec
 end
 
-local set_tab_by_name
 --------------------------------------------------------------------------------
 local function handle_buttons(self,fields)
 
@@ -207,12 +135,30 @@ local function handle_events(self,event)
 	return false
 end
 
+
+--------------------------------------------------------------------------------
+local function tab_header(self)
+
+	local toadd = ""
+
+	for i=1,#self.tablist,1 do
+
+		if toadd ~= "" then
+			toadd = toadd .. ","
+		end
+
+		toadd = toadd .. self.tablist[i].caption
+	end
+	return string.format("tabheader[%f,%f;%s;%s;%i;true;false]",
+			self.header_x, self.header_y, self.name, toadd, self.last_tab_index);
+end
+
 --------------------------------------------------------------------------------
 local function switch_to_tab(self, index)
 	--first call on_change for tab to leave
 	if self.tablist[self.last_tab_index].on_change ~= nil then
 		self.tablist[self.last_tab_index].on_change("LEAVE",
-				self.current_tab, self.tablist[index].name, self)
+				self.current_tab, self.tablist[index].name)
 	end
 
 	--update tabview data
@@ -227,46 +173,27 @@ local function switch_to_tab(self, index)
 	-- call for tab to enter
 	if self.tablist[index].on_change ~= nil then
 		self.tablist[index].on_change("ENTER",
-				old_tab,self.current_tab,self)
+				old_tab,self.current_tab)
 	end
 end
 
 --------------------------------------------------------------------------------
-local function handle_tab_buttons(self, fields)
+local function handle_tab_buttons(self,fields)
 	--save tab selection to config file
-	--[[if fields[self.name] then
+	if fields[self.name] then
 		local index = tonumber(fields[self.name])
 		switch_to_tab(self, index)
 		return true
-	end]]
-
-	local name_prefix = self.name .. "_"
-	local name_prefix_len = #name_prefix
-	for field in pairs(fields) do
-		if field:sub(1, name_prefix_len) == name_prefix then
-			local index = tonumber(field:sub(name_prefix_len + 1))
-			if math.abs(self.last_tab_index) == index then return false end
-			switch_to_tab(self, index)
-			return true
-		end
 	end
 
 	return false
 end
 
 --------------------------------------------------------------------------------
--- Declared as a local variable above handle_buttons
-function set_tab_by_name(self, name)
-	-- This uses pairs so that hidden tabs (with a negative index) are searched
-	-- as well
-	for i, tab in pairs(self.tablist) do
-		if tab.name == name then
+local function set_tab_by_name(self, name)
+	for i=1,#self.tablist,1 do
+		if self.tablist[i].name == name then
 			switch_to_tab(self, i)
-
-			if name ~= "local" then
-				mm_texture.set_dirt_bg()
-			end
-
 			return true
 		end
 	end
@@ -292,7 +219,7 @@ local function show_tabview(self)
 	-- call for tab to enter
 	if self.tablist[self.last_tab_index].on_change ~= nil then
 		self.tablist[self.last_tab_index].on_change("ENTER",
-				nil,self.current_tab,self)
+				nil,self.current_tab)
 	end
 end
 
@@ -314,6 +241,7 @@ local tabview_metatable = {
 			function(self,handler) self.glb_evt_handler = handler end,
 	set_fixed_size =
 			function(self,state) self.fixed_size = state end,
+	tab_header = tab_header,
 	handle_tab_buttons = handle_tab_buttons
 }
 

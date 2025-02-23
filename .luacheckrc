@@ -70,6 +70,7 @@ files["builtin/mainmenu"] = {
 
 	read_globals = {
 		"PLATFORM",
+		"btn_style",
 	},
 }
 
