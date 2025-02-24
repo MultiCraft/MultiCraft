@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-OPENAL_VERSION=1.23.1
+OPENAL_VERSION=1.24.2
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps

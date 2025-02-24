@@ -118,7 +118,6 @@
 		8453A49E24DB22F00087ECF9 /* client in Resources */ = {isa = PBXBuildFile; fileRef = 8453A49D24DB22F00087ECF9 /* client */; };
 		845856B324B1322D0040BA4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 845856B224B1322D0040BA4F /* Assets.xcassets */; };
 		84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0624B1348B0040BA4F /* libcurl.tbd */; };
-		84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0B24B134D90040BA4F /* libiconv.tbd */; };
 		8458610724B13BDF0040BA4F /* mini-gmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 8458610524B13BDF0040BA4F /* mini-gmp.c */; };
 		8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8458610924B13BF90040BA4F /* jsoncpp.cpp */; };
 		8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458616724B1B7990040BA4F /* libIrrlicht.a */; };
@@ -520,7 +519,6 @@
 		84585C0024B1347B0040BA4F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		84585C0424B134850040BA4F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		84585C0624B1348B0040BA4F /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
-		84585C0B24B134D90040BA4F /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		8458610524B13BDF0040BA4F /* mini-gmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "mini-gmp.c"; path = "../../../lib/gmp/mini-gmp.c"; sourceTree = "<group>"; };
 		8458610624B13BDF0040BA4F /* mini-gmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "mini-gmp.h"; path = "../../../lib/gmp/mini-gmp.h"; sourceTree = "<group>"; };
 		8458610924B13BF90040BA4F /* jsoncpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jsoncpp.cpp; path = ../../../lib/jsoncpp/jsoncpp.cpp; sourceTree = "<group>"; };
@@ -870,7 +868,6 @@
 				841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */,
 				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
 				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
-				84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */,
 				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
 				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
 				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
@@ -1076,7 +1073,6 @@
 				84585C0624B1348B0040BA4F /* libcurl.tbd */,
 				844436EE28DA80C100662A9D /* libfreetype.a */,
 				84EEE5E62782728E00F61929 /* libintl.a */,
-				84585C0B24B134D90040BA4F /* libiconv.tbd */,
 				8458616724B1B7990040BA4F /* libIrrlicht.a */,
 				8488539E28DA4851004AD90F /* libjpeg.a */,
 				841AD8A428D0C1810042E335 /* libleveldb.a */,
@@ -2127,7 +2123,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 60;
+				CURRENT_PROJECT_VERSION = 70;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2169,7 +2165,7 @@
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 MultiCraft Studio OÜ. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MARKETING_VERSION = 2.0.9;
@@ -2202,7 +2198,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 60;
+				CURRENT_PROJECT_VERSION = 70;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2245,7 +2241,7 @@
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 MultiCraft Studio OÜ. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MARKETING_VERSION = 2.0.9;
