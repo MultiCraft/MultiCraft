@@ -1007,7 +1007,15 @@ bool UDPPeer::processReliableSendCommand(
 							- BASE_HEADER_SIZE
 							- RELIABLE_HEADER_SIZE;
 
-	sanity_check(c.data.getSize() < MAX_RELIABLE_WINDOW_SIZE*512);
+//	sanity_check(c.data.getSize() < MAX_RELIABLE_WINDOW_SIZE*512);
+
+	if (c.data.getSize() >= MAX_RELIABLE_WINDOW_SIZE * 512) {
+		errorstream << m_connection->getDesc()
+			<< " Command data size exceeded: " << c.data.getSize()
+			<< " bytes, peer_id: " << c.peer_id
+			<< ", channel: " << c.channelnum << std::endl;
+		return false;
+	}
 
 	std::list<SharedBuffer<u8>> originals;
 	u16 split_sequence_number = chan.readNextSplitSeqNum();
