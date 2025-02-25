@@ -342,11 +342,7 @@ void set_default_settings()
 	settings->setDefault("emoji_font_system_paths", "");
 #endif
 
-#if !defined(__ANDROID__) && !defined(__APPLE__)
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallbackFull.ttf"));
-#else
-	settings->setDefault("fallback_font_path", MultiCraftFont);
-#endif
 
 	settings->setDefault("fallback_font_shadow", "1");
 	settings->setDefault("fallback_font_shadow_alpha", "128");
