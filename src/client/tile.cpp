@@ -210,6 +210,9 @@ public:
 			m_image.second->drop();
 		}
 		m_images.clear();
+
+		// I have no idea if this is needed, but it won't hurt
+		m_image_files.clear();
 	}
 	void insert(const std::string &name, video::IImage *img, bool prefer_local)
 	{
@@ -257,6 +260,10 @@ public:
 				n->second->drop();
 		}
 
+		// TODO: Maybe skip storing this if a texture pack is active? At the
+		// moment the image is stored, loaded, then discarded by the
+		// prefer_local check (as it was before this PR)
+
 		m_image_files[name] = data;
 	}
 	video::IImage* get(const std::string &name)
@@ -270,13 +277,6 @@ public:
 	// Primarily fetches from cache, secondarily tries to read from filesystem
 	video::IImage *getOrLoad(const std::string &name)
 	{
-		std::map<std::string, video::IImage*>::iterator n;
-		n = m_images.find(name);
-		if (n != m_images.end()){
-			n->second->grab(); // Grab for caller
-			return n->second;
-		}
-
 		const auto image_data = m_image_files.find(name);
 		if (image_data != m_image_files.end()) {
 			// Read from compressed RAM	copy
@@ -287,12 +287,16 @@ public:
 
 			if (img) {
 				insert(name, img, true);
+				img->drop();
 				// warningstream << "Loaded image file " << name << " from RAM cache! Images still in cache: " << m_image_files.size() << std::endl;
-
-				// loadImageFromString does not call drop(), so we don't have
-				// to call grab() again
-				return get(name);
 			}
+		}
+
+		std::map<std::string, video::IImage*>::iterator n;
+		n = m_images.find(name);
+		if (n != m_images.end()){
+			n->second->grab(); // Grab for caller
+			return n->second;
 		}
 
 		video::IVideoDriver *driver = RenderingEngine::get_video_driver();
