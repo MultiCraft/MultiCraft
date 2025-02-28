@@ -906,7 +906,7 @@ fallback_font_shadow_alpha (Fallback font shadow alpha) int 128 0 255
 #    If “freetype” setting is enabled: Must be a TrueType font.
 #    If “freetype” setting is disabled: Must be a bitmap or XML vectors font.
 #    This font will be used for certain languages or if the default font is unavailable.
-fallback_font_path (Fallback font path) filepath fonts/DroidSansFallbackFull.ttf
+fallback_font_path (Fallback font path) filepath fonts/DroidSansFallback.ttf
 
 #    Font size of the recent chat text and chat prompt in point (pt).
 #    Value 0 will use the default font size.

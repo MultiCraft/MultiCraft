@@ -307,10 +307,11 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 
 	std::string wanted_font_path;
 	wanted_font_path = g_settings->get(setting_prefix + "font_path" + setting_suffix);
+	std::string fallback_font_path = g_settings->get("fallback_font_path");
 
 	std::string fallback_settings[] = {
 		wanted_font_path,
-		g_settings->get("fallback_font_path"),
+		fallback_font_path,
 		Settings::getLayer(SL_DEFAULTS)->get(setting_prefix + "font_path")
 	};
 
@@ -339,6 +340,9 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 			// Load fallback emoji font if system fonts are not available
 			if (!success)
 				font->loadAdditionalFont(emoji_font_path.c_str(), true);
+
+			if (font_path != fallback_font_path)
+				font->loadAdditionalFont(fallback_font_path.c_str(), false);
 
 			return font;
 		}
