@@ -85,7 +85,7 @@ tasks.register('prepareAssetsFiles') {
 		from "../native/deps/irrlicht/shaders" into "${assetsFolder}/client/shaders/Irrlicht"
 	}
 	copy {
-		from "${projRoot}/fonts/DroidSansFallbackFull.ttf" into "${assetsFolder}/fonts"
+		from "${projRoot}/fonts/DroidSansFallback.ttf" into "${assetsFolder}/fonts"
 		from "${projRoot}/fonts/MultiCraftFont.ttf" into "${assetsFolder}/fonts"
 		from "${projRoot}/fonts/OpenMoji.ttf" into "${assetsFolder}/fonts"
 	}

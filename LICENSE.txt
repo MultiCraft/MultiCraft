@@ -237,7 +237,7 @@ Arimo - Apache License, version 2.0
 Cousine - Apache License, version 2.0
   Digitized data copyright (c) 2010-2012 Google Corporation.
 
-DroidSansFallBackFull:
+DroidSansFallBack:
 
   Copyright (C) 2008 The Android Open Source Project
 
