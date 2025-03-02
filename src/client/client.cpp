@@ -138,7 +138,6 @@ Client::Client(
 	m_round_screen = g_settings->getU16("round_screen");
 	m_hud_scaling = g_settings->getFloat("hud_scaling");
 	m_inv_item_anim_enabled = g_settings->getBool("inventory_items_animations");
-	m_convert_to_16bit = g_settings->getBool("convert_to_16bit");
 }
 
 void Client::loadMods()
@@ -714,65 +713,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 	if (!name.empty()) {
 		TRACESTREAM(<< "Client: Attempting to load image "
 			<< "file \"" << filename << "\"" << std::endl);
-
-		io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
-		video::IVideoDriver *vdrv = RenderingEngine::get_video_driver();
-
-		// Silly irrlicht's const-incorrectness
-		Buffer<char> data_rw(data.c_str(), data.size());
-
-		// Create an irrlicht memory file
-		io::IReadFile *rfile = irrfs->createMemoryReadFile(
-				*data_rw, data_rw.getSize(), "_tempreadfile");
-
-		FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
-
-		// Read image
-		video::IImage *img = vdrv->createImageFromFile(rfile);
-		if (!img) {
-			errorstream<<"Client: Cannot create image from data of "
-					<<"file \""<<filename<<"\""<<std::endl;
-			rfile->drop();
-			return false;
-		}
-
-#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
-		if (getConvertTo16bitEnabled()) {
-			irr::video::ECOLOR_FORMAT format = img->getColorFormat();
-			irr::video::ECOLOR_FORMAT new_format = irr::video::ECF_UNKNOWN;
-
-			if (format == irr::video::ECF_R8G8B8) {
-				new_format = irr::video::ECF_R5G6B5;
-			} else if (format == irr::video::ECF_A8R8G8B8) {
-				bool can_convert = true;
-
-				u32 data_size = img->getImageDataSizeInBytes();
-				u8 *data = (u8*) img->getData();
-				for (u32 i = 0; i < data_size; i += 4) {
-					u8 alpha = data[i + 3];
-					if (alpha > 0 && alpha < 255) {
-						can_convert = false;
-						break;
-					}
-				}
-
-				if (can_convert)
-					new_format = irr::video::ECF_A1R5G5B5;
-			}
-
-			if (new_format != irr::video::ECF_UNKNOWN) {
-				core::dimension2du dimensions = img->getDimension();
-				irr::video::IImage* converted_img = vdrv->createImage(new_format, dimensions);
-				img->copyTo(converted_img, core::position2d<s32>(0, 0));
-				img->drop();
-				img = converted_img;
-			}
-		}
-#endif
-
-		m_tsrc->insertSourceImage(filename, img);
-		img->drop();
-		rfile->drop();
+		m_tsrc->insertSourceImage(filename, data);
 		return true;
 	}
 
