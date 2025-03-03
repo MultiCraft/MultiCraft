@@ -1259,7 +1259,7 @@ bool Game::init(
 		u16 port,
 		const SubgameSpec &gamespec)
 {
-	texture_src = createTextureSource();
+	texture_src = createTextureSource(false);
 
 	showOverlayMessage(N_("Loading..."), 0, 0);
 
