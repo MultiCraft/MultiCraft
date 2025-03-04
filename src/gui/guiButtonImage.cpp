@@ -35,7 +35,7 @@ GUIButtonImage::GUIButtonImage(gui::IGUIEnvironment *environment,
 	: GUIButton(environment, parent, id, rectangle, tsrc, noclip)
 {
 	GUIButton::setScaleImage(true);
-	m_image = make_irr<GUIAnimatedImage>(environment, this, id, rectangle);
+	m_image = make_irr<GUIAnimatedImage>(environment, this, id, rectangle, tsrc, true);
 	sendToBack(m_image.get());
 }
 
@@ -55,15 +55,13 @@ void GUIButtonImage::setFromStyle(const StyleSpec &style)
 {
 	GUIButton::setFromStyle(style);
 
-	video::IVideoDriver *driver = Environment->getVideoDriver();
-
 	if (style.isNotDefault(StyleSpec::FGIMG)) {
-		video::ITexture *texture = style.getTexture(StyleSpec::FGIMG,
-				getTextureSource());
+		const std::string texture_name = style.get(StyleSpec::FGIMG, "");
 
-		setForegroundImage(::grab(guiScalingImageButton(driver, texture,
-				AbsoluteRect.getWidth(), AbsoluteRect.getHeight())),
-				style.getRect(StyleSpec::FGIMG_MIDDLE, m_image->getMiddleRect()));
+		// Use setTextureName instead of setForegroundImage
+		m_foreground_image = nullptr;
+		m_image->setTextureName(texture_name);
+		m_image->setMiddleRect(style.getRect(StyleSpec::FGIMG_MIDDLE, m_image->getMiddleRect()));
 	} else {
 		setForegroundImage();
 	}
