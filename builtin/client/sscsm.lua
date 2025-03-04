@@ -77,8 +77,10 @@ do
 	end
 
 	local after = core.after
-	safe_funcs[after] = function(n, ...)
-		if type(n) == "number" then return after(n, pcall, ...) end
+	safe_funcs[after] = function(n, func, ...)
+		return after(n, function(func, ...)
+			log_pcall(pcall(func, ...))
+		end, func, ...)
 	end
 
 	local on_fs_input = core.register_on_formspec_input
