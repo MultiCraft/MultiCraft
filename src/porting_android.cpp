@@ -186,12 +186,12 @@ std::string getCacheDir()
 
 void initializePaths()
 {
-	std::string path_storage = SDL_AndroidGetExternalStoragePath();
-	std::string path_data = SDL_AndroidGetInternalStoragePath();
+	const char *path_storage = SDL_AndroidGetExternalStoragePath();
+	const char *path_data = SDL_AndroidGetInternalStoragePath();
 
 	path_user = path_storage;
 	path_share = path_data;
-	path_locale = path_data + DIR_DELIM + "locale";
+	path_locale = path_share + DIR_DELIM + "locale";
 	path_cache = getCacheDir();
 }
 

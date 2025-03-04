@@ -256,19 +256,15 @@ class GameActivity : SDLActivity() {
 		return value
 	}
 
-	@Suppress("unused")
 	fun getDensity() = resources.displayMetrics.density
 
-	@Suppress("unused")
 	fun notifyServerConnect(multiplayer: Boolean) {
 		isMultiPlayer = multiplayer
 	}
 
-	@Suppress("unused")
 	fun notifyExitGame() {
 	}
 
-	@Suppress("unused")
 	fun openURI(uri: String?) {
 		val builder = CustomTabsIntent.Builder()
 		builder.setShareState(SHARE_STATE_OFF)
@@ -281,30 +277,27 @@ class GameActivity : SDLActivity() {
 		}
 	}
 
-	@Suppress("unused")
 	fun finishGame(exc: String?) {
+		print(exc)
 		finishApp(true)
 	}
 
-	@Suppress("unused")
 	fun handleError(exc: String?) {
+		print(exc)
 	}
 
-	@Suppress("unused")
 	fun upgrade(item: String) {
+		print(item)
 	}
 
-	@Suppress("unused")
 	fun getSecretKey(key: String): String {
 		return key
 	}
 
-	@Suppress("unused")
 	fun getRoundScreen(): Int {
 		return radius
 	}
 
-	@Suppress("unused")
 	fun getCpuArchitecture(): String {
 		return System.getProperty("os.arch") ?: "null"
 	}
