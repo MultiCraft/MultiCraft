@@ -211,8 +211,8 @@ do
 			"register_on_receiving_chat_message",
 			"register_on_sending_chat_message", "register_on_tab", "rgba",
 			"run_server_chatcommand", "send_chat_message", "send_respawn",
-			"serialize", "sha1", "show_formspec", "sound_play", "sound_stop",
-			"string_to_area", "string_to_pos", "string_to_privs",
+			"serialize", "sha1", "show_formspec", "sound_fade", "sound_play",
+			"sound_stop", "string_to_area", "string_to_pos", "string_to_privs",
 			"strip_background_colors", "strip_colors",
 			"strip_foreground_colors", "translate", "wrap_text",
 			"write_json"}) do
