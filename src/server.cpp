@@ -335,7 +335,17 @@ Server::~Server()
 		}
 
 		infostream << "Server: Saving environment metadata" << std::endl;
-		m_env->saveMeta();
+		try {
+			m_env->saveMeta();
+		} catch (const SerializationError &e) {
+			if (m_on_shutdown_errmsg) {
+				if (m_on_shutdown_errmsg->empty()) {
+					*m_on_shutdown_errmsg = std::string("ServerEnvironment: ") + e.what();
+				} else {
+					*m_on_shutdown_errmsg += std::string("\nServerEnvironment: ") + e.what();
+				}
+			}
+		}
 	}
 
 	// Stop threads
