@@ -1087,7 +1087,7 @@
 # screenshot_path = screenshots
 
 #    Format of screenshots.
-#    type: enum values: png, jpg, bmp, pcx, ppm, tga
+#    type: enum values: png, jpg, bmp, tga
 # screenshot_format = png
 
 #    Screenshot quality. Only used for JPEG format.

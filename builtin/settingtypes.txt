@@ -917,7 +917,7 @@ chat_font_size (Chat font size) int 0
 screenshot_path (Screenshot folder) path screenshots
 
 #    Format of screenshots.
-screenshot_format (Screenshot format) enum png png,jpg,bmp,pcx,ppm,tga
+screenshot_format (Screenshot format) enum png png,jpg,bmp,tga
 
 #    Screenshot quality. Only used for JPEG format.
 #    1 means worst quality; 100 means best quality.

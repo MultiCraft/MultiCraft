@@ -93,7 +93,6 @@ std::string getImagePath(std::string path)
 	// A NULL-ended list of possible image extensions
 	const char *extensions[] = {
 		"png", "jpg", "bmp", "tga",
-		"pcx", "ppm", "psd", "wal", "rgb",
 		NULL
 	};
 	// If there is no extension, add one
