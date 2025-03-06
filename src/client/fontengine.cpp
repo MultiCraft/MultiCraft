@@ -216,8 +216,11 @@ void FontEngine::readSettings()
 		The fallback font is (normally) required for languages with
 		non-Latin script, like Chinese.
 		When in doubt, test your translation. */
-		m_currentMode = is_yes(gettext("needs_fallback_font")) ?
-				FM_Fallback : FM_Standard;
+		//m_currentMode = is_yes(gettext("needs_fallback_font")) ?
+		//		FM_Fallback : FM_Standard;
+
+		// Never use FM_Fallback mode because the fallback font is loaded anyway
+		m_currentMode = FM_Standard;
 
 		m_default_bold = g_settings->getBool("font_bold");
 		m_default_italic = g_settings->getBool("font_italic");
