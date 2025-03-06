@@ -52,9 +52,13 @@ static video::SMaterial baseMaterial()
 	return mat;
 };
 
+
 Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc) :
-		scene::ISceneNode(RenderingEngine::get_scene_manager()->getRootSceneNode(),
-			RenderingEngine::get_scene_manager(), id)
+		Sky(id, tsrc, ssrc, RenderingEngine::get_scene_manager())
+{}
+
+Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager *smgr) :
+		scene::ISceneNode(smgr->getRootSceneNode(), smgr, id)
 {
 	setAutomaticCulling(scene::EAC_OFF);
 	m_box.MaxEdge.set(0, 0, 0);
