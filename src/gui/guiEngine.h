@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/sound.h"
 #include "client/tile.h"
 #include "util/enriched_string.h"
+#include "client/sky.h"
 
 /******************************************************************************/
 /* Structs and macros                                                         */
@@ -170,7 +171,7 @@ private:
 	/** pointer to data beeing transfered back to main game handling */
 	MainMenuData            *m_data = nullptr;
 	/** pointer to texture source */
-	ISimpleTextureSource    *m_texture_source = nullptr;
+	ITextureSource          *m_texture_source = nullptr;
 	/** pointer to soundmanager*/
 	ISoundManager           *m_sound_manager = nullptr;
 
@@ -268,6 +269,9 @@ private:
 	bool        m_clouds_enabled = true;
 	/** data used to draw clouds */
 	clouddata   m_cloud;
+
+	IWritableShaderSource *m_shader_src = nullptr;
+	Sky *m_sky = nullptr;
 
 	/** start playing a sound and return handle */
 	s32 playSound(const SimpleSoundSpec &spec, bool looped);

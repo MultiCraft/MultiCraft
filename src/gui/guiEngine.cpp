@@ -104,6 +104,10 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	//create texture source
 	m_texture_source = createTextureSource(true);
 
+	m_shader_src = createShaderSource();
+	if (m_shader_src)
+		m_sky = new Sky(-1, m_texture_source, m_shader_src, m_smgr);
+
 	//create soundmanager
 	MenuMusicFetcher soundfetcher;
 #if USE_SOUND
@@ -231,7 +235,7 @@ void GUIEngine::run()
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
 
-	static const video::SColor sky_color(255, 5, 155, 245);
+	const video::SColor sky_color = m_sky ? m_sky->getSkyColor() : video::SColor(255, 5, 155, 245);
 
 	// Reset fog color
 	{
@@ -286,6 +290,12 @@ void GUIEngine::run()
 
 		if (m_clouds_enabled)
 		{
+			if (m_sky) {
+				m_sky->update(1, 1, 1, true, CAMERA_MODE_FIRST, 0, 0);
+				m_sky->setVisible(true);
+				m_sky->setStarsVisible(true);
+				m_sky->render();
+			}
 			cloudPreProcess();
 			drawOverlay(driver);
 		}
@@ -341,6 +351,10 @@ GUIEngine::~GUIEngine()
 	}
 
 	delete m_texture_source;
+	if (m_shader_src)
+		delete m_shader_src;
+	if (m_sky)
+		m_sky->drop();
 
 	// m_cloud.clouds is g_menuclouds and is dropped elsewhere
 	// if (m_cloud.clouds)
