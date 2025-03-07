@@ -233,4 +233,5 @@ protected:
 	bool m_swipe_started;
 	int m_swipe_start_y;
 	float m_swipe_pos;
+	ParsedText::Element *m_pressed_element = nullptr;
 };

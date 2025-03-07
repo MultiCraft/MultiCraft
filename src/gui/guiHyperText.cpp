@@ -1153,10 +1153,15 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 			return true;
 
 		} else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
+			m_pressed_element = getElementAt(event.MouseInput.X, event.MouseInput.Y);
+
+			if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y)))
+				return true;
+		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
 			ParsedText::Element *element = getElementAt(
 					event.MouseInput.X, event.MouseInput.Y);
 
-			if (element) {
+			if (element && element == m_pressed_element) {
 				for (auto &tag : element->tags) {
 					if (tag->name == "action") {
 						Text = core::stringw(L"action:") +
@@ -1174,6 +1179,7 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 				}
 			}
 
+			m_pressed_element = nullptr;
 			if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y)))
 				return true;
 		}
