@@ -1159,7 +1159,7 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 				return true;
 		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
 			ParsedText::Element *element = getElementAt(
-				event.MouseInput.X, event.MouseInput.Y);
+					event.MouseInput.X, event.MouseInput.Y);
 
 			if (element && element == m_pressed_element) {
 				for (auto &tag : element->tags) {
