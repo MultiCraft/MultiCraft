@@ -210,7 +210,9 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 	return image;
 }
 
-void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags)
+void SGUITTGlyph::preload(u32 char_index, FT_Face face,
+		video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags,
+		bool bold, bool italic)
 {
 	if (isLoaded) return;
 
@@ -232,7 +234,23 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face, video::IVideoDriver* dri
 
 	FT_GlyphSlot glyph = face->glyph;
 
-	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
+	if (!FT_HAS_COLOR(face)) {
+		if (bold)
+			FT_Outline_Embolden(&(glyph->outline), face->size->metrics.height * 3 / 100);
+
+		if (italic) {
+			FT_Matrix italic_matrix;
+			float slant = 0.2;
+			italic_matrix.xx = 0x10000;
+			italic_matrix.xy = (FT_Fixed)(slant * 0x10000);
+			italic_matrix.yx = 0;
+			italic_matrix.yy = 0x10000;
+
+			FT_Outline_Transform(&(glyph->outline), &italic_matrix);
+		}
+	}
+
+	if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0) {
 		FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
 	}
 
@@ -296,7 +314,10 @@ void SGUITTGlyph::unload()
 
 //////////////////////
 
-CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env, const io::path& filename, const u32 size, const bool antialias, const bool transparency, const u32 shadow, const u32 shadow_alpha)
+CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
+		const io::path& filename, const u32 size, const bool antialias,
+		const bool transparency, const bool bold, const bool italic,
+		const u32 shadow, const u32 shadow_alpha)
 {
 	if (!c_libraryLoaded)
 	{
@@ -314,11 +335,15 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env, const io::path& filen
 	}
 
 	font->shadow_alpha = shadow_alpha;
+	font->bold = bold;
+	font->italic = italic;
 
 	return font;
 }
 
-CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device, const io::path& filename, const u32 size, const bool antialias, const bool transparency)
+CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
+		const io::path& filename, const u32 size, const bool antialias,
+		const bool transparency, const bool bold, const bool italic)
 {
 	if (!c_libraryLoaded)
 	{
@@ -336,17 +361,26 @@ CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device, const io::path& fil
 		return 0;
 	}
 
+	font->bold = bold;
+	font->italic = italic;
+
 	return font;
 }
 
-CGUITTFont* CGUITTFont::create(IGUIEnvironment *env, const io::path& filename, const u32 size, const bool antialias, const bool transparency)
+CGUITTFont* CGUITTFont::create(IGUIEnvironment *env, const io::path& filename,
+		const u32 size, const bool antialias, const bool transparency,
+		const bool bold, const bool italic)
 {
-	return CGUITTFont::createTTFont(env, filename, size, antialias, transparency);
+	return CGUITTFont::createTTFont(env, filename, size, antialias,
+			transparency, bold, italic);
 }
 
-CGUITTFont* CGUITTFont::create(IrrlichtDevice *device, const io::path& filename, const u32 size, const bool antialias, const bool transparency)
+CGUITTFont* CGUITTFont::create(IrrlichtDevice *device, const io::path& filename,
+		const u32 size, const bool antialias, const bool transparency,
+		const bool bold, const bool italic)
 {
-	return CGUITTFont::createTTFont(device, filename, size, antialias, transparency);
+	return CGUITTFont::createTTFont(device, filename, size, antialias,
+			transparency, bold, italic);
 }
 
 //////////////////////
@@ -1064,9 +1098,10 @@ begin:
 				if (FT_HAS_COLOR(tt_face))
 					flags |= FT_LOAD_COLOR;
 				else
-					flags |= FT_LOAD_RENDER;
+					flags |= FT_LOAD_DEFAULT;
 
-				glyph->preload(char_index, tt_face, Driver, size, flags);
+				glyph->preload(char_index, tt_face, Driver, size, flags, bold,
+						italic);
 
 				if (!glyph->isLoaded && current_face < tt_faces.size()) {
 					current_face++;
