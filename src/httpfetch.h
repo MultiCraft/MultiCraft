@@ -126,4 +126,4 @@ void httpfetch_caller_free(unsigned long caller);
 // This blocks and therefore should only be used from background threads.
 // Returned is whether the request completed without interruption.
 bool httpfetch_sync_interruptible(const HTTPFetchRequest &fetch_request,
-		HTTPFetchResult &fetch_result, long interval = 100);
+		HTTPFetchResult &fetch_result, long interval = 25);
