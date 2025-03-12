@@ -236,7 +236,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	if (!FT_HAS_COLOR(face)) {
 		if (bold)
-			FT_Outline_Embolden(&(glyph->outline), face->size->metrics.height * 3 / 100);
+			FT_Outline_Embolden(&(glyph->outline), (float)font_size * 2.5f);
 
 		if (italic) {
 			FT_Matrix italic_matrix;
@@ -327,16 +327,17 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 	}
 
 	CGUITTFont* font = new CGUITTFont(env);
+
+	font->shadow_alpha = shadow_alpha;
+	font->bold = bold;
+	font->italic = italic;
+
 	bool ret = font->load(filename, size, antialias, transparency, shadow);
 	if (!ret)
 	{
 		font->drop();
 		return 0;
 	}
-
-	font->shadow_alpha = shadow_alpha;
-	font->bold = bold;
-	font->italic = italic;
 
 	return font;
 }
@@ -353,16 +354,17 @@ CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
 	}
 
 	CGUITTFont* font = new CGUITTFont(device->getGUIEnvironment());
+
+	font->bold = bold;
+	font->italic = italic;
 	font->Device = device;
+
 	bool ret = font->load(filename, size, antialias, transparency, false);
 	if (!ret)
 	{
 		font->drop();
 		return 0;
 	}
-
-	font->bold = bold;
-	font->italic = italic;
 
 	return font;
 }
@@ -981,6 +983,17 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 	}
 	if (text_dimension.Width < line.Width)
 		text_dimension.Width = line.Width;
+
+	if (italic) {
+		float slant = 0.2f;
+		s32 italic_extra_width = static_cast<s32>(max_font_height * slant);
+		text_dimension.Width += italic_extra_width;
+	}
+
+	if (bold) {
+		s32 bold_extra_width = size * 0.1f;
+		text_dimension.Width += bold_extra_width;
+	}
 
 	return text_dimension;
 }
