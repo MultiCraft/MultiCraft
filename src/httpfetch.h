@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include <functional>
 #include <vector>
 #include "util/string.h"
 #include "config.h"
@@ -126,4 +127,5 @@ void httpfetch_caller_free(unsigned long caller);
 // This blocks and therefore should only be used from background threads.
 // Returned is whether the request completed without interruption.
 bool httpfetch_sync_interruptible(const HTTPFetchRequest &fetch_request,
-		HTTPFetchResult &fetch_result, long interval = 25);
+		HTTPFetchResult &fetch_result, long interval = 25,
+		std::function<bool()> is_cancelled = {});

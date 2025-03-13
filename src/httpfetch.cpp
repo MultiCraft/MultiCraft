@@ -798,14 +798,14 @@ static void httpfetch_sync(const HTTPFetchRequest &fetch_request,
 }
 
 bool httpfetch_sync_interruptible(const HTTPFetchRequest &fetch_request,
-		HTTPFetchResult &fetch_result, long interval)
+		HTTPFetchResult &fetch_result, long interval, std::function<bool()> is_cancelled)
 {
 	if (Thread *thread = Thread::getCurrentThread()) {
 		HTTPFetchRequest req = fetch_request;
 		req.caller = httpfetch_caller_alloc_secure();
 		httpfetch_async(req);
 		do {
-			if (thread->stopRequested()) {
+			if (thread->stopRequested() || (is_cancelled && is_cancelled())) {
 				httpfetch_caller_free(req.caller);
 				fetch_result = HTTPFetchResult(fetch_request);
 				return false;
