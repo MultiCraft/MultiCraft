@@ -311,6 +311,7 @@ void set_default_settings()
 
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
+	settings->setDefault("use_freetype_outline", "true");
 	std::string MultiCraftFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf");
 
 #if !defined(__ANDROID__) && !defined(__APPLE__)

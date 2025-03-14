@@ -37,6 +37,7 @@
 #include "irrUString.h"
 #include "util/enriched_string.h"
 #include FT_FREETYPE_H
+#include FT_OUTLINE_H
 
 namespace irr
 {
@@ -71,7 +72,9 @@ namespace gui
 		//! However, it simply defines the SGUITTGlyph's properties and will only create the page
 		//! textures if necessary.  The actual creation of the textures should only occur right
 		//! before the batch draw call.
-		void preload(u32 char_index, FT_Face face, video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags);
+		void preload(u32 char_index, FT_Face face, video::IVideoDriver* driver,
+				u32 font_size, const FT_Int32 loadFlags, bool bold,
+				bool italic);
 
 		//! Unloads the glyph.
 		void unload();
@@ -230,10 +233,23 @@ namespace gui
 			//! \param antialias set the use_monochrome (opposite to antialias) flag
 			//! \param transparency set the use_transparency flag
 			//! \return Returns a pointer to a CGUITTFont.  Will return 0 if the font failed to load.
-			static CGUITTFont* createTTFont(IGUIEnvironment *env, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true, const u32 shadow = 0, const u32 shadow_alpha = 255);
-			static CGUITTFont* createTTFont(IrrlichtDevice *device, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
-			static CGUITTFont* create(IGUIEnvironment *env, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
-			static CGUITTFont* create(IrrlichtDevice *device, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
+			static CGUITTFont* createTTFont(IGUIEnvironment *env,
+					const io::path& filename, const u32 size,
+					const bool antialias = true, const bool transparency = true,
+					const bool bold = false, const bool italic = false,
+					const u32 shadow = 0, const u32 shadow_alpha = 255);
+			static CGUITTFont* createTTFont(IrrlichtDevice *device,
+					const io::path& filename, const u32 size,
+					const bool antialias = true, const bool transparency = true,
+					const bool bold = false, const bool italic = false);
+			static CGUITTFont* create(IGUIEnvironment *env,
+					const io::path& filename, const u32 size,
+					const bool antialias = true, const bool transparency = true,
+					const bool bold = false, const bool italic = false);
+			static CGUITTFont* create(IrrlichtDevice *device,
+					const io::path& filename, const u32 size,
+					const bool antialias = true, const bool transparency = true,
+					const bool bold = false, const bool italic = false);
 
 			//! Destructor
 			virtual ~CGUITTFont();
@@ -406,6 +422,8 @@ namespace gui
 			core::ustring Invisible;
 			std::vector<u32> shadow_offsets;
 			u32 shadow_alpha;
+			bool bold;
+			bool italic;
 	};
 
 } // end namespace gui
