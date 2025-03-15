@@ -39,10 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/guiscalingfilter.h"
 #include "irrlicht_changes/static_text.h"
 #include "translation.h"
-
-#if ENABLE_GLES && !defined(__APPLE__)
 #include "client/tile.h"
-#endif
 
 
 /******************************************************************************/
@@ -59,49 +56,6 @@ void TextDestGuiEngine::gotText(const StringMap &fields)
 void TextDestGuiEngine::gotText(const std::wstring &text)
 {
 	m_engine->getScriptIface()->handleMainMenuEvent(wide_to_utf8(text));
-}
-
-/******************************************************************************/
-MenuTextureSource::~MenuTextureSource()
-{
-	for (const std::string &texture_to_delete : m_to_delete) {
-		const char *tname = texture_to_delete.c_str();
-		video::ITexture *texture = m_driver->getTexture(tname);
-		m_driver->removeTexture(texture);
-	}
-}
-
-/******************************************************************************/
-video::ITexture *MenuTextureSource::getTexture(const std::string &name, u32 *id)
-{
-	if (id)
-		*id = 0;
-
-	if (name.empty())
-		return NULL;
-
-#if ENABLE_GLES && !defined(__APPLE__)
-	if (hasNPotSupport())
-		return m_driver->getTexture(name.c_str());
-
-	video::ITexture *retval = m_driver->findTexture(name.c_str());
-	if (retval)
-		return retval;
-
-	video::IImage *image = m_driver->createImageFromFile(name.c_str());
-	if (!image)
-		return NULL;
-
-	// Verified by the profiler - it reduces memory usage!
-	video::IImage *newimage = Align2Npot2(image, m_driver);
-	retval = m_driver->addTexture(name.c_str(), newimage);
-	image = NULL;
-	m_to_delete.insert(name);
-	newimage->drop();
-	return retval;
-#else
-	return m_driver->getTexture(name.c_str());
-#endif
 }
 
 /******************************************************************************/
@@ -148,7 +102,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	m_buttonhandler = new TextDestGuiEngine(this);
 
 	//create texture source
-	m_texture_source = new MenuTextureSource(RenderingEngine::get_video_driver());
+	m_texture_source = createTextureSource(true);
 
 	//create soundmanager
 	MenuMusicFetcher soundfetcher;

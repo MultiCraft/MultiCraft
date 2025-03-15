@@ -34,7 +34,7 @@ class WorkerViewModel(
 
 	private val mWorkManager: WorkManager by lazy { WorkManager.getInstance(application) }
 
-	val unzippingWorkObserver: LiveData<WorkInfo> by lazy {
+	val unzippingWorkObserver: LiveData<WorkInfo?> by lazy {
 		mWorkManager.getWorkInfoByIdLiveData(
 			unzippingWorkReq.id
 		)

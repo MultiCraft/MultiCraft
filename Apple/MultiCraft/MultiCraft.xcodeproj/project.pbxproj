@@ -118,7 +118,6 @@
 		8453A49E24DB22F00087ECF9 /* client in Resources */ = {isa = PBXBuildFile; fileRef = 8453A49D24DB22F00087ECF9 /* client */; };
 		845856B324B1322D0040BA4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 845856B224B1322D0040BA4F /* Assets.xcassets */; };
 		84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0624B1348B0040BA4F /* libcurl.tbd */; };
-		84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0B24B134D90040BA4F /* libiconv.tbd */; };
 		8458610724B13BDF0040BA4F /* mini-gmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 8458610524B13BDF0040BA4F /* mini-gmp.c */; };
 		8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8458610924B13BF90040BA4F /* jsoncpp.cpp */; };
 		8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458616724B1B7990040BA4F /* libIrrlicht.a */; };
@@ -220,7 +219,6 @@
 		84F20E8225D52868009562A9 /* auth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E5A25D52866009562A9 /* auth.cpp */; };
 		84F20E8325D52868009562A9 /* metricsbackend.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E5E25D52867009562A9 /* metricsbackend.cpp */; };
 		84F20E8425D52868009562A9 /* numeric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E5F25D52867009562A9 /* numeric.cpp */; };
-		84F20E8525D52868009562A9 /* sha1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6025D52867009562A9 /* sha1.cpp */; };
 		84F20E8625D52868009562A9 /* serialize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6225D52867009562A9 /* serialize.cpp */; };
 		84F20E8725D52868009562A9 /* areastore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6525D52867009562A9 /* areastore.cpp */; };
 		84F20E8825D52868009562A9 /* ieee_float.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6625D52867009562A9 /* ieee_float.cpp */; };
@@ -521,7 +519,6 @@
 		84585C0024B1347B0040BA4F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		84585C0424B134850040BA4F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		84585C0624B1348B0040BA4F /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
-		84585C0B24B134D90040BA4F /* libiconv.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libiconv.tbd; path = usr/lib/libiconv.tbd; sourceTree = SDKROOT; };
 		8458610524B13BDF0040BA4F /* mini-gmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "mini-gmp.c"; path = "../../../lib/gmp/mini-gmp.c"; sourceTree = "<group>"; };
 		8458610624B13BDF0040BA4F /* mini-gmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "mini-gmp.h"; path = "../../../lib/gmp/mini-gmp.h"; sourceTree = "<group>"; };
 		8458610924B13BF90040BA4F /* jsoncpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jsoncpp.cpp; path = ../../../lib/jsoncpp/jsoncpp.cpp; sourceTree = "<group>"; };
@@ -714,14 +711,12 @@
 		84F20E5D25D52867009562A9 /* auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = auth.h; path = ../../../src/util/auth.h; sourceTree = "<group>"; };
 		84F20E5E25D52867009562A9 /* metricsbackend.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metricsbackend.cpp; path = ../../../src/util/metricsbackend.cpp; sourceTree = "<group>"; };
 		84F20E5F25D52867009562A9 /* numeric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = numeric.cpp; path = ../../../src/util/numeric.cpp; sourceTree = "<group>"; };
-		84F20E6025D52867009562A9 /* sha1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sha1.cpp; path = ../../../src/util/sha1.cpp; sourceTree = "<group>"; };
 		84F20E6125D52867009562A9 /* md32_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = md32_common.h; path = ../../../src/util/md32_common.h; sourceTree = "<group>"; };
 		84F20E6225D52867009562A9 /* serialize.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = serialize.cpp; path = ../../../src/util/serialize.cpp; sourceTree = "<group>"; };
 		84F20E6325D52867009562A9 /* pointedthing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pointedthing.h; path = ../../../src/util/pointedthing.h; sourceTree = "<group>"; };
 		84F20E6425D52867009562A9 /* metricsbackend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = metricsbackend.h; path = ../../../src/util/metricsbackend.h; sourceTree = "<group>"; };
 		84F20E6525D52867009562A9 /* areastore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = areastore.cpp; path = ../../../src/util/areastore.cpp; sourceTree = "<group>"; };
 		84F20E6625D52867009562A9 /* ieee_float.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ieee_float.cpp; path = ../../../src/util/ieee_float.cpp; sourceTree = "<group>"; };
-		84F20E6725D52867009562A9 /* sha1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sha1.h; path = ../../../src/util/sha1.h; sourceTree = "<group>"; };
 		84F20E6825D52867009562A9 /* sha2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sha2.h; path = ../../../src/util/sha2.h; sourceTree = "<group>"; };
 		84F20E6925D52867009562A9 /* sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sha256.c; path = ../../../src/util/sha256.c; sourceTree = "<group>"; };
 		84F20E6A25D52867009562A9 /* directiontables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = directiontables.h; path = ../../../src/util/directiontables.h; sourceTree = "<group>"; };
@@ -873,7 +868,6 @@
 				841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */,
 				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
 				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
-				84585C0E24B134F80040BA4F /* libiconv.tbd in Frameworks */,
 				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
 				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
 				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
@@ -1079,7 +1073,6 @@
 				84585C0624B1348B0040BA4F /* libcurl.tbd */,
 				844436EE28DA80C100662A9D /* libfreetype.a */,
 				84EEE5E62782728E00F61929 /* libintl.a */,
-				84585C0B24B134D90040BA4F /* libiconv.tbd */,
 				8458616724B1B7990040BA4F /* libIrrlicht.a */,
 				8488539E28DA4851004AD90F /* libjpeg.a */,
 				841AD8A428D0C1810042E335 /* libleveldb.a */,
@@ -1425,8 +1418,6 @@
 				84F20E7F25D52868009562A9 /* quicktune.h */,
 				84F20E6225D52867009562A9 /* serialize.cpp */,
 				84F20E7325D52868009562A9 /* serialize.h */,
-				84F20E6025D52867009562A9 /* sha1.cpp */,
-				84F20E6725D52867009562A9 /* sha1.h */,
 				84F20E6825D52867009562A9 /* sha2.h */,
 				84F20E6925D52867009562A9 /* sha256.c */,
 				84F20E5825D52866009562A9 /* srp.cpp */,
@@ -2037,7 +2028,6 @@
 				84135B7925D5264B00CA4DCF /* face_position_cache.cpp in Sources */,
 				84135BA025D5264C00CA4DCF /* itemstackmetadata.cpp in Sources */,
 				84135B9525D5264C00CA4DCF /* hud.cpp in Sources */,
-				84F20E8525D52868009562A9 /* sha1.cpp in Sources */,
 				84F20E5725D5283F009562A9 /* unit_sao.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2133,7 +2123,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 60;
+				CURRENT_PROJECT_VERSION = 70;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2175,7 +2165,7 @@
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 MultiCraft Studio OÜ. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MARKETING_VERSION = 2.0.9;
@@ -2208,7 +2198,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 60;
+				CURRENT_PROJECT_VERSION = 70;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2251,7 +2241,7 @@
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2024 MultiCraft Studio OÜ. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MARKETING_VERSION = 2.0.9;

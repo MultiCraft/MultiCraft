@@ -77,8 +77,10 @@ do
 	end
 
 	local after = core.after
-	safe_funcs[after] = function(n, ...)
-		if type(n) == "number" then return after(n, pcall, ...) end
+	safe_funcs[after] = function(n, func, ...)
+		return after(n, function(func, ...)
+			log_pcall(pcall(func, ...))
+		end, func, ...)
 	end
 
 	local on_fs_input = core.register_on_formspec_input
@@ -211,8 +213,8 @@ do
 			"register_on_receiving_chat_message",
 			"register_on_sending_chat_message", "register_on_tab", "rgba",
 			"run_server_chatcommand", "send_chat_message", "send_respawn",
-			"serialize", "sha1", "show_formspec", "sound_play", "sound_stop",
-			"string_to_area", "string_to_pos", "string_to_privs",
+			"serialize", "sha1", "show_formspec", "sound_fade", "sound_play",
+			"sound_stop", "string_to_area", "string_to_pos", "string_to_privs",
 			"strip_background_colors", "strip_colors",
 			"strip_foreground_colors", "translate", "wrap_text",
 			"write_json"}) do
