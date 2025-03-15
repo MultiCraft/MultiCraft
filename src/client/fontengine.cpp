@@ -293,14 +293,14 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	if (spec.italic)
 		setting_suffix.append("_italic");
 
-	u32 size = std::floor(RenderingEngine::getDisplayDensity() *
-			g_settings->getFloat("gui_scaling") * spec.size);
+	u32 size = std::max(std::floor(RenderingEngine::getDisplayDensity() *
+			g_settings->getFloat("gui_scaling") * spec.size), 1.0f);
 
-	if (size == 0) {
+	/*if (size == 0) {
 		errorstream << "FontEngine: attempt to use font size 0" << std::endl;
 		errorstream << "  display density: " << RenderingEngine::getDisplayDensity() << std::endl;
 		abort();
-	}
+	}*/
 
 	u16 font_shadow       = 0;
 	u16 font_shadow_alpha = 0;
