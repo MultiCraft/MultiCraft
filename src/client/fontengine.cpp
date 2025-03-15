@@ -287,20 +287,33 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 			break;
 	}
 
-	bool use_freetype_outline = g_settings->getBool("use_freetype_outline");
-
 	std::string setting_suffix = "";
 	bool bold_outline = false;
 	bool italic_outline = false;
 
-	if (use_freetype_outline) {
-		bold_outline = spec.bold;
-		italic_outline = spec.italic;
-	} else {
-		if (spec.bold)
+	std::string bold_path = g_settings->get(setting_prefix + "font_path_bold");
+	std::string italic_path = g_settings->get(setting_prefix + "font_path_italic");
+	std::string bold_italic_path = g_settings->get(setting_prefix + "font_path_bold_italic");
+
+	if (spec.bold && spec.italic) {
+		if (bold_italic_path.empty()) {
+			bold_outline = true;
+			italic_outline = true;
+		} else {
+			setting_suffix.append("_bold_italic");
+		}
+	} else if (spec.bold) {
+		if (bold_path.empty()) {
+			bold_outline = true;
+		} else {
 			setting_suffix.append("_bold");
-		if (spec.italic)
+		}
+	} else if (spec.italic) {
+		if (italic_path.empty()) {
+			italic_outline = true;
+		} else {
 			setting_suffix.append("_italic");
+		}
 	}
 
 	u32 size = std::floor(RenderingEngine::getDisplayDensity() *
