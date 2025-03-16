@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /** reference to access font engine, has to be initialized by main */
 FontEngine* g_fontengine = NULL;
 
-/******************************************************************************/
+/** callback to be used on change of font size setting */
 void FontEngine::fontSettingChanged(const std::string &name, void *userdata)
 {
 	((FontEngine *)userdata)->m_needs_reload = true;
