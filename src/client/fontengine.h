@@ -131,6 +131,9 @@ public:
 	/** update internal parameters from settings */
 	void readSettings();
 
+	/** reload fonts if settings were changed */
+	void handleReload();
+
 private:
 	/** update content of font cache in case of a setting change made it invalid */
 	void updateFontCache();
@@ -147,6 +150,9 @@ private:
 	/** clean cache */
 	void cleanCache();
 
+	/** callback to be used on change of font size setting */
+	static void fontSettingChanged(const std::string &name, void *userdata);
+
 	/** pointer to irrlicht gui environment */
 	gui::IGUIEnvironment* m_env = nullptr;
 
@@ -162,6 +168,8 @@ private:
 
 	/** current font engine mode */
 	FontMode m_currentMode = FM_Standard;
+
+	bool m_needs_reload = false;
 
 	DISABLE_CLASS_COPY(FontEngine);
 };

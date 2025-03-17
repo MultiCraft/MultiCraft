@@ -274,6 +274,8 @@ void GUIEngine::run()
 			previous_screen_size = current_screen_size;
 		}
 
+		g_fontengine->handleReload();
+
 		//check if we need to update the "upper left corner"-text
 		if (text_height != g_fontengine->getTextHeight()) {
 			updateTopLeftTextSize();
