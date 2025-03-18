@@ -408,7 +408,7 @@ local function parse_config_file(read_all, parse_mods)
 		-- Parse client mods
 		local clientmods_category_initialized = false
 		local clientmods = {}
-		get_mods(core.get_clientmodpath(), clientmods)
+		get_mods(core.get_clientmodpath(), "clientmods", clientmods)
 		for _, mod in ipairs(clientmods) do
 			local path = mod.path .. DIR_DELIM .. FILENAME
 			local file = io.open(path, "r")
