@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-GETTEXT_VERSION=0.23.1
+GETTEXT_VERSION=0.24
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
