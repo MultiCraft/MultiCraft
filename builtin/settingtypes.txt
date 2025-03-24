@@ -636,7 +636,7 @@ fullscreen (Full screen) bool false
 fullscreen_bpp (Full screen BPP) int 24
 
 #    Vertical screen synchronization.
-vsync (VSync) bool false
+vsync (VSync) bool true
 
 #    Field of view in degrees.
 fov (Field of view) int 72 45 160
