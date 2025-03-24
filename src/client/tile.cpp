@@ -277,20 +277,8 @@ public:
 			if (!fs::ReadFile(path, data))
 				return nullptr;
 
-#ifdef SIGN_KEY
-			static std::string secret_key = porting::getSecretKey(SIGN_KEY);
-#else
-			static std::string secret_key = porting::getSecretKey("");
-#endif
-			Encryption::setKey(secret_key);
-			Encryption::EncryptedData encrypted_data;
-			bool success = encrypted_data.fromString(data);
-			if (!success)
-				return nullptr;
-
 			std::string decrypted_data;
-			success = Encryption::decrypt(encrypted_data, decrypted_data);
-			if (!success)
+			if (!Encryption::decryptSimple(data, decrypted_data))
 				return nullptr;
 
 			// Silly irrlicht's const-incorrectness
