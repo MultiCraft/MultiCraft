@@ -59,6 +59,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "defaultsettings.h"
 #include "server/mods.h"
 #include "util/base64.h"
+#include "util/encryption.h"
 #include "util/hashing.h"
 #include "util/hex.h"
 #include "database/database.h"
@@ -3927,6 +3928,27 @@ Translations *Server::getTranslationLanguage(const std::string &lang_code)
 				translations->loadTranslation(data);
 			}
 		}
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		else if (str_ends_with(i.first, suffix + ".e")) {
+			std::string data;
+			if (!fs::ReadFile(i.second.path, data))
+				continue;
+
+#ifdef SIGN_KEY
+			static std::string secret_key = porting::getSecretKey(SIGN_KEY);
+#else
+			static std::string secret_key = porting::getSecretKey("");
+#endif
+			Encryption::setKey(secret_key);
+			Encryption::EncryptedData encrypted_data;
+			if (encrypted_data.fromString(data)) {
+				std::string decrypted_data;
+				if (Encryption::decrypt(encrypted_data, decrypted_data))
+					translations->loadTranslation(decrypted_data);
+			}
+		}
+#endif
 	}
 
 	return translations;
