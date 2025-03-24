@@ -142,3 +142,21 @@ void Encryption::setKey(std::string new_key)
 
 	setKey((uint8_t *)&resized_key[0]);
 }
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+bool Encryption::decryptSimple(const std::string &data, std::string &decrypted_data)
+{
+#ifdef SIGN_KEY
+	static std::string secret_key = porting::getSecretKey(SIGN_KEY);
+#else
+	static std::string secret_key = porting::getSecretKey("");
+#endif
+	setKey(secret_key);
+
+	EncryptedData encrypted_data;
+	if (!encrypted_data.fromString(data))
+		return false;
+
+	return decrypt(encrypted_data, decrypted_data);
+}
+#endif

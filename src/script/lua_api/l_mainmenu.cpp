@@ -896,18 +896,9 @@ int ModApiMainMenu::l_load_translation(lua_State *L)
 	std::string tr_data = std::string(tr_data_raw, tr_data_length);
 
 #if defined(__ANDROID__) || defined(__APPLE__)
-#ifdef SIGN_KEY
-	static std::string secret_key = porting::getSecretKey(SIGN_KEY);
-#else
-	static std::string secret_key = porting::getSecretKey("");
-#endif
-	Encryption::setKey(secret_key);
-	Encryption::EncryptedData encrypted_data;
-	if (encrypted_data.fromString(tr_data)) {
-		std::string decrypted_data;
-		if (Encryption::decrypt(encrypted_data, decrypted_data)) {
-			g_client_translations->loadTranslation(decrypted_data);
-		}
+	std::string decrypted_data;
+	if (Encryption::decryptSimple(tr_data, decrypted_data)) {
+		g_client_translations->loadTranslation(decrypted_data);
 		return 0;
 	}
 #endif
