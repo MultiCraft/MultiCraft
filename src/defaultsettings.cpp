@@ -194,7 +194,7 @@ void set_default_settings()
 	settings->setDefault("autosave_screensize", "true");
 	settings->setDefault("fullscreen", "false");
 	settings->setDefault("fullscreen_bpp", "24");
-	settings->setDefault("vsync", "false");
+	settings->setDefault("vsync", "true");
 	settings->setDefault("fov", "72");
 	settings->setDefault("leaves_style", "fancy");
 	settings->setDefault("connected_glass", "false");
@@ -510,7 +510,6 @@ void set_default_settings()
 	settings->setDefault("screen_w", "0");
 	settings->setDefault("screen_h", "0");
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
-	settings->setDefault("vsync", "true");
 
 	float ScaleFactor = porting::getScreenScale();
 	settings->setDefault("display_density_factor", std::to_string(ScaleFactor));
