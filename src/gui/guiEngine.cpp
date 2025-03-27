@@ -40,6 +40,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlicht_changes/static_text.h"
 #include "translation.h"
 #include "client/tile.h"
+#include "daynightratio.h"
+#include "light.h"
 
 
 /******************************************************************************/
@@ -106,7 +108,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 
 	m_shader_src = createShaderSource();
 	if (m_shader_src)
-		m_sky = new Sky(-1, m_texture_source, m_shader_src, m_smgr);
+		m_sky = new Sky(-1, nullptr, m_shader_src, m_smgr);
 
 	//create soundmanager
 	MenuMusicFetcher soundfetcher;
@@ -235,10 +237,8 @@ void GUIEngine::run()
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
 
-	const video::SColor sky_color = m_sky ? m_sky->getSkyColor() : video::SColor(255, 5, 155, 245);
-
 	// Reset fog color
-	{
+	// {
 		video::SColor fog_color;
 		video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
 		f32 fog_start = 0;
@@ -249,11 +249,18 @@ void GUIEngine::run()
 		driver->getFog(fog_color, fog_type, fog_start, fog_end, fog_density,
 				fog_pixelfog, fog_rangefog);
 
-		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
-				fog_pixelfog, fog_rangefog);
-	}
+		{
+			const video::SColor sky_color = video::SColor(255, 5, 155, 245);
+			driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
+						   fog_pixelfog, fog_rangefog);
+		}
+	// }
 
 	while (RenderingEngine::run() && (!m_startgame) && (!m_kill)) {
+		const video::SColor sky_color = m_sky ? m_sky->getSkyColor() : video::SColor(255, 5, 155, 245);
+		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
+				fog_pixelfog, fog_rangefog);
+
 		IrrlichtDevice *device = RenderingEngine::get_raw_device();
 #ifdef __IOS__
 		if (device->isWindowMinimized())
@@ -291,8 +298,10 @@ void GUIEngine::run()
 		if (m_clouds_enabled)
 		{
 			if (m_sky) {
-				// TODO: 1.f - m_timeofday is probably wrong
-				m_sky->update(m_timeofday, 1.f - m_timeofday, 1.f - m_timeofday, true, CAMERA_MODE_FIRST, 3, 0);
+				u32 daynight_ratio = time_to_daynight_ratio(m_timeofday * 24000.0f, true);
+				float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
+
+				m_sky->update(m_timeofday, time_brightness, time_brightness, true, CAMERA_MODE_FIRST, 3, 0);
 				m_sky->render();
 			}
 			cloudPreProcess();

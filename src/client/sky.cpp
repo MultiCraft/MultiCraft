@@ -77,20 +77,22 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 	//m_materials[1].MaterialType = video::EMT_TRANSPARENT_VERTEX_ALPHA;
 	m_materials[1].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 
-	m_materials[2] = baseMaterial();
-	m_materials[2].setTexture(0, tsrc->getTextureForMesh("sunrisebg.png"));
-	m_materials[2].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
-	//m_materials[2].MaterialType = video::EMT_TRANSPARENT_ADD_COLOR;
+	if (tsrc) {
+		m_materials[2] = baseMaterial();
+		m_materials[2].setTexture(0, tsrc->getTextureForMesh("sunrisebg.png"));
+		m_materials[2].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
+		//m_materials[2].MaterialType = video::EMT_TRANSPARENT_ADD_COLOR;
+	}
 
 	// Ensures that sun and moon textures and tonemaps are correct.
 	setSkyDefaults();
-	m_sun_texture = tsrc->isKnownSourceImage(m_sun_params.texture) ?
+	m_sun_texture = tsrc && tsrc->isKnownSourceImage(m_sun_params.texture) ?
 		tsrc->getTextureForMesh(m_sun_params.texture) : nullptr;
-	m_moon_texture = tsrc->isKnownSourceImage(m_moon_params.texture) ?
+	m_moon_texture = tsrc && tsrc->isKnownSourceImage(m_moon_params.texture) ?
 		tsrc->getTextureForMesh(m_moon_params.texture) : nullptr;
-	m_sun_tonemap = tsrc->isKnownSourceImage(m_sun_params.tonemap) ?
+	m_sun_tonemap = tsrc && tsrc->isKnownSourceImage(m_sun_params.tonemap) ?
 		tsrc->getTexture(m_sun_params.tonemap) : nullptr;
-	m_moon_tonemap = tsrc->isKnownSourceImage(m_moon_params.tonemap) ?
+	m_moon_tonemap = tsrc && tsrc->isKnownSourceImage(m_moon_params.tonemap) ?
 		tsrc->getTexture(m_moon_params.tonemap) : nullptr;
 
 	if (m_sun_texture) {
