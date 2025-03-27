@@ -249,12 +249,6 @@ int ModApiMainMenu::l_set_sky(lua_State *L)
 		const std::string type = luaL_checkstring(L, -1);
 		if (type == "regular") {
 			sky->setVisible(true);
-		} else if (type == "plain") {
-			sky->setVisible(false);
-
-			// Disable directional sun/moon tinting on plain or invalid skyboxes.
-			sky->setHorizonTint(sky->getBgColor(), sky->getBgColor(), "custom");
-			return 0;
 		} else {
 			throw LuaError("Unsupported sky type: " + type);
 		}
