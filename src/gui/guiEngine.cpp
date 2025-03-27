@@ -303,6 +303,7 @@ void GUIEngine::run()
 
 				m_sky->update(m_timeofday, time_brightness, time_brightness, true, CAMERA_MODE_FIRST, 3, 0);
 				m_sky->render();
+				m_cloud.clouds->update(v3f(0, 0, 0), m_sky->getCloudColor());
 			}
 			cloudPreProcess();
 			drawOverlay(driver);
@@ -347,7 +348,6 @@ GUIEngine::~GUIEngine()
 		m_sound_manager = NULL;
 	}
 
-	infostream<<"GUIEngine: Deinitializing scripting"<<std::endl;
 	delete m_script;
 
 	m_irr_toplefttext->setText(L"");

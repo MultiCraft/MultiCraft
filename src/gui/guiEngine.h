@@ -151,10 +151,6 @@ public:
 	unsigned int queueAsync(const std::string &serialized_fct,
 			const std::string &serialized_params);
 
-	void setTimeOfDay(float timeofday) {
-		m_timeofday = timeofday;
-	}
-
 private:
 
 	/** find and run the main menu script */
