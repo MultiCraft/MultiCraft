@@ -151,6 +151,10 @@ public:
 	unsigned int queueAsync(const std::string &serialized_fct,
 			const std::string &serialized_params);
 
+	void setTimeOfDay(float timeofday) {
+		m_timeofday = timeofday;
+	}
+
 private:
 
 	/** find and run the main menu script */
@@ -272,6 +276,8 @@ private:
 
 	IWritableShaderSource *m_shader_src = nullptr;
 	Sky *m_sky = nullptr;
+
+	float m_timeofday = 0.5f;
 
 	/** start playing a sound and return handle */
 	s32 playSound(const SimpleSoundSpec &spec, bool looped);

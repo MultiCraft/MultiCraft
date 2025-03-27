@@ -187,6 +187,9 @@ core.set_background(type, texturepath,[tile],[minsize])
 ^ minsize: minimum tile size, images are scaled to at least this size prior
 ^   doing tiling (background only)
 core.set_clouds(<true/false>)
+core.set_sky(sky_params)
+^ sky_params is a table like the one in-game
+^ Only "regular" and "plain" skies are supported
 core.set_topleft_text(text)
 core.show_keys_menu()
 core.show_path_select_dialog(formname, caption, is_file_select)

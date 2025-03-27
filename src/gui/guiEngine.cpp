@@ -291,9 +291,8 @@ void GUIEngine::run()
 		if (m_clouds_enabled)
 		{
 			if (m_sky) {
-				m_sky->update(1, 1, 1, true, CAMERA_MODE_FIRST, 0, 0);
-				m_sky->setVisible(true);
-				m_sky->setStarsVisible(true);
+				// TODO: 1.f - m_timeofday is probably wrong
+				m_sky->update(m_timeofday, 1.f - m_timeofday, 1.f - m_timeofday, true, CAMERA_MODE_FIRST, 3, 0);
 				m_sky->render();
 			}
 			cloudPreProcess();
