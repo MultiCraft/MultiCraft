@@ -322,7 +322,7 @@ int ModApiMainMenu::l_set_stars(lua_State *L)
 	if (getintfield(L, 1, "count", count))
 		sky->setStarCount(count, true);
 
-	lua_getfield(L, 2, "star_color");
+	lua_getfield(L, 1, "star_color");
 	if (!lua_isnil(L, -1)) {
 		video::SColor starcolor;
 		read_color(L, -1, &starcolor);
@@ -331,7 +331,7 @@ int ModApiMainMenu::l_set_stars(lua_State *L)
 	lua_pop(L, 1);
 
 	f32 star_scale;
-	if (getfloatfield(L, 2, "scale", star_scale))
+	if (getfloatfield(L, 1, "scale", star_scale))
 		sky->setStarScale(star_scale);
 
 	return 0;
