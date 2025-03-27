@@ -37,6 +37,7 @@ class Sky : public scene::ISceneNode
 public:
 	//! constructor
 	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc);
+	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager *smgr);
 
 	virtual void OnRegisterSceneNode();
 
