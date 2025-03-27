@@ -178,7 +178,8 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	const texture_layer layer = m_clouds_enabled ? TEX_LAYER_OVERLAY : TEX_LAYER_BACKGROUND;
 	const video::ITexture* texture = m_textures[layer].texture;
 	RenderingEngine::setLoadScreenBackground(m_clouds_enabled,
-			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "");
+			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "",
+			m_sky ? m_sky->getSkyColor() : video::SColor(255, 5, 155, 245));
 
 	m_menu->quitMenu();
 	m_menu->drop();
