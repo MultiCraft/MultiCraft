@@ -50,7 +50,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #include <SDL.h>
-#include <SDL_syswm.h>
 #endif
 
 #ifdef _WIN32
@@ -288,15 +287,13 @@ void RenderingEngine::setupTopLevelXorgWindow(const std::string &name)
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11)
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0)
 		return;
 
-	Display *x11_dpl = info.info.x11.display;
-	Window x11_win = info.info.x11.window;
+	Display *x11_dpl = (Display *)SDL_GetPointerProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+	Window x11_win = (Window)SDL_GetNumberProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
 #else
 	Display *x11_dpl = reinterpret_cast<Display *>(exposedData.OpenGLLinux.X11Display);
 	Window x11_win = reinterpret_cast<Window>(exposedData.OpenGLLinux.X11Window);
@@ -493,17 +490,16 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11) {
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0) {
 		delete[] icon_buffer;
 		return false;
 	}
 
-	Display *x11_dpl = info.info.x11.display;
-	Window x11_win = info.info.x11.window;
+	Display *x11_dpl = (Display *)SDL_GetPointerProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+	Window x11_win = (Window)SDL_GetNumberProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+
 #else
 	Display *x11_dpl = (Display *)exposedData.OpenGLLinux.X11Display;
 	Window x11_win = (Window)exposedData.OpenGLLinux.X11Window;
@@ -804,12 +800,9 @@ static float calcDisplayDensity(irr::video::IVideoDriver *driver)
 
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11)
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0)
 		return g_settings->getFloat("screen_dpi") / 96.0;
+
 #endif
 
 	const char *current_display = getenv("DISPLAY");

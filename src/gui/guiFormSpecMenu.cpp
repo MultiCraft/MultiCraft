@@ -221,8 +221,12 @@ void GUIFormSpecMenu::setInitialFocus()
 				&& it->getText()[0] == 0) {
 			Environment->setFocus(it);
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
+			if (porting::hasRealKeyboard()) {
+				video::IVideoDriver* driver = Environment->getVideoDriver();
+				const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+				SDL_Window *window = exposedData.OpenGLSDL.Window;
+				SDL_StartTextInput(window);
+			}
 #endif
 			return;
 		}
@@ -233,8 +237,12 @@ void GUIFormSpecMenu::setInitialFocus()
 		if (it->getType() == gui::EGUIET_EDIT_BOX) {
 			Environment->setFocus(it);
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
+			if (porting::hasRealKeyboard()) {
+				video::IVideoDriver* driver = Environment->getVideoDriver();
+				const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+				SDL_Window *window = exposedData.OpenGLSDL.Window;
+				SDL_StartTextInput(window);
+			}
 #endif
 			return;
 		}

@@ -132,8 +132,8 @@ jclass findClass(const std::string &classname)
 
 void initAndroid()
 {
-	porting::jnienv = (JNIEnv*)SDL_AndroidGetJNIEnv();
-	activityObj = (jobject)SDL_AndroidGetActivity();
+	porting::jnienv = (JNIEnv*)SDL_GetAndroidJNIEnv();
+	activityObj = (jobject)SDL_GetAndroidActivity();
 
 	activityClass = findClass("com/multicraft/game/GameActivity");
 	if (activityClass == nullptr)
@@ -186,8 +186,8 @@ std::string getCacheDir()
 
 void initializePaths()
 {
-	const char *path_storage = SDL_AndroidGetExternalStoragePath();
-	const char *path_data = SDL_AndroidGetInternalStoragePath();
+	const char *path_storage = SDL_GetAndroidExternalStoragePath();
+	const char *path_data = SDL_GetAndroidInternalStoragePath();
 
 	path_user = path_storage;
 	path_share = path_data;
@@ -308,7 +308,7 @@ void notifyExitGame()
 
 void showToast(const std::string &msg)
 {
-	SDL_AndroidShowToast(msg.c_str(), 1, -1, 0, 0);
+	SDL_ShowAndroidToast(msg.c_str(), 1, -1, 0, 0);
 }
 
 float getScreenScale()

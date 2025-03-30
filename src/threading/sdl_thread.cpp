@@ -135,7 +135,7 @@ void Thread::setName(const std::string &name)
 
 unsigned int Thread::getNumberOfProcessors()
 {
-	return SDL_GetCPUCount();
+	return SDL_GetNumLogicalCPUCores();
 }
 
 bool Thread::bindToProcessor(unsigned int proc_number)
@@ -146,7 +146,7 @@ bool Thread::bindToProcessor(unsigned int proc_number)
 
 bool Thread::setPriority(SDL_ThreadPriority prio)
 {
-	int result = SDL_SetThreadPriority(prio);
+	int result = SDL_SetCurrentThreadPriority(prio);
 	return result == 0;
 }
 

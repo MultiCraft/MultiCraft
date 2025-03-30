@@ -213,14 +213,14 @@ void init_gettext(const char *path, const std::string &configured_language,
 	else {
 		 /* set current system default locale */
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-		SDL_Locale* locale = SDL_GetPreferredLocales();
+		SDL_Locale** locale = SDL_GetPreferredLocales(nullptr);
 
-		if (locale) {
-			if (locale[0].language) {
+		if (locale && locale[0]) {
+			if (locale[0]->language) {
 				char lang[3] = {0};
-				strncpy(lang, locale[0].language, 2);
-				SDL_setenv("LANG", lang, 1);
-				SDL_setenv("LANGUAGE", lang, 1);
+				strncpy(lang, locale[0]->language, 2);
+				SDL_setenv_unsafe("LANG", lang, 1);
+				SDL_setenv_unsafe("LANGUAGE", lang, 1);
 			}
 
 			SDL_free(locale);

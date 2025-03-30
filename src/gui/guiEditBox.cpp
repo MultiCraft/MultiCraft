@@ -297,7 +297,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 	bool altPressed = false;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	SDL_Keymod keymod = SDL_GetModState();
-	altPressed = keymod & KMOD_ALT;
+	altPressed = keymod & SDL_KMOD_ALT;
 #endif
 
 	// control shortcut handling

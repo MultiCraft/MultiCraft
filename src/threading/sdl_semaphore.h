@@ -42,7 +42,7 @@ public:
 	bool wait(unsigned int time_ms);
 
 private:
-	SDL_sem *semaphore;
+	SDL_Semaphore *semaphore;
 };
 
 #endif

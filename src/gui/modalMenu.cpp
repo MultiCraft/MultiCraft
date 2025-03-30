@@ -72,8 +72,12 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 GUIModalMenu::~GUIModalMenu()
 {
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-		SDL_StopTextInput();
+	video::IVideoDriver* driver = Environment->getVideoDriver();
+	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
+	
+	if (porting::hasRealKeyboard() && SDL_TextInputActive(window))
+		SDL_StopTextInput(window);
 #endif
 	m_menumgr->deletingMenu(this);
 }
@@ -321,14 +325,23 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 		if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUSED &&
 			event.GUIEvent.Caller &&
 			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
+			if (porting::hasRealKeyboard()) {
+				video::IVideoDriver* driver = Environment->getVideoDriver();
+				const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+				SDL_Window *window = exposedData.OpenGLSDL.Window;
+				SDL_StartTextInput(window);
+			}
 		}
 		else if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUS_LOST &&
 			event.GUIEvent.Caller &&
 			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
-			if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-				SDL_StopTextInput();
+
+			video::IVideoDriver* driver = Environment->getVideoDriver();
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+	
+			if (porting::hasRealKeyboard() && SDL_TextInputActive(window))
+				SDL_StopTextInput(window);
 		}
 	}
 #endif
