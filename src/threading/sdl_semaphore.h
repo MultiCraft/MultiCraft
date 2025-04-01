@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h"
 #include "util/basic_macros.h"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 class Semaphore
 {

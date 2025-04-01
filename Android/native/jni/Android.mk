@@ -33,8 +33,8 @@ LOCAL_SRC_FILES := deps/libjpeg/lib/$(APP_ABI)/libjpeg.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := SDL2
-LOCAL_SRC_FILES := deps/sdl2/lib/$(APP_ABI)/libSDL2.a
+LOCAL_MODULE := SDL3
+LOCAL_SRC_FILES := deps/sdl3/lib/$(APP_ABI)/libSDL3.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -117,7 +117,7 @@ LOCAL_C_INCLUDES := \
 	deps/irrlicht/include                          \
 	deps/libpng/include                            \
 	deps/libjpeg/include                           \
-	deps/sdl2/include                              \
+	deps/sdl3/include                              \
 	deps/leveldb/include                           \
 	deps/libcurl/include                           \
 	deps/luajit/include                            \
@@ -261,7 +261,7 @@ LOCAL_STATIC_LIBRARIES += \
 	Freetype \
 	OpenAL \
 	Gettext \
-	Irrlicht libpng libjpeg SDL2 \
+	Irrlicht libpng libjpeg SDL3 \
 	LevelDB \
 	Vorbis \
 	LuaJIT \

@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <atomic>
 #include <mutex>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 class Thread
 {

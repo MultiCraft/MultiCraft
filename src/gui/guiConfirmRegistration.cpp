@@ -41,7 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	#include <SDL.h>
+	#include <SDL3/SDL.h>
 #endif
 
 #include "gettext.h"

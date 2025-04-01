@@ -45,7 +45,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "prof.h"
 #endif
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 extern int real_main(int argc, char *argv[]);
 extern "C" void external_pause_game();
