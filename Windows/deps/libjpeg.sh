@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-JPEG_VERSION=3.0.0
+JPEG_VERSION=3.1.0
 
 if [ ! -d libjpeg-src ]; then
 	wget https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-$JPEG_VERSION.tar.gz

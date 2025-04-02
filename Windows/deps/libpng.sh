@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-PNG_VERSION=1.6.40
+PNG_VERSION=1.6.47
 
 export DEPS_ROOT=$(pwd)
 

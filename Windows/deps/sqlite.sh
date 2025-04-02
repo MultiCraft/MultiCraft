@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-SQLITE_VERSION=3.42.0
+SQLITE_VERSION=3.49.1
 
 . ./sdk.sh
 
