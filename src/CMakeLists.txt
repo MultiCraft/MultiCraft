@@ -430,7 +430,6 @@ set(common_SRCS
 	${mapgen_SRCS}
 	${server_SRCS}
 	${content_SRCS}
-	ban.cpp
 	chat.cpp
 	clientiface.cpp
 	collision.cpp
@@ -503,6 +502,11 @@ if(BUILD_UNITTESTS)
 	set(common_SRCS ${common_SRCS} ${UNITTEST_SRCS})
 endif()
 
+option(ENABLE_BANMANAGER "Enable builtin BanManager" TRUE)
+if(ENABLE_BANMANAGER)
+	add_definitions(-DBAN_MANAGER=1)
+	set(common_SRCS ${common_SRCS} ban.cpp)
+endif()
 
 # This gives us the icon and file version information
 if(WIN32)
