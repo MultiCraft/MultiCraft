@@ -59,7 +59,6 @@ public:
 			Inventory *inventory);
 	~Hud();
 
-	void drawHotbar(u16 playeritem);
 	void resizeHotbar();
 	void drawCrosshair();
 	void drawSelectionMesh();
@@ -102,6 +101,8 @@ private:
 
 	void drawCompassRotate(HudElement *e, video::ITexture *texture,
 			const core::rect<s32> &rect, int way);
+
+	void drawHotbar();
 
 	float m_hud_scaling; // cached minetest setting
 	float m_scale_factor;
