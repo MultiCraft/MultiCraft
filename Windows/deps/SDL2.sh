@@ -17,6 +17,7 @@ mkdir -p build; cd build
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DCMAKE_C_FLAGS="$CFLAGS" \
     -DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC" \
     -DSDL_SHARED=0 \
