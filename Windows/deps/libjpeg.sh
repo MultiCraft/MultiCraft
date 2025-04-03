@@ -4,10 +4,7 @@
 JPEG_VERSION=3.1.0
 
 if [ ! -d libjpeg-src ]; then
-	wget https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-$JPEG_VERSION.tar.gz
-	tar -xzf libjpeg-turbo-$JPEG_VERSION.tar.gz
-	mv libjpeg-turbo-$JPEG_VERSION libjpeg-src
-	rm libjpeg-turbo-$JPEG_VERSION.tar.gz
+	git clone -b $JPEG_VERSION --depth 1 https://github.com/libjpeg-turbo/libjpeg-turbo libjpeg-src
 	mkdir libjpeg-src/build
 fi
 
