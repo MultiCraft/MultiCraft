@@ -50,7 +50,7 @@ cmake ../ \
 	-DCURL_INCLUDE_DIR="$DEPS_ROOT/libcurl/include" \
 	-DLUA_LIBRARY="$DEPS_ROOT/luajit/lib/libluajit.a" \
 	-DLUA_INCLUDE_DIR="$DEPS_ROOT/luajit/include" \
-	-DZLIB_LIBRARIES="$DEPS_ROOT/zlib/lib/libzlibstatic.a" \
+	-DZLIB_LIBRARIES="$DEPS_ROOT/zlib/lib/libz.a" \
 	-DZLIB_INCLUDE_DIR="$DEPS_ROOT/zlib/include" \
 	-DPNG_LIBRARIES="$DEPS_ROOT/libpng/lib/libpng16.a" \
 	-DPNG_INCLUDE_DIR="$DEPS_ROOT/libpng/include" \
