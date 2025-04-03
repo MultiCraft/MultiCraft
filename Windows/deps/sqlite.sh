@@ -27,6 +27,6 @@ cp -a ./sqlite3*.h ../../sqlite/include
 # update lib
 rm -rf ../../sqlite/lib
 mkdir -p ../../sqlite/lib
-cp .libs/libsqlite3.a ../../sqlite/lib
+cp ./libsqlite3.a ../../sqlite/lib
 
 echo "SQLite build successful"
