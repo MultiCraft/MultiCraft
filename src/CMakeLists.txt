@@ -621,7 +621,14 @@ if(BUILD_CLIENT)
 			ENABLE_EXPORTS 1
 		)
 	endif()
-
+	if(USE_SOUND)
+		if(USE_STATIC_BUILD AND WIN32)
+			target_link_libraries(
+				${PROJECT_NAME}
+				avrt
+			)
+		endif()
+	endif()
 	if(USE_SDL)
 		target_link_libraries(
 			${PROJECT_NAME}
