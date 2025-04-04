@@ -4,6 +4,9 @@
  * according to the OpenSSL license [found in ../../LICENSE].
  * ====================================================================
  */
+ 
+#ifndef USE_OPENSSL
+ 
 # include <stdlib.h>
 # include <string.h>
 
@@ -397,3 +400,5 @@ static void sha256_block_data_order(SHA256_CTX *ctx, const void *in,
 
 #  endif
 # endif                         /* SHA256_ASM */
+
+#endif
