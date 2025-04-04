@@ -4,9 +4,9 @@
  * according to the OpenSSL license [found in ../../LICENSE].
  * ====================================================================
  */
- 
+
 #ifndef USE_OPENSSL
- 
+
 # include <stdlib.h>
 # include <string.h>
 
