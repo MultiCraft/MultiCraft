@@ -28,8 +28,8 @@ cmake --build . -j${NPROC}
 # update `include` folder
 rm -rf ../../sdl2/include
 mkdir -p ../../sdl2/include
-cp -a ./include ../../sdl2
-cp -a ./include-config-release/* ../../sdl2/include
+cp -a ./include/SDL2/* ../../sdl2/include
+cp -a ./include-config-release/SDL2/* ../../sdl2/include
 # update lib
 rm -rf ../../sdl2/lib
 mkdir -p ../../sdl2/lib

@@ -20,7 +20,7 @@ cmake --build . -j${NPROC}
 # update `include` folder
 rm -rf ../../libjpeg/include
 mkdir -p ../../libjpeg/include
-cp -a ../*.h ../../libjpeg/include
+cp -a ../src/*.h ../../libjpeg/include
 cp -a *.h ../../libjpeg/include
 # update lib
 rm -rf ../../libjpeg/lib
