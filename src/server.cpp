@@ -71,6 +71,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if USE_ZSTD
 #include <zstd.h>
 #endif
+#if defined(__ANDROID__) || defined(__APPLE__)
+#include "util/encryption.h"
+#endif
 
 class ClientNotFoundException : public BaseException
 {
@@ -3943,6 +3946,17 @@ Translations *Server::getTranslationLanguage(const std::string &lang_code)
 				translations->loadTranslation(data);
 			}
 		}
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		else if (str_ends_with(i.first, suffix + ".e")) {
+			std::string data;
+			if (fs::ReadFile(i.second.path, data)) {
+				std::string decrypted_data;
+				if (Encryption::decryptSimple(data, decrypted_data))
+					translations->loadTranslation(decrypted_data);
+			}
+		}
+#endif
 	}
 
 	return translations;
