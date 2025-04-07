@@ -464,7 +464,8 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				v2s32 offset((e->align.X - 1.0) * dstsize.X / 2,
 				             (e->align.Y - 1.0) * dstsize.Y / 2);
 
-				if ((dstsize.Y + pos.Y + offset.Y + e->offset.Y * m_scale_factor) > m_displaycenter.Y)
+				if ((dstsize.Y + pos.Y + offset.Y + e->offset.Y * m_scale_factor) > m_displaycenter.Y &&
+						e->scale.X >= 0 && e->scale.Y >= 0)
 					offset.Y -= m_hud_move_upwards;
 				core::rect<s32> rect(0, 0, dstsize.X, dstsize.Y);
 				rect += pos + offset + v2s32(e->offset.X * m_scale_factor,
