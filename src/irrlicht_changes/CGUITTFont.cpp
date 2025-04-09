@@ -421,14 +421,15 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 			}
 
 			// For devices with low RAM only fonts smaller than 5MB are loaded into memory. Otherwise just use FT_New_Face.
-			float memoryMax = porting::getTotalSystemMemory() / 1024;
+			float memoryMax = (float) porting::getTotalSystemMemory() / 1024;
 			int maxFontSize = 5 * 1024 * 1024;
-			if (memoryMax <= 2.0f && file->getSize() < maxFontSize) {
+			size_t fileSize = file->getSize();
+			if (memoryMax < 3.0f && fileSize > maxFontSize) {
 				use_memory_face = false;
 			} else {
-				face->face_buffer = new FT_Byte[file->getSize()];
-				file->read(face->face_buffer, file->getSize());
-				face->face_buffer_size = file->getSize();
+				face->face_buffer = new FT_Byte[fileSize];
+				file->read(face->face_buffer, fileSize);
+				face->face_buffer_size = fileSize;
 				file->drop();
 
 				// Create the face.
@@ -438,6 +439,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 
 					c_faces.remove(filename);
 					delete face;
+					delete[] face->face_buffer;
 					face = 0;
 					return false;
 				}
