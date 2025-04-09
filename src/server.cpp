@@ -127,6 +127,12 @@ void *ServerThread::run()
 		} catch (LuaError &e) {
 			m_server->setAsyncFatalError(
 					"ServerThread::run Lua: " + std::string(e.what()));
+		} catch (SerializationError &e) {
+			m_server->setAsyncFatalError(
+					"ServerThread::run: " + std::string(e.what()));
+		} catch (DatabaseException &e) {
+			m_server->setAsyncFatalError(
+					"ServerThread::run: " + std::string(e.what()));
 		}
 	}
 
@@ -293,7 +299,9 @@ Server::~Server()
 		MutexAutoLock envlock(m_env_mutex);
 
 		infostream << "Server: Saving players" << std::endl;
-		m_env->saveLoadedPlayers();
+		try {
+			m_env->saveLoadedPlayers();
+		} catch (DatabaseException &e) {}
 
 		infostream << "Server: Kicking players" << std::endl;
 		std::string kick_msg;
@@ -305,7 +313,9 @@ Server::~Server()
 		if (kick_msg.empty()) {
 			kick_msg = g_settings->get("kick_msg_shutdown");
 		}
-		m_env->saveLoadedPlayers(true);
+		try {
+			m_env->saveLoadedPlayers(true);
+		} catch (DatabaseException &e) {}
 		m_env->kickAllPlayers(SERVER_ACCESSDENIED_SHUTDOWN,
 			kick_msg, reconnect);
 	}
@@ -340,7 +350,7 @@ Server::~Server()
 		infostream << "Server: Saving environment metadata" << std::endl;
 		try {
 			m_env->saveMeta();
-		} catch (const SerializationError &e) {
+		} catch (SerializationError &e) {
 			if (m_on_shutdown_errmsg) {
 				if (m_on_shutdown_errmsg->empty()) {
 					*m_on_shutdown_errmsg = std::string("ServerEnvironment: ") + e.what();
