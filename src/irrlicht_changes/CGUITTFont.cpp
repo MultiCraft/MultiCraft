@@ -439,7 +439,6 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 
 					c_faces.remove(filename);
 					delete face;
-					delete[] face->face_buffer;
 					face = 0;
 					return false;
 				}
