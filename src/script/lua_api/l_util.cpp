@@ -541,6 +541,15 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	lua_settable(L, top);
 	return 1;
 }
+
+int ModApiUtil::l_get_system_ram(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+	const int res = porting::getTotalSystemMemory();
+	lua_pushinteger(L, res);
+
+	return 1;
+}
 #endif
 
 void ModApiUtil::Initialize(lua_State *L, int top)
@@ -648,6 +657,7 @@ void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	API_FCT(upgrade);
 	API_FCT(get_secret_key);
 	API_FCT(get_screen_info);
+	API_FCT(get_system_ram);
 #else
 	FATAL_ERROR("InitializeMainMenu called from server");
 #endif

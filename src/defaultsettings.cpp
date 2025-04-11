@@ -502,7 +502,7 @@ void set_default_settings()
 	settings->setDefault("device_is_tablet", std::to_string(isTablet));
 #endif
 
-	float memoryMax = porting::getTotalSystemMemory() / 1024;
+	float memoryMax = (float) porting::getTotalSystemMemory() / 1024;
 	settings->setDefault("convert_to_16bit", std::to_string(memoryMax <= 2));
 
 	// Altered settings for macOS

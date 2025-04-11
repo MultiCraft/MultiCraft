@@ -109,6 +109,9 @@ private:
 	static int l_get_secret_key(lua_State *L);
 
 	static int l_get_screen_info(lua_State *L);
+
+	// get_system_ram()
+	static int l_get_system_ram(lua_State *L);
 #endif
 
 public:
