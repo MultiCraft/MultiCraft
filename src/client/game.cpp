@@ -720,9 +720,8 @@ protected:
 	bool initGui();
 
 	// Client connection
-	bool connectToServer(const GameStartData &start_data,
-			bool *connect_ok, bool *aborted);
-	bool getServerContent(bool *aborted);
+	bool connectToServer(const GameStartData &start_data, bool *connect_ok);
+	bool getServerContent();
 
 	// Main loop
 
@@ -956,6 +955,8 @@ private:
 #ifdef HAVE_TOUCHSCREENGUI
 	bool m_cache_touchtarget;
 #endif
+
+	bool m_connect_aborted = false;
 };
 
 Game::Game() :
@@ -1375,18 +1376,19 @@ void Game::copyServerClientCache()
 
 bool Game::createClient(const GameStartData &start_data)
 {
+	bool could_connect = false;
+
 	showOverlayMessage(N_("Creating client..."), 0, 10);
 
 	draw_control = new MapDrawControl;
 	if (!draw_control)
 		return false;
 
-	bool could_connect, connect_aborted;
-	if (!connectToServer(start_data, &could_connect, &connect_aborted))
+	if (!connectToServer(start_data, &could_connect))
 		return false;
 
 	if (!could_connect) {
-		if (error_message->empty() && !connect_aborted) {
+		if (error_message->empty() && !m_connect_aborted) {
 			// Should not happen if error messages are set properly
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
@@ -1398,8 +1400,8 @@ bool Game::createClient(const GameStartData &start_data)
 	porting::notifyServerConnect(!simple_singleplayer_mode);
 #endif
 
-	if (!getServerContent(&connect_aborted)) {
-		if (error_message->empty() && !connect_aborted) {
+	if (!getServerContent()) {
+		if (error_message->empty() && !m_connect_aborted) {
 			// Should not happen if error messages are set properly
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
@@ -1412,7 +1414,10 @@ bool Game::createClient(const GameStartData &start_data)
 	shader_src->addShaderConstantSetterFactory(scsf);
 
 	// Update cached textures, meshes and materials
-	client->afterContentReceived();
+	if (!client->afterContentReceived()) {
+		infostream << "Connect aborted [Escape]" << std::endl;
+		return false;
+	}
 
 	RenderingEngine::draw_load_cleanup();
 
@@ -1504,11 +1509,8 @@ bool Game::initGui()
 	return true;
 }
 
-bool Game::connectToServer(const GameStartData &start_data,
-		bool *connect_ok, bool *connection_aborted)
+bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 {
-	*connect_ok = false;	// Let's not be overly optimistic
-	*connection_aborted = false;
 	bool local_server_mode = false;
 
 	showOverlayMessage(N_("Resolving address..."), 0, 15);
@@ -1550,6 +1552,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			connect_address.isIPv6(), m_game_ui.get());
 
 	client->m_simple_singleplayer_mode = simple_singleplayer_mode;
+	client->m_connect_aborted = &m_connect_aborted;
 
 	infostream << "Connecting to server at ";
 	connect_address.print(&infostream);
@@ -1593,7 +1596,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			// Break conditions
-			if (*connection_aborted)
+			if (m_connect_aborted)
 				break;
 
 			if (client->accessDenied()) {
@@ -1605,7 +1608,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			if (input->cancelPressed()) {
-				*connection_aborted = true;
+				m_connect_aborted = true;
 				infostream << "Connect aborted [Escape]" << std::endl;
 				break;
 			}
@@ -1619,7 +1622,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
 						   &g_menumgr, client, start_data.name, start_data.password,
-						   connection_aborted, texture_src, sound))->drop();
+						   &m_connect_aborted, texture_src, sound))->drop();
 				}
 			} else {
 				wait_time += dtime;
@@ -1643,7 +1646,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 	return result;
 }
 
-bool Game::getServerContent(bool *aborted)
+bool Game::getServerContent()
 {
 	input->clear();
 
@@ -1679,8 +1682,13 @@ bool Game::getServerContent(bool *aborted)
 			return false;
 		}
 
+		if (m_connect_aborted) {
+			infostream << "Connect aborted [Escape]" << std::endl;
+			return false;
+		}
+
 		if (input->cancelPressed()) {
-			*aborted = true;
+			m_connect_aborted = true;
 			infostream << "Connect aborted [Escape]" << std::endl;
 			return false;
 		}
