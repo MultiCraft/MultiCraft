@@ -151,11 +151,13 @@ public:
 	static std::vector<core::vector3d<u32>> getSupportedVideoModes();
 	static std::vector<irr::video::E_DRIVER_TYPE> getSupportedVideoDrivers();
 
-	static void setLoadScreenBackground(const bool clouds, const std::string texture)
+	static void setLoadScreenBackground(const bool clouds, const std::string texture,
+			const video::SColor sky_color)
 	{
 		if (s_singleton) {
 			s_singleton->m_load_bg_clouds = clouds;
 			s_singleton->m_load_bg_texture = texture;
+			s_singleton->m_sky_color = sky_color;
 		}
 	}
 
@@ -187,4 +189,5 @@ private:
 
 	bool m_load_bg_clouds = false;
 	std::string m_load_bg_texture = "";
+	video::SColor m_sky_color;
 };

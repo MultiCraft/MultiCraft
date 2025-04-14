@@ -650,7 +650,7 @@ void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
 void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 									ITextureSource *tsrc, float dtime)
 {
-	driver->beginScene(true, true, video::SColor(255, 5, 155, 245));
+	driver->beginScene(true, true, m_sky_color);
 
 	const bool cloud_menu_background = m_load_bg_clouds && g_settings->getBool("menu_clouds");
 	if (cloud_menu_background) {

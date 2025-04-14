@@ -40,6 +40,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlicht_changes/static_text.h"
 #include "translation.h"
 #include "client/tile.h"
+#include "daynightratio.h"
+#include "light.h"
 
 
 /******************************************************************************/
@@ -103,6 +105,10 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 
 	//create texture source
 	m_texture_source = createTextureSource(true);
+
+	m_shader_src = createShaderSource();
+	if (m_shader_src)
+		m_sky = new Sky(-1, nullptr, m_shader_src, m_smgr);
 
 	//create soundmanager
 	MenuMusicFetcher soundfetcher;
@@ -172,7 +178,8 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	const texture_layer layer = m_clouds_enabled ? TEX_LAYER_OVERLAY : TEX_LAYER_BACKGROUND;
 	const video::ITexture* texture = m_textures[layer].texture;
 	RenderingEngine::setLoadScreenBackground(m_clouds_enabled,
-			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "");
+			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "",
+			m_sky ? m_sky->getSkyColor() : video::SColor(255, 5, 155, 245));
 
 	m_menu->quitMenu();
 	m_menu->drop();
@@ -231,10 +238,8 @@ void GUIEngine::run()
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
 
-	static const video::SColor sky_color(255, 5, 155, 245);
-
 	// Reset fog color
-	{
+	// {
 		video::SColor fog_color;
 		video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
 		f32 fog_start = 0;
@@ -245,11 +250,18 @@ void GUIEngine::run()
 		driver->getFog(fog_color, fog_type, fog_start, fog_end, fog_density,
 				fog_pixelfog, fog_rangefog);
 
-		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
-				fog_pixelfog, fog_rangefog);
-	}
+		{
+			const video::SColor sky_color = video::SColor(255, 5, 155, 245);
+			driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
+						   fog_pixelfog, fog_rangefog);
+		}
+	// }
 
 	while (RenderingEngine::run() && (!m_startgame) && (!m_kill)) {
+		const video::SColor sky_color = m_sky ? m_sky->getSkyColor() : video::SColor(255, 5, 155, 245);
+		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
+				fog_pixelfog, fog_rangefog);
+
 		IrrlichtDevice *device = RenderingEngine::get_raw_device();
 #ifdef __IOS__
 		if (device->isWindowMinimized())
@@ -286,6 +298,14 @@ void GUIEngine::run()
 
 		if (m_clouds_enabled)
 		{
+			if (m_sky) {
+				u32 daynight_ratio = time_to_daynight_ratio(m_timeofday * 24000.0f, true);
+				float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
+
+				m_sky->update(m_timeofday, time_brightness, time_brightness, true, CAMERA_MODE_FIRST, 3, 0);
+				m_sky->render();
+				m_cloud.clouds->update(v3f(0, 0, 0), m_sky->getCloudColor());
+			}
 			cloudPreProcess();
 			drawOverlay(driver);
 		}
@@ -329,7 +349,6 @@ GUIEngine::~GUIEngine()
 		m_sound_manager = NULL;
 	}
 
-	infostream<<"GUIEngine: Deinitializing scripting"<<std::endl;
 	delete m_script;
 
 	m_irr_toplefttext->setText(L"");
@@ -341,6 +360,10 @@ GUIEngine::~GUIEngine()
 	}
 
 	delete m_texture_source;
+	if (m_shader_src)
+		delete m_shader_src;
+	if (m_sky)
+		m_sky->drop();
 
 	// m_cloud.clouds is g_menuclouds and is dropped elsewhere
 	// if (m_cloud.clouds)
