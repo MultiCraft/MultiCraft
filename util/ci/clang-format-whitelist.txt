@@ -109,6 +109,9 @@ src/clouds.h
 src/collision.cpp
 src/collision.h
 src/config.h
+src/content/mods.cpp
+src/content/mods.h
+src/content/subgames.h
 src/content_cao.cpp
 src/content_cao.h
 src/content_cso.cpp
