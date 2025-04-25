@@ -346,6 +346,7 @@ GUIEngine::~GUIEngine()
 		m_sound_manager = NULL;
 	}
 
+	infostream<<"GUIEngine: Deinitializing scripting"<<std::endl;
 	delete m_script;
 
 	m_irr_toplefttext->setText(L"");
