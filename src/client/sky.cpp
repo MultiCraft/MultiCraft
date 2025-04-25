@@ -35,6 +35,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 using namespace irr::core;
 
+// Menu sky are created later
+class Sky;
+Sky *g_menusky = NULL;
+
 static video::SMaterial baseMaterial()
 {
 	video::SMaterial mat;
@@ -830,6 +834,14 @@ void Sky::setMoonTexture(const std::string &moon_texture,
 		}
 	} else {
 		m_moon_texture = nullptr;
+	}
+}
+
+void Sky::setStarScale(f32 star_scale)
+{
+	if (m_star_params.scale != star_scale) {
+		m_star_params.scale = star_scale;
+		updateStars();
 	}
 }
 

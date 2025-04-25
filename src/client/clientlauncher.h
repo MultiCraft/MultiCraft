@@ -52,4 +52,6 @@ private:
 	InputHandler *input = nullptr;
 	MyEventReceiver *receiver = nullptr;
 	gui::IGUISkin *skin = nullptr;
+	IWritableShaderSource *m_shader_src = nullptr;
+
 };

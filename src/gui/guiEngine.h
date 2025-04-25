@@ -151,6 +151,8 @@ public:
 	unsigned int queueAsync(const std::string &serialized_fct,
 			const std::string &serialized_params);
 
+	static float g_timeofday;
+
 private:
 
 	/** find and run the main menu script */
@@ -270,15 +272,9 @@ private:
 	/** data used to draw clouds */
 	clouddata   m_cloud;
 
-	IWritableShaderSource *m_shader_src = nullptr;
-	Sky *m_sky = nullptr;
-
-	float m_timeofday = 0.5f;
-
 	/** start playing a sound and return handle */
 	s32 playSound(const SimpleSoundSpec &spec, bool looped);
 	/** stop playing a sound started with playSound() */
 	void stopSound(s32 handle);
-
 
 };
