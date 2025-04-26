@@ -236,7 +236,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	if (!FT_HAS_COLOR(face)) {
 		if (bold)
-			FT_Outline_Embolden(&(glyph->outline), (float)font_size * 2.5f);
+			FT_Outline_Embolden(&(glyph->outline), (float)font_size * 2.0f);
 
 		if (italic) {
 			FT_Matrix italic_matrix;

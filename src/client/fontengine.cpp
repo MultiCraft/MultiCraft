@@ -303,17 +303,15 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 			setting_suffix.append("_bold_italic");
 		}
 	} else if (spec.bold) {
-		if (bold_path.empty()) {
+		if (bold_path.empty())
 			bold_outline = true;
-		} else {
+		else
 			setting_suffix.append("_bold");
-		}
 	} else if (spec.italic) {
-		if (italic_path.empty()) {
+		if (italic_path.empty())
 			italic_outline = true;
-		} else {
+		else
 			setting_suffix.append("_italic");
-		}
 	}
 
 	u32 size = std::floor(RenderingEngine::getDisplayDensity() *
