@@ -538,6 +538,7 @@ void set_default_settings()
 	settings->setDefault("fixed_virtual_joystick", "true");
 	settings->setDefault("virtual_joystick_triggers_aux", "false");
 	settings->setDefault("fast_move", "true");
+	settings->setDefault("dig_and_move", "false");
 #endif
 
 	// Mobile Platform
