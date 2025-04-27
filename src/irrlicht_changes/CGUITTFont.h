@@ -309,6 +309,10 @@ namespace gui
 			virtual core::dimension2d<u32> getDimension(const wchar_t* text) const;
 			virtual core::dimension2d<u32> getDimension(const core::ustring& text) const;
 
+			//! Returns the dimension of a text string with keep in mind that italic/bold text is slightly longer.
+			virtual core::dimension2d<u32> getTotalDimension(const wchar_t* text) const;
+			virtual core::dimension2d<u32> getTotalDimension(const core::ustring& text) const;
+
 			//! Calculates the index of the character in the text which is on a specific position.
 			virtual s32 getCharacterFromPos(const wchar_t* text, s32 pixel_x) const;
 			virtual s32 getCharacterFromPos(const core::ustring& text, s32 pixel_x) const;

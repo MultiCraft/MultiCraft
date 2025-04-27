@@ -984,6 +984,23 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 	if (text_dimension.Width < line.Width)
 		text_dimension.Width = line.Width;
 
+	return text_dimension;
+}
+
+core::dimension2d<u32> CGUITTFont::getTotalDimension(const wchar_t* text) const
+{
+	return getTotalDimension(core::ustring(text));
+}
+
+core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) const
+{
+	core::dimension2d<u32> text_dimension = getDimension(text);
+
+	s32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
+	s32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
+	s32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
+	s32 max_font_height = core::max_(test1, core::max_(test2, test3));
+
 	if (italic) {
 		float slant = 0.2f;
 		s32 italic_extra_width = static_cast<s32>(max_font_height * slant);
