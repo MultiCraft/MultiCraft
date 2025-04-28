@@ -280,7 +280,7 @@ function sscsm.com_send(pname, channel, msg)
 	end
 
 	-- Compress long messages
-	if #msg > 4096 then
+	if #msg > 512 then
 		-- Chat messages can't contain binary data so base64 is used
 		local compressed_msg = minetest.encode_base64(minetest.compress(msg))
 
