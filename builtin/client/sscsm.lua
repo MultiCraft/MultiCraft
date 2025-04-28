@@ -340,9 +340,9 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 		if first_char == "E" then
 			-- End of messages, decompress and execute
 			local compressed = core.decode_base64(table.concat(chunks))
-			local code = compressed and core.decompress(compressed)
-			if not code then return end
-			local files = code:split("\0")
+			local all_code = compressed and core.decompress(compressed)
+			if not all_code then return end
+			local files = all_code:split("\0")
 			for _, file in ipairs(files) do
 				local name, code = file:match("^([^\n]-)\n(.-)$")
 				if not name then return end
