@@ -325,7 +325,6 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 
 		-- Automatically leave on last CSM
 		if name == ":cleanup" then
-			print('leaving channel')
 			leave_mod_channel()
 		end
 	elseif channel_name == v2_channel_name then
@@ -358,6 +357,9 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 			end
 
 			leave_mod_channel()
+
+			-- No need to store the compressed chunks anymore
+			chunks = nil
 		end
 	end
 end)
