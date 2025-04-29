@@ -184,17 +184,11 @@ void GUIEditBoxWithScrollBar::draw()
 					start_pos = ml ? m_broken_text_positions[i] : 0;
 				}
 
-
-				// draw normal text
-				font->draw(txt_line->c_str(), m_current_text_rect,
-					m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-					false, true, &local_clip_rect);
-
 				// draw mark and marked text
 				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
-
 					s32 mbegin = 0, mend = 0;
-					s32 lineStartPos = 0, lineEndPos = txt_line->size();
+					s32 mark_start_pos = 0; 
+					s32 mark_end_pos = txt_line->size();
 
 					if (i == hline_start) {
 						// highlight start is on this line
@@ -206,33 +200,56 @@ void GUIEditBoxWithScrollBar::draw()
 							&((*txt_line)[m_real_mark_begin - start_pos]),
 							m_real_mark_begin - start_pos > 0 ? &((*txt_line)[m_real_mark_begin - start_pos - 1]) : 0);
 
-						lineStartPos = m_real_mark_begin - start_pos;
+						mark_start_pos = m_real_mark_begin - start_pos;
 					}
 					if (i == hline_start + hline_count - 1) {
 						// highlight end is on this line
 						s2 = txt_line->subString(0, m_real_mark_end - start_pos);
 						mend = font->getDimension(s2.c_str()).Width;
-						lineEndPos = (s32)s2.size();
+						mark_end_pos = (s32)s2.size();
 					} else {
 						mend = font->getDimension(txt_line->c_str()).Width;
 					}
 
-
-					m_current_text_rect.UpperLeftCorner.X += mbegin;
-					m_current_text_rect.LowerRightCorner.X = m_current_text_rect.UpperLeftCorner.X + mend - mbegin;
-
+					core::rect<s32> mark_rect = m_current_text_rect;
+					mark_rect.UpperLeftCorner.X += mbegin;
+					mark_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X + mend - mbegin;
 
 					// draw mark
-					skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), m_current_text_rect, &local_clip_rect);
+					skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), mark_rect, &local_clip_rect);
 
-					// draw marked text
-					s = txt_line->subString(lineStartPos, lineEndPos - lineStartPos);
+					// draw text before marked
+					core::rect<s32> before_rect = m_current_text_rect;
+					before_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X;
+					s = txt_line->subString(0, mark_start_pos);
 
 					if (s.size())
-						font->draw(s.c_str(), m_current_text_rect,
+						font->draw(s.c_str(), before_rect,
+							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
+							false, true, &local_clip_rect);
+
+					// draw marked text
+					s = txt_line->subString(mark_start_pos, mark_end_pos - mark_start_pos);
+
+					if (s.size())
+						font->draw(s.c_str(), mark_rect,
 							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_HIGH_LIGHT_TEXT),
 							false, true, &local_clip_rect);
 
+					// draw text after marked
+					core::rect<s32> after_rect = m_current_text_rect;
+					after_rect.UpperLeftCorner.X = mark_rect.LowerRightCorner.X;
+					s = txt_line->subString(mark_end_pos, txt_line->size() - mark_end_pos);
+
+					if (s.size())
+						font->draw(s.c_str(), after_rect,
+							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
+							false, true, &local_clip_rect);
+				} else {
+					// draw normal text
+					font->draw(txt_line->c_str(), m_current_text_rect,
+						m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
+						false, true, &local_clip_rect);
 				}
 			}
 
