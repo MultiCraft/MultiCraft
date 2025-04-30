@@ -65,7 +65,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "guiInventoryList.h"
 #include "guiItemImage.h"
 #include "guiScrollContainer.h"
-#include "intlGUIEditBox.h"
 #include "guiHyperText.h"
 #include "guiScene.h"
 #include "touchscreengui.h"
@@ -1610,22 +1609,16 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 	GUIEditBox *box = nullptr;
 	gui::IGUIEditBox *e = nullptr;
 
-#if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
-		box = new gui::intlGUIEditBox(spec.fdefault.c_str(), true, Environment,
-				data->current_parent, spec.fid, rect, is_editable, is_multiline);
+	if (is_multiline) {
+		box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
+				data->current_parent, spec.fid, rect, is_editable, !is_editable,
+				m_sound_manager);
 		e = box;
-#else
-		if (is_multiline) {
-			box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
-					data->current_parent, spec.fid, rect, is_editable, !is_editable,
-					m_sound_manager);
-			e = box;
-		} else if (is_editable) {
-			e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
-					data->current_parent, spec.fid);
-			e->grab();
-		}
-#endif
+	} else if (is_editable) {
+		e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
+				data->current_parent, spec.fid);
+		e->grab();
+	}
 
 	auto style = getDefaultStyleForElement(is_multiline ? "textarea" : "field", spec.fname);
 
