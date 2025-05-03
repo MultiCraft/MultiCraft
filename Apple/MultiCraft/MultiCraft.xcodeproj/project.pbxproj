@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -1700,7 +1700,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1600;
 				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
@@ -1709,7 +1709,6 @@
 				};
 			};
 			buildConfigurationList = 845856A424B1322C0040BA4F /* Build configuration list for PBXProject "MultiCraft" */;
-			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1744,11 +1743,15 @@
 				ar,
 				th,
 				Base,
+				ko,
+				"zh-Hans",
+				"zh-Hant",
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			packageReferences = (
 				84D1BF522CD7EC430077DD47 /* XCRemoteSwiftPackageReference "zstd" */,
 			);
+			preferredProjectObjectVersion = 77;
 			productRefGroup = 845856AA24B1322C0040BA4F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2117,7 +2120,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 70;
+				CURRENT_PROJECT_VERSION = 75;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2192,7 +2195,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 70;
+				CURRENT_PROJECT_VERSION = 75;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (

@@ -9,4 +9,4 @@ export OSX_ARCH="-arch x86_64 -arch arm64"
 
 export OSX_CC=$(xcrun --sdk macosx --find clang)
 export OSX_CXX=$(xcrun --sdk macosx --find clang++)
-export OSX_FLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path) -mmacosx-version-min=$OSX_OSVER -fdata-sections -ffunction-sections -Ofast"
+export OSX_FLAGS="-isysroot $(xcrun --sdk macosx --show-sdk-path) -mmacosx-version-min=$OSX_OSVER -fdata-sections -ffunction-sections -O3 -ffast-math"

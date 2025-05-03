@@ -40,7 +40,7 @@ if INIT == "game" then
 elseif INIT == "mainmenu" then
 	local mm_script = core.settings:get("main_menu_script")
 	if not mm_script or mm_script == "" then
-		mm_script = scriptdir .. "hosting" .. DIR_DELIM .. "init.lua"
+		mm_script = scriptdir .. ".." .. DIR_DELIM .. "menu" .. DIR_DELIM .. "init.lua"
 	end
 	local custom_loaded = false
 	if mm_script and mm_script ~= "" then
