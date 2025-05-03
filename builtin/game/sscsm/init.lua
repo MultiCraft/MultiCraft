@@ -43,7 +43,7 @@ end
 
 -- Register code
 sscsm.registered_csms = {}
-local csm_order = false
+local csm_order
 
 -- Recalculate the CSM loading order
 -- TODO: Make this nicer
@@ -71,7 +71,7 @@ local function recalc_csm_order()
 		for name2, u in pairs(unsatisfied) do
 			if u[name] then
 				u[name] = nil
-				if #u == 0 then
+				if not next(u) then
 					table.insert(staging, name2)
 				end
 			end
@@ -146,20 +146,77 @@ core.register_on_mods_loaded(recalc_csm_order)
 
 -- Handle players joining
 local has_sscsms = {}
-local mod_channel = core.mod_channel_join("sscsm:exec_pipe")
+local sscsms_sent = {}
+local v2_mod_channels = {}
+local legacy_mod_channel = core.mod_channel_join("sscsm:exec_pipe")
+local v2_chunk_size = 65530
 core.register_on_modchannel_message(function(channel_name, sender, message)
-	if channel_name ~= "sscsm:exec_pipe" or not sender or
-			not mod_channel:is_writeable() or message ~= "0" or
-			sender:find("\n") or has_sscsms[sender] then
-		return
-	end
-	core.log("info", "[SSCSM] Sending CSMs on request for " .. sender .. "...")
-	for _, name in ipairs(csm_order) do
-		local def = sscsm.registered_csms[name]
-		if not def.is_enabled_for or def.is_enabled_for(sender) then
-			mod_channel:send_all("0" .. sender .. "\n" .. name
-				.. "\n" .. sscsm.registered_csms[name].code)
+	if not sender or sscsms_sent[sender] or message ~= "0" then return end
+
+	local v2_channel = v2_mod_channels[sender]
+	if channel_name == "sscsm:exec_pipe" then
+		-- Legacy protocol (uncompressed)
+		if not legacy_mod_channel:is_writeable() or sender:find("\n") then
+			return
 		end
+
+		sscsms_sent[sender] = true
+		core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
+			" (legacy protocol)...")
+		for _, name in ipairs(csm_order) do
+			local def = sscsm.registered_csms[name]
+			if not def.is_enabled_for or def.is_enabled_for(sender) then
+				legacy_mod_channel:send_all("0" .. sender .. "\n" .. name
+					.. "\n" .. def.code)
+			end
+		end
+	elseif channel_name == "sscsm:v2_" .. sender and v2_channel then
+		-- New protocol (compressed)
+		local blob = {}
+
+		for _, name in ipairs(csm_order) do
+			local def = sscsm.registered_csms[name]
+			if not def.is_enabled_for or def.is_enabled_for(sender) then
+				blob[#blob + 1] = name .. "\n" .. def.code
+			end
+		end
+
+		local compressed = core.encode_base64(core.compress(table.concat(blob, "\0")))
+
+		sscsms_sent[sender] = true
+		core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
+			" (v2 protocol)...")
+		-- This is not optimal but the compressed code is probably only one or
+		-- two chunks anyway
+		while #compressed > v2_chunk_size do
+			v2_channel:send_all("C" .. compressed:sub(1, v2_chunk_size))
+			compressed = compressed:sub(v2_chunk_size + 1)
+		end
+		v2_channel:send_all("E" .. compressed)
+	end
+
+	-- No point staying in the v2 mod channel now that SSCSMs are sent
+	if v2_channel then
+		v2_channel:leave()
+		v2_mod_channels[sender] = nil
+	end
+end)
+
+core.register_on_joinplayer(function(player)
+	-- Join player-specific mod channels to avoid relaying messages to players
+	-- that don't need them
+	local name = player:get_player_name()
+	v2_mod_channels[name] = core.mod_channel_join("sscsm:v2_" .. name)
+end)
+
+core.register_on_leaveplayer(function(player)
+	local name = player:get_player_name()
+	has_sscsms[name] = nil
+
+	-- Leave the v2 mod channel
+	if v2_mod_channels[name] then
+		v2_mod_channels[name]:leave()
+		v2_mod_channels[name] = nil
 	end
 end)
 
@@ -223,7 +280,7 @@ function sscsm.com_send(pname, channel, msg)
 	end
 
 	-- Compress long messages
-	if #msg > 4096 then
+	if #msg > 512 then
 		-- Chat messages can't contain binary data so base64 is used
 		local compressed_msg = minetest.encode_base64(minetest.compress(msg))
 
@@ -320,10 +377,6 @@ end)
 function sscsm.has_sscsms_enabled(name)
 	return has_sscsms[name] or false
 end
-
-core.register_on_leaveplayer(function(player)
-	has_sscsms[player:get_player_name()] = nil
-end)
 
 function sscsm.com_send_all(channel, msg)
 	for name, _ in pairs(has_sscsms) do
