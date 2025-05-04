@@ -60,6 +60,18 @@ end
 
 core.global_exists = sscsm.global_exists
 
+-- Check if join_mod_channel and leave_mod_channel exist.
+if sscsm.global_exists('join_mod_channel')
+		and sscsm.global_exists('leave_mod_channel') then
+	sscsm.join_mod_channel  = join_mod_channel
+	sscsm.leave_mod_channel = leave_mod_channel
+	join_mod_channel, leave_mod_channel = nil, nil
+else
+	local dummy = function() end
+	sscsm.join_mod_channel  = dummy
+	sscsm.leave_mod_channel = dummy
+end
+
 -- Add print()
 function print(...)
 	local msg = '[SSCSM] '
@@ -328,15 +340,9 @@ core.register_on_receiving_chat_message(function(message)
 end)
 
 sscsm.register_on_mods_loaded(function()
+	sscsm.leave_mod_channel()
 	sscsm.com_send('sscsm:com_test', {flags = sscsm.restriction_flags})
 end)
-
--- Call leave_mod_channel for legacy clients
-if sscsm.global_exists('leave_mod_channel') then
-	sscsm.register_on_mods_loaded(leave_mod_channel)
-	join_mod_channel = nil
-	leave_mod_channel = nil
-end
 
 if core.global_exists("set_error_handler") then
 	set_error_handler(function(err)
