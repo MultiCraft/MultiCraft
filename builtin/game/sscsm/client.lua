@@ -136,46 +136,11 @@ function sscsm.unregister_chatcommand(cmd)
 	sscsm.registered_chatcommands[cmd] = nil
 end
 
--- A proper get_player_control didn't exist before Minetest 5.3.0.
-if core.localplayer.get_control then
-	-- Preserve API compatibility
-	if core.localplayer:get_control().LMB == nil then
-		-- MT 5.4+
-		function sscsm.get_player_control()
-			local c = core.localplayer:get_control()
-			c.LMB, c.RMB = c.dig, c.place
-			return c
-		end
-	else
-		-- MT 5.3
-		function sscsm.get_player_control()
-			local c = core.localplayer:get_control()
-			c.dig, c.place = c.LMB, c.RMB
-			return c
-		end
-	end
-else
-	-- MT 5.0 to 5.2
-	local floor = math.floor
-	function sscsm.get_player_control()
-		local n = core.localplayer:get_key_pressed()
-		return {
-			up    = n % 2 == 1,
-			down  = floor(n / 2) % 2 == 1,
-			left  = floor(n / 4) % 2 == 1,
-			right = floor(n / 8) % 2 == 1,
-			jump  = floor(n / 16) % 2 == 1,
-			aux1  = floor(n / 32) % 2 == 1,
-			sneak = floor(n / 64) % 2 == 1,
-			LMB   = floor(n / 128) % 2 == 1,
-			RMB   = floor(n / 256) % 2 == 1,
-			dig   = floor(n / 128) % 2 == 1,
-			place = floor(n / 256) % 2 == 1,
-		}
-	end
-
-	-- In Minetest 5.2.0, core.get_node_light() segfaults.
-	core.get_node_light = nil
+-- This function exists for backwards compatibility reasons
+function sscsm.get_player_control()
+	local c = core.localplayer:get_control()
+	c.LMB, c.RMB = c.dig, c.place
+	return c
 end
 
 -- Call func(...) every <interval> seconds.
