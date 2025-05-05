@@ -212,6 +212,7 @@ end)
 core.register_on_leaveplayer(function(player)
 	local name = player:get_player_name()
 	has_sscsms[name] = nil
+	sscsms_sent[name] = nil
 
 	-- Leave the v2 mod channel
 	if v2_mod_channels[name] then
