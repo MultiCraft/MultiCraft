@@ -1799,16 +1799,21 @@ void texture_update_progress(void *args, u32 progress, u32 max_progress)
 		}
 
 		if (do_draw) {
+			float dtime = (float)(time_ms - targs->last_time_ms) / 1000.0f;
 			targs->last_time_ms = time_ms;
 			std::basic_stringstream<wchar_t> strm;
 			strm << targs->text_base << " " << targs->last_percent << "%...";
-			RenderingEngine::draw_load_screen(strm.str(), targs->guienv, targs->tsrc, 0,
+			RenderingEngine::draw_load_screen(strm.str(), targs->guienv, targs->tsrc, dtime,
 				72 + (u16) ((18. / 100.) * (double) targs->last_percent));
 		}
 }
 
 bool Client::afterContentReceived()
 {
+	u64 time_ms = porting::getTimeMs();
+	u64 last_time_ms = time_ms;
+	float dtime = 0;
+
 	infostream<<"Client::afterContentReceived() started"<<std::endl;
 	assert(m_itemdef_received); // pre-condition
 	assert(m_nodedef_received); // pre-condition
@@ -1823,7 +1828,10 @@ bool Client::afterContentReceived()
 
 	// Rebuild inherited images and recreate textures
 	infostream<<"- Rebuilding images and textures"<<std::endl;
-	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, 0, 70);
+	last_time_ms = time_ms;
+	time_ms = porting::getTimeMs();
+	dtime = (float)(time_ms - last_time_ms) / 1000.0f;
+	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, 70);
 	m_tsrc->rebuildImagesAndTextures();
 	delete[] text;
 
@@ -1835,7 +1843,10 @@ bool Client::afterContentReceived()
 	// Rebuild shaders
 	infostream<<"- Rebuilding shaders"<<std::endl;
 	text = wgettext("Rebuilding shaders...");
-	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, 0, 71);
+	last_time_ms = time_ms;
+	time_ms = porting::getTimeMs();
+	dtime = (float)(time_ms - last_time_ms) / 1000.0f;
+	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, 71);
 	m_shsrc->rebuildShaders();
 	delete[] text;
 
@@ -1847,7 +1858,10 @@ bool Client::afterContentReceived()
 	// Update node aliases
 	infostream<<"- Updating node aliases"<<std::endl;
 	text = wgettext("Initializing nodes...");
-	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, 0, 72);
+	last_time_ms = time_ms;
+	time_ms = porting::getTimeMs();
+	dtime = (float)(time_ms - last_time_ms) / 1000.0f;
+	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, 72);
 	m_nodedef->updateAliases(m_itemdef);
 	for (const auto &path : getTextureDirs()) {
 		TextureOverrideSource override_source(path + DIR_DELIM + "override.txt");

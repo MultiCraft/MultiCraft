@@ -957,6 +957,8 @@ private:
 #endif
 
 	bool m_connect_aborted = false;
+	u64 load_last_time_ms = 0;
+	u64 load_time_ms = 0;
 };
 
 Game::Game() :
@@ -1264,6 +1266,12 @@ bool Game::init(
 {
 	texture_src = createTextureSource(false);
 
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_time_ms = porting::getTimeMs();
+	load_last_time_ms = load_time_ms;
 	showOverlayMessage(N_("Loading..."), 0, 0);
 
 	shader_src = createShaderSource();
@@ -1320,7 +1328,14 @@ bool Game::initSound()
 bool Game::createSingleplayerServer(const std::string &map_dir,
 		const SubgameSpec &gamespec, u16 port)
 {
-	showOverlayMessage(N_("Loading..."), 0, 5);
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Loading..."), dtime, 5);
 
 	std::string bind_str = g_settings->get("bind_address");
 	Address bind_addr(0, 0, 0, 0, port);
@@ -1378,7 +1393,14 @@ bool Game::createClient(const GameStartData &start_data)
 {
 	bool could_connect = false;
 
-	showOverlayMessage(N_("Creating client..."), 0, 10);
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Creating client..."), dtime, 10);
 
 	draw_control = new MapDrawControl;
 	if (!draw_control)
@@ -1513,7 +1535,14 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 {
 	bool local_server_mode = false;
 
-	showOverlayMessage(N_("Resolving address..."), 0, 15);
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Resolving address..."), dtime, 15);
 
 	Address connect_address(0, 0, 0, 0, start_data.socket_port);
 
@@ -1565,7 +1594,6 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 		Wait for server to accept connection
 	*/
 
-	bool result = true;
 	const f32 connect_timeout = start_data.reconnecting ?
 			g_settings->getFloat("reconnect_timeout") :
 			g_settings->getFloat("connect_timeout");
