@@ -110,8 +110,8 @@ irr::gui::IGUIFont *FontEngine::getFont(FontSpec spec)
 				spec.mode == FM_SimpleMono) ?
 				FM_SimpleMono : FM_Simple;
 		// Support for those could be added, but who cares?
-		spec.bold = false;
-		spec.italic = false;
+		//spec.bold = false;
+		//spec.italic = false;
 	}
 
 	// Fallback to default size
@@ -298,10 +298,31 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	}
 
 	std::string setting_suffix = "";
-	if (spec.bold)
-		setting_suffix.append("_bold");
-	if (spec.italic)
-		setting_suffix.append("_italic");
+	bool bold_outline = false;
+	bool italic_outline = false;
+
+	std::string bold_path = g_settings->get(setting_prefix + "font_path_bold");
+	std::string italic_path = g_settings->get(setting_prefix + "font_path_italic");
+	std::string bold_italic_path = g_settings->get(setting_prefix + "font_path_bold_italic");
+
+	if (spec.bold && spec.italic) {
+		if (bold_italic_path.empty()) {
+			bold_outline = true;
+			italic_outline = true;
+		} else {
+			setting_suffix.append("_bold_italic");
+		}
+	} else if (spec.bold) {
+		if (bold_path.empty())
+			bold_outline = true;
+		else
+			setting_suffix.append("_bold");
+	} else if (spec.italic) {
+		if (italic_path.empty())
+			italic_outline = true;
+		else
+			setting_suffix.append("_italic");
+	}
 
 	u32 size = std::max(std::floor(RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("gui_scaling") * spec.size), 1.0f);
@@ -334,8 +355,8 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 #if USE_FREETYPE
 	for (const std::string &font_path : fallback_settings) {
 		irr::gui::CGUITTFont *font = gui::CGUITTFont::createTTFont(m_env,
-				font_path.c_str(), size, true, true, font_shadow,
-				font_shadow_alpha);
+				font_path.c_str(), size, true, true, bold_outline, italic_outline,
+				font_shadow, font_shadow_alpha);
 
 		if (font) {
 			std::vector<std::string> emoji_paths = split(emoji_font_system_paths, ',');

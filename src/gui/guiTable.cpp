@@ -37,6 +37,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h" // for dpi
 #include "client/guiscalingfilter.h"
 
+#if USE_FREETYPE
+	#include "irrlicht_changes/CGUITTFont.h"
+#endif
+
 /*
 	GUITable
 */
@@ -357,7 +361,7 @@ void GUITable::setTable(const TableOptions &options,
 				row->content_index = allocString(content[i * colcount + j]);
 				const core::stringw &text = m_strings[row->content_index];
 				row->content_width = m_font ?
-					m_font->getDimension(text.c_str()).Width : 0;
+					((CGUITTFont *)m_font)->getTotalDimension(text.c_str()).Width : 0;
 				row->content_width = MYMAX(row->content_width, width);
 				s32 row_xmax = row->x + padding + row->content_width;
 				xmax = MYMAX(xmax, row_xmax);
