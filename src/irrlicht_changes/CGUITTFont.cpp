@@ -217,6 +217,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	if (isLoaded) return;
 
 	float scale = 1.0f;
+	float bold_offset = 0;
 
 	// Set the size of the glyph.
 	FT_Set_Pixel_Sizes(face, 0, font_size);
@@ -235,8 +236,11 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	FT_GlyphSlot glyph = face->glyph;
 
 	if (!FT_HAS_COLOR(face)) {
-		if (bold)
-			FT_Outline_Embolden(&(glyph->outline), (float)font_size * 2.0f);
+		if (bold) {
+			float embolden_amount = (float)font_size * 2.0f;
+			bold_offset = embolden_amount * 2.0f;
+			FT_Outline_Embolden(&(glyph->outline), embolden_amount);
+		}
 
 		if (italic) {
 			FT_Matrix italic_matrix;
@@ -258,6 +262,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	// Setup the glyph information here:
 	advance = glyph->advance;
+	advance.x += bold_offset;
 	advance.x *= scale;
 	advance.y *= scale;
 	offset = core::vector2di(glyph->bitmap_left * scale, glyph->bitmap_top * scale);
