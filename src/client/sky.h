@@ -110,6 +110,9 @@ public:
 		ITextureSource *tsrc);
 	const video::SColorf &getCurrentStarColor() const { return m_star_color; }
 
+	void setCustomSkyBodyPos(float moon_horizon_pos, float moon_day_pos,
+			float sun_horizon_pos, float sun_day_pos);
+
 private:
 	aabb3f m_box;
 	video::SMaterial m_materials[SKY_MATERIAL_COUNT];
@@ -196,6 +199,12 @@ private:
 	video::ITexture *m_moon_texture;
 	video::ITexture *m_sun_tonemap;
 	video::ITexture *m_moon_tonemap;
+
+	bool m_use_custom_sky_body_pos = false;
+	float m_custom_moon_horizon_pos = -90;
+	float m_custom_moon_day_pos = -90;
+	float m_custom_sun_horizon_pos = -90;
+	float m_custom_sun_day_pos = -90;
 
 	void updateStars();
 

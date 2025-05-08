@@ -33,6 +33,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "camera.h" // CameraModes
 #include "config.h"
+#include "filesys.h"
+#include "porting.h"
+
 using namespace irr::core;
 
 // Menu sky are created later
@@ -81,7 +84,7 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 	//m_materials[1].MaterialType = video::EMT_TRANSPARENT_VERTEX_ALPHA;
 	m_materials[1].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
 
-	if (tsrc) {
+	if (tsrc && tsrc->isKnownSourceImage("sunrisebg.png")) {
 		m_materials[2] = baseMaterial();
 		m_materials[2].setTexture(0, tsrc->getTextureForMesh("sunrisebg.png"));
 		m_materials[2].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
@@ -300,7 +303,7 @@ void Sky::render()
 
 		// Draw sunrise/sunset horizon glow texture
 		// (textures/base/pack/sunrisebg.png)
-		if (m_sun_params.sunrise_visible) {
+		if (m_sun_params.sunrise_visible && !m_use_custom_sky_body_pos) {
 			driver->setMaterial(m_materials[2]);
 			float mid1 = 0.25;
 			float mid = wicked_time_of_day < 0.5 ? mid1 : (1.0 - mid1);
@@ -627,7 +630,12 @@ void Sky::draw_sun(video::IVideoDriver *driver, float sunsize, const video::SCol
 		const video::SColor colors[4] = {c1, c2, suncolor, suncolor2};
 		for (int i = 0; i < 4; i++) {
 			draw_sky_body(vertices, -sunsizes[i], sunsizes[i], colors[i]);
-			place_sky_body(vertices, 90, wicked_time_of_day * 360 - 90);
+
+			if (m_use_custom_sky_body_pos)
+				place_sky_body(vertices, m_custom_sun_horizon_pos, m_custom_sun_day_pos);
+			else
+				place_sky_body(vertices, 90, wicked_time_of_day * 360 - 90);
+
 			driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 		}
 	} else {
@@ -639,7 +647,12 @@ void Sky::draw_sun(video::IVideoDriver *driver, float sunsize, const video::SCol
 		else
 			c = video::SColor(255, 255, 255, 255);
 		draw_sky_body(vertices, -d, d, c);
-		place_sky_body(vertices, 90, wicked_time_of_day * 360 - 90);
+
+		if (m_use_custom_sky_body_pos)
+			place_sky_body(vertices, m_custom_sun_horizon_pos, m_custom_sun_day_pos);
+		else
+			place_sky_body(vertices, 90, wicked_time_of_day * 360 - 90);
+
 		driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 	}
 }
@@ -680,7 +693,12 @@ void Sky::draw_moon(video::IVideoDriver *driver, float moonsize, const video::SC
 		const video::SColor colors[4] = {c1, c2, mooncolor, mooncolor2};
 		for (int i = 0; i < 4; i++) {
 			draw_sky_body(vertices, moonsizes_1[i], moonsizes_2[i], colors[i]);
-			place_sky_body(vertices, -90, wicked_time_of_day * 360 - 90);
+
+			if (m_use_custom_sky_body_pos)
+				place_sky_body(vertices, m_custom_moon_horizon_pos, m_custom_moon_day_pos);
+			else
+				place_sky_body(vertices, -90, wicked_time_of_day * 360 - 90);
+
 			driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 		}
 	} else {
@@ -692,7 +710,12 @@ void Sky::draw_moon(video::IVideoDriver *driver, float moonsize, const video::SC
 		else
 			c = video::SColor(255, 255, 255, 255);
 		draw_sky_body(vertices, -d, d, c);
-		place_sky_body(vertices, -90, wicked_time_of_day * 360 - 90);
+
+		if (m_use_custom_sky_body_pos)
+			place_sky_body(vertices, m_custom_moon_horizon_pos, m_custom_moon_day_pos);
+		else
+			place_sky_body(vertices, -90, wicked_time_of_day * 360 - 90);
+
 		driver->drawIndexedTriangleList(&vertices[0], 4, indices, 2);
 	}
 }
@@ -946,4 +969,14 @@ void Sky::setSkyDefaults()
 	m_sun_params = sky_defaults.getSunDefaults();
 	m_moon_params = sky_defaults.getMoonDefaults();
 	m_star_params = sky_defaults.getStarDefaults();
+}
+
+void Sky::setCustomSkyBodyPos(float moon_horizon_pos, float moon_day_pos,
+		float sun_horizon_pos, float sun_day_pos)
+{
+	m_use_custom_sky_body_pos = true;
+	m_custom_moon_horizon_pos = moon_horizon_pos;
+	m_custom_moon_day_pos = moon_day_pos;
+	m_custom_sun_horizon_pos = sun_horizon_pos;
+	m_custom_sun_day_pos = sun_day_pos;
 }

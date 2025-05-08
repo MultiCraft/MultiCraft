@@ -91,11 +91,13 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 		gui::IGUIElement *parent,
 		IMenuManager *menumgr,
 		MainMenuData *data,
+		ITextureSource *texture_source,
 		bool &kill) :
 	m_parent(parent),
 	m_menumanager(menumgr),
 	m_smgr(g_menucloudsmgr),
 	m_data(data),
+	m_texture_source(texture_source),
 	m_kill(kill)
 {
 	//initialize texture pointers
@@ -104,9 +106,6 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	}
 	// is deleted by guiformspec!
 	m_buttonhandler = new TextDestGuiEngine(this);
-
-	//create texture source
-	m_texture_source = createTextureSource(true);
 
 	//create soundmanager
 	MenuMusicFetcher soundfetcher;
@@ -356,8 +355,6 @@ GUIEngine::~GUIEngine()
 		if (texture.texture)
 			RenderingEngine::get_video_driver()->removeTexture(texture.texture);
 	}
-
-	delete m_texture_source;
 
 	// m_cloud.clouds is g_menuclouds and is dropped elsewhere
 	// if (m_cloud.clouds)

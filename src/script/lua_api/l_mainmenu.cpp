@@ -333,6 +333,26 @@ int ModApiMainMenu::l_set_stars(lua_State *L)
 }
 
 /******************************************************************************/
+int ModApiMainMenu::l_set_sky_body_pos(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	float moon_horizon_pos = readParam<float>(L, 1);
+	float moon_day_pos = readParam<float>(L, 2);
+	float sun_horizon_pos = readParam<float>(L, 3);
+	float sun_day_pos = readParam<float>(L, 4);
+
+	sky->setCustomSkyBodyPos(moon_horizon_pos, moon_day_pos, sun_horizon_pos,
+			sun_day_pos);
+
+	return 0;
+}
+
+/******************************************************************************/
 int ModApiMainMenu::l_set_timeofday(lua_State *L)
 {
 	GUIEngine* engine = getGuiEngine(L);
@@ -1033,6 +1053,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(set_clouds);
 	API_FCT(set_sky);
 	API_FCT(set_stars);
+	API_FCT(set_sky_body_pos);
 	API_FCT(set_timeofday);
 	API_FCT(get_textlist_index);
 	API_FCT(get_table_index);

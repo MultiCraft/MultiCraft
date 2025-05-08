@@ -124,6 +124,7 @@ public:
 			gui::IGUIElement *parent,
 			IMenuManager *menumgr,
 			MainMenuData *data,
+			ITextureSource *texture_source,
 			bool &kill);
 
 	/** default destructor */
