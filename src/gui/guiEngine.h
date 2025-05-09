@@ -124,7 +124,6 @@ public:
 			gui::IGUIElement *parent,
 			IMenuManager *menumgr,
 			MainMenuData *data,
-			ITextureSource *texture_source,
 			bool &kill);
 
 	/** default destructor */
@@ -151,6 +150,8 @@ public:
 	/** pass async callback to scriptengine **/
 	unsigned int queueAsync(const std::string &serialized_fct,
 			const std::string &serialized_params);
+
+	ITextureSource *getTextureSource() { return m_texture_source; }
 
 	static float g_timeofday;
 

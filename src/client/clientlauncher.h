@@ -53,5 +53,4 @@ private:
 	MyEventReceiver *receiver = nullptr;
 	gui::IGUISkin *skin = nullptr;
 	IWritableShaderSource *m_shader_src = nullptr;
-	ITextureSource          *m_texture_source = nullptr;
 };

@@ -195,7 +195,6 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 //	g_menuclouds->update(v3f(0, 0, 0), video::SColor(255, 240, 240, 255));
 
 	m_shader_src = createShaderSource();
-	m_texture_source = createTextureSource(true);
 
 	if (m_shader_src) {
 		set_light_table(g_settings->getFloat("display_gamma"));
@@ -207,7 +206,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		m_shader_src->addShaderConstantSetterFactory(scsf);
 
 		if (!g_menusky) {
-			g_menusky = new Sky(-1, m_texture_source, m_shader_src, g_menucloudsmgr);
+			g_menusky = new Sky(-1, nullptr, m_shader_src, g_menucloudsmgr);
 		}
 
 		u32 daynight_ratio = time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);
@@ -349,7 +348,6 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 	g_menucloudsmgr->drop();
 
 	delete m_shader_src;
-	delete m_texture_source;
 
 	return retval;
 }
@@ -598,16 +596,8 @@ void ClientLauncher::main_menu(MainMenuData *menudata)
 	// Cursor can be non-visible when coming from the game
 	input->setCursorVisible(true);
 
-	if (!m_texture_source)
-		m_texture_source = createTextureSource(true);
-
 	/* show main menu */
-	GUIEngine mymenu(&input->joystick, guiroot, &g_menumgr, menudata, m_texture_source, *kill);
-
-	// Delete texture source after exit main menu to avoid conflict with texture
-	// source in game
-	delete m_texture_source;
-	m_texture_source = nullptr;
+	GUIEngine mymenu(&input->joystick, guiroot, &g_menumgr, menudata, *kill);
 
 	/* leave scene manager in a clean state */
 	RenderingEngine::get_scene_manager()->clear();

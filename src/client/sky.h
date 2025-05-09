@@ -43,6 +43,8 @@ public:
 	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc);
 	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager *smgr);
 
+	virtual ~Sky();
+
 	virtual void OnRegisterSceneNode();
 
 	//! renders the node.

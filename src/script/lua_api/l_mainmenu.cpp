@@ -353,6 +353,40 @@ int ModApiMainMenu::l_set_sky_body_pos(lua_State *L)
 }
 
 /******************************************************************************/
+int ModApiMainMenu::l_set_moon_texture(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	std::string moon_texture = readParam<std::string>(L, 1, "");
+	std::string moon_tonemap = readParam<std::string>(L, 2, "");
+
+	sky->setMoonTexture(moon_texture, moon_tonemap, engine->getTextureSource());
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_sun_texture(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	std::string sun_texture = readParam<std::string>(L, 1, "");
+	std::string sun_tonemap = readParam<std::string>(L, 2, "");
+
+	sky->setSunTexture(sun_texture, sun_tonemap, engine->getTextureSource());
+
+	return 0;
+}
+
+/******************************************************************************/
 int ModApiMainMenu::l_set_timeofday(lua_State *L)
 {
 	GUIEngine* engine = getGuiEngine(L);
@@ -1054,6 +1088,8 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(set_sky);
 	API_FCT(set_stars);
 	API_FCT(set_sky_body_pos);
+	API_FCT(set_moon_texture);
+	API_FCT(set_sun_texture);
 	API_FCT(set_timeofday);
 	API_FCT(get_textlist_index);
 	API_FCT(get_table_index);

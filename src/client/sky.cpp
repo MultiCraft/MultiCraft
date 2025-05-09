@@ -103,6 +103,7 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 		tsrc->getTexture(m_moon_params.tonemap) : nullptr;
 
 	if (m_sun_texture) {
+		m_sun_texture->grab();
 		m_materials[3] = baseMaterial();
 		m_materials[3].setTexture(0, m_sun_texture);
 		m_materials[3].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
@@ -111,10 +112,13 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 		m_materials[3].setFlag(video::E_MATERIAL_FLAG::EMF_TRILINEAR_FILTER, false);
 		m_materials[3].setFlag(video::E_MATERIAL_FLAG::EMF_ANISOTROPIC_FILTER, false);
 		// Use tonemaps if available
-		if (m_sun_tonemap)
+		if (m_sun_tonemap) {
+			m_sun_tonemap->grab();
 			m_materials[3].Lighting = true;
+		}
 	}
 	if (m_moon_texture) {
+		m_moon_texture->grab();
 		m_materials[4] = baseMaterial();
 		m_materials[4].setTexture(0, m_moon_texture);
 		m_materials[4].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
@@ -123,8 +127,10 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 		m_materials[4].setFlag(video::E_MATERIAL_FLAG::EMF_TRILINEAR_FILTER, false);
 		m_materials[4].setFlag(video::E_MATERIAL_FLAG::EMF_ANISOTROPIC_FILTER, false);
 		// Use tonemaps if available
-		if (m_moon_tonemap)
+		if (m_moon_tonemap) {
+			m_moon_tonemap->grab();
 			m_materials[4].Lighting = true;
+		}
 	}
 
 	for (int i = 5; i < 11; i++) {
@@ -134,6 +140,18 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 	}
 	m_directional_colored_fog = g_settings->getBool("directional_colored_fog");
 	setStarCount(1000, true);
+}
+
+Sky::~Sky()
+{
+	if (m_moon_texture)
+		m_moon_texture->drop();
+	if (m_moon_tonemap)
+		m_moon_tonemap->drop();
+	if (m_sun_texture)
+		m_sun_texture->drop();
+	if (m_sun_tonemap)
+		m_sun_tonemap->drop();
 }
 
 void Sky::OnRegisterSceneNode()
@@ -781,20 +799,31 @@ void Sky::setSunTexture(const std::string &sun_texture,
 {
 	// Ignore matching textures (with modifiers) entirely,
 	// but lets at least update the tonemap before hand.
+	if (m_sun_tonemap)
+		m_sun_tonemap->drop();
+
 	m_sun_params.tonemap = sun_tonemap;
 	m_sun_tonemap = tsrc->isKnownSourceImage(m_sun_params.tonemap) ?
 		tsrc->getTexture(m_sun_params.tonemap) : nullptr;
 	m_materials[3].Lighting = !!m_sun_tonemap;
 
+	if (m_sun_tonemap)
+		m_sun_tonemap->grab();
+
 	if (m_sun_params.texture == sun_texture)
 		return;
+
 	m_sun_params.texture = sun_texture;
+
+	if (m_sun_texture)
+		m_sun_texture->drop();
 
 	if (sun_texture != "") {
 		// We want to ensure the texture exists first.
 		m_sun_texture = tsrc->getTextureForMesh(m_sun_params.texture);
 
 		if (m_sun_texture) {
+			m_sun_texture->grab();
 			m_materials[3] = baseMaterial();
 			m_materials[3].setTexture(0, m_sun_texture);
 			m_materials[3].MaterialType = video::
@@ -829,20 +858,31 @@ void Sky::setMoonTexture(const std::string &moon_texture,
 {
 	// Ignore matching textures (with modifiers) entirely,
 	// but lets at least update the tonemap before hand.
+	if (m_moon_tonemap)
+		m_moon_tonemap->drop();
+
 	m_moon_params.tonemap = moon_tonemap;
 	m_moon_tonemap = tsrc->isKnownSourceImage(m_moon_params.tonemap) ?
 		tsrc->getTexture(m_moon_params.tonemap) : nullptr;
 	m_materials[4].Lighting = !!m_moon_tonemap;
 
+	if (m_moon_tonemap)
+		m_moon_tonemap->grab();
+
 	if (m_moon_params.texture == moon_texture)
 		return;
+
 	m_moon_params.texture = moon_texture;
+
+	if (m_moon_texture)
+		m_moon_texture->drop();
 
 	if (moon_texture != "") {
 		// We want to ensure the texture exists first.
 		m_moon_texture = tsrc->getTextureForMesh(m_moon_params.texture);
 
 		if (m_moon_texture) {
+			m_moon_texture->grab();
 			m_materials[4] = baseMaterial();
 			m_materials[4].setTexture(0, m_moon_texture);
 			m_materials[4].MaterialType = video::
