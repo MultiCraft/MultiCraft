@@ -771,10 +771,17 @@ int ModApiMainMenu::l_download_file(lua_State *L)
 		}
 	} else {
 		errorstream << "DOWNLOAD denied: " << absolute_destination
-				<< " isn't a allowed path" << std::endl;
+		<< " isn't a allowed path" << std::endl;
 	}
 	lua_pushboolean(L,false);
 	return 1;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_cancel_all_download_files(lua_State *L)
+{
+	GUIEngine::cancelAllDownloadFiles();
+	return 0;
 }
 
 /******************************************************************************/
@@ -956,6 +963,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(get_mainmenu_path);
 	API_FCT(show_path_select_dialog);
 	API_FCT(download_file);
+	API_FCT(cancel_all_download_files);
 	API_FCT(gettext);
 	API_FCT(get_video_drivers);
 	API_FCT(get_video_modes);
@@ -990,6 +998,7 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(extract_zip);
 	API_FCT(may_modify_path);
 	API_FCT(download_file);
+	API_FCT(cancel_all_download_files);
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
 	//API_FCT(gettext); (gettext lib isn't threadsafe)
