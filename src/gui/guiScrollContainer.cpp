@@ -90,7 +90,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			if (!m_swipe_started && m_orientation != UNDEFINED &&
 					m_swipe_start_px != -1 &&
 					std::abs(m_swipe_start_px - mouse_pos +
-						m_scrollbar->getPos() *
+							m_scrollbar->getPos() *
 									m_scrollfactor) >
 							0.1 * screen_dpi) {
 				m_swipe_started = true;
