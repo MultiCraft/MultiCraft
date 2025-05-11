@@ -67,9 +67,11 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 	}
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#ifdef HAVE_TOUCHSCREENGUI
+// #ifdef HAVE_TOUCHSCREENGUI
+#if 1
 	if (event.EventType == EET_MOUSE_INPUT_EVENT && m_scrollbar) {
-		const int mouse_pos = m_orientation == HORIZONTAL ? event.MouseInput.X : event.MouseInput.Y;
+		const int mouse_pos = m_orientation == HORIZONTAL ? event.MouseInput.X
+														  : event.MouseInput.Y;
 		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 			if (isPointInside(core::position2d<s32>(
 					    event.MouseInput.X, event.MouseInput.Y))) {
@@ -88,7 +90,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			if (!m_swipe_started && m_orientation != UNDEFINED &&
 					m_swipe_start_px != -1 &&
 					std::abs(m_swipe_start_px - mouse_pos +
-							m_scrollbar->getPos() *
+							 m_scrollbar->getPos() *
 									m_scrollfactor) >
 							0.1 * screen_dpi) {
 				m_swipe_started = true;

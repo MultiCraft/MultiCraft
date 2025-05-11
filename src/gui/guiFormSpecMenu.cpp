@@ -4174,7 +4174,8 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 	}
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#ifdef HAVE_TOUCHSCREENGUI
+// #ifdef HAVE_TOUCHSCREENGUI
+#if 1
 	// If element is inside scroll container then send it to scroll container
 	// first so that it can handle swipe gesture
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
