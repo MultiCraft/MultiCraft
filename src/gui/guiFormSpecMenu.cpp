@@ -628,7 +628,7 @@ void GUIFormSpecMenu::parseCheckbox(parserData* data, const std::string &element
 			fselected = true;
 
 		std::wstring wlabel = translate_string(utf8_to_wide(unescape_string(label)));
-		const core::dimension2d<u32> label_size = m_font->getDimension(wlabel.c_str());
+		const core::dimension2d<u32> label_size = ((CGUITTFont *)m_font)->getTotalDimension(wlabel.c_str());
 		s32 cb_size = Environment->getSkin()->getSize(gui::EGDS_CHECK_BOX_WIDTH);
 		s32 y_center = (std::max(label_size.Height, (u32)cb_size) + 1) / 2;
 
@@ -1902,7 +1902,7 @@ void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 
 				rect = core::rect<s32>(
 					pos.X, pos.Y,
-					pos.X + font->getDimension(wlabel_plain.c_str()).Width,
+					pos.X + ((CGUITTFont *)font)->getTotalDimension(wlabel_plain.c_str()).Width,
 					pos.Y + imgsize.Y);
 
 			} else {
@@ -1924,7 +1924,7 @@ void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 
 				rect = core::rect<s32>(
 					pos.X, pos.Y - m_btn_height,
-					pos.X + font->getDimension(wlabel_plain.c_str()).Width,
+					pos.X + ((CGUITTFont *)font)->getTotalDimension(wlabel_plain.c_str()).Width,
 					pos.Y + m_btn_height);
 			}
 

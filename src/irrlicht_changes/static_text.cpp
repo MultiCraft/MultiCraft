@@ -109,7 +109,7 @@ void StaticText::draw()
 			if (HAlign == EGUIA_LOWERRIGHT)
 			{
 				r.UpperLeftCorner.X = frameRect.LowerRightCorner.X -
-					font->getDimension(str.c_str()).Width;
+					((CGUITTFont *)font)->getTotalDimension(str.c_str()).Width;
 			}
 
 #if USE_FREETYPE
@@ -399,7 +399,7 @@ void StaticText::updateText()
 					// we must break the last word to the next line.
 					const s32 whitelgth = font->getDimension(whitespace.c_str()).Width;
 					//const std::wstring sanitized = removeEscapes(word.c_str());
-					const s32 wordlgth = font->getDimension(word.c_str()).Width;
+					const s32 wordlgth = ((CGUITTFont *)font)->getTotalDimension(word.c_str()).Width;
 
 					if (wordlgth > elWidth)
 					{
@@ -413,7 +413,7 @@ void StaticText::updateText()
 							EnrichedString second = word.substr(where, word.size() - where);
 							first.addCharNoColor(L'-');
 							BrokenText.push_back(line + first);
-							const s32 secondLength = font->getDimension(second.c_str()).Width;
+							const s32 secondLength = ((CGUITTFont *)font)->getTotalDimension(second.c_str()).Width;
 
 							length = secondLength;
 							line = second;
@@ -501,7 +501,7 @@ void StaticText::updateText()
 					// here comes the next whitespace, look if
 					// we must break the last word to the next line.
 					const s32 whitelgth = font->getDimension(whitespace.c_str()).Width;
-					const s32 wordlgth = font->getDimension(word.c_str()).Width;
+					const s32 wordlgth = ((CGUITTFont *)font)->getTotalDimension(word.c_str()).Width;
 
 					if (length && (length + wordlgth + whitelgth > elWidth))
 					{
