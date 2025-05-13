@@ -34,7 +34,6 @@ endif()
 option(USE_SDL "Use SDL2 for window management" FALSE)
 option(USE_ZSTD "Use Zstandard for MapBlock compression" TRUE)
 option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
-option(ZSTD_MAP_SAVING "Use Zstandard to save maps on disk" FALSE)
 
 if(USE_SDL)
 	if(NOT USE_STATIC_BUILD)
@@ -52,12 +51,6 @@ endif()
 
 if(USE_ZSTD)
 	add_definitions(-DUSE_ZSTD=1)
-
-	if(ZSTD_MAP_SAVING)
-		add_definitions(-DZSTD_MAP_SAVING=1)
-	endif()
-elseif (ZSTD_MAP_SAVING)
-	message(FATAL_ERROR "ZSTD_MAP_SAVING is enabled but USE_ZSTD is not.")
 endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
@@ -269,9 +262,18 @@ option(ENABLE_OPENSSL "Use OpenSSL's libcrypto for faster SHA implementations" T
 set(USE_OPENSSL FALSE)
 
 if(ENABLE_OPENSSL)
-	find_package(OpenSSL 3.0)
+	if(NOT USE_STATIC_BUILD)
+		find_package(OpenSSL 3.0)
+		if(OPENSSL_FOUND)
+			set(OPENSSL_LIBRARY OpenSSL::Crypto)
+		endif()
+	else()
+		set(OPENSSL_FOUND TRUE)
+		include_directories(${OPENSSL_INCLUDE_DIR})
+	endif()
 	if(OPENSSL_FOUND)
 		set(USE_OPENSSL TRUE)
+		add_definitions(-DUSE_OPENSSL=1)
 		message(STATUS "OpenSSL's libcrypto SHA enabled.")
 	else()
 		message(STATUS "OpenSSL not found!")
@@ -430,7 +432,6 @@ set(common_SRCS
 	${mapgen_SRCS}
 	${server_SRCS}
 	${content_SRCS}
-	ban.cpp
 	chat.cpp
 	clientiface.cpp
 	collision.cpp
@@ -503,6 +504,11 @@ if(BUILD_UNITTESTS)
 	set(common_SRCS ${common_SRCS} ${UNITTEST_SRCS})
 endif()
 
+option(ENABLE_BANMANAGER "Enable builtin BanManager" TRUE)
+if(ENABLE_BANMANAGER)
+	add_definitions(-DBAN_MANAGER=1)
+	set(common_SRCS ${common_SRCS} ban.cpp)
+endif()
 
 # This gives us the icon and file version information
 if(WIN32)
@@ -621,7 +627,14 @@ if(BUILD_CLIENT)
 			ENABLE_EXPORTS 1
 		)
 	endif()
-
+	if(USE_SOUND)
+		if(USE_STATIC_BUILD AND WIN32)
+			target_link_libraries(
+				${PROJECT_NAME}
+				avrt
+			)
+		endif()
+	endif()
 	if(USE_SDL)
 		target_link_libraries(
 			${PROJECT_NAME}
@@ -659,6 +672,14 @@ if(BUILD_CLIENT)
 				${PROJECT_NAME}
 				${GETTEXT_ICONV_LIBRARY}
 			)
+		endif()
+	endif()
+	if (USE_OPENSSL)
+		target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARY})
+		if(USE_STATIC_BUILD)
+			if(WIN32)
+				target_link_libraries(${PROJECT_NAME} bcrypt crypt32 ws2_32)
+			endif()
 		endif()
 	endif()
 	if(USE_CURL)
@@ -701,9 +722,6 @@ if(BUILD_CLIENT)
 	endif()
 	if (USE_SPATIAL)
 		target_link_libraries(${PROJECT_NAME} ${SPATIAL_LIBRARY})
-	endif()
-	if (USE_OPENSSL)
-		target_link_libraries(${PROJECT_NAME} OpenSSL::Crypto)
 	endif()
 endif(BUILD_CLIENT)
 
@@ -771,7 +789,7 @@ if(BUILD_SERVER)
 		target_link_libraries(${PROJECT_NAME}server ${SPATIAL_LIBRARY})
 	endif()
 	if (USE_OPENSSL)
-		target_link_libraries(${PROJECT_NAME}server OpenSSL::Crypto)
+		target_link_libraries(${PROJECT_NAME}server ${OPENSSL_LIBRARY})
 	endif()
 	if(USE_CURL)
 		target_link_libraries(

@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-PNG_VERSION=1.6.46
+PNG_VERSION=1.6.47
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps

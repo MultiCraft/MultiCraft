@@ -37,7 +37,7 @@ const button_data buttons_data[] = {
 	{ "jump_btn.png", N_("Jump"), "jump" },
 	{ "drop_btn.png", N_("Drop"), "drop" },
 	{ "sneak_btn.png", N_("Sneak"), "sneak" },
-	{ "aux_btn.png", N_("Special"), "special1" },
+	{ "special1_btn.png", N_("Special"), "special1" },
 	{ "inventory_btn.png", N_("Inventory"), "inventory" },
 	{ "escape_btn.png", N_("Exit"), "escape" },
 	{ "minimap_btn.png", N_("Toggle minimap"), "minimap" },
@@ -70,9 +70,9 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	m_touchscreen_threshold = g_settings->getU16("touchscreen_threshold");
 	m_touch_sensitivity = rangelim(g_settings->getFloat("touch_sensitivity"), 0.1, 1.0);
 	m_screensize = m_device->getVideoDriver()->getScreenSize();
-	m_button_size = std::min(m_screensize.Y / 4.5f,
+	m_button_size = std::min(m_screensize.Y / 7.5f,
 			RenderingEngine::getDisplayDensity() *
-			g_settings->getFloat("hud_scaling") * 65.0f);
+			g_settings->getFloat("hud_scaling") * 64.0f);
 
 	std::string keyname_dig = g_settings->get("keymap_dig");
 	m_keycode_dig = keyname_to_keycode(keyname_dig.c_str());
@@ -244,9 +244,9 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 	case joystick_center_id:
 		return rect<s32>(0, 0, m_button_size * 1.5, m_button_size * 1.5);
 	case jump_id:
-		return rect<s32>(m_screensize.X - m_button_size * 3.37,
+		return rect<s32>(m_screensize.X - m_button_size * 3.375,
 				m_screensize.Y - m_button_size * 2.75,
-				m_screensize.X - m_button_size * 1.87,
+				m_screensize.X - m_button_size * 1.875,
 				m_screensize.Y - m_button_size * 1.25);
 	case drop_id:
 		return rect<s32>(m_screensize.X - m_button_size,
@@ -254,19 +254,19 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 				m_screensize.X,
 				m_screensize.Y / 2 - m_button_size / 2);
 	case sneak_id:
-		return rect<s32>(m_screensize.X - m_button_size * 3.38,
+		return rect<s32>(m_screensize.X - m_button_size * 3.375,
 				m_screensize.Y - m_button_size * 1.125,
-				m_screensize.X - m_button_size * 1.7,
+				m_screensize.X - m_button_size * 1.6875,
 				m_screensize.Y);
 	case inventory_id:
-		return rect<s32>(m_screensize.X - m_button_size * 1.7,
+		return rect<s32>(m_screensize.X - m_button_size * 1.6875,
 				m_screensize.Y - m_button_size * 1.5,
 				m_screensize.X,
 				m_screensize.Y);
 	case special1_id:
-		return rect<s32>(m_screensize.X - m_button_size * 1.8,
+		return rect<s32>(m_screensize.X - m_button_size * 1.75,
 				m_screensize.Y - m_button_size * 4,
-				m_screensize.X - m_button_size * 0.3,
+				m_screensize.X - m_button_size * 0.25,
 				m_screensize.Y - m_button_size * 2.5);
 	case escape_id:
 		return rect<s32>(m_screensize.X / 2 - m_button_size * 2,
@@ -311,9 +311,9 @@ void TouchScreenGUI::updateButtons()
 		return;
 
 	m_screensize = screensize;
-	m_button_size = std::min(m_screensize.Y / 4.5f,
+	m_button_size = std::min(m_screensize.Y / 7.5f,
 			RenderingEngine::getDisplayDensity() *
-			g_settings->getFloat("hud_scaling") * 65.0f);
+			g_settings->getFloat("hud_scaling") * 64.0f);
 
 	for (auto button : m_buttons) {
 		if (button->overflow_menu)
@@ -527,6 +527,7 @@ bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 	s32 dx = x - m_button_size * 5 / 2;
 	s32 dy = y - m_screensize.Y + m_button_size * 5 / 2;
 	double distance = sqrt(dx * dx + dy * dy);
+	if (distance == 0) return false;
 
 	if (distance > m_button_size * 1.5) {
 		s32 ndx = m_button_size * dx / distance * 1.5f - m_button_size / 2.0f * 1.5f;
@@ -595,7 +596,7 @@ void TouchScreenGUI::updateCamera(s32 x, s32 y)
 
 		m_camera.yaw_change -= (x - m_camera.x) * m_touch_sensitivity;
 		m_camera.pitch += (y - m_camera.y) * m_touch_sensitivity;
-		m_camera.pitch = MYMIN(MYMAX(m_camera.pitch, -180), 180);
+		m_camera.pitch = std::min(std::max((float) m_camera.pitch, -180.0f), 180.0f);
 
 		m_camera.x = x;
 		m_camera.y = y;

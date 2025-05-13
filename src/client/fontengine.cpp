@@ -36,9 +36,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 FontEngine* g_fontengine = NULL;
 
 /** callback to be used on change of font size setting */
-static void font_setting_changed(const std::string &name, void *userdata)
+void FontEngine::fontSettingChanged(const std::string &name, void *userdata)
 {
-	g_fontengine->readSettings();
+	((FontEngine *)userdata)->m_needs_reload = true;
 }
 
 /******************************************************************************/
@@ -57,27 +57,27 @@ FontEngine::FontEngine(gui::IGUIEnvironment* env) :
 	readSettings();
 
 	if (m_currentMode == FM_Standard) {
-		g_settings->registerChangedCallback("font_size", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("font_bold", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("font_italic", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("font_path", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("font_path_bold", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("font_path_italic", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("font_path_bolditalic", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("font_shadow", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("font_shadow_alpha", font_setting_changed, NULL);
+		g_settings->registerChangedCallback("font_size", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_bold", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_italic", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_path", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_path_bold", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_path_italic", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_path_bolditalic", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_shadow", fontSettingChanged, this);
+		g_settings->registerChangedCallback("font_shadow_alpha", fontSettingChanged, this);
 	}
 	else if (m_currentMode == FM_Fallback) {
-		g_settings->registerChangedCallback("font_size", font_setting_changed, NULL); // fallback_font_size
-		g_settings->registerChangedCallback("fallback_font_path", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("fallback_font_shadow", font_setting_changed, NULL);
-		g_settings->registerChangedCallback("fallback_font_shadow_alpha", font_setting_changed, NULL);
+		g_settings->registerChangedCallback("font_size", fontSettingChanged, this); // fallback_font_size
+		g_settings->registerChangedCallback("fallback_font_path", fontSettingChanged, this);
+		g_settings->registerChangedCallback("fallback_font_shadow", fontSettingChanged, this);
+		g_settings->registerChangedCallback("fallback_font_shadow_alpha", fontSettingChanged, this);
 	}
 
-	g_settings->registerChangedCallback("mono_font_path", font_setting_changed, NULL);
-	g_settings->registerChangedCallback("mono_font_size", font_setting_changed, NULL);
-	g_settings->registerChangedCallback("screen_dpi", font_setting_changed, NULL);
-	g_settings->registerChangedCallback("gui_scaling", font_setting_changed, NULL);
+	g_settings->registerChangedCallback("mono_font_path", fontSettingChanged, this);
+	g_settings->registerChangedCallback("mono_font_size", fontSettingChanged, this);
+	g_settings->registerChangedCallback("screen_dpi", fontSettingChanged, this);
+	g_settings->registerChangedCallback("gui_scaling", fontSettingChanged, this);
 }
 
 /******************************************************************************/
@@ -110,8 +110,8 @@ irr::gui::IGUIFont *FontEngine::getFont(FontSpec spec)
 				spec.mode == FM_SimpleMono) ?
 				FM_SimpleMono : FM_Simple;
 		// Support for those could be added, but who cares?
-		spec.bold = false;
-		spec.italic = false;
+		//spec.bold = false;
+		//spec.italic = false;
 	}
 
 	// Fallback to default size
@@ -238,6 +238,16 @@ void FontEngine::readSettings()
 }
 
 /******************************************************************************/
+void FontEngine::handleReload()
+{
+	if (!m_needs_reload)
+		return;
+
+	m_needs_reload = false;
+	readSettings();
+}
+
+/******************************************************************************/
 void FontEngine::updateSkin()
 {
 	gui::IGUIFont *font = getFont();
@@ -288,19 +298,40 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	}
 
 	std::string setting_suffix = "";
-	if (spec.bold)
-		setting_suffix.append("_bold");
-	if (spec.italic)
-		setting_suffix.append("_italic");
+	bool bold_outline = false;
+	bool italic_outline = false;
 
-	u32 size = std::floor(RenderingEngine::getDisplayDensity() *
-			g_settings->getFloat("gui_scaling") * spec.size);
+	std::string bold_path = g_settings->get(setting_prefix + "font_path_bold");
+	std::string italic_path = g_settings->get(setting_prefix + "font_path_italic");
+	std::string bold_italic_path = g_settings->get(setting_prefix + "font_path_bold_italic");
 
-	if (size == 0) {
+	if (spec.bold && spec.italic) {
+		if (bold_italic_path.empty()) {
+			bold_outline = true;
+			italic_outline = true;
+		} else {
+			setting_suffix.append("_bold_italic");
+		}
+	} else if (spec.bold) {
+		if (bold_path.empty())
+			bold_outline = true;
+		else
+			setting_suffix.append("_bold");
+	} else if (spec.italic) {
+		if (italic_path.empty())
+			italic_outline = true;
+		else
+			setting_suffix.append("_italic");
+	}
+
+	u32 size = std::max(std::floor(RenderingEngine::getDisplayDensity() *
+			g_settings->getFloat("gui_scaling") * spec.size), 1.0f);
+
+	/*if (size == 0) {
 		errorstream << "FontEngine: attempt to use font size 0" << std::endl;
 		errorstream << "  display density: " << RenderingEngine::getDisplayDensity() << std::endl;
 		abort();
-	}
+	}*/
 
 	u16 font_shadow       = 0;
 	u16 font_shadow_alpha = 0;
@@ -324,8 +355,8 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 #if USE_FREETYPE
 	for (const std::string &font_path : fallback_settings) {
 		irr::gui::CGUITTFont *font = gui::CGUITTFont::createTTFont(m_env,
-				font_path.c_str(), size, true, true, font_shadow,
-				font_shadow_alpha);
+				font_path.c_str(), size, true, true, bold_outline, italic_outline,
+				font_shadow, font_shadow_alpha);
 
 		if (font) {
 			std::vector<std::string> emoji_paths = split(emoji_font_system_paths, ',');
