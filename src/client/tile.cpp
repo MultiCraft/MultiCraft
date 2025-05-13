@@ -22,8 +22,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <algorithm>
 #include <ICameraSceneNode.h>
 #include <IrrCompileConfig.h>
+#include <IFileSystem.h>
 #include "util/string.h"
 #include "util/container.h"
+#include "util/encryption.h"
 #include "util/thread.h"
 #include "filesys.h"
 #include "settings.h"
@@ -263,11 +265,37 @@ public:
 		if (path.empty()) {
 			infostream<<"SourceImageCache::getOrLoad(): No path found for \""
 					<<name<<"\""<<std::endl;
-			return NULL;
+			return nullptr;
 		}
 		infostream<<"SourceImageCache::getOrLoad(): Loading path \""<<path
 				<<"\""<<std::endl;
-		video::IImage *img = driver->createImageFromFile(path.c_str());
+		video::IImage *img;
+#if defined(__ANDROID__) || defined(__APPLE__)
+		if (m_main_menu && path.compare(path.size() - 2, 2, ".e") == 0) {
+			std::string data;
+			if (!fs::ReadFile(path, data))
+				return nullptr;
+
+			std::string decrypted_data;
+			if (!Encryption::decryptSimple(data, decrypted_data))
+				return nullptr;
+
+			// Silly irrlicht's const-incorrectness
+			Buffer<char> data_rw(decrypted_data.c_str(), decrypted_data.size());
+
+			// Create an irrlicht memory file
+			io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
+			io::IReadFile *rfile = irrfs->createMemoryReadFile(
+					*data_rw, data_rw.getSize(), "_tempreadfile");
+
+			FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
+
+			// Read image
+			img = driver->createImageFromFile(rfile);
+			rfile->drop();
+		} else
+#endif
+		img = driver->createImageFromFile(path.c_str());
 
 		// If it fails when using just texture name then try to create it
 		// with texture path

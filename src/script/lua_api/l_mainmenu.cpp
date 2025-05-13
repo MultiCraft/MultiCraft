@@ -36,6 +36,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mapgen/mapgen.h"
 #include "settings.h"
 #include "translation.h"
+#if defined(__ANDROID__) || defined(__APPLE__)
+#include "util/encryption.h"
+#endif
 
 #include <IFileArchive.h>
 #include <IFileSystem.h>
@@ -945,10 +948,17 @@ int ModApiMainMenu::l_download_file(lua_State *L)
 		}
 	} else {
 		errorstream << "DOWNLOAD denied: " << absolute_destination
-				<< " isn't a allowed path" << std::endl;
+		<< " isn't a allowed path" << std::endl;
 	}
 	lua_pushboolean(L,false);
 	return 1;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_cancel_all_download_files(lua_State *L)
+{
+	GUIEngine::cancelAllDownloadFiles();
+	return 0;
 }
 
 /******************************************************************************/
@@ -1065,7 +1075,20 @@ int ModApiMainMenu::l_sleep_ms(lua_State *L)
 /******************************************************************************/
 int ModApiMainMenu::l_load_translation(lua_State *L)
 {
-	const std::string tr_data = luaL_checkstring(L, 1);
+	size_t tr_data_length;
+	const char *tr_data_raw = luaL_checklstring(L, 1, &tr_data_length);
+	sanity_check(tr_data_raw != NULL);
+
+	std::string tr_data = std::string(tr_data_raw, tr_data_length);
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+	std::string decrypted_data;
+	if (Encryption::decryptSimple(tr_data, decrypted_data)) {
+		g_client_translations->loadTranslation(decrypted_data);
+		return 0;
+	}
+#endif
+
 	g_client_translations->loadTranslation(tr_data);
 	return 0;
 }
@@ -1123,6 +1146,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(get_mainmenu_path);
 	API_FCT(show_path_select_dialog);
 	API_FCT(download_file);
+	API_FCT(cancel_all_download_files);
 	API_FCT(gettext);
 	API_FCT(get_video_drivers);
 	API_FCT(get_video_modes);
@@ -1157,6 +1181,7 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(extract_zip);
 	API_FCT(may_modify_path);
 	API_FCT(download_file);
+	API_FCT(cancel_all_download_files);
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
 	//API_FCT(gettext); (gettext lib isn't threadsafe)

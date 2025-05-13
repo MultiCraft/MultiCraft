@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
+thread_local Thread *current_thread = nullptr;
+
 Thread::Thread(const std::string &name) :
 		m_name(name), m_request_stop(false), m_running(false)
 {
@@ -108,6 +110,7 @@ bool Thread::getReturnValue(void **ret)
 int Thread::threadProc(void *data)
 {
 	Thread *thr = (Thread *)data;
+	current_thread = thr;
 
 	g_logger.registerThread(thr->m_name);
 	thr->m_running = true;
@@ -126,6 +129,11 @@ int Thread::threadProc(void *data)
 	g_logger.deregisterThread();
 
 	return 0;
+}
+
+Thread *Thread::getCurrentThread()
+{
+	return current_thread;
 }
 
 void Thread::setName(const std::string &name)

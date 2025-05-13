@@ -71,6 +71,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if USE_ZSTD
 #include <zstd.h>
 #endif
+#if defined(__ANDROID__) || defined(__APPLE__)
+#include "util/encryption.h"
+#endif
 
 class ClientNotFoundException : public BaseException
 {
@@ -124,6 +127,12 @@ void *ServerThread::run()
 		} catch (LuaError &e) {
 			m_server->setAsyncFatalError(
 					"ServerThread::run Lua: " + std::string(e.what()));
+		} catch (SerializationError &e) {
+			m_server->setAsyncFatalError(
+					"ServerThread::run: " + std::string(e.what()));
+		} catch (DatabaseException &e) {
+			m_server->setAsyncFatalError(
+					"ServerThread::run: " + std::string(e.what()));
 		}
 	}
 
@@ -290,7 +299,9 @@ Server::~Server()
 		MutexAutoLock envlock(m_env_mutex);
 
 		infostream << "Server: Saving players" << std::endl;
-		m_env->saveLoadedPlayers();
+		try {
+			m_env->saveLoadedPlayers();
+		} catch (DatabaseException &e) {}
 
 		infostream << "Server: Kicking players" << std::endl;
 		std::string kick_msg;
@@ -302,7 +313,9 @@ Server::~Server()
 		if (kick_msg.empty()) {
 			kick_msg = g_settings->get("kick_msg_shutdown");
 		}
-		m_env->saveLoadedPlayers(true);
+		try {
+			m_env->saveLoadedPlayers(true);
+		} catch (DatabaseException &e) {}
 		m_env->kickAllPlayers(SERVER_ACCESSDENIED_SHUTDOWN,
 			kick_msg, reconnect);
 	}
@@ -337,7 +350,7 @@ Server::~Server()
 		infostream << "Server: Saving environment metadata" << std::endl;
 		try {
 			m_env->saveMeta();
-		} catch (const SerializationError &e) {
+		} catch (SerializationError &e) {
 			if (m_on_shutdown_errmsg) {
 				if (m_on_shutdown_errmsg->empty()) {
 					*m_on_shutdown_errmsg = std::string("ServerEnvironment: ") + e.what();
@@ -360,7 +373,9 @@ Server::~Server()
 #if USE_SQLITE
 	delete m_rollback;
 #endif
+#if BAN_MANAGER
 	delete m_banmanager;
+#endif
 	delete m_itemdef;
 	delete m_nodedef;
 	delete m_craftdef;
@@ -401,9 +416,11 @@ void Server::init()
 	// Create emerge manager
 	m_emerge = new EmergeManager(this);
 
+#if BAN_MANAGER
 	// Create ban manager
 	std::string ban_path = m_path_world + DIR_DELIM "ipban.txt";
 	m_banmanager = new BanManager(ban_path);
+#endif
 
 	m_modmgr = std::unique_ptr<ServerModManager>(new ServerModManager(m_path_world));
 	std::vector<ModSpec> unsatisfied_mods = m_modmgr->getUnsatisfiedMods();
@@ -980,10 +997,12 @@ void Server::AsyncRunStep(bool initial_step)
 
 			ScopeProfiler sp(g_profiler, "Server: map saving (sum)");
 
+#if BAN_MANAGER
 			// Save ban file
 			if (m_banmanager->isModified()) {
 				m_banmanager->save();
 			}
+#endif
 
 			// Save changed parts of map
 			m_env->getMap().save(MOD_STATE_WRITE_NEEDED);
@@ -1132,6 +1151,7 @@ void Server::ProcessData(NetworkPacket *pkt)
 	ScopeProfiler sp(g_profiler, "Server: Process network packet (sum)");
 	u32 peer_id = pkt->getPeerId();
 
+#if BAN_MANAGER
 	try {
 		Address address = getPeerAddress(peer_id);
 		std::string addr_s = address.serializeString();
@@ -1156,6 +1176,7 @@ void Server::ProcessData(NetworkPacket *pkt)
 				<< peer_id << " not found" << std::endl;
 		return;
 	}
+#endif
 
 	try {
 		ToServerCommand command = (ToServerCommand) pkt->getCommand();
@@ -3196,17 +3217,25 @@ void Server::reportFormspecPrependModified(const std::string &name)
 
 void Server::setIpBanned(const std::string &ip, const std::string &name)
 {
+#if BAN_MANAGER
 	m_banmanager->add(ip, name);
+#endif
 }
 
 void Server::unsetIpBanned(const std::string &ip_or_name)
 {
+#if BAN_MANAGER
 	m_banmanager->remove(ip_or_name);
+#endif
 }
 
 std::string Server::getBanDescription(const std::string &ip_or_name)
 {
+#if BAN_MANAGER
 	return m_banmanager->getBanDescription(ip_or_name);
+#else
+	return "";
+#endif
 }
 
 void Server::notifyPlayer(const char *name, const std::wstring &msg)
@@ -3927,6 +3956,17 @@ Translations *Server::getTranslationLanguage(const std::string &lang_code)
 				translations->loadTranslation(data);
 			}
 		}
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		else if (str_ends_with(i.first, suffix + ".e")) {
+			std::string data;
+			if (fs::ReadFile(i.second.path, data)) {
+				std::string decrypted_data;
+				if (Encryption::decryptSimple(data, decrypted_data))
+					translations->loadTranslation(decrypted_data);
+			}
+		}
+#endif
 	}
 
 	return translations;

@@ -76,7 +76,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // Saved on disk version
-#if USE_ZSTD && ZSTD_MAP_SAVING
+#if USE_ZSTD
 #define SER_FMT_VER_HIGHEST_WRITE 29
 #else
 #define SER_FMT_VER_HIGHEST_WRITE 28
