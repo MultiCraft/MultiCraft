@@ -59,7 +59,7 @@ private:
 	f32 m_scrollfactor;
 
 	bool m_swipe_started;
-	int m_swipe_start_y;
+	int m_swipe_start_px;
 	float m_swipe_pos;
 
 	void updateScrolling();
