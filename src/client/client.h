@@ -341,11 +341,12 @@ public:
 	void confirmRegistration();
 	bool m_is_registration_confirmation_state = false;
 	bool m_simple_singleplayer_mode;
+	bool *m_connect_aborted = nullptr;
 
 	float mediaReceiveProgress();
 
-	void drawLoadScreen(const std::wstring &text, float dtime, int percent);
-	void afterContentReceived();
+	bool drawLoadScreen(const std::wstring &text, float dtime, int percent);
+	bool afterContentReceived();
 
 	float getRTT();
 	float getCurRate();
