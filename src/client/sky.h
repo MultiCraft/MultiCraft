@@ -29,6 +29,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define SKY_MATERIAL_COUNT 12
 
+// Menu sky
+class Sky;
+extern Sky *g_menusky;
+
 class ITextureSource;
 
 // Skybox, rendered with zbuffer turned off, before all other nodes.
@@ -37,6 +41,9 @@ class Sky : public scene::ISceneNode
 public:
 	//! constructor
 	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc);
+	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager *smgr);
+
+	virtual ~Sky();
 
 	virtual void OnRegisterSceneNode();
 
@@ -79,7 +86,7 @@ public:
 	void setStarsVisible(bool stars_visible) { m_star_params.visible = stars_visible; }
 	void setStarCount(u16 star_count, bool force_update);
 	void setStarColor(video::SColor star_color) { m_star_params.starcolor = star_color; }
-	void setStarScale(f32 star_scale) { m_star_params.scale = star_scale; updateStars(); }
+	void setStarScale(f32 star_scale);
 
 	bool getCloudsVisible() const { return m_clouds_visible && m_clouds_enabled; }
 	const video::SColorf &getCloudColor() const { return m_cloudcolor_f; }
@@ -104,6 +111,10 @@ public:
 	void addTextureToSkybox(const  std::string &texture, int material_id,
 		ITextureSource *tsrc);
 	const video::SColorf &getCurrentStarColor() const { return m_star_color; }
+
+	void setCustomSkyBodyPos(float moon_horizon_pos, float moon_day_pos,
+			float moon_angle, float sun_horizon_pos, float sun_day_pos,
+			float sun_angle);
 
 private:
 	aabb3f m_box;
@@ -192,6 +203,14 @@ private:
 	video::ITexture *m_sun_tonemap;
 	video::ITexture *m_moon_tonemap;
 
+	bool m_use_custom_sky_body_pos = false;
+	float m_custom_moon_horizon_pos = -90;
+	float m_custom_moon_day_pos = -90;
+	float m_custom_moon_angle = 0;
+	float m_custom_sun_horizon_pos = -90;
+	float m_custom_sun_day_pos = -90;
+	float m_custom_sun_angle = 0;
+
 	void updateStars();
 
 	void draw_sun(video::IVideoDriver *driver, float sunsize, const video::SColor &suncolor,
@@ -202,6 +221,6 @@ private:
 		float pos_1, float pos_2, const video::SColor &c);
 	void draw_stars(video::IVideoDriver *driver, float wicked_time_of_day);
 	void place_sky_body(std::array<video::S3DVertex, 4> &vertices,
-		float horizon_position,	float day_position);
+		float horizon_position,	float day_position, float angle = 0);
 	void setSkyDefaults();
 };
