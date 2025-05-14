@@ -113,7 +113,8 @@ public:
 	const video::SColorf &getCurrentStarColor() const { return m_star_color; }
 
 	void setCustomSkyBodyPos(float moon_horizon_pos, float moon_day_pos,
-			float sun_horizon_pos, float sun_day_pos);
+			float moon_angle, float sun_horizon_pos, float sun_day_pos,
+			float sun_angle);
 
 private:
 	aabb3f m_box;
@@ -205,8 +206,10 @@ private:
 	bool m_use_custom_sky_body_pos = false;
 	float m_custom_moon_horizon_pos = -90;
 	float m_custom_moon_day_pos = -90;
+	float m_custom_moon_angle = 0;
 	float m_custom_sun_horizon_pos = -90;
 	float m_custom_sun_day_pos = -90;
+	float m_custom_sun_angle = 0;
 
 	void updateStars();
 
@@ -218,6 +221,6 @@ private:
 		float pos_1, float pos_2, const video::SColor &c);
 	void draw_stars(video::IVideoDriver *driver, float wicked_time_of_day);
 	void place_sky_body(std::array<video::S3DVertex, 4> &vertices,
-		float horizon_position,	float day_position);
+		float horizon_position,	float day_position, float angle = 0);
 	void setSkyDefaults();
 };

@@ -346,11 +346,13 @@ int ModApiMainMenu::l_set_sky_body_pos(lua_State *L)
 
 	float moon_horizon_pos = readParam<float>(L, 1);
 	float moon_day_pos = readParam<float>(L, 2);
-	float sun_horizon_pos = readParam<float>(L, 3);
-	float sun_day_pos = readParam<float>(L, 4);
+	float moon_angle= readParam<float>(L, 3);
+	float sun_horizon_pos = readParam<float>(L, 4);
+	float sun_day_pos = readParam<float>(L, 5);
+	float sun_angle = readParam<float>(L, 6);
 
-	sky->setCustomSkyBodyPos(moon_horizon_pos, moon_day_pos, sun_horizon_pos,
-			sun_day_pos);
+	sky->setCustomSkyBodyPos(moon_horizon_pos, moon_day_pos, moon_angle,
+			sun_horizon_pos, sun_day_pos, sun_angle);
 
 	return 0;
 }

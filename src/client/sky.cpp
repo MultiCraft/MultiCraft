@@ -650,7 +650,8 @@ void Sky::draw_sun(video::IVideoDriver *driver, float sunsize, const video::SCol
 			draw_sky_body(vertices, -sunsizes[i], sunsizes[i], colors[i]);
 
 			if (m_use_custom_sky_body_pos)
-				place_sky_body(vertices, m_custom_sun_horizon_pos, m_custom_sun_day_pos);
+				place_sky_body(vertices, m_custom_sun_horizon_pos,
+						m_custom_sun_day_pos, m_custom_sun_angle);
 			else
 				place_sky_body(vertices, 90, wicked_time_of_day * 360 - 90);
 
@@ -667,7 +668,8 @@ void Sky::draw_sun(video::IVideoDriver *driver, float sunsize, const video::SCol
 		draw_sky_body(vertices, -d, d, c);
 
 		if (m_use_custom_sky_body_pos)
-			place_sky_body(vertices, m_custom_sun_horizon_pos, m_custom_sun_day_pos);
+			place_sky_body(vertices, m_custom_sun_horizon_pos,
+					m_custom_sun_day_pos, m_custom_sun_angle);
 		else
 			place_sky_body(vertices, 90, wicked_time_of_day * 360 - 90);
 
@@ -713,7 +715,8 @@ void Sky::draw_moon(video::IVideoDriver *driver, float moonsize, const video::SC
 			draw_sky_body(vertices, moonsizes_1[i], moonsizes_2[i], colors[i]);
 
 			if (m_use_custom_sky_body_pos)
-				place_sky_body(vertices, m_custom_moon_horizon_pos, m_custom_moon_day_pos);
+				place_sky_body(vertices, m_custom_moon_horizon_pos,
+						m_custom_moon_day_pos, m_custom_moon_angle);
 			else
 				place_sky_body(vertices, -90, wicked_time_of_day * 360 - 90);
 
@@ -730,7 +733,8 @@ void Sky::draw_moon(video::IVideoDriver *driver, float moonsize, const video::SC
 		draw_sky_body(vertices, -d, d, c);
 
 		if (m_use_custom_sky_body_pos)
-			place_sky_body(vertices, m_custom_moon_horizon_pos, m_custom_moon_day_pos);
+			place_sky_body(vertices, m_custom_moon_horizon_pos,
+					m_custom_moon_day_pos, m_custom_moon_angle);
 		else
 			place_sky_body(vertices, -90, wicked_time_of_day * 360 - 90);
 
@@ -778,8 +782,8 @@ void Sky::draw_sky_body(std::array<video::S3DVertex, 4> &vertices, float pos_1, 
 }
 
 
-void Sky::place_sky_body(
-	std::array<video::S3DVertex, 4> &vertices, float horizon_position, float day_position)
+void Sky::place_sky_body(std::array<video::S3DVertex, 4> &vertices,
+		float horizon_position, float day_position, float angle)
 	/*
 	* Place body in the sky.
 	* vertices: The body as a rectangle of 4 vertices
@@ -789,6 +793,7 @@ void Sky::place_sky_body(
 {
 	for (video::S3DVertex &vertex : vertices) {
 		// Body is directed to -Z (south) by default
+		vertex.Pos.rotateXYBy(angle);
 		vertex.Pos.rotateXZBy(horizon_position);
 		vertex.Pos.rotateXYBy(day_position);
 	}
@@ -1012,11 +1017,14 @@ void Sky::setSkyDefaults()
 }
 
 void Sky::setCustomSkyBodyPos(float moon_horizon_pos, float moon_day_pos,
-		float sun_horizon_pos, float sun_day_pos)
+		float moon_angle, float sun_horizon_pos, float sun_day_pos,
+		float sun_angle)
 {
 	m_use_custom_sky_body_pos = true;
 	m_custom_moon_horizon_pos = moon_horizon_pos;
 	m_custom_moon_day_pos = moon_day_pos;
+	m_custom_moon_angle = moon_angle;
 	m_custom_sun_horizon_pos = sun_horizon_pos;
 	m_custom_sun_day_pos = sun_day_pos;
+	m_custom_sun_angle = sun_angle;
 }
