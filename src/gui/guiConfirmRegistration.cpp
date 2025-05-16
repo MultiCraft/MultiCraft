@@ -69,11 +69,15 @@ GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard()) {
+	if (Environment && porting::hasRealKeyboard()) {
 		video::IVideoDriver* driver = Environment->getVideoDriver();
-		const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-		SDL_Window *window = exposedData.OpenGLSDL.Window;
-		SDL_StartTextInput(window);
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			if (window)
+				SDL_StartTextInput(window);
+		}
 	}
 #endif
 }
@@ -83,12 +87,16 @@ GUIConfirmRegistration::~GUIConfirmRegistration()
 	removeChildren();
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	video::IVideoDriver* driver = Environment->getVideoDriver();
-	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-	SDL_Window *window = exposedData.OpenGLSDL.Window;
-	
-	if (porting::hasRealKeyboard() && SDL_TextInputActive(window))
-		SDL_StopTextInput(window);
+	if (Environment && porting::hasRealKeyboard()) {
+		video::IVideoDriver* driver = Environment->getVideoDriver();
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+			
+			if (window && SDL_TextInputActive(window))
+				SDL_StopTextInput(window);
+		}
+	}
 #endif
 }
 
