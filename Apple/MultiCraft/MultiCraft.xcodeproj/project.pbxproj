@@ -129,8 +129,10 @@
 		8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8488539E28DA4851004AD90F /* libjpeg.a */; };
 		848920FD29984994001CB194 /* sdl_semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FA29984994001CB194 /* sdl_semaphore.cpp */; };
 		848920FE29984994001CB194 /* sdl_thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FB29984994001CB194 /* sdl_thread.cpp */; };
+		848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848A7CE22DD8042E00CC49EB /* AVFoundation.framework */; };
+		848A7CE52DD8048500CC49EB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848A7CE42DD8048400CC49EB /* CoreMedia.framework */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
-		8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL2.a */; };
+		8495BD1628B80B14009FCF4D /* libSDL3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL3.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
@@ -536,8 +538,11 @@
 		848920FA29984994001CB194 /* sdl_semaphore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_semaphore.cpp; path = ../../../src/threading/sdl_semaphore.cpp; sourceTree = "<group>"; };
 		848920FB29984994001CB194 /* sdl_thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_thread.cpp; path = ../../../src/threading/sdl_thread.cpp; sourceTree = "<group>"; };
 		848920FC29984994001CB194 /* sdl_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sdl_thread.h; path = ../../../src/threading/sdl_thread.h; sourceTree = "<group>"; };
+		848A7CE02DD8040E00CC49EB /* AVFAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFAudio.framework; path = System/Library/Frameworks/AVFAudio.framework; sourceTree = SDKROOT; };
+		848A7CE22DD8042E00CC49EB /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		848A7CE42DD8048400CC49EB /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		8495BD1528B80B00009FCF4D /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../deps/SDL2/libSDL2.a; sourceTree = "<group>"; };
+		8495BD1528B80B00009FCF4D /* libSDL3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL3.a; path = ../deps/SDL3/libSDL3.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
 		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		849D0845278AC1B200471354 /* lchacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lchacha.c; path = ../../../lib/luachacha/lchacha.c; sourceTree = "<group>"; };
@@ -869,6 +874,7 @@
 				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
 				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
 				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
+				848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */,
 				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
 				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
 				841AD8BB28D12E980042E335 /* libintl.a in Frameworks */,
@@ -877,7 +883,8 @@
 				841AD8B128D0DE430042E335 /* libogg.a in Frameworks */,
 				841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */,
 				84C2AB5328DA7776001968EE /* libpng.a in Frameworks */,
-				8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */,
+				8495BD1628B80B14009FCF4D /* libSDL3.a in Frameworks */,
+				848A7CE52DD8048500CC49EB /* CoreMedia.framework in Frameworks */,
 				841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */,
 				841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */,
 				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
@@ -1060,6 +1067,9 @@
 		84585BFF24B1347B0040BA4F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				848A7CE42DD8048400CC49EB /* CoreMedia.framework */,
+				848A7CE22DD8042E00CC49EB /* AVFoundation.framework */,
+				848A7CE02DD8040E00CC49EB /* AVFAudio.framework */,
 				84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */,
 				8458617724B1BF2D0040BA4F /* AppKit.framework */,
 				841AD8AC28D0D6920042E335 /* AudioUnit.framework */,
@@ -1080,7 +1090,7 @@
 				841AD8B028D0DE3D0042E335 /* libogg.a */,
 				841AD8A928D0CE7F0042E335 /* libopenal.a */,
 				84C2AB5228DA7770001968EE /* libpng.a */,
-				8495BD1528B80B00009FCF4D /* libSDL2.a */,
+				8495BD1528B80B00009FCF4D /* libSDL3.a */,
 				841AD8B428D0E2340042E335 /* libvorbis.a */,
 				841AD8B828D0E2E40042E335 /* libvorbisfile.a */,
 				848CE6E427778E30001D3E0F /* libz.tbd */,
@@ -2158,7 +2168,7 @@
 					"${SRCROOT}/../deps/libogg/include",
 					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
-					"${SRCROOT}/../deps/SDL2/include",
+					"${SRCROOT}/../deps/SDL3/include",
 					"${SRCROOT}/../deps/libvorbis/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
@@ -2180,7 +2190,7 @@
 					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
-					"-L${SRCROOT}/../deps/SDL2",
+					"-L${SRCROOT}/../deps/SDL3",
 					"-L${SRCROOT}/../deps/libvorbis",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG";
@@ -2234,7 +2244,7 @@
 					"${SRCROOT}/../deps/libogg/include",
 					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
-					"${SRCROOT}/../deps/SDL2/include",
+					"${SRCROOT}/../deps/SDL3/include",
 					"${SRCROOT}/../deps/libvorbis/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
@@ -2256,7 +2266,7 @@
 					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
-					"-L${SRCROOT}/../deps/SDL2",
+					"-L${SRCROOT}/../deps/SDL3",
 					"-L${SRCROOT}/../deps/libvorbis",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
