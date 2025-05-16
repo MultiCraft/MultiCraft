@@ -73,11 +73,12 @@ GUIModalMenu::~GUIModalMenu()
 {
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	if (Environment && porting::hasRealKeyboard()) {
-		video::IVideoDriver* driver = Environment->getVideoDriver();
+		video::IVideoDriver *driver = Environment->getVideoDriver();
 		if (driver) {
-			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			const video::SExposedVideoData exposedData =
+					driver->getExposedVideoData();
 			SDL_Window *window = exposedData.OpenGLSDL.Window;
-			
+
 			if (window && SDL_TextInputActive(window))
 				SDL_StopTextInput(window);
 		}
