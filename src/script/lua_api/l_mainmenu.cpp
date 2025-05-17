@@ -358,7 +358,7 @@ int ModApiMainMenu::l_set_sky_body_pos(lua_State *L)
 }
 
 /******************************************************************************/
-int ModApiMainMenu::l_set_moon_texture(lua_State *L)
+int ModApiMainMenu::l_set_moon(lua_State *L)
 {
 	GUIEngine* engine = getGuiEngine(L);
 	sanity_check(engine != NULL);
@@ -366,16 +366,37 @@ int ModApiMainMenu::l_set_moon_texture(lua_State *L)
 	if (!sky)
 		return 0;
 
-	std::string moon_texture = readParam<std::string>(L, 1, "");
-	std::string moon_tonemap = readParam<std::string>(L, 2, "");
+	std::string texture;
+	lua_getfield(L, 1, "texture");
+	if (!lua_isnil(L, -1)) {
+		texture = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
 
-	sky->setMoonTexture(moon_texture, moon_tonemap, engine->getTextureSource());
+	std::string tonemap;
+	lua_getfield(L, 1, "tonemap");
+	if (!lua_isnil(L, -1)) {
+		tonemap = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	sky->setMoonTexture(texture, tonemap, engine->getTextureSource());
+
+	float scale = 1.0f;
+	if (getfloatfield(L, 1, "scale", scale)) {
+		sky->setMoonScale(0.5f);
+	}
+
+	bool visible = true;
+	if (getboolfield(L, 1, "visible", visible)) {
+		sky->setMoonVisible(visible);
+	}
 
 	return 0;
 }
 
 /******************************************************************************/
-int ModApiMainMenu::l_set_sun_texture(lua_State *L)
+int ModApiMainMenu::l_set_sun(lua_State *L)
 {
 	GUIEngine* engine = getGuiEngine(L);
 	sanity_check(engine != NULL);
@@ -383,10 +404,31 @@ int ModApiMainMenu::l_set_sun_texture(lua_State *L)
 	if (!sky)
 		return 0;
 
-	std::string sun_texture = readParam<std::string>(L, 1, "");
-	std::string sun_tonemap = readParam<std::string>(L, 2, "");
+	std::string texture;
+	lua_getfield(L, 1, "texture");
+	if (!lua_isnil(L, -1)) {
+		texture = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
 
-	sky->setSunTexture(sun_texture, sun_tonemap, engine->getTextureSource());
+	std::string tonemap;
+	lua_getfield(L, 1, "tonemap");
+	if (!lua_isnil(L, -1)) {
+		tonemap = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	sky->setSunTexture(texture, tonemap, engine->getTextureSource());
+
+	float scale = 1.0f;
+	if (getfloatfield(L, 1, "scale", scale)) {
+		sky->setSunScale(0.5f);
+	}
+
+	bool visible = true;
+	if (getboolfield(L, 1, "visible", visible)) {
+		sky->setSunVisible(visible);
+	}
 
 	return 0;
 }
@@ -1113,8 +1155,8 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(set_sky);
 	API_FCT(set_stars);
 	API_FCT(set_sky_body_pos);
-	API_FCT(set_moon_texture);
-	API_FCT(set_sun_texture);
+	API_FCT(set_moon);
+	API_FCT(set_sun);
 	API_FCT(set_timeofday);
 	API_FCT(get_textlist_index);
 	API_FCT(get_table_index);

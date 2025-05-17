@@ -98,9 +98,9 @@ private:
 
 	static int l_set_sky_body_pos(lua_State *L);
 
-	static int l_set_moon_texture(lua_State *L);
+	static int l_set_moon(lua_State *L);
 
-	static int l_set_sun_texture(lua_State *L);
+	static int l_set_sun(lua_State *L);
 
 	static int l_set_timeofday(lua_State *L);
 
