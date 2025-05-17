@@ -1876,13 +1876,6 @@ bool GenericCAO::directReportPunch(v3f dir, const ItemStack *punchitem,
 			punchitem,
 			time_from_last_punch);
 
-	if (!itemgroup_get(m_armor_groups, "silent")) {
-		SimpleSoundSpec spec;
-		spec.name = "player_punch";
-		spec.gain = 1.0f;
-		m_client->sound()->playSoundAt(spec, false, getPosition());
-	}
-
 	s16 damage = result.damage;
 	if(result.did_punch && damage != 0)
 	{

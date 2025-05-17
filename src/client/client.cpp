@@ -672,22 +672,8 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 
 	name = removeStringEnd(filename, enc_ext);
 	if (!name.empty()) {
-#ifdef SIGN_KEY
-		static std::string secret_key = porting::getSecretKey(SIGN_KEY);
-#else
-		static std::string secret_key = porting::getSecretKey("");
-#endif
-		Encryption::setKey(secret_key);
-		Encryption::EncryptedData encrypted_data;
-		bool success = encrypted_data.fromString(data);
-
-		if (!success)
-			return false;
-
 		std::string decrypted_data;
-		success = Encryption::decrypt(encrypted_data, decrypted_data);
-
-		if (!success)
+		if (!Encryption::decryptSimple(data, decrypted_data))
 			return false;
 
 		std::string real_filename = name;
@@ -707,7 +693,6 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 
 	const char *image_ext[] = {
 		".png", ".jpg", ".bmp", ".tga",
-		".pcx", ".ppm", ".psd", ".wal", ".rgb",
 		NULL
 	};
 	name = removeStringEnd(filename, image_ext);
@@ -789,7 +774,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 	}
 
 	const char *model_ext[] = {
-		".x", ".b3d", ".md2", ".obj",
+		".x", ".b3d", ".obj",
 		NULL
 	};
 	name = removeStringEnd(filename, model_ext);

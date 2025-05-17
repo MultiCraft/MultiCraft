@@ -764,10 +764,10 @@ float getScreenScale()
 }
 #endif
 
-float getTotalSystemMemory()
+int getTotalSystemMemory()
 {
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-	static const float retval = SDL_GetSystemRAM();
+	static const int retval = SDL_GetSystemRAM();
 	return retval;
 #else
 	return 0;

@@ -367,7 +367,7 @@ float getScreenScale();
  * Get total device memory
  */
 
-float getTotalSystemMemory();
+int getTotalSystemMemory();
 
 bool open_directory(const std::string &path);
 

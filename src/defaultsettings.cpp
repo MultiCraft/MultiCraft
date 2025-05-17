@@ -194,7 +194,7 @@ void set_default_settings()
 	settings->setDefault("autosave_screensize", "true");
 	settings->setDefault("fullscreen", "false");
 	settings->setDefault("fullscreen_bpp", "24");
-	settings->setDefault("vsync", "false");
+	settings->setDefault("vsync", "true");
 	settings->setDefault("fov", "72");
 	settings->setDefault("leaves_style", "fancy");
 	settings->setDefault("connected_glass", "false");
@@ -320,9 +320,9 @@ void set_default_settings()
 	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
 #else
 	settings->setDefault("font_path", MultiCraftFont);
-	settings->setDefault("font_path_italic", MultiCraftFont);
-	settings->setDefault("font_path_bold", MultiCraftFont);
-	settings->setDefault("font_path_bold_italic", MultiCraftFont);
+	settings->setDefault("font_path_italic", "");
+	settings->setDefault("font_path_bold", "");
+	settings->setDefault("font_path_bold_italic", "");
 #endif
 
 	settings->setDefault("font_bold", "false");
@@ -331,9 +331,9 @@ void set_default_settings()
 	settings->setDefault("font_shadow_alpha", "127");
 
 	settings->setDefault("mono_font_path", MultiCraftFont);
-	settings->setDefault("mono_font_path_italic", MultiCraftFont);
-	settings->setDefault("mono_font_path_bold", MultiCraftFont);
-	settings->setDefault("mono_font_path_bold_italic", MultiCraftFont);
+	settings->setDefault("mono_font_path_italic", "");
+	settings->setDefault("mono_font_path_bold", "");
+	settings->setDefault("mono_font_path_bold_italic", "");
 
 	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf"));
 #if defined(__ANDROID__)
@@ -502,7 +502,7 @@ void set_default_settings()
 	settings->setDefault("device_is_tablet", std::to_string(isTablet));
 #endif
 
-	float memoryMax = porting::getTotalSystemMemory() / 1024;
+	float memoryMax = (float) porting::getTotalSystemMemory() / 1024;
 	settings->setDefault("convert_to_16bit", std::to_string(memoryMax <= 2));
 
 	// Altered settings for macOS
@@ -510,7 +510,6 @@ void set_default_settings()
 	settings->setDefault("screen_w", "0");
 	settings->setDefault("screen_h", "0");
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
-	settings->setDefault("vsync", "true");
 
 	float ScaleFactor = porting::getScreenScale();
 	settings->setDefault("display_density_factor", std::to_string(ScaleFactor));

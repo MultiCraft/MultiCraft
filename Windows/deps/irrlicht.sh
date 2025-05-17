@@ -16,7 +16,8 @@ CPPFLAGS="$CPPFLAGS \
           -I$DEPS_ROOT/sdl3/include \
           -I$DEPS_ROOT/zlib/include \
           -I$DEPS_ROOT/libjpeg/include \
-          -I$DEPS_ROOT/libpng/include" \
+          -I$DEPS_ROOT/libpng/include \
+          -I$DEPS_ROOT/openssl/include" \
 CXXFLAGS="$CXXFLAGS -std=gnu++17" \
 make staticlib_win32 -j${NPROC} NDEBUG=1
 

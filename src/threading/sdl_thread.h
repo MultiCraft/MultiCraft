@@ -99,6 +99,11 @@ public:
 	bool setPriority(SDL_ThreadPriority prio);
 
 	/*
+	 * Returns the thread object of the current thread if it exists.
+	 */
+	static Thread *getCurrentThread();
+
+	/*
 	 * Sets the currently executing thread's name to where supported; useful
 	 * for debugging.
 	 */

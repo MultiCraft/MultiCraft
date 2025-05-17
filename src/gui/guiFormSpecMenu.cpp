@@ -65,7 +65,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "guiInventoryList.h"
 #include "guiItemImage.h"
 #include "guiScrollContainer.h"
-#include "intlGUIEditBox.h"
 #include "guiHyperText.h"
 #include "guiScene.h"
 #include "touchscreengui.h"
@@ -645,7 +644,7 @@ void GUIFormSpecMenu::parseCheckbox(parserData* data, const std::string &element
 			fselected = true;
 
 		std::wstring wlabel = translate_string(utf8_to_wide(unescape_string(label)));
-		const core::dimension2d<u32> label_size = m_font->getDimension(wlabel.c_str());
+		const core::dimension2d<u32> label_size = ((CGUITTFont *)m_font)->getTotalDimension(wlabel.c_str());
 		s32 cb_size = Environment->getSkin()->getSize(gui::EGDS_CHECK_BOX_WIDTH);
 		s32 y_center = (std::max(label_size.Height, (u32)cb_size) + 1) / 2;
 
@@ -1626,22 +1625,16 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 	GUIEditBox *box = nullptr;
 	gui::IGUIEditBox *e = nullptr;
 
-#if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
-		box = new gui::intlGUIEditBox(spec.fdefault.c_str(), true, Environment,
-				data->current_parent, spec.fid, rect, is_editable, is_multiline);
+	if (is_multiline) {
+		box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
+				data->current_parent, spec.fid, rect, is_editable, !is_editable,
+				m_sound_manager);
 		e = box;
-#else
-		if (is_multiline) {
-			box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
-					data->current_parent, spec.fid, rect, is_editable, !is_editable,
-					m_sound_manager);
-			e = box;
-		} else if (is_editable) {
-			e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
-					data->current_parent, spec.fid);
-			e->grab();
-		}
-#endif
+	} else if (is_editable) {
+		e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
+				data->current_parent, spec.fid);
+		e->grab();
+	}
 
 	auto style = getDefaultStyleForElement(is_multiline ? "textarea" : "field", spec.fname);
 
@@ -1925,7 +1918,7 @@ void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 
 				rect = core::rect<s32>(
 					pos.X, pos.Y,
-					pos.X + font->getDimension(wlabel_plain.c_str()).Width,
+					pos.X + ((CGUITTFont *)font)->getTotalDimension(wlabel_plain.c_str()).Width,
 					pos.Y + imgsize.Y);
 
 			} else {
@@ -1947,7 +1940,7 @@ void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 
 				rect = core::rect<s32>(
 					pos.X, pos.Y - m_btn_height,
-					pos.X + font->getDimension(wlabel_plain.c_str()).Width,
+					pos.X + ((CGUITTFont *)font)->getTotalDimension(wlabel_plain.c_str()).Width,
 					pos.Y + m_btn_height);
 			}
 

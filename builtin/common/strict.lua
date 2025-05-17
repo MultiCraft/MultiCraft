@@ -55,3 +55,41 @@ end
 
 setmetatable(_G, meta)
 
+
+if string.buffer then
+	local setmetatable = setmetatable
+	local new_unsafe_buffer = string.buffer.new
+	local unsafe_buffers = setmetatable({}, {__mode = "k"})
+
+	-- Note: Mods can still get access to the Buffer metatable
+	local Buffer = {__metatable = "buffer"}
+	Buffer.__index = Buffer
+
+	-- Functions that shouldn't return anything
+	for _, name in ipairs({"reset", "free", "put", "putf", "set"}) do
+		Buffer[name] = function(self, ...)
+			-- Discard return values in case the functions start returning
+			-- values in the future.
+			local real_buf = unsafe_buffers[self]
+			real_buf[name](real_buf, ...)
+		end
+	end
+
+	-- Functions that return safe values
+	for _, name in ipairs({"get", "tostring"}) do
+		Buffer[name] = function(self, ...)
+			local real_buf = unsafe_buffers[self]
+			return real_buf[name](real_buf, ...)
+		end
+	end
+
+	Buffer.__tostring = Buffer.tostring
+
+	string.buffer = {}
+	function string.buffer.new()
+		local proxy = {}
+		unsafe_buffers[proxy] = new_unsafe_buffer()
+		setmetatable(proxy, Buffer)
+		return proxy
+	end
+end

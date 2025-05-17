@@ -179,7 +179,6 @@ LOCAL_SRC_FILES := \
 	../../src/threading/sdl_semaphore.cpp          \
 	../../src/threading/sdl_thread.cpp             \
 	$(wildcard ../../src/util/*.cpp)               \
-	../../src/ban.cpp                              \
 	../../src/chat.cpp                             \
 	../../src/clientiface.cpp                      \
 	../../src/collision.cpp                        \

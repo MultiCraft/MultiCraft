@@ -48,6 +48,8 @@ core.open_dir(path)
 ^ Must be an existing directory.
 core.get_version() (possible in async calls)
 ^ returns current core version
+core.get_system_ram()
+^ returns system memory in MB
 
 
 
@@ -94,6 +96,8 @@ HTTP Requests
 * core.download_file(url, target) (possible in async calls)
     * url to download, and target to store to
     * returns true/false
+* core.cancel_all_download_files() (possible in async calls)
+    * Cancels all calls to core.download_file running in other threads
 * `minetest.get_http_api()` (possible in async calls)
     * returns `HTTPApiTable` containing http functions.
     * The returned table contains the functions `fetch_sync`, `fetch_async` and
