@@ -288,4 +288,5 @@ private:
 	/** stop playing a sound started with playSound() */
 	void stopSound(s32 handle);
 
+
 };

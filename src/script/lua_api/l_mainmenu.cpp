@@ -384,7 +384,7 @@ int ModApiMainMenu::l_set_moon(lua_State *L)
 
 	float scale = 1.0f;
 	if (getfloatfield(L, 1, "scale", scale)) {
-		sky->setMoonScale(0.5f);
+		sky->setMoonScale(scale);
 	}
 
 	bool visible = true;
@@ -422,7 +422,7 @@ int ModApiMainMenu::l_set_sun(lua_State *L)
 
 	float scale = 1.0f;
 	if (getfloatfield(L, 1, "scale", scale)) {
-		sky->setSunScale(0.5f);
+		sky->setSunScale(scale);
 	}
 
 	bool visible = true;
