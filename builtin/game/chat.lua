@@ -689,7 +689,10 @@ local function handle_give_command(cmd, giver, receiver, stackstring)
 			end
 		end
 	end
-	local itemstack = ItemStack(stackstring)
+	local ok, itemstack = pcall(ItemStack, stackstring)
+	if not ok then
+			return false, "Invalid item stack string"
+	end
 	if itemstack:is_empty() then
 		return false, "Cannot give an empty item"
 	elseif (not itemstack:is_known()) or (itemstack:get_name() == "unknown") then
