@@ -67,8 +67,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 	}
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-// #ifdef HAVE_TOUCHSCREENGUI
-#if 1
+#ifdef HAVE_TOUCHSCREENGUI
 	if (event.EventType == EET_MOUSE_INPUT_EVENT && m_scrollbar) {
 		const int mouse_pos = m_orientation == HORIZONTAL ? event.MouseInput.X
 								  : event.MouseInput.Y;
