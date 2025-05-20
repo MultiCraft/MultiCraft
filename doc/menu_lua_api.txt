@@ -191,6 +191,32 @@ core.set_background(type, texturepath,[tile],[minsize])
 ^ minsize: minimum tile size, images are scaled to at least this size prior
 ^   doing tiling (background only)
 core.set_clouds(<true/false>)
+core.set_sky(sky_params)
+^ sky_params is a table like the one in-game
+^ Only "regular" skies are supported
+core.set_stars(params)
+^ changes parameters of stars displayed in main menu
+^   visible: visibility <true/false>
+^   count: how many stars should be generated
+^   star_color: color of the stars
+^   star_scale: scale of the stars
+core.set_sky_body_pos(moon_horizon_pos, moon_day_pos, moon_angle, sun_horizon_pos, sun_day_pos, sun_angle)
+^ set some sky body values in degrees that are used for rendering
+core.set_moon(params)
+^ set some moon parameters
+^   texture: main texture name
+^   tonemap: tonemap texture name
+^   scale: scale of the moon
+^   visible: visibility <true/false>
+core.set_sun(params)
+^ set some sun parameters
+^   texture: main texture name
+^   tonemap: tonemap texture name
+^   scale: scale of the sun
+^   visible: visibility <true/false>
+core.set_timeofday(value)
+^ set time of day for rendering sky in main menu
+^   value: a value between 0 and 1
 core.set_topleft_text(text)
 core.show_keys_menu()
 core.show_path_select_dialog(formname, caption, is_file_select)
