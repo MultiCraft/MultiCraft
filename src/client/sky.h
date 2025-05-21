@@ -41,7 +41,8 @@ class Sky : public scene::ISceneNode
 public:
 	//! constructor
 	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc);
-	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager *smgr);
+	Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc,
+			scene::ISceneManager *smgr, bool is_mainmenu = false);
 
 	virtual ~Sky();
 
@@ -210,6 +211,8 @@ private:
 	float m_custom_sun_horizon_pos = -90;
 	float m_custom_sun_day_pos = -90;
 	float m_custom_sun_angle = 0;
+
+	bool m_is_mainmenu = false;
 
 	void updateStars();
 

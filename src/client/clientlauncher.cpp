@@ -206,7 +206,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		m_shader_src->addShaderConstantSetterFactory(scsf);
 
 		if (!g_menusky) {
-			g_menusky = new Sky(-1, nullptr, m_shader_src, g_menucloudsmgr);
+			g_menusky = new Sky(-1, nullptr, m_shader_src, g_menucloudsmgr, true);
 		}
 
 		u32 daynight_ratio = time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);

@@ -63,9 +63,11 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc) :
 		Sky(id, tsrc, ssrc, RenderingEngine::get_scene_manager())
 {}
 
-Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager *smgr) :
+Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager *smgr, bool is_mainmenu) :
 		scene::ISceneNode(smgr->getRootSceneNode(), smgr, id)
 {
+	m_is_mainmenu = is_mainmenu;
+
 	setAutomaticCulling(scene::EAC_OFF);
 	m_box.MaxEdge.set(0, 0, 0);
 	m_box.MinEdge.set(0, 0, 0);
@@ -354,7 +356,7 @@ void Sky::render()
 
 		// Draw far cloudy fog thing below all horizons in front of sun, moon
 		// and stars.
-		if (m_visible) {
+		if (m_visible && !m_is_mainmenu) {
 			driver->setMaterial(m_materials[1]);
 
 			for (u32 j = 0; j < 4; j++) {
