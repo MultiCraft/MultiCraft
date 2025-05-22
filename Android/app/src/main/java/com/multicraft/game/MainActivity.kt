@@ -32,22 +32,20 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.*
-import androidx.work.WorkInfo
+import androidx.lifecycle.lifecycleScope
 import com.multicraft.game.databinding.ActivityMainBinding
 import com.multicraft.game.dialogs.ConnectionDialog
-import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isPie
+import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.getStringValue
-import com.multicraft.game.helpers.PreferenceHelper.set
-import com.multicraft.game.workmanager.UnzipWorker.Companion.PROGRESS
-import com.multicraft.game.workmanager.WorkerViewModel
-import com.multicraft.game.workmanager.WorkerViewModelFactory
+import com.multicraft.game.helpers.finishApp
+import com.multicraft.game.helpers.isConnected
+import com.multicraft.game.helpers.makeFullScreen
+import com.multicraft.game.helpers.showRestartDialog
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 	private lateinit var binding: ActivityMainBinding
@@ -56,12 +54,13 @@ class MainActivity : AppCompatActivity() {
 	private lateinit var prefs: SharedPreferences
 	private lateinit var restartStartForResult: ActivityResultLauncher<Intent>
 	private lateinit var connStartForResult: ActivityResultLauncher<Intent>
-	private val versionCode = BuildConfig.VERSION_CODE
-	private val versionName = "${BuildConfig.VERSION_NAME}+$versionCode"
+
 
 	companion object {
 		var radius = 0
 		const val NO_SPACE_LEFT = "ENOSPC"
+		const val VERSION_CODE = BuildConfig.VERSION_CODE
+		const val VERSION_NAME = "${BuildConfig.VERSION_NAME}+$VERSION_CODE"
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,56 +125,35 @@ class MainActivity : AppCompatActivity() {
 		animation.start()
 	}
 
-	private fun startNative() {
-		val initLua = File(filesDir, "builtin${sep}mainmenu${sep}init.lua")
-		if (initLua.exists() && initLua.canRead()) {
-			val intent = Intent(this, GameActivity::class.java)
-			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-			startActivity(intent)
-		} else {
-			prefs[TAG_BUILD_VER] = "0"
-			showRestartDialog(restartStartForResult)
-		}
+	private fun startNative(isExtract: Boolean = false) {
+		val intent = Intent(this, GameActivity::class.java)
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		intent.putExtra("update", isExtract)
+		startActivity(intent)
 	}
 
 	private fun prepareToRun() {
 		val filesList = mutableListOf<File>().apply {
-			addAll(listOf(
-				"builtin",
-				"client${sep}shaders",
-				"fonts",
-				"games${sep}default",
-				"textures${sep}base"
-			).map { File(filesDir, it) })
+			addAll(
+				listOf(
+					"builtin",
+					"client${sep}shaders",
+					"fonts",
+					"games${sep}default",
+					"textures${sep}base"
+				).map { File(filesDir, it) })
 		}
-
-		val zips = mutableListOf("assets.zip")
 
 		lifecycleScope.launch {
 			filesList.forEach { it.deleteRecursively() }
-			zips.forEach {
-				try {
-					assets.open(it).use { input ->
-						File(cacheDir, it).copyInputStreamToFile(input)
-					}
-				} catch (e: IOException) {
-					val isNotEnoughSpace = e.message!!.contains(NO_SPACE_LEFT)
-					runOnUiThread { showRestartDialog(restartStartForResult, !isNotEnoughSpace) }
-					return@forEach
-				}
-			}
-			try {
-				startUnzipWorker(zips.toTypedArray())
-			} catch (e: Exception) {
-				runOnUiThread { showRestartDialog(restartStartForResult) }
-			}
+			startNative(true)
 		}
 	}
 
 	private fun checkAppVersion() {
 		val prefVersion = prefs.getStringValue(TAG_BUILD_VER)
-		if (prefVersion == versionName)
+		if (prefVersion == VERSION_NAME)
 			startNative()
 		else
 			prepareToRun()
@@ -203,31 +181,5 @@ class MainActivity : AppCompatActivity() {
 		} catch (e: Exception) {
 			checkAppVersion()
 		}
-	}
-
-	private fun startUnzipWorker(file: Array<String>) {
-		val viewModelFactory = WorkerViewModelFactory(application, file)
-		val viewModel = ViewModelProvider(this, viewModelFactory)[WorkerViewModel::class.java]
-		viewModel.unzippingWorkObserver
-			.observe(this, Observer { workInfo ->
-				if (workInfo == null)
-					return@Observer
-				val progress = workInfo.progress.getInt(PROGRESS, 0)
-				if (progress > 0) {
-					val progressMessage = "${getString(R.string.loading)} $progress%"
-					binding.tvProgress.text = progressMessage
-				}
-
-				if (workInfo.state.isFinished) {
-					if (workInfo.state == WorkInfo.State.FAILED) {
-						val isRestart = workInfo.outputData.getBoolean("restart", true)
-						showRestartDialog(restartStartForResult, isRestart)
-					} else if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-						prefs[TAG_BUILD_VER] = versionName
-						startNative()
-					}
-				}
-			})
-		viewModel.startOneTimeWorkRequest()
 	}
 }
