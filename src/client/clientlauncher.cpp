@@ -115,6 +115,13 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 	}
 #endif
 
+#if defined(__ANDROID__)
+    if (!init_assets()) {
+        errorstream << "Could not extract assets." << std::endl;
+        return false;
+    }
+#endif
+
 	if (!init_engine()) {
 		errorstream << "Could not initialize game engine." << std::endl;
 		return false;
@@ -375,6 +382,47 @@ void ClientLauncher::init_args(GameStartData &start_data, const Settings &cmd_ar
 
 	random_input = g_settings->getBool("random_input")
 			|| cmd_args.getFlag("random-input");
+}
+
+bool ClientLauncher::init_assets() {
+	if (!porting::needsExtractAssets())
+		return true;
+
+	IrrlichtDevice *nulldevice = createDevice(video::EDT_NULL);
+
+	if (!nulldevice) {
+		porting::hideSplashScreen();
+		return false;
+	}
+
+	io::IFileSystem *irrfs = nulldevice->getFileSystem();
+	std::string error_msg;
+
+	// Removing old assets will be done in java activity
+	//std::string dirs[] = {
+	//		"builtin",
+	//		"client/shaders",
+	//		"fonts",
+	//		"games/default",
+	//		"textures/base"
+	//};
+
+	//for (std::string dir : dirs) {
+	//	fs::RecursiveDelete(porting::path_share + "/" + dir);
+	//}
+
+	if (!fs::extractZipFileFromAssets(irrfs, "assets.zip",
+	                                  porting::path_share, "", &error_msg)) {
+		errorstream << "Could not extract assets: " << error_msg << std::endl;
+		nulldevice->drop();
+		porting::hideSplashScreen();
+		return false;
+	}
+
+	nulldevice->drop();
+	porting::hideSplashScreen();
+
+	return true;
 }
 
 bool ClientLauncher::init_engine()

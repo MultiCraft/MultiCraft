@@ -4,7 +4,6 @@
 	android:installLocation="auto">
 
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
@@ -85,9 +84,6 @@
 			android:screenOrientation="sensorLandscape"
 			android:theme="@style/CustomDialog" />
 
-		<service
-			android:name="androidx.work.impl.foreground.SystemForegroundService"
-			android:foregroundServiceType="shortService" />
 	</application>
 
 </manifest>

@@ -765,80 +765,194 @@ bool safeWriteToFile(const std::string &path, const std::string &content)
 }
 
 #ifndef SERVER
-bool extractZipFile(io::IFileSystem *fs, const char *filename,
-		const std::string &destination, const char *password, std::string *errorMessage)
-{
-	// Be careful here not to touch the global file hierarchy in Irrlicht
-	// since this function needs to be thread-safe!
 
-	io::IArchiveLoader *zip_loader = nullptr;
-	for (u32 i = 0; i < fs->getArchiveLoaderCount(); i++) {
-		if (fs->getArchiveLoader(i)->isALoadableFileFormat(io::EFAT_ZIP)) {
-			zip_loader = fs->getArchiveLoader(i);
-			break;
-		}
-	}
-	if (!zip_loader) {
-		warningstream << "fs::extractZipFile(): Irrlicht said it doesn't support ZIPs." << std::endl;
-		return false;
-	}
-
-	irr_ptr<io::IFileArchive> opened_zip(zip_loader->createArchive(filename, false, false));
-	if (opened_zip.get() == nullptr) {
-		if (errorMessage != nullptr)
-			*errorMessage = "failed to open zip file";
-		return false;
-	}
-
-	opened_zip->Password = core::stringc(password);
-	const io::IFileList* files_in_zip = opened_zip->getFileList();
-
-	for (u32 i = 0; i < files_in_zip->getFileCount(); i++) {
-		std::string fullpath = destination + DIR_DELIM;
-		fullpath += files_in_zip->getFullFileName(i).c_str();
-		std::string fullpath_dir = fs::RemoveLastPathComponent(fullpath);
-
-		if (files_in_zip->isDirectory(i))
-			continue; // ignore, we create dirs as necessary
-
-		if (!fs::PathExists(fullpath_dir) && !fs::CreateAllDirs(fullpath_dir))
-			return false;
-
-		irr_ptr<io::IReadFile> toread(opened_zip->createAndOpenFile(i));
-
-		if (toread.get() == nullptr) {
-			// Wrong password
-			fs->removeFileArchive(fs->getFileArchiveCount()-1);
+	bool extractZipFileInternal(io::IFileSystem *fs, irr_ptr<io::IFileArchive> &opened_zip,
+					const std::string &destination, const char *password, std::string *errorMessage)
+	{
+		if (opened_zip.get() == nullptr) {
 			if (errorMessage != nullptr)
-				*errorMessage = "invalid password";
+				*errorMessage = "failed to open zip file";
 			return false;
 		}
 
-		std::ofstream os(fullpath.c_str(), std::ios::binary);
-		if (!os.good())
-			return false;
+		opened_zip->Password = core::stringc(password);
+		const io::IFileList *files_in_zip = opened_zip->getFileList();
 
-		char buffer[4096];
-		long total_read = 0;
+		for (u32 i = 0; i < files_in_zip->getFileCount(); i++) {
+			std::string fullpath = destination + DIR_DELIM;
+			fullpath += files_in_zip->getFullFileName(i).c_str();
+			std::string fullpath_dir = fs::RemoveLastPathComponent(fullpath);
 
-		while (total_read < toread->getSize()) {
-			long bytes_read = toread->read(buffer, sizeof(buffer));
-			bool error = true;
-			if (bytes_read != 0) {
-				os.write(buffer, bytes_read);
-				error = os.fail();
-			}
-			if (error) {
-				os.close();
-				remove(fullpath.c_str());
+			if (files_in_zip->isDirectory(i))
+				continue; // ignore, we create dirs as necessary
+
+			if (!fs::PathExists(fullpath_dir) && !fs::CreateAllDirs(fullpath_dir))
+				return false;
+
+			irr_ptr<io::IReadFile> toread(opened_zip->createAndOpenFile(i));
+
+			if (toread.get() == nullptr) {
+				// Wrong password
+				fs->removeFileArchive(fs->getFileArchiveCount() - 1);
+				if (errorMessage != nullptr)
+					*errorMessage = "invalid password";
 				return false;
 			}
-			total_read += bytes_read;
+
+			std::ofstream os(fullpath.c_str(), std::ios::binary);
+			if (!os.good())
+				return false;
+
+			char buffer[4096];
+			long total_read = 0;
+
+			while (total_read < toread->getSize()) {
+				long bytes_read = toread->read(buffer, sizeof(buffer));
+				bool error = true;
+				if (bytes_read != 0) {
+					os.write(buffer, bytes_read);
+					error = os.fail();
+				}
+				if (error) {
+					os.close();
+					remove(fullpath.c_str());
+					return false;
+				}
+				total_read += bytes_read;
+			}
 		}
+
+		return true;
 	}
 
-	return true;
-}
+	bool extractZipFile(io::IFileSystem *fs, const char *filename,
+	                    const std::string &destination, const char *password,
+	                    std::string *errorMessage) {
+		// Be careful here not to touch the global file hierarchy in Irrlicht
+		// since this function needs to be thread-safe!
+
+		io::IArchiveLoader *zip_loader = nullptr;
+		for (u32 i = 0; i < fs->getArchiveLoaderCount(); i++) {
+			if (fs->getArchiveLoader(i)->isALoadableFileFormat(io::EFAT_ZIP)) {
+				zip_loader = fs->getArchiveLoader(i);
+				break;
+			}
+		}
+		if (!zip_loader) {
+			warningstream << "fs::extractZipFile(): Irrlicht said it doesn't support ZIPs."
+			              << std::endl;
+			return false;
+		}
+
+		irr_ptr<io::IFileArchive> opened_zip(zip_loader->createArchive(filename, false, false));
+
+		return extractZipFileInternal(fs, opened_zip, destination, password, errorMessage);
+	}
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+
+	void *ReadFileFromAssets(const char *filename, size_t *size) {
+		SDL_RWops *file = SDL_RWFromFile(filename, "rb");
+
+		if (!file)
+			return nullptr;
+
+		const size_t chunk_size = 65536;
+		size_t buffer_size = chunk_size;
+		void *buffer = SDL_malloc(buffer_size);
+
+		if (!buffer) {
+			SDL_RWclose(file);
+			return nullptr;
+		}
+
+		size_t total_bytes = 0;
+		size_t bytes_read = 0;
+
+		do {
+			if (total_bytes + chunk_size > buffer_size) {
+				buffer_size += chunk_size;
+				void *new_buffer = SDL_realloc(buffer, buffer_size);
+
+				if (!new_buffer) {
+					SDL_free(buffer);
+					SDL_RWclose(file);
+					return nullptr;
+				}
+
+				buffer = new_buffer;
+			}
+
+			bytes_read = SDL_RWread(file, (char *) buffer + total_bytes, 1, chunk_size);
+
+			total_bytes += bytes_read;
+		} while (bytes_read == chunk_size);
+
+		SDL_RWclose(file);
+
+		if (total_bytes == 0) {
+			SDL_free(buffer);
+			return nullptr;
+		}
+
+		if (size)
+			*size = total_bytes;
+
+		if (total_bytes < buffer_size) {
+			void *final_buffer = SDL_realloc(buffer, total_bytes);
+
+			if (final_buffer)
+				buffer = final_buffer;
+		}
+
+		return buffer;
+	}
+
+	bool extractZipFileFromAssets(io::IFileSystem *fs, const char *filename,
+	                              const std::string &destination, const char *password,
+	                              std::string *errorMessage) {
+		// Be careful here not to touch the global file hierarchy in Irrlicht
+		// since this function needs to be thread-safe!
+
+		io::IArchiveLoader *zip_loader = nullptr;
+		for (u32 i = 0; i < fs->getArchiveLoaderCount(); i++) {
+			if (fs->getArchiveLoader(i)->isALoadableFileFormat(io::EFAT_ZIP)) {
+				zip_loader = fs->getArchiveLoader(i);
+				break;
+			}
+		}
+		if (!zip_loader) {
+			warningstream << "fs::extractZipFile(): Irrlicht said it doesn't support ZIPs."
+			              << std::endl;
+			return false;
+		}
+
+		size_t length = 0;
+		void *data = ReadFileFromAssets(filename, &length);
+
+		if (!data) {
+			if (errorMessage != nullptr)
+				*errorMessage = "failed to open zip file";
+		}
+
+		io::IReadFile *file_mem = fs->createMemoryReadFile(data, length, filename);
+
+		if (!file_mem) {
+			if (errorMessage != nullptr)
+				*errorMessage = "failed to open zip file";
+		}
+
+		irr_ptr<io::IFileArchive> opened_zip(zip_loader->createArchive(file_mem, false, false));
+
+		bool result = extractZipFileInternal(fs, opened_zip, destination, password, errorMessage);
+
+		file_mem->drop();
+		SDL_free(data);
+
+		return result;
+	}
+
+#endif
 #endif
 
 bool ReadFile(const std::string &path, std::string &out)

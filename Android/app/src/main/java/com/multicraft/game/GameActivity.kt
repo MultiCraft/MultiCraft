@@ -24,19 +24,34 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
-import android.view.*
+import android.view.Gravity
+import android.view.KeyEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.AppCompatImageView
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
+import androidx.core.content.ContextCompat
+import com.multicraft.game.MainActivity.Companion.VERSION_NAME
 import com.multicraft.game.MainActivity.Companion.radius
-import com.multicraft.game.databinding.*
-import com.multicraft.game.helpers.*
+import com.multicraft.game.databinding.InputTextBinding
+import com.multicraft.game.databinding.MultilineInputBinding
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
+import com.multicraft.game.helpers.PreferenceHelper
+import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
+import com.multicraft.game.helpers.PreferenceHelper.set
+import com.multicraft.game.helpers.finishApp
+import com.multicraft.game.helpers.hasHardKeyboard
+import com.multicraft.game.helpers.makeFullScreen
+import com.multicraft.game.helpers.makeFullScreenAlert
 import org.libsdl.app.SDLActivity
 import kotlin.system.exitProcess
 
@@ -52,6 +67,8 @@ class GameActivity : SDLActivity() {
 		external fun keyboardEvent(keyboard: Boolean)
 	}
 
+	private var splashView: View? = null
+	private var isExtract: Boolean = false
 	private var messageReturnValue = ""
 	private var hasKeyboard = false
 	override fun getLibraries() = arrayOf("MultiCraft")
@@ -68,7 +85,38 @@ class GameActivity : SDLActivity() {
 			exitProcess(0)
 		}
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+		isExtract = intent.getBooleanExtra("update", false)
+		if (isExtract) {
+			val container = FrameLayout(this).apply {
+				layoutParams = ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.MATCH_PARENT
+				)
+				setBackgroundResource(R.drawable.bg)
+			}
+			val imageView = AppCompatImageView(this).apply {
+				setImageDrawable(ContextCompat.getDrawable(context, R.drawable.bg))
+				layoutParams = FrameLayout.LayoutParams(
+					FrameLayout.LayoutParams.WRAP_CONTENT,
+					FrameLayout.LayoutParams.WRAP_CONTENT
+				).apply {
+					gravity = Gravity.CENTER
+				}
+			}
+
+			container.addView(imageView)
+			splashView = container
+			window.addContentView(
+				container,
+				ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.MATCH_PARENT
+				)
+			)
+		}
 		hasKeyboard = hasHardKeyboard()
+		val prefs = PreferenceHelper.init(this)
+		prefs[TAG_BUILD_VER] = VERSION_NAME
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -301,4 +349,15 @@ class GameActivity : SDLActivity() {
 	fun getCpuArchitecture(): String {
 		return System.getProperty("os.arch") ?: "null"
 	}
+
+	fun hideSplashScreen() {
+		runOnUiThread {
+			splashView?.let { view ->
+				(view.parent as? ViewGroup)?.removeView(view)
+				splashView = null
+			}
+		}
+	}
+
+	fun needsExtractAssets() = isExtract
 }

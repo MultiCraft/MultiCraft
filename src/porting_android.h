@@ -120,4 +120,14 @@ std::string getCpuArchitecture();
  * get encrypted key for further actions
  */
 std::string getSecretKey(const std::string &key);
+
+/**
+ * hide splash screen after assets extraction
+ */
+void hideSplashScreen();
+
+/**
+ * returns true if assets extraction is needed
+ */
+bool needsExtractAssets();
 }
