@@ -126,10 +126,18 @@ class MainActivity : AppCompatActivity() {
 	}
 
 	private fun startNative(isExtract: Boolean = false) {
-		val intent = Intent(this, GameActivity::class.java)
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
-		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-		intent.putExtra("update", isExtract)
+		val intent = Intent(this, GameActivity::class.java).apply {
+			addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+			addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+			val update = if (isExtract) {
+				true
+			} else {
+				val initLua = File(filesDir, "builtin${sep}mainmenu${sep}init.lua")
+				!(initLua.exists() && initLua.canRead())
+			}
+
+			putExtra("update", update)
+		}
 		startActivity(intent)
 	}
 
@@ -178,7 +186,7 @@ class MainActivity : AppCompatActivity() {
 		if (isConnected()) checkAppVersion()
 		else try {
 			showConnectionDialog()
-		} catch (e: Exception) {
+		} catch (_: Exception) {
 			checkAppVersion()
 		}
 	}
