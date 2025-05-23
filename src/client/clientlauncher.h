@@ -36,6 +36,7 @@ public:
 
 private:
 	void init_args(GameStartData &start_data, const Settings &cmd_args);
+	bool init_assets();
 	bool init_engine();
 	void init_input();
 
