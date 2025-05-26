@@ -411,8 +411,8 @@ bool ClientLauncher::init_assets() {
 	//	fs::RecursiveDelete(porting::path_share + "/" + dir);
 	//}
 
-	if (!fs::extractZipFileFromAssets(irrfs, "assets.zip",
-	                                  porting::path_share, "", &error_msg)) {
+	if (!fs::extractZipFileFromAssets(irrfs, porting::path_share, "",
+					&error_msg)) {
 		errorstream << "Could not extract assets: " << error_msg << std::endl;
 		nulldevice->drop();
 		porting::hideSplashScreen();

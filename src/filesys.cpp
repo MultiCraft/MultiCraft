@@ -848,11 +848,11 @@ bool safeWriteToFile(const std::string &path, const std::string &content)
 
 		return extractZipFileInternal(fs, opened_zip, destination, password, errorMessage);
 	}
-
+#ifdef __ANDROID__
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
 	void *ReadFileFromAssets(const char *filename, size_t *size) {
-		SDL_RWops *file = SDL_RWFromFile(filename, "rb");
+		AAsset *file = AAssetManager_open(porting::asset_manager, filename, 0);
 
 		if (!file)
 			return nullptr;
@@ -862,7 +862,7 @@ bool safeWriteToFile(const std::string &path, const std::string &content)
 		void *buffer = SDL_malloc(buffer_size);
 
 		if (!buffer) {
-			SDL_RWclose(file);
+			AAsset_close(file);
 			return nullptr;
 		}
 
@@ -876,19 +876,20 @@ bool safeWriteToFile(const std::string &path, const std::string &content)
 
 				if (!new_buffer) {
 					SDL_free(buffer);
-					SDL_RWclose(file);
+					AAsset_close(file);
 					return nullptr;
 				}
 
 				buffer = new_buffer;
 			}
 
-			bytes_read = SDL_RWread(file, (char *) buffer + total_bytes, 1, chunk_size);
+			bytes_read = AAsset_read(file, (char *)buffer + total_bytes, chunk_size);
+
 
 			total_bytes += bytes_read;
 		} while (bytes_read == chunk_size);
 
-		SDL_RWclose(file);
+		AAsset_close(file);
 
 		if (total_bytes == 0) {
 			SDL_free(buffer);
@@ -908,9 +909,9 @@ bool safeWriteToFile(const std::string &path, const std::string &content)
 		return buffer;
 	}
 
-	bool extractZipFileFromAssets(io::IFileSystem *fs, const char *filename,
-	                              const std::string &destination, const char *password,
-	                              std::string *errorMessage) {
+	bool extractZipFileFromAssets(io::IFileSystem *fs,
+					const std::string &destination, const char *password,
+					std::string *errorMessage) {
 		// Be careful here not to touch the global file hierarchy in Irrlicht
 		// since this function needs to be thread-safe!
 
@@ -928,30 +929,61 @@ bool safeWriteToFile(const std::string &path, const std::string &content)
 		}
 
 		size_t length = 0;
-		void *data = ReadFileFromAssets(filename, &length);
+		bool result = porting::createAssetManager();
 
-		if (!data) {
-			if (errorMessage != nullptr)
-				*errorMessage = "failed to open zip file";
+
+
+		if (!result) {
+			warningstream << "fs::extractZipFile(): Couldn't create asset manager" << std::endl;
+			return false;
 		}
 
-		io::IReadFile *file_mem = fs->createMemoryReadFile(data, length, filename);
+		AAssetDir *asset_dir = AAssetManager_openDir(porting::asset_manager, "");
 
-		if (!file_mem) {
-			if (errorMessage != nullptr)
-				*errorMessage = "failed to open zip file";
+
+		if (!asset_dir) {
+			warningstream << "fs::extractZipFile(): Couldn't open main directory" << std::endl;
+			return false;
 		}
 
-		irr_ptr<io::IFileArchive> opened_zip(zip_loader->createArchive(file_mem, false, false));
+		while (true) {
+			const char *filename = AAssetDir_getNextFileName(asset_dir);
 
-		bool result = extractZipFileInternal(fs, opened_zip, destination, password, errorMessage);
+			if (!filename)
+				break;
 
-		file_mem->drop();
-		SDL_free(data);
+			if (!str_ends_with(std::string(filename), ".zip"))
+				continue;
+
+			size_t length = 0;
+			void *data = ReadFileFromAssets(filename, &length);
+
+			if (!data) {
+				if (errorMessage != nullptr)
+					*errorMessage = "failed to open zip file";
+			}
+
+			io::IReadFile *file_mem = fs->createMemoryReadFile(data, length, filename);
+
+			if (!file_mem) {
+				if (errorMessage != nullptr)
+					*errorMessage = "failed to open zip file";
+			}
+
+			irr_ptr<io::IFileArchive> opened_zip(zip_loader->createArchive(file_mem, false, false));
+
+			result = extractZipFileInternal(fs, opened_zip, destination, password, errorMessage);
+
+			file_mem->drop();
+			SDL_free(data);
+		}
+
+		porting::destroyAssetManager();
 
 		return result;
 	}
 
+#endif
 #endif
 #endif
 

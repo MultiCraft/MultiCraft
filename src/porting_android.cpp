@@ -95,6 +95,8 @@ JNIEnv      *jnienv;
 jclass       activityClass;
 jobject      activityObj;
 std::string  input_dialog_owner;
+AAssetManager *asset_manager = NULL;
+jobject java_asset_manager_ref = 0;
 
 jclass findClass(const std::string &classname)
 {
@@ -460,5 +462,34 @@ bool needsExtractAssets() {
 	               "porting::needsExtractAssets unable to find Java needsExtractAssets method");
 
 	return jnienv->CallBooleanMethod(activityObj, needsExtract);
+}
+
+bool createAssetManager() {
+	jmethodID midGetContext = jnienv->GetStaticMethodID(activityClass,
+	                                                    "getContext",
+	                                                    "()Landroid/content/Context;");
+
+	jobject context = jnienv->CallStaticObjectMethod(activityClass, midGetContext);
+
+	jmethodID mid = jnienv->GetMethodID(jnienv->GetObjectClass(context),
+	                                    "getAssets", "()Landroid/content/res/AssetManager;");
+	jobject javaAssetManager = jnienv->CallObjectMethod(context, mid);
+
+	java_asset_manager_ref = jnienv->NewGlobalRef(javaAssetManager);
+	asset_manager = AAssetManager_fromJava(jnienv, java_asset_manager_ref);
+
+	if (!asset_manager) {
+		jnienv->DeleteGlobalRef(java_asset_manager_ref);
+		return false;
+	}
+
+	return true;
+}
+
+void destroyAssetManager() {
+	if (asset_manager) {
+		jnienv->DeleteGlobalRef(java_asset_manager_ref);
+		asset_manager = NULL;
+	}
 }
 }
