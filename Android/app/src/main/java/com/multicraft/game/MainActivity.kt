@@ -35,15 +35,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.multicraft.game.databinding.ActivityMainBinding
 import com.multicraft.game.dialogs.ConnectionDialog
+import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isPie
-import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.getStringValue
-import com.multicraft.game.helpers.finishApp
-import com.multicraft.game.helpers.isConnected
-import com.multicraft.game.helpers.makeFullScreen
-import com.multicraft.game.helpers.showRestartDialog
 import kotlinx.coroutines.launch
 import java.io.File
 

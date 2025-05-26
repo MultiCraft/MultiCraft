@@ -24,11 +24,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
-import android.view.Gravity
-import android.view.KeyEvent
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
 import android.view.inputmethod.EditorInfo
@@ -44,14 +40,10 @@ import com.multicraft.game.MainActivity.Companion.VERSION_NAME
 import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.InputTextBinding
 import com.multicraft.game.databinding.MultilineInputBinding
+import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
-import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.set
-import com.multicraft.game.helpers.finishApp
-import com.multicraft.game.helpers.hasHardKeyboard
-import com.multicraft.game.helpers.makeFullScreen
-import com.multicraft.game.helpers.makeFullScreenAlert
 import org.libsdl.app.SDLActivity
 import kotlin.system.exitProcess
 
