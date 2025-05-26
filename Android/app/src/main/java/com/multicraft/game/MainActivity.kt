@@ -51,12 +51,9 @@ class MainActivity : AppCompatActivity() {
 	private lateinit var restartStartForResult: ActivityResultLauncher<Intent>
 	private lateinit var connStartForResult: ActivityResultLauncher<Intent>
 
-
 	companion object {
 		var radius = 0
 		const val NO_SPACE_LEFT = "ENOSPC"
-		const val VERSION_CODE = BuildConfig.VERSION_CODE
-		const val VERSION_NAME = "${BuildConfig.VERSION_NAME}+$VERSION_CODE"
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -139,14 +136,13 @@ class MainActivity : AppCompatActivity() {
 
 	private fun prepareToRun() {
 		val filesList = mutableListOf<File>().apply {
-			addAll(
-				listOf(
-					"builtin",
-					"client${sep}shaders",
-					"fonts",
-					"games${sep}default",
-					"textures${sep}base"
-				).map { File(filesDir, it) })
+			addAll(listOf(
+				"builtin",
+				"client${sep}shaders",
+				"fonts",
+				"games${sep}default",
+				"textures${sep}base"
+			).map { File(filesDir, it) })
 		}
 
 		lifecycleScope.launch {
@@ -157,7 +153,7 @@ class MainActivity : AppCompatActivity() {
 
 	private fun checkAppVersion() {
 		val prefVersion = prefs.getStringValue(TAG_BUILD_VER)
-		if (prefVersion == VERSION_NAME)
+		if (prefVersion == "${BuildConfig.VERSION_CODE}")
 			startNative()
 		else
 			prepareToRun()

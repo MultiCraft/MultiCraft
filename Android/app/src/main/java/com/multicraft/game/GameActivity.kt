@@ -36,7 +36,6 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.content.ContextCompat
-import com.multicraft.game.MainActivity.Companion.VERSION_NAME
 import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.InputTextBinding
 import com.multicraft.game.databinding.MultilineInputBinding
@@ -108,7 +107,7 @@ class GameActivity : SDLActivity() {
 		}
 		hasKeyboard = hasHardKeyboard()
 		val prefs = PreferenceHelper.init(this)
-		prefs[TAG_BUILD_VER] = VERSION_NAME
+		prefs[TAG_BUILD_VER] = BuildConfig.VERSION_CODE
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
