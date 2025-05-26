@@ -115,7 +115,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 	}
 #endif
 
-#if defined(__ANDROID__)
+#ifdef __ANDROID__
     if (!init_assets()) {
         errorstream << "Could not extract assets." << std::endl;
         return false;
@@ -384,6 +384,7 @@ void ClientLauncher::init_args(GameStartData &start_data, const Settings &cmd_ar
 			|| cmd_args.getFlag("random-input");
 }
 
+#ifdef __ANDROID__
 bool ClientLauncher::init_assets() {
 	if (!porting::needsExtractAssets())
 		return true;
@@ -424,6 +425,7 @@ bool ClientLauncher::init_assets() {
 
 	return true;
 }
+#endif
 
 bool ClientLauncher::init_engine()
 {
