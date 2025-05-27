@@ -1014,8 +1014,8 @@ bool UDPPeer::processReliableSendCommand(
 			<< " Command data size exceeded: " << c.data.getSize()
 			<< " bytes, peer_id: " << c.peer_id
 			<< ", channel: " << c.channelnum << std::endl;
-		abort();
-	//	return false;
+	//	abort();
+		return false;
 	}
 
 	std::list<SharedBuffer<u8>> originals;
