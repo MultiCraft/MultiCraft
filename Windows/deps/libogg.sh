@@ -13,7 +13,8 @@ cd libogg-src/build
 cmake .. \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS" \
-	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC"
+	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC" \
+	-DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 cmake --build . -j${NPROC}
 

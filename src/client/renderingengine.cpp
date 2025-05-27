@@ -24,10 +24,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "fontengine.h"
 #include "client.h"
 #include "clouds.h"
+#include "daynightratio.h"
 #include "util/numeric.h"
 #include "guiscalingfilter.h"
 #include "localplayer.h"
 #include "client/hud.h"
+#include "client/sky.h"
+#include "gui/guiEngine.h"
 #include "camera.h"
 #include "minimap.h"
 #include "clientmap.h"
@@ -650,10 +653,31 @@ void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
 void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 									ITextureSource *tsrc, float dtime)
 {
-	driver->beginScene(true, true, video::SColor(255, 5, 155, 245));
+	driver->beginScene(true, true, m_sky_color);
 
 	const bool cloud_menu_background = m_load_bg_clouds && g_settings->getBool("menu_clouds");
 	if (cloud_menu_background) {
+		video::SColor fog_color;
+		video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
+		f32 fog_start = 0;
+		f32 fog_end = 0;
+		f32 fog_density = 0;
+		bool fog_pixelfog = false;
+		bool fog_rangefog = false;
+		driver->getFog(fog_color, fog_type, fog_start, fog_end, fog_density,
+				fog_pixelfog, fog_rangefog);
+
+		const video::SColor sky_color = g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245);
+		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
+				fog_pixelfog, fog_rangefog);
+
+		if (g_menusky) {
+			u32 daynight_ratio = time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);
+			float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
+			g_menusky->update(GUIEngine::g_timeofday, time_brightness, time_brightness, true, CAMERA_MODE_FIRST, 3, 0);
+			g_menusky->render();
+			g_menuclouds->update(v3f(0, 0, 0), g_menusky->getCloudColor());
+		}
 		g_menuclouds->step(dtime * 3);
 		g_menuclouds->render();
 		g_menucloudsmgr->drawAll();

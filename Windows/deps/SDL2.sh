@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-SDL2_VERSION=2.26.5
+SDL2_VERSION=2.32.4
 
 . ./sdk.sh
 
@@ -17,6 +17,7 @@ mkdir -p build; cd build
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
     -DCMAKE_C_FLAGS="$CFLAGS" \
     -DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC" \
     -DSDL_SHARED=0 \
@@ -27,8 +28,8 @@ cmake --build . -j${NPROC}
 # update `include` folder
 rm -rf ../../sdl2/include
 mkdir -p ../../sdl2/include
-cp -a ./include ../../sdl2
-cp -a ./include-config-release/* ../../sdl2/include
+cp -a ./include/SDL2/* ../../sdl2/include
+cp -a ./include-config-release/SDL2/* ../../sdl2/include
 # update lib
 rm -rf ../../sdl2/lib
 mkdir -p ../../sdl2/lib

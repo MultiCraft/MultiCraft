@@ -25,12 +25,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <map>
 #include <cerrno>
 #include <mutex>
-#include "network/socket.h" // for select()
 #include "threading/event.h"
 #include "config.h"
 #include "exceptions.h"
 #include "debug.h"
 #include "log.h"
+#include "porting.h"
 #include "util/container.h"
 #include "util/thread.h"
 #include "version.h"
@@ -233,9 +233,8 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 	oss(std::ios::binary)
 {
 	curl = pool->alloc();
-	if (curl == NULL) {
+	if (!curl)
 		return;
-	}
 
 	// Set static cURL options
 	curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1);
@@ -412,10 +411,12 @@ HTTPFetchOngoing::~HTTPFetchOngoing()
 	// Set safe options for the reusable cURL handle
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
 			httpfetch_discardfunction);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, NULL);
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, NULL);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, nullptr);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, nullptr);
+	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, nullptr);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, nullptr);
 	if (http_header) {
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, NULL);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, nullptr);
 		curl_slist_free_all(http_header);
 	}
 	if (multipart_mime) {
@@ -427,6 +428,12 @@ HTTPFetchOngoing::~HTTPFetchOngoing()
 	pool->free(curl);
 }
 
+
+#if LIBCURL_VERSION_NUM >= 0x074200
+#define HAVE_CURL_MULTI_POLL
+#else
+#undef HAVE_CURL_MULTI_POLL
+#endif
 
 class CurlFetchThread : public Thread
 {
@@ -594,62 +601,40 @@ protected:
 	// Wait until some IO happens, or timeout elapses
 	void waitForIO(long timeout)
 	{
-		fd_set read_fd_set;
-		fd_set write_fd_set;
-		fd_set exc_fd_set;
-		int max_fd;
-		long select_timeout = -1;
-		struct timeval select_tv;
 		CURLMcode mres;
 
-		FD_ZERO(&read_fd_set);
-		FD_ZERO(&write_fd_set);
-		FD_ZERO(&exc_fd_set);
+#ifdef HAVE_CURL_MULTI_POLL
+		mres = curl_multi_poll(m_multi, nullptr, 0, timeout, nullptr);
 
-		mres = curl_multi_fdset(m_multi, &read_fd_set,
-				&write_fd_set, &exc_fd_set, &max_fd);
 		if (mres != CURLM_OK) {
-			errorstream<<"curl_multi_fdset"
-				<<" returned error code "<<mres
-				<<std::endl;
-			select_timeout = 0;
+			errorstream << "curl_multi_poll returned error code "
+				<< mres << std::endl;
+		}
+#else
+		// If there's nothing to do curl_multi_wait() will immediately return
+		// so we have to emulate the sleeping.
+
+		fd_set dummy;
+		int max_fd;
+		mres = curl_multi_fdset(m_multi, &dummy, &dummy, &dummy, &max_fd);
+		if (mres != CURLM_OK) {
+			errorstream << "curl_multi_fdset returned error code "
+				<< mres << std::endl;
+			max_fd = -1;
 		}
 
-		mres = curl_multi_timeout(m_multi, &select_timeout);
-		if (mres != CURLM_OK) {
-			errorstream<<"curl_multi_timeout"
-				<<" returned error code "<<mres
-				<<std::endl;
-			select_timeout = 0;
-		}
+		if (max_fd == -1) { // curl has nothing to wait for
+			if (timeout > 0)
+				sleep_ms(timeout);
+		} else {
+			mres = curl_multi_wait(m_multi, nullptr, 0, timeout, nullptr);
 
-		// Limit timeout so new requests get through
-		if (select_timeout < 0 || select_timeout > timeout)
-			select_timeout = timeout;
-
-		if (select_timeout > 0) {
-			// in Winsock it is forbidden to pass three empty
-			// fd_sets to select(), so in that case use sleep_ms
-			if (max_fd != -1) {
-				select_tv.tv_sec = select_timeout / 1000;
-				select_tv.tv_usec = (select_timeout % 1000) * 1000;
-				int retval = select(max_fd + 1, &read_fd_set,
-						&write_fd_set, &exc_fd_set,
-						&select_tv);
-				if (retval == -1) {
-					#ifdef _WIN32
-					errorstream<<"select returned error code "
-						<<WSAGetLastError()<<std::endl;
-					#else
-					errorstream<<"select returned error code "
-						<<errno<<std::endl;
-					#endif
-				}
-			}
-			else {
-				sleep_ms(select_timeout);
+			if (mres != CURLM_OK) {
+				errorstream << "curl_multi_wait returned error code "
+					<< mres << std::endl;
 			}
 		}
+#endif
 	}
 
 	void *run()
@@ -783,7 +768,7 @@ static void httpfetch_request_clear(unsigned long caller)
 	}
 }
 
-void httpfetch_sync(const HTTPFetchRequest &fetch_request,
+static void httpfetch_sync(const HTTPFetchRequest &fetch_request,
 		HTTPFetchResult &fetch_result)
 {
 	// Create ongoing fetch data and make a cURL handle
@@ -794,6 +779,28 @@ void httpfetch_sync(const HTTPFetchRequest &fetch_request,
 	CURLcode res = ongoing.start(NULL);
 	// Update fetch result
 	fetch_result = *ongoing.complete(res);
+}
+
+bool httpfetch_sync_interruptible(const HTTPFetchRequest &fetch_request,
+		HTTPFetchResult &fetch_result, long interval, std::function<bool()> is_cancelled)
+{
+	if (Thread *thread = Thread::getCurrentThread()) {
+		HTTPFetchRequest req = fetch_request;
+		req.caller = httpfetch_caller_alloc_secure();
+		httpfetch_async(req);
+		do {
+			if (thread->stopRequested() || (is_cancelled && is_cancelled())) {
+				httpfetch_caller_free(req.caller);
+				fetch_result = HTTPFetchResult(fetch_request);
+				return false;
+			}
+			sleep_ms(interval);
+		} while (!httpfetch_async_get(req.caller, fetch_result));
+		httpfetch_caller_free(req.caller);
+	} else {
+		httpfetch_sync(fetch_request, fetch_result);
+	}
+	return true;
 }
 
 #else  // USE_CURL
@@ -825,13 +832,14 @@ static void httpfetch_request_clear(unsigned long caller)
 {
 }
 
-void httpfetch_sync(const HTTPFetchRequest &fetch_request,
-		HTTPFetchResult &fetch_result)
+bool httpfetch_sync_interruptible(const HTTPFetchRequest &fetch_request,
+		HTTPFetchResult &fetch_result, long interval)
 {
-	errorstream << "httpfetch_sync: unable to fetch " << fetch_request.url
+	errorstream << "httpfetch_sync_interruptible: unable to fetch " << fetch_request.url
 			<< " because USE_CURL=0" << std::endl;
 
 	fetch_result = HTTPFetchResult(fetch_request); // sets succeeded = false etc.
+	return false;
 }
 
 #endif  // USE_CURL

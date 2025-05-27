@@ -22,11 +22,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /******************************************************************************/
 /* Includes                                                                   */
 /******************************************************************************/
+#include <atomic>
 #include "irrlichttypes.h"
 #include "guiFormSpecMenu.h"
 #include "client/sound.h"
 #include "client/tile.h"
 #include "util/enriched_string.h"
+#include "client/sky.h"
 
 /******************************************************************************/
 /* Structs and macros                                                         */
@@ -150,6 +152,10 @@ public:
 	unsigned int queueAsync(const std::string &serialized_fct,
 			const std::string &serialized_params);
 
+	ITextureSource *getTextureSource() { return m_texture_source; }
+
+	static float g_timeofday;
+
 private:
 
 	/** find and run the main menu script */
@@ -170,7 +176,7 @@ private:
 	/** pointer to data beeing transfered back to main game handling */
 	MainMenuData            *m_data = nullptr;
 	/** pointer to texture source */
-	ISimpleTextureSource    *m_texture_source = nullptr;
+	ITextureSource          *m_texture_source = nullptr;
 	/** pointer to soundmanager*/
 	ISoundManager           *m_sound_manager = nullptr;
 
@@ -224,12 +230,20 @@ private:
 	bool setTexture(texture_layer layer, const std::string &texturepath,
 			bool tile_image, unsigned int minsize);
 
+	/** used to check the validity of download_file requests */
+	static std::atomic<unsigned int> s_download_file_reset_counter;
+
 	/**
 	 * download a file using curl
 	 * @param url url to download
 	 * @param target file to store to
 	 */
 	static bool downloadFile(const std::string &url, const std::string &target);
+
+	static void cancelAllDownloadFiles()
+	{
+		s_download_file_reset_counter++;
+	}
 
 	/** array containing pointers to current specified texture layers */
 	image_definition m_textures[TEX_LAYER_MAX];

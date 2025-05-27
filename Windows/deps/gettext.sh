@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-GETTEXT_VERSION=0.22
+GETTEXT_VERSION=0.24
 
 if [ ! -d gettext-src ]; then
 	wget https://ftp.gnu.org/pub/gnu/gettext/gettext-$GETTEXT_VERSION.tar.gz

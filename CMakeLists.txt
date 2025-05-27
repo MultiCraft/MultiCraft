@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
-
-cmake_policy(SET CMP0025 OLD)
+cmake_minimum_required(VERSION 3.12)
 
 # This can be read from ${PROJECT_NAME} after project() is called
 project(multicraft)

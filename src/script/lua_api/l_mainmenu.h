@@ -92,6 +92,18 @@ private:
 
 	static int l_set_clouds(lua_State *L);
 
+	static int l_set_sky(lua_State *L);
+
+	static int l_set_stars(lua_State *L);
+
+	static int l_set_sky_body_pos(lua_State *L);
+
+	static int l_set_moon(lua_State *L);
+
+	static int l_set_sun(lua_State *L);
+
+	static int l_set_timeofday(lua_State *L);
+
 	static int l_get_textlist_index(lua_State *L);
 
 	static int l_get_table_index(lua_State *L);
@@ -139,6 +151,8 @@ private:
 	static int l_may_modify_path(lua_State *L);
 
 	static int l_download_file(lua_State *L);
+
+	static int l_cancel_all_download_files(lua_State *L);
 
 	static int l_get_video_drivers(lua_State *L);
 
