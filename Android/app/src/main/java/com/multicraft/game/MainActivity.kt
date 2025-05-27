@@ -39,7 +39,7 @@ import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isPie
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
-import com.multicraft.game.helpers.PreferenceHelper.getStringValue
+import com.multicraft.game.helpers.PreferenceHelper.getIntValue
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -152,8 +152,13 @@ class MainActivity : AppCompatActivity() {
 	}
 
 	private fun checkAppVersion() {
-		val prefVersion = prefs.getStringValue(TAG_BUILD_VER)
-		if (prefVersion == "${BuildConfig.VERSION_CODE}")
+		var prefVersion = 0
+		try {
+			prefVersion = prefs.getIntValue(TAG_BUILD_VER)
+		} catch (_: ClassCastException) {
+
+		}
+		if (prefVersion == BuildConfig.VERSION_CODE)
 			startNative()
 		else
 			prepareToRun()
