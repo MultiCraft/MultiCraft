@@ -775,7 +775,7 @@ bool extractZipFileInternal(io::IFileSystem *fs, irr_ptr<io::IFileArchive> &open
 	}
 
 	opened_zip->Password = core::stringc(password);
-	const io::IFileList *files_in_zip = opened_zip->getFileList();
+	const io::IFileList* files_in_zip = opened_zip->getFileList();
 
 	for (u32 i = 0; i < files_in_zip->getFileCount(); i++) {
 		std::string fullpath = destination + DIR_DELIM;
@@ -792,7 +792,7 @@ bool extractZipFileInternal(io::IFileSystem *fs, irr_ptr<io::IFileArchive> &open
 
 		if (toread.get() == nullptr) {
 			// Wrong password
-			fs->removeFileArchive(fs->getFileArchiveCount() - 1);
+			fs->removeFileArchive(fs->getFileArchiveCount()-1);
 			if (errorMessage != nullptr)
 				*errorMessage = "invalid password";
 			return false;
@@ -837,6 +837,7 @@ bool extractZipFile(io::IFileSystem *fs, const char *filename,
 			break;
 		}
 	}
+
 	if (!zip_loader) {
 		warningstream << "fs::extractZipFile(): Irrlicht said it doesn't support ZIPs."
 		              << std::endl;

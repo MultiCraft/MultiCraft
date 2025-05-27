@@ -385,7 +385,8 @@ void ClientLauncher::init_args(GameStartData &start_data, const Settings &cmd_ar
 }
 
 #ifdef __ANDROID__
-bool ClientLauncher::init_assets() {
+bool ClientLauncher::init_assets()
+{
 	if (!porting::needsExtractAssets())
 		return true;
 
@@ -399,21 +400,18 @@ bool ClientLauncher::init_assets() {
 	io::IFileSystem *irrfs = nulldevice->getFileSystem();
 	std::string error_msg;
 
-	// Removing old assets will be done in java activity
-	//std::string dirs[] = {
-	//		"builtin",
-	//		"client/shaders",
-	//		"fonts",
-	//		"games/default",
-	//		"textures/base"
-	//};
+	// Removing old assets will be done in Java activity
+	/*std::string dirs[] = {
+			"builtin", "client/shaders",
+			"fonts", "textures/base"
+	};
 
-	//for (std::string dir : dirs) {
-	//	fs::RecursiveDelete(porting::path_share + "/" + dir);
-	//}
+	for (std::string dir : dirs) {
+		fs::RecursiveDelete(porting::path_share + "/" + dir);
+	}*/
 
 	if (!fs::extractZipFileFromAssets(irrfs, porting::path_share, "",
-					&error_msg)) {
+				&error_msg)) {
 		errorstream << "Could not extract assets: " << error_msg << std::endl;
 		nulldevice->drop();
 		porting::hideSplashScreen();

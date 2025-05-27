@@ -438,41 +438,43 @@ std::string getSecretKey(const std::string &key)
 	return returnValue;
 }
 
-void hideSplashScreen() {
+void hideSplashScreen()
+{
 	if (jnienv == nullptr || activityObj == nullptr)
 		return;
 
 	jmethodID hideSplash = jnienv->GetMethodID(activityClass,
-	                                           "hideSplashScreen", "()V");
+			"hideSplashScreen", "()V");
 
 	FATAL_ERROR_IF(hideSplash == nullptr,
-	               "porting::hideSplashScreen unable to find Java hideSplashScreen method");
+		"porting::hideSplashScreen unable to find Java hideSplashScreen method");
 
 	jnienv->CallVoidMethod(activityObj, hideSplash);
 }
 
-bool needsExtractAssets() {
+bool needsExtractAssets()
+{
 	if (jnienv == nullptr || activityObj == nullptr)
 		return false;
 
 	jmethodID needsExtract = jnienv->GetMethodID(activityClass,
-	                                             "needsExtractAssets", "()Z");
+			"needsExtractAssets", "()Z");
 
 	FATAL_ERROR_IF(needsExtract == nullptr,
-	               "porting::needsExtractAssets unable to find Java needsExtractAssets method");
+		"porting::needsExtractAssets unable to find Java needsExtractAssets method");
 
 	return jnienv->CallBooleanMethod(activityObj, needsExtract);
 }
 
-bool createAssetManager() {
+bool createAssetManager()
+{
 	jmethodID midGetContext = jnienv->GetStaticMethodID(activityClass,
-	                                                    "getContext",
-	                                                    "()Landroid/content/Context;");
+			"getContext", "()Landroid/content/Context;");
 
 	jobject context = jnienv->CallStaticObjectMethod(activityClass, midGetContext);
 
 	jmethodID mid = jnienv->GetMethodID(jnienv->GetObjectClass(context),
-	                                    "getAssets", "()Landroid/content/res/AssetManager;");
+			"getAssets", "()Landroid/content/res/AssetManager;");
 	jobject javaAssetManager = jnienv->CallObjectMethod(context, mid);
 
 	java_asset_manager_ref = jnienv->NewGlobalRef(javaAssetManager);
@@ -486,7 +488,8 @@ bool createAssetManager() {
 	return true;
 }
 
-void destroyAssetManager() {
+void destroyAssetManager()
+{
 	if (asset_manager) {
 		jnienv->DeleteGlobalRef(java_asset_manager_ref);
 		asset_manager = NULL;

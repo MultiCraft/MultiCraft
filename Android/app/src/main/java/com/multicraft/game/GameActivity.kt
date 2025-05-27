@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.multicraft.game
 
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
 import android.view.*
@@ -36,6 +35,7 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.InputTextBinding
 import com.multicraft.game.databinding.MultilineInputBinding
@@ -311,8 +311,8 @@ class GameActivity : SDLActivity() {
 			.setExitAnimations(this, R.anim.slide_in_top, R.anim.slide_out_bottom)
 		val customTabsIntent = builder.build()
 		try {
-			customTabsIntent.launchUrl(this, Uri.parse(uri))
-		} catch (ignored: Exception) {
+			customTabsIntent.launchUrl(this, uri!!.toUri())
+		} catch (_: Exception) {
 		}
 	}
 
