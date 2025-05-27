@@ -136,14 +136,10 @@ class MainActivity : AppCompatActivity() {
 
 	private fun prepareToRun() {
 		val filesList = mutableListOf<File>().apply {
-			addAll(
-				listOf(
-					"builtin",
-					"client${sep}shaders",
-					"fonts",
-					"games${sep}default",
-					"textures${sep}base"
-				).map { File(filesDir, it) })
+			addAll(listOf(
+				"builtin", "client${sep}shaders",
+				"fonts", "textures${sep}base"
+			).map { File(filesDir, it) })
 		}
 
 		lifecycleScope.launch {
