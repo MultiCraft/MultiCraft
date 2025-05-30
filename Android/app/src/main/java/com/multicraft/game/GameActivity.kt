@@ -21,9 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.multicraft.game
 
 import android.content.res.Configuration
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.text.InputType
-import android.view.*
+import android.view.KeyEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
 import android.view.inputmethod.EditorInfo
@@ -31,18 +35,21 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.multicraft.game.MainActivity.Companion.radius
+import com.multicraft.game.databinding.ActivityMainBinding
 import com.multicraft.game.databinding.InputTextBinding
 import com.multicraft.game.databinding.MultilineInputBinding
-import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
+import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.set
+import com.multicraft.game.helpers.finishApp
+import com.multicraft.game.helpers.hasHardKeyboard
+import com.multicraft.game.helpers.makeFullScreen
+import com.multicraft.game.helpers.makeFullScreenAlert
 import org.libsdl.app.SDLActivity
 import kotlin.system.exitProcess
 
@@ -85,18 +92,10 @@ class GameActivity : SDLActivity() {
 				)
 				setBackgroundResource(R.drawable.bg)
 			}
-			val imageView = AppCompatImageView(this).apply {
-				setImageDrawable(ContextCompat.getDrawable(context, R.drawable.bg))
-				layoutParams = FrameLayout.LayoutParams(
-					FrameLayout.LayoutParams.WRAP_CONTENT,
-					FrameLayout.LayoutParams.WRAP_CONTENT
-				).apply {
-					gravity = Gravity.CENTER
-				}
-			}
-
-			container.addView(imageView)
+			val binding = ActivityMainBinding.inflate(layoutInflater)
+			container.addView(binding.root)
 			splashView = container
+			(binding.loadingAnim.drawable as AnimationDrawable).start()
 			window.addContentView(
 				container,
 				ViewGroup.LayoutParams(

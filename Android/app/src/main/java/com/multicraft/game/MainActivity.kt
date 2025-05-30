@@ -122,6 +122,7 @@ class MainActivity : AppCompatActivity() {
 		val intent = Intent(this, GameActivity::class.java).apply {
 			addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
 			addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+			addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
 			val update = if (isExtract) {
 				true
 			} else {
