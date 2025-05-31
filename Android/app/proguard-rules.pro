@@ -35,6 +35,8 @@
 	java.lang.String getSecretKey(java.lang.String);
 	int getRoundScreen();
 	java.lang.String getCpuArchitecture();
+	void hideSplashScreen();
+	boolean needsExtractAssets();
 }
 -keepclasseswithmembernames,includedescriptorclasses class * {
 	native <methods>;

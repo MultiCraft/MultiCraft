@@ -44,8 +44,8 @@ object PreferenceHelper {
 		else -> throw UnsupportedOperationException("Not yet implemented")
 	}
 
-	fun SharedPreferences.getStringValue(key: String) = when (key) {
-		TAG_BUILD_VER -> getString(key, "0") as String
+	fun SharedPreferences.getIntValue(key: String) = when (key) {
+		TAG_BUILD_VER -> getInt(key, 0)
 		else -> throw UnsupportedOperationException("Not yet implemented")
 	}
 }
