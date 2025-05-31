@@ -33,8 +33,6 @@ import androidx.core.view.*
 import com.multicraft.game.R
 import com.multicraft.game.dialogs.RestartDialog
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
-import java.io.File
-import java.io.InputStream
 
 // Activity extensions
 fun Activity.finishApp(restart: Boolean) {
@@ -73,10 +71,6 @@ fun AppCompatActivity.showRestartDialog(
 
 fun Activity.hasHardKeyboard() =
 	resources.configuration.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO
-
-// Other extensions
-fun File.copyInputStreamToFile(inputStream: InputStream) =
-	outputStream().use { fileOut -> inputStream.copyTo(fileOut, 8192) }
 
 fun Window.makeFullScreen() {
 	WindowCompat.setDecorFitsSystemWindows(this, false)

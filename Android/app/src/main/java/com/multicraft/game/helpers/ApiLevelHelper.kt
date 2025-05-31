@@ -32,5 +32,4 @@ object ApiLevelHelper {
 
 	fun isAndroid12() = isGreaterOrEqual(S)
 
-	fun isAndroid14() = isGreaterOrEqual(UPSIDE_DOWN_CAKE)
 }

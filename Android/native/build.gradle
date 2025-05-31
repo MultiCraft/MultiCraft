@@ -6,7 +6,7 @@ plugins {
 android {
 	buildToolsVersion = "35.0.1"
 	compileSdk = 35
-	ndkVersion = "28.0.13004108"
+	ndkVersion = "28.1.13356709"
 	namespace = "com.multicraft"
 
 	defaultConfig {

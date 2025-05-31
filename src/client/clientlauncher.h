@@ -36,6 +36,9 @@ public:
 
 private:
 	void init_args(GameStartData &start_data, const Settings &cmd_args);
+#ifdef __ANDROID__
+	bool init_assets();
+#endif
 	bool init_engine();
 	void init_input();
 
