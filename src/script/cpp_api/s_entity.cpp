@@ -41,7 +41,11 @@ bool ScriptApiEntity::luaentity_Add(u16 id, const char *name)
 	// Should be a table, which we will use as a prototype
 	//luaL_checktype(L, -1, LUA_TTABLE);
 	if (lua_type(L, -1) != LUA_TTABLE){
+#ifdef NDEBUG
+		warningstream<<"LuaEntity name \""<<name<<"\" not defined and will be removed"<<std::endl;
+#else
 		errorstream<<"LuaEntity name \""<<name<<"\" not defined"<<std::endl;
+#endif
 		return false;
 	}
 	int prototype_table = lua_gettop(L);

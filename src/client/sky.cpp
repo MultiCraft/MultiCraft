@@ -113,11 +113,14 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 		m_materials[3].setFlag(video::E_MATERIAL_FLAG::EMF_TRILINEAR_FILTER, false);
 		m_materials[3].setFlag(video::E_MATERIAL_FLAG::EMF_ANISOTROPIC_FILTER, false);
 		// Use tonemaps if available
-		if (m_sun_tonemap) {
-			m_sun_tonemap->grab();
+		if (m_sun_tonemap)
 			m_materials[3].Lighting = true;
-		}
 	}
+
+	// Grab m_sun_tonemap in case it is set but m_sun_texture isn't
+	if (m_sun_tonemap)
+		m_sun_tonemap->grab();
+
 	if (m_moon_texture) {
 		m_moon_texture->grab();
 		m_materials[4] = baseMaterial();
@@ -128,11 +131,12 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 		m_materials[4].setFlag(video::E_MATERIAL_FLAG::EMF_TRILINEAR_FILTER, false);
 		m_materials[4].setFlag(video::E_MATERIAL_FLAG::EMF_ANISOTROPIC_FILTER, false);
 		// Use tonemaps if available
-		if (m_moon_tonemap) {
-			m_moon_tonemap->grab();
+		if (m_moon_tonemap)
 			m_materials[4].Lighting = true;
-		}
 	}
+
+	if (m_moon_tonemap)
+		m_moon_tonemap->grab();
 
 	for (int i = 5; i < 11; i++) {
 		m_materials[i] = baseMaterial();
