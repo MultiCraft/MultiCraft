@@ -443,13 +443,23 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 
 			if (!m_events[id]) {
-				m_events[id] = true;
-				m_camera.downtime = porting::getTimeMs();
-				m_camera.x = x;
-				m_camera.y = y;
-				m_camera.event_id = id;
+				if (m_camera.event_id == -1) {
+					m_events[id] = true;
+					m_camera.downtime = porting::getTimeMs();
+					m_camera.x = x;
+					m_camera.y = y;
+					m_camera.event_id = id;
 
-				updateCamera(x, y);
+					updateCamera(m_camera, x, y);
+				} else if (m_camera_additional.event_id == -1) {
+					m_events[id] = true;
+					m_camera_additional.downtime = porting::getTimeMs();
+					m_camera_additional.x = x;
+					m_camera_additional.y = y;
+					m_camera_additional.event_id = id;
+
+					updateCamera(m_camera_additional, x, y);
+				}
 			}
 		}
 
@@ -472,7 +482,15 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if (m_joystick.event_id == id)
 			m_joystick.reset(m_visible && !m_overflow_open);
 
-		if (m_camera.event_id == id) {
+		if (m_camera.event_id == id && m_camera_additional.event_id != -1) {
+			m_camera.reset();
+			m_camera.event_id = m_camera_additional.event_id;
+			m_camera.x = m_camera_additional.x;
+			m_camera.y = m_camera_additional.y;
+			m_camera.has_really_moved = true;
+			m_camera_additional.reset();
+			updateCamera(m_camera, m_camera.x, m_camera.y);
+		} else if (m_camera.event_id == id) {
 			bool place = false;
 			if (!m_camera.has_really_moved && !m_camera.dig) {
 				u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
@@ -480,6 +498,15 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 			m_camera.reset();
 			m_camera.place = place;
+		} else if (m_camera_additional.event_id == id) {
+			bool place = false;
+			if (!m_camera_additional.has_really_moved && !m_camera_additional.dig) {
+				u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
+				place = (delta >= MIN_PLACE_TIME_MS);
+			}
+			m_camera_additional.reset();
+			m_camera_additional.place = place;
+			m_camera_additional.place_shootline = place;
 		}
 
 		result = true;
@@ -490,7 +517,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				if (moveJoystick(x, y))
 					result = true;
 			} else if (m_camera.event_id == id) {
-				updateCamera(x, y);
+				updateCamera(m_camera, x, y);
+			} else if (m_camera_additional.event_id == id) {
+				updateCamera(m_camera_additional, x, y);
 			} else {
 				bool overflow_btn_pressed = false;
 
@@ -585,25 +614,25 @@ bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 	return false;
 }
 
-void TouchScreenGUI::updateCamera(s32 x, s32 y)
+void TouchScreenGUI::updateCamera(camera_info &camera, s32 x, s32 y)
 {
 	double distance = sqrt(
-			(m_camera.x - x) * (m_camera.x - x) +
-			(m_camera.y - y) * (m_camera.y - y));
+			(camera.x - x) * (camera.x - x) +
+			(camera.y - y) * (camera.y - y));
 
-	if ((m_dig_and_move || !m_camera.dig) &&
-			((distance > m_touchscreen_threshold) || m_camera.has_really_moved)) {
-		m_camera.has_really_moved = true;
+	if ((m_dig_and_move || !camera.dig) &&
+			((distance > m_touchscreen_threshold) || camera.has_really_moved)) {
+		camera.has_really_moved = true;
 
-		m_camera.yaw_change -= (x - m_camera.x) * m_touch_sensitivity;
-		m_camera.pitch += (y - m_camera.y) * m_touch_sensitivity;
-		m_camera.pitch = std::min(std::max((float) m_camera.pitch, -180.0f), 180.0f);
+		camera.yaw_change -= (x - camera.x) * m_touch_sensitivity;
+		camera.pitch += (y - camera.y) * m_touch_sensitivity;
+		camera.pitch = std::min(std::max((float) camera.pitch, -180.0f), 180.0f);
 
-		m_camera.x = x;
-		m_camera.y = y;
+		camera.x = x;
+		camera.y = y;
 	}
 
-	m_camera.shootline = m_device->getSceneManager()
+	camera.shootline = m_device->getSceneManager()
 			->getSceneCollisionManager()
 			->getRayFromScreenCoordinates(v2s32(x, y));
 }
@@ -664,6 +693,18 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 		}
 	}
 
+	if (m_camera_additional.dig) {
+		if (m_keycode_dig == keycode)
+			return true;
+	}
+
+	if (m_camera_additional.place) {
+		if (m_keycode_place == keycode) {
+			m_camera_additional.place = false;
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -693,6 +734,14 @@ void TouchScreenGUI::step(float dtime)
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera.dig = true;
+			wakeUpInputhandler();
+		}
+	}
+
+	if (m_camera_additional.event_id != -1 && (!m_camera_additional.has_really_moved)) {
+		u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
+		if (delta > MIN_DIG_TIME_MS) {
+			m_camera_additional.dig = true;
 			wakeUpInputhandler();
 		}
 	}
@@ -779,6 +828,7 @@ void TouchScreenGUI::reset()
 
 	m_joystick.reset(m_visible && !m_overflow_open);
 	m_camera.reset();
+	m_camera_additional.reset();
 }
 
 void TouchScreenGUI::wakeUpInputhandler()
