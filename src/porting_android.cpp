@@ -95,6 +95,8 @@ JNIEnv      *jnienv;
 jclass       activityClass;
 jobject      activityObj;
 std::string  input_dialog_owner;
+AAssetManager *asset_manager = NULL;
+jobject java_asset_manager_ref = 0;
 
 jclass findClass(const std::string &classname)
 {
@@ -434,5 +436,63 @@ std::string getSecretKey(const std::string &key)
 	jnienv->DeleteLocalRef(result);
 
 	return returnValue;
+}
+
+void hideSplashScreen()
+{
+	if (jnienv == nullptr || activityObj == nullptr)
+		return;
+
+	jmethodID hideSplash = jnienv->GetMethodID(activityClass,
+			"hideSplashScreen", "()V");
+
+	FATAL_ERROR_IF(hideSplash == nullptr,
+		"porting::hideSplashScreen unable to find Java hideSplashScreen method");
+
+	jnienv->CallVoidMethod(activityObj, hideSplash);
+}
+
+bool needsExtractAssets()
+{
+	if (jnienv == nullptr || activityObj == nullptr)
+		return false;
+
+	jmethodID needsExtract = jnienv->GetMethodID(activityClass,
+			"needsExtractAssets", "()Z");
+
+	FATAL_ERROR_IF(needsExtract == nullptr,
+		"porting::needsExtractAssets unable to find Java needsExtractAssets method");
+
+	return jnienv->CallBooleanMethod(activityObj, needsExtract);
+}
+
+bool createAssetManager()
+{
+	jmethodID midGetContext = jnienv->GetStaticMethodID(activityClass,
+			"getContext", "()Landroid/content/Context;");
+
+	jobject context = jnienv->CallStaticObjectMethod(activityClass, midGetContext);
+
+	jmethodID mid = jnienv->GetMethodID(jnienv->GetObjectClass(context),
+			"getAssets", "()Landroid/content/res/AssetManager;");
+	jobject javaAssetManager = jnienv->CallObjectMethod(context, mid);
+
+	java_asset_manager_ref = jnienv->NewGlobalRef(javaAssetManager);
+	asset_manager = AAssetManager_fromJava(jnienv, java_asset_manager_ref);
+
+	if (!asset_manager) {
+		jnienv->DeleteGlobalRef(java_asset_manager_ref);
+		return false;
+	}
+
+	return true;
+}
+
+void destroyAssetManager()
+{
+	if (asset_manager) {
+		jnienv->DeleteGlobalRef(java_asset_manager_ref);
+		asset_manager = NULL;
+	}
 }
 }

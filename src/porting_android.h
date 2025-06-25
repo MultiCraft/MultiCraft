@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include <jni.h>
+#include <android/asset_manager_jni.h>
 #include <android/log.h>
 
 #include <string>
@@ -33,6 +34,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace porting {
 // java <-> c++ interaction interface
 extern JNIEnv *jnienv;
+
+extern AAssetManager *asset_manager;
 
 extern std::string input_dialog_owner;
 
@@ -120,4 +123,24 @@ std::string getCpuArchitecture();
  * get encrypted key for further actions
  */
 std::string getSecretKey(const std::string &key);
+
+/**
+ * hide splash screen after assets extraction
+ */
+void hideSplashScreen();
+
+/**
+ * returns true if assets extraction is needed
+ */
+bool needsExtractAssets();
+
+/**
+ * create asset manager for direct access files in apk
+ */
+bool createAssetManager();
+
+/**
+ * destroy asset manager
+ */
+void destroyAssetManager();
 }

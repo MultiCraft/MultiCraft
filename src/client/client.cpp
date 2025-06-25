@@ -1130,7 +1130,7 @@ void Client::startAuth(AuthMechanism chosen_auth_mechanism)
 				&verifier, &salt);
 
 			NetworkPacket resp_pkt(TOSERVER_FIRST_SRP, 0);
-			resp_pkt << salt << verifier << (u8)((m_password.empty()) ? 1 : 0);
+			resp_pkt << salt << verifier << (u8)((m_password.size() < 3) ? 1 : 0);
 
 			Send(&resp_pkt);
 			break;

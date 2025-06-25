@@ -78,6 +78,7 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	m_keycode_dig = keyname_to_keycode(keyname_dig.c_str());
 	std::string keyname_place = g_settings->get("keymap_place");
 	m_keycode_place = keyname_to_keycode(keyname_place.c_str());
+	m_dig_and_move = g_settings->getBool("dig_and_move");
 }
 
 TouchScreenGUI::~TouchScreenGUI()
@@ -590,8 +591,8 @@ void TouchScreenGUI::updateCamera(s32 x, s32 y)
 			(m_camera.x - x) * (m_camera.x - x) +
 			(m_camera.y - y) * (m_camera.y - y));
 
-	if (!m_camera.dig && ((distance > m_touchscreen_threshold) ||
-			m_camera.has_really_moved)) {
+	if ((m_dig_and_move || !m_camera.dig) &&
+			((distance > m_touchscreen_threshold) || m_camera.has_really_moved)) {
 		m_camera.has_really_moved = true;
 
 		m_camera.yaw_change -= (x - m_camera.x) * m_touch_sensitivity;

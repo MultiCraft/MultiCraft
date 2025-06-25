@@ -213,6 +213,8 @@ private:
 	irr::EKEY_CODE m_keycode_dig;
 	irr::EKEY_CODE m_keycode_place;
 
+	bool m_dig_and_move = false;
+
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
 	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
