@@ -128,6 +128,7 @@ struct camera_info
 	bool has_really_moved = false;
 	bool dig = false;
 	bool place = false;
+	bool place_shootline = false;
 	s32 x = 0;
 	s32 y = 0;
 	s32 event_id = -1;
@@ -138,6 +139,7 @@ struct camera_info
 		has_really_moved = false;
 		dig = false;
 		place = false;
+		place_shootline = false;
 		x = 0;
 		y = 0;
 		event_id = -1;
@@ -172,7 +174,16 @@ public:
 		return res;
 	}
 
-	line3d<f32> getShootline() { return m_camera.shootline; }
+	line3d<f32> getShootline()
+	{
+		if (m_camera_additional.event_id != -1 ||
+				m_camera_additional.place_shootline) {
+			m_camera_additional.place_shootline = false;
+			return m_camera_additional.shootline;
+		} else {
+			return m_camera.shootline;
+		}
+	}
 
 	void step(float dtime);
 	void hide();
@@ -204,6 +215,7 @@ private:
 	std::vector<button_info *> m_buttons;
 	joystick_info m_joystick;
 	camera_info m_camera;
+	camera_info m_camera_additional;
 
 	bool m_overflow_open = false;
 	bool m_overflow_close_schedule = false;
@@ -228,7 +240,7 @@ private:
 	void toggleOverflowMenu();
 
 	bool moveJoystick(s32 x, s32 y);
-	void updateCamera(s32 x, s32 y);
+	void updateCamera(camera_info &camera, s32 x, s32 y);
 
 	void setVisible(bool visible);
 
