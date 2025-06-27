@@ -30,6 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <vector>
 
 #include "client/tile.h"
+#include "settings.h"
 
 using namespace irr;
 using namespace irr::core;
@@ -198,6 +199,9 @@ private:
 	double m_touch_sensitivity;
 	bool m_visible = true;
 	bool m_buttons_initialized = false;
+	bool m_dig_and_move = false;
+	irr::EKEY_CODE m_keycode_dig;
+	irr::EKEY_CODE m_keycode_place;
 
 	std::map<size_t, bool> m_events;
 	std::vector<hud_button_info> m_hud_buttons;
@@ -210,10 +214,11 @@ private:
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
 
-	irr::EKEY_CODE m_keycode_dig;
-	irr::EKEY_CODE m_keycode_place;
+	Settings* m_settings = nullptr;
+	std::string m_settings_path;
 
-	bool m_dig_and_move = false;
+	void initSettings();
+	void setDefaultValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
 
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);

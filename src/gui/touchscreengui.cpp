@@ -23,7 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "touchscreengui.h"
 #include "irrlichttypes.h"
 #include "client/keycode.h"
-#include "settings.h"
+#include "filesys.h"
 #include "gettext.h"
 #include "porting.h"
 #include "client/guiscalingfilter.h"
@@ -51,9 +51,9 @@ const button_data buttons_data[] = {
 	{ "rangeview_btn.png", N_("Range select"), "rangeselect" },
 	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat" },
 	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags" },
-	{ "joystick_off.png", "", "" },
-	{ "joystick_bg.png", "", "" },
-	{ "joystick_center.png", "", "" },
+	{ "joystick_off.png", "", "joystick_off" },
+	{ "joystick_bg.png", "", "joystick_bg" },
+	{ "joystick_center.png", "", "joystick_center" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -117,12 +117,16 @@ TouchScreenGUI::~TouchScreenGUI()
 		m_joystick.button_center->drop();
 		m_joystick.button_center = nullptr;
 	}
+
+	delete m_settings;
 }
 
 void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode)
 {
 	assert(tsrc);
 	m_texturesource = tsrc;
+
+	initSettings();
 
 	initJoystickButton();
 
@@ -231,77 +235,12 @@ void TouchScreenGUI::initJoystickButton()
 
 rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 {
-	switch (id) {
-	case joystick_off_id:
-		return rect<s32>(m_button_size / 2,
-				m_screensize.Y - m_button_size * 4.5,
-				m_button_size * 4.5,
-				m_screensize.Y - m_button_size / 2);
-	case joystick_bg_id:
-		return rect<s32>(m_button_size / 2,
-				m_screensize.Y - m_button_size * 4.5,
-				m_button_size * 4.5,
-				m_screensize.Y - m_button_size / 2);
-	case joystick_center_id:
-		return rect<s32>(0, 0, m_button_size * 1.5, m_button_size * 1.5);
-	case jump_id:
-		return rect<s32>(m_screensize.X - m_button_size * 3.375,
-				m_screensize.Y - m_button_size * 2.75,
-				m_screensize.X - m_button_size * 1.875,
-				m_screensize.Y - m_button_size * 1.25);
-	case drop_id:
-		return rect<s32>(m_screensize.X - m_button_size,
-				m_screensize.Y / 2 - m_button_size * 1.5,
-				m_screensize.X,
-				m_screensize.Y / 2 - m_button_size / 2);
-	case sneak_id:
-		return rect<s32>(m_screensize.X - m_button_size * 3.375,
-				m_screensize.Y - m_button_size * 1.125,
-				m_screensize.X - m_button_size * 1.6875,
-				m_screensize.Y);
-	case inventory_id:
-		return rect<s32>(m_screensize.X - m_button_size * 1.6875,
-				m_screensize.Y - m_button_size * 1.5,
-				m_screensize.X,
-				m_screensize.Y);
-	case special1_id:
-		return rect<s32>(m_screensize.X - m_button_size * 1.75,
-				m_screensize.Y - m_button_size * 4,
-				m_screensize.X - m_button_size * 0.25,
-				m_screensize.Y - m_button_size * 2.5);
-	case escape_id:
-		return rect<s32>(m_screensize.X / 2 - m_button_size * 2,
-				0,
-				m_screensize.X / 2 - m_button_size,
-				m_button_size);
-	case minimap_id:
-		return rect<s32>(m_screensize.X / 2 - m_button_size,
-				0,
-				m_screensize.X / 2,
-				m_button_size);
-	case camera_id:
-		return rect<s32>(m_screensize.X / 2,
-				0,
-				m_screensize.X / 2 + m_button_size,
-				m_button_size);
-	case overflow_id:
-		return rect<s32>(m_screensize.X / 2 + m_button_size,
-				0,
-				m_screensize.X / 2 + m_button_size * 2,
-				m_button_size);
-	case chat_id:
-		return rect<s32>(m_screensize.X - m_button_size * 1.25,
-				0,
-				m_screensize.X,
-				m_button_size);
-	case tab_id:
-		return rect<s32>(m_screensize.X - m_button_size * 1.25,
-				m_button_size,
-				m_screensize.X,
-				m_button_size * 2);
-	default:
-		return rect<s32>(0, 0, 0, 0);
-	}
+	std::string name = std::string("tg_") + buttons_data[id].name;
+
+	return rect<s32>(m_settings->getFloat(name + "_x1"),
+				m_settings->getFloat(name + "_y1"),
+				m_settings->getFloat(name + "_x2"),
+				m_settings->getFloat(name + "_y2"));
 }
 
 void TouchScreenGUI::updateButtons()
@@ -382,6 +321,83 @@ void TouchScreenGUI::rebuildOverflowMenu()
 			pos.Y += spacing.Y;
 		}
 	}
+}
+
+void TouchScreenGUI::initSettings()
+{
+	m_settings = Settings::getLayer(SL_TOUCHSCREENGUI);
+	if (m_settings == nullptr)
+		m_settings = Settings::createLayer(SL_TOUCHSCREENGUI);
+
+	m_settings_path = porting::path_user + DIR_DELIM + "touchscreengui.conf";
+
+	m_settings->readConfigFile(m_settings_path.c_str());
+
+	setDefaultValues(jump_id,
+			m_screensize.X - m_button_size * 3.375, m_screensize.Y - m_button_size * 2.75,
+			m_screensize.X - m_button_size * 1.875, m_screensize.Y - m_button_size * 1.25);
+
+	setDefaultValues(drop_id,
+			m_screensize.X - m_button_size, m_screensize.Y / 2 - m_button_size * 1.5,
+			m_screensize.X, m_screensize.Y / 2 - m_button_size / 2);
+
+	setDefaultValues(sneak_id,
+			m_screensize.X - m_button_size * 3.375, m_screensize.Y - m_button_size * 1.125,
+			m_screensize.X - m_button_size * 1.6875, m_screensize.Y);
+
+	setDefaultValues(special1_id,
+			m_screensize.X - m_button_size * 1.75, m_screensize.Y - m_button_size * 4,
+			m_screensize.X - m_button_size * 0.25, m_screensize.Y - m_button_size * 2.5);
+
+	setDefaultValues(inventory_id,
+			m_screensize.X - m_button_size * 1.6875, m_screensize.Y - m_button_size * 1.5,
+			m_screensize.X, m_screensize.Y);
+
+	setDefaultValues(escape_id,
+			m_screensize.X / 2 - m_button_size * 2, 0,
+			m_screensize.X / 2 - m_button_size, m_button_size);
+
+	setDefaultValues(minimap_id,
+			m_screensize.X / 2 - m_button_size, 0,
+			m_screensize.X / 2, m_button_size);
+
+	setDefaultValues(camera_id,
+			m_screensize.X / 2, 0,
+			m_screensize.X / 2 + m_button_size, m_button_size);
+
+	setDefaultValues(overflow_id,
+			m_screensize.X / 2 + m_button_size, 0,
+			m_screensize.X / 2 + m_button_size * 2, m_button_size);
+
+	setDefaultValues(chat_id,
+			m_screensize.X - m_button_size * 1.25, 0,
+			m_screensize.X, m_button_size);
+
+	setDefaultValues(tab_id,
+			m_screensize.X - m_button_size * 1.25, 0,
+			m_screensize.X, m_button_size);
+
+	setDefaultValues(joystick_off_id,
+			m_button_size / 2, m_screensize.Y - m_button_size * 4.5,
+			m_button_size * 4.5, m_screensize.Y - m_button_size / 2);
+
+	setDefaultValues(joystick_bg_id,
+			m_button_size / 2, m_screensize.Y - m_button_size * 4.5,
+			m_button_size * 4.5, m_screensize.Y - m_button_size / 2);
+
+	setDefaultValues(joystick_center_id,
+			0, 0, m_button_size * 1.5, m_button_size * 1.5);
+
+	m_settings->updateConfigFile(m_settings_path.c_str());
+}
+
+void TouchScreenGUI::setDefaultValues(touch_gui_button_id id, float x1, float y1, float x2, float y2)
+{
+	std::string name = std::string("tg_") + buttons_data[id].name;
+	m_settings->setDefault(name + "_x1", std::to_string(x1));
+	m_settings->setDefault(name + "_y1", std::to_string(y1));
+	m_settings->setDefault(name + "_x2", std::to_string(x2));
+	m_settings->setDefault(name + "_y2", std::to_string(y2));
 }
 
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
