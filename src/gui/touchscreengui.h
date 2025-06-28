@@ -62,7 +62,17 @@ typedef enum
 	joystick_off_id,
 	joystick_bg_id,
 	joystick_center_id,
+	editor_open_id,
+	editor_close_id,
+	editor_default_id,
 } touch_gui_button_id;
+
+typedef enum
+{
+	STATE_DEFAULT = 0,
+	STATE_OVERFLOW,
+	STATE_EDITOR,
+} touch_gui_state;
 
 struct button_data
 {
@@ -76,7 +86,7 @@ struct button_info
 	IGUIButton *guibutton = nullptr;
 	IGUIStaticText *text = nullptr;
 	touch_gui_button_id id = unknown_id;
-	bool overflow_menu = false;
+	touch_gui_state state = STATE_DEFAULT;
 	bool pressed = false;
 	s32 event_id = -1;
 
@@ -145,6 +155,22 @@ struct camera_info
 	}
 };
 
+struct editor_info
+{
+	button_info *button = nullptr;
+	s32 event_id = -1;
+	s32 x = 0;
+	s32 y = 0;
+
+	void reset()
+	{
+		button = nullptr;
+		event_id = -1;
+		x = 0;
+		y = 0;
+	}
+};
+
 class TouchScreenGUI
 {
 public:
@@ -208,8 +234,9 @@ private:
 	std::vector<button_info *> m_buttons;
 	joystick_info m_joystick;
 	camera_info m_camera;
+	editor_info m_editor;
 
-	bool m_overflow_open = false;
+	touch_gui_state m_current_state = STATE_DEFAULT;
 	bool m_overflow_close_schedule = false;
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
@@ -219,22 +246,21 @@ private:
 
 	void initSettings();
 	void setDefaultValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
+	void setValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
 
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
 	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
-			bool overflow_menu = false, const char *texture = "");
+			touch_gui_state state = STATE_DEFAULT, const char *texture = "");
 	void initJoystickButton();
-
 	rect<s32> getButtonRect(touch_gui_button_id id);
 	void updateButtons();
-
 	void rebuildOverflowMenu();
-	void toggleOverflowMenu();
 
 	bool moveJoystick(s32 x, s32 y);
 	void updateCamera(s32 x, s32 y);
 
+	void changeCurrentState(touch_gui_state state);
 	void setVisible(bool visible);
 
 	void wakeUpInputhandler();
