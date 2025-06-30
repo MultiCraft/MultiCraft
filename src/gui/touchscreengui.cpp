@@ -56,7 +56,7 @@ const button_data buttons_data[] = {
 	{ "joystick_center.png", "", "joystick_center" },
 	{ "overflow_btn.png", N_("Open editor"), "editor_open" },
 	{ "checkbox.png", N_("Close editor"), "editor_close" },
-	{ "clear.png", N_("Restore default values"), "editor_default" },
+	{ "refresh.png", N_("Restore default values"), "editor_default" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -415,6 +415,17 @@ void TouchScreenGUI::setValues(touch_gui_button_id id, float x1, float y1, float
 	m_settings->setFloat(name + "_y2", y2);
 }
 
+void TouchScreenGUI::resetAllValues()
+{
+	for (auto name : m_settings->getNames()) {
+		m_settings->remove(name);
+	}
+
+	m_settings->updateConfigFile(m_settings_path.c_str());
+
+	initSettings();
+}
+
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
 	if (!m_buttons_initialized)
@@ -433,6 +444,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 	if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
 		m_events[id] = false;
+		bool reset_all_values = false;
 		touch_gui_state new_state = m_current_state;
 
 		for (auto button : m_buttons) {
@@ -447,6 +459,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				if (button->id == editor_open_id) {
 					new_state = STATE_EDITOR;
 				} else if (button->id == editor_close_id) {
+					new_state = STATE_DEFAULT;
+				} else if (button->id == editor_default_id) {
+					reset_all_values = true;
 					new_state = STATE_DEFAULT;
 				} else if (button->id == overflow_id) {
 					if (m_current_state == STATE_OVERFLOW)
@@ -518,6 +533,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 		if ((m_current_state == STATE_OVERFLOW) && !m_events[id])
 			new_state = STATE_DEFAULT;
+
+		if (reset_all_values)
+			resetAllValues();
 
 		if (m_current_state != new_state)
 			changeCurrentState(new_state);

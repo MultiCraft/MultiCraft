@@ -249,6 +249,7 @@ private:
 	void initSettings();
 	void setDefaultValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
 	void setValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
+	void resetAllValues();
 
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
