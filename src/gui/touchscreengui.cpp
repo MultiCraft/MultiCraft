@@ -51,12 +51,12 @@ const button_data buttons_data[] = {
 	{ "rangeview_btn.png", N_("Range select"), "rangeselect" },
 	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat" },
 	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags" },
-	{ "joystick_off.png", "", "joystick_off" },
-	{ "joystick_bg.png", "", "joystick_bg" },
+	{ "joystick_off.png", "", "joystick" },
+	{ "joystick_bg.png", "", "joystick" },
 	{ "joystick_center.png", "", "joystick_center" },
 	{ "overflow_btn.png", N_("Open editor"), "editor_open" },
-	{ "overflow_btn.png", N_("Close editor"), "editor_close" },
-	{ "overflow_btn.png", N_("Restore default values"), "editor_default" },
+	{ "checkbox.png", N_("Close editor"), "editor_close" },
+	{ "clear.png", N_("Restore default values"), "editor_default" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -160,6 +160,9 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 		initButton(id, recti(), STATE_OVERFLOW);
 	}
 
+	initButton(editor_close_id, getButtonRect(editor_close_id), STATE_EDITOR);
+	initButton(editor_default_id, getButtonRect(editor_default_id), STATE_EDITOR);
+
 	rebuildOverflowMenu();
 
 	m_buttons_initialized = true;
@@ -248,12 +251,6 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 
 void TouchScreenGUI::updateButtons()
 {
-	v2u32 screensize = m_device->getVideoDriver()->getScreenSize();
-
-	if (screensize == m_screensize)
-		return;
-
-	m_screensize = screensize;
 	m_button_size = std::min(m_screensize.Y / 7.5f,
 			RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("hud_scaling") * 64.0f);
@@ -390,6 +387,14 @@ void TouchScreenGUI::initSettings()
 
 	setDefaultValues(joystick_center_id,
 			0, 0, m_button_size * 1.5, m_button_size * 1.5);
+
+	setDefaultValues(editor_close_id,
+			0, m_screensize.Y - m_button_size *1.5,
+			m_button_size * 1.5, m_screensize.Y);
+
+	setDefaultValues(editor_default_id,
+			m_button_size * 1.5, m_screensize.Y - m_button_size *1.5,
+			m_button_size * 1.5 * 2, m_screensize.Y);
 }
 
 void TouchScreenGUI::setDefaultValues(touch_gui_button_id id, float x1, float y1, float x2, float y2)
@@ -428,8 +433,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 	if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
 		m_events[id] = false;
-		bool overflow_btn_pressed = false;
-		bool editor_open_btn_pressed = false;
+		touch_gui_state new_state = m_current_state;
 
 		for (auto button : m_buttons) {
 			if (m_current_state != button->state)
@@ -440,14 +444,18 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				button->pressed = true;
 				button->event_id = id;
 
-				if (button->id == editor_open_id)
-					editor_open_btn_pressed = true;
-
-				if (button->id == overflow_id)
-					overflow_btn_pressed = true;
-
-				if (button->state == STATE_OVERFLOW)
+				if (button->id == editor_open_id) {
+					new_state = STATE_EDITOR;
+				} else if (button->id == editor_close_id) {
+					new_state = STATE_DEFAULT;
+				} else if (button->id == overflow_id) {
+					if (m_current_state == STATE_OVERFLOW)
+						new_state = STATE_DEFAULT;
+					else
+						new_state = STATE_OVERFLOW;
+				} else if (button->state == STATE_OVERFLOW) {
 					m_overflow_close_schedule = true;
+				}
 			}
 		}
 
@@ -490,22 +498,29 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
 					m_events[id] = true;
-					m_editor.button = button;
+					m_editor.guibutton = button->guibutton;
+					m_editor.button_id = button->id;
 					m_editor.event_id = id;
 					m_editor.x = x;
 					m_editor.y = y;
 				}
 			}
+
+			if (m_joystick.button_off->isPointInside(core::position2d<s32>(x, y))) {
+				m_events[id] = true;
+				m_editor.guibutton = m_joystick.button_off;
+				m_editor.button_id = joystick_off_id;
+				m_editor.event_id = id;
+				m_editor.x = x;
+				m_editor.y = y;
+			}
 		}
 
-		if (editor_open_btn_pressed) {
-			changeCurrentState(STATE_EDITOR);
-		} else if (overflow_btn_pressed || ((m_current_state == STATE_OVERFLOW) && !m_events[id])) {
-			if (m_current_state == STATE_DEFAULT)
-				changeCurrentState(STATE_OVERFLOW);
-			else
-				changeCurrentState(STATE_DEFAULT);
-		}
+		if ((m_current_state == STATE_OVERFLOW) && !m_events[id])
+			new_state = STATE_DEFAULT;
+
+		if (m_current_state != new_state)
+			changeCurrentState(new_state);
 
 		result = true;
 
@@ -534,9 +549,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		}
 
 		if (m_editor.event_id == id) {
-			IGUIButton *button = m_editor.button->guibutton;
+			IGUIButton *button = m_editor.guibutton;
 			rect<s32> rect = button->getRelativePosition();
-			setValues(m_editor.button->id,
+			setValues(m_editor.button_id,
 					rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
 					rect.LowerRightCorner.X, rect.LowerRightCorner.Y);
 			m_editor.reset();
@@ -554,7 +569,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			} else if (m_camera.event_id == id) {
 				updateCamera(x, y);
 			} else if (m_editor.event_id == id) {
-				IGUIButton *button = m_editor.button->guibutton;
+				IGUIButton *button = m_editor.guibutton;
 				rect<s32> rect = button->getRelativePosition();
 				rect += v2s32(x - m_editor.x, y - m_editor.y);
 				button->setRelativePosition(rect);
@@ -598,17 +613,24 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 {
-	s32 dx = x - m_button_size * 5 / 2;
-	s32 dy = y - m_screensize.Y + m_button_size * 5 / 2;
+	rect<s32> joystick_rect = m_joystick.button_bg->getRelativePosition();
+	s32 joystick_pos_x = joystick_rect.UpperLeftCorner.X;
+	s32 joystick_pos_y = joystick_rect.UpperLeftCorner.Y;
+	s32 joystick_size = joystick_rect.getWidth();
+
+	s32 dx = x - joystick_pos_x - joystick_size / 2;
+	s32 dy = y - joystick_pos_y - joystick_size / 2;
 	double distance = sqrt(dx * dx + dy * dy);
-	if (distance == 0) return false;
+
+	if (distance == 0)
+		return false;
 
 	if (distance > m_button_size * 1.5) {
 		s32 ndx = m_button_size * dx / distance * 1.5f - m_button_size / 2.0f * 1.5f;
 		s32 ndy = m_button_size * dy / distance * 1.5f - m_button_size / 2.0f * 1.5f;
 		m_joystick.button_center->setRelativePosition(v2s32(
-				m_button_size * 5 / 2 + ndx,
-				m_screensize.Y - m_button_size * 5 / 2 + ndy));
+				joystick_pos_x + joystick_size / 2 + ndx,
+				joystick_pos_y + joystick_size / 2 + ndy));
 	} else {
 		m_joystick.button_center->setRelativePosition(v2s32(
 				x - m_button_size / 2.0f * 1.5f,
@@ -761,7 +783,12 @@ bool TouchScreenGUI::immediateRelease(irr::EKEY_CODE keycode)
 
 void TouchScreenGUI::step(float dtime)
 {
-	updateButtons();
+	v2u32 screensize = m_device->getVideoDriver()->getScreenSize();
+
+	if (screensize != m_screensize) {
+		m_screensize = screensize;
+		updateButtons();
+	}
 
 	if (m_current_state == STATE_OVERFLOW && m_overflow_close_schedule)
 		changeCurrentState(STATE_DEFAULT);
@@ -829,6 +856,9 @@ void TouchScreenGUI::setVisible(bool visible)
 void TouchScreenGUI::changeCurrentState(touch_gui_state state)
 {
 	reset();
+
+	if (m_current_state == STATE_EDITOR)
+		updateButtons();
 
 	m_current_state = state;
 	m_overflow_close_schedule = false;

@@ -157,14 +157,16 @@ struct camera_info
 
 struct editor_info
 {
-	button_info *button = nullptr;
+	IGUIButton *guibutton = nullptr;
+	touch_gui_button_id button_id = unknown_id;
 	s32 event_id = -1;
 	s32 x = 0;
 	s32 y = 0;
 
 	void reset()
 	{
-		button = nullptr;
+		guibutton = nullptr;
+		button_id = unknown_id;
 		event_id = -1;
 		x = 0;
 		y = 0;
