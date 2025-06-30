@@ -57,11 +57,17 @@ const button_data buttons_data[] = {
 	{ "overflow_btn.png", N_("Open editor"), "editor_open" },
 	{ "checkbox.png", N_("Close editor"), "editor_close" },
 	{ "refresh.png", N_("Restore default values"), "editor_default" },
+	{ "next_icon.png", N_("Move button"), "editor_move" },
+	{ "plus.png", N_("Scale button"), "editor_scale" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
 	flymove_id, fastmove_id, noclip_id,
 	range_id, toggle_chat_id, toggle_nametags_id, editor_open_id
+};
+
+static const touch_gui_button_id editor_buttons_id[] {
+	editor_close_id, editor_default_id, editor_move_id, editor_scale_id
 };
 
 TouchScreenGUI *g_touchscreengui = nullptr;
@@ -160,8 +166,9 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 		initButton(id, recti(), STATE_OVERFLOW);
 	}
 
-	initButton(editor_close_id, getButtonRect(editor_close_id), STATE_EDITOR);
-	initButton(editor_default_id, getButtonRect(editor_default_id), STATE_EDITOR);
+	for (auto id : editor_buttons_id) {
+		initButton(id, getButtonRect(id), STATE_EDITOR);
+	}
 
 	rebuildOverflowMenu();
 
@@ -395,6 +402,14 @@ void TouchScreenGUI::initSettings()
 	setDefaultValues(editor_default_id,
 			m_button_size * 1.5, m_screensize.Y - m_button_size *1.5,
 			m_button_size * 1.5 * 2, m_screensize.Y);
+
+	setDefaultValues(editor_move_id,
+			m_button_size * 1.5 * 3, m_screensize.Y - m_button_size *1.5,
+			m_button_size * 1.5 * 4, m_screensize.Y);
+
+	setDefaultValues(editor_scale_id,
+			m_button_size * 1.5 * 4, m_screensize.Y - m_button_size *1.5,
+			m_button_size * 1.5 * 5, m_screensize.Y);
 }
 
 void TouchScreenGUI::setDefaultValues(touch_gui_button_id id, float x1, float y1, float x2, float y2)
@@ -463,6 +478,10 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				} else if (button->id == editor_default_id) {
 					reset_all_values = true;
 					new_state = STATE_DEFAULT;
+				} else if (button->id == editor_move_id) {
+					m_editor.change_size = false;
+				} else if (button->id == editor_scale_id) {
+					m_editor.change_size = true;
 				} else if (button->id == overflow_id) {
 					if (m_current_state == STATE_OVERFLOW)
 						new_state = STATE_DEFAULT;
@@ -518,6 +537,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					m_editor.event_id = id;
 					m_editor.x = x;
 					m_editor.y = y;
+					m_editor.old_rect = button->guibutton->getRelativePosition();
 				}
 			}
 
@@ -528,6 +548,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				m_editor.event_id = id;
 				m_editor.x = x;
 				m_editor.y = y;
+				m_editor.old_rect = m_joystick.button_off->getRelativePosition();
 			}
 		}
 
@@ -587,12 +608,20 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			} else if (m_camera.event_id == id) {
 				updateCamera(x, y);
 			} else if (m_editor.event_id == id) {
-				IGUIButton *button = m_editor.guibutton;
-				rect<s32> rect = button->getRelativePosition();
-				rect += v2s32(x - m_editor.x, y - m_editor.y);
-				button->setRelativePosition(rect);
-				m_editor.x = x;
-				m_editor.y = y;
+				if (m_editor.change_size) {
+					IGUIButton *button = m_editor.guibutton;
+					rect<s32> rect = m_editor.old_rect;
+					s32 value = std::max(x - m_editor.x, y - m_editor.y);
+					rect.LowerRightCorner += v2s32(value, value);
+					button->setRelativePosition(rect);
+				} else {
+					IGUIButton *button = m_editor.guibutton;
+					rect<s32> rect = button->getRelativePosition();
+					rect += v2s32(x - m_editor.x, y - m_editor.y);
+					button->setRelativePosition(rect);
+					m_editor.x = x;
+					m_editor.y = y;
+				}
 			} else {
 				bool overflow_btn_pressed = false;
 

@@ -65,6 +65,8 @@ typedef enum
 	editor_open_id,
 	editor_close_id,
 	editor_default_id,
+	editor_move_id,
+	editor_scale_id,
 } touch_gui_button_id;
 
 typedef enum
@@ -162,6 +164,8 @@ struct editor_info
 	s32 event_id = -1;
 	s32 x = 0;
 	s32 y = 0;
+	bool change_size = false;
+	rect<s32> old_rect;
 
 	void reset()
 	{
