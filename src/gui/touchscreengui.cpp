@@ -246,16 +246,6 @@ void TouchScreenGUI::initJoystickButton()
 			buttons_data[joystick_center_id].image, button_center_rect);
 }
 
-rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
-{
-	std::string name = std::string("tg_") + buttons_data[id].name;
-
-	return rect<s32>(m_settings->getFloat(name + "_x1"),
-				m_settings->getFloat(name + "_y1"),
-				m_settings->getFloat(name + "_x2"),
-				m_settings->getFloat(name + "_y2"));
-}
-
 void TouchScreenGUI::updateButtons()
 {
 	m_button_size = std::min(m_screensize.Y / 7.5f,
@@ -415,19 +405,29 @@ void TouchScreenGUI::initSettings()
 void TouchScreenGUI::setDefaultValues(touch_gui_button_id id, float x1, float y1, float x2, float y2)
 {
 	std::string name = std::string("tg_") + buttons_data[id].name;
-	m_settings->setDefault(name + "_x1", std::to_string(x1));
-	m_settings->setDefault(name + "_y1", std::to_string(y1));
-	m_settings->setDefault(name + "_x2", std::to_string(x2));
-	m_settings->setDefault(name + "_y2", std::to_string(y2));
+	m_settings->setDefault(name + "_x1", std::to_string(x1 / m_screensize.X));
+	m_settings->setDefault(name + "_y1", std::to_string(y1 / m_screensize.Y));
+	m_settings->setDefault(name + "_x2", std::to_string(x2 / m_screensize.X));
+	m_settings->setDefault(name + "_y2", std::to_string(y2 / m_screensize.Y));
 }
 
 void TouchScreenGUI::setValues(touch_gui_button_id id, float x1, float y1, float x2, float y2)
 {
 	std::string name = std::string("tg_") + buttons_data[id].name;
-	m_settings->setFloat(name + "_x1", x1);
-	m_settings->setFloat(name + "_y1", y1);
-	m_settings->setFloat(name + "_x2", x2);
-	m_settings->setFloat(name + "_y2", y2);
+	m_settings->setFloat(name + "_x1", x1 / m_screensize.X);
+	m_settings->setFloat(name + "_y1", y1 / m_screensize.Y);
+	m_settings->setFloat(name + "_x2", x2 / m_screensize.X);
+	m_settings->setFloat(name + "_y2", y2 / m_screensize.Y);
+}
+
+rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
+{
+	std::string name = std::string("tg_") + buttons_data[id].name;
+
+	return rect<s32>(m_settings->getFloat(name + "_x1") * m_screensize.X,
+				m_settings->getFloat(name + "_y1") * m_screensize.Y,
+				m_settings->getFloat(name + "_x2") * m_screensize.X,
+				m_settings->getFloat(name + "_y2") * m_screensize.Y);
 }
 
 void TouchScreenGUI::resetAllValues()
@@ -664,24 +664,27 @@ bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 	s32 joystick_pos_x = joystick_rect.UpperLeftCorner.X;
 	s32 joystick_pos_y = joystick_rect.UpperLeftCorner.Y;
 	s32 joystick_size = joystick_rect.getWidth();
+	rect<s32> joystick_center_rect = m_joystick.button_center->getRelativePosition();
+	s32 joystick_center_size = joystick_center_rect.getWidth();
 
 	s32 dx = x - joystick_pos_x - joystick_size / 2;
 	s32 dy = y - joystick_pos_y - joystick_size / 2;
 	double distance = sqrt(dx * dx + dy * dy);
+	float max_distance = (float)joystick_size / 2.66f;
 
 	if (distance == 0)
 		return false;
 
-	if (distance > m_button_size * 1.5) {
-		s32 ndx = m_button_size * dx / distance * 1.5f - m_button_size / 2.0f * 1.5f;
-		s32 ndy = m_button_size * dy / distance * 1.5f - m_button_size / 2.0f * 1.5f;
+	if (distance > max_distance) {
+		s32 ndx = max_distance * dx / distance - joystick_center_size / 2.0f;
+		s32 ndy = max_distance * dy / distance - joystick_center_size / 2.0f;
 		m_joystick.button_center->setRelativePosition(v2s32(
 				joystick_pos_x + joystick_size / 2 + ndx,
 				joystick_pos_y + joystick_size / 2 + ndy));
 	} else {
 		m_joystick.button_center->setRelativePosition(v2s32(
-				x - m_button_size / 2.0f * 1.5f,
-				y - m_button_size / 2.0f * 1.5f));
+				x - joystick_center_size / 2.0f,
+				y - joystick_center_size / 2.0f));
 	}
 
 	// angle in degrees

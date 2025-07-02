@@ -254,6 +254,7 @@ private:
 	void setDefaultValues(
 			touch_gui_button_id id, float x1, float y1, float x2, float y2);
 	void setValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
+	rect<s32> getButtonRect(touch_gui_button_id id);
 	void resetAllValues();
 
 	void loadButtonTexture(
@@ -261,7 +262,6 @@ private:
 	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 			touch_gui_state state = STATE_DEFAULT, const char *texture = "");
 	void initJoystickButton();
-	rect<s32> getButtonRect(touch_gui_button_id id);
 	void updateButtons();
 	void rebuildOverflowMenu();
 
