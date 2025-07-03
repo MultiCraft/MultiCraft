@@ -159,6 +159,8 @@ struct camera_info
 
 struct editor_info
 {
+	button_info *button_move = nullptr;
+	button_info *button_scale = nullptr;
 	IGUIButton *guibutton = nullptr;
 	touch_gui_button_id button_id = unknown_id;
 	s32 event_id = -1;
@@ -259,7 +261,7 @@ private:
 
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
-	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
+	button_info * initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 			touch_gui_state state = STATE_DEFAULT, const char *custom_image = "");
 	void initJoystickButton();
 	void updateButtons();

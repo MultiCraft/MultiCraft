@@ -66,10 +66,6 @@ static const touch_gui_button_id overflow_buttons_id[] {
 	range_id, toggle_chat_id, toggle_nametags_id, editor_open_id
 };
 
-static const touch_gui_button_id editor_buttons_id[] {
-	editor_close_id, editor_default_id, editor_move_id, editor_scale_id
-};
-
 TouchScreenGUI *g_touchscreengui = nullptr;
 bool TouchScreenGUI::m_active = true;
 
@@ -165,9 +161,14 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 		initButton(id, recti(), STATE_OVERFLOW);
 	}
 
-	for (auto id : editor_buttons_id) {
-		initButton(id, getButtonRect(id), STATE_EDITOR);
-	}
+	initButton(editor_close_id, getButtonRect(editor_close_id), STATE_EDITOR);
+	initButton(editor_default_id, getButtonRect(editor_default_id), STATE_EDITOR);
+	m_editor.button_move = initButton(editor_move_id,
+			getButtonRect(editor_move_id), STATE_EDITOR);
+	m_editor.button_scale = initButton(editor_scale_id,
+			getButtonRect(editor_scale_id), STATE_EDITOR);
+
+	m_editor.button_move->guibutton->setOverrideColor(video::SColor(255, 255, 0, 0));
 
 	rebuildOverflowMenu();
 
@@ -198,7 +199,7 @@ void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, const char *path,
 	}
 }
 
-void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_rect,
+button_info * TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 		touch_gui_state state, const char *custom_image)
 {
 	button_info *btn = new button_info();
@@ -224,6 +225,8 @@ void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_
 	delete[] str;
 
 	m_buttons.push_back(btn);
+
+	return btn;
 }
 
 void TouchScreenGUI::initJoystickButton()
@@ -486,8 +489,14 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_state = STATE_DEFAULT;
 				} else if (button->id == editor_move_id) {
 					m_editor.change_size = false;
+					m_editor.button_move->guibutton->
+							setOverrideColor(video::SColor(255, 255, 0, 0));
+					m_editor.button_scale->guibutton->enableOverrideColor(false);
 				} else if (button->id == editor_scale_id) {
 					m_editor.change_size = true;
+					m_editor.button_scale->guibutton->
+							setOverrideColor(video::SColor(255, 255, 0, 0));
+					m_editor.button_move->guibutton->enableOverrideColor(false);
 				} else if (button->id == overflow_id) {
 					if (m_current_state == STATE_OVERFLOW)
 						new_state = STATE_DEFAULT;
@@ -531,7 +540,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 		}
 
-		if (m_current_state == STATE_EDITOR && m_editor.event_id == -1) {
+		if (m_current_state == STATE_EDITOR && !m_events[id] && m_editor.event_id == -1) {
 			for (auto button : m_buttons) {
 				if (button->state != STATE_DEFAULT)
 					continue;
