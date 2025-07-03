@@ -260,7 +260,7 @@ private:
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
 	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
-			touch_gui_state state = STATE_DEFAULT, const char *texture = "");
+			touch_gui_state state = STATE_DEFAULT, const char *custom_image = "");
 	void initJoystickButton();
 	void updateButtons();
 	void rebuildOverflowMenu();

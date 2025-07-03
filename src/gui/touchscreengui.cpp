@@ -55,10 +55,10 @@ const button_data buttons_data[] = {
 	{ "joystick_bg.png", "", "joystick" },
 	{ "joystick_center.png", "", "joystick_center" },
 	{ "overflow_btn.png", N_("Open editor"), "editor_open" },
-	{ "checkbox.png", N_("Close editor"), "editor_close" },
-	{ "refresh.png", N_("Restore default values"), "editor_default" },
-	{ "next_icon.png", N_("Move button"), "editor_move" },
-	{ "plus.png", N_("Scale button"), "editor_scale" },
+	{ "", N_("Close"), "editor_close" },
+	{ "", N_("Restore"), "editor_default" },
+	{ "", N_("Move"), "editor_move" },
+	{ "", N_("Scale"), "editor_scale" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -199,19 +199,24 @@ void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, const char *path,
 }
 
 void TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_rect,
-		touch_gui_state state, const char *texture)
+		touch_gui_state state, const char *custom_image)
 {
 	button_info *btn = new button_info();
 	btn->state = state;
 	btn->id = id;
 
+	const char *image = strcmp(custom_image, "") == 0 ? buttons_data[id].image : custom_image;
+	const wchar_t *str = wgettext(buttons_data[id].title);
+
 	btn->guibutton = m_guienv->addButton(button_rect, nullptr);
 	btn->guibutton->grab();
 	btn->guibutton->setVisible(m_visible && state == STATE_DEFAULT);
-	const char *image = strcmp(texture, "") == 0 ? buttons_data[id].image : texture;
-	loadButtonTexture(btn->guibutton, image, button_rect);
 
-	const wchar_t *str = wgettext(buttons_data[id].title);
+	if (strcmp(image, "") != 0)
+		loadButtonTexture(btn->guibutton, image, button_rect);
+	else
+		btn->guibutton->setText(str);
+
 	btn->text = m_guienv->addStaticText(str, recti());
 	btn->text->setTextAlignment(EGUIA_CENTER, EGUIA_UPPERLEFT);
 	btn->text->setVisible(m_current_state == STATE_OVERFLOW);
@@ -384,20 +389,20 @@ void TouchScreenGUI::initSettings()
 			0, 0, m_button_size * 1.5, m_button_size * 1.5);
 
 	setDefaultValues(editor_close_id,
-			0, m_screensize.Y - m_button_size *1.5,
-			m_button_size * 1.5, m_button_size * 1.5);
+			m_button_size, m_screensize.Y - m_button_size,
+			m_button_size * 2, m_button_size);
 
 	setDefaultValues(editor_default_id,
-			m_button_size * 1.5, m_screensize.Y - m_button_size *1.5,
-			m_button_size * 1.5, m_button_size * 1.5);
+			m_button_size * 3, m_screensize.Y - m_button_size,
+			m_button_size * 2, m_button_size);
 
 	setDefaultValues(editor_move_id,
-			m_button_size * 1.5 * 3, m_screensize.Y - m_button_size *1.5,
-			m_button_size * 1.5, m_button_size * 1.5);
+			m_button_size * 6, m_screensize.Y - m_button_size,
+			m_button_size * 2, m_button_size);
 
 	setDefaultValues(editor_scale_id,
-			m_button_size * 1.5 * 4, m_screensize.Y - m_button_size *1.5,
-			m_button_size * 1.5, m_button_size * 1.5);
+			m_button_size * 8, m_screensize.Y - m_button_size,
+			m_button_size * 2, m_button_size);
 }
 
 void TouchScreenGUI::setDefaultValues(touch_gui_button_id id, float x, float y, float w, float h)
@@ -422,11 +427,11 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 {
 	std::string name = std::string("tg_") + buttons_data[id].name;
 	position2d<s32> pos = position2d<s32>(
-			m_settings->getFloat(name + "_x") * m_screensize.X,
-			m_settings->getFloat(name + "_y") * m_screensize.Y);
+			std::round(m_settings->getFloat(name + "_x") * m_screensize.X),
+			std::round(m_settings->getFloat(name + "_y") * m_screensize.Y));
 	dimension2d<s32> size = dimension2d<s32>(
-			m_settings->getFloat(name + "_w") * m_button_size,
-			m_settings->getFloat(name + "_h") * m_button_size);
+			std::round(m_settings->getFloat(name + "_w") * m_button_size),
+			std::round(m_settings->getFloat(name + "_h") * m_button_size));
 
 	return rect<s32>(pos, size);
 }
