@@ -199,8 +199,9 @@ void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, const char *path,
 	}
 }
 
-button_info * TouchScreenGUI::initButton(touch_gui_button_id id, const rect<s32> &button_rect,
-		touch_gui_state state, const char *custom_image)
+button_info *TouchScreenGUI::initButton(touch_gui_button_id id,
+		const rect<s32> &button_rect, touch_gui_state state,
+		const char *custom_image)
 {
 	button_info *btn = new button_info();
 	btn->state = state;
