@@ -217,6 +217,8 @@ public:
 	void resetHud();
 	void registerHudItem(s32 index, const rect<s32> &button_rect);
 
+	void openEditor() { changeCurrentState(STATE_EDITOR); }
+
 	static bool isActive() { return m_active; }
 	static void setActive(bool active) { m_active = active; }
 

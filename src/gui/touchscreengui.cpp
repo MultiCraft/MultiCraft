@@ -63,7 +63,7 @@ const button_data buttons_data[] = {
 
 static const touch_gui_button_id overflow_buttons_id[] {
 	flymove_id, fastmove_id, noclip_id,
-	range_id, toggle_chat_id, toggle_nametags_id, editor_open_id
+	range_id, toggle_chat_id, toggle_nametags_id
 };
 
 TouchScreenGUI *g_touchscreengui = nullptr;

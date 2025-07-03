@@ -155,6 +155,15 @@ struct LocalFormspecHandler : public TextDest
 				return;
 			}
 
+			if (fields.find("btn_key_touchscreen_edit") != fields.end()) {
+#ifdef HAVE_TOUCHSCREENGUI
+				if (g_touchscreengui) {
+					g_touchscreengui->openEditor();
+				}
+#endif
+				return;
+			}
+
 			if (fields.find("btn_exit_menu") != fields.end()) {
 				g_gamecallback->disconnect();
 				return;
@@ -4413,6 +4422,10 @@ void Game::showPauseMenu()
 		ypos -= 0.6f;
 	ypos += 0.5f;
 #endif
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui)
+		ypos -= 1.0f;
+#endif
 	const bool high_dpi = RenderingEngine::isHighDpi();
 	const std::string x2 = high_dpi ? ".x2" : "";
 	std::string sound_name = g_settings->get("btn_press_sound");
@@ -4448,6 +4461,12 @@ void Game::showPauseMenu()
 #endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
 		<< strgettext("Change Keys")  << ";;false]";
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui) {
+		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_touchscreen_edit;"
+			<< strgettext("Edit Touchscreen GUI")  << ";;false]";
+	}
+#endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
 		<< strgettext("Exit to Menu") << ";;false]";
 #if !defined(__ANDROID__) && !defined(__IOS__)
