@@ -13,6 +13,7 @@ sh scripts/irrlicht.sh
 sh scripts/gettext.sh
 sh scripts/freetype.sh
 sh scripts/leveldb.sh
+sh scripts/libcurl.sh
 sh scripts/libogg.sh
 sh scripts/libvorbis.sh
 sh scripts/luajit.sh
