@@ -655,8 +655,13 @@ void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 {
 	driver->beginScene(true, true, m_sky_color);
 
+	const v2u32 screensize = driver->getScreenSize();
+
 	const bool cloud_menu_background = m_load_bg_clouds && g_settings->getBool("menu_clouds");
 	if (cloud_menu_background) {
+		scene::ICameraSceneNode *camera = g_menucloudsmgr->getActiveCamera();
+		camera->setAspectRatio((float)(screensize.X) / screensize.Y);
+
 		video::SColor fog_color;
 		video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
 		f32 fog_start = 0;
@@ -683,7 +688,6 @@ void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 		g_menucloudsmgr->drawAll();
 	}
 
-	const v2u32 screensize = driver->getScreenSize();
 	video::ITexture *texture = m_load_bg_texture.empty() ? nullptr : driver->getTexture(m_load_bg_texture.c_str());
 	if (texture == nullptr) {
 		if (!cloud_menu_background) {

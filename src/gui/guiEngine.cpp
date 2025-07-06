@@ -294,6 +294,7 @@ void GUIEngine::run()
 
 		if (m_clouds_enabled)
 		{
+			m_cloud.camera->setAspectRatio((float)(current_screen_size.Width) / current_screen_size.Height);
 			if (g_menusky) {
 				u32 daynight_ratio = time_to_daynight_ratio(g_timeofday * 24000.0f, true);
 				float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
@@ -369,9 +370,7 @@ void GUIEngine::cloudInit()
 //	m_cloud.clouds->setHeight(100.0f); // 120 is default value
 //	m_cloud.clouds->update(v3f(0, 0, 0), video::SColor(255,240,240,255));
 
-	m_cloud.camera = m_smgr->addCameraSceneNode(0,
-				v3f(0,0,0), v3f(0, 60, 100));
-	m_cloud.camera->setFarValue(10000);
+	m_cloud.camera = m_smgr->getActiveCamera();
 
 	m_cloud.lasttime = RenderingEngine::get_timer_time();
 }
