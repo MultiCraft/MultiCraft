@@ -34,10 +34,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 using namespace irr::core;
 
 const button_data buttons_data[] = {
-	{ "jump_btn.png", N_("Jump"), "jump", false },
-	{ "drop_btn.png", N_("Drop"), "drop", false },
-	{ "sneak_btn.png", N_("Sneak"), "sneak", false },
-	{ "special1_btn.png", N_("Special"), "special1", false },
+	{ "jump_btn.png", N_("Jump"), "jump" },
+	{ "drop_btn.png", N_("Drop"), "drop" },
+	{ "sneak_btn.png", N_("Sneak"), "sneak" },
+	{ "special1_btn.png", N_("Special"), "special1" },
 	{ "inventory_btn.png", N_("Inventory"), "inventory", true },
 	{ "escape_btn.png", N_("Exit"), "escape", true },
 	{ "minimap_btn.png", N_("Toggle minimap"), "minimap", true },
@@ -51,9 +51,9 @@ const button_data buttons_data[] = {
 	{ "rangeview_btn.png", N_("Range select"), "rangeselect", true },
 	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat", true },
 	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags", true },
-	{ "joystick_off.png", "", "", false },
-	{ "joystick_bg.png", "", "", false },
-	{ "joystick_center.png", "", "", false },
+	{ "joystick_off.png", "", "" },
+	{ "joystick_bg.png", "", "" },
+	{ "joystick_center.png", "", "" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
