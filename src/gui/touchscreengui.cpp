@@ -79,6 +79,7 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	std::string keyname_place = g_settings->get("keymap_place");
 	m_keycode_place = keyname_to_keycode(keyname_place.c_str());
 	m_dig_and_move = g_settings->getBool("dig_and_move");
+	m_enable_sound = g_settings->getBool("enable_touchscreengui_sound");
 	m_press_sound = g_settings->get("btn_press_sound");
 }
 
@@ -852,6 +853,6 @@ void TouchScreenGUI::playSound()
 	if (!m_sound_manager)
 		return;
 
-	if (!m_press_sound.empty())
+	if (m_enable_sound && !m_press_sound.empty())
 		m_sound_manager->playSound(m_press_sound, false, 1.0f);
 }

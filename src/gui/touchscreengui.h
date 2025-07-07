@@ -216,6 +216,7 @@ private:
 	bool m_dig_and_move = false;
 	irr::EKEY_CODE m_keycode_dig;
 	irr::EKEY_CODE m_keycode_place;
+	bool m_enable_sound = true;
 	std::string m_press_sound;
 
 	std::map<size_t, bool> m_events;
