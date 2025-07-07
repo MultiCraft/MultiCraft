@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <map>
 #include <vector>
 
+#include "client/sound.h"
 #include "client/tile.h"
 
 using namespace irr;
@@ -68,6 +69,7 @@ struct button_data
 	const char *image;
 	const char *title;
 	const char *name;
+	bool has_sound;
 };
 
 struct button_info
@@ -152,7 +154,8 @@ public:
 	TouchScreenGUI(IrrlichtDevice *device);
 	~TouchScreenGUI();
 
-	void init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode);
+	void init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode,
+			ISoundManager *sound_manage);
 	bool preprocessEvent(const SEvent &event);
 	bool isButtonPressed(irr::EKEY_CODE keycode);
 	bool immediateRelease(irr::EKEY_CODE keycode);
@@ -199,9 +202,10 @@ public:
 private:
 	static bool m_active;
 
-	IrrlichtDevice *m_device;
-	IGUIEnvironment *m_guienv;
-	ISimpleTextureSource *m_texturesource;
+	IrrlichtDevice *m_device = nullptr;
+	IGUIEnvironment *m_guienv = nullptr;
+	ISimpleTextureSource *m_texturesource = nullptr;
+	ISoundManager *m_sound_manager = nullptr;
 
 	v2u32 m_screensize;
 	s32 m_button_size;
@@ -209,6 +213,10 @@ private:
 	double m_touch_sensitivity;
 	bool m_visible = true;
 	bool m_buttons_initialized = false;
+	bool m_dig_and_move = false;
+	irr::EKEY_CODE m_keycode_dig;
+	irr::EKEY_CODE m_keycode_place;
+	std::string m_press_sound;
 
 	std::map<size_t, bool> m_events;
 	std::vector<hud_button_info> m_hud_buttons;
@@ -221,11 +229,6 @@ private:
 	bool m_overflow_close_schedule = false;
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
-
-	irr::EKEY_CODE m_keycode_dig;
-	irr::EKEY_CODE m_keycode_place;
-
-	bool m_dig_and_move = false;
 
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
@@ -245,6 +248,8 @@ private:
 	void setVisible(bool visible);
 
 	void wakeUpInputhandler();
+
+	void playSound();
 };
 
 extern TouchScreenGUI *g_touchscreengui;
