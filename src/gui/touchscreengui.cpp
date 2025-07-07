@@ -45,12 +45,12 @@ const button_data buttons_data[] = {
 	{ "overflow_btn.png", N_("Overflow menu"), "overflow", true },
 	{ "chat_btn.png", N_("Chat"), "chat", true },
 	{ "tab_btn.png", N_("Tab"), "tabb", true },
-	{ "fly_btn.png", N_("Toggle fly"), "freemove", false },
-	{ "fast_btn.png", N_("Toggle fast"), "fastmove", false },
-	{ "noclip_btn.png", N_("Toggle noclip"), "noclip", false },
-	{ "rangeview_btn.png", N_("Range select"), "rangeselect", false },
-	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat", false },
-	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags", false },
+	{ "fly_btn.png", N_("Toggle fly"), "freemove", true },
+	{ "fast_btn.png", N_("Toggle fast"), "fastmove", true },
+	{ "noclip_btn.png", N_("Toggle noclip"), "noclip", true },
+	{ "rangeview_btn.png", N_("Range select"), "rangeselect", true },
+	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat", true },
+	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags", true },
 	{ "joystick_off.png", "", "", false },
 	{ "joystick_bg.png", "", "", false },
 	{ "joystick_center.png", "", "", false },
@@ -79,7 +79,6 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	std::string keyname_place = g_settings->get("keymap_place");
 	m_keycode_place = keyname_to_keycode(keyname_place.c_str());
 	m_dig_and_move = g_settings->getBool("dig_and_move");
-	m_enable_sound = g_settings->getBool("enable_touchscreengui_sound");
 	m_press_sound = g_settings->get("btn_press_sound");
 }
 
@@ -850,9 +849,6 @@ void TouchScreenGUI::wakeUpInputhandler()
 
 void TouchScreenGUI::playSound()
 {
-	if (!m_sound_manager)
-		return;
-
-	if (m_enable_sound && !m_press_sound.empty())
+	if (m_sound_manager && !m_press_sound.empty())
 		m_sound_manager->playSound(m_press_sound, false, 1.0f);
 }
