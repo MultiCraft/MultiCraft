@@ -48,7 +48,7 @@ public:
 
 	virtual void listAllLoadableBlocks(std::vector<v3s16> &dst) = 0;
 
-	virtual void compact() {};
+	virtual void compact(){};
 };
 
 class PlayerSAO;
