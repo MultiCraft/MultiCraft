@@ -1120,6 +1120,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 	}
 	std::cerr << std::endl;
 	db->endSave();
+	db->compact();
 
 	actionstream << "Done, " << count << " blocks were recompressed." << std::endl;
 	return true;
