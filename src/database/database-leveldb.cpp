@@ -104,6 +104,11 @@ void Database_LevelDB::listAllLoadableBlocks(std::vector<v3s16> &dst)
 	delete it;
 }
 
+void Database_LevelDB::compact()
+{
+	m_database->CompactRange(nullptr, nullptr);
+}
+
 PlayerDatabaseLevelDB::PlayerDatabaseLevelDB(const std::string &savedir)
 {
 	leveldb::Options options;
