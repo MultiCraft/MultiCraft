@@ -38,19 +38,19 @@ const button_data buttons_data[] = {
 	{ "drop_btn.png", N_("Drop"), "drop" },
 	{ "sneak_btn.png", N_("Sneak"), "sneak" },
 	{ "special1_btn.png", N_("Special"), "special1" },
-	{ "inventory_btn.png", N_("Inventory"), "inventory" },
-	{ "escape_btn.png", N_("Exit"), "escape" },
-	{ "minimap_btn.png", N_("Toggle minimap"), "minimap" },
-	{ "camera_btn.png", N_("Change camera"), "camera_mode" },
-	{ "overflow_btn.png", N_("Overflow menu"), "overflow" },
-	{ "chat_btn.png", N_("Chat"), "chat" },
-	{ "tab_btn.png", N_("Tab"), "tabb" },
-	{ "fly_btn.png", N_("Toggle fly"), "freemove" },
-	{ "fast_btn.png", N_("Toggle fast"), "fastmove" },
-	{ "noclip_btn.png", N_("Toggle noclip"), "noclip" },
-	{ "rangeview_btn.png", N_("Range select"), "rangeselect" },
-	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat" },
-	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags" },
+	{ "inventory_btn.png", N_("Inventory"), "inventory", true },
+	{ "escape_btn.png", N_("Exit"), "escape", true },
+	{ "minimap_btn.png", N_("Toggle minimap"), "minimap", true },
+	{ "camera_btn.png", N_("Change camera"), "camera_mode", true },
+	{ "overflow_btn.png", N_("Overflow menu"), "overflow", true },
+	{ "chat_btn.png", N_("Chat"), "chat", true },
+	{ "tab_btn.png", N_("Tab"), "tabb", true },
+	{ "fly_btn.png", N_("Toggle fly"), "freemove", true },
+	{ "fast_btn.png", N_("Toggle fast"), "fastmove", true },
+	{ "noclip_btn.png", N_("Toggle noclip"), "noclip", true },
+	{ "rangeview_btn.png", N_("Range select"), "rangeselect", true },
+	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat", true },
+	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags", true },
 	{ "joystick_off.png", "", "" },
 	{ "joystick_bg.png", "", "" },
 	{ "joystick_center.png", "", "" },
@@ -79,6 +79,7 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	std::string keyname_place = g_settings->get("keymap_place");
 	m_keycode_place = keyname_to_keycode(keyname_place.c_str());
 	m_dig_and_move = g_settings->getBool("dig_and_move");
+	m_press_sound = g_settings->get("btn_press_sound");
 }
 
 TouchScreenGUI::~TouchScreenGUI()
@@ -119,10 +120,12 @@ TouchScreenGUI::~TouchScreenGUI()
 	}
 }
 
-void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode)
+void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode,
+		ISoundManager *sound_manager)
 {
 	assert(tsrc);
 	m_texturesource = tsrc;
+	m_sound_manager = sound_manager;
 
 	initJoystickButton();
 
@@ -418,6 +421,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (button->overflow_menu)
 					m_overflow_close_schedule = true;
+
+				if (buttons_data[button->id].has_sound)
+					playSound();
 			}
 		}
 
@@ -839,4 +845,10 @@ void TouchScreenGUI::wakeUpInputhandler()
 	event.TouchInput.Event = ETIE_COUNT;
 
 	m_device->postEventFromUser(event);
+}
+
+void TouchScreenGUI::playSound()
+{
+	if (m_sound_manager && !m_press_sound.empty())
+		m_sound_manager->playSound(m_press_sound, false, 1.0f);
 }
