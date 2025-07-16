@@ -112,6 +112,9 @@ private:
 
 	// get_system_ram()
 	static int l_get_system_ram(lua_State *L);
+
+	// set_clipboard_text(text)
+	static int l_set_clipboard_text(lua_State *L);
 #endif
 
 public:

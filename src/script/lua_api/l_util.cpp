@@ -550,6 +550,13 @@ int ModApiUtil::l_get_system_ram(lua_State *L)
 
 	return 1;
 }
+
+int ModApiUtil::l_set_clipboard_text(lua_State *L)
+{
+	const char *text = luaL_checkstring(L, 1);
+	porting::setClipboardText(text);
+	return 0;
+}
 #endif
 
 void ModApiUtil::Initialize(lua_State *L, int top)
@@ -613,6 +620,7 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(sha1);
 
 	API_FCT(get_screen_info);
+	API_FCT(set_clipboard_text);
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
@@ -658,6 +666,7 @@ void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	API_FCT(get_secret_key);
 	API_FCT(get_screen_info);
 	API_FCT(get_system_ram);
+	API_FCT(set_clipboard_text);
 #else
 	FATAL_ERROR("InitializeMainMenu called from server");
 #endif

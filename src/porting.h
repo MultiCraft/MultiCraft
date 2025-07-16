@@ -371,6 +371,8 @@ int getTotalSystemMemory();
 
 bool open_directory(const std::string &path);
 
+void setClipboardText(const char *text);
+
 } // namespace porting
 
 #ifdef __ANDROID__

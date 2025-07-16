@@ -784,6 +784,13 @@ bool open_directory(const std::string &path)
 	return open_uri(path);
 }
 
+void setClipboardText(const char *text)
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	SDL_SetClipboardText(text);
+#endif
+}
+
 // Load performance counter frequency only once at startup
 #ifdef _WIN32
 
