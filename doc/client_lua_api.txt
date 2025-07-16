@@ -656,7 +656,7 @@ Minetest namespace reference
    * If a flag in this table is set to true, the feature is RESTRICTED.
    * Possible flags: `load_client_mods`, `chat_messages`, `read_itemdefs`,
                    `read_nodedefs`, `lookup_nodes`, `read_playerinfo`
-* `minetest.set_clipboard_text(text)`: Copies text to the clipboard
+* `minetest.copy_to_clipboard(text)`: Copies text to the clipboard
 
 ### Logging
 * `minetest.debug(...)`
