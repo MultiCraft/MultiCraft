@@ -553,8 +553,9 @@ int ModApiUtil::l_get_system_ram(lua_State *L)
 
 int ModApiUtil::l_set_clipboard_text(lua_State *L)
 {
+	IOSOperator *op = RenderingEngine::get_raw_device()->getOSOperator();
 	const char *text = luaL_checkstring(L, 1);
-	porting::setClipboardText(text);
+	op->copyToClipboard(text);
 	return 0;
 }
 #endif
