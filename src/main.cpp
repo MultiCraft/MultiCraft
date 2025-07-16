@@ -1083,7 +1083,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 	std::vector<v3s16> blocks;
 	db->listAllLoadableBlocks(blocks);
 	db->beginSave();
-	/*std::istringstream iss(std::ios_base::binary);
+	std::istringstream iss(std::ios_base::binary);
 	std::ostringstream oss(std::ios_base::binary);
 	for (auto it = blocks.begin(); it != blocks.end(); ++it) {
 		if (kill) return false;
@@ -1117,7 +1117,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 			db->beginSave();
 			last_update_time = porting::getTimeS();
 		}
-	}*/
+	}
 	std::cerr << std::endl;
 	db->endSave();
 	db->compact();
