@@ -409,6 +409,9 @@ void Client::handleCommand_CopyToClipboard(NetworkPacket *pkt)
 
 	IOSOperator *op = RenderingEngine::get_raw_device()->getOSOperator();
 	op->copyToClipboard(text.c_str());
+#if defined(__ANDROID__) || defined(__IOS__)
+	porting::showToast("Copied to clipboard");
+#endif
 }
 
 void Client::handleCommand_ChatMessage(NetworkPacket *pkt)

@@ -556,6 +556,9 @@ int ModApiUtil::l_copy_to_clipboard(lua_State *L)
 	IOSOperator *op = RenderingEngine::get_raw_device()->getOSOperator();
 	const char *text = luaL_checkstring(L, 1);
 	op->copyToClipboard(text);
+#if defined(__ANDROID__) || defined(__IOS__)
+	porting::showToast("Copied to clipboard");
+#endif
 	return 0;
 }
 #endif
