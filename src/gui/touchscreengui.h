@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <map>
 #include <vector>
 
+#include "client/sound.h"
 #include "client/tile.h"
 #include "settings.h"
 
@@ -81,6 +82,7 @@ struct button_data
 	const char *image;
 	const char *title;
 	const char *name;
+	bool has_sound;
 };
 
 struct button_info
@@ -141,6 +143,7 @@ struct camera_info
 	bool has_really_moved = false;
 	bool dig = false;
 	bool place = false;
+	bool place_shootline = false;
 	s32 x = 0;
 	s32 y = 0;
 	s32 event_id = -1;
@@ -151,6 +154,7 @@ struct camera_info
 		has_really_moved = false;
 		dig = false;
 		place = false;
+		place_shootline = false;
 		x = 0;
 		y = 0;
 		event_id = -1;
@@ -185,7 +189,8 @@ public:
 	TouchScreenGUI(IrrlichtDevice *device);
 	~TouchScreenGUI();
 
-	void init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode);
+	void init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode,
+			ISoundManager *sound_manage);
 	bool preprocessEvent(const SEvent &event);
 	bool isButtonPressed(irr::EKEY_CODE keycode);
 	bool immediateRelease(irr::EKEY_CODE keycode);
@@ -207,7 +212,16 @@ public:
 		return res;
 	}
 
-	line3d<f32> getShootline() { return m_camera.shootline; }
+	line3d<f32> getShootline()
+	{
+		if (m_camera_additional.event_id != -1 ||
+				m_camera_additional.place_shootline) {
+			m_camera_additional.place_shootline = false;
+			return m_camera_additional.shootline;
+		} else {
+			return m_camera.shootline;
+		}
+	}
 
 	void step(float dtime);
 	void hide();
@@ -225,9 +239,10 @@ public:
 private:
 	static bool m_active;
 
-	IrrlichtDevice *m_device;
-	IGUIEnvironment *m_guienv;
-	ISimpleTextureSource *m_texturesource;
+	IrrlichtDevice *m_device = nullptr;
+	IGUIEnvironment *m_guienv = nullptr;
+	ISimpleTextureSource *m_texturesource = nullptr;
+	ISoundManager *m_sound_manager = nullptr;
 
 	v2u32 m_screensize;
 	s32 m_button_size;
@@ -238,6 +253,7 @@ private:
 	bool m_dig_and_move = false;
 	irr::EKEY_CODE m_keycode_dig;
 	irr::EKEY_CODE m_keycode_place;
+	std::string m_press_sound;
 
 	std::map<size_t, bool> m_events;
 	std::vector<hud_button_info> m_hud_buttons;
@@ -245,6 +261,7 @@ private:
 	joystick_info m_joystick;
 	camera_info m_camera;
 	editor_info m_editor;
+	camera_info m_camera_additional;
 
 	touch_gui_state m_current_state = STATE_DEFAULT;
 	bool m_overflow_close_schedule = false;
@@ -271,12 +288,14 @@ private:
 	void rebuildOverflowMenu();
 
 	bool moveJoystick(s32 x, s32 y);
-	void updateCamera(s32 x, s32 y);
+	void updateCamera(camera_info &camera, s32 x, s32 y);
 
 	void changeCurrentState(touch_gui_state state);
 	void setVisible(bool visible);
 
 	void wakeUpInputhandler();
+
+	void playSound();
 };
 
 extern TouchScreenGUI *g_touchscreengui;

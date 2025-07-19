@@ -38,19 +38,19 @@ const button_data buttons_data[] = {
 	{ "drop_btn.png", N_("Drop"), "drop" },
 	{ "sneak_btn.png", N_("Sneak"), "sneak" },
 	{ "special1_btn.png", N_("Special"), "special1" },
-	{ "inventory_btn.png", N_("Inventory"), "inventory" },
-	{ "escape_btn.png", N_("Exit"), "escape" },
-	{ "minimap_btn.png", N_("Toggle minimap"), "minimap" },
-	{ "camera_btn.png", N_("Change camera"), "camera_mode" },
-	{ "overflow_btn.png", N_("Overflow menu"), "overflow" },
-	{ "chat_btn.png", N_("Chat"), "chat" },
-	{ "tab_btn.png", N_("Tab"), "tabb" },
-	{ "fly_btn.png", N_("Toggle fly"), "freemove" },
-	{ "fast_btn.png", N_("Toggle fast"), "fastmove" },
-	{ "noclip_btn.png", N_("Toggle noclip"), "noclip" },
-	{ "rangeview_btn.png", N_("Range select"), "rangeselect" },
-	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat" },
-	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags" },
+	{ "inventory_btn.png", N_("Inventory"), "inventory", true },
+	{ "escape_btn.png", N_("Exit"), "escape", true },
+	{ "minimap_btn.png", N_("Toggle minimap"), "minimap", true },
+	{ "camera_btn.png", N_("Change camera"), "camera_mode", true },
+	{ "overflow_btn.png", N_("Overflow menu"), "overflow", true },
+	{ "chat_btn.png", N_("Chat"), "chat", true },
+	{ "tab_btn.png", N_("Tab"), "tabb", true },
+	{ "fly_btn.png", N_("Toggle fly"), "freemove", true },
+	{ "fast_btn.png", N_("Toggle fast"), "fastmove", true },
+	{ "noclip_btn.png", N_("Toggle noclip"), "noclip", true },
+	{ "rangeview_btn.png", N_("Range select"), "rangeselect", true },
+	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat", true },
+	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags", true },
 	{ "joystick_off.png", "", "joystick" },
 	{ "joystick_bg.png", "", "joystick" },
 	{ "joystick_center.png", "", "joystick_center" },
@@ -83,6 +83,7 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	std::string keyname_place = g_settings->get("keymap_place");
 	m_keycode_place = keyname_to_keycode(keyname_place.c_str());
 	m_dig_and_move = g_settings->getBool("dig_and_move");
+	m_press_sound = g_settings->get("btn_press_sound");
 }
 
 TouchScreenGUI::~TouchScreenGUI()
@@ -125,10 +126,12 @@ TouchScreenGUI::~TouchScreenGUI()
 	delete m_settings;
 }
 
-void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode)
+void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode,
+		ISoundManager *sound_manager)
 {
 	assert(tsrc);
 	m_texturesource = tsrc;
+	m_sound_manager = sound_manager;
 
 	initSettings();
 
@@ -506,6 +509,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				} else if (button->state == STATE_OVERFLOW) {
 					m_overflow_close_schedule = true;
 				}
+
+				if (buttons_data[button->id].has_sound)
+					playSound();
 			}
 		}
 
@@ -531,13 +537,23 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 
 			if (!m_events[id]) {
-				m_events[id] = true;
-				m_camera.downtime = porting::getTimeMs();
-				m_camera.x = x;
-				m_camera.y = y;
-				m_camera.event_id = id;
+				if (m_camera.event_id == -1) {
+					m_events[id] = true;
+					m_camera.downtime = porting::getTimeMs();
+					m_camera.x = x;
+					m_camera.y = y;
+					m_camera.event_id = id;
 
-				updateCamera(x, y);
+					updateCamera(m_camera, x, y);
+				} else if (m_dig_and_move && m_camera_additional.event_id == -1) {
+					m_events[id] = true;
+					m_camera_additional.downtime = porting::getTimeMs();
+					m_camera_additional.x = x;
+					m_camera_additional.y = y;
+					m_camera_additional.event_id = id;
+
+					updateCamera(m_camera_additional, x, y);
+				}
 			}
 		}
 
@@ -593,7 +609,15 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if (m_joystick.event_id == id)
 			m_joystick.reset(m_visible && m_current_state == STATE_DEFAULT);
 
-		if (m_camera.event_id == id) {
+		if (m_camera.event_id == id && m_camera_additional.event_id != -1) {
+			m_camera.reset();
+			m_camera.event_id = m_camera_additional.event_id;
+			m_camera.x = m_camera_additional.x;
+			m_camera.y = m_camera_additional.y;
+			m_camera.has_really_moved = true;
+			m_camera_additional.reset();
+			updateCamera(m_camera, m_camera.x, m_camera.y);
+		} else if (m_camera.event_id == id) {
 			bool place = false;
 			if (!m_camera.has_really_moved && !m_camera.dig) {
 				u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
@@ -601,6 +625,15 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 			m_camera.reset();
 			m_camera.place = place;
+		} else if (m_dig_and_move && m_camera_additional.event_id == id) {
+			bool place = false;
+			if (!m_camera_additional.has_really_moved && !m_camera_additional.dig) {
+				u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
+				place = (delta >= MIN_PLACE_TIME_MS);
+			}
+			m_camera_additional.reset();
+			m_camera_additional.place = place;
+			m_camera_additional.place_shootline = place;
 		}
 
 		if (m_editor.event_id == id) {
@@ -622,7 +655,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				if (moveJoystick(x, y))
 					result = true;
 			} else if (m_camera.event_id == id) {
-				updateCamera(x, y);
+				updateCamera(m_camera, x, y);
 			} else if (m_editor.event_id == id) {
 				if (m_editor.change_size) {
 					IGUIButton *button = m_editor.guibutton;
@@ -640,6 +673,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					m_editor.x = x;
 					m_editor.y = y;
 				}
+			} else if (m_dig_and_move && m_camera_additional.event_id == id) {
+				updateCamera(m_camera_additional, x, y);
 			} else {
 				bool overflow_btn_pressed = false;
 
@@ -748,25 +783,25 @@ bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 	return false;
 }
 
-void TouchScreenGUI::updateCamera(s32 x, s32 y)
+void TouchScreenGUI::updateCamera(camera_info &camera, s32 x, s32 y)
 {
 	double distance = sqrt(
-			(m_camera.x - x) * (m_camera.x - x) +
-			(m_camera.y - y) * (m_camera.y - y));
+			(camera.x - x) * (camera.x - x) +
+			(camera.y - y) * (camera.y - y));
 
-	if ((m_dig_and_move || !m_camera.dig) &&
-			((distance > m_touchscreen_threshold) || m_camera.has_really_moved)) {
-		m_camera.has_really_moved = true;
+	if ((m_dig_and_move || !camera.dig) &&
+			((distance > m_touchscreen_threshold) || camera.has_really_moved)) {
+		camera.has_really_moved = true;
 
-		m_camera.yaw_change -= (x - m_camera.x) * m_touch_sensitivity;
-		m_camera.pitch += (y - m_camera.y) * m_touch_sensitivity;
-		m_camera.pitch = std::min(std::max((float) m_camera.pitch, -180.0f), 180.0f);
+		camera.yaw_change -= (x - camera.x) * m_touch_sensitivity;
+		camera.pitch += (y - camera.y) * m_touch_sensitivity;
+		camera.pitch = std::min(std::max((float) camera.pitch, -180.0f), 180.0f);
 
-		m_camera.x = x;
-		m_camera.y = y;
+		camera.x = x;
+		camera.y = y;
 	}
 
-	m_camera.shootline = m_device->getSceneManager()
+	camera.shootline = m_device->getSceneManager()
 			->getSceneCollisionManager()
 			->getRayFromScreenCoordinates(v2s32(x, y));
 }
@@ -831,6 +866,18 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 		}
 	}
 
+	if (m_camera_additional.dig) {
+		if (m_keycode_dig == keycode)
+			return true;
+	}
+
+	if (m_camera_additional.place) {
+		if (m_keycode_place == keycode) {
+			m_camera_additional.place = false;
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -866,6 +913,14 @@ void TouchScreenGUI::step(float dtime)
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera.dig = true;
+			wakeUpInputhandler();
+		}
+	}
+
+	if (m_camera_additional.event_id != -1 && (!m_camera_additional.has_really_moved)) {
+		u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
+		if (delta > MIN_DIG_TIME_MS) {
+			m_camera_additional.dig = true;
 			wakeUpInputhandler();
 		}
 	}
@@ -961,6 +1016,7 @@ void TouchScreenGUI::reset()
 
 	m_joystick.reset(m_visible && (m_current_state == STATE_DEFAULT));
 	m_camera.reset();
+	m_camera_additional.reset();
 }
 
 void TouchScreenGUI::wakeUpInputhandler()
@@ -971,4 +1027,10 @@ void TouchScreenGUI::wakeUpInputhandler()
 	event.TouchInput.Event = ETIE_COUNT;
 
 	m_device->postEventFromUser(event);
+}
+
+void TouchScreenGUI::playSound()
+{
+	if (m_sound_manager && !m_press_sound.empty())
+		m_sound_manager->playSound(m_press_sound, false, 1.0f);
 }
