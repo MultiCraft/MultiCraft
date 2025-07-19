@@ -322,6 +322,11 @@ enum ToClientCommand
 
 	// (oops, there is some gap here)
 
+	TOCLIENT_COPY_TO_CLIPBOARD = 0x2E,
+	/*
+		std::string text
+	*/
+
 	TOCLIENT_CHAT_MESSAGE = 0x2F,
 	/*
 		u8 version

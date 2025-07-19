@@ -50,6 +50,8 @@ core.get_version() (possible in async calls)
 ^ returns current core version
 core.get_system_ram()
 ^ returns system memory in MB
+core.copy_to_clipboard(text)
+^ Copies text to the clipboard
 
 
 

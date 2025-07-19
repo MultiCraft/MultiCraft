@@ -3274,6 +3274,13 @@ bool Server::showFormspec(const char *playername, const std::string &formspec,
 	return true;
 }
 
+void Server::copyToClipboard(RemotePlayer *player, const std::string &text)
+{
+	NetworkPacket pkt(TOCLIENT_COPY_TO_CLIPBOARD, 0, player->getPeerId());
+	pkt << text;
+	Send(&pkt);
+}
+
 u32 Server::hudAdd(RemotePlayer *player, HudElement *form)
 {
 	if (!player)

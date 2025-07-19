@@ -44,6 +44,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "tileanimation.h"
 #include "gettext.h"
 #include "skyparams.h"
+#include "client/renderingengine.h"
 
 void Client::handleCommand_Deprecated(NetworkPacket* pkt)
 {
@@ -395,6 +396,22 @@ void Client::handleCommand_TimeOfDay(NetworkPacket* pkt)
 	//infostream << "Client: time_of_day=" << time_of_day
 	//		<< " time_speed=" << time_speed
 	//		<< " dr=" << dr << std::endl;
+}
+
+void Client::handleCommand_CopyToClipboard(NetworkPacket *pkt)
+{
+	/*
+	 *	std::string text
+	 */
+
+	std::string text;
+	*pkt >> text;
+
+	IOSOperator *op = RenderingEngine::get_raw_device()->getOSOperator();
+	op->copyToClipboard(text.c_str());
+#if defined(__ANDROID__) || defined(__IOS__)
+	porting::showToast("Copied to clipboard");
+#endif
 }
 
 void Client::handleCommand_ChatMessage(NetworkPacket *pkt)

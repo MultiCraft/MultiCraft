@@ -306,6 +306,7 @@ public:
 	Map & getMap() { return m_env->getMap(); }
 	ServerEnvironment & getEnv() { return *m_env; }
 	v3f findSpawnPos();
+	void copyToClipboard(RemotePlayer *player, const std::string &text);
 
 	u32 hudAdd(RemotePlayer *player, HudElement *element);
 	bool hudRemove(RemotePlayer *player, u32 id);

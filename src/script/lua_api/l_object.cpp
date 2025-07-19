@@ -1379,6 +1379,20 @@ int ObjectRef::l_get_formspec_prepend(lua_State *L)
 	return 1;
 }
 
+// copy_to_clipboard(self, text)
+int ObjectRef::l_copy_to_clipboard(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+	ObjectRef *ref = checkobject(L, 1);
+	RemotePlayer *player = getplayer(ref);
+	if (player == nullptr)
+		return 0;
+
+	std::string text = luaL_checkstring(L, 2);
+	getServer(L)->copyToClipboard(player, text);
+	return 0;
+}
+
 // get_player_control(self)
 int ObjectRef::l_get_player_control(lua_State *L)
 {
@@ -2383,6 +2397,7 @@ luaL_Reg ObjectRef::methods[] = {
 	luamethod(ObjectRef, get_inventory_formspec),
 	luamethod(ObjectRef, set_formspec_prepend),
 	luamethod(ObjectRef, get_formspec_prepend),
+	luamethod(ObjectRef, copy_to_clipboard),
 	luamethod(ObjectRef, get_player_control),
 	luamethod(ObjectRef, get_player_control_bits),
 	luamethod(ObjectRef, set_physics_override),
