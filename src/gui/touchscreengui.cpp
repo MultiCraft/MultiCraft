@@ -1017,6 +1017,7 @@ void TouchScreenGUI::reset()
 	m_joystick.reset(m_visible && (m_current_state == STATE_DEFAULT));
 	m_camera.reset();
 	m_camera_additional.reset();
+	m_editor.reset();
 }
 
 void TouchScreenGUI::wakeUpInputhandler()
