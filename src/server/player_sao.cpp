@@ -549,7 +549,11 @@ void PlayerSAO::unlinkPlayerSessionAndSave()
 {
 	assert(m_player->getPlayerSAO() == this);
 	m_player->setPeerId(PEER_ID_INEXISTENT);
-	m_env->savePlayer(m_player);
+	try {
+		m_env->savePlayer(m_player);
+	} catch (const DatabaseException &e) {
+		errorstream << "ServerEnvironment: " << e.what() << std::endl;
+	}
 	m_player->setPlayerSAO(NULL);
 	m_env->removePlayer(m_player);
 }
