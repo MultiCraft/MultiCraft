@@ -6,7 +6,7 @@ plugins {
 android {
 	buildToolsVersion = "35.0.1"
 	compileSdk = 35
-	ndkVersion = "28.1.13356709"
+	ndkVersion = "28.2.13676358"
 	namespace = "com.multicraft"
 
 	defaultConfig {
@@ -37,7 +37,6 @@ android {
 		abi {
 			enable true
 			reset()
-			//noinspection ChromeOsAbiSupport
 			include 'armeabi-v7a', 'arm64-v8a', 'x86_64'
 		}
 	}
