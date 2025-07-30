@@ -64,6 +64,7 @@ typedef enum
 	joystick_bg_id,
 	joystick_center_id,
 	editor_open_id,
+	editor_save_id,
 	editor_close_id,
 	editor_default_id,
 	editor_move_id,
@@ -277,6 +278,7 @@ private:
 	void setValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
 	rect<s32> getButtonRect(touch_gui_button_id id);
 	void resetAllValues();
+	void restoreAllValues();
 
 	void loadButtonTexture(
 			IGUIButton *btn, const char *path, const rect<s32> &button_rect);

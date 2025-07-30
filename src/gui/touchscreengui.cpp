@@ -54,11 +54,12 @@ const button_data buttons_data[] = {
 	{ "joystick_off.png", "", "joystick" },
 	{ "joystick_bg.png", "", "joystick" },
 	{ "joystick_center.png", "", "joystick_center" },
-	{ "overflow_btn.png", N_("Open editor"), "editor_open" },
-	{ "", N_("Close"), "editor_close" },
-	{ "", N_("Restore"), "editor_default" },
-	{ "", N_("Move"), "editor_move" },
-	{ "", N_("Scale"), "editor_scale" },
+	{ "", N_("Open editor"), "editor_open" },
+	{ "edit-interface_save.png", N_("Save"), "editor_save" },
+	{ "edit-interface_close.png", N_("Close"), "editor_close" },
+	{ "edit-interface_restore.png", N_("Restore"), "editor_default" },
+	{ "edit-interface_move.png", N_("Move"), "editor_move" },
+	{ "edit-interface_scale.png", N_("Scale"), "editor_scale" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -164,6 +165,7 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 		initButton(id, recti(), STATE_OVERFLOW);
 	}
 
+	initButton(editor_save_id, getButtonRect(editor_save_id), STATE_EDITOR);
 	initButton(editor_close_id, getButtonRect(editor_close_id), STATE_EDITOR);
 	initButton(editor_default_id, getButtonRect(editor_default_id), STATE_EDITOR);
 	m_editor.button_move = initButton(editor_move_id,
@@ -395,20 +397,24 @@ void TouchScreenGUI::initSettings()
 	setDefaultValues(joystick_center_id,
 			0, 0, m_button_size * 1.5, m_button_size * 1.5);
 
-	setDefaultValues(editor_close_id,
+	setDefaultValues(editor_save_id,
 			m_button_size, m_screensize.Y - m_button_size,
 			m_button_size * 2, m_button_size);
 
-	setDefaultValues(editor_default_id,
+	setDefaultValues(editor_close_id,
 			m_button_size * 3, m_screensize.Y - m_button_size,
 			m_button_size * 2, m_button_size);
 
+	setDefaultValues(editor_default_id,
+			m_button_size * 5, m_screensize.Y - m_button_size,
+			m_button_size * 2, m_button_size);
+
 	setDefaultValues(editor_move_id,
-			m_button_size * 6, m_screensize.Y - m_button_size,
+			m_button_size * 8, m_screensize.Y - m_button_size,
 			m_button_size * 2, m_button_size);
 
 	setDefaultValues(editor_scale_id,
-			m_button_size * 8, m_screensize.Y - m_button_size,
+			m_button_size * 10, m_screensize.Y - m_button_size,
 			m_button_size * 2, m_button_size);
 }
 
@@ -454,6 +460,15 @@ void TouchScreenGUI::resetAllValues()
 	initSettings();
 }
 
+void TouchScreenGUI::restoreAllValues()
+{
+	for (auto name : m_settings->getNames()) {
+		m_settings->remove(name);
+	}
+
+	initSettings();
+}
+
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
 	if (!m_buttons_initialized)
@@ -473,6 +488,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 	if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
 		m_events[id] = false;
 		bool reset_all_values = false;
+		bool restore_all_values = false;
 		touch_gui_state new_state = m_current_state;
 
 		for (auto button : m_buttons) {
@@ -486,7 +502,11 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (button->id == editor_open_id) {
 					new_state = STATE_EDITOR;
+				} else if (button->id == editor_save_id) {
+					m_settings->updateConfigFile(m_settings_path.c_str());
+					new_state = STATE_DEFAULT;
 				} else if (button->id == editor_close_id) {
+					restore_all_values = true;
 					new_state = STATE_DEFAULT;
 				} else if (button->id == editor_default_id) {
 					reset_all_values = true;
@@ -590,6 +610,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if (reset_all_values)
 			resetAllValues();
 
+		if (restore_all_values)
+			restoreAllValues();
+
 		if (m_current_state != new_state)
 			changeCurrentState(new_state);
 
@@ -643,8 +666,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
 					rect.getWidth(), rect.getHeight());
 			m_editor.reset();
-
-			m_settings->updateConfigFile(m_settings_path.c_str());
 		}
 
 		result = true;
