@@ -81,6 +81,7 @@ typedef enum
 struct button_data
 {
 	const char *image;
+	const char *image_pressed;
 	const char *title;
 	const char *name;
 	bool has_sound;
@@ -281,10 +282,11 @@ private:
 	void restoreAllValues();
 
 	void loadButtonTexture(
-			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
+			IGUIButton *btn, std::string image, std::string image_pressed,
+			const rect<s32> &button_rect);
 	button_info *initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 			touch_gui_state state = STATE_DEFAULT,
-			const char *custom_image = "");
+			std::string custom_image = "");
 	void initJoystickButton();
 	void updateButtons();
 	void rebuildOverflowMenu();

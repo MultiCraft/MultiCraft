@@ -34,32 +34,32 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 using namespace irr::core;
 
 const button_data buttons_data[] = {
-	{ "jump_btn.png", N_("Jump"), "jump" },
-	{ "drop_btn.png", N_("Drop"), "drop" },
-	{ "sneak_btn.png", N_("Sneak"), "sneak" },
-	{ "special1_btn.png", N_("Special"), "special1" },
-	{ "inventory_btn.png", N_("Inventory"), "inventory", true },
-	{ "escape_btn.png", N_("Exit"), "escape", true },
-	{ "minimap_btn.png", N_("Toggle minimap"), "minimap", true },
-	{ "camera_btn.png", N_("Change camera"), "camera_mode", true },
-	{ "overflow_btn.png", N_("Overflow menu"), "overflow", true },
-	{ "chat_btn.png", N_("Chat"), "chat", true },
-	{ "tab_btn.png", N_("Tab"), "tabb", true },
-	{ "fly_btn.png", N_("Toggle fly"), "freemove", true },
-	{ "fast_btn.png", N_("Toggle fast"), "fastmove", true },
-	{ "noclip_btn.png", N_("Toggle noclip"), "noclip", true },
-	{ "rangeview_btn.png", N_("Range select"), "rangeselect", true },
-	{ "chat_hide_btn.png", N_("Toggle chat log"), "toggle_chat", true },
-	{ "names_hide_btn.png", N_("Toggle nametags"), "toggle_nametags", true },
-	{ "joystick_off.png", "", "joystick" },
-	{ "joystick_bg.png", "", "joystick" },
-	{ "joystick_center.png", "", "joystick_center" },
-	{ "", N_("Open editor"), "editor_open" },
-	{ "edit-interface_save.png", N_("Save"), "editor_save" },
-	{ "edit-interface_close.png", N_("Close"), "editor_close" },
-	{ "edit-interface_restore.png", N_("Restore"), "editor_default" },
-	{ "edit-interface_move.png", N_("Move"), "editor_move" },
-	{ "edit-interface_scale.png", N_("Scale"), "editor_scale" },
+	{ "jump_btn.png", "", N_("Jump"), "jump" },
+	{ "drop_btn.png", "", N_("Drop"), "drop" },
+	{ "sneak_btn.png", "", N_("Sneak"), "sneak" },
+	{ "special1_btn.png", "", N_("Special"), "special1" },
+	{ "inventory_btn.png", "", N_("Inventory"), "inventory", true },
+	{ "escape_btn.png", "", N_("Exit"), "escape", true },
+	{ "minimap_btn.png", "", N_("Toggle minimap"), "minimap", true },
+	{ "camera_btn.png", "", N_("Change camera"), "camera_mode", true },
+	{ "overflow_btn.png", "", N_("Overflow menu"), "overflow", true },
+	{ "chat_btn.png", "", N_("Chat"), "chat", true },
+	{ "tab_btn.png", "", N_("Tab"), "tabb", true },
+	{ "fly_btn.png", "", N_("Toggle fly"), "freemove", true },
+	{ "fast_btn.png", "", N_("Toggle fast"), "fastmove", true },
+	{ "noclip_btn.png", "", N_("Toggle noclip"), "noclip", true },
+	{ "rangeview_btn.png", "", N_("Range select"), "rangeselect", true },
+	{ "chat_hide_btn.png", "", N_("Toggle chat log"), "toggle_chat", true },
+	{ "names_hide_btn.png", "", N_("Toggle nametags"), "toggle_nametags", true },
+	{ "joystick_off.png", "", "", "joystick" },
+	{ "joystick_bg.png", "", "", "joystick" },
+	{ "joystick_center.png", "", "", "joystick_center" },
+	{ "", "", N_("Open editor"), "editor_open" },
+	{ "edit-interface_save.png", "edit-interface_save_pressed.png", N_("Save"), "editor_save" },
+	{ "edit-interface_close.png", "edit-interface_close_pressed.png", N_("Close"), "editor_close" },
+	{ "edit-interface_restore.png", "edit-interface_restore_pressed.png", N_("Restore"), "editor_default" },
+	{ "edit-interface_move.png", "edit-interface_move_pressed.png", N_("Move"), "editor_move" },
+	{ "edit-interface_scale.png", "edit-interface_scale_pressed.png", N_("Scale"), "editor_scale" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -170,8 +170,10 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	initButton(editor_default_id, getButtonRect(editor_default_id), STATE_EDITOR);
 	m_editor.button_move = initButton(editor_move_id,
 			getButtonRect(editor_move_id), STATE_EDITOR);
+	m_editor.button_move->guibutton->setIsPushButton();
 	m_editor.button_scale = initButton(editor_scale_id,
 			getButtonRect(editor_scale_id), STATE_EDITOR);
+	m_editor.button_scale->guibutton->setIsPushButton();
 
 	m_editor.button_move->guibutton->setOverrideColor(video::SColor(255, 255, 0, 0));
 
@@ -180,23 +182,34 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	m_buttons_initialized = true;
 }
 
-void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, const char *path,
-		const rect<s32> &button_rect)
+void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, std::string image,
+		std::string image_pressed, const rect<s32> &button_rect)
 {
+	std::string image_path = std::string("touch") + DIR_DELIM + image;
 	video::ITexture *texture = guiScalingImageButton(m_device->getVideoDriver(),
-			m_texturesource->getTexture(path, nullptr), button_rect.getWidth(),
-			button_rect.getHeight());
+			m_texturesource->getTexture(image_path.c_str(), nullptr),
+			button_rect.getWidth(), button_rect.getHeight());
+	video::ITexture *texture_pressed = texture;
+
+	if (!image_pressed.empty()) {
+		std::string pressed_path = std::string("touch") + DIR_DELIM + image_pressed;
+		video::ITexture *tmp = guiScalingImageButton(m_device->getVideoDriver(),
+				m_texturesource->getTexture(pressed_path.c_str(), nullptr),
+				button_rect.getWidth(), button_rect.getHeight());
+		if (tmp)
+			texture_pressed = tmp;
+	}
 
 	if (texture) {
 		btn->setUseAlphaChannel(true);
 		if (g_settings->getBool("gui_scaling_filter")) {
 			rect<s32> txr_rect = rect<s32>(v2s32(0, 0), button_rect.getSize());
 			btn->setImage(texture, txr_rect);
-			btn->setPressedImage(texture, txr_rect);
+			btn->setPressedImage(texture_pressed, txr_rect);
 			btn->setScaleImage(false);
 		} else {
 			btn->setImage(texture);
-			btn->setPressedImage(texture);
+			btn->setPressedImage(texture_pressed);
 			btn->setScaleImage(true);
 		}
 		btn->setDrawBorder(false);
@@ -206,21 +219,22 @@ void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, const char *path,
 
 button_info *TouchScreenGUI::initButton(touch_gui_button_id id,
 		const rect<s32> &button_rect, touch_gui_state state,
-		const char *custom_image)
+		std::string custom_image)
 {
 	button_info *btn = new button_info();
 	btn->state = state;
 	btn->id = id;
 
-	const char *image = strcmp(custom_image, "") == 0 ? buttons_data[id].image : custom_image;
+	std::string image = custom_image == "" ? buttons_data[id].image : custom_image;
+	std::string image_pressed = custom_image == "" ? buttons_data[id].image_pressed : custom_image;
 	const wchar_t *str = wgettext(buttons_data[id].title);
 
 	btn->guibutton = m_guienv->addButton(button_rect, nullptr);
 	btn->guibutton->grab();
 	btn->guibutton->setVisible(m_visible && state == STATE_DEFAULT);
 
-	if (strcmp(image, "") != 0)
-		loadButtonTexture(btn->guibutton, image, button_rect);
+	if (!image.empty())
+		loadButtonTexture(btn->guibutton, image, image_pressed, button_rect);
 	else
 		btn->guibutton->setText(str);
 
@@ -242,21 +256,21 @@ void TouchScreenGUI::initJoystickButton()
 	m_joystick.button_off->setVisible(m_visible);
 	m_joystick.button_off->grab();
 	loadButtonTexture(m_joystick.button_off,
-			buttons_data[joystick_off_id].image, button_off_rect);
+			buttons_data[joystick_off_id].image, "", button_off_rect);
 
 	const rect<s32> &button_bg_rect = getButtonRect(joystick_bg_id);
 	m_joystick.button_bg = m_guienv->addButton(button_bg_rect, nullptr);
 	m_joystick.button_bg->setVisible(false);
 	m_joystick.button_bg->grab();
 	loadButtonTexture(m_joystick.button_bg,
-			buttons_data[joystick_bg_id].image, button_bg_rect);
+			buttons_data[joystick_bg_id].image, "", button_bg_rect);
 
 	const rect<s32> &button_center_rect = getButtonRect(joystick_center_id);
 	m_joystick.button_center = m_guienv->addButton(button_center_rect, nullptr);
 	m_joystick.button_center->setVisible(false);
 	m_joystick.button_center->grab();
 	loadButtonTexture(m_joystick.button_center,
-			buttons_data[joystick_center_id].image, button_center_rect);
+			buttons_data[joystick_center_id].image, "", button_center_rect);
 }
 
 void TouchScreenGUI::updateButtons()
@@ -516,11 +530,15 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					m_editor.button_move->guibutton->
 							setOverrideColor(video::SColor(255, 255, 0, 0));
 					m_editor.button_scale->guibutton->enableOverrideColor(false);
+					m_editor.button_move->guibutton->setPressed(true);
+					m_editor.button_scale->guibutton->setPressed(false);
 				} else if (button->id == editor_scale_id) {
 					m_editor.change_size = true;
 					m_editor.button_scale->guibutton->
 							setOverrideColor(video::SColor(255, 255, 0, 0));
 					m_editor.button_move->guibutton->enableOverrideColor(false);
+					m_editor.button_move->guibutton->setPressed(false);
+					m_editor.button_scale->guibutton->setPressed(true);
 				} else if (button->id == overflow_id) {
 					if (m_current_state == STATE_OVERFLOW)
 						new_state = STATE_DEFAULT;
