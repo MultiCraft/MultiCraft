@@ -281,9 +281,8 @@ private:
 	void resetAllValues();
 	void restoreAllValues();
 
-	void loadButtonTexture(
-			IGUIButton *btn, std::string image, std::string image_pressed,
-			const rect<s32> &button_rect);
+	void loadButtonTexture(IGUIButton *btn, std::string image,
+			std::string image_pressed, const rect<s32> &button_rect);
 	button_info *initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 			touch_gui_state state = STATE_DEFAULT,
 			std::string custom_image = "");
