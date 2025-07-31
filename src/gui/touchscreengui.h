@@ -82,6 +82,7 @@ struct button_data
 {
 	const char *image;
 	const char *image_pressed;
+	const char *image_float;
 	const char *title;
 	const char *name;
 	bool has_sound;
@@ -94,6 +95,7 @@ struct button_info
 	touch_gui_button_id id = unknown_id;
 	touch_gui_state state = STATE_DEFAULT;
 	bool pressed = false;
+	bool floating = false;
 	s32 event_id = -1;
 
 	void reset()
@@ -165,6 +167,7 @@ struct camera_info
 
 struct editor_info
 {
+	button_info *button = nullptr;
 	button_info *button_move = nullptr;
 	button_info *button_scale = nullptr;
 	IGUIButton *guibutton = nullptr;
@@ -177,6 +180,7 @@ struct editor_info
 
 	void reset()
 	{
+		button = nullptr;
 		guibutton = nullptr;
 		button_id = unknown_id;
 		event_id = -1;
@@ -278,6 +282,7 @@ private:
 			touch_gui_button_id id, float x1, float y1, float x2, float y2);
 	void setValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
 	rect<s32> getButtonRect(touch_gui_button_id id);
+	rect<s32> getDefaultButtonRect(touch_gui_button_id id);
 	void resetAllValues();
 	void restoreAllValues();
 

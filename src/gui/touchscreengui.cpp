@@ -34,32 +34,32 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 using namespace irr::core;
 
 const button_data buttons_data[] = {
-	{ "jump_btn.png", "", N_("Jump"), "jump" },
-	{ "drop_btn.png", "", N_("Drop"), "drop" },
-	{ "sneak_btn.png", "", N_("Sneak"), "sneak" },
-	{ "special1_btn.png", "", N_("Special"), "special1" },
-	{ "inventory_btn.png", "", N_("Inventory"), "inventory", true },
-	{ "escape_btn.png", "", N_("Exit"), "escape", true },
-	{ "minimap_btn.png", "", N_("Toggle minimap"), "minimap", true },
-	{ "camera_btn.png", "", N_("Change camera"), "camera_mode", true },
-	{ "overflow_btn.png", "", N_("Overflow menu"), "overflow", true },
-	{ "chat_btn.png", "", N_("Chat"), "chat", true },
-	{ "tab_btn.png", "", N_("Tab"), "tabb", true },
-	{ "fly_btn.png", "", N_("Toggle fly"), "freemove", true },
-	{ "fast_btn.png", "", N_("Toggle fast"), "fastmove", true },
-	{ "noclip_btn.png", "", N_("Toggle noclip"), "noclip", true },
-	{ "rangeview_btn.png", "", N_("Range select"), "rangeselect", true },
-	{ "chat_hide_btn.png", "", N_("Toggle chat log"), "toggle_chat", true },
-	{ "names_hide_btn.png", "", N_("Toggle nametags"), "toggle_nametags", true },
-	{ "joystick_off.png", "", "", "joystick" },
-	{ "joystick_bg.png", "", "", "joystick" },
-	{ "joystick_center.png", "", "", "joystick_center" },
-	{ "", "", N_("Open editor"), "editor_open" },
-	{ "edit-interface_save.png", "edit-interface_save_pressed.png", N_("Save"), "editor_save" },
-	{ "edit-interface_close.png", "edit-interface_close_pressed.png", N_("Close"), "editor_close" },
-	{ "edit-interface_restore.png", "edit-interface_restore_pressed.png", N_("Restore"), "editor_default" },
-	{ "edit-interface_move.png", "edit-interface_move_pressed.png", N_("Move"), "editor_move" },
-	{ "edit-interface_scale.png", "edit-interface_scale_pressed.png", N_("Scale"), "editor_scale" },
+	{ "jump_btn.png", "", "", N_("Jump"), "jump" },
+	{ "drop_btn.png", "", "drop_btn_float.png", N_("Drop"), "drop" },
+	{ "sneak_btn.png", "", "sneak_btn_float.png", N_("Sneak"), "sneak" },
+	{ "special1_btn.png", "", "", N_("Special"), "special1" },
+	{ "inventory_btn.png", "", "inventory_btn_float.png", N_("Inventory"), "inventory", true },
+	{ "escape_btn.png", "", "escape_btn_float.png", N_("Exit"), "escape", true },
+	{ "minimap_btn.png", "", "minimap_btn_float.png", N_("Toggle minimap"), "minimap", true },
+	{ "camera_btn.png", "", "camera_btn_float.png", N_("Change camera"), "camera_mode", true },
+	{ "overflow_btn.png", "", "overflow_btn_float.png", N_("Overflow menu"), "overflow", true },
+	{ "chat_btn.png", "", "chat_btn_float.png", N_("Chat"), "chat", true },
+	{ "tab_btn.png", "", "tab_btn_float.png", N_("Tab"), "tabb", true },
+	{ "fly_btn.png", "", "", N_("Toggle fly"), "freemove", true },
+	{ "fast_btn.png", "", "", N_("Toggle fast"), "fastmove", true },
+	{ "noclip_btn.png", "", "", N_("Toggle noclip"), "noclip", true },
+	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true },
+	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true },
+	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true },
+	{ "joystick_off.png", "", "", "", "joystick" },
+	{ "joystick_bg.png", "", "", "", "joystick" },
+	{ "joystick_center.png", "", "", "", "joystick_center" },
+	{ "", "", "", N_("Open editor"), "editor_open" },
+	{ "edit-interface_save.png", "edit-interface_save_pressed.png", "", N_("Save"), "editor_save" },
+	{ "edit-interface_close.png", "edit-interface_close_pressed.png", "", N_("Close"), "editor_close" },
+	{ "edit-interface_restore.png", "edit-interface_restore_pressed.png", "", N_("Restore"), "editor_default" },
+	{ "edit-interface_move.png", "edit-interface_move_pressed.png", "", N_("Move"), "editor_move" },
+	{ "edit-interface_scale.png", "edit-interface_scale_pressed.png", "", N_("Scale"), "editor_scale" },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -171,6 +171,7 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	m_editor.button_move = initButton(editor_move_id,
 			getButtonRect(editor_move_id), STATE_EDITOR);
 	m_editor.button_move->guibutton->setIsPushButton();
+	m_editor.button_move->guibutton->setPressed(true);
 	m_editor.button_scale = initButton(editor_scale_id,
 			getButtonRect(editor_scale_id), STATE_EDITOR);
 	m_editor.button_scale->guibutton->setIsPushButton();
@@ -185,6 +186,9 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, std::string image,
 		std::string image_pressed, const rect<s32> &button_rect)
 {
+	if (image.empty())
+		return;
+
 	std::string image_path = std::string("touch") + DIR_DELIM + image;
 	video::ITexture *texture = guiScalingImageButton(m_device->getVideoDriver(),
 			m_texturesource->getTexture(image_path.c_str(), nullptr),
@@ -225,8 +229,18 @@ button_info *TouchScreenGUI::initButton(touch_gui_button_id id,
 	btn->state = state;
 	btn->id = id;
 
-	std::string image = custom_image == "" ? buttons_data[id].image : custom_image;
-	std::string image_pressed = custom_image == "" ? buttons_data[id].image_pressed : custom_image;
+	std::string image = buttons_data[id].image;
+	std::string image_pressed = buttons_data[id].image_pressed;
+
+	if (!custom_image.empty()) {
+		image = custom_image;
+		image_pressed = custom_image;
+	} else if (state == STATE_DEFAULT && button_rect != getDefaultButtonRect(id)) {
+		image = buttons_data[id].image_float;
+		image_pressed = buttons_data[id].image_float;
+		btn->floating = true;
+	}
+
 	const wchar_t *str = wgettext(buttons_data[id].title);
 
 	btn->guibutton = m_guienv->addButton(button_rect, nullptr);
@@ -283,7 +297,15 @@ void TouchScreenGUI::updateButtons()
 			continue;
 
 		if (button->guibutton) {
+			rect<s32> default_rect = getDefaultButtonRect(button->id);
 			rect<s32> rect = getButtonRect(button->id);
+
+			if (button->floating && rect == default_rect) {
+				loadButtonTexture(button->guibutton,
+					buttons_data[button->id].image, "", getButtonRect(button->id));
+				button->floating = false;
+			}
+
 			button->guibutton->setRelativePosition(rect);
 		}
 	}
@@ -463,6 +485,20 @@ rect<s32> TouchScreenGUI::getButtonRect(touch_gui_button_id id)
 	return rect<s32>(pos, size);
 }
 
+rect<s32> TouchScreenGUI::getDefaultButtonRect(touch_gui_button_id id)
+{
+	Settings *settings = Settings::getLayer(SL_DEFAULTS);
+	std::string name = std::string("tg_") + buttons_data[id].name;
+	position2d<s32> pos = position2d<s32>(
+			std::round(settings->getFloat(name + "_x") * m_screensize.X),
+			std::round(settings->getFloat(name + "_y") * m_screensize.Y));
+	dimension2d<s32> size = dimension2d<s32>(
+			std::round(settings->getFloat(name + "_w") * m_button_size),
+			std::round(settings->getFloat(name + "_h") * m_button_size));
+
+	return rect<s32>(pos, size);
+}
+
 void TouchScreenGUI::resetAllValues()
 {
 	for (auto name : m_settings->getNames()) {
@@ -602,6 +638,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
 					m_events[id] = true;
+					m_editor.button = button;
 					m_editor.guibutton = button->guibutton;
 					m_editor.button_id = button->id;
 					m_editor.event_id = id;
@@ -613,6 +650,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 			if (m_joystick.button_off->isPointInside(core::position2d<s32>(x, y))) {
 				m_events[id] = true;
+				m_editor.button = nullptr;
 				m_editor.guibutton = m_joystick.button_off;
 				m_editor.button_id = joystick_off_id;
 				m_editor.event_id = id;
@@ -678,8 +716,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		}
 
 		if (m_editor.event_id == id) {
-			IGUIButton *button = m_editor.guibutton;
-			rect<s32> rect = button->getRelativePosition();
+			IGUIButton *guibutton = m_editor.guibutton;
+			rect<s32> rect = guibutton->getRelativePosition();
 			setValues(m_editor.button_id,
 					rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
 					rect.getWidth(), rect.getHeight());
@@ -697,18 +735,29 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				updateCamera(m_camera, x, y);
 			} else if (m_editor.event_id == id) {
 				if (m_editor.change_size) {
-					IGUIButton *button = m_editor.guibutton;
+					IGUIButton *guibutton = m_editor.guibutton;
 					rect<s32> rect = m_editor.old_rect;
 					s32 value = std::max(x - m_editor.x, y - m_editor.y);
 					rect.LowerRightCorner += v2s32(value, value);
 					s32 min_size = m_button_size * 0.75f;
-					if (rect.getWidth() >= min_size && rect.getHeight() >= min_size)
-						button->setRelativePosition(rect);
+					if (rect.getWidth() >= min_size && rect.getHeight() >= min_size) {
+						if (!m_editor.button->floating) {
+							loadButtonTexture(guibutton,
+								buttons_data[m_editor.button_id].image_float, "", rect);
+							m_editor.button->floating = true;
+						}
+						guibutton->setRelativePosition(rect);
+					}
 				} else {
-					IGUIButton *button = m_editor.guibutton;
-					rect<s32> rect = button->getRelativePosition();
+					IGUIButton *guibutton = m_editor.guibutton;
+					rect<s32> rect = guibutton->getRelativePosition();
 					rect += v2s32(x - m_editor.x, y - m_editor.y);
-					button->setRelativePosition(rect);
+					if (!m_editor.button->floating) {
+						loadButtonTexture(guibutton,
+							buttons_data[m_editor.button_id].image_float, "", rect);
+						m_editor.button->floating = true;
+					}
+					guibutton->setRelativePosition(rect);
 					m_editor.x = x;
 					m_editor.y = y;
 				}
