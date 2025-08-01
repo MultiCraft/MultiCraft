@@ -232,13 +232,15 @@ button_info *TouchScreenGUI::initButton(touch_gui_button_id id,
 
 	std::string image = buttons_data[id].image;
 	std::string image_pressed = buttons_data[id].image_pressed;
+	std::string image_float = buttons_data[id].image_float;
 
 	if (!custom_image.empty()) {
 		image = custom_image;
 		image_pressed = custom_image;
-	} else if (state == STATE_DEFAULT && button_rect != getDefaultButtonRect(id)) {
-		image = buttons_data[id].image_float;
-		image_pressed = buttons_data[id].image_float;
+	} else if (!image_float.empty() && state == STATE_DEFAULT &&
+			button_rect != getDefaultButtonRect(id)) {
+		image = image_float;
+		image_pressed = image_float;
 		btn->floating = true;
 	}
 
