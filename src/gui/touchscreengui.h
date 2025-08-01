@@ -98,6 +98,7 @@ struct button_info
 	bool pressed = false;
 	bool floating = false;
 	s32 event_id = -1;
+	std::string image;
 
 	void reset()
 	{

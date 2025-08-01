@@ -226,18 +226,22 @@ button_info *TouchScreenGUI::initButton(touch_gui_button_id id,
 		const rect<s32> &button_rect, touch_gui_state state,
 		std::string custom_image)
 {
-	button_info *btn = new button_info();
-	btn->state = state;
-	btn->id = id;
-
 	std::string image = buttons_data[id].image;
 	std::string image_pressed = buttons_data[id].image_pressed;
 	std::string image_float = buttons_data[id].image_float;
 
+	button_info *btn = new button_info();
+	btn->state = state;
+	btn->id = id;
+	btn->image = image;
+
 	if (!custom_image.empty()) {
 		image = custom_image;
 		image_pressed = custom_image;
-	} else if (!image_float.empty() && state == STATE_DEFAULT &&
+		btn->image = image;
+	}
+
+	if (!image_float.empty() && state == STATE_DEFAULT &&
 			button_rect != getDefaultButtonRect(id)) {
 		image = image_float;
 		image_pressed = image_float;
@@ -326,7 +330,7 @@ void TouchScreenGUI::updateButtons()
 			} else if (!(buttons_data[button->id].is_top_button && top_should_float) &&
 					button->floating && rect == default_rect) {
 				loadButtonTexture(button->guibutton,
-					buttons_data[button->id].image, "", getButtonRect(button->id));
+					button->image, "", getButtonRect(button->id));
 				button->floating = false;
 			}
 
@@ -443,7 +447,7 @@ void TouchScreenGUI::initSettings()
 			m_button_size * 1.25, m_button_size);
 
 	setDefaultValues(tab_id,
-			m_screensize.X - m_button_size * 1.25, 0,
+			m_screensize.X - m_button_size * 1.25, m_button_size,
 			m_button_size * 1.25, m_button_size);
 
 	setDefaultValues(joystick_off_id,
