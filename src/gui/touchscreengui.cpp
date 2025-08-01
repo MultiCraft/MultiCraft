@@ -2,8 +2,8 @@
 Copyright (C) 2014 sapier
 Copyright (C) 2018 srifqi, Muhammad Rifqi Priyo Susanto
 		<muhammadrifqipriyosusanto@gmail.com>
-Copyright (C) 2014-2024 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
-Copyright (C) 2023-2024 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
