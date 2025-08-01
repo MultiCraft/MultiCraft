@@ -56,11 +56,11 @@ const button_data buttons_data[] = {
 	{ "joystick_bg.png", "", "", "", "joystick", false, false },
 	{ "joystick_center.png", "", "", "", "joystick_center", false, false },
 	{ "", "", "", N_("Open editor"), "editor_open", false, false },
-	{ "edit-interface_save.png", "edit-interface_save_pressed.png", "", N_("Save"), "editor_save", false, false },
-	{ "edit-interface_close.png", "edit-interface_close_pressed.png", "", N_("Close"), "editor_close", false, false },
-	{ "edit-interface_restore.png", "edit-interface_restore_pressed.png", "", N_("Restore"), "editor_default", false, false },
-	{ "edit-interface_move.png", "edit-interface_move_pressed.png", "", N_("Move"), "editor_move", false, false },
-	{ "edit-interface_scale.png", "edit-interface_scale_pressed.png", "", N_("Scale"), "editor_scale", false, false },
+	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", false, false },
+	{ "edit_ui_close.png", "edit_ui_close_pressed.png", "", N_("Close"), "editor_close", false, false },
+	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", false, false },
+	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", false, false },
+	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", false, false },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
