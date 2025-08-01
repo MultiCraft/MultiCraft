@@ -763,7 +763,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					rect.LowerRightCorner += v2s32(value, value);
 					s32 min_size = m_button_size * 0.75f;
 					if (rect.getWidth() >= min_size && rect.getHeight() >= min_size) {
-						if (!m_editor.button->floating) {
+						if (m_editor.button && !m_editor.button->floating) {
 							m_editor.button->floating = true;
 							loadButtonTexture(guibutton,
 								buttons_data[m_editor.button_id].image_float, "", rect);
@@ -785,7 +785,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					IGUIButton *guibutton = m_editor.guibutton;
 					rect<s32> rect = guibutton->getRelativePosition();
 					rect += v2s32(x - m_editor.x, y - m_editor.y);
-					if (!m_editor.button->floating) {
+					if (m_editor.button && !m_editor.button->floating) {
 						m_editor.button->floating = true;
 						loadButtonTexture(guibutton,
 							buttons_data[m_editor.button_id].image_float, "", rect);
