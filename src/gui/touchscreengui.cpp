@@ -545,10 +545,7 @@ void TouchScreenGUI::restoreAllValues()
 
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
-	if (!m_buttons_initialized)
-		return false;
-
-	if (!m_visible)
+	if (!m_buttons_initialized || !m_visible || m_close)
 		return false;
 
 	if (event.EventType != EET_TOUCH_INPUT_EVENT)
@@ -1032,6 +1029,9 @@ bool TouchScreenGUI::immediateRelease(irr::EKEY_CODE keycode)
 
 void TouchScreenGUI::step(float dtime)
 {
+	if (!m_buttons_initialized || m_close)
+		return;
+
 	v2u32 screensize = m_device->getVideoDriver()->getScreenSize();
 
 	if (screensize != m_screensize) {
@@ -1082,7 +1082,7 @@ void TouchScreenGUI::setVisible(bool visible)
 {
 	m_visible = visible;
 
-	if (!m_buttons_initialized)
+	if (!m_buttons_initialized || m_close)
 		return;
 
 	for (auto button : m_buttons) {
@@ -1122,6 +1122,14 @@ void TouchScreenGUI::changeCurrentState(touch_gui_state state)
 	m_overflow_close_schedule = false;
 
 	setVisible(m_visible);
+}
+
+void TouchScreenGUI::openEditor()
+{
+	if (!m_buttons_initialized || m_close)
+		return;
+
+	changeCurrentState(STATE_EDITOR);
 }
 
 void TouchScreenGUI::hide()
