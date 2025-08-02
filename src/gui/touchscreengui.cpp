@@ -389,10 +389,7 @@ void TouchScreenGUI::rebuildOverflowMenu()
 
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
-	if (!m_buttons_initialized)
-		return false;
-
-	if (!m_visible)
+	if (!m_buttons_initialized || !m_visible || m_close)
 		return false;
 
 	if (event.EventType != EET_TOUCH_INPUT_EVENT)
@@ -731,6 +728,9 @@ bool TouchScreenGUI::immediateRelease(irr::EKEY_CODE keycode)
 
 void TouchScreenGUI::step(float dtime)
 {
+	if (!m_buttons_initialized || m_close)
+		return;
+
 	updateButtons();
 
 	if (m_overflow_open && m_overflow_close_schedule)
@@ -775,7 +775,7 @@ void TouchScreenGUI::setVisible(bool visible)
 {
 	m_visible = visible;
 
-	if (!m_buttons_initialized)
+	if (!m_buttons_initialized || m_close)
 		return;
 
 	for (auto button : m_buttons) {

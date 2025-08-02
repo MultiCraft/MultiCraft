@@ -192,6 +192,7 @@ public:
 	void hide();
 	void show();
 	void reset();
+	void close() { m_close = true; }
 
 	void resetHud();
 	void registerHudItem(s32 index, const rect<s32> &button_rect);
@@ -213,6 +214,7 @@ private:
 	double m_touch_sensitivity;
 	bool m_visible = true;
 	bool m_buttons_initialized = false;
+	bool m_close = false;
 	bool m_dig_and_move = false;
 	irr::EKEY_CODE m_keycode_dig;
 	irr::EKEY_CODE m_keycode_place;
