@@ -34,33 +34,33 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 using namespace irr::core;
 
 const button_data buttons_data[] = {
-	// image, image_pressed, image_float, title, name, has_sound, is_top_button
-	{ "jump_btn.png", "", "", N_("Jump"), "jump", false, false },
-	{ "drop_btn.png", "", "drop_btn_float.png", N_("Drop"), "drop", false, false },
-	{ "sneak_btn.png", "", "sneak_btn_float.png", N_("Sneak"), "sneak", false, false },
-	{ "special1_btn.png", "", "", N_("Special"), "special1", false, false },
-	{ "inventory_btn.png", "", "inventory_btn_float.png", N_("Inventory"), "inventory", true, false },
-	{ "escape_btn.png", "", "escape_btn_float.png", N_("Exit"), "escape", true, true },
-	{ "minimap_btn.png", "", "minimap_btn_float.png", N_("Toggle minimap"), "minimap", true, true },
-	{ "camera_btn.png", "", "camera_btn_float.png", N_("Change camera"), "camera_mode", true, true },
-	{ "overflow_btn.png", "", "overflow_btn_float.png", N_("Overflow menu"), "overflow", true, true },
-	{ "chat_btn.png", "", "chat_btn_float.png", N_("Chat"), "chat", true, false },
-	{ "tab_btn.png", "", "tab_btn_float.png", N_("Tab"), "tabb", true, false },
-	{ "fly_btn.png", "", "", N_("Toggle fly"), "freemove", true, false },
-	{ "fast_btn.png", "", "", N_("Toggle fast"), "fastmove", true, false },
-	{ "noclip_btn.png", "", "", N_("Toggle noclip"), "noclip", true, false },
-	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true, false },
-	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true, false },
-	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true, false },
-	{ "joystick_off.png", "", "", "", "joystick", false, false },
-	{ "joystick_bg.png", "", "", "", "joystick", false, false },
-	{ "joystick_center.png", "", "", "", "joystick_center", false, false },
-	{ "", "", "", N_("Open editor"), "editor_open", false, false },
-	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", false, false },
-	{ "edit_ui_close.png", "edit_ui_close_pressed.png", "", N_("Close"), "editor_close", false, false },
-	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", false, false },
-	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", false, false },
-	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", false, false },
+	// image, image_pressed, image_float, title, name, has_sound, group
+	{ "jump_btn.png", "", "", N_("Jump"), "jump", false, -1 },
+	{ "drop_btn.png", "", "drop_btn_float.png", N_("Drop"), "drop", false, -1 },
+	{ "sneak_btn.png", "", "sneak_btn_float.png", N_("Sneak"), "sneak", false, -1 },
+	{ "special1_btn.png", "", "", N_("Special"), "special1", false, -1 },
+	{ "inventory_btn.png", "", "inventory_btn_float.png", N_("Inventory"), "inventory", true, -1 },
+	{ "escape_btn.png", "", "escape_btn_float.png", N_("Exit"), "escape", true, 1 },
+	{ "minimap_btn.png", "", "minimap_btn_float.png", N_("Toggle minimap"), "minimap", true, 1 },
+	{ "camera_btn.png", "", "camera_btn_float.png", N_("Change camera"), "camera_mode", true, 1 },
+	{ "overflow_btn.png", "", "overflow_btn_float.png", N_("Overflow menu"), "overflow", true, 1 },
+	{ "chat_btn.png", "", "chat_btn_float.png", N_("Chat"), "chat", true, 2 },
+	{ "tab_btn.png", "", "tab_btn_float.png", N_("Tab"), "tabb", true, 2 },
+	{ "fly_btn.png", "", "", N_("Toggle fly"), "freemove", true, -1 },
+	{ "fast_btn.png", "", "", N_("Toggle fast"), "fastmove", true, -1 },
+	{ "noclip_btn.png", "", "", N_("Toggle noclip"), "noclip", true, -1 },
+	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true, -1 },
+	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true, -1 },
+	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true, -1 },
+	{ "joystick_off.png", "", "", "", "joystick", false, -1 },
+	{ "joystick_bg.png", "", "", "", "joystick", false, -1 },
+	{ "joystick_center.png", "", "", "", "joystick_center", false, -1 },
+	{ "", "", "", N_("Open editor"), "editor_open", false, -1 },
+	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", false, -1 },
+	{ "edit_ui_close.png", "edit_ui_close_pressed.png", "", N_("Close"), "editor_close", false, -1 },
+	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", false, -1 },
+	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", false, -1 },
+	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", false, -1 },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -299,35 +299,38 @@ void TouchScreenGUI::updateButtons()
 	m_button_size = RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("hud_scaling") * 64.0f;
 
-	bool top_should_float = false;
-
-	for (auto button : m_buttons) {
-		if (!buttons_data[button->id].is_top_button)
-			continue;
-
-		rect<s32> default_rect = getDefaultButtonRect(button->id);
-		rect<s32> rect = getButtonRect(button->id);
-
-		if (rect != default_rect) {
-			top_should_float = true;
-			break;
-		}
-	}
-
 	for (auto button : m_buttons) {
 		if (button->state == STATE_OVERFLOW)
 			continue;
 
 		if (button->guibutton) {
+			int group = buttons_data[button->id].group;
+			bool should_float = false;
+
+			if (buttons_data[button->id].group > -1) {
+				for (auto button : m_buttons) {
+					if (buttons_data[button->id].group != group)
+						continue;
+
+					rect<s32> default_rect = getDefaultButtonRect(button->id);
+					rect<s32> rect = getButtonRect(button->id);
+
+					if (rect != default_rect) {
+						should_float = true;
+						break;
+					}
+				}
+			}
+
 			rect<s32> default_rect = getDefaultButtonRect(button->id);
 			rect<s32> rect = getButtonRect(button->id);
 
-			if (buttons_data[button->id].is_top_button && top_should_float &&
+			if (buttons_data[button->id].group > -1 && should_float &&
 					!button->floating) {
 				loadButtonTexture(button->guibutton,
 					buttons_data[button->id].image_float, "", getButtonRect(button->id));
 				button->floating = true;
-			} else if (!(buttons_data[button->id].is_top_button && top_should_float) &&
+			} else if (!(buttons_data[button->id].group > -1 && should_float) &&
 					button->floating && rect == default_rect) {
 				loadButtonTexture(button->guibutton,
 					button->image, "", getButtonRect(button->id));
@@ -771,9 +774,10 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 							loadButtonTexture(guibutton,
 								buttons_data[m_editor.button_id].image_float, "", rect);
 
-							if (buttons_data[m_editor.button_id].is_top_button) {
+							if (buttons_data[m_editor.button_id].group > -1) {
 								for (auto button : m_buttons) {
-									if (buttons_data[button->id].is_top_button && !button->floating) {
+									if (buttons_data[button->id].group == buttons_data[m_editor.button_id].group &&
+											!button->floating) {
 										button->floating = true;
 										loadButtonTexture(button->guibutton,
 											buttons_data[button->id].image_float, "",
@@ -793,9 +797,10 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 						loadButtonTexture(guibutton,
 							buttons_data[m_editor.button_id].image_float, "", rect);
 
-						if (buttons_data[m_editor.button_id].is_top_button) {
+						if (buttons_data[m_editor.button_id].group > -1) {
 							for (auto button : m_buttons) {
-								if (buttons_data[button->id].is_top_button && !button->floating) {
+								if (buttons_data[button->id].group == buttons_data[m_editor.button_id].group &&
+										!button->floating) {
 									button->floating = true;
 									loadButtonTexture(button->guibutton,
 										buttons_data[button->id].image_float, "",

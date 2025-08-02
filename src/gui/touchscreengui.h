@@ -86,7 +86,7 @@ struct button_data
 	const char *title;
 	const char *name;
 	bool has_sound;
-	bool is_top_button;
+	int group;
 };
 
 struct button_info
