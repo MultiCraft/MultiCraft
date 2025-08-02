@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2014 sapier
-Copyright (C) 2014-2024 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
-Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -31,6 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "client/sound.h"
 #include "client/tile.h"
+#include "settings.h"
 
 using namespace irr;
 using namespace irr::core;
@@ -62,14 +63,30 @@ typedef enum
 	joystick_off_id,
 	joystick_bg_id,
 	joystick_center_id,
+	editor_open_id,
+	editor_save_id,
+	editor_close_id,
+	editor_default_id,
+	editor_move_id,
+	editor_scale_id,
 } touch_gui_button_id;
+
+typedef enum
+{
+	STATE_DEFAULT = 0,
+	STATE_OVERFLOW,
+	STATE_EDITOR,
+} touch_gui_state;
 
 struct button_data
 {
 	const char *image;
+	const char *image_pressed;
+	const char *image_float;
 	const char *title;
 	const char *name;
 	bool has_sound;
+	int group;
 };
 
 struct button_info
@@ -77,9 +94,11 @@ struct button_info
 	IGUIButton *guibutton = nullptr;
 	IGUIStaticText *text = nullptr;
 	touch_gui_button_id id = unknown_id;
-	bool overflow_menu = false;
+	touch_gui_state state = STATE_DEFAULT;
 	bool pressed = false;
+	bool floating = false;
 	s32 event_id = -1;
+	std::string image;
 
 	void reset()
 	{
@@ -148,6 +167,30 @@ struct camera_info
 	}
 };
 
+struct editor_info
+{
+	button_info *button = nullptr;
+	button_info *button_move = nullptr;
+	button_info *button_scale = nullptr;
+	IGUIButton *guibutton = nullptr;
+	touch_gui_button_id button_id = unknown_id;
+	s32 event_id = -1;
+	s32 x = 0;
+	s32 y = 0;
+	bool change_size = false;
+	rect<s32> old_rect;
+
+	void reset()
+	{
+		button = nullptr;
+		guibutton = nullptr;
+		button_id = unknown_id;
+		event_id = -1;
+		x = 0;
+		y = 0;
+	}
+};
+
 class TouchScreenGUI
 {
 public:
@@ -192,9 +235,12 @@ public:
 	void hide();
 	void show();
 	void reset();
+	void close() { m_close = true; }
 
 	void resetHud();
 	void registerHudItem(s32 index, const rect<s32> &button_rect);
+
+	void openEditor();
 
 	static bool isActive() { return m_active; }
 	static void setActive(bool active) { m_active = active; }
@@ -213,10 +259,10 @@ private:
 	double m_touch_sensitivity;
 	bool m_visible = true;
 	bool m_buttons_initialized = false;
+	bool m_close = false;
 	bool m_dig_and_move = false;
 	irr::EKEY_CODE m_keycode_dig;
 	irr::EKEY_CODE m_keycode_place;
-	bool m_enable_sound = true;
 	std::string m_press_sound;
 
 	std::map<size_t, bool> m_events;
@@ -224,28 +270,39 @@ private:
 	std::vector<button_info *> m_buttons;
 	joystick_info m_joystick;
 	camera_info m_camera;
+	editor_info m_editor;
 	camera_info m_camera_additional;
 
-	bool m_overflow_open = false;
+	touch_gui_state m_current_state = STATE_DEFAULT;
 	bool m_overflow_close_schedule = false;
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
 
-	void loadButtonTexture(
-			IGUIButton *btn, const char *path, const rect<s32> &button_rect);
-	void initButton(touch_gui_button_id id, const rect<s32> &button_rect,
-			bool overflow_menu = false, const char *texture = "");
-	void initJoystickButton();
+	Settings *m_settings = nullptr;
+	std::string m_settings_path;
 
+	void initSettings();
+	void setDefaultValues(
+			touch_gui_button_id id, float x1, float y1, float x2, float y2);
+	void setValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
 	rect<s32> getButtonRect(touch_gui_button_id id);
-	void updateButtons();
+	rect<s32> getDefaultButtonRect(touch_gui_button_id id);
+	void resetAllValues();
+	void restoreAllValues();
 
+	void loadButtonTexture(IGUIButton *btn, std::string image,
+			std::string image_pressed, const rect<s32> &button_rect);
+	button_info *initButton(touch_gui_button_id id, const rect<s32> &button_rect,
+			touch_gui_state state = STATE_DEFAULT,
+			std::string custom_image = "");
+	void initJoystickButton();
+	void updateButtons();
 	void rebuildOverflowMenu();
-	void toggleOverflowMenu();
 
 	bool moveJoystick(s32 x, s32 y);
 	void updateCamera(camera_info &camera, s32 x, s32 y);
 
+	void changeCurrentState(touch_gui_state state);
 	void setVisible(bool visible);
 
 	void wakeUpInputhandler();
