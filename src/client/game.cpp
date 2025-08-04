@@ -4457,21 +4457,18 @@ void Game::showPauseMenu()
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
 #if defined(__ANDROID__) || defined(__IOS__)
 	bool hasRealKeyboard = porting::hasRealKeyboard();
-	if (simple_singleplayer_mode && hasRealKeyboard)
+	if (simple_singleplayer_mode && (hasRealKeyboard || g_touchscreengui))
 		ypos -= 0.6f;
 	ypos += 0.5f;
 #endif
-#ifdef HAVE_TOUCHSCREENGUI
-	if (g_touchscreengui)
-		ypos -= 1.0f;
-#endif
+
 	const bool high_dpi = RenderingEngine::isHighDpi();
 	const std::string x2 = high_dpi ? ".x2" : "";
 	std::string sound_name = g_settings->get("btn_press_sound");
 	str_formspec_escape(sound_name);
 	std::ostringstream os;
 
-	os << "formspec_version[1]" << SIZE_TAG
+	os << "formspec_version[1]" << "size[11,6.9]"
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
 
