@@ -840,9 +840,11 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			if (m_editor.history_current_id > -1)
 				m_editor.history_data.resize(m_editor.history_current_id);
 
-			editor_history_data history_data = {guibutton, m_editor.button_id, m_editor.old_rect, rect};
-			m_editor.history_data.push_back(history_data);
-			m_editor.history_current_id = m_editor.history_data.size();
+			if (rect != m_editor.old_rect) {
+				editor_history_data history_data = {guibutton, m_editor.button_id, m_editor.old_rect, rect};
+				m_editor.history_data.push_back(history_data);
+				m_editor.history_current_id = m_editor.history_data.size();
+			}
 			m_editor.reset();
 
 			updateButtons();
