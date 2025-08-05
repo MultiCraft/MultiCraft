@@ -1,8 +1,8 @@
 /*
 Minetest
 Copyright (C) 2014 celeron55, Perttu Ahola <celeron55@gmail.com>
-Copyright (C) 2014-2023 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
-Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
+Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -123,6 +123,11 @@ std::string getCpuArchitecture();
  * get encrypted key for further actions
  */
 std::string getSecretKey(const std::string &key);
+
+/**
+ * returns true if game running on Google PC emulator
+ */
+bool isGooglePC();
 
 /**
  * hide splash screen after assets extraction

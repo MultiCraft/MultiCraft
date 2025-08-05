@@ -2362,7 +2362,7 @@ void Server::SendBlockNoLock(session_t peer_id, MapBlock *block, u8 ver,
 		Create a packet with the block in the right format
 	*/
 #if USE_ZSTD
-	thread_local const int net_compression_level = m_simple_singleplayer_mode ? ZSTD_minCLevel() :
+	thread_local const int net_compression_level = m_simple_singleplayer_mode ? -1 :
 			rangelim(g_settings->getS16("map_compression_level_net"), ZSTD_minCLevel(), ZSTD_maxCLevel());
 #else
 	thread_local const int net_compression_level = rangelim(g_settings->getS16("map_compression_level_net"), -1, 9);
@@ -3272,6 +3272,13 @@ bool Server::showFormspec(const char *playername, const std::string &formspec,
 
 	SendShowFormspecMessage(player->getPeerId(), formspec, formname);
 	return true;
+}
+
+void Server::copyToClipboard(RemotePlayer *player, const std::string &text)
+{
+	NetworkPacket pkt(TOCLIENT_COPY_TO_CLIPBOARD, 0, player->getPeerId());
+	pkt << text;
+	Send(&pkt);
 }
 
 u32 Server::hudAdd(RemotePlayer *player, HudElement *form)
