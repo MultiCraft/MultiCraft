@@ -526,32 +526,32 @@ void TouchScreenGUI::initSettings()
 			0, 0, m_button_size * 1.5, m_button_size * 1.5);
 
 	setDefaultValues(editor_save_id,
-			m_button_size, m_screensize.Y - m_button_size,
-			m_button_size * 2, m_button_size);
+			m_button_size * 0.5, m_screensize.Y - m_button_size * 0.75,
+			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_close_id,
-			m_button_size * 3, m_screensize.Y - m_button_size,
-			m_button_size * 2, m_button_size);
+			m_button_size * 2, m_screensize.Y - m_button_size * 0.75,
+			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_default_id,
-			m_button_size * 5, m_screensize.Y - m_button_size,
-			m_button_size * 2, m_button_size);
+			m_button_size * 3.5, m_screensize.Y - m_button_size * 0.75,
+			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_move_id,
-			m_button_size * 8, m_screensize.Y - m_button_size,
-			m_button_size * 2, m_button_size);
+			m_button_size * 5.5, m_screensize.Y - m_button_size * 0.75,
+			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_scale_id,
-			m_button_size * 10, m_screensize.Y - m_button_size,
-			m_button_size * 2, m_button_size);
+			m_button_size * 7, m_screensize.Y - m_button_size * 0.75,
+			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_undo_id,
-			m_button_size * 13, m_screensize.Y - m_button_size,
-			m_button_size * 2, m_button_size);
+			m_button_size * 9, m_screensize.Y - m_button_size * 0.75,
+			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_redo_id,
-			m_button_size * 15, m_screensize.Y - m_button_size,
-			m_button_size * 2, m_button_size);
+			m_button_size * 10.5, m_screensize.Y - m_button_size * 0.75,
+			m_button_size * 1.5, m_button_size * 0.75);
 }
 
 void TouchScreenGUI::setDefaultValues(touch_gui_button_id id, float x, float y, float w, float h)
