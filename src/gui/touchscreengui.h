@@ -311,6 +311,9 @@ private:
 			std::string custom_image = "");
 	void initJoystickButton();
 	void updateButtons();
+	void updateButtonTexture(button_info *button, rect<s32> current_rect,
+			bool should_float = false);
+	void updateEditorButtonsState();
 	void rebuildOverflowMenu();
 
 	bool moveJoystick(s32 x, s32 y);

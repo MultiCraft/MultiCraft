@@ -174,8 +174,6 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	m_editor.button_move = initButton(editor_move_id,
 			getButtonRect(editor_move_id), STATE_EDITOR);
 	m_editor.button_move->guibutton->setIsPushButton();
-	m_editor.button_move->guibutton->setPressed(true);
-	m_editor.button_move->guibutton->setOverrideColor(video::SColor(255, 255, 0, 0));
 	m_editor.button_scale = initButton(editor_scale_id,
 			getButtonRect(editor_scale_id), STATE_EDITOR);
 	m_editor.button_scale->guibutton->setIsPushButton();
@@ -183,7 +181,6 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 			getButtonRect(editor_undo_id), STATE_EDITOR);
 	m_editor.button_redo = initButton(editor_redo_id,
 			getButtonRect(editor_redo_id), STATE_EDITOR);
-
 
 	updateButtons();
 
@@ -310,41 +307,10 @@ void TouchScreenGUI::updateButtons()
 			continue;
 
 		if (button->guibutton) {
-			int group = buttons_data[button->id].group;
-			bool should_float = false;
+			rect<s32> rect = getButtonRect(button->id);
+			button->guibutton->setRelativePosition(rect);
 
-			rect<s32> default_rect = getDefaultButtonRect(button->id);
-			rect<s32> current_rect = getButtonRect(button->id);
-
-			if (current_rect != default_rect)
-				should_float = true;
-
-			if (!should_float && buttons_data[button->id].group > -1) {
-				for (auto button : m_buttons) {
-					if (buttons_data[button->id].group != group)
-						continue;
-
-					rect<s32> default_rect = getDefaultButtonRect(button->id);
-					rect<s32> current_rect = getButtonRect(button->id);
-
-					if (current_rect != default_rect) {
-						should_float = true;
-						break;
-					}
-				}
-			}
-
-			if (should_float && !button->floating) {
-				loadButtonTexture(button->guibutton,
-					buttons_data[button->id].image_float, "", getButtonRect(button->id));
-				button->floating = true;
-			} else if (!should_float && button->floating) {
-				loadButtonTexture(button->guibutton,
-					button->image, "", getButtonRect(button->id));
-				button->floating = false;
-			}
-
-			button->guibutton->setRelativePosition(current_rect);
+			updateButtonTexture(button, rect);
 		}
 	}
 
@@ -363,7 +329,95 @@ void TouchScreenGUI::updateButtons()
 		m_joystick.button_center->setRelativePosition(rect);
 	}
 
+	updateEditorButtonsState();
 	rebuildOverflowMenu();
+}
+
+void TouchScreenGUI::updateButtonTexture(button_info *button,
+		rect<s32> current_rect, bool should_float)
+{
+	if (!should_float) {
+		rect<s32> default_rect = getDefaultButtonRect(button->id);
+
+		if (current_rect != default_rect)
+			should_float = true;
+	}
+
+	int group = buttons_data[button->id].group;
+
+	if (!should_float && group > -1) {
+		for (auto button : m_buttons) {
+			if (buttons_data[button->id].group != group)
+				continue;
+
+			rect<s32> default_rect = getDefaultButtonRect(button->id);
+			rect<s32> current_rect = getButtonRect(button->id);
+
+			if (current_rect != default_rect) {
+				should_float = true;
+				break;
+			}
+		}
+	}
+
+	if (should_float && !button->floating) {
+		loadButtonTexture(button->guibutton,
+				buttons_data[button->id].image_float, "",
+				getButtonRect(button->id));
+		button->floating = true;
+	} else if (!should_float && button->floating) {
+		loadButtonTexture(button->guibutton, button->image, "",
+				getButtonRect(button->id));
+		button->floating = false;
+	}
+}
+
+void TouchScreenGUI::updateEditorButtonsState()
+{
+	if (m_editor.button_move) {
+		if (m_editor.change_size) {
+			m_editor.button_move->guibutton->enableOverrideColor(false);
+			m_editor.button_move->guibutton->setPressed(false);
+		} else {
+			m_editor.button_move->guibutton->
+					setOverrideColor(video::SColor(255, 255, 0, 0));
+			m_editor.button_move->guibutton->setPressed(true);
+		}
+	}
+
+	if (m_editor.button_scale) {
+		if (m_editor.change_size) {
+			m_editor.button_scale->guibutton->
+					setOverrideColor(video::SColor(255, 255, 0, 0));
+			m_editor.button_scale->guibutton->setPressed(true);
+		} else {
+			m_editor.button_scale->guibutton->enableOverrideColor(false);
+			m_editor.button_scale->guibutton->setPressed(false);
+		}
+	}
+
+	if (m_editor.button_undo) {
+		if (m_editor.history_current_id > 0)
+			loadButtonTexture(m_editor.button_undo->guibutton,
+					buttons_data[editor_undo_id].image_pressed, "",
+					getButtonRect(editor_undo_id));
+		else
+			loadButtonTexture(m_editor.button_undo->guibutton,
+					buttons_data[editor_undo_id].image, "",
+					getButtonRect(editor_undo_id));
+	}
+
+	if (m_editor.button_redo) {
+		if (m_editor.history_current_id > -1 &&
+				m_editor.history_current_id < m_editor.history_data.size())
+			loadButtonTexture(m_editor.button_redo->guibutton,
+					buttons_data[editor_redo_id].image_pressed, "",
+					getButtonRect(editor_redo_id));
+		else
+			loadButtonTexture(m_editor.button_redo->guibutton,
+					buttons_data[editor_redo_id].image, "",
+					getButtonRect(editor_redo_id));
+	}
 }
 
 void TouchScreenGUI::rebuildOverflowMenu()
@@ -606,18 +660,10 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_state = STATE_DEFAULT;
 				} else if (button->id == editor_move_id) {
 					m_editor.change_size = false;
-					m_editor.button_move->guibutton->
-							setOverrideColor(video::SColor(255, 255, 0, 0));
-					m_editor.button_scale->guibutton->enableOverrideColor(false);
-					m_editor.button_move->guibutton->setPressed(true);
-					m_editor.button_scale->guibutton->setPressed(false);
+					updateEditorButtonsState();
 				} else if (button->id == editor_scale_id) {
 					m_editor.change_size = true;
-					m_editor.button_scale->guibutton->
-							setOverrideColor(video::SColor(255, 255, 0, 0));
-					m_editor.button_move->guibutton->enableOverrideColor(false);
-					m_editor.button_move->guibutton->setPressed(false);
-					m_editor.button_scale->guibutton->setPressed(true);
+					updateEditorButtonsState();
 				} else if (button->id == editor_undo_id) {
 					if (m_editor.history_current_id > 0) {
 						m_editor.history_current_id--;
@@ -628,6 +674,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 						setValues(button_id,
 								rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
 								rect.getWidth(), rect.getHeight());
+
 						updateButtons();
 					}
 				} else if (button->id == editor_redo_id) {
@@ -639,8 +686,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 						setValues(button_id,
 								rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
 								rect.getWidth(), rect.getHeight());
-						updateButtons();
 						m_editor.history_current_id++;
+
+						updateButtons();
 					}
 				} else if (button->id == overflow_id) {
 					if (m_current_state == STATE_OVERFLOW)
@@ -796,6 +844,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			m_editor.history_data.push_back(history_data);
 			m_editor.history_current_id = m_editor.history_data.size();
 			m_editor.reset();
+
+			updateButtons();
 		}
 
 		result = true;
@@ -814,47 +864,41 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					s32 value = std::max(x - m_editor.x, y - m_editor.y);
 					rect.LowerRightCorner += v2s32(value, value);
 					s32 min_size = m_button_size * 0.75f;
+
 					if (rect.getWidth() >= min_size && rect.getHeight() >= min_size) {
 						if (m_editor.button && !m_editor.button->floating) {
-							m_editor.button->floating = true;
-							loadButtonTexture(guibutton,
-								buttons_data[m_editor.button_id].image_float, "", rect);
+							updateButtonTexture(m_editor.button, rect, true);
 
 							if (buttons_data[m_editor.button_id].group > -1) {
 								for (auto button : m_buttons) {
 									if (buttons_data[button->id].group == buttons_data[m_editor.button_id].group &&
 											!button->floating) {
-										button->floating = true;
-										loadButtonTexture(button->guibutton,
-											buttons_data[button->id].image_float, "",
-											getButtonRect(button->id));
+										updateButtonTexture(button, getButtonRect(button->id), true);
 									}
 								}
 							}
 						}
+
 						guibutton->setRelativePosition(rect);
 					}
 				} else {
 					IGUIButton *guibutton = m_editor.guibutton;
 					rect<s32> rect = guibutton->getRelativePosition();
 					rect += v2s32(x - m_editor.x, y - m_editor.y);
+
 					if (m_editor.button && !m_editor.button->floating) {
-						m_editor.button->floating = true;
-						loadButtonTexture(guibutton,
-							buttons_data[m_editor.button_id].image_float, "", rect);
+						updateButtonTexture(m_editor.button, rect, true);
 
 						if (buttons_data[m_editor.button_id].group > -1) {
 							for (auto button : m_buttons) {
 								if (buttons_data[button->id].group == buttons_data[m_editor.button_id].group &&
 										!button->floating) {
-									button->floating = true;
-									loadButtonTexture(button->guibutton,
-										buttons_data[button->id].image_float, "",
-										getButtonRect(button->id));
+									updateButtonTexture(button, getButtonRect(button->id), true);
 								}
 							}
 						}
 					}
+
 					guibutton->setRelativePosition(rect);
 					m_editor.x = x;
 					m_editor.y = y;
