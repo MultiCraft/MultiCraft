@@ -69,6 +69,8 @@ typedef enum
 	editor_default_id,
 	editor_move_id,
 	editor_scale_id,
+	editor_undo_id,
+	editor_redo_id
 } touch_gui_button_id;
 
 typedef enum
@@ -167,11 +169,21 @@ struct camera_info
 	}
 };
 
+struct editor_history_data
+{
+	IGUIButton *guibutton = nullptr;
+	touch_gui_button_id button_id = unknown_id;
+	rect<s32> old_rect;
+	rect<s32> new_rect;
+};
+
 struct editor_info
 {
 	button_info *button = nullptr;
 	button_info *button_move = nullptr;
 	button_info *button_scale = nullptr;
+	button_info *button_undo = nullptr;
+	button_info *button_redo = nullptr;
 	IGUIButton *guibutton = nullptr;
 	touch_gui_button_id button_id = unknown_id;
 	s32 event_id = -1;
@@ -179,6 +191,8 @@ struct editor_info
 	s32 y = 0;
 	bool change_size = false;
 	rect<s32> old_rect;
+	std::vector<editor_history_data> history_data;
+	int history_current_id = -1;
 
 	void reset()
 	{
