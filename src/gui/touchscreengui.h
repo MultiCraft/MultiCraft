@@ -179,11 +179,12 @@ struct editor_history_data
 
 struct editor_info
 {
-	button_info *button = nullptr;
 	button_info *button_move = nullptr;
 	button_info *button_scale = nullptr;
 	button_info *button_undo = nullptr;
 	button_info *button_redo = nullptr;
+
+	button_info *button = nullptr;
 	IGUIButton *guibutton = nullptr;
 	touch_gui_button_id button_id = unknown_id;
 	s32 event_id = -1;
@@ -191,7 +192,7 @@ struct editor_info
 	s32 y = 0;
 	bool change_size = false;
 	rect<s32> old_rect;
-	std::vector<editor_history_data> history_data;
+	std::vector<std::vector<editor_history_data>> history_data;
 	int history_current_id = -1;
 
 	void reset()

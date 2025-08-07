@@ -601,13 +601,48 @@ rect<s32> TouchScreenGUI::getDefaultButtonRect(touch_gui_button_id id)
 
 void TouchScreenGUI::resetAllValues()
 {
-	for (auto name : m_settings->getNames()) {
-		m_settings->remove(name);
+	std::vector<editor_history_data> history_data;
+
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		rect<s32> default_rect = getDefaultButtonRect(button->id);
+		rect<s32> current_rect = button->guibutton->getRelativePosition();
+
+		if (current_rect != default_rect) {
+			button->guibutton->setRelativePosition(default_rect);
+			setValues(button->id,
+					default_rect.UpperLeftCorner.X, default_rect.UpperLeftCorner.Y,
+					default_rect.getWidth(), default_rect.getHeight());
+
+			editor_history_data data = {button->guibutton, button->id, current_rect, default_rect};
+			history_data.push_back(data);
+		}
 	}
 
-	m_settings->updateConfigFile(m_settings_path.c_str());
+	rect<s32> default_rect = getDefaultButtonRect(joystick_off_id);
+	rect<s32> current_rect = m_joystick.button_off->getRelativePosition();
 
-	initSettings();
+	if (current_rect != default_rect) {
+		m_joystick.button_off->setRelativePosition(default_rect);
+		setValues(joystick_off_id,
+				default_rect.UpperLeftCorner.X, default_rect.UpperLeftCorner.Y,
+				default_rect.getWidth(), default_rect.getHeight());
+
+		editor_history_data data = {m_joystick.button_off, joystick_off_id, current_rect, default_rect};
+		history_data.push_back(data);
+	}
+
+	if (history_data.size() > 0) {
+		if (m_editor.history_current_id > -1)
+			m_editor.history_data.resize(m_editor.history_current_id);
+
+		m_editor.history_data.push_back(history_data);
+		m_editor.history_current_id = m_editor.history_data.size();
+
+		updateButtons();
+	}
 }
 
 void TouchScreenGUI::restoreAllValues()
@@ -657,7 +692,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_state = STATE_DEFAULT;
 				} else if (button->id == editor_default_id) {
 					reset_all_values = true;
-					new_state = STATE_DEFAULT;
 				} else if (button->id == editor_move_id) {
 					m_editor.change_size = false;
 					updateEditorButtonsState();
@@ -667,25 +701,25 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				} else if (button->id == editor_undo_id) {
 					if (m_editor.history_current_id > 0) {
 						m_editor.history_current_id--;
-						IGUIButton *guibutton = m_editor.history_data[m_editor.history_current_id].guibutton;
-						touch_gui_button_id button_id = m_editor.history_data[m_editor.history_current_id].button_id;
-						rect<s32> rect = m_editor.history_data[m_editor.history_current_id].old_rect;
-						guibutton->setRelativePosition(rect);
-						setValues(button_id,
-								rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
-								rect.getWidth(), rect.getHeight());
+						for (auto data : m_editor.history_data[m_editor.history_current_id]) {
+							rect<s32> rect = data.old_rect;
+							data.guibutton->setRelativePosition(rect);
+							setValues(data.button_id,
+									rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
+									rect.getWidth(), rect.getHeight());
+						}
 
 						updateButtons();
 					}
 				} else if (button->id == editor_redo_id) {
 					if (m_editor.history_current_id >= 0 && m_editor.history_current_id < m_editor.history_data.size()) {
-						IGUIButton *guibutton = m_editor.history_data[m_editor.history_current_id].guibutton;
-						touch_gui_button_id button_id = m_editor.history_data[m_editor.history_current_id].button_id;
-						rect<s32> rect = m_editor.history_data[m_editor.history_current_id].new_rect;
-						guibutton->setRelativePosition(rect);
-						setValues(button_id,
-								rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
-								rect.getWidth(), rect.getHeight());
+						for (auto data : m_editor.history_data[m_editor.history_current_id]) {
+							rect<s32> rect = data.new_rect;
+							data.guibutton->setRelativePosition(rect);
+							setValues(data.button_id,
+									rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
+									rect.getWidth(), rect.getHeight());
+						}
 						m_editor.history_current_id++;
 
 						updateButtons();
@@ -841,7 +875,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				m_editor.history_data.resize(m_editor.history_current_id);
 
 			if (rect != m_editor.old_rect) {
-				editor_history_data history_data = {guibutton, m_editor.button_id, m_editor.old_rect, rect};
+				editor_history_data data = {guibutton, m_editor.button_id, m_editor.old_rect, rect};
+				std::vector<editor_history_data> history_data;
+				history_data.push_back(data);
 				m_editor.history_data.push_back(history_data);
 				m_editor.history_current_id = m_editor.history_data.size();
 			}
@@ -1229,6 +1265,11 @@ void TouchScreenGUI::openEditor()
 {
 	if (!m_buttons_initialized || m_close)
 		return;
+
+	m_editor.reset();
+	m_editor.history_current_id = -1;
+	m_editor.history_data.clear();
+	updateEditorButtonsState();
 
 	changeCurrentState(STATE_EDITOR);
 }
