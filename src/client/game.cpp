@@ -4461,14 +4461,13 @@ void Game::showPauseMenu()
 		ypos -= 0.6f;
 	ypos += 0.5f;
 #endif
-
 	const bool high_dpi = RenderingEngine::isHighDpi();
 	const std::string x2 = high_dpi ? ".x2" : "";
 	std::string sound_name = g_settings->get("btn_press_sound");
 	str_formspec_escape(sound_name);
 	std::ostringstream os;
 
-	os << "formspec_version[1]" << "size[11,6.9]"
+	os << "formspec_version[1]" << SIZE_TAG
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
 
@@ -4498,7 +4497,7 @@ void Game::showPauseMenu()
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
 		<< strgettext("Change Keys")  << ";;false]";
 #ifdef HAVE_TOUCHSCREENGUI
-	if (g_touchscreengui) {
+	else if (g_touchscreengui) {
 		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_touchscreen_edit;"
 			<< strgettext("Edit Touchscreen GUI")  << ";;false]";
 	}
