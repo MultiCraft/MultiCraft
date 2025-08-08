@@ -669,8 +669,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 	if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
 		m_events[id] = false;
-		bool reset_all_values = false;
-		bool restore_all_values = false;
 		touch_gui_state new_state = m_current_state;
 
 		for (auto button : m_buttons) {
@@ -684,46 +682,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (button->id == editor_open_id) {
 					new_state = STATE_EDITOR;
-				} else if (button->id == editor_save_id) {
-					m_settings->updateConfigFile(m_settings_path.c_str());
-					new_state = STATE_DEFAULT;
-				} else if (button->id == editor_close_id) {
-					restore_all_values = true;
-					new_state = STATE_DEFAULT;
-				} else if (button->id == editor_default_id) {
-					reset_all_values = true;
-				} else if (button->id == editor_move_id) {
-					m_editor.change_size = false;
-					updateEditorButtonsState();
-				} else if (button->id == editor_scale_id) {
-					m_editor.change_size = true;
-					updateEditorButtonsState();
-				} else if (button->id == editor_undo_id) {
-					if (m_editor.history_current_id > 0) {
-						m_editor.history_current_id--;
-						for (auto data : m_editor.history_data[m_editor.history_current_id]) {
-							rect<s32> rect = data.old_rect;
-							data.guibutton->setRelativePosition(rect);
-							setValues(data.button_id,
-									rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
-									rect.getWidth(), rect.getHeight());
-						}
-
-						updateButtons();
-					}
-				} else if (button->id == editor_redo_id) {
-					if (m_editor.history_current_id >= 0 && m_editor.history_current_id < m_editor.history_data.size()) {
-						for (auto data : m_editor.history_data[m_editor.history_current_id]) {
-							rect<s32> rect = data.new_rect;
-							data.guibutton->setRelativePosition(rect);
-							setValues(data.button_id,
-									rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
-									rect.getWidth(), rect.getHeight());
-						}
-						m_editor.history_current_id++;
-
-						updateButtons();
-					}
 				} else if (button->id == overflow_id) {
 					if (m_current_state == STATE_OVERFLOW)
 						new_state = STATE_DEFAULT;
@@ -812,12 +770,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if ((m_current_state == STATE_OVERFLOW) && !m_events[id])
 			new_state = STATE_DEFAULT;
 
-		if (reset_all_values)
-			resetAllValues();
-
-		if (restore_all_values)
-			restoreAllValues();
-
 		if (m_current_state != new_state)
 			changeCurrentState(new_state);
 
@@ -826,12 +778,61 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 	} else if (event.TouchInput.Event == ETIE_LEFT_UP) {
 		m_events.erase(id);
 
+		touch_gui_state new_state = m_current_state;
+		bool reset_all_values = false;
+		bool restore_all_values = false;
+
 		for (auto button : m_buttons) {
 			if (m_current_state != button->state)
 				continue;
 
-			if (button->event_id == id)
+			if (button->event_id == id) {
+				if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
+					if (button->id == editor_save_id) {
+						m_settings->updateConfigFile(m_settings_path.c_str());
+						new_state = STATE_DEFAULT;
+					} else if (button->id == editor_close_id) {
+						restore_all_values = true;
+						new_state = STATE_DEFAULT;
+					} else if (button->id == editor_default_id) {
+						reset_all_values = true;
+					} else if (button->id == editor_move_id) {
+						m_editor.change_size = false;
+						updateEditorButtonsState();
+					} else if (button->id == editor_scale_id) {
+						m_editor.change_size = true;
+						updateEditorButtonsState();
+					} else if (button->id == editor_undo_id) {
+						if (m_editor.history_current_id > 0) {
+							m_editor.history_current_id--;
+							for (auto data : m_editor.history_data[m_editor.history_current_id]) {
+								rect<s32> rect = data.old_rect;
+								data.guibutton->setRelativePosition(rect);
+								setValues(data.button_id,
+										rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
+										rect.getWidth(), rect.getHeight());
+							}
+
+							updateButtons();
+						}
+					} else if (button->id == editor_redo_id) {
+						if (m_editor.history_current_id >= 0 && m_editor.history_current_id < m_editor.history_data.size()) {
+							for (auto data : m_editor.history_data[m_editor.history_current_id]) {
+								rect<s32> rect = data.new_rect;
+								data.guibutton->setRelativePosition(rect);
+								setValues(data.button_id,
+										rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
+										rect.getWidth(), rect.getHeight());
+							}
+							m_editor.history_current_id++;
+
+							updateButtons();
+						}
+					}
+				}
+
 				button->reset();
+			}
 		}
 
 		if (m_joystick.event_id == id)
@@ -885,6 +886,15 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 			updateButtons();
 		}
+
+		if (reset_all_values)
+			resetAllValues();
+
+		if (restore_all_values)
+			restoreAllValues();
+
+		if (m_current_state != new_state)
+			changeCurrentState(new_state);
 
 		result = true;
 
@@ -954,12 +964,16 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 						if (button->id == overflow_id)
 							overflow_btn_pressed = true;
 
-						button->pressed = true;
-						button->event_id = id;
-						result = true;
+						if (button->state == STATE_DEFAULT) {
+							button->pressed = true;
+							button->event_id = id;
+							result = true;
+						}
 					} else if (button->event_id == id) {
-						button->reset();
-						result = true;
+						if (button->state == STATE_DEFAULT) {
+							button->reset();
+							result = true;
+						}
 					}
 				}
 
