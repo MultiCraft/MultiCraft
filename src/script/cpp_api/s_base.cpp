@@ -168,8 +168,30 @@ ScriptApiBase::~ScriptApiBase()
 	lua_close(m_luastack);
 }
 
+static std::string get_traceback(lua_State *L, const char *msg) {
+	std::string out = msg ? msg : "(no message)";
+	lua_getglobal(L, "debug");
+	if (!lua_istable(L, -1)) { lua_pop(L, 1); return out; }
+	lua_getfield(L, -1, "traceback");
+	if (!lua_isfunction(L, -1)) { lua_pop(L, 2); return out; }
+	lua_pushstring(L, msg ? msg : "");
+	lua_pushinteger(L, 2); // skip current service frames
+	if (lua_pcall(L, 2, 1, 0) == 0) {
+		const char *tb = lua_tostring(L, -1);
+		if (tb) out = tb;
+		lua_pop(L, 1); // traceback string
+	} else {
+		lua_pop(L, 1); // error from debug.traceback
+	}
+	lua_pop(L, 1); // debug
+	return out;
+}
+
 int ScriptApiBase::luaPanic(lua_State *L)
 {
+	const char *msg = lua_tostring(L, -1);
+	errorstream << "LUA PANIC: " << get_traceback(L, msg) << std::endl;
+
 	std::ostringstream oss;
 	oss << "LUA PANIC: unprotected error in call to Lua API ("
 		<< readParam<std::string>(L, -1) << ")";
