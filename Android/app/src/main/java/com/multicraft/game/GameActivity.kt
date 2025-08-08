@@ -27,9 +27,7 @@ import android.text.InputType
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+import android.view.WindowManager.LayoutParams.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
@@ -42,14 +40,10 @@ import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.ActivityMainBinding
 import com.multicraft.game.databinding.InputTextBinding
 import com.multicraft.game.databinding.MultilineInputBinding
+import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
-import com.multicraft.game.helpers.PreferenceHelper
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.set
-import com.multicraft.game.helpers.finishApp
-import com.multicraft.game.helpers.hasHardKeyboard
-import com.multicraft.game.helpers.makeFullScreen
-import com.multicraft.game.helpers.makeFullScreenAlert
 import org.libsdl.app.SDLActivity
 import kotlin.system.exitProcess
 
@@ -82,7 +76,7 @@ class GameActivity : SDLActivity() {
 		} catch (e: Exception) {
 			exitProcess(0)
 		}
-		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+		window.addFlags(FLAG_KEEP_SCREEN_ON)
 		isExtract = intent.getBooleanExtra("update", false)
 		if (isExtract) {
 			val container = FrameLayout(this).apply {
@@ -139,7 +133,6 @@ class GameActivity : SDLActivity() {
 		}
 	}
 
-	@Suppress("unused")
 	fun showDialog(hint: String?, current: String?, editType: Int) {
 		isInputActive = true
 		messageReturnValue = ""
@@ -284,10 +277,8 @@ class GameActivity : SDLActivity() {
 		}
 	}
 
-	@Suppress("unused")
 	fun isDialogActive() = isInputActive
 
-	@Suppress("unused")
 	fun getDialogValue(): String {
 		val value = messageReturnValue
 		messageReturnValue = ""

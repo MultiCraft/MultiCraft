@@ -6565,6 +6565,7 @@ object you are working with still exists.
       bgcolor[], any non-style elements (eg: label) may result in weird behaviour.
     * Only affects formspecs shown after this is called.
 * `get_formspec_prepend(formspec)`: returns a formspec string.
+* `copy_to_clipboard(text)`: Copies text to the player's clipboard.
 * `get_player_control()`: returns table with player pressed keys
     * The table consists of fields with the following boolean values
       representing the pressed keys: `up`, `down`, `left`, `right`, `jump`,
