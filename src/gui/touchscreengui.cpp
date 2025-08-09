@@ -55,14 +55,14 @@ const button_data buttons_data[] = {
 	{ "joystick_off.png", "", "", "", "joystick", false, -1 },
 	{ "joystick_bg.png", "", "", "", "joystick", false, -1 },
 	{ "joystick_center.png", "", "", "", "joystick_center", false, -1 },
-	{ "", "", "", N_("Open editor"), "editor_open", false, -1 },
-	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", false, -1 },
-	{ "edit_ui_close.png", "edit_ui_close_pressed.png", "", N_("Close"), "editor_close", false, -1 },
-	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", false, -1 },
-	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", false, -1 },
-	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", false, -1 },
-	{ "edit_ui_undo.png", "edit_ui_undo_pressed.png", "", N_("Undo"), "editor_undo", false, -1 },
-	{ "edit_ui_redo.png", "edit_ui_redo_pressed.png", "", N_("Redo"), "editor_redo", false, -1 },
+	{ "", "", "", N_("Open editor"), "editor_open", true, -1 },
+	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", true, -1 },
+	{ "edit_ui_close.png", "edit_ui_close_pressed.png", "", N_("Close"), "editor_close", true, -1 },
+	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", true, -1 },
+	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", true, -1 },
+	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", true, -1 },
+	{ "edit_ui_undo.png", "edit_ui_undo_pressed.png", "", N_("Undo"), "editor_undo", true, -1 },
+	{ "edit_ui_redo.png", "edit_ui_redo_pressed.png", "", N_("Redo"), "editor_redo", true, -1 },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -691,7 +691,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					m_overflow_close_schedule = true;
 				}
 
-				if (buttons_data[button->id].has_sound)
+				if (button->state != STATE_EDITOR && buttons_data[button->id].has_sound)
 					playSound();
 			}
 		}
@@ -788,23 +788,36 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 			if (button->event_id == id) {
 				if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
+					bool play_sound = false;
+
 					if (button->id == editor_save_id) {
+						play_sound = true;
 						m_settings->updateConfigFile(m_settings_path.c_str());
 						new_state = STATE_DEFAULT;
 					} else if (button->id == editor_close_id) {
+						play_sound = true;
 						restore_all_values = true;
 						new_state = STATE_DEFAULT;
 					} else if (button->id == editor_default_id) {
+						play_sound = true;
 						reset_all_values = true;
 					} else if (button->id == editor_move_id) {
-						m_editor.change_size = false;
-						updateEditorButtonsState();
+						if (m_editor.change_size) {
+							play_sound = true;
+							m_editor.change_size = false;
+							updateEditorButtonsState();
+						}
 					} else if (button->id == editor_scale_id) {
-						m_editor.change_size = true;
-						updateEditorButtonsState();
+						if (!m_editor.change_size) {
+							play_sound = true;
+							m_editor.change_size = true;
+							updateEditorButtonsState();
+						}
 					} else if (button->id == editor_undo_id) {
 						if (m_editor.history_current_id > 0) {
+							play_sound = true;
 							m_editor.history_current_id--;
+
 							for (auto data : m_editor.history_data[m_editor.history_current_id]) {
 								rect<s32> rect = data.old_rect;
 								data.guibutton->setRelativePosition(rect);
@@ -824,11 +837,17 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 										rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
 										rect.getWidth(), rect.getHeight());
 							}
+
+							play_sound = true;
 							m_editor.history_current_id++;
 
 							updateButtons();
 						}
 					}
+
+					if (button->state == STATE_EDITOR && play_sound &&
+							buttons_data[button->id].has_sound)
+						playSound();
 				}
 
 				button->reset();
