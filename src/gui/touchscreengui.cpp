@@ -169,7 +169,6 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	}
 
 	initButton(editor_save_id, getButtonRect(editor_save_id), STATE_EDITOR);
-	initButton(editor_close_id, getButtonRect(editor_close_id), STATE_EDITOR);
 	initButton(editor_default_id, getButtonRect(editor_default_id), STATE_EDITOR);
 	m_editor.button_move = initButton(editor_move_id,
 			getButtonRect(editor_move_id), STATE_EDITOR);
@@ -526,31 +525,27 @@ void TouchScreenGUI::initSettings()
 			0, 0, m_button_size * 1.5, m_button_size * 1.5);
 
 	setDefaultValues(editor_save_id,
-			m_screensize.X / 2 - m_button_size * 5.75, m_screensize.Y - m_button_size * 0.75,
-			m_button_size * 1.5, m_button_size * 0.75);
-
-	setDefaultValues(editor_close_id,
-			m_screensize.X / 2 - m_button_size * 4.25, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 - m_button_size * 5.0, m_screensize.Y - m_button_size * 0.75,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_default_id,
-			m_screensize.X / 2 - m_button_size * 2.75, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 - m_button_size * 3.5, m_screensize.Y - m_button_size * 0.75,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_move_id,
-			m_screensize.X / 2 - m_button_size * 0.75, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 - m_button_size * 1.5, m_screensize.Y - m_button_size * 0.75,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_scale_id,
-			m_screensize.X / 2 + m_button_size * 0.75, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2, m_screensize.Y - m_button_size * 0.75,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_undo_id,
-			m_screensize.X / 2 + m_button_size * 2.75, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 + m_button_size * 2.0, m_screensize.Y - m_button_size * 0.75,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_redo_id,
-			m_screensize.X / 2 + m_button_size * 4.25, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 + m_button_size * 3.5, m_screensize.Y - m_button_size * 0.75,
 			m_button_size * 1.5, m_button_size * 0.75);
 }
 
