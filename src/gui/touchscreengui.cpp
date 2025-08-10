@@ -1295,8 +1295,6 @@ void TouchScreenGUI::openEditor()
 		return;
 
 	m_editor.reset();
-	m_editor.history_current_id = -1;
-	m_editor.history_data.clear();
 	updateEditorButtonsState();
 
 	changeCurrentState(STATE_EDITOR);
