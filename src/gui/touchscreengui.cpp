@@ -882,6 +882,19 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if (m_editor.event_id == id) {
 			IGUIButton *guibutton = m_editor.guibutton;
 			rect<s32> rect = guibutton->getRelativePosition();
+
+			if (m_editor.change_size) {
+				if (rect.UpperLeftCorner.X < 0)
+					rect += v2s32(-rect.UpperLeftCorner.X, 0);
+				else if (rect.LowerRightCorner.X > m_screensize.X)
+					rect -= v2s32(rect.LowerRightCorner.X - m_screensize.X, 0);
+
+				if (rect.UpperLeftCorner.Y < 0)
+					rect += v2s32(0, -rect.UpperLeftCorner.Y);
+				else if (rect.LowerRightCorner.Y > m_screensize.Y)
+					rect -= v2s32(0, rect.LowerRightCorner.Y - m_screensize.Y);
+			}
+
 			setValues(m_editor.button_id,
 					rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
 					rect.getWidth(), rect.getHeight());
@@ -926,8 +939,10 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					s32 value = std::max(x - m_editor.x, y - m_editor.y);
 					rect.LowerRightCorner += v2s32(value, value);
 					s32 min_size = m_button_size * 0.75f;
+					s32 max_size = std::min(m_button_size * 6.0f, m_screensize.Y * 0.75f);
 
-					if (rect.getWidth() >= min_size && rect.getHeight() >= min_size) {
+					if (rect.getWidth() >= min_size && rect.getHeight() >= min_size &&
+							rect.getWidth() <= max_size && rect.getHeight() <= max_size) {
 						if (m_editor.button && !m_editor.button->floating) {
 							updateButtonTexture(m_editor.button, rect, true);
 
@@ -947,6 +962,16 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					IGUIButton *guibutton = m_editor.guibutton;
 					rect<s32> rect = guibutton->getRelativePosition();
 					rect += v2s32(x - m_editor.x, y - m_editor.y);
+
+					if (rect.UpperLeftCorner.X < 0)
+						rect += v2s32(-rect.UpperLeftCorner.X, 0);
+					else if (rect.LowerRightCorner.X > m_screensize.X)
+						rect -= v2s32(rect.LowerRightCorner.X - m_screensize.X, 0);
+
+					if (rect.UpperLeftCorner.Y < 0)
+						rect += v2s32(0, -rect.UpperLeftCorner.Y);
+					else if (rect.LowerRightCorner.Y > m_screensize.Y)
+						rect -= v2s32(0, rect.LowerRightCorner.Y - m_screensize.Y);
 
 					if (m_editor.button && !m_editor.button->floating) {
 						updateButtonTexture(m_editor.button, rect, true);
