@@ -168,9 +168,13 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 		initButton(id, recti(), STATE_OVERFLOW);
 	}
 
-	initButton(editor_save_id, getButtonRect(editor_save_id), STATE_EDITOR);
-	initButton(editor_default_id, getButtonRect(editor_default_id), STATE_EDITOR);
-	m_editor.button_move = initButton(editor_move_id,
+	m_editor.button_save = initButton(editor_save_id,
+			getButtonRect(editor_save_id), STATE_EDITOR);
+	m_editor.button_save->guibutton->setIsPushButton();
+	m_editor.button_default = initButton(editor_default_id,
+			getButtonRect(editor_default_id), STATE_EDITOR);
+	m_editor.button_default->guibutton->setIsPushButton();
+	m_editor.button_move = m_editor.button_move = initButton(editor_move_id,
 			getButtonRect(editor_move_id), STATE_EDITOR);
 	m_editor.button_move->guibutton->setIsPushButton();
 	m_editor.button_scale = initButton(editor_scale_id,
@@ -178,8 +182,10 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	m_editor.button_scale->guibutton->setIsPushButton();
 	m_editor.button_undo = initButton(editor_undo_id,
 			getButtonRect(editor_undo_id), STATE_EDITOR);
+	m_editor.button_undo->guibutton->setIsPushButton();
 	m_editor.button_redo = initButton(editor_redo_id,
 			getButtonRect(editor_redo_id), STATE_EDITOR);
+	m_editor.button_redo->guibutton->setIsPushButton();
 
 	updateButtons();
 
@@ -433,26 +439,24 @@ void TouchScreenGUI::updateEditorButtonsState()
 	}
 
 	if (m_editor.button_undo) {
-		if (m_editor.history_current_id > 0)
-			loadButtonTexture(nullptr, m_editor.button_undo->guibutton,
-					buttons_data[editor_undo_id].image_pressed, "",
-					getButtonRect(editor_undo_id));
-		else
-			loadButtonTexture(nullptr, m_editor.button_undo->guibutton,
-					buttons_data[editor_undo_id].image, "",
-					getButtonRect(editor_undo_id));
+		if (m_editor.history_current_id > 0) {
+			m_editor.button_undo->guibutton->setPressed(true);
+			m_editor.button_undo->inactive = false;
+		} else {
+			m_editor.button_undo->guibutton->setPressed(false);
+			m_editor.button_undo->inactive = true;
+		}
 	}
 
 	if (m_editor.button_redo) {
 		if (m_editor.history_current_id > -1 &&
-				m_editor.history_current_id < m_editor.history_data.size())
-			loadButtonTexture(nullptr, m_editor.button_redo->guibutton,
-					buttons_data[editor_redo_id].image_pressed, "",
-					getButtonRect(editor_redo_id));
-		else
-			loadButtonTexture(nullptr, m_editor.button_redo->guibutton,
-					buttons_data[editor_redo_id].image, "",
-					getButtonRect(editor_redo_id));
+				m_editor.history_current_id < m_editor.history_data.size()) {
+			m_editor.button_redo->guibutton->setPressed(true);
+			m_editor.button_redo->inactive = false;
+		} else {
+			m_editor.button_redo->guibutton->setPressed(false);
+			m_editor.button_redo->inactive = true;
+		}
 	}
 }
 
@@ -725,6 +729,11 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (button->state != STATE_EDITOR && buttons_data[button->id].has_sound)
 					playSound();
+
+				if (button->state == STATE_EDITOR && button->guibutton->isPushButton() &&
+						!button->inactive) {
+					button->guibutton->setPressed(true);
+				}
 			}
 		}
 
@@ -813,6 +822,14 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		touch_gui_state new_state = m_current_state;
 		bool reset_all_values = false;
 		bool restore_all_values = false;
+
+		for (auto button : m_buttons) {
+			if (button->state == STATE_EDITOR && button->guibutton->isPushButton()) {
+				button->guibutton->setPressed(false);
+			}
+		}
+
+		updateEditorButtonsState();
 
 		for (auto button : m_buttons) {
 			if (m_current_state != button->state)

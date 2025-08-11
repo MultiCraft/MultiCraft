@@ -99,6 +99,7 @@ struct button_info
 	touch_gui_state state = STATE_DEFAULT;
 	bool pressed = false;
 	bool floating = false;
+	bool inactive = false;
 	s32 event_id = -1;
 	std::string image;
 	float aspect_ratio = -1;
@@ -180,6 +181,8 @@ struct editor_history_data
 
 struct editor_info
 {
+	button_info *button_save = nullptr;
+	button_info *button_default = nullptr;
 	button_info *button_move = nullptr;
 	button_info *button_scale = nullptr;
 	button_info *button_undo = nullptr;
