@@ -4455,8 +4455,8 @@ void Game::showPauseMenu()
 #endif*/
 
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
-#if defined(__ANDROID__) || defined(__IOS__)
 	bool hasRealKeyboard = porting::hasRealKeyboard();
+#if defined(__ANDROID__) || defined(__IOS__)
 	if (simple_singleplayer_mode && (hasRealKeyboard || g_touchscreengui))
 		ypos -= 0.6f;
 	ypos += 0.5f;
@@ -4491,11 +4491,9 @@ void Game::showPauseMenu()
 			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
-#if defined(__ANDROID__) || defined(__IOS__)
 	if (hasRealKeyboard)
-#endif
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
-		<< strgettext("Change Keys")  << ";;false]";
+		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
+			<< strgettext("Change Keys")  << ";;false]";
 #ifdef HAVE_TOUCHSCREENGUI
 	else if (g_touchscreengui) {
 		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_touchscreen_edit;"
