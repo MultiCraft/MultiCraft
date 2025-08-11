@@ -101,6 +101,7 @@ struct button_info
 	bool floating = false;
 	s32 event_id = -1;
 	std::string image;
+	float aspect_ratio = -1;
 
 	void reset()
 	{
@@ -305,8 +306,9 @@ private:
 	void resetAllValues();
 	void restoreAllValues();
 
-	void loadButtonTexture(IGUIButton *btn, std::string image,
-			std::string image_pressed, const rect<s32> &button_rect);
+	void loadButtonTexture(button_info *button, IGUIButton *guibutton,
+			std::string image, std::string image_pressed,
+			const rect<s32> &button_rect);
 	button_info *initButton(touch_gui_button_id id, const rect<s32> &button_rect,
 			touch_gui_state state = STATE_DEFAULT,
 			std::string custom_image = "");

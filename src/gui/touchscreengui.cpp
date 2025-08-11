@@ -186,8 +186,8 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	m_buttons_initialized = true;
 }
 
-void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, std::string image,
-		std::string image_pressed, const rect<s32> &button_rect)
+void TouchScreenGUI::loadButtonTexture(button_info *button, IGUIButton *guibutton,
+		std::string image, std::string image_pressed, const rect<s32> &button_rect)
 {
 	if (image.empty())
 		return;
@@ -208,19 +208,24 @@ void TouchScreenGUI::loadButtonTexture(IGUIButton *btn, std::string image,
 	}
 
 	if (texture) {
-		btn->setUseAlphaChannel(true);
+		if (button) {
+			core::dimension2d<u32> texture_size = texture->getOriginalSize();
+			button->aspect_ratio = (float)texture_size.Width / texture_size.Height;
+		}
+
+		guibutton->setUseAlphaChannel(true);
 		if (g_settings->getBool("gui_scaling_filter")) {
 			rect<s32> txr_rect = rect<s32>(v2s32(0, 0), button_rect.getSize());
-			btn->setImage(texture, txr_rect);
-			btn->setPressedImage(texture_pressed, txr_rect);
-			btn->setScaleImage(false);
+			guibutton->setImage(texture, txr_rect);
+			guibutton->setPressedImage(texture_pressed, txr_rect);
+			guibutton->setScaleImage(false);
 		} else {
-			btn->setImage(texture);
-			btn->setPressedImage(texture_pressed);
-			btn->setScaleImage(true);
+			guibutton->setImage(texture);
+			guibutton->setPressedImage(texture_pressed);
+			guibutton->setScaleImage(true);
 		}
-		btn->setDrawBorder(false);
-		btn->setText(L"");
+		guibutton->setDrawBorder(false);
+		guibutton->setText(L"");
 	}
 }
 
@@ -257,7 +262,7 @@ button_info *TouchScreenGUI::initButton(touch_gui_button_id id,
 	btn->guibutton->setVisible(m_visible && state == STATE_DEFAULT);
 
 	if (!image.empty())
-		loadButtonTexture(btn->guibutton, image, image_pressed, button_rect);
+		loadButtonTexture(btn, btn->guibutton, image, image_pressed, button_rect);
 	else
 		btn->guibutton->setText(str);
 
@@ -278,21 +283,21 @@ void TouchScreenGUI::initJoystickButton()
 	m_joystick.button_off = m_guienv->addButton(button_off_rect, nullptr);
 	m_joystick.button_off->setVisible(m_visible);
 	m_joystick.button_off->grab();
-	loadButtonTexture(m_joystick.button_off,
+	loadButtonTexture(nullptr, m_joystick.button_off,
 			buttons_data[joystick_off_id].image, "", button_off_rect);
 
 	const rect<s32> &button_bg_rect = getButtonRect(joystick_bg_id);
 	m_joystick.button_bg = m_guienv->addButton(button_bg_rect, nullptr);
 	m_joystick.button_bg->setVisible(false);
 	m_joystick.button_bg->grab();
-	loadButtonTexture(m_joystick.button_bg,
+	loadButtonTexture(nullptr, m_joystick.button_bg,
 			buttons_data[joystick_bg_id].image, "", button_bg_rect);
 
 	const rect<s32> &button_center_rect = getButtonRect(joystick_center_id);
 	m_joystick.button_center = m_guienv->addButton(button_center_rect, nullptr);
 	m_joystick.button_center->setVisible(false);
 	m_joystick.button_center->grab();
-	loadButtonTexture(m_joystick.button_center,
+	loadButtonTexture(nullptr, m_joystick.button_center,
 			buttons_data[joystick_center_id].image, "", button_center_rect);
 }
 
@@ -306,10 +311,22 @@ void TouchScreenGUI::updateButtons()
 			continue;
 
 		if (button->guibutton) {
-			rect<s32> rect = getButtonRect(button->id);
-			button->guibutton->setRelativePosition(rect);
+			rect<s32> current_rect = getButtonRect(button->id);
+			updateButtonTexture(button, current_rect);
 
-			updateButtonTexture(button, rect);
+			if (button->aspect_ratio > 0) {
+				if (button->floating) {
+					s32 height = std::round((float)current_rect.getWidth() / button->aspect_ratio);
+					current_rect.LowerRightCorner.Y = current_rect.UpperLeftCorner.Y + height;
+				} else {
+					rect<s32> default_rect = getDefaultButtonRect(button->id);
+					float default_aspect_ratio = (float)default_rect.getWidth() / default_rect.getHeight();
+					s32 height = std::round((float)current_rect.getWidth() / default_aspect_ratio);
+					current_rect.LowerRightCorner.Y = current_rect.UpperLeftCorner.Y + height;
+				}
+			}
+
+			button->guibutton->setRelativePosition(current_rect);
 		}
 	}
 
@@ -338,7 +355,9 @@ void TouchScreenGUI::updateButtonTexture(button_info *button,
 	if (!should_float) {
 		rect<s32> default_rect = getDefaultButtonRect(button->id);
 
-		if (current_rect != default_rect)
+		if (current_rect.UpperLeftCorner.X != default_rect.UpperLeftCorner.X ||
+				current_rect.UpperLeftCorner.Y != default_rect.UpperLeftCorner.Y ||
+				current_rect.getWidth() != default_rect.getWidth())
 			should_float = true;
 	}
 
@@ -352,7 +371,9 @@ void TouchScreenGUI::updateButtonTexture(button_info *button,
 			rect<s32> default_rect = getDefaultButtonRect(button->id);
 			rect<s32> current_rect = getButtonRect(button->id);
 
-			if (current_rect != default_rect) {
+			if (current_rect.UpperLeftCorner.X != default_rect.UpperLeftCorner.X ||
+					current_rect.UpperLeftCorner.Y != default_rect.UpperLeftCorner.Y ||
+					current_rect.getWidth() != default_rect.getWidth()) {
 				should_float = true;
 				break;
 			}
@@ -360,14 +381,30 @@ void TouchScreenGUI::updateButtonTexture(button_info *button,
 	}
 
 	if (should_float && !button->floating) {
-		loadButtonTexture(button->guibutton,
+		loadButtonTexture(button, button->guibutton,
 				buttons_data[button->id].image_float, "",
 				getButtonRect(button->id));
 		button->floating = true;
+
+		if (button->aspect_ratio > 0) {
+			rect<s32> rect = getButtonRect(button->id);
+			s32 height = std::round((float)rect.getWidth() / button->aspect_ratio);
+			rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + height;
+			button->guibutton->setRelativePosition(rect);
+		}
 	} else if (!should_float && button->floating) {
-		loadButtonTexture(button->guibutton, button->image, "",
+		loadButtonTexture(button, button->guibutton, button->image, "",
 				getButtonRect(button->id));
 		button->floating = false;
+
+		if (button->aspect_ratio > 0) {
+			rect<s32> current_rect = getButtonRect(button->id);
+			rect<s32> default_rect = getDefaultButtonRect(button->id);
+			float default_aspect_ratio = (float)default_rect.getWidth() / default_rect.getHeight();
+			s32 height = std::round((float)current_rect.getWidth() / default_aspect_ratio);
+			current_rect.LowerRightCorner.Y = current_rect.UpperLeftCorner.Y + height;
+			button->guibutton->setRelativePosition(current_rect);
+		}
 	}
 }
 
@@ -397,11 +434,11 @@ void TouchScreenGUI::updateEditorButtonsState()
 
 	if (m_editor.button_undo) {
 		if (m_editor.history_current_id > 0)
-			loadButtonTexture(m_editor.button_undo->guibutton,
+			loadButtonTexture(nullptr, m_editor.button_undo->guibutton,
 					buttons_data[editor_undo_id].image_pressed, "",
 					getButtonRect(editor_undo_id));
 		else
-			loadButtonTexture(m_editor.button_undo->guibutton,
+			loadButtonTexture(nullptr, m_editor.button_undo->guibutton,
 					buttons_data[editor_undo_id].image, "",
 					getButtonRect(editor_undo_id));
 	}
@@ -409,11 +446,11 @@ void TouchScreenGUI::updateEditorButtonsState()
 	if (m_editor.button_redo) {
 		if (m_editor.history_current_id > -1 &&
 				m_editor.history_current_id < m_editor.history_data.size())
-			loadButtonTexture(m_editor.button_redo->guibutton,
+			loadButtonTexture(nullptr, m_editor.button_redo->guibutton,
 					buttons_data[editor_redo_id].image_pressed, "",
 					getButtonRect(editor_redo_id));
 		else
-			loadButtonTexture(m_editor.button_redo->guibutton,
+			loadButtonTexture(nullptr, m_editor.button_redo->guibutton,
 					buttons_data[editor_redo_id].image, "",
 					getButtonRect(editor_redo_id));
 	}
@@ -954,6 +991,12 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 									}
 								}
 							}
+
+						}
+
+						if (m_editor.button->floating && m_editor.button->aspect_ratio > 0) {
+							s32 height = std::round((float)rect.getWidth() / m_editor.button->aspect_ratio);
+							rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + height;
 						}
 
 						guibutton->setRelativePosition(rect);
@@ -962,16 +1005,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					IGUIButton *guibutton = m_editor.guibutton;
 					rect<s32> rect = guibutton->getRelativePosition();
 					rect += v2s32(x - m_editor.x, y - m_editor.y);
-
-					if (rect.UpperLeftCorner.X < 0)
-						rect += v2s32(-rect.UpperLeftCorner.X, 0);
-					else if (rect.LowerRightCorner.X > m_screensize.X)
-						rect -= v2s32(rect.LowerRightCorner.X - m_screensize.X, 0);
-
-					if (rect.UpperLeftCorner.Y < 0)
-						rect += v2s32(0, -rect.UpperLeftCorner.Y);
-					else if (rect.LowerRightCorner.Y > m_screensize.Y)
-						rect -= v2s32(0, rect.LowerRightCorner.Y - m_screensize.Y);
 
 					if (m_editor.button && !m_editor.button->floating) {
 						updateButtonTexture(m_editor.button, rect, true);
@@ -984,7 +1017,22 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 								}
 							}
 						}
+
+						if (m_editor.button->aspect_ratio > 0) {
+							s32 height = std::round((float)rect.getWidth() / m_editor.button->aspect_ratio);
+							rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + height;
+						}
 					}
+
+					if (rect.UpperLeftCorner.X < 0)
+						rect += v2s32(-rect.UpperLeftCorner.X, 0);
+					else if (rect.LowerRightCorner.X > m_screensize.X)
+						rect -= v2s32(rect.LowerRightCorner.X - m_screensize.X, 0);
+
+					if (rect.UpperLeftCorner.Y < 0)
+						rect += v2s32(0, -rect.UpperLeftCorner.Y);
+					else if (rect.LowerRightCorner.Y > m_screensize.Y)
+						rect -= v2s32(0, rect.LowerRightCorner.Y - m_screensize.Y);
 
 					guibutton->setRelativePosition(rect);
 					m_editor.x = x;
