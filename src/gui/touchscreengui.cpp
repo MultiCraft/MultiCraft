@@ -824,14 +824,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		bool restore_all_values = false;
 
 		for (auto button : m_buttons) {
-			if (button->state == STATE_EDITOR && button->guibutton->isPushButton()) {
-				button->guibutton->setPressed(false);
-			}
-		}
-
-		updateEditorButtonsState();
-
-		for (auto button : m_buttons) {
 			if (m_current_state != button->state)
 				continue;
 
@@ -897,6 +889,11 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					if (button->state == STATE_EDITOR && play_sound &&
 							buttons_data[button->id].has_sound)
 						playSound();
+				}
+
+				if (button->state == STATE_EDITOR && button->guibutton->isPushButton()) {
+					button->guibutton->setPressed(false);
+					updateEditorButtonsState();
 				}
 
 				button->reset();
