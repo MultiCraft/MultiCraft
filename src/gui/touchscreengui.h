@@ -65,7 +65,6 @@ typedef enum
 	joystick_center_id,
 	editor_open_id,
 	editor_save_id,
-	//	editor_close_id,
 	editor_default_id,
 	editor_move_id,
 	editor_scale_id,
