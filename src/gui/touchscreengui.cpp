@@ -1002,7 +1002,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 							}
 						}
 
-						if (m_editor.button->floating && m_editor.button->aspect_ratio > 0) {
+						if (m_editor.button && m_editor.button->floating && m_editor.button->aspect_ratio > 0) {
 							s32 height = std::round((float)rect.getWidth() / m_editor.button->aspect_ratio);
 							rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + height;
 						}
