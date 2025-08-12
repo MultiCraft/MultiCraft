@@ -4497,7 +4497,7 @@ void Game::showPauseMenu()
 #ifdef HAVE_TOUCHSCREENGUI
 	else if (g_touchscreengui) {
 		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_touchscreen_edit;"
-			<< strgettext("Edit Touchscreen GUI")  << ";;false]";
+			<< strgettext("Change Keys") << strgettext(" (Touch)") << ";;false]";
 	}
 #endif
 	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
