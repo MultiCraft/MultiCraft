@@ -1317,9 +1317,9 @@ ServerMap::~ServerMap()
 			// Save only changed parts
 			save(MOD_STATE_WRITE_AT_UNLOAD);
 			infostream << "ServerMap: Saved map to " << m_savedir << std::endl;
-#ifdef SERVER
-			dbase->compact();
-#endif
+//#ifdef SERVER
+			//dbase->compact();
+//#endif
 		} else {
 			infostream << "ServerMap: Map not saved" << std::endl;
 		}
