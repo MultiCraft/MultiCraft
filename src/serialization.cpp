@@ -306,8 +306,13 @@ void compress(u8 *data, u32 size, std::ostream &os, u8 version, int level)
 	if(version >= 29)
 	{
 #if USE_ZSTD
-		// map the zlib levels [0,9] to [1,10]. -1 becomes 0 which indicates the default (currently 3)
-		compressZstd(data, size, os, level + 1);
+		if (level == -1)
+#if ZSTD_VERSION_NUMBER >= 10500
+			level = ZSTD_defaultCLevel();
+#else
+			level = 0;
+#endif
+		compressZstd(data, size, os, level);
 		return;
 #else
 		FATAL_ERROR("Zstd compression is not enabled");

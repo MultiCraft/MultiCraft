@@ -674,22 +674,30 @@ core.register_chatcommand("mods", {
 	end,
 })
 
-local function handle_give_command(cmd, giver, receiver, stackstring)
-	core.log("action", giver .. " invoked " .. cmd
-			.. ', stackstring="' .. stackstring .. '"')
-	local ritems = core.registered_items
-	if not stackstring:match(":") and not ritems[stackstring] then
+local function guess_mod_name(stackstring, ritems)
+	if not stackstring:find(":", 1, true) and not ritems[stackstring] then
+		local base_name = stackstring:match("%S*")
 		local modslist = core.get_modnames()
 		table.insert(modslist, 1, "default")
 		for _, modname in pairs(modslist) do
-			local namecheck = modname .. ":" .. stackstring:match("%S*")
+			local namecheck = modname .. ":" .. base_name
 			if ritems[namecheck] then
-				stackstring = modname .. ":" .. stackstring
-				break
+				return modname .. ":" .. stackstring
 			end
 		end
 	end
-	local itemstack = ItemStack(stackstring)
+
+	return stackstring
+end
+
+local function handle_give_command(cmd, giver, receiver, stackstring)
+	core.log("action", giver .. " invoked " .. cmd
+			.. ', stackstring="' .. stackstring .. '"')
+	stackstring = guess_mod_name(stackstring, core.registered_items)
+	local ok, itemstack = pcall(ItemStack, stackstring)
+	if not ok then
+			return false, "Invalid item stack string"
+	end
 	if itemstack:is_empty() then
 		return false, "Cannot give an empty item"
 	elseif (not itemstack:is_known()) or (itemstack:get_name() == "unknown") then
@@ -760,6 +768,7 @@ core.register_chatcommand("spawnentity", {
 		if not entityname then
 			return false, "EntityName required"
 		end
+		entityname = guess_mod_name(entityname, core.registered_entities)
 		core.log("action", ("%s invokes /spawnentity, entityname=%q")
 				:format(name, entityname))
 		local player = core.get_player_by_name(name)

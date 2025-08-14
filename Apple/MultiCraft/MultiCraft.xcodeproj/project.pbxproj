@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -116,7 +116,6 @@
 		84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0024B1347B0040BA4F /* Foundation.framework */; };
 		8453A49E24DB22F00087ECF9 /* client in Resources */ = {isa = PBXBuildFile; fileRef = 8453A49D24DB22F00087ECF9 /* client */; };
 		845856B324B1322D0040BA4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 845856B224B1322D0040BA4F /* Assets.xcassets */; };
-		84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0624B1348B0040BA4F /* libcurl.tbd */; };
 		8458610724B13BDF0040BA4F /* mini-gmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 8458610524B13BDF0040BA4F /* mini-gmp.c */; };
 		8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8458610924B13BF90040BA4F /* jsoncpp.cpp */; };
 		8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458616724B1B7990040BA4F /* libIrrlicht.a */; };
@@ -135,6 +134,7 @@
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
+		849FD2C82DFD8FCE00C8B942 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 849FD2C72DFD8FCE00C8B942 /* libcurl.a */; };
 		84A1F9BB252E617D00000717 /* scripting_mainmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */; };
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
@@ -517,7 +517,6 @@
 		845856B724B1322D0040BA4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		84585C0024B1347B0040BA4F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		84585C0424B134850040BA4F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		84585C0624B1348B0040BA4F /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
 		8458610524B13BDF0040BA4F /* mini-gmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "mini-gmp.c"; path = "../../../lib/gmp/mini-gmp.c"; sourceTree = "<group>"; };
 		8458610624B13BDF0040BA4F /* mini-gmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "mini-gmp.h"; path = "../../../lib/gmp/mini-gmp.h"; sourceTree = "<group>"; };
 		8458610924B13BF90040BA4F /* jsoncpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jsoncpp.cpp; path = ../../../lib/jsoncpp/jsoncpp.cpp; sourceTree = "<group>"; };
@@ -543,6 +542,7 @@
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
 		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		849D0845278AC1B200471354 /* lchacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lchacha.c; path = ../../../lib/luachacha/lchacha.c; sourceTree = "<group>"; };
+		849FD2C72DFD8FCE00C8B942 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = ../deps/libcurl/libcurl.a; sourceTree = "<group>"; };
 		84A1F9A7252E616A00000717 /* mutex_auto_lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mutex_auto_lock.h; path = ../../../src/threading/mutex_auto_lock.h; sourceTree = "<group>"; };
 		84A1F9A8252E616A00000717 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = event.cpp; path = ../../../src/threading/event.cpp; sourceTree = "<group>"; };
 		84A1F9AE252E616B00000717 /* event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event.h; path = ../../../src/threading/event.h; sourceTree = "<group>"; };
@@ -869,7 +869,7 @@
 				84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */,
 				841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */,
 				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
-				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
+				849FD2C82DFD8FCE00C8B942 /* libcurl.a in Frameworks */,
 				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
 				848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */,
 				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
@@ -1077,7 +1077,7 @@
 				84585C0024B1347B0040BA4F /* Foundation.framework */,
 				84BE974228CA1291004E8CEC /* GameController.framework */,
 				84585C0424B134850040BA4F /* OpenGL.framework */,
-				84585C0624B1348B0040BA4F /* libcurl.tbd */,
+				849FD2C72DFD8FCE00C8B942 /* libcurl.a */,
 				844436EE28DA80C100662A9D /* libfreetype.a */,
 				84EEE5E62782728E00F61929 /* libintl.a */,
 				8458616724B1B7990040BA4F /* libIrrlicht.a */,
@@ -1710,7 +1710,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 1600;
 				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
@@ -1719,7 +1719,6 @@
 				};
 			};
 			buildConfigurationList = 845856A424B1322C0040BA4F /* Build configuration list for PBXProject "MultiCraft" */;
-			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1754,11 +1753,16 @@
 				ar,
 				th,
 				Base,
+				ko,
+				"zh-Hans",
+				"zh-Hant",
+				ms,
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			packageReferences = (
 				84D1BF522CD7EC430077DD47 /* XCRemoteSwiftPackageReference "zstd" */,
 			);
+			preferredProjectObjectVersion = 77;
 			productRefGroup = 845856AA24B1322C0040BA4F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -2127,7 +2131,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 70;
+				CURRENT_PROJECT_VERSION = 75;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2142,7 +2146,7 @@
 					"USE_ZSTD=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=9",
+					"VERSION_PATCH=10",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=1",
 				);
@@ -2164,6 +2168,7 @@
 					"${SRCROOT}/../deps/libpng/include",
 					"${SRCROOT}/../deps/SDL3/include",
 					"${SRCROOT}/../deps/libvorbis/include",
+					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
@@ -2172,7 +2177,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.0.9;
+				MARKETING_VERSION = 2.0.10;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
@@ -2186,6 +2191,7 @@
 					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/SDL3",
 					"-L${SRCROOT}/../deps/libvorbis",
+					"-L${SRCROOT}/../deps/libcurl",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
@@ -2202,7 +2208,7 @@
 				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 70;
+				CURRENT_PROJECT_VERSION = 75;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2218,7 +2224,7 @@
 					"USE_ZSTD=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=9",
+					"VERSION_PATCH=10",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=0",
 				);
@@ -2240,6 +2246,7 @@
 					"${SRCROOT}/../deps/libpng/include",
 					"${SRCROOT}/../deps/SDL3/include",
 					"${SRCROOT}/../deps/libvorbis/include",
+					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
@@ -2248,7 +2255,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.0.9;
+				MARKETING_VERSION = 2.0.10;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
@@ -2262,6 +2269,7 @@
 					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/SDL3",
 					"-L${SRCROOT}/../deps/libvorbis",
+					"-L${SRCROOT}/../deps/libcurl",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";

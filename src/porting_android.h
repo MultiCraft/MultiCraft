@@ -1,8 +1,8 @@
 /*
 Minetest
 Copyright (C) 2014 celeron55, Perttu Ahola <celeron55@gmail.com>
-Copyright (C) 2014-2023 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
-Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
+Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include <jni.h>
+#include <android/asset_manager_jni.h>
 #include <android/log.h>
 
 #include <string>
@@ -33,6 +34,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace porting {
 // java <-> c++ interaction interface
 extern JNIEnv *jnienv;
+
+extern AAssetManager *asset_manager;
 
 extern std::string input_dialog_owner;
 
@@ -120,4 +123,29 @@ std::string getCpuArchitecture();
  * get encrypted key for further actions
  */
 std::string getSecretKey(const std::string &key);
+
+/**
+ * returns true if game running on Google PC emulator
+ */
+bool isGooglePC();
+
+/**
+ * hide splash screen after assets extraction
+ */
+void hideSplashScreen();
+
+/**
+ * returns true if assets extraction is needed
+ */
+bool needsExtractAssets();
+
+/**
+ * create asset manager for direct access files in apk
+ */
+bool createAssetManager();
+
+/**
+ * destroy asset manager
+ */
+void destroyAssetManager();
 }

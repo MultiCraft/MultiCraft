@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/sound.h"
 #include "client/tile.h"
 #include "util/enriched_string.h"
+#include "client/sky.h"
 
 /******************************************************************************/
 /* Structs and macros                                                         */
@@ -151,6 +152,10 @@ public:
 	unsigned int queueAsync(const std::string &serialized_fct,
 			const std::string &serialized_params);
 
+	ITextureSource *getTextureSource() { return m_texture_source; }
+
+	static float g_timeofday;
+
 private:
 
 	/** find and run the main menu script */
@@ -171,7 +176,7 @@ private:
 	/** pointer to data beeing transfered back to main game handling */
 	MainMenuData            *m_data = nullptr;
 	/** pointer to texture source */
-	ISimpleTextureSource    *m_texture_source = nullptr;
+	ITextureSource          *m_texture_source = nullptr;
 	/** pointer to soundmanager*/
 	ISoundManager           *m_sound_manager = nullptr;
 

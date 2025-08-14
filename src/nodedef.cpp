@@ -1431,7 +1431,7 @@ void NodeDefManager::applyTextureOverrides(const std::vector<TextureOverride> &o
 	}
 }
 
-void NodeDefManager::updateTextures(IGameDef *gamedef,
+bool NodeDefManager::updateTextures(IGameDef *gamedef,
 	void (*progress_callback)(void *progress_args, u32 progress, u32 max_progress),
 	void *progress_callback_args)
 {
@@ -1453,7 +1453,14 @@ void NodeDefManager::updateTextures(IGameDef *gamedef,
 		ContentFeatures *f = &(m_content_features[i]);
 		f->updateTextures(tsrc, shdsrc, meshmanip, client, tsettings);
 		progress_callback(progress_callback_args, i, size);
+
+		bool result = RenderingEngine::run();
+
+		if (!result || *(client->m_connect_aborted))
+			return false;
 	}
+
+	return true;
 #endif
 }
 

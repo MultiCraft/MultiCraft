@@ -6,7 +6,7 @@ plugins {
 android {
 	buildToolsVersion = "35.0.1"
 	compileSdk = 35
-	ndkVersion = "28.0.13004108"
+	ndkVersion = "28.2.13676358"
 	namespace = "com.multicraft.game"
 
 	defaultConfig {
@@ -129,10 +129,9 @@ dependencies {
 	implementation project(':native')
 
 	/* Third-party libraries */
-	implementation 'androidx.appcompat:appcompat:1.7.0'
-	implementation 'androidx.appcompat:appcompat-resources:1.7.0'
+	implementation 'androidx.appcompat:appcompat:1.7.1'
+	implementation 'androidx.appcompat:appcompat-resources:1.7.1'
 	implementation 'androidx.browser:browser:1.8.0'
-	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.7'
-	implementation 'androidx.work:work-runtime-ktx:2.10.0'
+	implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.2'
 	implementation 'com.google.android.material:material:1.12.0'
 }

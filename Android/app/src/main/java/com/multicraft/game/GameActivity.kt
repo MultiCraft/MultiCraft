@@ -21,22 +21,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.multicraft.game
 
 import android.content.res.Configuration
-import android.net.Uri
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.text.InputType
-import android.view.*
-import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
-import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+import android.view.KeyEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager.LayoutParams.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
+import androidx.core.net.toUri
 import com.multicraft.game.MainActivity.Companion.radius
-import com.multicraft.game.databinding.*
+import com.multicraft.game.databinding.ActivityMainBinding
+import com.multicraft.game.databinding.InputTextBinding
+import com.multicraft.game.databinding.MultilineInputBinding
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
+import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
+import com.multicraft.game.helpers.PreferenceHelper.set
 import org.libsdl.app.SDLActivity
 import kotlin.system.exitProcess
 
@@ -52,6 +59,8 @@ class GameActivity : SDLActivity() {
 		external fun keyboardEvent(keyboard: Boolean)
 	}
 
+	private var splashView: View? = null
+	private var isExtract: Boolean = false
 	private var messageReturnValue = ""
 	private var hasKeyboard = false
 	override fun getLibraries() = arrayOf("MultiCraft")
@@ -67,8 +76,31 @@ class GameActivity : SDLActivity() {
 		} catch (e: Exception) {
 			exitProcess(0)
 		}
-		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+		window.addFlags(FLAG_KEEP_SCREEN_ON)
+		isExtract = intent.getBooleanExtra("update", false)
+		if (isExtract) {
+			val container = FrameLayout(this).apply {
+				layoutParams = ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.MATCH_PARENT
+				)
+				setBackgroundResource(R.drawable.bg)
+			}
+			val binding = ActivityMainBinding.inflate(layoutInflater)
+			container.addView(binding.root)
+			splashView = container
+			(binding.loadingAnim.drawable as AnimationDrawable).start()
+			window.addContentView(
+				container,
+				ViewGroup.LayoutParams(
+					ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.MATCH_PARENT
+				)
+			)
+		}
 		hasKeyboard = hasHardKeyboard()
+		val prefs = PreferenceHelper.init(this)
+		prefs[TAG_BUILD_VER] = BuildConfig.VERSION_CODE
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -101,7 +133,6 @@ class GameActivity : SDLActivity() {
 		}
 	}
 
-	@Suppress("unused")
 	fun showDialog(hint: String?, current: String?, editType: Int) {
 		isInputActive = true
 		messageReturnValue = ""
@@ -246,10 +277,8 @@ class GameActivity : SDLActivity() {
 		}
 	}
 
-	@Suppress("unused")
 	fun isDialogActive() = isInputActive
 
-	@Suppress("unused")
 	fun getDialogValue(): String {
 		val value = messageReturnValue
 		messageReturnValue = ""
@@ -272,8 +301,8 @@ class GameActivity : SDLActivity() {
 			.setExitAnimations(this, R.anim.slide_in_top, R.anim.slide_out_bottom)
 		val customTabsIntent = builder.build()
 		try {
-			customTabsIntent.launchUrl(this, Uri.parse(uri))
-		} catch (ignored: Exception) {
+			customTabsIntent.launchUrl(this, uri!!.toUri())
+		} catch (_: Exception) {
 		}
 	}
 
@@ -301,4 +330,15 @@ class GameActivity : SDLActivity() {
 	fun getCpuArchitecture(): String {
 		return System.getProperty("os.arch") ?: "null"
 	}
+
+	fun hideSplashScreen() {
+		runOnUiThread {
+			splashView?.let { view ->
+				(view.parent as? ViewGroup)?.removeView(view)
+				splashView = null
+			}
+		}
+	}
+
+	fun needsExtractAssets() = isExtract
 }

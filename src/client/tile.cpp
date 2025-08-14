@@ -297,6 +297,13 @@ public:
 #endif
 		img = driver->createImageFromFile(path.c_str());
 
+		// If it fails when using just texture name then try to create it
+		// with texture path
+		if (!img && m_main_menu) {
+			path = getTexturePath(name);
+			img = driver->createImageFromFile(path.c_str());
+		}
+
 		if (img){
 			m_images[name] = img;
 			img->grab(); // Grab for caller

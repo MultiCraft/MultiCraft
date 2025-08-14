@@ -3184,6 +3184,10 @@ For the following functions, `v`, `v1`, `v2` are vectors,
     * Returns a vector.
     * A copy of `a` if `a` is a vector.
     * `{x = a, y = b, z = c}`, if all of `a`, `b`, `c` are defined numbers.
+* `vector.zero()`:
+    * Returns a new vector `(0, 0, 0)`.
+* `vector.copy(v)`:
+    * Returns a copy of the vector `v`.
 * `vector.direction(p1, p2)`:
     * Returns a vector of length 1 with direction `p1` to `p2`.
     * If `p1` and `p2` are identical, returns `{x = 0, y = 0, z = 0}`.
@@ -6561,6 +6565,7 @@ object you are working with still exists.
       bgcolor[], any non-style elements (eg: label) may result in weird behaviour.
     * Only affects formspecs shown after this is called.
 * `get_formspec_prepend(formspec)`: returns a formspec string.
+* `copy_to_clipboard(text)`: Copies text to the player's clipboard.
 * `get_player_control()`: returns table with player pressed keys
     * The table consists of fields with the following boolean values
       representing the pressed keys: `up`, `down`, `left`, `right`, `jump`,

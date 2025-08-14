@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "lua_api/l_mainmenu.h"
 #include "lua_api/l_internal.h"
+#include "common/c_converter.h"
 #include "common/c_content.h"
 #include "cpp_api/s_async.h"
 #include "gui/guiEngine.h"
@@ -223,6 +224,226 @@ int ModApiMainMenu::l_set_clouds(lua_State *L)
 
 	engine->m_clouds_enabled = value;
 
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_sky(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	SkyboxParams skybox;
+
+	lua_getfield(L, 1, "base_color");
+	if (!lua_isnil(L, -1)) {
+		video::SColor bgcolor;
+		read_color(L, -1, &bgcolor);
+		sky->setFallbackBgColor(bgcolor);
+	}
+	lua_pop(L, 1);
+
+	lua_getfield(L, 1, "type");
+	if (!lua_isnil(L, -1)) {
+		const std::string type = luaL_checkstring(L, -1);
+		if (type == "regular") {
+			sky->setVisible(true);
+		} else {
+			throw LuaError("Unsupported sky type: " + type);
+		}
+	}
+	lua_pop(L, 1);
+
+	engine->m_clouds_enabled = getboolfield_default(L, 1, "clouds",
+			engine->m_clouds_enabled);
+
+	lua_getfield(L, 1, "sky_color");
+	if (lua_istable(L, -1)) {
+		SkyboxDefaults sky_defaults;
+		SkyColor sky_color = sky_defaults.getSkyColorDefaults();
+
+		lua_getfield(L, -1, "day_sky");
+		read_color(L, -1, &sky_color.day_sky);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "day_horizon");
+		read_color(L, -1, &sky_color.day_horizon);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "dawn_sky");
+		read_color(L, -1, &sky_color.dawn_sky);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "dawn_horizon");
+		read_color(L, -1, &sky_color.dawn_horizon);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "night_sky");
+		read_color(L, -1, &sky_color.night_sky);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "night_horizon");
+		read_color(L, -1, &sky_color.night_horizon);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "indoors");
+		read_color(L, -1, &sky_color.indoors);
+		lua_pop(L, 1);
+
+		sky->setSkyColors(sky_color);
+	}
+	lua_pop(L, 1);
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_stars(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	bool visible;
+	if (getboolfield(L, 1, "visible", visible))
+		sky->setStarsVisible(visible);
+
+	u16 count;
+	if (getintfield(L, 1, "count", count))
+		sky->setStarCount(count, false);
+
+	lua_getfield(L, 1, "star_color");
+	if (!lua_isnil(L, -1)) {
+		video::SColor starcolor;
+		read_color(L, -1, &starcolor);
+		sky->setStarColor(starcolor);
+	}
+	lua_pop(L, 1);
+
+	f32 star_scale;
+	if (getfloatfield(L, 1, "scale", star_scale))
+		sky->setStarScale(star_scale);
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_sky_body_pos(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	float moon_horizon_pos = readParam<float>(L, 1);
+	float moon_day_pos = readParam<float>(L, 2);
+	float moon_angle= readParam<float>(L, 3);
+	float sun_horizon_pos = readParam<float>(L, 4);
+	float sun_day_pos = readParam<float>(L, 5);
+	float sun_angle = readParam<float>(L, 6);
+
+	sky->setCustomSkyBodyPos(moon_horizon_pos, moon_day_pos, moon_angle,
+			sun_horizon_pos, sun_day_pos, sun_angle);
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_moon(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	std::string texture;
+	lua_getfield(L, 1, "texture");
+	if (!lua_isnil(L, -1)) {
+		texture = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	std::string tonemap;
+	lua_getfield(L, 1, "tonemap");
+	if (!lua_isnil(L, -1)) {
+		tonemap = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	sky->setMoonTexture(texture, tonemap, engine->getTextureSource());
+
+	float scale = 1.0f;
+	if (getfloatfield(L, 1, "scale", scale)) {
+		sky->setMoonScale(scale);
+	}
+
+	bool visible = true;
+	if (getboolfield(L, 1, "visible", visible)) {
+		sky->setMoonVisible(visible);
+	}
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_sun(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	std::string texture;
+	lua_getfield(L, 1, "texture");
+	if (!lua_isnil(L, -1)) {
+		texture = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	std::string tonemap;
+	lua_getfield(L, 1, "tonemap");
+	if (!lua_isnil(L, -1)) {
+		tonemap = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	sky->setSunTexture(texture, tonemap, engine->getTextureSource());
+
+	float scale = 1.0f;
+	if (getfloatfield(L, 1, "scale", scale)) {
+		sky->setSunScale(scale);
+	}
+
+	bool visible = true;
+	if (getboolfield(L, 1, "visible", visible)) {
+		sky->setSunVisible(visible);
+	}
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_timeofday(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+
+	float timeofday_f = readParam<float>(L, 1);
+	luaL_argcheck(L, timeofday_f >= 0.0f && timeofday_f <= 1.0f, 1,
+				  "value must be between 0 and 1");
+
+	engine->g_timeofday = timeofday_f;
 	return 0;
 }
 
@@ -931,6 +1152,12 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(update_formspec);
 	API_FCT(set_formspec_prepend);
 	API_FCT(set_clouds);
+	API_FCT(set_sky);
+	API_FCT(set_stars);
+	API_FCT(set_sky_body_pos);
+	API_FCT(set_moon);
+	API_FCT(set_sun);
+	API_FCT(set_timeofday);
 	API_FCT(get_textlist_index);
 	API_FCT(get_table_index);
 	API_FCT(get_worlds);

@@ -37,12 +37,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "content_cao.h"
 #include "content/subgames.h"
 #include "client/event_manager.h"
+#include "daynightratio.h"
 #include "fontengine.h"
 #include "itemdef.h"
 #include "log.h"
 #include "filesys.h"
 #include "gameparams.h"
 #include "gettext.h"
+#include "gui/guiEngine.h"
 #include "gui/guiChatConsole.h"
 #include "gui/guiConfirmRegistration.h"
 #include "gui/guiFormSpecMenu.h"
@@ -61,7 +63,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server.h"
 #include "settings.h"
 #include "shader.h"
-#include "sky.h"
 #include "translation.h"
 #include "util/basic_macros.h"
 #include "util/directiontables.h"
@@ -424,118 +425,91 @@ public:
 	}
 };
 
-
-// before 1.8 there isn't a "integer interface", only float
-#if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
-typedef f32 SamplerLayer_t;
-#else
-typedef s32 SamplerLayer_t;
-#endif
-
-
-class GameGlobalShaderConstantSetter : public IShaderConstantSetter
+void GameGlobalShaderConstantSetter::onSettingsChange(const std::string &name)
 {
-	Sky *m_sky;
-	bool *m_force_fog_off;
-	f32 *m_fog_range;
-	bool m_fog_enabled;
-	CachedPixelShaderSetting<float, 4> m_sky_bg_color;
-	CachedPixelShaderSetting<float> m_fog_distance;
-	CachedVertexShaderSetting<float> m_animation_timer_vertex;
-	CachedPixelShaderSetting<float> m_animation_timer_pixel;
-	CachedPixelShaderSetting<float, 3> m_day_light;
-	CachedPixelShaderSetting<float, 4> m_star_color;
-	CachedPixelShaderSetting<float, 3> m_eye_position_pixel;
-	CachedVertexShaderSetting<float, 3> m_eye_position_vertex;
-	CachedPixelShaderSetting<float, 3> m_minimap_yaw;
-	CachedPixelShaderSetting<float, 3> m_camera_offset_pixel;
-	CachedPixelShaderSetting<float, 3> m_camera_offset_vertex;
-	CachedPixelShaderSetting<SamplerLayer_t> m_base_texture;
-	CachedPixelShaderSetting<SamplerLayer_t> m_normal_texture;
-	Client *m_client;
-
-public:
-	void onSettingsChange(const std::string &name)
-	{
-		if (name == "enable_fog")
-			m_fog_enabled = g_settings->getBool("enable_fog");
-	}
-
-	static void settingsCallback(const std::string &name, void *userdata)
-	{
-		reinterpret_cast<GameGlobalShaderConstantSetter*>(userdata)->onSettingsChange(name);
-	}
-
-	void setSky(Sky *sky) { m_sky = sky; }
-
-	GameGlobalShaderConstantSetter(Sky *sky, bool *force_fog_off,
-			f32 *fog_range, Client *client) :
-		m_sky(sky),
-		m_force_fog_off(force_fog_off),
-		m_fog_range(fog_range),
-		m_sky_bg_color("skyBgColor"),
-		m_fog_distance("fogDistance"),
-		m_animation_timer_vertex("animationTimer"),
-		m_animation_timer_pixel("animationTimer"),
-		m_day_light("dayLight"),
-		m_star_color("starColor"),
-		m_eye_position_pixel("eyePosition"),
-		m_eye_position_vertex("eyePosition"),
-		m_minimap_yaw("yawVec"),
-		m_camera_offset_pixel("cameraOffset"),
-		m_camera_offset_vertex("cameraOffset"),
-		m_base_texture("baseTexture"),
-		m_normal_texture("normalTexture"),
-		m_client(client)
-	{
-		g_settings->registerChangedCallback("enable_fog", settingsCallback, this);
+	if (name == "enable_fog")
 		m_fog_enabled = g_settings->getBool("enable_fog");
-	}
+}
 
-	~GameGlobalShaderConstantSetter()
-	{
-		g_settings->deregisterChangedCallback("enable_fog", settingsCallback, this);
-	}
+void GameGlobalShaderConstantSetter::settingsCallback(const std::string &name, void *userdata)
+{
+	reinterpret_cast<GameGlobalShaderConstantSetter*>(userdata)->onSettingsChange(name);
+}
 
-	void onSetConstants(video::IMaterialRendererServices *services) override
-	{
-		// Background color
-		video::SColor bgcolor = m_sky->getBgColor();
-		video::SColorf bgcolorf(bgcolor);
-		float bgcolorfa[4] = {
-			bgcolorf.r,
-			bgcolorf.g,
-			bgcolorf.b,
-			bgcolorf.a,
-		};
-		m_sky_bg_color.set(bgcolorfa, services);
+GameGlobalShaderConstantSetter::GameGlobalShaderConstantSetter(Sky *sky, bool *force_fog_off,
+		f32 *fog_range, Client *client) :
+	m_sky(sky),
+	m_force_fog_off(force_fog_off),
+	m_fog_range(fog_range),
+	m_sky_bg_color("skyBgColor"),
+	m_fog_distance("fogDistance"),
+	m_animation_timer_vertex("animationTimer"),
+	m_animation_timer_pixel("animationTimer"),
+	m_day_light("dayLight"),
+	m_star_color("starColor"),
+	m_eye_position_pixel("eyePosition"),
+	m_eye_position_vertex("eyePosition"),
+	m_minimap_yaw("yawVec"),
+	m_camera_offset_pixel("cameraOffset"),
+	m_camera_offset_vertex("cameraOffset"),
+	m_base_texture("baseTexture"),
+	m_normal_texture("normalTexture"),
+	m_client(client)
+{
+	g_settings->registerChangedCallback("enable_fog", settingsCallback, this);
+	m_fog_enabled = g_settings->getBool("enable_fog");
+}
 
-		// Fog distance
-		float fog_distance = -1.0f; // sentinel for disabled fog
+GameGlobalShaderConstantSetter::~GameGlobalShaderConstantSetter()
+{
+	g_settings->deregisterChangedCallback("enable_fog", settingsCallback, this);
+}
 
-		if (m_fog_enabled && !*m_force_fog_off)
-			fog_distance = *m_fog_range;
+void GameGlobalShaderConstantSetter::onSetConstants(video::IMaterialRendererServices *services)
+{
+	// Background color
+	video::SColor bgcolor = m_sky->getBgColor();
+	video::SColorf bgcolorf(bgcolor);
+	float bgcolorfa[4] = {
+		bgcolorf.r,
+		bgcolorf.g,
+		bgcolorf.b,
+		bgcolorf.a,
+	};
+	m_sky_bg_color.set(bgcolorfa, services);
 
-		m_fog_distance.set(&fog_distance, services);
+	// Fog distance
+	float fog_distance = -1.0f; // sentinel for disabled fog
 
-		u32 daynight_ratio = (float)m_client->getEnv().getDayNightRatio();
-		video::SColorf sunlight;
-		get_sunlight_color(&sunlight, daynight_ratio);
-		float dnc[3] = {
-			sunlight.r,
-			sunlight.g,
-			sunlight.b };
-		m_day_light.set(dnc, services);
+	if (m_fog_enabled && !*m_force_fog_off)
+		fog_distance = *m_fog_range;
 
-		video::SColorf star_color = m_sky->getCurrentStarColor();
-		float clr[4] = {star_color.r, star_color.g, star_color.b, star_color.a};
-		m_star_color.set(clr, services);
+	m_fog_distance.set(&fog_distance, services);
 
-		u32 animation_timer = porting::getTimeMs() % 1000000;
-		float animation_timer_f = (float)animation_timer / 100000.f;
-		m_animation_timer_vertex.set(&animation_timer_f, services);
-		m_animation_timer_pixel.set(&animation_timer_f, services);
+	u32 daynight_ratio = 0;
+	if (m_client)
+		daynight_ratio = m_client->getEnv().getDayNightRatio();
+	else
+		daynight_ratio = time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);
 
+	video::SColorf sunlight;
+	get_sunlight_color(&sunlight, daynight_ratio);
+	float dnc[3] = {
+		sunlight.r,
+		sunlight.g,
+		sunlight.b };
+	m_day_light.set(dnc, services);
+
+	video::SColorf star_color = m_sky->getCurrentStarColor();
+	float clr[4] = {star_color.r, star_color.g, star_color.b, star_color.a};
+	m_star_color.set(clr, services);
+
+	u32 animation_timer = porting::getTimeMs() % 1000000;
+	float animation_timer_f = (float)animation_timer / 100000.f;
+	m_animation_timer_vertex.set(&animation_timer_f, services);
+	m_animation_timer_pixel.set(&animation_timer_f, services);
+
+	if (m_client) {
 		float eye_position_array[3];
 		v3f epos = m_client->getEnv().getLocalPlayer()->getEyePosition();
 #if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
@@ -547,20 +521,22 @@ public:
 #endif
 		m_eye_position_pixel.set(eye_position_array, services);
 		m_eye_position_vertex.set(eye_position_array, services);
+	}
 
-		if (m_client->getMinimap()) {
-			float minimap_yaw_array[3];
-			v3f minimap_yaw = m_client->getMinimap()->getYawVec();
+	if (m_client && m_client->getMinimap()) {
+		float minimap_yaw_array[3];
+		v3f minimap_yaw = m_client->getMinimap()->getYawVec();
 #if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
-			minimap_yaw_array[0] = minimap_yaw.X;
-			minimap_yaw_array[1] = minimap_yaw.Y;
-			minimap_yaw_array[2] = minimap_yaw.Z;
+		minimap_yaw_array[0] = minimap_yaw.X;
+		minimap_yaw_array[1] = minimap_yaw.Y;
+		minimap_yaw_array[2] = minimap_yaw.Z;
 #else
-			minimap_yaw.getAs3Values(minimap_yaw_array);
+		minimap_yaw.getAs3Values(minimap_yaw_array);
 #endif
-			m_minimap_yaw.set(minimap_yaw_array, services);
-		}
+		m_minimap_yaw.set(minimap_yaw_array, services);
+	}
 
+	if (m_client) {
 		float camera_offset_array[3];
 		v3f offset = intToFloat(m_client->getCamera()->getOffset(), BS);
 #if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
@@ -577,42 +553,33 @@ public:
 		m_base_texture.set(&base_tex, services);
 		m_normal_texture.set(&normal_tex, services);
 	}
-};
+}
 
 
-class GameGlobalShaderConstantSetterFactory : public IShaderConstantSetterFactory
+GameGlobalShaderConstantSetterFactory::GameGlobalShaderConstantSetterFactory(bool *force_fog_off,
+		f32 *fog_range, Client *client) :
+	m_sky(NULL),
+	m_force_fog_off(force_fog_off),
+	m_fog_range(fog_range),
+	m_client(client)
+{}
+
+void GameGlobalShaderConstantSetterFactory::setSky(Sky *sky) {
+	m_sky = sky;
+	for (GameGlobalShaderConstantSetter *ggscs : created_nosky) {
+		ggscs->setSky(m_sky);
+	}
+	created_nosky.clear();
+}
+
+IShaderConstantSetter* GameGlobalShaderConstantSetterFactory::create()
 {
-	Sky *m_sky;
-	bool *m_force_fog_off;
-	f32 *m_fog_range;
-	Client *m_client;
-	std::vector<GameGlobalShaderConstantSetter *> created_nosky;
-public:
-	GameGlobalShaderConstantSetterFactory(bool *force_fog_off,
-			f32 *fog_range, Client *client) :
-		m_sky(NULL),
-		m_force_fog_off(force_fog_off),
-		m_fog_range(fog_range),
-		m_client(client)
-	{}
-
-	void setSky(Sky *sky) {
-		m_sky = sky;
-		for (GameGlobalShaderConstantSetter *ggscs : created_nosky) {
-			ggscs->setSky(m_sky);
-		}
-		created_nosky.clear();
-	}
-
-	virtual IShaderConstantSetter* create()
-	{
-		auto *scs = new GameGlobalShaderConstantSetter(
-				m_sky, m_force_fog_off, m_fog_range, m_client);
-		if (!m_sky)
-			created_nosky.push_back(scs);
-		return scs;
-	}
-};
+	auto *scs = new GameGlobalShaderConstantSetter(
+			m_sky, m_force_fog_off, m_fog_range, m_client);
+	if (!m_sky)
+		created_nosky.push_back(scs);
+	return scs;
+}
 
 #define SIZE_TAG "size[11,5.5]"
 
@@ -720,9 +687,8 @@ protected:
 	bool initGui();
 
 	// Client connection
-	bool connectToServer(const GameStartData &start_data,
-			bool *connect_ok, bool *aborted);
-	bool getServerContent(bool *aborted);
+	bool connectToServer(const GameStartData &start_data, bool *connect_ok);
+	bool getServerContent();
 
 	// Main loop
 
@@ -956,6 +922,10 @@ private:
 #ifdef HAVE_TOUCHSCREENGUI
 	bool m_cache_touchtarget;
 #endif
+
+	bool m_connect_aborted = false;
+	u64 load_last_time_ms = 0;
+	u64 load_time_ms = 0;
 };
 
 Game::Game() :
@@ -1208,7 +1178,10 @@ void Game::shutdown()
 		formspec->quitMenu();
 
 #ifdef HAVE_TOUCHSCREENGUI
-	g_touchscreengui->hide();
+	if (g_touchscreengui) {
+		g_touchscreengui->hide();
+		g_touchscreengui->close();
+	}
 #endif
 
 	showOverlayMessage(N_("Shutting down..."), 0, 100);
@@ -1263,6 +1236,12 @@ bool Game::init(
 {
 	texture_src = createTextureSource(false);
 
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_time_ms = porting::getTimeMs();
+	load_last_time_ms = load_time_ms;
 	showOverlayMessage(N_("Loading..."), 0, 0);
 
 	shader_src = createShaderSource();
@@ -1319,7 +1298,14 @@ bool Game::initSound()
 bool Game::createSingleplayerServer(const std::string &map_dir,
 		const SubgameSpec &gamespec, u16 port)
 {
-	showOverlayMessage(N_("Loading..."), 0, 5);
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Loading..."), dtime, 5);
 
 	std::string bind_str = g_settings->get("bind_address");
 	Address bind_addr(0, 0, 0, 0, port);
@@ -1375,18 +1361,26 @@ void Game::copyServerClientCache()
 
 bool Game::createClient(const GameStartData &start_data)
 {
-	showOverlayMessage(N_("Creating client..."), 0, 10);
+	bool could_connect = false;
+
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Creating client..."), dtime, 10);
 
 	draw_control = new MapDrawControl;
 	if (!draw_control)
 		return false;
 
-	bool could_connect, connect_aborted;
-	if (!connectToServer(start_data, &could_connect, &connect_aborted))
+	if (!connectToServer(start_data, &could_connect))
 		return false;
 
 	if (!could_connect) {
-		if (error_message->empty() && !connect_aborted) {
+		if (error_message->empty() && !m_connect_aborted) {
 			// Should not happen if error messages are set properly
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
@@ -1398,8 +1392,8 @@ bool Game::createClient(const GameStartData &start_data)
 	porting::notifyServerConnect(!simple_singleplayer_mode);
 #endif
 
-	if (!getServerContent(&connect_aborted)) {
-		if (error_message->empty() && !connect_aborted) {
+	if (!getServerContent()) {
+		if (error_message->empty() && !m_connect_aborted) {
 			// Should not happen if error messages are set properly
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
@@ -1412,7 +1406,10 @@ bool Game::createClient(const GameStartData &start_data)
 	shader_src->addShaderConstantSetterFactory(scsf);
 
 	// Update cached textures, meshes and materials
-	client->afterContentReceived();
+	if (!client->afterContentReceived()) {
+		infostream << "Connect aborted [Escape]" << std::endl;
+		return false;
+	}
 
 	RenderingEngine::draw_load_cleanup();
 
@@ -1495,7 +1492,7 @@ bool Game::initGui()
 
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui) {
-		g_touchscreengui->init(texture_src, simple_singleplayer_mode);
+		g_touchscreengui->init(texture_src, simple_singleplayer_mode, sound);
 		if (g_touchscreengui->isActive())
 			g_touchscreengui->show();
 	}
@@ -1504,14 +1501,18 @@ bool Game::initGui()
 	return true;
 }
 
-bool Game::connectToServer(const GameStartData &start_data,
-		bool *connect_ok, bool *connection_aborted)
+bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 {
-	*connect_ok = false;	// Let's not be overly optimistic
-	*connection_aborted = false;
 	bool local_server_mode = false;
 
-	showOverlayMessage(N_("Resolving address..."), 0, 15);
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Resolving address..."), dtime, 15);
 
 	Address connect_address(0, 0, 0, 0, start_data.socket_port);
 
@@ -1550,6 +1551,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			connect_address.isIPv6(), m_game_ui.get());
 
 	client->m_simple_singleplayer_mode = simple_singleplayer_mode;
+	client->m_connect_aborted = &m_connect_aborted;
 
 	infostream << "Connecting to server at ";
 	connect_address.print(&infostream);
@@ -1562,7 +1564,6 @@ bool Game::connectToServer(const GameStartData &start_data,
 		Wait for server to accept connection
 	*/
 
-	bool result = true;
 	const f32 connect_timeout = start_data.reconnecting ?
 			g_settings->getFloat("reconnect_timeout") :
 			g_settings->getFloat("connect_timeout");
@@ -1593,7 +1594,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			// Break conditions
-			if (*connection_aborted)
+			if (m_connect_aborted)
 				break;
 
 			if (client->accessDenied()) {
@@ -1605,7 +1606,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			if (input->cancelPressed()) {
-				*connection_aborted = true;
+				m_connect_aborted = true;
 				infostream << "Connect aborted [Escape]" << std::endl;
 				break;
 			}
@@ -1619,7 +1620,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
 						   &g_menumgr, client, start_data.name, start_data.password,
-						   connection_aborted, texture_src, sound))->drop();
+						   &m_connect_aborted, texture_src, sound))->drop();
 				}
 			} else {
 				wait_time += dtime;
@@ -1643,7 +1644,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 	return result;
 }
 
-bool Game::getServerContent(bool *aborted)
+bool Game::getServerContent()
 {
 	input->clear();
 
@@ -1679,8 +1680,13 @@ bool Game::getServerContent(bool *aborted)
 			return false;
 		}
 
+		if (m_connect_aborted) {
+			infostream << "Connect aborted [Escape]" << std::endl;
+			return false;
+		}
+
 		if (input->cancelPressed()) {
-			*aborted = true;
+			m_connect_aborted = true;
 			infostream << "Connect aborted [Escape]" << std::endl;
 			return false;
 		}
