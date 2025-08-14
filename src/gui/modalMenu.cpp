@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 
 #ifdef HAVE_TOUCHSCREENGUI
-#include "touchscreengui.h"
+	#include "touchscreengui_mc.h"
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_

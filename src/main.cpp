@@ -50,7 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "translation.h"
 #endif
 #ifdef HAVE_TOUCHSCREENGUI
-	#include "gui/touchscreengui.h"
+	#include "gui/touchscreengui_mc.h"
 #endif
 
 #ifdef __APPLE__

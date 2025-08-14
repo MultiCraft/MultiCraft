@@ -67,7 +67,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "guiScrollContainer.h"
 #include "guiHyperText.h"
 #include "guiScene.h"
-#include "touchscreengui.h"
+#ifdef HAVE_TOUCHSCREENGUI
+	#include "touchscreengui_mc.h"
+#endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #include <SDL.h>

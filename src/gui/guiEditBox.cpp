@@ -24,7 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "IGUIFont.h"
 
 #include "porting.h"
-#include "touchscreengui.h"
+#ifdef HAVE_TOUCHSCREENGUI
+	#include "touchscreengui_mc.h"
+#endif
 #include "util/string.h"
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
