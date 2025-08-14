@@ -29,7 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "content_cao.h"
 #include "client/joystick_controller.h"
 #ifdef HAVE_TOUCHSCREENGUI
-	#include "gui/touchscreengui_mc.h"
+#include "gui/touchscreengui_mc.h"
 #endif
 
 

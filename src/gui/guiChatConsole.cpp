@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <algorithm>
 #include <string>
 #ifdef HAVE_TOUCHSCREENGUI
-	#include "touchscreengui_mc.h"
+#include "touchscreengui_mc.h"
 #endif
 
 #if USE_FREETYPE
