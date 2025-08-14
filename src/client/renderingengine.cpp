@@ -955,3 +955,40 @@ bool RenderingEngine::isHighDpi()
 	return RenderingEngine::getDisplayDensity() >= 3;
 #endif
 }
+
+void RenderingEngine::startTextInput()
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	if (engine && porting::hasRealKeyboard()) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			if (window)
+				SDL_StartTextInput(window);
+		}
+	}
+#endif
+}
+
+void RenderingEngine::stopTextInput()
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	if (engine && porting::hasRealKeyboard()) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			if (window && SDL_TextInputActive(window))
+				SDL_StopTextInput(window);
+		}
+	}
+#endif
+}

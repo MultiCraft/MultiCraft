@@ -71,19 +71,7 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 
 GUIModalMenu::~GUIModalMenu()
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (Environment && porting::hasRealKeyboard()) {
-		video::IVideoDriver *driver = Environment->getVideoDriver();
-		if (driver) {
-			const video::SExposedVideoData exposedData =
-					driver->getExposedVideoData();
-			SDL_Window *window = exposedData.OpenGLSDL.Window;
-
-			if (window && SDL_TextInputActive(window))
-				SDL_StopTextInput(window);
-		}
-	}
-#endif
+	RenderingEngine::stopTextInput();
 	m_menumgr->deletingMenu(this);
 }
 
@@ -328,33 +316,14 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 	// Enable text input events when edit box is focused
 	if (event.EventType == EET_GUI_EVENT) {
 		if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUSED &&
-			event.GUIEvent.Caller &&
-			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
-			if (Environment && porting::hasRealKeyboard()) {
-				video::IVideoDriver* driver = Environment->getVideoDriver();
-				if (driver) {
-					const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-					SDL_Window *window = exposedData.OpenGLSDL.Window;
-
-					if (window)
-						SDL_StartTextInput(window);
-				}
-			}
+				event.GUIEvent.Caller &&
+				event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
+			RenderingEngine::startTextInput();
 		}
 		else if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUS_LOST &&
-			event.GUIEvent.Caller &&
-			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
-
-			if (Environment && porting::hasRealKeyboard()) {
-				video::IVideoDriver* driver = Environment->getVideoDriver();
-				if (driver) {
-					const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-					SDL_Window *window = exposedData.OpenGLSDL.Window;
-					
-					if (window && SDL_TextInputActive(window))
-						SDL_StopTextInput(window);
-				}
-			}
+				event.GUIEvent.Caller &&
+				event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
+			RenderingEngine::stopTextInput();
 		}
 	}
 #endif

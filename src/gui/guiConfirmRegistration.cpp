@@ -64,36 +64,14 @@ GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 	m_touchscreen_visible = false;
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (Environment && porting::hasRealKeyboard()) {
-		video::IVideoDriver* driver = Environment->getVideoDriver();
-		if (driver) {
-			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-			SDL_Window *window = exposedData.OpenGLSDL.Window;
-
-			if (window)
-				SDL_StartTextInput(window);
-		}
-	}
-#endif
+	RenderingEngine::startTextInput();
 }
 
 GUIConfirmRegistration::~GUIConfirmRegistration()
 {
 	removeChildren();
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (Environment && porting::hasRealKeyboard()) {
-		video::IVideoDriver* driver = Environment->getVideoDriver();
-		if (driver) {
-			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-			SDL_Window *window = exposedData.OpenGLSDL.Window;
-			
-			if (window && SDL_TextInputActive(window))
-				SDL_StopTextInput(window);
-		}
-	}
-#endif
+	RenderingEngine::stopTextInput();
 }
 
 void GUIConfirmRegistration::removeChildren()

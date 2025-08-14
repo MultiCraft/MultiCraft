@@ -114,18 +114,7 @@ GUIChatConsole::~GUIChatConsole()
 	removeChild(m_vscrollbar);
 	delete m_vscrollbar;
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (Environment && porting::hasRealKeyboard()) {
-		video::IVideoDriver* driver = Environment->getVideoDriver();
-		if (driver) {
-			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-			SDL_Window *window = exposedData.OpenGLSDL.Window;
-			
-			if (window && SDL_TextInputActive(window))
-				SDL_StopTextInput(window);
-		}
-	}
-#endif
+	RenderingEngine::stopTextInput();
 
 	if (m_font)
 		m_font->drop();
@@ -152,18 +141,7 @@ void GUIChatConsole::openConsole(f32 scale)
 	Environment->setFocus(this);
 	m_menumgr->createdMenu(this);
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (Environment && porting::hasRealKeyboard()) {
-		video::IVideoDriver* driver = Environment->getVideoDriver();
-		if (driver) {
-			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-			SDL_Window *window = exposedData.OpenGLSDL.Window;
-
-			if (window)
-				SDL_StartTextInput(window);
-		}
-	}
-#endif
+	RenderingEngine::startTextInput();
 }
 
 bool GUIChatConsole::isOpen() const
@@ -187,18 +165,7 @@ void GUIChatConsole::closeConsole()
 		recalculateConsolePosition();
 	}
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (Environment && porting::hasRealKeyboard()) {
-		video::IVideoDriver* driver = Environment->getVideoDriver();
-		if (driver) {
-			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
-			SDL_Window *window = exposedData.OpenGLSDL.Window;
-			
-			if (window && SDL_TextInputActive(window))
-				SDL_StopTextInput(window);
-		}
-	}
-#endif
+	RenderingEngine::stopTextInput();
 
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui && g_touchscreengui->isActive())
