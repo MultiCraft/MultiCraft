@@ -1,14 +1,11 @@
 #!/bin/bash -e
 
-SQLITE_VERSION=3.49.1
+SQLITE_VERSION=3.50.4
 
 . ./sdk.sh
 
 if [ ! -d sqlite-src ]; then
-	wget https://www.sqlite.org/src/tarball/sqlite.tar.gz?r=version-$SQLITE_VERSION
-	tar -xzf sqlite.tar.gz?r=version-$SQLITE_VERSION
-	mv sqlite sqlite-src
-	rm sqlite.tar.gz?r=version-$SQLITE_VERSION
+	git clone -b version-$OPENSSL_VERSION --depth 1 https://github.com/sqlite/sqlite.git sqlite-src
 	mkdir sqlite-src/build
 fi
 

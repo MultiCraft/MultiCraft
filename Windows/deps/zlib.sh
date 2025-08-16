@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-ZLIB_VERSION=2.2.4
+ZLIB_VERSION=2.2.5
 
 . ./sdk.sh
 

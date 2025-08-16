@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-CURL_VERSION=8.13.0
+CURL_VERSION=8.15.0
 
 export DEPS_ROOT=$(pwd)
 
