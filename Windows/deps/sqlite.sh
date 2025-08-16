@@ -5,7 +5,7 @@ SQLITE_VERSION=3.50.4
 . ./sdk.sh
 
 if [ ! -d sqlite-src ]; then
-	git clone -b version-$OPENSSL_VERSION --depth 1 https://github.com/sqlite/sqlite.git sqlite-src
+	git clone -b version-$SQLITE_VERSION --depth 1 https://github.com/sqlite/sqlite.git sqlite-src
 	mkdir sqlite-src/build
 fi
 
