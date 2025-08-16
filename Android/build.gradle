@@ -8,7 +8,7 @@ plugins {
 ext {
 	versionMajor = 2 // Version Major
 	versionMinor = 0 // Version Minor
-	versionPatch = 10 // Version Patch
+	versionPatch = 11 // Version Patch
 	versionExtra = "" // Version Extra
 	versionCode  = 200 // Android Version Code
 	developmentBuild = 0 // Whether it is a development build, or a release
