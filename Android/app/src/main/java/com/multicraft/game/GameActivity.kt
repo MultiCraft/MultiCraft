@@ -24,9 +24,7 @@ import android.content.res.Configuration
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.text.InputType
-import android.view.KeyEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.WindowManager.LayoutParams.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -37,9 +35,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.net.toUri
 import com.multicraft.game.MainActivity.Companion.radius
-import com.multicraft.game.databinding.ActivityMainBinding
-import com.multicraft.game.databinding.InputTextBinding
-import com.multicraft.game.databinding.MultilineInputBinding
+import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
@@ -80,10 +76,7 @@ class GameActivity : SDLActivity() {
 		isExtract = intent.getBooleanExtra("update", false)
 		if (isExtract) {
 			val container = FrameLayout(this).apply {
-				layoutParams = ViewGroup.LayoutParams(
-					ViewGroup.LayoutParams.MATCH_PARENT,
-					ViewGroup.LayoutParams.MATCH_PARENT
-				)
+				layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
 				setBackgroundResource(R.drawable.bg)
 			}
 			val binding = ActivityMainBinding.inflate(layoutInflater)
@@ -92,10 +85,7 @@ class GameActivity : SDLActivity() {
 			(binding.loadingAnim.drawable as AnimationDrawable).start()
 			window.addContentView(
 				container,
-				ViewGroup.LayoutParams(
-					ViewGroup.LayoutParams.MATCH_PARENT,
-					ViewGroup.LayoutParams.MATCH_PARENT
-				)
+				ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
 			)
 		}
 		hasKeyboard = hasHardKeyboard()

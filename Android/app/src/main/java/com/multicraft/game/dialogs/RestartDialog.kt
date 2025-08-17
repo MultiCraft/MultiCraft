@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game.dialogs
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
@@ -53,11 +52,11 @@ class RestartDialog : AppCompatActivity() {
 		val message = intent.getStringExtra("message")!!
 		binding.errorDesc.text = message
 		binding.restart.setOnClickListener {
-			setResult(Activity.RESULT_OK)
+			setResult(RESULT_OK)
 			finish()
 		}
 		binding.close.setOnClickListener {
-			setResult(Activity.RESULT_CANCELED)
+			setResult(RESULT_CANCELED)
 			finish()
 		}
 	}
