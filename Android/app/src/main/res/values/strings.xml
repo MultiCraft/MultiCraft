@@ -3,7 +3,6 @@
 	<string name="app_name" translatable="false">MultiCraft</string>
 	<!-- preparation for start -->
 	<string name="preparing">Preparing to launch&#8230;</string>
-	<string name="loading">Loading&#8230;</string>
 
 	<string name="input_text">Enter text</string>
 	<string name="input_password">Enter password</string>
