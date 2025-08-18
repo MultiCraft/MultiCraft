@@ -20,7 +20,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game.dialogs
 
-import android.app.Activity
 import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
@@ -37,7 +36,7 @@ import org.libsdl.app.SDLActivity
 
 class ConnectionDialog : AppCompatActivity() {
 	private fun isSimCardPresent(): Boolean {
-		val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+		val telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
 
 		if (!isOreo())
 			return telephonyManager.simState == SIM_STATE_READY
@@ -69,15 +68,15 @@ class ConnectionDialog : AppCompatActivity() {
 		})
 
 		binding.wifi.setOnClickListener {
-			setResult(Activity.RESULT_OK)
+			setResult(RESULT_OK)
 			finish()
 		}
 		binding.mobile.setOnClickListener {
-			setResult(Activity.RESULT_FIRST_USER)
+			setResult(RESULT_FIRST_USER)
 			finish()
 		}
 		binding.ignore.setOnClickListener {
-			setResult(Activity.RESULT_CANCELED)
+			setResult(RESULT_CANCELED)
 			finish()
 		}
 	}

@@ -137,7 +137,32 @@ LOCAL_SRC_FILES := \
 	../../src/database/database-dummy.cpp          \
 	../../src/database/database-files.cpp          \
 	../../src/database/database-leveldb.cpp        \
-	$(wildcard ../../src/gui/*.cpp)                \
+	../../src/gui/guiAnimatedImage.cpp             \
+	../../src/gui/guiBackgroundImage.cpp           \
+	../../src/gui/guiBox.cpp                       \
+	../../src/gui/guiButton.cpp                    \
+	../../src/gui/guiButtonImage.cpp               \
+	../../src/gui/guiButtonItemImage.cpp           \
+	../../src/gui/guiChatConsole.cpp               \
+	../../src/gui/guiConfirmRegistration.cpp       \
+	../../src/gui/guiEditBox.cpp                   \
+	../../src/gui/guiEditBoxWithScrollbar.cpp      \
+	../../src/gui/guiEngine.cpp                    \
+	../../src/gui/guiFormSpecMenu.cpp              \
+	../../src/gui/guiInventoryList.cpp             \
+	../../src/gui/guiItemImage.cpp                 \
+	../../src/gui/guiKeyChangeMenu.cpp             \
+	../../src/gui/guiPathSelectMenu.cpp            \
+	../../src/gui/guiScene.cpp                     \
+	../../src/gui/guiScrollBar.cpp                 \
+	../../src/gui/guiScrollContainer.cpp           \
+	../../src/gui/guiSkin.cpp                      \
+	../../src/gui/guiTable.cpp                     \
+	../../src/gui/guiHyperText.cpp                 \
+	../../src/gui/guiVolumeChange.cpp              \
+	../../src/gui/modalMenu.cpp                    \
+	../../src/gui/profilergraph.cpp                \
+	../../src/gui/touchscreengui_mc.cpp            \
 	$(wildcard ../../src/irrlicht_changes/*.cpp)   \
 	$(wildcard ../../src/mapgen/*.cpp)             \
 	$(wildcard ../../src/network/*.cpp)            \
