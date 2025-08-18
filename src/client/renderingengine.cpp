@@ -961,6 +961,8 @@ void RenderingEngine::startTextInput()
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	RenderingEngine *engine = RenderingEngine::get_instance();
 
+	SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, porting::hasRealKeyboard() ? "0" : "1");
+
 	if (engine && porting::hasRealKeyboard()) {
 		video::IVideoDriver* driver = engine->getVideoDriver();
 		if (driver) {
