@@ -2002,11 +2002,6 @@ void Game::processKeyInput()
 			showPauseMenu();
 		}
 	} else if (wasKeyDown(KeyType::CHAT)) {
-#if defined(__ANDROID__) || defined(__IOS__)
-		if (isKeyDown(KeyType::SNEAK))
-			m_game_ui->toggleChat();
-		else
- #endif
 		openConsole(core::clamp(g_settings->getFloat("console_message_height"), 0.1f, 1.0f), L"");
 	} else if (wasKeyDown(KeyType::CMD)) {
 		openConsole(core::clamp(g_settings->getFloat("console_message_height"), 0.1f, 1.0f), L"/");
@@ -2024,7 +2019,7 @@ void Game::processKeyInput()
 		if (isKeyDown(KeyType::SNEAK) && client->checkPrivilege("fly"))
 			toggleFast();
 		else
- #endif
+#endif
 		toggleFreeMoveAlt();
 	} else if (wasKeyDown(KeyType::PITCHMOVE)) {
 		togglePitchMove();

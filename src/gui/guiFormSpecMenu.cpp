@@ -77,7 +77,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef __IOS__
-#import "wrapper.h"
+#import "DeviceModels.h"
 #endif
 
 #define MY_CHECKPOS(a,b)													\
@@ -3422,7 +3422,8 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 #ifdef __IOS__
 				// Prefer Desktop size on large tablets.
-				if (!Device7and9Inch && !Device8and3Inch && !Device10and5Inch)
+				const char *model = MultiCraft::getDeviceModel();
+				if (isDevice11Inch(model) || isDevice12and9Inch(model))
 					prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
 #endif
 			}
@@ -3811,7 +3812,7 @@ void GUIFormSpecMenu::drawMenu()
 		m_zero_pointer = AbsoluteClippingRect.UpperLeftCorner;
 		m_pointer = m_zero_pointer;
 	}
-	
+
 	/*
 		Draw fields/buttons tooltips and update the mouse cursor
 	*/

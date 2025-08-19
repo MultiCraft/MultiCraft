@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef __IOS__
-#import "wrapper.h"
+#import "DeviceModels.h"
 #endif
 
 void set_default_settings()
@@ -576,7 +576,8 @@ void set_default_settings()
 	if (memoryMax < 2) {
 		// minimal settings for less than 2GB RAM
 #elif __IOS__
-	if (false) {
+	const char *model = MultiCraft::getDeviceModel();
+	if (/* DISABLES CODE */ (false)) {
 		// obsolete
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "60");
@@ -591,8 +592,8 @@ void set_default_settings()
 	} else if (memoryMax >= 2 && memoryMax < 4) {
 		// low settings for 2-4GB RAM
 #elif __IOS__
-	} else if (!IOS_VERSION_AVAILABLE("13.0")) {
-		// low settings
+	} else if (/* DISABLES CODE */ (false)) {
+		// obsolete
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "120");
 		settings->setDefault("client_mapblock_limit", "200");
@@ -605,10 +606,7 @@ void set_default_settings()
 	} else if (memoryMax >= 4 && memoryMax <= 5) {
 		// medium settings for 4.1-5GB RAM
 #elif __IOS__
-	} else if (([SDVersion deviceVersion] == iPhone6S) || ([SDVersion deviceVersion] == iPhone6SPlus) || ([SDVersion deviceVersion] == iPhoneSE) ||
-			   ([SDVersion deviceVersion] == iPhone7) || ([SDVersion deviceVersion] == iPhone7Plus) ||
-			   ([SDVersion deviceVersion] == iPadMini4) || ([SDVersion deviceVersion] == iPadAir2) || ([SDVersion deviceVersion] == iPad5))
-	{
+	} else if (isDeviceMidrange(model)) {
 		// medium settings
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "180");
@@ -692,48 +690,37 @@ void set_default_settings()
 
 	// iOS Settings
 #ifdef __IOS__
-	// Switch to olges2 with shaders in new iOS versions
-	if (IOS_VERSION_AVAILABLE("14.0")) {
-		settings->setDefault("video_driver", "ogles2");
-		settings->setDefault("enable_shaders", "true");
-	} else {
-		settings->setDefault("video_driver", "ogles1");
-		settings->setDefault("enable_shaders", "false");
-	}
-
-	settings->setDefault("debug_log_level", "none");
-
 	// Set the size of the elements depending on the screen size
-	if SDVersion4Inch {
+	if (isDevice4Inch(model)) {
 		// 4" iPhone and iPod Touch
 		settings->setDefault("hud_scaling", "0.55");
 		settings->setDefault("touch_sensitivity", "0.33");
 		settings->setDefault("console_message_height", "0");
-	} else if SDVersion4and7Inch {
+	} else if (isDevice4and7Inch(model)) {
 		// 4.7" iPhone
 		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("touch_sensitivity", "0.27");
 		settings->setDefault("console_message_height", "0");
-	} else if SDVersion5and5Inch {
+	} else if (isDevice5and5Inch(model)) {
 		// 5.5" iPhone Plus
 		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("touch_sensitivity", "0.3");
-	} else if (SDVersion5and8Inch || SDVersion6and1Inch) {
+	} else if (isDevice5and8Inch(model) || isDevice6and1Inch(model)) {
 		// 5.8" and 6.1" iPhones
 		settings->setDefault("hud_scaling", "0.8");
 		settings->setDefault("touch_sensitivity", "0.35");
 		settings->setDefault("selectionbox_width", "6");
-	} else if SDVersion6and5Inch {
+	} else if (isDevice6and5Inch(model)) {
 		// 6.5" iPhone
 		settings->setDefault("hud_scaling", "0.85");
 		settings->setDefault("touch_sensitivity", "0.35");
 		settings->setDefault("selectionbox_width", "6");
-	} else if SDVersion7and9Inch {
+	} else if (isDevice7and9Inch(model)) {
 		// iPad mini
 		settings->setDefault("hud_scaling", "0.9");
 		settings->setDefault("touch_sensitivity", "0.25");
 		settings->setDefault("selectionbox_width", "6");
-	} else if SDVersion8and3Inch {
+	} else if (isDevice8and3Inch(model)) {
 		settings->setDefault("touch_sensitivity", "0.25");
 		settings->setDefault("selectionbox_width", "6");
 	} else {
@@ -742,11 +729,11 @@ void set_default_settings()
 		settings->setDefault("selectionbox_width", "6");
 	}
 
-	if SDVersion4Inch {
+	if (isDevice4Inch(model) || isDevice4and7Inch(model)) {
 		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
-	} else if (SDVersion4and7Inch || SDVersion5and5Inch) {
+	} else if (isDevice5and5Inch(model)) {
 		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 1));
-	} else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad && !SDVersion7and9Inch) {
+	} else if (isTablet && !isDevice7and9Inch(model)) {
 		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE + 1));
 	}
 
@@ -754,10 +741,12 @@ void set_default_settings()
 	int RoundScreen = porting::getRoundScreen();
 	if (RoundScreen > 0) {
 		int upwards = 25, round = 40;
-		if SDVersioniPhone12Series {
+		if (isDeviceiPhone12Series(model)) {
 			upwards = 20, round = 90;
-		} else if SDVersion8and3Inch {
+		} else if (isDevice8and3Inch(model)) {
 			upwards = 15, round = 20;
+		} else if (isDevice12and9Inch(model)) {
+			upwards = 20, round = 20;
 		}
 
 		settings->setDefault("hud_move_upwards", std::to_string(upwards));
