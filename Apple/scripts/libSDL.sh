@@ -1,15 +1,15 @@
 #!/bin/bash -e
 
-SDL3_VERSION=release-3.2.8
+SDL_VERSION=release-3.2.8
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
 
 if [ ! -d SDL3-src ]; then
-	wget https://github.com/libsdl-org/SDL/archive/$SDL3_VERSION.tar.gz
-	tar -xzf $SDL3_VERSION.tar.gz
-	mv SDL-$SDL3_VERSION SDL3-src
-	rm $SDL3_VERSION.tar.gz
+	wget https://github.com/libsdl-org/SDL/archive/$SDL_VERSION.tar.gz
+	tar -xzf $SDL_VERSION.tar.gz
+	mv SDL-$SDL_VERSION SDL3-src
+	rm $SDL_VERSION.tar.gz
 	# Disable some features that are not needed
 	sed -i '' 's/#define SDL_AUDIO_DRIVER_COREAUDIO  1/#define SDL_AUDIO_DRIVER_COREAUDIO  0/g' SDL3-src/include/build_config/SDL_build_config_macos.h
 	sed -i '' 's/#define SDL_AUDIO_DRIVER_DISK   1/#define SDL_AUDIO_DRIVER_DISK   0/g' SDL3-src/include/build_config/SDL_build_config_macos.h
@@ -52,4 +52,4 @@ cd ../SDL3
 lipo -create templib_*.a -output libSDL3.a
 rm templib_*.a
 
-echo "SDL3 build successful"
+echo "libSDL build successful"
