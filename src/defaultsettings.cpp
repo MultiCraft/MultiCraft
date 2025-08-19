@@ -254,11 +254,7 @@ void set_default_settings()
 	settings->setDefault("texture_clean_transparent", "false");
 	settings->setDefault("texture_min_size", "0");
 	settings->setDefault("ambient_occlusion_gamma", "1.8");
-#if ENABLE_GLES
-	settings->setDefault("enable_shaders", "false");
-#else
 	settings->setDefault("enable_shaders", "true");
-#endif
 	settings->setDefault("enable_particles", "true");
 	settings->setDefault("arm_inertia", "true");
 	settings->setDefault("show_nametag_backgrounds", "false");
@@ -503,7 +499,7 @@ void set_default_settings()
 #endif
 
 	float memoryMax = (float) porting::getTotalSystemMemory() / 1024;
-	settings->setDefault("convert_to_16bit", std::to_string(memoryMax <= 2));
+	settings->setDefault("convert_to_16bit", std::to_string(memoryMax <= 3));
 
 	// Altered settings for macOS
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
@@ -543,7 +539,7 @@ void set_default_settings()
 
 	// Mobile Platform
 #if defined(__ANDROID__) || defined(__IOS__)
-	settings->setDefault("fullscreen", "true");
+	settings->setDefault("video_driver", "ogles2");
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
 	settings->setDefault("curl_verify_cert", "false");
@@ -557,10 +553,25 @@ void set_default_settings()
 		settings->setDefault("recent_chat_messages", "8");
 		settings->setDefault("console_message_height", "0.4");
 	} else {
+		settings->setDefault("recent_chat_messages", "6");
 		settings->setDefault("console_message_height", "0.3");
 	}
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
+#ifdef __ANDROID__
+	if (memoryMax < 4) {
+		settings->setDefault("fps_max_unfocused", "10");
+		settings->setDefault("smooth_lighting", "false");
+		settings->setDefault("max_objects_per_block", "16");
+		settings->setDefault("dedicated_server_step", "0.2");
+		settings->setDefault("abm_interval", "2.0");
+		settings->setDefault("nodetimer_interval", "0.4");
+		settings->setDefault("chunksize", "3");
+		settings->setDefault("arm_inertia", "false");
+		settings->setDefault("enable_particles", "false");
+	}
+#endif
+
 #ifdef __ANDROID__
 	if (memoryMax < 2) {
 		// minimal settings for less than 2GB RAM
@@ -571,18 +582,11 @@ void set_default_settings()
 		settings->setDefault("client_unload_unused_data_timeout", "60");
 		settings->setDefault("client_mapblock_limit", "50");
 		settings->setDefault("fps_max", "35");
-		settings->setDefault("fps_max_unfocused", "10");
 		settings->setDefault("viewing_range", "30");
-		settings->setDefault("smooth_lighting", "false");
 		settings->setDefault("enable_3d_clouds", "false");
 		settings->setDefault("active_object_send_range_blocks", "1");
 		settings->setDefault("active_block_range", "1");
-		settings->setDefault("max_objects_per_block", "16");
-		settings->setDefault("dedicated_server_step", "0.2");
-		settings->setDefault("abm_interval", "3.0");
-		settings->setDefault("chunksize", "3");
 		settings->setDefault("max_block_generate_distance", "1");
-		settings->setDefault("arm_inertia", "false");
 #ifdef __ANDROID__
 	} else if (memoryMax >= 2 && memoryMax < 4) {
 		// low settings for 2-4GB RAM
@@ -593,17 +597,10 @@ void set_default_settings()
 		settings->setDefault("client_unload_unused_data_timeout", "120");
 		settings->setDefault("client_mapblock_limit", "200");
 		settings->setDefault("fps_max", "35");
-		settings->setDefault("fps_max_unfocused", "10");
 		settings->setDefault("viewing_range", "40");
-		settings->setDefault("smooth_lighting", "false");
 		settings->setDefault("active_object_send_range_blocks", "1");
 		settings->setDefault("active_block_range", "2");
-		settings->setDefault("max_objects_per_block", "16");
-		settings->setDefault("dedicated_server_step", "0.2");
-		settings->setDefault("abm_interval", "2.0");
-		settings->setDefault("chunksize", "3");
 		settings->setDefault("max_block_generate_distance", "2");
-		settings->setDefault("arm_inertia", "false");
 #ifdef __ANDROID__
 	} else if (memoryMax >= 4 && memoryMax <= 5) {
 		// medium settings for 4.1-5GB RAM
@@ -624,9 +621,11 @@ void set_default_settings()
 		settings->setDefault("max_block_generate_distance", "3");
 	} else {
 		// high settings
+		settings->setDefault("client_unload_unused_data_timeout", "300");
 		settings->setDefault("client_mapblock_limit", "500");
 		settings->setDefault("viewing_range", "120");
 		settings->setDefault("active_object_send_range_blocks", "4");
+		settings->setDefault("active_block_range", "3");
 		settings->setDefault("max_block_generate_distance", "5");
 
 		// enable visual shader effects
@@ -637,25 +636,19 @@ void set_default_settings()
 
 	// Android Settings
 #ifdef __ANDROID__
-	// Switch to olges2 with shaders on powerful Android devices
-	if (memoryMax > 5) {
-		settings->setDefault("video_driver", "ogles2");
-		settings->setDefault("enable_shaders", "true");
-	} else {
+	// Switch to ogles1 without shaders on low-end Android devices
+	std::string arch = porting::getCpuArchitecture();
+	if (memoryMax < 4 && arch != "x86" && arch != "x86_64") {
 		settings->setDefault("video_driver", "ogles1");
-		settings->setDefault("enable_shaders", "false");
 	}
 
-	// Prefer ogles2 on an Intel platform
-	std::string arch = porting::getCpuArchitecture();
-	if (arch == "x86" || arch == "x86_64") {
-		settings->setDefault("video_driver", "ogles2");
-		settings->setDefault("enable_shaders", "true");
-	}
+	if (porting::isGooglePC())
+		settings->setDefault("mouse_sensitivity", "0.8");
 
 	v2u32 window_size = RenderingEngine::getDisplaySize();
 	if (window_size.X > 0) {
 		float x_inches = window_size.X / (160.f * RenderingEngine::getDisplayDensity());
+		float ratio = (float) window_size.X / (float) window_size.Y;
 		if (x_inches <= 3.7) {
 			// small 4" phones
 			settings->setDefault("hud_scaling", "0.55");
@@ -668,11 +661,19 @@ void set_default_settings()
 			settings->setDefault("console_message_height", "0");
 		} else if (x_inches > 4.5 && x_inches <= 5.5) {
 			// large 6" phones
-			settings->setDefault("hud_scaling", "0.7");
+			if (ratio > 2.1f) {
+				settings->setDefault("hud_scaling", "0.75");
+			} else {
+				settings->setDefault("hud_scaling", "0.7");
+			}
 			settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 5.5 && x_inches <= 6.5) {
 			// 7" tablets
-			settings->setDefault("hud_scaling", "0.85");
+			if (ratio > 2.1f) {
+				settings->setDefault("hud_scaling", "0.9");
+			} else {
+				settings->setDefault("hud_scaling", "0.85");
+			}
 			settings->setDefault("selectionbox_width", "6");
 		}
 

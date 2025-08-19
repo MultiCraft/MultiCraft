@@ -343,17 +343,19 @@ jstring getJniString(const std::string &message)
 	return jMessage;
 }
 
-void upgrade(const std::string &item)
+bool upgrade(const std::string &item)
 {
 	jmethodID upgradeGame = jnienv->GetMethodID(activityClass,
-			"upgrade", "(Ljava/lang/String;)V");
+			"upgrade", "(Ljava/lang/String;)Z");
 
 	FATAL_ERROR_IF(upgradeGame == nullptr,
 		"porting::upgrade unable to find Java upgrade method");
 
 	jstring jitem = jnienv->NewStringUTF(item.c_str());
-	jnienv->CallVoidMethod(activityObj, upgradeGame, jitem);
+	jboolean res = jnienv->CallBooleanMethod(activityObj, upgradeGame, jitem);
 	jnienv->DeleteLocalRef(jitem);
+
+	return res == JNI_TRUE;
 }
 
 int getRoundScreen()
