@@ -143,6 +143,7 @@ public:
 	static void setSalt(uint8_t new_salt[SHA256_DIGEST_LENGTH]);
 	static void setSalt(std::string new_salt);
 #if defined(__ANDROID__) || defined(__APPLE__)
-	static bool decryptSimple(const std::string &data, std::string &decrypted_data);
+	static bool decryptSimple(const std::string &data, std::string &decrypted_data,
+			std::string *filename_to = nullptr);
 #endif
 };
