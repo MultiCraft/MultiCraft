@@ -224,7 +224,7 @@ bool ScriptApiItem::getItemCallback(const char *name, const char *callbackname,
 	// Should be a table
 	if (lua_type(L, -1) != LUA_TTABLE) {
 		// Report error and clean up
-		errorstream << "Item \"" << name << "\" not defined";
+		warningstream << "Item \"" << name << "\" not defined";
 		if (p)
 			errorstream << " at position " << PP(*p);
 		errorstream << std::endl;
