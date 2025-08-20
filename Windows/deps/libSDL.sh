@@ -1,14 +1,14 @@
 #!/bin/bash -e
 
-SDL3_VERSION=3.2.8
+SDL_VERSION=3.2.8
 
 . ./sdk.sh
 
-if [ ! -d SDL3-src ]; then
-	wget https://github.com/libsdl-org/SDL/archive/release-$SDL3_VERSION.tar.gz
-	tar -xzf release-$SDL3_VERSION.tar.gz
-	mv SDL-release-$SDL3_VERSION sdl3-src
-	rm release-$SDL3_VERSION.tar.gz
+if [ ! -d sdl3-src ]; then
+	wget https://github.com/libsdl-org/SDL/archive/release-$SDL_VERSION.tar.gz
+	tar -xzf release-$SDL_VERSION.tar.gz
+	mv SDL-release-$SDL_VERSION sdl3-src
+	rm release-$SDL_VERSION.tar.gz
 fi
 
 cd sdl3-src
@@ -34,4 +34,4 @@ rm -rf ../../sdl3/lib
 mkdir -p ../../sdl3/lib
 cp -a *.a ../../sdl3/lib
 
-echo "SDL3 build successful"
+echo "libSDL build successful"

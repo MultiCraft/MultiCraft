@@ -29,11 +29,11 @@ build_linux_deps() {
 	mkdir deps
 	cd deps
 
-	SDL3_VERSION=release-3.2.8
-	wget https://github.com/libsdl-org/SDL/archive/$SDL3_VERSION.tar.gz
-	tar -xzf $SDL3_VERSION.tar.gz
-	mv SDL-$SDL3_VERSION SDL3-src
-	rm $SDL3_VERSION.tar.gz
+	SDL_VERSION=release-3.2.8
+	wget https://github.com/libsdl-org/SDL/archive/$SDL_VERSION.tar.gz
+	tar -xzf $SDL_VERSION.tar.gz
+	mv SDL-$SDL_VERSION SDL3-src
+	rm $SDL_VERSION.tar.gz
 	cd SDL3-src
 	mkdir build
 	cd build
