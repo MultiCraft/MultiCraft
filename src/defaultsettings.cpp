@@ -307,26 +307,18 @@ void set_default_settings()
 
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
-	std::string MultiCraftFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf");
 
-#if !defined(__ANDROID__) && !defined(__APPLE__)
-	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
-	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-Italic.ttf"));
-	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Arimo-Bold.ttf"));
-	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
-#else
-	settings->setDefault("font_path", MultiCraftFont);
+	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
 	settings->setDefault("font_path_italic", "");
 	settings->setDefault("font_path_bold", "");
 	settings->setDefault("font_path_bold_italic", "");
-#endif
 
 	settings->setDefault("font_bold", "false");
 	settings->setDefault("font_italic", "false");
 	settings->setDefault("font_shadow", "1");
 	settings->setDefault("font_shadow_alpha", "127");
 
-	settings->setDefault("mono_font_path", MultiCraftFont);
+	settings->setDefault("mono_font_path", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
 	settings->setDefault("mono_font_path_italic", "");
 	settings->setDefault("mono_font_path_bold", "");
 	settings->setDefault("mono_font_path_bold_italic", "");
