@@ -356,7 +356,7 @@ bool open_url(const std::string &url);
  */
 
 #if defined(__APPLE__)
-void upgrade(const std::string &item);
+bool upgrade(const std::string &item);
 
 std::string getSecretKey(const std::string &key);
 

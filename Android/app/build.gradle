@@ -93,9 +93,9 @@ tasks.register('prepareAssetsFiles') {
 		def moPath = "${assetsFolder}/locale/${poFile.parentFile.name}/LC_MESSAGES"
 		file(moPath).mkdirs()
 		if (!Os.isFamily(Os.FAMILY_WINDOWS)) {
-			exec {
+			/*exec {
 				commandLine 'msgfmt', '-o', "${moPath}/minetest.mo", poFile
-			}
+			}*/
 		}
 	}
 	copy {

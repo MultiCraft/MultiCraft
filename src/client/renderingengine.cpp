@@ -102,6 +102,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	u16 screen_w = g_settings->getU16("screen_w");
 	u16 screen_h = g_settings->getU16("screen_h");
 #elif defined(__ANDROID__) || defined(__IOS__)
+	fullscreen = true;
 	u16 screen_w = 0;
 	u16 screen_h = 0;
 #else

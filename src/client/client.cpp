@@ -708,7 +708,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 
 		// Create an irrlicht memory file
 		io::IReadFile *rfile = irrfs->createMemoryReadFile(
-				*data_rw, data_rw.getSize(), "_tempreadfile");
+				*data_rw, data_rw.getSize(), filename.c_str());
 
 		FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
 

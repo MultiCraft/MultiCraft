@@ -50,6 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/client.h"
 #include "client/fontengine.h"
 #include "client/sound.h"
+#include "util/encryption.h"
 #include "util/hex.h"
 #include "util/numeric.h"
 #include "util/string.h" // for parseColorString()
@@ -76,7 +77,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef __IOS__
-#import "wrapper.h"
+#import "DeviceModels.h"
 #endif
 
 #define MY_CHECKPOS(a,b)													\
@@ -2850,8 +2851,29 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 		warningstream << "invalid use of model without a size[] element" << std::endl;
 
 	scene::ISceneManager *smgr = RenderingEngine::get_scene_manager();
-	scene::IAnimatedMesh *mesh = m_client == nullptr ? smgr->getMesh(meshstr.c_str()) :
-			m_client->getMesh(meshstr);
+
+	scene::IAnimatedMesh *mesh;
+	if (m_client != nullptr) {
+		mesh = m_client->getMesh(meshstr);
+#if defined(__ANDROID__) || defined(__APPLE__)
+	} else if (meshstr.compare(meshstr.size() - 2, 2, ".e") == 0) {
+		std::string data, decrypted_data, filename;
+		if (fs::ReadFile(meshstr, data) &&
+				Encryption::decryptSimple(data, decrypted_data, &filename)) {
+			Buffer<char> data_rw(decrypted_data.c_str(), decrypted_data.size());
+			io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
+			io::IReadFile *rfile = irrfs->createMemoryReadFile(
+				*data_rw, data_rw.getSize(), filename.c_str());
+			FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
+			mesh = smgr->getMesh(rfile);
+			rfile->drop();
+		} else {
+			mesh = nullptr;
+		}
+#endif
+	} else {
+		mesh = smgr->getMesh(meshstr.c_str());
+	}
 
 	if (!mesh) {
 		errorstream << "Invalid model element: Unable to load mesh:"
@@ -3394,7 +3416,8 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 #ifdef __IOS__
 				// Prefer Desktop size on large tablets.
-				if (!Device7and9Inch && !Device8and3Inch && !Device10and5Inch)
+				const char *model = MultiCraft::getDeviceModel();
+				if (isDevice11Inch(model) || isDevice12and9Inch(model))
 					prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
 #endif
 			}
@@ -3783,7 +3806,7 @@ void GUIFormSpecMenu::drawMenu()
 		m_zero_pointer = AbsoluteClippingRect.UpperLeftCorner;
 		m_pointer = m_zero_pointer;
 	}
-	
+
 	/*
 		Draw fields/buttons tooltips and update the mouse cursor
 	*/

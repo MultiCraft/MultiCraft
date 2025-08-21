@@ -305,8 +305,9 @@ class GameActivity : SDLActivity() {
 		print(exc)
 	}
 
-	fun upgrade(item: String) {
+	fun upgrade(item: String): Boolean {
 		print(item)
+		return false
 	}
 
 	fun getSecretKey(key: String): String {
