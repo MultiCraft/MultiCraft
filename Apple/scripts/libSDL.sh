@@ -5,27 +5,27 @@ SDL_VERSION=release-3.2.8
 . scripts/sdk.sh
 mkdir -p deps; cd deps
 
-if [ ! -d SDL3-src ]; then
+if [ ! -d libSDL-src ]; then
 	wget https://github.com/libsdl-org/SDL/archive/$SDL_VERSION.tar.gz
 	tar -xzf $SDL_VERSION.tar.gz
-	mv SDL-$SDL_VERSION SDL3-src
+	mv SDL-$SDL_VERSION libSDL-src
 	rm $SDL_VERSION.tar.gz
 	# Disable some features that are not needed
-	sed -i '' 's/#define SDL_AUDIO_DRIVER_COREAUDIO  1/#define SDL_AUDIO_DRIVER_COREAUDIO  0/g' SDL3-src/include/build_config/SDL_build_config_macos.h
-	sed -i '' 's/#define SDL_AUDIO_DRIVER_DISK   1/#define SDL_AUDIO_DRIVER_DISK   0/g' SDL3-src/include/build_config/SDL_build_config_macos.h
-	sed -i '' 's/#define SDL_AUDIO_DRIVER_DUMMY  1/#define SDL_AUDIO_DRIVER_DUMMY  0/g' SDL3-src/include/build_config/SDL_build_config_macos.h
-	sed -i '' 's/#define SDL_PLATFORM_SUPPORTS_METAL    1/#define SDL_PLATFORM_SUPPORTS_METAL    0/g' SDL3-src/include/build_config/SDL_build_config_macos.h
+	sed -i '' 's/#define SDL_AUDIO_DRIVER_COREAUDIO  1/#define SDL_AUDIO_DRIVER_COREAUDIO  0/g' libSDL-src/include/build_config/SDL_build_config_macos.h
+	sed -i '' 's/#define SDL_AUDIO_DRIVER_DISK   1/#define SDL_AUDIO_DRIVER_DISK   0/g' libSDL-src/include/build_config/SDL_build_config_macos.h
+	sed -i '' 's/#define SDL_AUDIO_DRIVER_DUMMY  1/#define SDL_AUDIO_DRIVER_DUMMY  0/g' libSDL-src/include/build_config/SDL_build_config_macos.h
+	sed -i '' 's/#define SDL_PLATFORM_SUPPORTS_METAL    1/#define SDL_PLATFORM_SUPPORTS_METAL    0/g' libSDL-src/include/build_config/SDL_build_config_macos.h
 fi
 
-rm -rf SDL3
+rm -rf libSDL
 
-mkdir -p SDL3/include
+mkdir -p libSDL/include
 
-cd SDL3-src
+cd libSDL-src
 
 for ARCH in x86_64 arm64
 do
-	echo "Building SDL3 for $ARCH"
+	echo "Building libSDL for $ARCH"
 	mkdir -p build; cd build
 	cmake .. \
 		-DCMAKE_BUILD_TYPE=Release \
@@ -39,18 +39,18 @@ do
 	cmake --build . -j
 
 	if [ $ARCH = "x86_64" ]; then
-		cp -rv ../include ../../SDL3
-		cp -v libSDL3.a ../../SDL3/templib_$ARCH.a
+		cp -rv ../include ../../libSDL
+		cp -v libSDL3.a ../../libSDL/templib_$ARCH.a
 	else
-		cp -v libSDL3.a ../../SDL3/templib_$ARCH.a
+		cp -v libSDL3.a ../../libSDL/templib_$ARCH.a
 	fi
 
 	cd ..; rm -rf build
 done
 
 # repack into one .a
-cd ../SDL3
-lipo -create templib_*.a -output libSDL3.a
+cd ../libSDL
+lipo -create templib_*.a -output libSDL.a
 rm templib_*.a
 
 echo "libSDL build successful"

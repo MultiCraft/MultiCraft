@@ -130,7 +130,7 @@
 		848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848A7CE22DD8042E00CC49EB /* AVFoundation.framework */; };
 		848A7CE52DD8048500CC49EB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848A7CE42DD8048400CC49EB /* CoreMedia.framework */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
-		8495BD1628B80B14009FCF4D /* libSDL3.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL3.a */; };
+		8495BD1628B80B14009FCF4D /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
@@ -538,7 +538,7 @@
 		848A7CE22DD8042E00CC49EB /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		848A7CE42DD8048400CC49EB /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		8495BD1528B80B00009FCF4D /* libSDL3.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL3.a; path = ../deps/SDL3/libSDL3.a; sourceTree = "<group>"; };
+		8495BD1528B80B00009FCF4D /* libSDL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL.a; path = ../deps/libSDL/libSDL.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
 		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		849D0845278AC1B200471354 /* lchacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lchacha.c; path = ../../../lib/luachacha/lchacha.c; sourceTree = "<group>"; };
@@ -880,8 +880,8 @@
 				841AD8B128D0DE430042E335 /* libogg.a in Frameworks */,
 				841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */,
 				84C2AB5328DA7776001968EE /* libpng.a in Frameworks */,
-				8495BD1628B80B14009FCF4D /* libSDL3.a in Frameworks */,
 				848A7CE52DD8048500CC49EB /* CoreMedia.framework in Frameworks */,
+				8495BD1628B80B14009FCF4D /* libSDL.a in Frameworks */,
 				841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */,
 				841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */,
 				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
@@ -1087,7 +1087,7 @@
 				841AD8B028D0DE3D0042E335 /* libogg.a */,
 				841AD8A928D0CE7F0042E335 /* libopenal.a */,
 				84C2AB5228DA7770001968EE /* libpng.a */,
-				8495BD1528B80B00009FCF4D /* libSDL3.a */,
+				8495BD1528B80B00009FCF4D /* libSDL.a */,
 				841AD8B428D0E2340042E335 /* libvorbis.a */,
 				841AD8B828D0E2E40042E335 /* libvorbisfile.a */,
 				848CE6E427778E30001D3E0F /* libz.tbd */,
@@ -2166,7 +2166,7 @@
 					"${SRCROOT}/../deps/libogg/include",
 					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
-					"${SRCROOT}/../deps/SDL3/include",
+					"${SRCROOT}/../deps/libSDL/include",
 					"${SRCROOT}/../deps/libvorbis/include",
 					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
@@ -2189,7 +2189,7 @@
 					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
-					"-L${SRCROOT}/../deps/SDL3",
+					"-L${SRCROOT}/../deps/libSDL",
 					"-L${SRCROOT}/../deps/libvorbis",
 					"-L${SRCROOT}/../deps/libcurl",
 				);
@@ -2244,7 +2244,7 @@
 					"${SRCROOT}/../deps/libogg/include",
 					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
-					"${SRCROOT}/../deps/SDL3/include",
+					"${SRCROOT}/../deps/libSDL/include",
 					"${SRCROOT}/../deps/libvorbis/include",
 					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
@@ -2267,7 +2267,7 @@
 					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
-					"-L${SRCROOT}/../deps/SDL3",
+					"-L${SRCROOT}/../deps/libSDL",
 					"-L${SRCROOT}/../deps/libvorbis",
 					"-L${SRCROOT}/../deps/libcurl",
 				);
