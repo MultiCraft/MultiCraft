@@ -13,7 +13,7 @@ CPPFLAGS="$CPPFLAGS \
           -DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
           -DNO_IRR_COMPILE_WITH_OGLES2_ \
           -DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
-          -I$DEPS_ROOT/sdl3/include \
+          -I$DEPS_ROOT/libSDL/include \
           -I$DEPS_ROOT/zlib/include \
           -I$DEPS_ROOT/libjpeg/include \
           -I$DEPS_ROOT/libpng/include \

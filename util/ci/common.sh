@@ -32,9 +32,9 @@ build_linux_deps() {
 	SDL_VERSION=release-3.2.8
 	wget https://github.com/libsdl-org/SDL/archive/$SDL_VERSION.tar.gz
 	tar -xzf $SDL_VERSION.tar.gz
-	mv SDL-$SDL_VERSION SDL3-src
+	mv SDL-$SDL_VERSION libSDL-src
 	rm $SDL_VERSION.tar.gz
-	cd SDL3-src
+	cd libSDL-src
 	mkdir build
 	cd build
 	cmake ..

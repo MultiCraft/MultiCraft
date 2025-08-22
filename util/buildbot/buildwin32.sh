@@ -91,7 +91,7 @@ cd $libdir
 [ -d openal_stripped ] || unzip -o $packagedir/openal_stripped.zip
 [ -d luajit ] || unzip -o $packagedir/luajit-$luajit_version.zip -d luajit
 [ -d leveldb ] || unzip -o $packagedir/libleveldb-$leveldb_version.zip -d leveldb
-[ -d SDL3 ] || (unzip -o $packagedir/SDL3-devel-$sdl_version-mingw.zip SDL3-$sdl_version/i686-w64-mingw32/* -d SDL3 && mv SDL3/SDL3-$sdl_version/i686-w64-mingw32/* SDL3)
+[ -d libSDL ] || (unzip -o $packagedir/SDL3-devel-$sdl_version-mingw.zip SDL3-$sdl_version/i686-w64-mingw32/* -d libSDL && mv libSDL/SDL3-$sdl_version/i686-w64-mingw32/* libSDL)
 
 # Get libjpeg
 if [ ! -d libjpeg ]; then
@@ -154,7 +154,7 @@ if [ ! -d irrlicht ]; then
 		-DNO_IRR_COMPILE_WITH_OGLES2_ \
 		-DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
 		-I/usr/i686-w64-mingw32/include \
-		-I$libdir/SDL3/include \
+		-I$libdir/libSDL/include \
 		-I$libdir/zlib/include \
 		-I$libdir/libjpeg \
 		-I$libdir/libjpeg/build \
@@ -201,8 +201,8 @@ cmake .. \
 	\
 	-DUSE_STATIC_BUILD=1 \
 	-DUSE_SDL=1 \
-	-DSDL3_LIBRARIES="$libdir/SDL3/lib/libSDL3.a" \
-	-DSDL3_INCLUDE_DIRS="$libdir/SDL3/include" \
+	-DSDL_LIBRARIES="$libdir/libSDL/lib/libSDL3.a" \
+	-DSDL_INCLUDE_DIRS="$libdir/libSDL/include" \
 	\
 	-DCMAKE_C_FLAGS=" \
 		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \

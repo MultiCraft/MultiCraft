@@ -4,14 +4,14 @@ SDL_VERSION=3.2.8
 
 . ./sdk.sh
 
-if [ ! -d sdl3-src ]; then
+if [ ! -d libSDL-src ]; then
 	wget https://github.com/libsdl-org/SDL/archive/release-$SDL_VERSION.tar.gz
 	tar -xzf release-$SDL_VERSION.tar.gz
-	mv SDL-release-$SDL_VERSION sdl3-src
+	mv SDL-release-$SDL_VERSION libSDL-src
 	rm release-$SDL_VERSION.tar.gz
 fi
 
-cd sdl3-src
+cd libSDL-src
 
 mkdir -p build; cd build
 
@@ -25,13 +25,13 @@ cmake .. \
 cmake --build . -j${NPROC}
 
 # update `include` folder
-rm -rf ../../sdl3/include
-mkdir -p ../../sdl3/include
-cp -a ../include ../../sdl3
-cp -a ./include-config-release/* ../../sdl3/include
+rm -rf ../../libSDL/include
+mkdir -p ../../libSDL/include
+cp -a ../include ../../libSDL
+cp -a ./include-config-release/* ../../libSDL/include
 # update lib
-rm -rf ../../sdl3/lib
-mkdir -p ../../sdl3/lib
-cp -a *.a ../../sdl3/lib
+rm -rf ../../libSDL/lib
+mkdir -p ../../libSDL/lib
+cp -a libSDL3.a ../../libSDL/lib/libSDL.a
 
 echo "libSDL build successful"

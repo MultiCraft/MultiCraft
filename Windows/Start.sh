@@ -46,8 +46,8 @@ cmake ../ \
 		-D_WIN32_WINNT=0x0600" \
 	-DIRRLICHT_LIBRARY="$DEPS_ROOT/irrlicht/lib/libIrrlicht.a" \
 	-DIRRLICHT_INCLUDE_DIR="$DEPS_ROOT/irrlicht/include" \
-	-DSDL3_LIBRARIES="$DEPS_ROOT/sdl3/lib/libSDL3.a" \
-	-DSDL3_INCLUDE_DIRS="$DEPS_ROOT/sdl3/include" \
+	-DSDL_LIBRARIES="$DEPS_ROOT/libSDL/lib/libSDL.a" \
+	-DSDL_INCLUDE_DIRS="$DEPS_ROOT/libSDL/include" \
 	-DCURL_LIBRARY="$DEPS_ROOT/libcurl/lib/libcurl.a" \
 	-DCURL_INCLUDE_DIR="$DEPS_ROOT/libcurl/include" \
 	-DLUA_LIBRARY="$DEPS_ROOT/luajit/lib/libluajit.a" \

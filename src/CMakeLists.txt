@@ -31,20 +31,20 @@ if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 	set(BUILD_SERVER TRUE)
 endif()
 
-option(USE_SDL "Use SDL3 for window management" FALSE)
+option(USE_SDL "Use SDL for window management" FALSE)
 option(USE_ZSTD "Use Zstandard for MapBlock compression" TRUE)
 option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
 
 if(USE_SDL)
 	if(NOT USE_STATIC_BUILD)
-		find_library(SDL3_LIBRARIES NAMES SDL3 libSDL3)
-		find_path(SDL3_INCLUDE_DIRS NAMES SDL.h PATH_SUFFIXES SDL3 include/SDL3 include PATHS)
+		find_library(SDL_LIBRARIES NAMES SDL3 libSDL3)
+		find_path(SDL_INCLUDE_DIRS NAMES SDL.h PATH_SUFFIXES SDL3 include/SDL3 include PATHS)
 	endif()
-	if (SDL3_LIBRARIES AND SDL3_INCLUDE_DIRS)
-		message(STATUS "SDL3 found.")
-		include_directories(${SDL3_INCLUDE_DIRS})
+	if (SDL_LIBRARIES AND SDL_INCLUDE_DIRS)
+		message(STATUS "SDL found.")
+		include_directories(${SDL_INCLUDE_DIRS})
 	else()
-		message(FATAL_ERROR "SDL3 not found.")
+		message(FATAL_ERROR "SDL not found.")
 	endif()
 endif()
 
@@ -637,7 +637,7 @@ if(BUILD_CLIENT)
 	if(USE_SDL)
 		target_link_libraries(
 			${PROJECT_NAME}
-			${SDL3_LIBRARIES}
+			${SDL_LIBRARIES}
 		)
 		if(USE_STATIC_BUILD AND WIN32)
 			target_link_libraries(
@@ -754,7 +754,7 @@ if(BUILD_SERVER)
 	if(USE_SDL)
 		target_link_libraries(
 			${PROJECT_NAME}server
-			${SDL3_LIBRARIES}
+			${SDL_LIBRARIES}
 		)
 		if(USE_STATIC_BUILD AND WIN32)
 			target_link_libraries(
