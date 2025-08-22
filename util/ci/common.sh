@@ -29,7 +29,7 @@ build_linux_deps() {
 	mkdir deps
 	cd deps
 
-	SDL_VERSION=release-3.2.8
+	SDL_VERSION=release-3.2.20
 	wget https://github.com/libsdl-org/SDL/archive/$SDL_VERSION.tar.gz
 	tar -xzf $SDL_VERSION.tar.gz
 	mv SDL-$SDL_VERSION libSDL-src
