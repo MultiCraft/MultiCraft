@@ -52,7 +52,7 @@ extern "C" void external_pause_game();
 
 static std::atomic<bool> ran = {false};
 
-extern "C" int SDL_main(int argc, char *argv[])
+extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[])
 {
 	if (ran.exchange(true)) {
 		errorstream << "Caught second android_main execution in a process" << std::endl;
