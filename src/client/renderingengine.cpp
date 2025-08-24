@@ -503,7 +503,6 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
 	Window x11_win = (Window)SDL_GetNumberProperty(
 			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
-
 #else
 	Display *x11_dpl = (Display *)exposedData.OpenGLLinux.X11Display;
 	Window x11_win = (Window)exposedData.OpenGLLinux.X11Window;

@@ -57,6 +57,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#include <MultiCraft-Swift.h>
 #endif
 
+#ifdef __IOS__
+	#include <SDL3/SDL_main.h> // ToDo: try to use this https://wiki.libsdl.org/SDL3/SDL_SetMainReady
+#endif
+
 // for version information only
 extern "C" {
 #if USE_LUAJIT
