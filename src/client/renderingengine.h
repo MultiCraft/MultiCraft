@@ -54,6 +54,8 @@ public:
 	static bool isTablet();
 #endif
 	static bool isHighDpi();
+	static void startTextInput();
+	static void stopTextInput();
 
 	bool setupTopLevelWindow(const std::string &name);
 	void setupTopLevelXorgWindow(const std::string &name);

@@ -73,7 +73,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 #ifdef __IOS__
@@ -222,10 +222,7 @@ void GUIFormSpecMenu::setInitialFocus()
 		if (it->getType() == gui::EGUIET_EDIT_BOX
 				&& it->getText()[0] == 0) {
 			Environment->setFocus(it);
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
-#endif
+			RenderingEngine::startTextInput();
 			return;
 		}
 	}
@@ -234,10 +231,7 @@ void GUIFormSpecMenu::setInitialFocus()
 	for (gui::IGUIElement *it : children) {
 		if (it->getType() == gui::EGUIET_EDIT_BOX) {
 			Environment->setFocus(it);
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
-#endif
+			RenderingEngine::startTextInput();
 			return;
 		}
 	}

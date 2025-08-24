@@ -40,7 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 inline u32 clamp_u8(s32 value)
@@ -116,10 +116,7 @@ GUIChatConsole::~GUIChatConsole()
 	removeChild(m_vscrollbar);
 	delete m_vscrollbar;
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-		SDL_StopTextInput();
-#endif
+	RenderingEngine::stopTextInput();
 
 	if (m_font)
 		m_font->drop();
@@ -146,10 +143,7 @@ void GUIChatConsole::openConsole(f32 scale)
 	Environment->setFocus(this);
 	m_menumgr->createdMenu(this);
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard())
-		SDL_StartTextInput();
-#endif
+	RenderingEngine::startTextInput();
 }
 
 bool GUIChatConsole::isOpen() const
@@ -173,10 +167,7 @@ void GUIChatConsole::closeConsole()
 		recalculateConsolePosition();
 	}
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-		SDL_StopTextInput();
-#endif
+	RenderingEngine::stopTextInput();
 
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui && g_touchscreengui->isActive())

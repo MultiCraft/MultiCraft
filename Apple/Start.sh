@@ -6,7 +6,7 @@ echo "Starting build MultiCraft for macOS..."
 echo
 echo "Build libraries:"
 
-sh scripts/SDL2.sh
+sh scripts/libSDL.sh
 sh scripts/libjpeg.sh
 sh scripts/libpng.sh
 sh scripts/irrlicht.sh
