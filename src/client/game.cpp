@@ -4498,24 +4498,24 @@ void Game::showPauseMenu()
 	};
 
 	if (!simple_singleplayer_mode)
-		buttons.push_back({"btn_change_password", strgettext("Change Password"), "🖋️", false});
+		buttons.emplace_back("btn_change_password", strgettext("Change Password"), "🖋️", false);
 
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound"))
-		buttons.push_back({"btn_sound", strgettext("Sound Volume"), "🔊", true});
+		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), "🔊", true);
 #endif
 
 	if (porting::hasRealKeyboard())
-		buttons.push_back({"btn_key_config", strgettext("Change Keys"), "⌨️", true});
+		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), "⌨️", true);
 #ifdef HAVE_TOUCHSCREENGUI
 	else if (g_touchscreengui)
-		buttons.push_back({"btn_key_touchscreen_edit", strgettext("Change Keys"), "👆", true});
+		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), "👆", true);
 #endif
 
-	buttons.push_back({"btn_exit_menu", strgettext("Exit to Menu"), "🚪", true});
+	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), "🚪", true);
 
 #if !defined(__ANDROID__) && !defined(__IOS__)
-	buttons.push_back({"btn_exit_os", strgettext("Exit to OS"), "❌", true});
+	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), "❌", true);
 #endif
 
 	createPauseMenuButtons(os, buttons, 3.0f, 0.95f, 0.2f);
