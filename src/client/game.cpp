@@ -4481,8 +4481,8 @@ void Game::showPauseMenu()
 	const std::string x2 = high_dpi ? ".x2" : "";
 	std::string sound_name = g_settings->get("btn_press_sound");
 	str_formspec_escape(sound_name);
-	std::ostringstream os;
 
+	std::ostringstream os;
 	os << "formspec_version[1]" << "size[11,6]"
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
@@ -4493,8 +4493,8 @@ void Game::showPauseMenu()
 		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
 		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]";
 
-	auto buttons = std::vector{
-		std::tuple{"btn_continue", strgettext("Continue"), "▶️", true}
+	auto buttons = std::vector<std::tuple<const char*, std::string, const char*, bool>>{
+		{"btn_continue", strgettext("Continue"), "▶️", true}
 	};
 
 	if (!simple_singleplayer_mode)
