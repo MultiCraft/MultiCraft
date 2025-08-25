@@ -4395,7 +4395,28 @@ void Game::showDeathFormspec()
 	formspec->setFocus("btn_respawn");
 }
 
-#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
+void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple<const char*, std::string,
+		const char*, bool>> &buttons, float center_y, float btn_h, float gap)
+{
+	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
+	float y = center_y + gap * 0.5f - total_height * 0.5f;
+
+	if (buttons.size() <= 4)
+		y = y - gap * 3;
+
+	for (auto &[id, text, emoji, is_exit] : buttons) {
+		if (is_exit)
+			os << "image_button_exit[3," << y << ";5," << btn_h
+			<< ";;" << id << ";" << text << ";;false]";
+		else
+			os << "image_button[3," << y << ";5," << btn_h
+			<< ";;" << id << ";" << text << ";;false]";
+		os << "label[3.15," << (y + btn_h * 0.5f - 0.32f) << "; " << emoji << "]";
+		y += btn_h + gap;
+	}
+}
+
+//#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
 void Game::showPauseMenu()
 {
 /*#ifdef HAVE_TOUCHSCREENGUI
@@ -4462,46 +4483,44 @@ void Game::showPauseMenu()
 	str_formspec_escape(sound_name);
 	std::ostringstream os;
 
-	os << "formspec_version[1]" << SIZE_TAG
+	os << "formspec_version[1]" << "size[11,6]"
 		<< "no_prepend[]"
 		<< "bgcolor[#00000060;true]"
 
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2 <<
-			".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") <<
-			";sound=" << sound_name << "]"
+		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2
+			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20")
+			<< ";sound=" << sound_name << "]"
 		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
+		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]";
 
-		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
-		<< strgettext("Continue") << ";;false]";
+	auto buttons = std::vector{
+		std::tuple{"btn_continue", strgettext("Continue"), "▶️", true}
+	};
 
-	if (!simple_singleplayer_mode) {
-		os << "image_button[3.5," << (ypos++) << ";4,0.9;;btn_change_password;"
-			<< strgettext("Change Password") << ";;false]";
-	}
+	if (!simple_singleplayer_mode)
+		buttons.push_back({"btn_change_password", strgettext("Change Password"), "🖋️", false});
 
 #if USE_SOUND
-	if (g_settings->getBool("enable_sound")) {
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_sound;"
-			<< strgettext("Sound Volume") << ";;false]";
-	}
+	if (g_settings->getBool("enable_sound"))
+		buttons.push_back({"btn_sound", strgettext("Sound Volume"), "🔊", true});
 #endif
-	if (hasRealKeyboard)
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
-			<< strgettext("Change Keys")  << ";;false]";
+
+	if (porting::hasRealKeyboard())
+		buttons.push_back({"btn_key_config", strgettext("Change Keys"), "⌨️", true});
 #ifdef HAVE_TOUCHSCREENGUI
-	else if (g_touchscreengui) {
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_touchscreen_edit;"
-			<< strgettext("Change Keys") << strgettext(" (Touch)") << ";;false]";
-	}
+	else if (g_touchscreengui)
+		buttons.push_back({"btn_key_touchscreen_edit", strgettext("Change Keys"), "👆", true});
 #endif
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
-		<< strgettext("Exit to Menu") << ";;false]";
+
+	buttons.push_back({"btn_exit_menu", strgettext("Exit to Menu"), "🚪", true});
+
 #if !defined(__ANDROID__) && !defined(__IOS__)
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_os;"
-		<< strgettext("Exit to OS")   << ";;false]";
+	buttons.push_back({"btn_exit_os", strgettext("Exit to OS"), "❌", true});
 #endif
-/*		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
+
+	createPauseMenuButtons(os, buttons, 3.0f, 0.95f, 0.2f);
+
+/*	os	<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
 		<< "textarea[0.4,0.25;3.9,6.25;;" << PROJECT_NAME_C " " VERSION_STRING "\n"
 		<< "\n"
 		<<  strgettext("Game info:") << "\n";
