@@ -46,13 +46,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 
 extern int real_main(int argc, char *argv[]);
 extern "C" void external_pause_game();
 
 static std::atomic<bool> ran = {false};
 
-extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	if (ran.exchange(true)) {
 		errorstream << "Caught second android_main execution in a process" << std::endl;

@@ -58,7 +58,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef __IOS__
-	#include <SDL3/SDL_main.h> // ToDo: try to use this https://wiki.libsdl.org/SDL3/SDL_SetMainReady
+	#include <SDL3/SDL_main.h>
 #endif
 
 // for version information only
