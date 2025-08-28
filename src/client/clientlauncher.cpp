@@ -251,7 +251,9 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		const wchar_t *text = wgettext("Main Menu");
 		RenderingEngine::get_raw_device()->
 			setWindowCaption((utf8_to_wide(PROJECT_NAME_C) +
+#ifndef NDEBUG
 			L" " + utf8_to_wide(g_version_hash) +
+#endif
 			L" [" + text + L"]").c_str());
 		delete[] text;
 
