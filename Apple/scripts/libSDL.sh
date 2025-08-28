@@ -6,15 +6,7 @@ SDL_VERSION=release-3.2.20
 mkdir -p deps; cd deps
 
 if [ ! -d libSDL-src ]; then
-	wget https://github.com/libsdl-org/SDL/archive/$SDL_VERSION.tar.gz
-	tar -xzf $SDL_VERSION.tar.gz
-	mv SDL-$SDL_VERSION libSDL-src
-	rm $SDL_VERSION.tar.gz
-	# Disable some features that are not needed
-	sed -i '' 's/#define SDL_AUDIO_DRIVER_COREAUDIO  1/#define SDL_AUDIO_DRIVER_COREAUDIO  0/g' libSDL-src/include/build_config/SDL_build_config_macos.h
-	sed -i '' 's/#define SDL_AUDIO_DRIVER_DISK   1/#define SDL_AUDIO_DRIVER_DISK   0/g' libSDL-src/include/build_config/SDL_build_config_macos.h
-	sed -i '' 's/#define SDL_AUDIO_DRIVER_DUMMY  1/#define SDL_AUDIO_DRIVER_DUMMY  0/g' libSDL-src/include/build_config/SDL_build_config_macos.h
-	sed -i '' 's/#define SDL_PLATFORM_SUPPORTS_METAL    1/#define SDL_PLATFORM_SUPPORTS_METAL    0/g' libSDL-src/include/build_config/SDL_build_config_macos.h
+	git clone -b $SDL_VERSION --depth 1 https://github.com/libsdl-org/SDL.git libSDL-src
 fi
 
 rm -rf libSDL
@@ -34,7 +26,13 @@ do
 		-DCMAKE_OBJC_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
 		-DCMAKE_INSTALL_PREFIX="." \
 		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
-		-DBUILD_SHARED_LIBS=OFF
+		-DBUILD_SHARED_LIBS=OFF \
+		-DSDL_AUDIO=OFF \
+		-DSDL_RENDER=OFF \
+		-DSDL_CAMERA=OFF \
+		-DSDL_METAL=OFF \
+		-DSDL_TESTS=OFF \
+		-DSDL_EXAMPLES=OFF
 
 	cmake --build . -j
 
