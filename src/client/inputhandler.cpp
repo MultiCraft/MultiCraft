@@ -31,7 +31,7 @@ extern "C" void external_pause_game();
 #endif
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 void KeyCache::populate_nonchanging()

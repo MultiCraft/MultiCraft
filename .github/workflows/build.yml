@@ -265,7 +265,7 @@ jobs:
 #    env:
 #      VCPKG_VERSION: a42af01b72c28a8e1d7b48107b33e4f286a55ef6
 #                    2023.11.20
-#      vcpkg_packages: zlib zstd curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp libpng libjpeg-turbo sdl2
+#      vcpkg_packages: zlib zstd curl[winssl] openal-soft libvorbis libogg sqlite3 freetype luajit gmp jsoncpp libpng libjpeg-turbo sdl3
 #    strategy:
 #      fail-fast: false
 #      matrix:
@@ -300,7 +300,7 @@ jobs:
 
 #      - name: Irrlicht
 #        run: |
-#          git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
+#          git clone --depth 1 -b SDL https://github.com/MoNTE48/Irrlicht irrlicht
 #          cd irrlicht
 #          cmake ${{matrix.config.generator}}  `
 #          -DCMAKE_TOOLCHAIN_FILE="${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake"  `

@@ -412,56 +412,56 @@ void SDLGameController::handleButton(const SEvent &event)
 	irr::EKEY_CODE key = KEY_UNKNOWN;
 
 	switch (event.SDLControllerButtonEvent.Button) {
-	case SDL_CONTROLLER_BUTTON_A:
+	case SDL_GAMEPAD_BUTTON_SOUTH:
 		key = getKeySetting("keymap_jump").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_B:
+	case SDL_GAMEPAD_BUTTON_EAST:
 		key = getKeySetting("keymap_sneak").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_X:
+	case SDL_GAMEPAD_BUTTON_WEST:
 		key = getKeySetting("keymap_special1").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_Y:
+	case SDL_GAMEPAD_BUTTON_NORTH:
 		key = getKeySetting("keymap_minimap").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_BACK:
+	case SDL_GAMEPAD_BUTTON_BACK:
 		key = getKeySetting("keymap_chat").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_GUIDE:
+	case SDL_GAMEPAD_BUTTON_GUIDE:
 		break;
-	case SDL_CONTROLLER_BUTTON_START:
+	case SDL_GAMEPAD_BUTTON_START:
 		key = KEY_ESCAPE;
 		break;
-	case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+	case SDL_GAMEPAD_BUTTON_LEFT_STICK:
 		key = getKeySetting("keymap_camera_mode").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
+	case SDL_GAMEPAD_BUTTON_RIGHT_STICK:
 		key = KEY_LBUTTON;
 		break;
-	case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+	case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
 		key = KEY_LBUTTON;
 		break;
-	case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+	case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
 		key = KEY_RBUTTON;
 		break;
-	case SDL_CONTROLLER_BUTTON_DPAD_UP:
+	case SDL_GAMEPAD_BUTTON_DPAD_UP:
 		key = getKeySetting("keymap_rangeselect").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+	case SDL_GAMEPAD_BUTTON_DPAD_DOWN:
 		key = getKeySetting("keymap_drop").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+	case SDL_GAMEPAD_BUTTON_DPAD_LEFT:
 		key = KEY_ESCAPE;
 		break;
-	case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+	case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
 		key = getKeySetting("keymap_inventory").getKeyCode();
 		break;
-	case SDL_CONTROLLER_BUTTON_MISC1:
-	case SDL_CONTROLLER_BUTTON_PADDLE1:
-	case SDL_CONTROLLER_BUTTON_PADDLE2:
-	case SDL_CONTROLLER_BUTTON_PADDLE3:
-	case SDL_CONTROLLER_BUTTON_PADDLE4:
-	case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+	case SDL_GAMEPAD_BUTTON_MISC1:
+	case SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1:
+	case SDL_GAMEPAD_BUTTON_LEFT_PADDLE1:
+	case SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2:
+	case SDL_GAMEPAD_BUTTON_LEFT_PADDLE2:
+	case SDL_GAMEPAD_BUTTON_TOUCHPAD:
 		break;
 	}
 
@@ -484,33 +484,33 @@ void SDLGameController::handleButtonInMenu(const SEvent &event)
 
 	// Just used game mapping for escape key for now
 	switch (event.SDLControllerButtonEvent.Button) {
-		case SDL_CONTROLLER_BUTTON_A:
-		case SDL_CONTROLLER_BUTTON_B:
-		case SDL_CONTROLLER_BUTTON_X:
-		case SDL_CONTROLLER_BUTTON_Y:
-		case SDL_CONTROLLER_BUTTON_BACK:
-		case SDL_CONTROLLER_BUTTON_GUIDE:
+		case SDL_GAMEPAD_BUTTON_SOUTH:
+		case SDL_GAMEPAD_BUTTON_EAST:
+		case SDL_GAMEPAD_BUTTON_WEST:
+		case SDL_GAMEPAD_BUTTON_NORTH:
+		case SDL_GAMEPAD_BUTTON_BACK:
+		case SDL_GAMEPAD_BUTTON_GUIDE:
 			break;
-		case SDL_CONTROLLER_BUTTON_START:
+		case SDL_GAMEPAD_BUTTON_START:
 			key = KEY_ESCAPE;
 			break;
-		case SDL_CONTROLLER_BUTTON_LEFTSTICK:
-		case SDL_CONTROLLER_BUTTON_RIGHTSTICK:
-		case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
-		case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
-		case SDL_CONTROLLER_BUTTON_DPAD_UP:
-		case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+		case SDL_GAMEPAD_BUTTON_LEFT_STICK:
+		case SDL_GAMEPAD_BUTTON_RIGHT_STICK:
+		case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:
+		case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:
+		case SDL_GAMEPAD_BUTTON_DPAD_UP:
+		case SDL_GAMEPAD_BUTTON_DPAD_DOWN:
 			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+		case SDL_GAMEPAD_BUTTON_DPAD_LEFT:
 			key = KEY_ESCAPE;
 			break;
-		case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
-		case SDL_CONTROLLER_BUTTON_MISC1:
-		case SDL_CONTROLLER_BUTTON_PADDLE1:
-		case SDL_CONTROLLER_BUTTON_PADDLE2:
-		case SDL_CONTROLLER_BUTTON_PADDLE3:
-		case SDL_CONTROLLER_BUTTON_PADDLE4:
-		case SDL_CONTROLLER_BUTTON_TOUCHPAD:
+		case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
+		case SDL_GAMEPAD_BUTTON_MISC1:
+		case SDL_GAMEPAD_BUTTON_RIGHT_PADDLE1:
+		case SDL_GAMEPAD_BUTTON_LEFT_PADDLE1:
+		case SDL_GAMEPAD_BUTTON_RIGHT_PADDLE2:
+		case SDL_GAMEPAD_BUTTON_LEFT_PADDLE2:
+		case SDL_GAMEPAD_BUTTON_TOUCHPAD:
 			break;
 	}
 
@@ -622,19 +622,19 @@ void SDLGameController::translateEvent(const SEvent &event)
 {
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT) {
 		if (isMenuActive()) {
-			if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSTICK ||
-					event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
+			if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_STICK ||
+					event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
 				handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
-			} else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
+			} else if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
 				handleMouseClickRight(event.SDLControllerButtonEvent.Pressed);
 			} else {
 				handleButtonInMenu(event);
 			}
 		} else {
-			if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_RIGHTSTICK ||
-				event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
+			if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_RIGHT_STICK ||
+				event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
 					handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
-			} else if (event.SDLControllerButtonEvent.Button == SDL_CONTROLLER_BUTTON_LEFTSHOULDER) {
+			} else if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
 				handleMouseClickRight(event.SDLControllerButtonEvent.Pressed);
 			} else {
 				handleButton(event);
@@ -644,12 +644,12 @@ void SDLGameController::translateEvent(const SEvent &event)
 		const s16* value = event.SDLControllerAxisEvent.Value;
 
 		if (isMenuActive()) {
-			handleMouseMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
+			handleMouseMovement(value[SDL_GAMEPAD_AXIS_LEFTX], value[SDL_GAMEPAD_AXIS_LEFTY]);
 		} else {
-			handleTriggerLeft(value[SDL_CONTROLLER_AXIS_TRIGGERLEFT]);
-			handleTriggerRight(value[SDL_CONTROLLER_AXIS_TRIGGERRIGHT]);
-			handlePlayerMovement(value[SDL_CONTROLLER_AXIS_LEFTX], value[SDL_CONTROLLER_AXIS_LEFTY]);
-			handleCameraOrientation(value[SDL_CONTROLLER_AXIS_RIGHTX], value[SDL_CONTROLLER_AXIS_RIGHTY]);
+			handleTriggerLeft(value[SDL_GAMEPAD_AXIS_LEFT_TRIGGER]);
+			handleTriggerRight(value[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER]);
+			handlePlayerMovement(value[SDL_GAMEPAD_AXIS_LEFTX], value[SDL_GAMEPAD_AXIS_LEFTY]);
+			handleCameraOrientation(value[SDL_GAMEPAD_AXIS_RIGHTX], value[SDL_GAMEPAD_AXIS_RIGHTY]);
 		}
 	}
 }

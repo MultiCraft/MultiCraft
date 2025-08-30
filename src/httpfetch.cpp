@@ -44,7 +44,8 @@ PcgRandom g_callerid_randomness;
 HTTPFetchRequest::HTTPFetchRequest() :
 	timeout(g_settings->getS32("curl_timeout")),
 	connect_timeout(timeout),
-	useragent(std::string(PROJECT_NAME_C "/") + g_version_hash + " (" + porting::get_sysinfo() + ")")
+	useragent(std::string(PROJECT_NAME_C "/") + g_version_hash + " " +
+		porting::getPlatformName() + " (" + porting::get_sysinfo() + ")")
 {
 }
 
