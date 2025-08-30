@@ -142,7 +142,7 @@ fi
 
 # Get irrlicht
 if [ ! -d irrlicht ]; then
-	git clone --depth 1 -b SDL3 https://github.com/deveee/Irrlicht irrlicht
+	git clone --depth 1 -b SDL https://github.com/MoNTE48/Irrlicht irrlicht
 
 	cd irrlicht/source/Irrlicht
 

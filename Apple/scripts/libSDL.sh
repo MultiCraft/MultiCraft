@@ -5,9 +5,8 @@ SDL_VERSION=release-3.2.20
 . scripts/sdk.sh
 mkdir -p deps; cd deps
 
-if [ ! -d libSDL-src ]; then
+[ ! -d libSDL-src ] && \
 	git clone -b $SDL_VERSION --depth 1 https://github.com/libsdl-org/SDL.git libSDL-src
-fi
 
 rm -rf libSDL
 

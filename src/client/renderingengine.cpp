@@ -830,7 +830,6 @@ static float calcDisplayDensity(irr::video::IVideoDriver *driver)
 
 	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0)
 		return g_settings->getFloat("screen_dpi") / 96.0;
-
 #endif
 
 	const char *current_display = getenv("DISPLAY");

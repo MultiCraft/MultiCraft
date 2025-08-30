@@ -112,7 +112,7 @@
 		84287CA6291ED0F000E30F96 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA4291ED0F000E30F96 /* locale */; };
 		84287CA7291ED0F000E30F96 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA5291ED0F000E30F96 /* fonts */; };
 		844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844436EE28DA80C100662A9D /* libfreetype.a */; };
-		84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617724B1BF2D0040BA4F /* AppKit.framework */; };
+		8463C2992E46BC22002D5BB3 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617724B1BF2D0040BA4F /* AppKit.framework */; };
 		84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0024B1347B0040BA4F /* Foundation.framework */; };
 		8453A49E24DB22F00087ECF9 /* client in Resources */ = {isa = PBXBuildFile; fileRef = 8453A49D24DB22F00087ECF9 /* client */; };
 		845856B324B1322D0040BA4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 845856B224B1322D0040BA4F /* Assets.xcassets */; };
@@ -863,7 +863,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84EA1B952CA4BC8B00CDCE7C /* AudioToolbox.framework in Frameworks */,
-				84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */,
+				8463C2992E46BC22002D5BB3 /* AppKit.framework in Frameworks */,
 				848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */,
 				8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */,
 				841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */,

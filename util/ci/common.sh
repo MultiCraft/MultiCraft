@@ -41,7 +41,7 @@ build_linux_deps() {
 	sudo make install
 	cd ../../
 
-	git clone --depth 1 -b SDL3 https://github.com/deveee/Irrlicht
+	git clone --depth 1 -b SDL https://github.com/MoNTE48/Irrlicht
 	cd Irrlicht/source/Irrlicht
 	make -j
 	cd ../../../

@@ -4,12 +4,8 @@ SDL_VERSION=3.2.20
 
 . ./sdk.sh
 
-if [ ! -d libSDL-src ]; then
-	wget https://github.com/libsdl-org/SDL/archive/release-$SDL_VERSION.tar.gz
-	tar -xzf release-$SDL_VERSION.tar.gz
-	mv SDL-release-$SDL_VERSION libSDL-src
-	rm release-$SDL_VERSION.tar.gz
-fi
+[ ! -d libSDL-src ] && \
+    git clone -b $SDL_VERSION --depth 1 https://github.com/libsdl-org/SDL.git libSDL-src
 
 cd libSDL-src
 
