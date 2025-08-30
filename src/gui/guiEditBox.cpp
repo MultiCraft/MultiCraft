@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/string.h"
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 GUIEditBox::~GUIEditBox()
@@ -299,7 +299,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 	bool altPressed = false;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	SDL_Keymod keymod = SDL_GetModState();
-	altPressed = keymod & KMOD_ALT;
+	altPressed = keymod & SDL_KMOD_ALT;
 #endif
 
 	// control shortcut handling

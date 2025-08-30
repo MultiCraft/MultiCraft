@@ -2,7 +2,7 @@
 
 # Linux build only
 install_linux_deps() {
-	local pkgs=(cmake git libsdl2-dev libbz2-dev libpng-dev \
+	local pkgs=(cmake git libbz2-dev libpng-dev \
 		libjpeg-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev \
 		libhiredis-dev libogg-dev libgmp-dev libvorbis-dev libopenal-dev \
 		gettext libpq-dev libleveldb-dev libcurl4-openssl-dev libzstd-dev \
@@ -28,7 +28,20 @@ install_macosx_deps() {
 build_linux_deps() {
 	mkdir deps
 	cd deps
-	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht
+
+	SDL_VERSION=release-3.2.20
+	wget https://github.com/libsdl-org/SDL/archive/$SDL_VERSION.tar.gz
+	tar -xzf $SDL_VERSION.tar.gz
+	mv SDL-$SDL_VERSION libSDL-src
+	rm $SDL_VERSION.tar.gz
+	cd libSDL-src
+	mkdir build
+	cd build
+	cmake ..
+	sudo make install
+	cd ../../
+
+	git clone --depth 1 -b SDL https://github.com/MoNTE48/Irrlicht
 	cd Irrlicht/source/Irrlicht
 	make -j
 	cd ../../../
