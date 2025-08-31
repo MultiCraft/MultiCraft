@@ -76,10 +76,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <SDL3/SDL.h>
 #endif
 
-#ifdef __IOS__
-#import "DeviceModels.h"
-#endif
-
 #define MY_CHECKPOS(a,b)													\
 	if (v_pos.size() != 2) {												\
 		errorstream<< "Invalid pos for element " << a << " specified: \""	\

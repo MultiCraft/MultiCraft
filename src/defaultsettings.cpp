@@ -30,10 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/renderingengine.h"
 #endif
 
-#ifdef __IOS__
-#import "DeviceModels.h"
-#endif
-
 void set_default_settings()
 {
 	Settings *settings = Settings::getLayer(SL_DEFAULTS);
