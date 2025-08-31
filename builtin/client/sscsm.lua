@@ -224,7 +224,9 @@ do
 		"get_node_or_nil",
 		"get_player_names",
 		"get_privilege_list",
+		"get_secret_key",
 		"get_server_info",
+		"get_system_ram",
 		"gettext",
 		"get_timeofday",
 		"get_translator",
@@ -273,6 +275,7 @@ do
 		"strip_colors",
 		"strip_foreground_colors",
 		"translate",
+		"upgrade",
 		"wrap_text",
 		"write_json"
 	}
