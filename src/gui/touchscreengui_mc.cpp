@@ -927,29 +927,75 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 		if (m_editor.event_id == id) {
 			IGUIButton *guibutton = m_editor.guibutton;
-			rect<s32> rect = guibutton->getRelativePosition();
+			rect<s32> new_rect = guibutton->getRelativePosition();
 
 			if (m_editor.change_size) {
-				if (rect.UpperLeftCorner.X < 0)
-					rect += v2s32(-rect.UpperLeftCorner.X, 0);
-				else if (rect.LowerRightCorner.X > m_screensize.X)
-					rect -= v2s32(rect.LowerRightCorner.X - m_screensize.X, 0);
+				if (new_rect.UpperLeftCorner.X < 0)
+					new_rect += v2s32(-new_rect.UpperLeftCorner.X, 0);
+				else if (new_rect.LowerRightCorner.X > m_screensize.X)
+					new_rect -= v2s32(new_rect.LowerRightCorner.X - m_screensize.X, 0);
 
-				if (rect.UpperLeftCorner.Y < 0)
-					rect += v2s32(0, -rect.UpperLeftCorner.Y);
-				else if (rect.LowerRightCorner.Y > m_screensize.Y)
-					rect -= v2s32(0, rect.LowerRightCorner.Y - m_screensize.Y);
+				if (new_rect.UpperLeftCorner.Y < 0)
+					new_rect += v2s32(0, -new_rect.UpperLeftCorner.Y);
+				else if (new_rect.LowerRightCorner.Y > m_screensize.Y)
+					new_rect -= v2s32(0, new_rect.LowerRightCorner.Y - m_screensize.Y);
+			}
+
+			if (m_editor.button_id == escape_id) {
+				for (auto button : m_buttons) {
+					if (button->state != STATE_DEFAULT)
+						continue;
+
+					if (button->id == m_editor.button_id)
+						continue;
+
+					IGUIButton *guibutton = button->guibutton;
+
+					if (guibutton) {
+						rect<s32> btn_rect = guibutton->getRelativePosition();
+
+						if (new_rect.isRectCollided(btn_rect)) {
+							new_rect = m_editor.old_rect;
+							break;
+						}
+					}
+				}
+
+				IGUIButton *guibutton = m_joystick.button_off;
+				rect<s32> btn_rect = guibutton->getRelativePosition();
+
+				if (new_rect.isRectCollided(btn_rect))
+					new_rect = m_editor.old_rect;
+			} else {
+				for (auto button : m_buttons) {
+					if (button->state != STATE_DEFAULT)
+						continue;
+
+					if (button->id != escape_id)
+						continue;
+
+					IGUIButton *guibutton = button->guibutton;
+
+					if (guibutton) {
+						rect<s32> btn_rect = guibutton->getRelativePosition();
+
+						if (new_rect.isRectCollided(btn_rect)) {
+							new_rect = m_editor.old_rect;
+							break;
+						}
+					}
+				}
 			}
 
 			setValues(m_editor.button_id,
-					rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y,
-					rect.getWidth(), rect.getHeight());
+					new_rect.UpperLeftCorner.X, new_rect.UpperLeftCorner.Y,
+					new_rect.getWidth(), new_rect.getHeight());
 
 			if (m_editor.history_current_id > -1)
 				m_editor.history_data.resize(m_editor.history_current_id);
 
-			if (rect != m_editor.old_rect) {
-				editor_history_data data = {guibutton, m_editor.button_id, m_editor.old_rect, rect};
+			if (new_rect != m_editor.old_rect) {
+				editor_history_data data = {guibutton, m_editor.button_id, m_editor.old_rect, new_rect};
 				std::vector<editor_history_data> history_data;
 				history_data.push_back(data);
 				m_editor.history_data.push_back(history_data);
