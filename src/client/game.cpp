@@ -4396,22 +4396,23 @@ void Game::showDeathFormspec()
 }
 
 void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple<const char*, std::string,
-		const char*, bool>> &buttons, float center_y, float btn_h, float gap)
+		std::string, bool>> &buttons, float center_y, float btn_h, float gap)
 {
 	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
 	float y = center_y + gap * 0.5f - total_height * 0.5f;
+	float icon_size = btn_h - 0.3f;
 
 	if (buttons.size() <= 4)
 		y = y - gap * 3;
 
-	for (auto &[id, text, emoji, is_exit] : buttons) {
+	for (auto &[id, text, icon, is_exit] : buttons) {
 		if (is_exit)
 			os << "image_button_exit[3," << y << ";5," << btn_h
 			<< ";;" << id << ";" << text << ";;false]";
 		else
 			os << "image_button[3," << y << ";5," << btn_h
 			<< ";;" << id << ";" << text << ";;false]";
-		os << "label[3.15," << (y + btn_h * 0.5f - 0.32f) << "; " << emoji << "]";
+		os << "image[3.15," << (y + 0.1f) << ";" << icon_size << "," << icon_size << ";" << icon << "]";
 		y += btn_h + gap;
 	}
 }
@@ -4493,29 +4494,30 @@ void Game::showPauseMenu()
 		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
 		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]";
 
-	auto buttons = std::vector<std::tuple<const char*, std::string, const char*, bool>>{
-		{"btn_continue", strgettext("Continue"), "▶️", true}
+	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
+	auto buttons = std::vector<std::tuple<const char*, std::string, std::string, bool>>{
+		{"btn_continue", strgettext("Continue"), sheet + "0,0", true}
 	};
 
 	if (!simple_singleplayer_mode)
-		buttons.emplace_back("btn_change_password", strgettext("Change Password"), "🖋️", false);
+		buttons.emplace_back("btn_change_password", strgettext("Change Password"), sheet + "0,2", false);
 
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound"))
-		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), "🔊", true);
+		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), sheet + "0,3", true);
 #endif
 
 	if (porting::hasRealKeyboard())
-		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), "⌨️", true);
+		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
 #ifdef HAVE_TOUCHSCREENGUI
 	else if (g_touchscreengui)
-		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), "👆", true);
+		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), sheet + "1,1", true);
 #endif
 
-	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), "🚪", true);
+	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), sheet + "1,0", true);
 
 #if !defined(__ANDROID__) && !defined(__IOS__)
-	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), "❌", true);
+	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), sheet + "1,2", true);
 #endif
 
 	createPauseMenuButtons(os, buttons, 3.0f, 0.95f, 0.2f);
