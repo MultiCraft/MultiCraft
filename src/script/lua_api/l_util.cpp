@@ -670,8 +670,6 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(get_version);
 	API_FCT(sha1);
 
-	API_FCT(upgrade);
-	API_FCT(get_secret_key);
 	API_FCT(get_screen_info);
 	API_FCT(get_system_ram);
 	API_FCT(copy_to_clipboard);
