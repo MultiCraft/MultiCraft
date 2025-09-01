@@ -649,7 +649,6 @@ void ModApiUtil::Initialize(lua_State *L, int top)
 	API_FCT(upgrade);
 	API_FCT(get_secret_key);
 #endif
-	API_FCT(get_system_ram);
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
