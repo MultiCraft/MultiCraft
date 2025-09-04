@@ -352,6 +352,12 @@ env:set("set_error_handler", function(func)
 	handle_error = func
 end)
 
+local function finish_env_setup()
+	env._raw.minetest.localplayer = core.localplayer
+	env._raw.minetest.camera = core.camera
+	env._raw.minetest.ui = copy(core.ui)
+end
+
 -- exec() code sent by the server.
 local legacy_channel_name = "sscsm:exec_pipe"
 local chunks, v2_channel_name
@@ -364,6 +370,10 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 		-- Legacy protocol
 		-- The first character is currently a version code, currently 0.
 		-- Do not change unless absolutely necessary.
+		if not next(loaded_sscsms) then
+			finish_env_setup()
+		end
+
 		local version = message:sub(1, 1)
 		local name, code
 		if version == "0" then
@@ -403,6 +413,7 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 
 		if first_char == "E" then
 			-- End of messages, decompress and execute
+			finish_env_setup()
 			local compressed = core.decode_base64(table.concat(chunks))
 			local all_code = compressed and core.decompress(compressed)
 			if not all_code then return end
@@ -428,24 +439,18 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 	end
 end)
 
--- Send "0" when the "sscsm:exec_pipe" channel is first joined.
-local sent_request = {}
+local sent_legacy_request = false
 core.register_on_modchannel_signal(function(channel_name, signal)
-	if sent_request[channel_name] or (channel_name ~= legacy_channel_name and
-			channel_name ~= v2_channel_name) then
-		return
-	end
+	if signal == 0 and channel_name == legacy_channel_name and not sent_legacy_request then
+		-- Send "0" when the "sscsm:exec_pipe" channel is first joined.
+		legacy_mod_channel:send_all("0")
+		sent_legacy_request = true
 
-	local mod_channel = channel_name == legacy_channel_name and legacy_mod_channel or v2_mod_channel
-
-	if signal == 0 then
-		env._raw.minetest.localplayer = core.localplayer
-		env._raw.minetest.camera = core.camera
-		env._raw.minetest.ui = copy(core.ui)
-		mod_channel:send_all("0")
-		sent_request[channel_name] = true
-	elseif signal == 1 then
-		mod_channel:leave()
+	-- Leave mod channels if they aren't set up
+	elseif signal == 1 and channel_name == legacy_channel_name then
+		legacy_mod_channel:leave()
+	elseif signal == 1 and channel_name == v2_channel_name then
+		v2_mod_channel:leave()
 	end
 end)
 
@@ -468,6 +473,10 @@ local function attempt_to_join_mod_channel()
 	-- Join the mod channels (the v2 channel must be joined first)
 	v2_channel_name = "sscsm:v2_" .. core.localplayer:get_name()
 	v2_mod_channel = core.mod_channel_join(v2_channel_name)
+
+	-- Send a packet on the v2 channel immediately to avoid a round trip
+	v2_mod_channel:send_all_force("0")
+
 	legacy_mod_channel = core.mod_channel_join(legacy_channel_name)
 end
 core.after(0, attempt_to_join_mod_channel)
