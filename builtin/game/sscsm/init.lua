@@ -148,58 +148,41 @@ core.register_on_mods_loaded(recalc_csm_order)
 local has_sscsms = {}
 local sscsms_sent = {}
 local v2_mod_channels = {}
-local legacy_mod_channel = core.mod_channel_join("sscsm:exec_pipe")
 local v2_chunk_size = 65530
 core.register_on_modchannel_message(function(channel_name, sender, message)
-	if not sender or sscsms_sent[sender] or message ~= "0" then return end
+	if not sender or sscsms_sent[sender] then return end
 
 	local v2_channel = v2_mod_channels[sender]
-	if channel_name == "sscsm:exec_pipe" then
-		-- Legacy protocol (uncompressed)
-		if not legacy_mod_channel:is_writeable() or sender:find("\n") then
-			return
-		end
-
-		sscsms_sent[sender] = true
-		core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
-			" (legacy protocol)...")
-		for _, name in ipairs(csm_order) do
-			local def = sscsm.registered_csms[name]
-			if not def.is_enabled_for or def.is_enabled_for(sender) then
-				legacy_mod_channel:send_all("0" .. sender .. "\n" .. name
-					.. "\n" .. def.code)
-			end
-		end
-	elseif channel_name == "sscsm:v2_" .. sender and v2_channel then
-		-- New protocol (compressed)
-		local blob = {}
-
-		for _, name in ipairs(csm_order) do
-			local def = sscsm.registered_csms[name]
-			if not def.is_enabled_for or def.is_enabled_for(sender) then
-				blob[#blob + 1] = name .. "\n" .. def.code
-			end
-		end
-
-		local compressed = core.encode_base64(core.compress(table.concat(blob, "\0")))
-
-		sscsms_sent[sender] = true
-		core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
-			" (v2 protocol)...")
-		-- This is not optimal but the compressed code is probably only one or
-		-- two chunks anyway
-		while #compressed > v2_chunk_size do
-			v2_channel:send_all("C" .. compressed:sub(1, v2_chunk_size))
-			compressed = compressed:sub(v2_chunk_size + 1)
-		end
-		v2_channel:send_all("E" .. compressed)
+	if channel_name ~= "sscsm:v2_" .. sender or not v2_channel then
+		return
 	end
+
+	-- New protocol (compressed)
+	local blob = {}
+
+	for _, name in ipairs(csm_order) do
+		local def = sscsm.registered_csms[name]
+		if not def.is_enabled_for or def.is_enabled_for(sender) then
+			blob[#blob + 1] = name .. "\n" .. def.code
+		end
+	end
+
+	local compressed = core.encode_base64(core.compress(table.concat(blob, "\0")))
+
+	sscsms_sent[sender] = true
+	core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
+		" (v2 protocol)...")
+	-- This is not optimal but the compressed code is probably only one or
+	-- two chunks anyway
+	while #compressed > v2_chunk_size do
+		v2_channel:send_all("C" .. compressed:sub(1, v2_chunk_size))
+		compressed = compressed:sub(v2_chunk_size + 1)
+	end
+	v2_channel:send_all("E" .. compressed)
 
 	-- No point staying in the v2 mod channel now that SSCSMs are sent
-	if v2_channel then
-		v2_channel:leave()
-		v2_mod_channels[sender] = nil
-	end
+	v2_channel:leave()
+	v2_mod_channels[sender] = nil
 end)
 
 core.register_on_joinplayer(function(player)

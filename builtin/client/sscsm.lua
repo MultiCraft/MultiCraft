@@ -335,13 +335,9 @@ assert(env._raw.minetest.register_on_sending_chat_message ~=
 
 -- SSCSM functions
 -- When calling these from an SSCSM, make sure they exist first.
-local legacy_mod_channel, v2_mod_channel
+local v2_mod_channel
 local loaded_sscsms = {}
 local function leave_mod_channel()
-	if legacy_mod_channel then
-		legacy_mod_channel:leave()
-		legacy_mod_channel = nil
-	end
 	if v2_mod_channel then
 		v2_mod_channel:leave()
 		v2_mod_channel = nil
@@ -359,101 +355,53 @@ local function finish_env_setup()
 end
 
 -- exec() code sent by the server.
-local legacy_channel_name = "sscsm:exec_pipe"
 local chunks, v2_channel_name
 core.register_on_modchannel_message(function(channel_name, sender, message)
-	if sender and sender ~= "" then
+	if (sender and sender ~= "") or channel_name ~= v2_channel_name then
 		return
 	end
 
-	if channel_name == legacy_channel_name then
-		-- Legacy protocol
-		-- The first character is currently a version code, currently 0.
-		-- Do not change unless absolutely necessary.
-		if not next(loaded_sscsms) then
-			finish_env_setup()
-		end
+	-- V2 protocol: Compressed blob of code
+	-- C: Continue (more messages coming)
+	-- E: End (this is the last message)
+	local first_char = message:sub(1, 1)
+	if first_char ~= "C" and first_char ~= "E" then return end
 
-		local version = message:sub(1, 1)
-		local name, code
-		if version == "0" then
-			local s, e = message:find("\n")
-			if not s or not e then return end
-			local target = message:sub(2, s - 1)
-			if target ~= core.localplayer:get_name() then return end
-			message = message:sub(e + 1)
-			s, e = message:find("\n")
-			if not s or not e then return end
-			name = message:sub(1, s - 1)
-			code = message:sub(e + 1)
-		else
-			return
-		end
+	chunks = chunks or {}
+	chunks[#chunks + 1] = message:sub(2)
 
-		-- Don't load the same SSCSM twice
-		if not loaded_sscsms[name] then
-			core.log("info", "[SSCSM] Loading " .. name .. " (legacy protocol)")
-			loaded_sscsms[name] = true
-			env:exec(code, name)
-		end
+	if first_char == "E" then
+		-- End of messages, decompress and execute
+		finish_env_setup()
+		local compressed = core.decode_base64(table.concat(chunks))
+		local all_code = compressed and core.decompress(compressed)
+		if not all_code then return end
+		local files = all_code:split("\0")
+		for _, file in ipairs(files) do
+			local name, code = file:match("^([^\n]-)\n(.-)$")
+			if not name then return end
 
-		-- Automatically leave on last CSM
-		if name == ":cleanup" then
-			leave_mod_channel()
-		end
-	elseif channel_name == v2_channel_name then
-		-- New protocol: Compressed blob of code
-		-- C: Continue (more messages coming)
-		-- E: End (this is the last message)
-		local first_char = message:sub(1, 1)
-		if first_char ~= "C" and first_char ~= "E" then return end
-
-		chunks = chunks or {}
-		chunks[#chunks + 1] = message:sub(2)
-
-		if first_char == "E" then
-			-- End of messages, decompress and execute
-			finish_env_setup()
-			local compressed = core.decode_base64(table.concat(chunks))
-			local all_code = compressed and core.decompress(compressed)
-			if not all_code then return end
-			local files = all_code:split("\0")
-			for _, file in ipairs(files) do
-				local name, code = file:match("^([^\n]-)\n(.-)$")
-				if not name then return end
-
-				if not loaded_sscsms[name] then
-					core.log("info", "[SSCSM] Loading " .. name .. " (v2 protocol)")
-					loaded_sscsms[name] = true
-					env:exec(code, name)
-				else
-					core.log("error", "[SSCSM] Attempt to load " .. name .. " twice")
-				end
+			if not loaded_sscsms[name] then
+				core.log("info", "[SSCSM] Loading " .. name .. " (v2 protocol)")
+				loaded_sscsms[name] = true
+				env:exec(code, name)
+			else
+				core.log("error", "[SSCSM] Attempt to load " .. name .. " twice")
 			end
-
-			leave_mod_channel()
-
-			-- No need to store the compressed chunks anymore
-			chunks = nil
 		end
+
+		leave_mod_channel()
+
+		-- No need to store the compressed chunks anymore
+		chunks = nil
 	end
 end)
 
-local sent_legacy_request = false
 core.register_on_modchannel_signal(function(channel_name, signal)
-	if signal == 0 and channel_name == legacy_channel_name and
-			legacy_mod_channel and not sent_legacy_request then
-		-- Send "0" when the "sscsm:exec_pipe" channel is first joined.
-		legacy_mod_channel:send_all("0")
-		sent_legacy_request = true
-
-	-- Leave mod channels if they aren't set up
-	elseif signal == 1 and channel_name == legacy_channel_name and
-			legacy_mod_channel then
-		legacy_mod_channel:leave()
-	elseif signal == 1 and channel_name == v2_channel_name and
-			legacy_mod_channel then
+	-- Leave the mod channel if it failed to join
+	if signal == 1 and channel_name == v2_channel_name and v2_mod_channel then
 		v2_mod_channel:leave()
+		v2_mod_channel = nil
 	end
 end)
 
@@ -479,7 +427,5 @@ local function attempt_to_join_mod_channel()
 
 	-- Send a packet on the v2 channel immediately to avoid a round trip
 	v2_mod_channel:send_all_force("0")
-
-	legacy_mod_channel = core.mod_channel_join(legacy_channel_name)
 end
 core.after(0, attempt_to_join_mod_channel)
