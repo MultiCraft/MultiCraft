@@ -4603,7 +4603,6 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]";
 
 	getButtonStyle(os);
-
 	os << "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
 		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
