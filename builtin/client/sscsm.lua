@@ -441,15 +441,18 @@ end)
 
 local sent_legacy_request = false
 core.register_on_modchannel_signal(function(channel_name, signal)
-	if signal == 0 and channel_name == legacy_channel_name and not sent_legacy_request then
+	if signal == 0 and channel_name == legacy_channel_name and
+			legacy_mod_channel and not sent_legacy_request then
 		-- Send "0" when the "sscsm:exec_pipe" channel is first joined.
 		legacy_mod_channel:send_all("0")
 		sent_legacy_request = true
 
 	-- Leave mod channels if they aren't set up
-	elseif signal == 1 and channel_name == legacy_channel_name then
+	elseif signal == 1 and channel_name == legacy_channel_name and
+			legacy_mod_channel then
 		legacy_mod_channel:leave()
-	elseif signal == 1 and channel_name == v2_channel_name then
+	elseif signal == 1 and channel_name == v2_channel_name and
+			legacy_mod_channel then
 		v2_mod_channel:leave()
 	end
 end)

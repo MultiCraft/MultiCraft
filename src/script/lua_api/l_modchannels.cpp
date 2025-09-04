@@ -84,7 +84,7 @@ int ModChannelRef::l_send_all_force(lua_State *L)
 		return 0;
 
 	std::string message = luaL_checkstring(L, 2);
-	getGameDef(L)->sendModChannelMessage(channel->getName(), message);
+	getGameDef(L)->sendModChannelMessage(channel->getName(), message, true);
 	return 0;
 }
 
