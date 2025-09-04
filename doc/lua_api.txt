@@ -4578,6 +4578,7 @@ Utilities
           version_string = "0.4.9-git", -- full version string
           platform = "Linux",           -- Equivalent to the "PLATFORM" variable
           sysinfo = "Linux/5.4.0-109-generic x86_64",
+          system_ram = 4096,            -- System ram in MiB, 0 if unknown
           state = "Active"              -- current client state
       }
 

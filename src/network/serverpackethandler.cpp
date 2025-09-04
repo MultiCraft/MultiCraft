@@ -392,11 +392,15 @@ void Server::handleCommand_ClientReady(NetworkPacket* pkt)
 	std::string full_ver;
 	*pkt >> major_ver >> minor_ver >> patch_ver >> reserved >> full_ver;
 
-	m_clients.setClientVersion(peer_id, major_ver, minor_ver, patch_ver,
-		full_ver);
-
 	if (pkt->getRemainingBytes() >= 2)
 		*pkt >> playersao->getPlayer()->formspec_version;
+
+	u32 ram = 0;
+	if (pkt->getRemainingBytes() >= 4)
+		*pkt >> ram;
+
+	m_clients.setClientVersion(peer_id, major_ver, minor_ver, patch_ver,
+		full_ver, ram);
 
 	const std::vector<std::string> &players = m_clients.getPlayerNames();
 	NetworkPacket list_pkt(TOCLIENT_UPDATE_PLAYER_LIST, 0, peer_id);
