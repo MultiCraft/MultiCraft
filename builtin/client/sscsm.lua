@@ -321,7 +321,7 @@ do
 		end
 	}
 
-	env:set_copy("minetest", t)
+	env:set_copy("core", t)
 end
 
 -- Add table.unpack
@@ -330,7 +330,7 @@ if not table.unpack then
 end
 
 -- Make sure copy() worked correctly
-assert(env._raw.minetest.register_on_sending_chat_message ~=
+assert(env._raw.core.register_on_sending_chat_message ~=
 	core.register_on_sending_chat_message, "Error in copy()!")
 
 -- SSCSM functions
@@ -349,9 +349,9 @@ env:set("set_error_handler", function(func)
 end)
 
 local function finish_env_setup()
-	env._raw.minetest.localplayer = core.localplayer
-	env._raw.minetest.camera = core.camera
-	env._raw.minetest.ui = copy(core.ui)
+	env._raw.core.localplayer = core.localplayer
+	env._raw.core.camera = core.camera
+	env._raw.core.ui = copy(core.ui)
 end
 
 -- exec() code sent by the server.
