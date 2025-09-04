@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 # This file sets the appropriate compiler and flags for compiling for macOS
-export OSX_OSVER=10.14
+export OSX_OSVER=10.15
 
 export OSX_ARCHES="x86_64 arm64"
 export OSX_ARCHITECTURES="x86_64;arm64"

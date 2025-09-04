@@ -1,13 +1,13 @@
 #!/bin/bash -e
 
-LUAJIT_VERSION="v2.1"
+LUAJIT_VERSION=2.1
 
 . scripts/sdk.sh
 export MACOSX_DEPLOYMENT_TARGET=11.0
 mkdir -p deps; cd deps
 
 if [ ! -d luajit-src ]; then
-	git clone -b $LUAJIT_VERSION --depth 1 -c core.autocrlf=false https://github.com/LuaJIT/LuaJIT luajit-src
+	git clone -b v$LUAJIT_VERSION --depth 1 -c core.autocrlf=false https://github.com/LuaJIT/LuaJIT luajit-src
 fi
 
 rm -rf luajit
