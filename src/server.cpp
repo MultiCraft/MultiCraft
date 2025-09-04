@@ -1301,6 +1301,8 @@ bool Server::getClientInfo(session_t peer_id, ClientInfo &ret)
 	ret.platform = client->getPlatform();
 	ret.sysinfo = client->getSysInfo();
 
+	ret.system_ram = client->getSystemRAM();
+
 	ret.lang_code = client->getLangCode();
 
 	m_clients.unlock();

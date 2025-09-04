@@ -353,6 +353,9 @@ public:
 	const std::string &getPlatform() const { return m_platform; }
 	const std::string &getSysInfo() const { return m_sysinfo; }
 
+	void setSystemRAM(u32 ram) { m_system_ram = ram; }
+	const u32 getSystemRAM() const { return m_system_ram; }
+
 	void setLangCode(const std::string &code) { m_lang_code = code; }
 	const std::string &getLangCode() const { return m_lang_code; }
 
@@ -441,6 +444,8 @@ private:
 	std::string m_platform = "unknown";
 	std::string m_sysinfo = "unknown";
 
+	u32 m_system_ram = 0;
+
 	u16 m_deployed_compression = 0;
 
 	/*
@@ -504,7 +509,7 @@ public:
 
 	/* set client version */
 	void setClientVersion(session_t peer_id, u8 major, u8 minor, u8 patch,
-			const std::string &full);
+			const std::string &full, u32 ram);
 
 	/* event to update client state */
 	void event(session_t peer_id, ClientStateEvent event);
