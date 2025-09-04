@@ -4395,7 +4395,44 @@ void Game::showDeathFormspec()
 	formspec->setFocus("btn_respawn");
 }
 
-#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
+void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple<const char*, std::string,
+		std::string, bool>> &buttons, float center_y, float btn_h, float gap)
+{
+	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
+	float y = center_y + gap * 0.5f - total_height * 0.5f;
+	float icon_size = btn_h - 0.3f;
+
+	if (buttons.size() <= 4)
+		y = y - gap * 3;
+
+	for (auto &[id, text, icon, is_exit] : buttons) {
+		if (is_exit)
+			os << "image_button_exit[3," << y << ";5," << btn_h
+			<< ";;" << id << ";" << text << ";;false]";
+		else
+			os << "image_button[3," << y << ";5," << btn_h
+			<< ";;" << id << ";" << text << ";;false]";
+		os << "image[3.15," << (y + 0.1f) << ";" << icon_size << "," << icon_size << ";" << icon << "]";
+		y += btn_h + gap;
+	}
+}
+
+void getButtonStyle(std::ostringstream &os)
+{
+	const bool high_dpi = RenderingEngine::isHighDpi();
+	const std::string x2 = high_dpi ? ".x2" : "";
+	std::string sound_name = g_settings->get("btn_press_sound");
+	str_formspec_escape(sound_name);
+	// image_button_exit inherits image_button's styles, no need to explicitly
+	// specify it here
+	os << "style_type[image_button;bgimg=gui/gui_button" << x2
+		<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20")
+		<< ";sound=" << sound_name << "]"
+		<< "style_type[image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
+		<< "style_type[image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]";
+}
+
+//#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
 void Game::showPauseMenu()
 {
 /*#ifdef HAVE_TOUCHSCREENGUI
@@ -4456,52 +4493,42 @@ void Game::showPauseMenu()
 		ypos -= 0.6f;
 	ypos += 0.5f;
 #endif
-	const bool high_dpi = RenderingEngine::isHighDpi();
-	const std::string x2 = high_dpi ? ".x2" : "";
-	std::string sound_name = g_settings->get("btn_press_sound");
-	str_formspec_escape(sound_name);
+
 	std::ostringstream os;
-
-	os << "formspec_version[1]" << SIZE_TAG
+	os << "formspec_version[1]" << "size[11,6]"
 		<< "no_prepend[]"
-		<< "bgcolor[#00000060;true]"
+		<< "bgcolor[#00000060;true]";
+	getButtonStyle(os);
 
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2 <<
-			".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") <<
-			";sound=" << sound_name << "]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
+	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
+	auto buttons = std::vector<std::tuple<const char*, std::string, std::string, bool>>{
+		{"btn_continue", strgettext("Continue"), sheet + "0,0", true}
+	};
 
-		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
-		<< strgettext("Continue") << ";;false]";
-
-	if (!simple_singleplayer_mode) {
-		os << "image_button[3.5," << (ypos++) << ";4,0.9;;btn_change_password;"
-			<< strgettext("Change Password") << ";;false]";
-	}
+	if (!simple_singleplayer_mode)
+		buttons.emplace_back("btn_change_password", strgettext("Change Password"), sheet + "0,2", false);
 
 #if USE_SOUND
-	if (g_settings->getBool("enable_sound")) {
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_sound;"
-			<< strgettext("Sound Volume") << ";;false]";
-	}
+	if (g_settings->getBool("enable_sound"))
+		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), sheet + "0,3", true);
 #endif
-	if (hasRealKeyboard)
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
-			<< strgettext("Change Keys")  << ";;false]";
+
+	if (porting::hasRealKeyboard())
+		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
 #ifdef HAVE_TOUCHSCREENGUI
-	else if (g_touchscreengui) {
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_touchscreen_edit;"
-			<< strgettext("Change Keys") << strgettext(" (Touch)") << ";;false]";
-	}
+	else if (g_touchscreengui)
+		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), sheet + "0,1", true);
 #endif
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
-		<< strgettext("Exit to Menu") << ";;false]";
+
+	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), sheet + "1,0", true);
+
 #if !defined(__ANDROID__) && !defined(__IOS__)
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_os;"
-		<< strgettext("Exit to OS")   << ";;false]";
+	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), sheet + "1,2", true);
 #endif
-/*		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
+
+	createPauseMenuButtons(os, buttons, 3.0f, 0.95f, 0.2f);
+
+/*	os	<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
 		<< "textarea[0.4,0.25;3.9,6.25;;" << PROJECT_NAME_C " " VERSION_STRING "\n"
 		<< "\n"
 		<<  strgettext("Game info:") << "\n";
@@ -4565,11 +4592,6 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 	str_formspec_escape(new_pw);
 	str_formspec_escape(confirm_pw);
 
-	const bool high_dpi = RenderingEngine::isHighDpi();
-	const std::string x2 = high_dpi ? ".x2" : "";
-	std::string sound_name = g_settings->get("btn_press_sound");
-	str_formspec_escape(sound_name);
-
 	std::ostringstream os;
 	os << "formspec_version[5]"
 		<< "size[10.5,7.5]"
@@ -4578,13 +4600,10 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "background9[0,0;0,0;bg_common.png;true;40]"
 		<< "pwdfield[1,1.2;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
 		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
-		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2
-			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << ";"
-			<< "sound=" << sound_name << "]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
-		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
+		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]";
+
+	getButtonStyle(os);
+	os << "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
 		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
 	if (new_pw != confirm_pw)
