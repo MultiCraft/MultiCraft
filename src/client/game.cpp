@@ -4417,6 +4417,21 @@ void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple
 	}
 }
 
+void getButtonStyle(std::ostringstream &os)
+{
+	const bool high_dpi = RenderingEngine::isHighDpi();
+	const std::string x2 = high_dpi ? ".x2" : "";
+	std::string sound_name = g_settings->get("btn_press_sound");
+	str_formspec_escape(sound_name);
+	// image_button_exit inherits image_button's styles, no need to explicitly
+	// specify it here
+	os << "style_type[image_button;bgimg=gui/gui_button" << x2
+		<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20")
+		<< ";sound=" << sound_name << "]"
+		<< "style_type[image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
+		<< "style_type[image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]";
+}
+
 //#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
 void Game::showPauseMenu()
 {
@@ -4478,21 +4493,12 @@ void Game::showPauseMenu()
 		ypos -= 0.6f;
 	ypos += 0.5f;
 #endif
-	const bool high_dpi = RenderingEngine::isHighDpi();
-	const std::string x2 = high_dpi ? ".x2" : "";
-	std::string sound_name = g_settings->get("btn_press_sound");
-	str_formspec_escape(sound_name);
 
 	std::ostringstream os;
 	os << "formspec_version[1]" << "size[11,6]"
 		<< "no_prepend[]"
-		<< "bgcolor[#00000060;true]"
-
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2
-			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20")
-			<< ";sound=" << sound_name << "]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]";
+		<< "bgcolor[#00000060;true]";
+	getButtonStyle(os);
 
 	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
 	auto buttons = std::vector<std::tuple<const char*, std::string, std::string, bool>>{
@@ -4586,11 +4592,6 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 	str_formspec_escape(new_pw);
 	str_formspec_escape(confirm_pw);
 
-	const bool high_dpi = RenderingEngine::isHighDpi();
-	const std::string x2 = high_dpi ? ".x2" : "";
-	std::string sound_name = g_settings->get("btn_press_sound");
-	str_formspec_escape(sound_name);
-
 	std::ostringstream os;
 	os << "formspec_version[5]"
 		<< "size[10.5,7.5]"
@@ -4599,13 +4600,11 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "background9[0,0;0,0;bg_common.png;true;40]"
 		<< "pwdfield[1,1.2;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
 		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
-		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2
-			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << ";"
-			<< "sound=" << sound_name << "]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
-		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
+		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]";
+
+	getButtonStyle(os);
+
+	os << "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
 		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
 	if (new_pw != confirm_pw)
