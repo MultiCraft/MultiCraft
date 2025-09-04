@@ -147,6 +147,7 @@ core.register_on_mods_loaded(recalc_csm_order)
 -- Handle players joining
 local has_sscsms = {}
 local sscsms_sent = {}
+local supports_zstd = {}
 local v2_mod_channels = {}
 local v2_chunk_size = 65530
 core.register_on_modchannel_message(function(channel_name, sender, message)
@@ -162,6 +163,7 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 		method = "deflate"
 	elseif message == "1" then
 		method = "zstd"
+		supports_zstd[sender] = true
 	else
 		-- Unsupported protocol version
 		return
@@ -206,6 +208,7 @@ core.register_on_leaveplayer(function(player)
 	local name = player:get_player_name()
 	has_sscsms[name] = nil
 	sscsms_sent[name] = nil
+	supports_zstd[name] = nil
 
 	-- Leave the v2 mod channel
 	if v2_mod_channels[name] then
@@ -276,11 +279,12 @@ function sscsm.com_send(pname, channel, msg)
 	-- Compress long messages
 	if #msg > 512 then
 		-- Chat messages can't contain binary data so base64 is used
-		local compressed_msg = minetest.encode_base64(minetest.compress(msg))
+		local method = supports_zstd[pname] and "zstd" or "deflate"
+		local compressed_msg = minetest.encode_base64(minetest.compress(msg, method))
 
 		-- Only use the compressed message if it's shorter
 		if #msg > #compressed_msg + 1 then
-			msg = "\003" .. compressed_msg
+			msg = (supports_zstd[pname] and "\004" or "\003") .. compressed_msg
 		end
 	end
 

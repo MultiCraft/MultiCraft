@@ -270,8 +270,9 @@ core.register_on_receiving_chat_message(function(message)
 	end
 
 	-- Decompress messages
-	if prefix == 3 then
-		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)))
+	if prefix == 3 or prefix == 4 then
+		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)),
+			prefix == 4 and "zstd" or "deflate")
 		prefix = msg:byte(1)
 	end
 
