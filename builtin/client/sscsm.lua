@@ -374,7 +374,14 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 		-- End of messages, decompress and execute
 		finish_env_setup()
 		local compressed = core.decode_base64(table.concat(chunks))
-		local all_code = compressed and core.decompress(compressed)
+		local all_code
+		if compressed and compressed:sub(1, 4) == "\40\181\47\253" then
+			-- zstd
+			all_code = core.decompress(compressed, "zstd")
+		else
+			-- Deflate
+			all_code = core.decompress(compressed)
+		end
 		if not all_code then return end
 		local files = all_code:split("\0")
 		for _, file in ipairs(files) do
@@ -426,6 +433,10 @@ local function attempt_to_join_mod_channel()
 	v2_mod_channel = core.mod_channel_join(v2_channel_name)
 
 	-- Send a packet on the v2 channel immediately to avoid a round trip
+	-- Protocol 2.1 (zstd support)
+	v2_mod_channel:send_all_force("1")
+
+	-- Send 0 as well to indicate that we still support deflate compression
 	v2_mod_channel:send_all_force("0")
 end
 core.after(0, attempt_to_join_mod_channel)

@@ -157,6 +157,16 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 		return
 	end
 
+	local method
+	if message == "0" then
+		method = "deflate"
+	elseif message == "1" then
+		method = "zstd"
+	else
+		-- Unsupported protocol version
+		return
+	end
+
 	-- New protocol (compressed)
 	local blob = {}
 
@@ -167,7 +177,7 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 		end
 	end
 
-	local compressed = core.encode_base64(core.compress(table.concat(blob, "\0")))
+	local compressed = core.encode_base64(core.compress(table.concat(blob, "\0"), method))
 
 	sscsms_sent[sender] = true
 	core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
