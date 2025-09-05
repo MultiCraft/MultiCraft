@@ -643,12 +643,12 @@ void ModApiUtil::Initialize(lua_State *L, int top)
 	API_FCT(decode_base64);
 
 	API_FCT(get_version);
-	API_FCT(get_system_ram);
 	API_FCT(sha1);
 
 #ifndef SERVER
 	API_FCT(upgrade);
 	API_FCT(get_secret_key);
+	API_FCT(get_system_ram);
 #endif
 
 	LuaSettings::create(L, g_settings, g_settings_path);
