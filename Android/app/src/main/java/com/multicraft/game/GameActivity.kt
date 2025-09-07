@@ -23,8 +23,10 @@ package com.multicraft.game
 import android.content.res.Configuration
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
+import android.system.Os
 import android.text.InputType
 import android.view.*
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager.LayoutParams.*
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -34,12 +36,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.net.toUri
-import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
-import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
-import com.multicraft.game.helpers.PreferenceHelper.set
 import org.libsdl.app.SDLActivity
 import kotlin.system.exitProcess
 
@@ -89,18 +88,11 @@ class GameActivity : SDLActivity() {
 			)
 		}
 		hasKeyboard = hasHardKeyboard()
-		val prefs = PreferenceHelper.init(this)
-		prefs[TAG_BUILD_VER] = BuildConfig.VERSION_CODE
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
 		super.onWindowFocusChanged(hasFocus)
 		if (hasFocus) window.makeFullScreen()
-	}
-
-	@Deprecated("Deprecated in Java")
-	override fun onBackPressed() {
-		// Ignore the back press so MultiCraft can handle it
 	}
 
 	override fun onPause() {
@@ -110,7 +102,12 @@ class GameActivity : SDLActivity() {
 
 	override fun onResume() {
 		super.onResume()
-		if (hasKeyboard) keyboardEvent(true)
+		if (hasKeyboard) {
+			try {
+				keyboardEvent(true)
+			} catch (_: UnsatisfiedLinkError) {
+			}
+		}
 		window.makeFullScreen()
 	}
 
@@ -286,7 +283,9 @@ class GameActivity : SDLActivity() {
 
 	fun openURI(uri: String?) {
 		val builder = CustomTabsIntent.Builder()
-		builder.setShareState(SHARE_STATE_OFF)
+			.setShareState(SHARE_STATE_OFF)
+			.setShowTitle(true)
+			.setUrlBarHidingEnabled(true)
 			.setStartAnimations(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
 			.setExitAnimations(this, R.anim.slide_in_top, R.anim.slide_out_bottom)
 		val customTabsIntent = builder.build()
@@ -314,13 +313,7 @@ class GameActivity : SDLActivity() {
 		return key
 	}
 
-	fun getRoundScreen(): Int {
-		return radius
-	}
-
-	fun getCpuArchitecture(): String {
-		return System.getProperty("os.arch") ?: "null"
-	}
+	fun getCpuArchitecture(): String = System.getProperty("os.arch") ?: "null"
 
 	fun hideSplashScreen() {
 		runOnUiThread {

@@ -670,7 +670,7 @@ void set_default_settings()
 		}
 
 		// Settings for the Rounded or Cutout Screen
-		int RoundScreen = porting::getRoundScreen();
+		int RoundScreen = porting::getWindowSafeArea();
 		if (RoundScreen > 0)
 			settings->setDefault("round_screen", std::to_string(RoundScreen));
 	}
@@ -726,7 +726,7 @@ void set_default_settings()
 	}
 
 	// Settings for the Rounded Screen and Home Bar
-	int RoundScreen = porting::getRoundScreen();
+	int RoundScreen = porting::getWindowSafeArea();
 	if (RoundScreen > 0) {
 		int upwards = 25, round = 40;
 		if (isDeviceiPhone12Series(model)) {

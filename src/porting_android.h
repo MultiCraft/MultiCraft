@@ -112,7 +112,7 @@ bool upgrade(const std::string &item);
 /**
  * get radius of rounded corners
  */
-int getRoundScreen();
+int getWindowSafeArea();
 
 /**
  * get actual CPU architecture

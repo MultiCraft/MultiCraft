@@ -26,7 +26,6 @@ import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.provider.Settings.ACTION_WIFI_SETTINGS
 import android.provider.Settings.ACTION_WIRELESS_SETTINGS
-import android.view.RoundedCorner
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -36,8 +35,6 @@ import androidx.lifecycle.lifecycleScope
 import com.multicraft.game.databinding.ActivityMainBinding
 import com.multicraft.game.dialogs.ConnectionDialog
 import com.multicraft.game.helpers.*
-import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
-import com.multicraft.game.helpers.ApiLevelHelper.isPie
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.getIntValue
 import kotlinx.coroutines.launch
@@ -52,7 +49,6 @@ class MainActivity : AppCompatActivity() {
 	private lateinit var connStartForResult: ActivityResultLauncher<Intent>
 
 	companion object {
-		var radius = 0
 		const val NO_SPACE_LEFT = "ENOSPC"
 	}
 
@@ -101,19 +97,6 @@ class MainActivity : AppCompatActivity() {
 
 	override fun onAttachedToWindow() {
 		super.onAttachedToWindow()
-		if (isPie()) {
-			val cutout = window.decorView.rootWindowInsets.displayCutout
-			if (cutout != null) {
-				radius = 40
-			}
-			if (isAndroid12()) {
-				val insets = window.decorView.rootWindowInsets
-				if (insets != null) {
-					val tl = insets.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)
-					radius = tl?.radius ?: if (cutout != null) 40 else 0
-				}
-			}
-		}
 		val animation = binding.loadingAnim.drawable as AnimationDrawable
 		animation.start()
 	}

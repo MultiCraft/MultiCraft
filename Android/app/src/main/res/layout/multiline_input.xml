@@ -2,7 +2,8 @@
 	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:id="@+id/multiRl"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent">
+	android:layout_height="match_parent"
+	android:fitsSystemWindows="true">
 
 	<com.google.android.material.textfield.TextInputLayout
 		android:id="@+id/multiInput"
@@ -16,7 +17,7 @@
 		app:endIconDrawable="@drawable/ic_baseline_send"
 		app:endIconMode="custom"
 		app:endIconTint="@null"
-		app:hintTextColor="@color/green_mc">
+		app:hintTextColor="@color/border">
 
 		<com.multicraft.game.CustomEditText
 			android:id="@+id/multiEditText"

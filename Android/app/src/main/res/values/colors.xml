@@ -3,4 +3,6 @@
 	<color name="dark">#121212</color>
 	<color name="green_mc">#32783C</color>
 	<color name="grey_900">#212121</color>
+	<color name="border">#0099ff</color>
+	<color name="bg">#824d2a</color>
 </resources>
