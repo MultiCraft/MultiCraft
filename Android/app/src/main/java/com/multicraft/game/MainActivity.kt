@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2024 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2024 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2025 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2025 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.drawable.AnimationDrawable
@@ -45,8 +46,9 @@ class MainActivity : AppCompatActivity() {
 	private var externalStorage: File? = null
 	private val sep = File.separator
 	private lateinit var prefs: SharedPreferences
-	private lateinit var restartStartForResult: ActivityResultLauncher<Intent>
 	private lateinit var connStartForResult: ActivityResultLauncher<Intent>
+	private lateinit var restartStartForResult: ActivityResultLauncher<Intent>
+	private lateinit var settingsStartForResult: ActivityResultLauncher<Intent>
 
 	companion object {
 		const val NO_SPACE_LEFT = "ENOSPC"
@@ -61,18 +63,24 @@ class MainActivity : AppCompatActivity() {
 			override fun handleOnBackPressed() {
 			}
 		})
-		connStartForResult = registerForActivityResult(
+		restartStartForResult = registerForActivityResult(
+			ActivityResultContracts.StartActivityForResult()
+		) {
+			finishApp(it.resultCode == RESULT_OK)
+		}
+		settingsStartForResult = registerForActivityResult(
 			ActivityResultContracts.StartActivityForResult()
 		) {
 			checkAppVersion()
 		}
-		restartStartForResult = registerForActivityResult(
+		connStartForResult = registerForActivityResult(
 			ActivityResultContracts.StartActivityForResult()
 		) {
-			if (it.resultCode == RESULT_OK)
-				finishApp(true)
-			else
-				finishApp(false)
+			when (it.resultCode) {
+				RESULT_OK -> settingsStartForResult.launch(Intent(ACTION_WIFI_SETTINGS))
+				RESULT_FIRST_USER -> settingsStartForResult.launch(Intent(ACTION_WIRELESS_SETTINGS))
+				else -> checkAppVersion()
+			}
 		}
 		try {
 			prefs = PreferenceHelper.init(this)
@@ -105,7 +113,6 @@ class MainActivity : AppCompatActivity() {
 		val intent = Intent(this, GameActivity::class.java).apply {
 			addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
 			addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-			addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
 			val update = if (isExtract) {
 				true
 			} else {
@@ -115,20 +122,28 @@ class MainActivity : AppCompatActivity() {
 
 			putExtra("update", update)
 		}
-		startActivity(intent)
+		val opts = ActivityOptions.makeCustomAnimation(this, 0, 0).toBundle()
+		startActivity(intent, opts)
 	}
 
 	private fun prepareToRun() {
-		val filesList = mutableListOf<File>().apply {
-			addAll(listOf(
-				"builtin", "client${sep}shaders",
-				"fonts", "textures${sep}base"
-			).map { File(filesDir, it) })
+		val filesList = buildList {
+			addAll(
+				listOf(
+					"builtin",
+					"client${sep}shaders",
+					"fonts",
+					"textures${sep}base"
+				).map { File(filesDir, it) })
 		}
 
 		lifecycleScope.launch {
 			filesList.forEach { it.deleteRecursively() }
-			startNative(true)
+			try {
+				startNative(true)
+			} catch (_: Exception) {
+				runOnUiThread { showRestartDialog(restartStartForResult) }
+			}
 		}
 	}
 
@@ -137,7 +152,6 @@ class MainActivity : AppCompatActivity() {
 		try {
 			prefVersion = prefs.getIntValue(TAG_BUILD_VER)
 		} catch (_: ClassCastException) {
-
 		}
 		if (prefVersion == BuildConfig.VERSION_CODE)
 			startNative()
@@ -147,16 +161,7 @@ class MainActivity : AppCompatActivity() {
 
 	private fun showConnectionDialog() {
 		val intent = Intent(this, ConnectionDialog::class.java)
-		val startForResult = registerForActivityResult(
-			ActivityResultContracts.StartActivityForResult()
-		) {
-			when (it.resultCode) {
-				RESULT_OK -> connStartForResult.launch(Intent(ACTION_WIFI_SETTINGS))
-				RESULT_FIRST_USER -> connStartForResult.launch(Intent(ACTION_WIRELESS_SETTINGS))
-				else -> checkAppVersion()
-			}
-		}
-		startForResult.launch(intent)
+		connStartForResult.launch(intent)
 	}
 
 	// check connection available
