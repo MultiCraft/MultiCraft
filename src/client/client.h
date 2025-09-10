@@ -499,6 +499,8 @@ private:
 	// If 0, server init hasn't been received yet.
 	u16 m_proto_ver = 0;
 
+	u16 m_compression_mode = NETPROTO_COMPRESSION_NONE;
+
 	bool m_update_wielded_item = false;
 	Inventory *m_inventory_from_server = nullptr;
 	float m_inventory_from_server_age = 0.0f;

@@ -924,6 +924,18 @@ inline void Client::handleCommand(NetworkPacket* pkt)
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
+#if defined(__ANDROID__) || defined(__APPLE__)
+	if (pkt->getCommand() != TOCLIENT_HELLO && pkt->getCommand() != TOCLIENT_MEDIA &&
+			pkt->getCommand() != 0 && m_compression_mode == NETPROTO_COMPRESSION_ENC) {
+#ifdef SIGN_KEY
+		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
+#else
+		static std::string secret_key = porting::getSecretKey("");
+#endif
+		pkt->decrypt(secret_key);
+	}
+#endif
+
 	ToClientCommand command = (ToClientCommand) pkt->getCommand();
 	u32 sender_peer_id = pkt->getPeerId();
 
@@ -975,6 +987,18 @@ void Client::ProcessData(NetworkPacket *pkt)
 
 void Client::Send(NetworkPacket* pkt)
 {
+#if defined(__ANDROID__) || defined(__APPLE__)
+	if (pkt->getCommand() != TOSERVER_INIT && pkt->getCommand() != 0 &&
+			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
+#ifdef SIGN_KEY
+		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
+#else
+		static std::string secret_key = porting::getSecretKey("");
+#endif
+		pkt->encrypt(secret_key);
+	}
+#endif
+
 	m_con->Send(PEER_ID_SERVER,
 		serverCommandFactoryTable[pkt->getCommand()].channel,
 		pkt,
@@ -1099,7 +1123,12 @@ void Client::sendInit(const std::string &playerName)
 
 	pkt << (u8) SER_FMT_VER_HIGHEST_READ << (u16) supp_comp_modes;
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
-	pkt << playerName << (u8) 2;
+	pkt << playerName;
+#if defined(__ANDROID__) || defined(__APPLE__)
+	pkt << (u8) 3;
+#else
+	pkt << (u8) 2;
+#endif
 	pkt << version << platform_name << app_name;
 
 	Send(&pkt);

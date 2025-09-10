@@ -118,6 +118,9 @@ public:
 	// ^ this comment has been here for 4 years
 	Buffer<u8> oldForgePacket();
 
+	bool encrypt(std::string key);
+	bool decrypt(std::string key);
+
 private:
 	void checkReadOffset(u32 from_offset, u32 field_size);
 
