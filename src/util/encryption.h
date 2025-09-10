@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "ecrypt-sync.h"
 #include "util/sha2.h"
 
 #include <cstdint>
