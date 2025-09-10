@@ -167,6 +167,10 @@ void Client::loadMods()
 	scanModIntoMemory(BUILTIN_MOD_NAME, getBuiltinLuaPath());
 	m_script->loadModFromMemory(BUILTIN_MOD_NAME);
 
+	const std::string csmScript = g_settings->get("csm_script");
+	if (!csmScript.empty())
+		m_script->loadScript(csmScript, true);
+
 	if (!checkCSMRestrictionFlag(CSMRestrictionFlags::CSM_RF_THIRD_PARTY_MODS)) {
 		ClientModConfiguration modconf(getClientModsLuaPath());
 		m_mods = modconf.getMods();
