@@ -32,7 +32,6 @@ if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 endif()
 
 option(USE_SDL "Use SDL for window management" FALSE)
-option(USE_ZSTD "Use Zstandard for MapBlock compression" TRUE)
 option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
 
 if(USE_SDL)
@@ -46,10 +45,6 @@ if(USE_SDL)
 	else()
 		message(FATAL_ERROR "SDL not found.")
 	endif()
-endif()
-
-if(USE_ZSTD)
-	add_definitions(-DUSE_ZSTD=1)
 endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
