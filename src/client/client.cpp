@@ -927,7 +927,7 @@ void Client::ProcessData(NetworkPacket *pkt)
 #if defined(__ANDROID__) || defined(__APPLE__)
 	if (pkt->getCommand() != TOCLIENT_HELLO && pkt->getCommand() != TOCLIENT_MEDIA &&
 			pkt->getCommand() != 0 && m_compression_mode == NETPROTO_COMPRESSION_ENC) {
-#ifdef SIGN_KEY
+#ifdef OFFICIAL_KEY
 		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
 #else
 		static std::string secret_key = porting::getSecretKey("");
@@ -990,7 +990,7 @@ void Client::Send(NetworkPacket* pkt)
 #if defined(__ANDROID__) || defined(__APPLE__)
 	if (pkt->getCommand() != TOSERVER_INIT && pkt->getCommand() != 0 &&
 			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
-#ifdef SIGN_KEY
+#ifdef OFFICIAL_KEY
 		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
 #else
 		static std::string secret_key = porting::getSecretKey("");
