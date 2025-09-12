@@ -16,6 +16,7 @@ sh ./openal.sh
 sh ./libcurl.sh
 sh ./libogg.sh
 sh ./vorbis.sh
+sh ./zstd.sh
 
 echo
 echo "All libraries were built!"
