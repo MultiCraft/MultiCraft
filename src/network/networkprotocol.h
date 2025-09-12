@@ -1018,6 +1018,7 @@ enum AccessDeniedCode : u8 {
 
 enum NetProtoCompressionMode {
 	NETPROTO_COMPRESSION_NONE = 0,
+	NETPROTO_COMPRESSION_ENC = 1001,
 };
 
 const static std::string accessDeniedStrings[SERVER_ACCESSDENIED_MAX] = {
