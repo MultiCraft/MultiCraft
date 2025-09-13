@@ -33,7 +33,6 @@
 	void handleError(java.lang.String);
 	boolean upgrade(java.lang.String);
 	java.lang.String getSecretKey(java.lang.String);
-	int getRoundScreen();
 	java.lang.String getCpuArchitecture();
 	void hideSplashScreen();
 	boolean needsExtractAssets();

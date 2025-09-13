@@ -359,19 +359,16 @@ bool upgrade(const std::string &item)
 	return res == JNI_TRUE;
 }
 
-int getRoundScreen()
+int getWindowSafeArea()
 {
-	static const int radius = [](){
-		jmethodID getRadius = jnienv->GetMethodID(activityClass,
-				"getRoundScreen", "()I");
+	SDL_Window* window = SDL_GetKeyboardFocus();
+	if (!window) return 0;
 
-		FATAL_ERROR_IF(getRadius == nullptr,
-			"porting::getRoundScreen unable to find Java getRoundScreen method");
+	SDL_Rect safe;
+	if (!SDL_GetWindowSafeArea(window, &safe))
+		return 0;
 
-		return jnienv->CallIntMethod(activityObj, getRadius);
-	}();
-
-	return radius;
+	return (safe.x > safe.y) ? safe.x : safe.y;
 }
 
 std::string getCpuArchitecture()

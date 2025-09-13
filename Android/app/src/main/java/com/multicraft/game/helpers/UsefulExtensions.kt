@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2024 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2024 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2025 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2025 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -23,18 +23,27 @@ package com.multicraft.game.helpers
 import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.view.Window
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.*
 import com.multicraft.game.R
 import com.multicraft.game.dialogs.RestartDialog
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
+import java.lang.System.currentTimeMillis
 
-// Activity extensions
+
+fun Activity.getIcon() = try {
+	packageManager.getApplicationIcon(packageName)
+} catch (_: PackageManager.NameNotFoundException) {
+	ContextCompat.getDrawable(this, R.mipmap.ic_launcher)
+}
+
 fun Activity.finishApp(restart: Boolean) {
 	if (restart) {
 		val intent = Intent(this, this::class.java)
@@ -43,7 +52,7 @@ fun Activity.finishApp(restart: Boolean) {
 			if (isAndroid12()) PendingIntent.FLAG_IMMUTABLE else PendingIntent.FLAG_CANCEL_CURRENT
 		val mgr = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 		mgr.set(
-			AlarmManager.RTC, System.currentTimeMillis(), PendingIntent.getActivity(
+			AlarmManager.RTC, currentTimeMillis(), PendingIntent.getActivity(
 				this, mPendingIntentId, intent, flag
 			)
 		)
@@ -88,3 +97,5 @@ fun Window.makeFullScreenAlert() {
 			WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 	}
 }
+
+fun Context.isTabletDp() = resources.configuration.smallestScreenWidthDp >= 600
