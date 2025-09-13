@@ -28,10 +28,8 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.imageview.ShapeableImageView
+import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
-import com.multicraft.game.helpers.getIcon
-import com.multicraft.game.helpers.isTabletDp
-import com.multicraft.game.helpers.makeFullScreen
 
 abstract class StandardDialog<B : ViewBinding> : AppCompatActivity() {
 	lateinit var binding: B

@@ -21,7 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.multicraft.game.helpers
 
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.*
+import android.os.Build.VERSION_CODES.O
+import android.os.Build.VERSION_CODES.S
 
 object ApiLevelHelper {
 	private fun isGreaterOrEqual(versionCode: Int) = SDK_INT >= versionCode

@@ -2,7 +2,7 @@ plugins {
 	id 'com.android.application' version '8.13.0' apply false
 	id 'com.android.library' version '8.13.0' apply false
 	id 'de.undercouch.download' version '5.6.0' apply false
-	id 'org.jetbrains.kotlin.android' version '2.2.10' apply false
+	id 'org.jetbrains.kotlin.android' version '2.2.20' apply false
 }
 
 ext {
@@ -12,9 +12,6 @@ ext {
 	versionExtra = "" // Version Extra
 	versionCode  = 200 // Android Version Code
 	developmentBuild = 0 // Whether it is a development build, or a release
-	// NOTE: +3 after each release!
-	// +1 for ARM, +1 for ARM64 and +1 for x86_64 APK's, because
-	// each APK must have a larger `versionCode` than the previous
 }
 
 tasks.register('clean', Delete) {

@@ -30,7 +30,8 @@ import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
@@ -40,7 +41,6 @@ import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.set
-import kotlinx.coroutines.*
 import org.libsdl.app.SDLActivity
 import kotlin.system.exitProcess
 
@@ -308,7 +308,6 @@ class GameActivity : SDLActivity() {
 		print(exc)
 	}
 
-	@Suppress("MemberVisibilityCanBePrivate")
 	fun upgrade(item: String?): Boolean {
 		return item?.isEmpty() ?: false
 	}

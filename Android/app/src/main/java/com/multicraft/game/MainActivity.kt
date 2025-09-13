@@ -127,15 +127,12 @@ class MainActivity : AppCompatActivity() {
 	}
 
 	private fun prepareToRun() {
-		val filesList = buildList {
-			addAll(
-				listOf(
-					"builtin",
-					"client${sep}shaders",
-					"fonts",
-					"textures${sep}base"
-				).map { File(filesDir, it) })
-		}
+		val filesList = listOf(
+			"builtin",
+			"client${sep}shaders",
+			"fonts",
+			"textures${sep}base"
+		).map { File(filesDir, it) }
 
 		lifecycleScope.launch {
 			filesList.forEach { it.deleteRecursively() }
