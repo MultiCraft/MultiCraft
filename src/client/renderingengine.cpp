@@ -929,6 +929,34 @@ v2u32 RenderingEngine::getDisplaySize()
 		return v2u32(0, 0);
 	return engine->getWindowSize();
 }
+
+int RenderingEngine::getWindowSafeArea()
+{
+#ifdef __IOS__
+	// don't make it static
+	return MultiCraft::getScreenRound();
+#elif defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	if (engine) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			SDL_Rect safe;
+			if (window && SDL_GetWindowSafeArea(window, &safe))
+				return (safe.x > safe.y) ? safe.x : safe.y;
+		}
+	}
+
+	return 0;
+#else
+	return 0;
+#endif
+}
+
 #endif // __ANDROID__/__IOS__
 
 #ifdef HAVE_TOUCHSCREENGUI

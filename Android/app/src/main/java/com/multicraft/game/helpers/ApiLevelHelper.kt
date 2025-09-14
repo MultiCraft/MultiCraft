@@ -28,8 +28,5 @@ object ApiLevelHelper {
 
 	fun isOreo() = isGreaterOrEqual(O)
 
-	fun isPie() = isGreaterOrEqual(P)
-
 	fun isAndroid12() = isGreaterOrEqual(S)
-
 }

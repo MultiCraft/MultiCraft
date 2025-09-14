@@ -34,7 +34,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.net.toUri
-import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
@@ -312,10 +311,6 @@ class GameActivity : SDLActivity() {
 
 	fun getSecretKey(key: String): String {
 		return key
-	}
-
-	fun getRoundScreen(): Int {
-		return radius
 	}
 
 	fun getCpuArchitecture(): String {
