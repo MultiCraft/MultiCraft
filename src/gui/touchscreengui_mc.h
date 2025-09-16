@@ -60,6 +60,7 @@ typedef enum
 	range_id,
 	toggle_chat_id,
 	toggle_nametags_id,
+	hide_touchscreengui_id,
 	joystick_off_id,
 	joystick_bg_id,
 	joystick_center_id,
@@ -77,6 +78,7 @@ typedef enum
 	STATE_DEFAULT = 0,
 	STATE_OVERFLOW,
 	STATE_EDITOR,
+	STATE_HIDDEN,
 } touch_gui_state;
 
 struct button_data
