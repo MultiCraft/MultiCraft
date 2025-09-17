@@ -693,7 +693,23 @@ void TouchScreenGUI::restoreAllValues()
 
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
-	if (!m_buttons_initialized || !m_visible || m_close)
+	if (!m_buttons_initialized || m_close)
+		return false;
+
+	if (m_current_state == STATE_HIDDEN) {
+		if (event.EventType == EET_MOUSE_INPUT_EVENT) {
+			setCurrentState(STATE_DEFAULT);
+		} else if (event.EventType == EET_KEY_INPUT_EVENT) {
+			std::string keyname = g_settings->get("keymap_screenshot");
+			irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
+			
+			if (event.KeyInput.Key != KEY_SNAPSHOT &&
+					event.KeyInput.Key != button_keycode)
+				setCurrentState(STATE_DEFAULT);
+		}
+	}
+
+	if (!m_visible)
 		return false;
 
 	if (event.EventType != EET_TOUCH_INPUT_EVENT)
@@ -706,10 +722,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 	if (event.TouchInput.Event == ETIE_PRESSED_DOWN) {
 		m_events[id] = false;
-
-		if (m_current_state == STATE_HIDDEN)
-			changeCurrentState(STATE_DEFAULT);
-
 		touch_gui_state new_state = m_current_state;
 
 		for (auto button : m_buttons) {
@@ -818,8 +830,11 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if ((m_current_state == STATE_OVERFLOW) && !m_events[id])
 			new_state = STATE_DEFAULT;
 
+		if ((m_current_state == STATE_HIDDEN) && !m_events[id])
+			new_state = STATE_DEFAULT;
+
 		if (m_current_state != new_state)
-			changeCurrentState(new_state);
+			setCurrentState(new_state);
 
 		result = true;
 
@@ -1021,7 +1036,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			restoreAllValues();
 
 		if (m_current_state != new_state)
-			changeCurrentState(new_state);
+			setCurrentState(new_state);
 
 		result = true;
 
@@ -1128,9 +1143,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (overflow_btn_pressed) {
 					if (m_current_state == STATE_DEFAULT)
-						changeCurrentState(STATE_OVERFLOW);
+						setCurrentState(STATE_OVERFLOW);
 					else
-						changeCurrentState(STATE_DEFAULT);
+						setCurrentState(STATE_DEFAULT);
 				}
 			}
 		}
@@ -1341,7 +1356,7 @@ void TouchScreenGUI::step(float dtime)
 	}
 
 	if (m_current_state == STATE_OVERFLOW && m_overflow_close_schedule)
-		changeCurrentState(STATE_DEFAULT);
+		setCurrentState(STATE_DEFAULT);
 
 	if (m_camera.event_id != -1 && (!m_camera.has_really_moved)) {
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
@@ -1417,7 +1432,7 @@ void TouchScreenGUI::setVisible(bool visible)
 		reset();
 }
 
-void TouchScreenGUI::changeCurrentState(touch_gui_state state)
+void TouchScreenGUI::setCurrentState(touch_gui_state state)
 {
 	reset();
 
@@ -1438,7 +1453,7 @@ void TouchScreenGUI::openEditor()
 	m_editor.reset();
 	updateEditorButtonsState();
 
-	changeCurrentState(STATE_EDITOR);
+	setCurrentState(STATE_EDITOR);
 }
 
 void TouchScreenGUI::hide()
