@@ -3890,9 +3890,9 @@ bool Server::leaveModChannel(const std::string &channel)
 	return m_modchannel_mgr->leaveChannel(channel, PEER_ID_SERVER);
 }
 
-bool Server::sendModChannelMessage(const std::string &channel, const std::string &message)
+bool Server::sendModChannelMessage(const std::string &channel, const std::string &message, bool force)
 {
-	if (!m_modchannel_mgr->canWriteOnChannel(channel))
+	if (!force && !m_modchannel_mgr->canWriteOnChannel(channel))
 		return false;
 
 	broadcastModChannelMessage(channel, message, PEER_ID_SERVER);
