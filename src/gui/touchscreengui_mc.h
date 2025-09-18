@@ -60,7 +60,7 @@ typedef enum
 	range_id,
 	toggle_chat_id,
 	toggle_nametags_id,
-	hide_touchscreengui_id,
+	hide_interface_id,
 	joystick_off_id,
 	joystick_bg_id,
 	joystick_center_id,

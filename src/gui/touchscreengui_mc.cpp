@@ -52,7 +52,7 @@ const button_data buttons_data[] = {
 	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true, -1 },
 	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true, -1 },
 	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true, -1 },
-	{ "names_hide_btn.png", "", "", N_("Hide touchscreengui"), "hide_touchscreengui", true, -1 },
+	{ "hide_interface.png", "", "", N_("Hide interface"), "hide_interface", true, -1 },
 	{ "joystick_off.png", "", "", "", "joystick", false, -1 },
 	{ "joystick_bg.png", "", "", "", "joystick", false, -1 },
 	{ "joystick_center.png", "", "", "", "joystick_center", false, -1 },
@@ -68,7 +68,7 @@ const button_data buttons_data[] = {
 static const touch_gui_button_id overflow_buttons_id[] {
 	flymove_id, fastmove_id, noclip_id,
 	range_id, toggle_chat_id, toggle_nametags_id,
-	hide_touchscreengui_id
+	hide_interface_id
 };
 
 TouchScreenGUI *g_touchscreengui = nullptr;
@@ -740,7 +740,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 						new_state = STATE_DEFAULT;
 					else
 						new_state = STATE_OVERFLOW;
-				} else if (button->id == hide_touchscreengui_id) {
+				} else if (button->id == hide_interface_id) {
 					new_state = STATE_HIDDEN;
 				} else if (button->state == STATE_OVERFLOW) {
 					m_overflow_close_schedule = true;
