@@ -105,6 +105,12 @@ private:
 	// get_csm_restrictions()
 	static int l_get_csm_restrictions(lua_State *L);
 
+	// upgrade(string)
+	static int l_upgrade(lua_State *L);
+
+	// get_secret_key(string)
+	static int l_get_secret_key(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };

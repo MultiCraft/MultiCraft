@@ -2157,9 +2157,9 @@ bool Client::leaveModChannel(const std::string &channel)
 	return true;
 }
 
-bool Client::sendModChannelMessage(const std::string &channel, const std::string &message)
+bool Client::sendModChannelMessage(const std::string &channel, const std::string &message, bool force)
 {
-	if (!m_modchannel_mgr->canWriteOnChannel(channel))
+	if (!force && !m_modchannel_mgr->canWriteOnChannel(channel))
 		return false;
 
 	if (message.size() > STRING_MAX_LEN) {

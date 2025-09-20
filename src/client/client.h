@@ -422,7 +422,7 @@ public:
 	bool joinModChannel(const std::string &channel) override;
 	bool leaveModChannel(const std::string &channel) override;
 	bool sendModChannelMessage(const std::string &channel,
-			const std::string &message) override;
+			const std::string &message, bool force = false) override;
 	ModChannel *getModChannel(const std::string &channel) override;
 
 	const std::string &getFormspecPrepend() const

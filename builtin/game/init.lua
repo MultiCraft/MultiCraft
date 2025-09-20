@@ -33,6 +33,5 @@ dofile(gamepath .. "voxelarea.lua")
 dofile(gamepath .. "forceloading.lua")
 dofile(gamepath .. "statbars.lua")
 dofile(gamepath .. "knockback.lua")
-dofile(gamepath .. "sscsm" .. DIR_DELIM .. "init.lua")
 
 profiler = nil
