@@ -359,21 +359,6 @@ bool upgrade(const std::string &item)
 	return res == JNI_TRUE;
 }
 
-int getRoundScreen()
-{
-	static const int radius = [](){
-		jmethodID getRadius = jnienv->GetMethodID(activityClass,
-				"getRoundScreen", "()I");
-
-		FATAL_ERROR_IF(getRadius == nullptr,
-			"porting::getRoundScreen unable to find Java getRoundScreen method");
-
-		return jnienv->CallIntMethod(activityObj, getRadius);
-	}();
-
-	return radius;
-}
-
 std::string getCpuArchitecture()
 {
 	static std::string arch = [](){
