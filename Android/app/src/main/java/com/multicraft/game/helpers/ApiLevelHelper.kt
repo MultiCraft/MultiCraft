@@ -30,5 +30,4 @@ object ApiLevelHelper {
 	fun isOreo() = isGreaterOrEqual(O)
 
 	fun isAndroid12() = isGreaterOrEqual(S)
-
 }

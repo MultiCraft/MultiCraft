@@ -359,18 +359,6 @@ bool upgrade(const std::string &item)
 	return res == JNI_TRUE;
 }
 
-int getWindowSafeArea()
-{
-	SDL_Window* window = SDL_GetKeyboardFocus();
-	if (!window) return 0;
-
-	SDL_Rect safe;
-	if (!SDL_GetWindowSafeArea(window, &safe))
-		return 0;
-
-	return (safe.x > safe.y) ? safe.x : safe.y;
-}
-
 std::string getCpuArchitecture()
 {
 	static std::string arch = [](){
