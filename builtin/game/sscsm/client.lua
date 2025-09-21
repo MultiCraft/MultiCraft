@@ -34,18 +34,6 @@ if not rawget   then function rawget(n, name) return n[name] end end
 if not rawset   then function rawset(n, k, v) n[k] = v end end
 if not rawequal then function rawequal(a, b) return a == b end end
 
--- Older versions of the CSM don't provide assert(), this function exists for
--- compatibility.
-if not assert then
-	function assert(value, ...)
-		if value then
-			return value, ...
-		else
-			error(... or 'assertion failed!', 2)
-		end
-	end
-end
-
 -- Create the API
 sscsm = {}
 function sscsm.global_exists(name)
@@ -270,8 +258,9 @@ core.register_on_receiving_chat_message(function(message)
 	end
 
 	-- Decompress messages
-	if prefix == 3 then
-		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)))
+	if prefix == 3 or prefix == 4 then
+		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)),
+			prefix == 4 and "zstd" or "deflate")
 		prefix = msg:byte(1)
 	end
 
