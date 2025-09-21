@@ -656,6 +656,10 @@ struct ClientEventHandler
 
 using PausedNodesList = std::vector<std::pair<irr_ptr<scene::IAnimatedMeshSceneNode>, float>>;
 
+#if defined(__ANDROID__) || defined(__IOS__)
+static std::atomic<bool> g_pause_menu_schedule(false);
+#endif
+
 /* This is not intended to be a public class. If a public class becomes
  * desirable then it may be better to create another 'wrapper' class that
  * hides most of the stuff in this class (nothing in this class is required
@@ -1116,6 +1120,13 @@ void Game::run()
 		//    RenderingEngine::run() from this iteration
 		//  + Sleep time until the wanted FPS are reached
 		limitFps(&draw_times, &dtime);
+
+#if defined(__ANDROID__) || defined(__IOS__)
+		if (g_pause_menu_schedule) {
+			g_pause_menu_schedule = false;
+			pauseGame();
+		}
+#endif
 
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
 		if (!device->isWindowFocused()) {
@@ -4626,8 +4637,6 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
  ****************************************************************************/
 /****************************************************************************/
 
-static Game *g_game = NULL;
-
 void the_game(bool *kill,
 		InputHandler *input,
 		const GameStartData &start_data,
@@ -4636,7 +4645,9 @@ void the_game(bool *kill,
 		bool *reconnect_requested) // Used for local game
 {
 	Game game;
-	g_game = &game;
+#if defined(__ANDROID__) || defined(__IOS__)
+	g_pause_menu_schedule = false;
+#endif
 
 	/* Make a copy of the server address because if a local singleplayer server
 	 * is created then this is updated and we don't want to change the value
@@ -4669,15 +4680,12 @@ void the_game(bool *kill,
 		porting::handleError("ModError", error_message);
 #endif
 	}
-	g_game = NULL;
 	game.shutdown();
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
 extern "C" void external_pause_game()
 {
-	if (!g_game)
-		return;
-	g_game->pauseGame();
+	g_pause_menu_schedule = true;
 }
 #endif
