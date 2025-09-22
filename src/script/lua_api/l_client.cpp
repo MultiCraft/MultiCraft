@@ -415,6 +415,36 @@ int ModApiClient::l_get_csm_restrictions(lua_State *L)
 	return 1;
 }
 
+int ModApiClient::l_upgrade(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+#if defined(__ANDROID__) || defined(__APPLE__)
+	const std::string item_name = std::string("CSM/") + luaL_checkstring(L, 1);
+	const bool res = porting::upgrade(item_name);
+	lua_pushboolean(L, res);
+#else
+	// Not implemented on other platforms
+	lua_pushnil(L);
+#endif
+
+	return 1;
+}
+
+int ModApiClient::l_get_secret_key(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+#if defined(__ANDROID__) || defined(__APPLE__)
+	const std::string secret_name = std::string("CSM/") + luaL_checkstring(L, 1);
+	const std::string res = porting::getSecretKey(secret_name);
+	lua_pushlstring(L, res.c_str(), res.size());
+#else
+	// Not implemented on other platforms
+	lua_pushstring(L, "");
+#endif
+
+	return 1;
+}
+
 void ModApiClient::Initialize(lua_State *L, int top)
 {
 	API_FCT(get_current_modname);
@@ -442,4 +472,6 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(get_builtin_path);
 	API_FCT(get_language);
 	API_FCT(get_csm_restrictions);
+	API_FCT(upgrade);
+	API_FCT(get_secret_key);
 }

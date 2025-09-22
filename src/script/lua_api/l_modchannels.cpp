@@ -76,6 +76,18 @@ int ModChannelRef::l_send_all(lua_State *L)
 	return 0;
 }
 
+int ModChannelRef::l_send_all_force(lua_State *L)
+{
+	ModChannelRef *ref = checkobject(L, 1);
+	ModChannel *channel = getobject(L, ref);
+	if (!channel)
+		return 0;
+
+	std::string message = luaL_checkstring(L, 2);
+	getGameDef(L)->sendModChannelMessage(channel->getName(), message, true);
+	return 0;
+}
+
 int ModChannelRef::l_is_writeable(lua_State *L)
 {
 	ModChannelRef *ref = checkobject(L, 1);
@@ -148,6 +160,7 @@ const luaL_Reg ModChannelRef::methods[] = {
 	luamethod(ModChannelRef, leave),
 	luamethod(ModChannelRef, is_writeable),
 	luamethod(ModChannelRef, send_all),
+	luamethod(ModChannelRef, send_all_force),
 	{0, 0},
 };
 // clang-format on
