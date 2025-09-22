@@ -73,7 +73,7 @@ public:
 	virtual void unregisterModStorage(const std::string &name) {}
 	bool joinModChannel(const std::string &channel);
 	bool leaveModChannel(const std::string &channel);
-	bool sendModChannelMessage(const std::string &channel, const std::string &message);
+	bool sendModChannelMessage(const std::string &channel, const std::string &message, bool force);
 	ModChannel *getModChannel(const std::string &channel)
 	{
 		return m_modchannel_mgr->getModChannel(channel);
@@ -243,7 +243,7 @@ bool TestGameDef::leaveModChannel(const std::string &channel)
 }
 
 bool TestGameDef::sendModChannelMessage(const std::string &channel,
-	const std::string &message)
+	const std::string &message, bool force)
 {
 	if (!m_modchannel_mgr->channelRegistered(channel))
 		return false;
