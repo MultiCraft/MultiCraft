@@ -224,11 +224,13 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 		case EET_SDL_TEXT_EVENT:
 			if (event.SDLTextEvent.Type == irr::ESDLET_TEXTINPUT) {
-				core::stringw text =
-						utf8_to_stringw(event.SDLTextEvent.Text);
+				if (event.SDLTextEvent.Text) {
+					core::stringw text = utf8_to_stringw(
+							event.SDLTextEvent.Text);
 
-				for (size_t i = 0; i < text.size(); i++)
-					inputChar(text[i]);
+					for (size_t i = 0; i < text.size(); i++)
+						inputChar(text[i]);
+				}
 
 				return true;
 			}

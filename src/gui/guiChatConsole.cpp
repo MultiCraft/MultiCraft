@@ -1198,10 +1198,12 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				deletePromptSelection();
 			}
 
-			std::wstring text = utf8_to_wide(event.SDLTextEvent.Text);
+			if (event.SDLTextEvent.Text) {
+				std::wstring text = utf8_to_wide(event.SDLTextEvent.Text);
 
-			for (u32 i = 0; i < text.size(); i++)
-				prompt.input(text[i]);
+				for (u32 i = 0; i < text.size(); i++)
+					prompt.input(text[i]);
+			}
 
 		}
 
