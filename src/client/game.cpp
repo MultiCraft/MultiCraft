@@ -626,7 +626,7 @@ struct GameRunData {
 	float repeat_place_timer;
 	float object_hit_delay_timer;
 	float time_from_last_punch;
-	float pause_game_timer;
+	u64 pause_game_timer;
 	ClientActiveObject *selected_object;
 
 	float jump_timer;
@@ -4285,15 +4285,17 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (g_menumgr.pausesGame()) {
-		runData.pause_game_timer += *dtime;
-		float disconnect_time = 180.0f;
+		u64 cur_time = porting::getTimeMs();
+		if (runData.pause_game_timer == 0)
+			runData.pause_game_timer = cur_time;
+		u64 disconnect_time = 180000;
 #ifdef __IOS__
-		disconnect_time = simple_singleplayer_mode ? 60.0f : 120.0f;
+		disconnect_time = simple_singleplayer_mode ? 60000 : 120000;
 #endif
-		if (runData.pause_game_timer > disconnect_time) {
+		if (cur_time - runData.pause_game_timer > disconnect_time)
 			g_gamecallback->disconnect();
-			return;
-		}
+	} else {
+		runData.pause_game_timer = 0;
 	}
 #endif
 }
@@ -4353,7 +4355,6 @@ void Game::pauseGame()
 		g_touchscreengui->reset();
 #endif
 	showPauseMenu();
-	runData.pause_game_timer = 0;
 }
 #endif
 
@@ -4411,7 +4412,7 @@ void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple
 {
 	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
 	float y = center_y + gap * 0.5f - total_height * 0.5f;
-	float icon_size = btn_h - 0.3f;
+	float icon_size = btn_h - 0.25f;
 
 	if (buttons.size() <= 4)
 		y = y - gap * 3;
@@ -4423,7 +4424,7 @@ void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple
 		else
 			os << "image_button[3," << y << ";5," << btn_h
 			<< ";;" << id << ";" << text << ";;false]";
-		os << "image[3.15," << (y + 0.1f) << ";" << icon_size << "," << icon_size << ";" << icon << "]";
+		os << "image[3.12," << (y + 0.1f) << ";" << icon_size << "," << icon_size << ";" << icon << "]";
 		y += btn_h + gap;
 	}
 }
@@ -4591,7 +4592,6 @@ void Game::showPauseMenu()
 	formspec->setFocus("btn_continue");
 	formspec->doPause = true;
 
-	runData.pause_game_timer = 0;
 	if (simple_singleplayer_mode)
 		pauseAnimation();
 }
