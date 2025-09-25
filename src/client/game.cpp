@@ -4084,7 +4084,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 	if (g_touchscreengui) {
 		std::string message = g_touchscreengui->getMessage();
 		if (!message.empty())
-			m_game_ui->showTranslatedStatusText(message.c_str());
+			m_game_ui->showTranslatedStatusText(message.c_str(), 4.0f);
 	}
 #endif
 
