@@ -252,6 +252,13 @@ public:
 		}
 	}
 
+	std::string getMessage()
+	{
+		std::string message = m_ui_message;
+		m_ui_message.clear();
+		return message;
+	}
+
 	void step(float dtime);
 	void hide();
 	void show();
@@ -289,6 +296,7 @@ private:
 	irr::EKEY_CODE m_keycode_dig;
 	irr::EKEY_CODE m_keycode_place;
 	std::string m_press_sound;
+	std::string m_ui_message;
 	u64 m_doubletap_time = 0;
 
 	std::map<size_t, bool> m_events;

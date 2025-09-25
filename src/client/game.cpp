@@ -4080,6 +4080,14 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		runData.update_draw_list_last_cam_dir = camera_direction;
 	}
 
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui) {
+		std::string message = g_touchscreengui->getMessage();
+		if (!message.empty())
+			m_game_ui->showTranslatedStatusText(message.c_str());
+	}
+#endif
+
 	m_game_ui->update(*stats, client, draw_control, cam, runData.pointed_old, gui_chat_console, dtime);
 
 	/*

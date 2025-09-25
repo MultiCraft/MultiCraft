@@ -749,9 +749,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 						new_state = STATE_DEFAULT;
 					} else {
 						new_state = STATE_HIDDEN;
-#if defined(__ANDROID__) || defined(__IOS__)
-						porting::showToast("Double-tap to show interface.");
-#endif
+						m_ui_message = "Use double-tap to show interface";
 					}
 				} else if (button->state == STATE_OVERFLOW) {
 					m_overflow_close_schedule = true;
