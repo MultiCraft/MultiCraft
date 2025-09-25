@@ -145,7 +145,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 
 #ifdef HAVE_TOUCHSCREENGUI
 	// Always send touch events to the touchscreen gui, so it has up-to-date information
-	if (m_touchscreengui && event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
+	if (m_touchscreengui) {
 		bool result = m_touchscreengui->preprocessEvent(event);
 
 		if (result) {
