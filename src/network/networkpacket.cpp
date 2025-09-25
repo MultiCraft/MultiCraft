@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "networkexceptions.h"
 #include "util/serialize.h"
 #include "networkprotocol.h"
+#include "util/encryption.h"
 
 NetworkPacket::NetworkPacket(u16 command, u32 datasize, session_t peer_id):
 m_datasize(datasize), m_command(command), m_peer_id(peer_id)
@@ -556,4 +557,50 @@ Buffer<u8> NetworkPacket::oldForgePacket()
 	memcpy(&sb[2], m_data.data(), m_datasize);
 
 	return sb;
+}
+
+bool NetworkPacket::encrypt(std::string key)
+{
+	std::string data((const char*)(m_data.data()), m_datasize);
+
+	Encryption::setKey(key);
+	Encryption::EncryptedData encrypted_data;
+	unsigned char salt[SHA256_DIGEST_LENGTH];
+	Encryption::generateSalt(salt, SHA256_DIGEST_LENGTH);
+	encrypted_data.setSalt(salt);
+	Encryption::encrypt(data, encrypted_data);
+	std::string data_to_write;
+	encrypted_data.toString(data_to_write);
+
+	m_read_offset = 0;
+	m_datasize = data_to_write.size();
+	m_data.resize(m_datasize);
+	memcpy(&m_data[0], data_to_write.c_str(), m_datasize);
+
+	return true;
+}
+
+bool NetworkPacket::decrypt(std::string key)
+{
+	std::string data((const char*)(m_data.data()), m_datasize);
+
+	Encryption::setKey(key);
+	Encryption::EncryptedData encrypted_data;
+	bool success = encrypted_data.fromString(data);
+
+	if (!success)
+		return false;
+
+	std::string data_to_write;
+	success = Encryption::decrypt(encrypted_data, data_to_write);
+
+	if (!success)
+		return false;
+
+	m_read_offset = 0;
+	m_datasize = data_to_write.size();
+	m_data.resize(m_datasize);
+	memcpy(&m_data[0], data_to_write.c_str(), m_datasize);
+
+	return true;
 }
