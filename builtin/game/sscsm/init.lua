@@ -1,8 +1,8 @@
 --
 -- SSCSM: Server-Sent Client-Side Mods
 --
--- Copyright © 2019-2021 by luk3yx
--- Copyright © 2020-2021 MultiCraft Development Team
+-- Copyright © 2019-2025 by luk3yx
+-- Copyright © 2020-2025 MultiCraft Development Team
 --
 -- This program is free software; you can redistribute it and/or modify
 -- it under the terms of the GNU Lesser General Public License as published by
@@ -19,27 +19,12 @@
 -- Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 --
 
-sscsm = {minify=true}
+sscsm = {}
+
 local format = string.format
-local modpath = core.get_builtin_path() .. "game" .. DIR_DELIM ..
-	"sscsm" .. DIR_DELIM
+local modpath = core.get_builtin_path() .. "game/sscsm"
 
--- Remove excess whitespace from code to allow larger files to be sent.
-if sscsm.minify then
-	local f = loadfile(modpath .. "minify.lua")
-	if f then
-		sscsm.minify_code = f()
-	else
-		core.log("warning", "[SSCSM] Could not load minify.lua!")
-	end
-end
-
-if not sscsm.minify_code then
-	function sscsm.minify_code(code)
-		assert(type(code) == "string")
-		return code
-	end
-end
+sscsm.minify_code = dofile(modpath .. "/minify.lua")
 
 -- Register code
 sscsm.registered_csms = {}
@@ -147,59 +132,54 @@ core.register_on_mods_loaded(recalc_csm_order)
 -- Handle players joining
 local has_sscsms = {}
 local sscsms_sent = {}
+local supports_zstd = {}
 local v2_mod_channels = {}
-local legacy_mod_channel = core.mod_channel_join("sscsm:exec_pipe")
 local v2_chunk_size = 65530
 core.register_on_modchannel_message(function(channel_name, sender, message)
-	if not sender or sscsms_sent[sender] or message ~= "0" then return end
+	if not sender or sscsms_sent[sender] then return end
 
 	local v2_channel = v2_mod_channels[sender]
-	if channel_name == "sscsm:exec_pipe" then
-		-- Legacy protocol (uncompressed)
-		if not legacy_mod_channel:is_writeable() or sender:find("\n") then
-			return
-		end
-
-		sscsms_sent[sender] = true
-		core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
-			" (legacy protocol)...")
-		for _, name in ipairs(csm_order) do
-			local def = sscsm.registered_csms[name]
-			if not def.is_enabled_for or def.is_enabled_for(sender) then
-				legacy_mod_channel:send_all("0" .. sender .. "\n" .. name
-					.. "\n" .. def.code)
-			end
-		end
-	elseif channel_name == "sscsm:v2_" .. sender and v2_channel then
-		-- New protocol (compressed)
-		local blob = {}
-
-		for _, name in ipairs(csm_order) do
-			local def = sscsm.registered_csms[name]
-			if not def.is_enabled_for or def.is_enabled_for(sender) then
-				blob[#blob + 1] = name .. "\n" .. def.code
-			end
-		end
-
-		local compressed = core.encode_base64(core.compress(table.concat(blob, "\0")))
-
-		sscsms_sent[sender] = true
-		core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
-			" (v2 protocol)...")
-		-- This is not optimal but the compressed code is probably only one or
-		-- two chunks anyway
-		while #compressed > v2_chunk_size do
-			v2_channel:send_all("C" .. compressed:sub(1, v2_chunk_size))
-			compressed = compressed:sub(v2_chunk_size + 1)
-		end
-		v2_channel:send_all("E" .. compressed)
+	if channel_name ~= "sscsm:v2_" .. sender or not v2_channel then
+		return
 	end
+
+	local method
+	if message == "0" then
+		method = "deflate"
+	elseif message == "1" then
+		method = "zstd"
+		supports_zstd[sender] = true
+	else
+		-- Unsupported protocol version
+		return
+	end
+
+	-- New protocol (compressed)
+	local blob = {}
+
+	for _, name in ipairs(csm_order) do
+		local def = sscsm.registered_csms[name]
+		if not def.is_enabled_for or def.is_enabled_for(sender) then
+			blob[#blob + 1] = name .. "\n" .. def.code
+		end
+	end
+
+	local compressed = core.encode_base64(core.compress(table.concat(blob, "\0"), method))
+
+	sscsms_sent[sender] = true
+	core.log("info", "[SSCSM] Sending CSMs on request for " .. sender ..
+		" (v2 protocol)...")
+	-- This is not optimal but the compressed code is probably only one or
+	-- two chunks anyway
+	while #compressed > v2_chunk_size do
+		v2_channel:send_all("C" .. compressed:sub(1, v2_chunk_size))
+		compressed = compressed:sub(v2_chunk_size + 1)
+	end
+	v2_channel:send_all("E" .. compressed)
 
 	-- No point staying in the v2 mod channel now that SSCSMs are sent
-	if v2_channel then
-		v2_channel:leave()
-		v2_mod_channels[sender] = nil
-	end
+	v2_channel:leave()
+	v2_mod_channels[sender] = nil
 end)
 
 core.register_on_joinplayer(function(player)
@@ -213,6 +193,7 @@ core.register_on_leaveplayer(function(player)
 	local name = player:get_player_name()
 	has_sscsms[name] = nil
 	sscsms_sent[name] = nil
+	supports_zstd[name] = nil
 
 	-- Leave the v2 mod channel
 	if v2_mod_channels[name] then
@@ -224,7 +205,7 @@ end)
 -- Register the SSCSM "builtins"
 sscsm.register({
 	name = ":init",
-	file = modpath .. "client.lua"
+	file = modpath .. "/client.lua"
 })
 
 sscsm.register({
@@ -283,11 +264,12 @@ function sscsm.com_send(pname, channel, msg)
 	-- Compress long messages
 	if #msg > 512 then
 		-- Chat messages can't contain binary data so base64 is used
-		local compressed_msg = minetest.encode_base64(minetest.compress(msg))
+		local method = supports_zstd[pname] and "zstd" or "deflate"
+		local compressed_msg = minetest.encode_base64(minetest.compress(msg, method))
 
 		-- Only use the compressed message if it's shorter
 		if #msg > #compressed_msg + 1 then
-			msg = "\003" .. compressed_msg
+			msg = (supports_zstd[pname] and "\004" or "\003") .. compressed_msg
 		end
 	end
 

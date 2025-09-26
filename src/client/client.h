@@ -422,7 +422,7 @@ public:
 	bool joinModChannel(const std::string &channel) override;
 	bool leaveModChannel(const std::string &channel) override;
 	bool sendModChannelMessage(const std::string &channel,
-			const std::string &message) override;
+			const std::string &message, bool force = false) override;
 	ModChannel *getModChannel(const std::string &channel) override;
 
 	const std::string &getFormspecPrepend() const
@@ -498,6 +498,8 @@ private:
 	// the server didn't send the version back then.
 	// If 0, server init hasn't been received yet.
 	u16 m_proto_ver = 0;
+
+	u16 m_compression_mode = NETPROTO_COMPRESSION_NONE;
 
 	bool m_update_wielded_item = false;
 	Inventory *m_inventory_from_server = nullptr;

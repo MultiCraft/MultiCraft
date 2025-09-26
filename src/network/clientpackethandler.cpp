@@ -84,6 +84,7 @@ void Client::handleCommand_Hello(NetworkPacket* pkt)
 
 	m_server_ser_ver = serialization_ver;
 	m_proto_ver = proto_ver;
+	m_compression_mode = compression_mode;
 
 	//TODO verify that username_legacy matches sent username, only
 	// differs in casing (make both uppercase and compare)
