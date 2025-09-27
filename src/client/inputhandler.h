@@ -275,14 +275,9 @@ public:
 class RealInputHandler : public InputHandler
 {
 public:
-	RealInputHandler(MyEventReceiver *receiver) : m_receiver(receiver)
-	{
-		m_receiver->joystick = &joystick;
-#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		m_receiver->sdl_game_controller = &sdl_game_controller;
-		m_receiver->input = this;
-#endif
-	}
+	RealInputHandler(MyEventReceiver *receiver);
+	virtual ~RealInputHandler();
+
 	virtual bool isKeyDown(GameKeyType k)
 	{
 		return m_receiver->IsKeyDown(keycache.key[k]) || joystick.isKeyDown(k);
@@ -363,6 +358,10 @@ public:
 	}
 
 private:
+#ifdef __IOS__
+	static bool SdlEventWatcher(void *userdata, SDL_Event *event);
+#endif
+
 	MyEventReceiver *m_receiver = nullptr;
 	v2s32 m_mousepos;
 };
