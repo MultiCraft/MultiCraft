@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2024 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2024 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2025 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2025 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -21,7 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.multicraft.game.helpers
 
 import android.os.Build.VERSION.SDK_INT
-import android.os.Build.VERSION_CODES.*
+import android.os.Build.VERSION_CODES.O
+import android.os.Build.VERSION_CODES.S
 
 object ApiLevelHelper {
 	private fun isGreaterOrEqual(versionCode: Int) = SDK_INT >= versionCode
