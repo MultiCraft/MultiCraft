@@ -2114,6 +2114,12 @@ void Game::processKeyInput()
 		runData.jump_timer = 0.0f;
 	}
 
+#if HAVE_TOUCHSCREENGUI
+	std::string btn = g_touchscreengui->getPressedCSMButton();
+	if (!btn.empty() && client->modsLoaded())
+		client->getScript()->on_hud_button_press(btn);
+#endif
+
 	if (quicktune->hasMessage()) {
 		m_game_ui->showStatusText(utf8_to_wide(quicktune->getMessage()));
 	}

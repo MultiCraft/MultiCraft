@@ -758,6 +758,15 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 
 			if (!m_events[id]) {
+				for (auto &csm_button : m_csm_buttons) {
+					if (csm_button.button_rect.isPointInside(v2s32(x, y))) {
+						m_events[id] = true;
+						m_pressed_csm_button = csm_button.name;
+					}
+				}
+			}
+
+			if (!m_events[id]) {
 				if (m_camera.event_id == -1) {
 					m_events[id] = true;
 					m_camera.downtime = porting::getTimeMs();
@@ -1317,6 +1326,12 @@ void TouchScreenGUI::registerHudItem(s32 index, const rect<s32> &button_rect)
 
 	hud_button_info hud_button = {index, button_rect};
 	m_hud_buttons.push_back(hud_button);
+}
+
+void TouchScreenGUI::registerCSMButton(const std::string &name, const rect<s32> &button_rect)
+{
+	csm_button_info csm_button = {name, button_rect};
+	m_csm_buttons.push_back(csm_button);
 }
 
 void TouchScreenGUI::resetHud()
