@@ -318,24 +318,24 @@ public:
 	virtual void dontListenForKeys() { m_receiver->dontListenForKeys(); }
 	virtual v2s32 getMousePos()
 	{
-		// if (RenderingEngine::get_raw_device()->getCursorControl()) {
-		// 	return RenderingEngine::get_raw_device()
-		// 			->getCursorControl()
-		// 			->getPosition();
-		// }
+		if (RenderingEngine::get_raw_device()->getCursorControl()) {
+			return RenderingEngine::get_raw_device()
+					->getCursorControl()
+					->getPosition();
+		}
 
 		return m_mousepos;
 	}
 
 	virtual void setMousePos(s32 x, s32 y)
 	{
-		// if (RenderingEngine::get_raw_device()->getCursorControl()) {
-		// 	RenderingEngine::get_raw_device()
-		// 			->getCursorControl()
-		// 			->setPosition(x, y);
-		// } else {
+		if (RenderingEngine::get_raw_device()->getCursorControl()) {
+			RenderingEngine::get_raw_device()
+					->getCursorControl()
+					->setPosition(x, y);
+		} else {
 			m_mousepos = v2s32(x, y);
-		// }
+		}
 	}
 
 	virtual s32 getMouseWheel() { return m_receiver->getMouseWheel(); }
@@ -350,10 +350,10 @@ public:
 #endif
 		IrrlichtDevice *device = RenderingEngine::get_raw_device();
 
-		// if (device->getCursorControl()) {
-		// 	if (visible != device->getCursorControl()->isVisible())
-		// 		device->getCursorControl()->setVisible(visible);
-		// }
+		if (device->getCursorControl()) {
+			if (visible != device->getCursorControl()->isVisible())
+				device->getCursorControl()->setVisible(visible);
+		}
 	}
 
 	void clear()
