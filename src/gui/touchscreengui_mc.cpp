@@ -761,7 +761,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				for (auto &csm_button : m_csm_buttons) {
 					if (csm_button.button_rect.isPointInside(v2s32(x, y))) {
 						m_events[id] = true;
-						m_pressed_csm_button = csm_button.name;
+						m_pressing_csm_button = csm_button.name;
 					}
 				}
 			}
@@ -974,6 +974,19 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 		if (restore_all_values)
 			restoreAllValues();
+
+		if (!m_pressing_csm_button.empty()) {
+			for (auto &csm_button : m_csm_buttons) {
+				if (m_pressing_csm_button == csm_button.name) {
+					// If the touch is still inside the button, trigger it
+					if (csm_button.button_rect.isPointInside(v2s32(x, y)))
+						m_last_pressed_csm_button = m_pressing_csm_button;
+					break;
+				}
+			}
+
+			m_pressing_csm_button.clear();
+		}
 
 		if (m_current_state != new_state)
 			changeCurrentState(new_state);

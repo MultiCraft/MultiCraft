@@ -455,6 +455,12 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 			case HUD_ELEM_IMAGE:
 			case HUD_ELEM_CSM_BUTTON: {
 				video::ITexture *texture = tsrc->getTexture(e->text);
+#if HAVE_TOUCHSCREENGUI
+				if (e->type == HUD_ELEM_CSM_BUTTON && g_touchscreengui &&
+						g_touchscreengui->getPressingCSMButton() == e->name &&
+						!e->text2.empty())
+					texture = tsrc->getTexture(e->text2);
+#endif
 				if (!texture)
 					continue;
 

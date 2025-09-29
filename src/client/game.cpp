@@ -2115,7 +2115,7 @@ void Game::processKeyInput()
 	}
 
 #if HAVE_TOUCHSCREENGUI
-	std::string btn = g_touchscreengui->getPressedCSMButton();
+	std::string btn = g_touchscreengui->getLastPressedCSMButton();
 	if (!btn.empty() && client->modsLoaded())
 		client->getScript()->on_hud_button_press(btn);
 #endif

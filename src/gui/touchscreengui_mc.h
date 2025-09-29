@@ -256,10 +256,10 @@ public:
 		}
 	}
 
-	std::string getPressedCSMButton()
-	{
-		std::string btn = m_pressed_csm_button;
-		m_pressed_csm_button.clear();
+	std::string getPressingCSMButton() { return m_pressing_csm_button; }
+	std::string getLastPressedCSMButton() {
+		std::string btn = m_last_pressed_csm_button;
+		m_last_pressed_csm_button.clear();
 		return btn;
 	}
 
@@ -302,7 +302,8 @@ private:
 	std::map<size_t, bool> m_events;
 	std::vector<hud_button_info> m_hud_buttons;
 	std::vector<csm_button_info> m_csm_buttons;
-	std::string m_pressed_csm_button;
+	std::string m_pressing_csm_button = "";
+	std::string m_last_pressed_csm_button = "";
 	std::vector<button_info *> m_buttons;
 	joystick_info m_joystick;
 	camera_info m_camera;

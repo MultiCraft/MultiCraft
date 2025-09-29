@@ -1473,6 +1473,7 @@ Same as `image`, but does not accept a `position`; the position is instead deter
 
 Displays a pressable image on the HUD. Takes the same parameters as `image`,
 plus passes the name field to `core.register_on_hud_button_press` CSM callbacks.
+The `text2` field may be used for a pressed texture.
 
 Only works on touchscreens, this acts exactly like a regular image on other
 devices.
