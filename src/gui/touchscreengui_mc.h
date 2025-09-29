@@ -257,7 +257,8 @@ public:
 	}
 
 	std::string getPressingCSMButton() { return m_pressing_csm_button; }
-	std::string getLastPressedCSMButton() {
+	std::string getLastPressedCSMButton()
+	{
 		std::string btn = m_last_pressed_csm_button;
 		m_last_pressed_csm_button.clear();
 		return btn;
