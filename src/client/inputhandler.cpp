@@ -109,8 +109,32 @@ void KeyCache::populate()
 	}
 }
 
-bool MyEventReceiver::OnEvent(const SEvent &event)
+bool MyEventReceiver::OnEvent(const SEvent &event2)
 {
+	SEvent event;
+
+	if (event2.EventType == irr::EET_MOUSE_INPUT_EVENT) {
+		event = {};
+		event.EventType = EET_TOUCH_INPUT_EVENT;
+		event.TouchInput.X = event2.MouseInput.X;
+		event.TouchInput.Y = event2.MouseInput.Y;
+		switch (event2.MouseInput.Event) {
+			case EMIE_LMOUSE_PRESSED_DOWN:
+				event.TouchInput.Event = ETIE_PRESSED_DOWN;
+				break;
+			case EMIE_MOUSE_MOVED:
+				event.TouchInput.Event = ETIE_MOVED;
+				break;
+			case EMIE_LMOUSE_LEFT_UP:
+				event.TouchInput.Event = ETIE_LEFT_UP;
+				break;
+			default:
+				return false;
+		}
+	} else {
+		event = event2;
+	}
+
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT ||
 			event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {

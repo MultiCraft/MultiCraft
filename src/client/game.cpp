@@ -4486,7 +4486,7 @@ void Game::showPauseMenu()
 			<< strgettext("Sound Volume") << ";;false]";
 	}
 #endif
-	if (hasRealKeyboard)
+	if (hasRealKeyboard && false)
 		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
 			<< strgettext("Change Keys")  << ";;false]";
 #ifdef HAVE_TOUCHSCREENGUI
