@@ -52,6 +52,7 @@ const button_data buttons_data[] = {
 	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true, -1 },
 	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true, -1 },
 	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true, -1 },
+	{ "hide_interface.png", "", "", N_("Hide interface"), "toggle_interface", true, -1 },
 	{ "joystick_off.png", "", "", "", "joystick", false, -1 },
 	{ "joystick_bg.png", "", "", "", "joystick", false, -1 },
 	{ "joystick_center.png", "", "", "", "joystick_center", false, -1 },
@@ -66,7 +67,8 @@ const button_data buttons_data[] = {
 
 static const touch_gui_button_id overflow_buttons_id[] {
 	flymove_id, fastmove_id, noclip_id,
-	range_id, toggle_chat_id, toggle_nametags_id
+	range_id, toggle_chat_id, toggle_nametags_id,
+	toggle_interface_id
 };
 
 TouchScreenGUI *g_touchscreengui = nullptr;
@@ -691,7 +693,23 @@ void TouchScreenGUI::restoreAllValues()
 
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
-	if (!m_buttons_initialized || !m_visible || m_close)
+	if (!m_buttons_initialized || m_close)
+		return false;
+
+	if (m_current_state == STATE_HIDDEN) {
+		if (event.EventType == EET_MOUSE_INPUT_EVENT) {
+			changeCurrentState(STATE_DEFAULT);
+		} else if (event.EventType == EET_KEY_INPUT_EVENT) {
+			std::string keyname = g_settings->get("keymap_screenshot");
+			irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
+
+			if (event.KeyInput.Key != KEY_SNAPSHOT &&
+					event.KeyInput.Key != button_keycode)
+				changeCurrentState(STATE_DEFAULT);
+		}
+	}
+
+	if (!m_visible)
 		return false;
 
 	if (event.EventType != EET_TOUCH_INPUT_EVENT)
@@ -707,7 +725,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		touch_gui_state new_state = m_current_state;
 
 		for (auto button : m_buttons) {
-			if (m_current_state != button->state)
+			if (m_current_state != button->state &&
+					!(m_current_state == STATE_HIDDEN && button->state == STATE_DEFAULT))
 				continue;
 
 			if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
@@ -719,9 +738,19 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_state = STATE_EDITOR;
 				} else if (button->id == overflow_id) {
 					if (m_current_state == STATE_OVERFLOW)
-						new_state = STATE_DEFAULT;
+						new_state = m_previous_state;
 					else
 						new_state = STATE_OVERFLOW;
+				} else if (button->id == toggle_interface_id) {
+					if (m_current_state == STATE_HIDDEN)
+						new_state = STATE_DEFAULT;
+					if (m_current_state == STATE_OVERFLOW &&
+							m_previous_state == STATE_HIDDEN) {
+						new_state = STATE_DEFAULT;
+					} else {
+						new_state = STATE_HIDDEN;
+						m_ui_message = "Use double-tap to show interface";
+					}
 				} else if (button->state == STATE_OVERFLOW) {
 					m_overflow_close_schedule = true;
 				}
@@ -736,12 +765,12 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 		}
 
-		if (m_current_state == STATE_DEFAULT) {
+		if (m_current_state == STATE_DEFAULT || m_current_state == STATE_HIDDEN) {
 			if (m_joystick.button_off->isPointInside(core::position2d<s32>(x, y))) {
 				m_events[id] = true;
 				m_joystick.button_off->setVisible(false);
-				m_joystick.button_bg->setVisible(true);
-				m_joystick.button_center->setVisible(true);
+				m_joystick.button_bg->setVisible(m_current_state == STATE_DEFAULT);
+				m_joystick.button_center->setVisible(m_current_state == STATE_DEFAULT);
 				m_joystick.pressed = true;
 				m_joystick.event_id = id;
 
@@ -766,6 +795,18 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					m_camera.event_id = id;
 
 					updateCamera(m_camera, x, y);
+
+					if (!m_doubletap_initialized) {
+						m_doubletap_initialized = true;
+						m_doubletap_time = m_camera.downtime;
+					} else {
+						u64 time = m_camera.downtime - m_doubletap_time;
+						m_doubletap_time = m_camera.downtime;
+						if (m_current_state == STATE_HIDDEN &&
+								time < MAX_DOUBLE_TAP_TIME_MS) {
+							new_state = STATE_DEFAULT;
+						}
+					}
 				} else if (m_dig_and_move && m_camera_additional.event_id == -1) {
 					m_events[id] = true;
 					m_camera_additional.downtime = porting::getTimeMs();
@@ -808,7 +849,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		}
 
 		if ((m_current_state == STATE_OVERFLOW) && !m_events[id])
-			new_state = STATE_DEFAULT;
+			new_state = m_previous_state;
 
 		if (m_current_state != new_state)
 			changeCurrentState(new_state);
@@ -823,7 +864,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		bool restore_all_values = false;
 
 		for (auto button : m_buttons) {
-			if (m_current_state != button->state)
+			if (m_current_state != button->state &&
+					!(m_current_state == STATE_HIDDEN && button->state == STATE_DEFAULT))
 				continue;
 
 			if (button->event_id == id) {
@@ -833,7 +875,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					if (button->id == editor_save_id) {
 						play_sound = true;
 						m_settings->updateConfigFile(m_settings_path.c_str());
-						new_state = STATE_DEFAULT;
+						new_state = m_previous_state;
 					} else if (button->id == editor_default_id) {
 						play_sound = true;
 						reset_all_values = true;
@@ -908,7 +950,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			updateCamera(m_camera, m_camera.x, m_camera.y);
 		} else if (m_camera.event_id == id) {
 			bool place = false;
-			if (!m_camera.has_really_moved && !m_camera.dig) {
+			if (!m_camera.has_really_moved && !m_camera.dig &&
+					m_current_state == STATE_DEFAULT) {
 				u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 				place = (delta >= MIN_PLACE_TIME_MS);
 			}
@@ -916,7 +959,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			m_camera.place = place;
 		} else if (m_dig_and_move && m_camera_additional.event_id == id) {
 			bool place = false;
-			if (!m_camera_additional.has_really_moved && !m_camera_additional.dig) {
+			if (!m_camera_additional.has_really_moved && !m_camera_additional.dig &&
+					m_current_state == STATE_DEFAULT) {
 				u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
 				place = (delta >= MIN_PLACE_TIME_MS);
 			}
@@ -1098,7 +1142,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				bool overflow_btn_pressed = false;
 
 				for (auto button : m_buttons) {
-					if (m_current_state != button->state)
+					if (m_current_state != button->state &&
+							!(m_current_state == STATE_HIDDEN && button->state == STATE_DEFAULT))
 						continue;
 
 					if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
@@ -1122,7 +1167,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					if (m_current_state == STATE_DEFAULT)
 						changeCurrentState(STATE_OVERFLOW);
 					else
-						changeCurrentState(STATE_DEFAULT);
+						changeCurrentState(m_previous_state);
 				}
 			}
 		}
@@ -1333,9 +1378,10 @@ void TouchScreenGUI::step(float dtime)
 	}
 
 	if (m_current_state == STATE_OVERFLOW && m_overflow_close_schedule)
-		changeCurrentState(STATE_DEFAULT);
+		changeCurrentState(m_previous_state);
 
-	if (m_camera.event_id != -1 && (!m_camera.has_really_moved)) {
+	if (m_camera.event_id != -1 && (!m_camera.has_really_moved) &&
+			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera.dig = true;
@@ -1343,7 +1389,8 @@ void TouchScreenGUI::step(float dtime)
 		}
 	}
 
-	if (m_camera_additional.event_id != -1 && (!m_camera_additional.has_really_moved)) {
+	if (m_camera_additional.event_id != -1 && (!m_camera_additional.has_really_moved) &&
+			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera_additional.dig = true;
@@ -1382,6 +1429,8 @@ void TouchScreenGUI::setVisible(bool visible)
 
 		if (m_current_state == STATE_EDITOR && button->state == STATE_DEFAULT)
 			is_visible = true;
+		else if (m_current_state == STATE_HIDDEN)
+			is_visible = false;
 
 		if (button->guibutton)
 			button->guibutton->setVisible(m_visible && is_visible);
@@ -1389,15 +1438,19 @@ void TouchScreenGUI::setVisible(bool visible)
 			button->text->setVisible(m_visible && is_visible);
 	}
 
+	bool is_visible = (m_current_state != STATE_OVERFLOW) && (m_current_state != STATE_HIDDEN);
+
 	if (m_joystick.button_off)
-		m_joystick.button_off->setVisible(m_visible && (m_current_state != STATE_OVERFLOW));
+		m_joystick.button_off->setVisible(m_visible && is_visible);
 	if (m_joystick.button_bg)
 		m_joystick.button_bg->setVisible(false);
 	if (m_joystick.button_center)
 		m_joystick.button_center->setVisible(false);
 
+	is_visible = (m_current_state == STATE_OVERFLOW) && (m_current_state != STATE_HIDDEN);
+
 	if (m_overflow_bg)
-		m_overflow_bg->setVisible(m_visible && (m_current_state == STATE_OVERFLOW));
+		m_overflow_bg->setVisible(m_visible && is_visible);
 
 	if (!visible)
 		reset();
@@ -1405,6 +1458,8 @@ void TouchScreenGUI::setVisible(bool visible)
 
 void TouchScreenGUI::changeCurrentState(touch_gui_state state)
 {
+	m_previous_state = m_current_state;
+
 	reset();
 
 	if (m_current_state == STATE_EDITOR)
@@ -1455,6 +1510,8 @@ void TouchScreenGUI::reset()
 	m_camera.reset();
 	m_camera_additional.reset();
 	m_editor.reset();
+
+	m_doubletap_initialized = false;
 }
 
 void TouchScreenGUI::wakeUpInputhandler()

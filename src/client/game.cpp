@@ -2596,12 +2596,25 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 
 	if (m_cache_enable_joysticks) {
 		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime;
+		f32 yaw = 0;
+		f32 pitch = 0;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		cam->camera_yaw -= input->sdl_game_controller.getCameraYaw() * c;
-		cam->camera_pitch += input->sdl_game_controller.getCameraPitch() * c;
+		yaw = input->sdl_game_controller.getCameraYaw();
+		pitch = input->sdl_game_controller.getCameraPitch();
+		cam->camera_yaw -= yaw * c;
+		cam->camera_pitch += pitch * c;
 #else
-		cam->camera_yaw -= input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL) * c;
-		cam->camera_pitch += input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL) * c;
+		yaw = input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL);
+		pitch = input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL)
+		cam->camera_yaw -= yaw * c;
+		cam->camera_pitch += pitch * c;
+#endif
+#ifdef HAVE_TOUCHSCREENGUI
+		if (g_touchscreengui) {
+			if (g_touchscreengui->getCurrentState() == STATE_HIDDEN &&
+					(yaw != 0 || pitch != 0))
+				g_touchscreengui->changeCurrentState(STATE_DEFAULT);
+		}
 #endif
 	}
 
@@ -4078,6 +4091,14 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		runData.update_draw_list_last_cam_dir = camera_direction;
 	}
 
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui) {
+		std::string message = g_touchscreengui->getMessage();
+		if (!message.empty())
+			m_game_ui->showTranslatedStatusText(message.c_str(), 4.0f);
+	}
+#endif
+
 	m_game_ui->update(*stats, client, draw_control, cam, runData.pointed_old, gui_chat_console, dtime);
 
 	/*
@@ -4140,8 +4161,15 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 				scene::ESNRP_SHADOW;
 	}
 
-	RenderingEngine::draw_scene(skycolor, m_game_ui->m_flags.show_hud,
-			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair, m_game_ui->m_flags.show_nametags);
+	bool show_hud = m_game_ui->m_flags.show_hud;
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui)
+		show_hud = (g_touchscreengui->getCurrentState() != STATE_HIDDEN);
+#endif
+
+	RenderingEngine::draw_scene(skycolor, show_hud,
+			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair,
+			m_game_ui->m_flags.show_nametags);
 
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
 	mat.EnableFlags = 0;
