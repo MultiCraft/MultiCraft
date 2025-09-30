@@ -60,6 +60,7 @@ public:
 	bool on_item_use(const ItemStack &item, const PointedThing &pointed);
 
 	bool on_inventory_open(Inventory *inventory);
+	void on_hud_button_press(const std::string &btn);
 
 	void setEnv(ClientEnvironment *env);
 };

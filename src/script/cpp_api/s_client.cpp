@@ -253,6 +253,18 @@ bool ScriptApiClient::on_inventory_open(Inventory *inventory)
 	return readParam<bool>(L, -1);
 }
 
+
+void ScriptApiClient::on_hud_button_press(const std::string &btn)
+{
+	SCRIPTAPI_PRECHECKHEADER
+
+	lua_getglobal(L, "core");
+	lua_getfield(L, -1, "registered_on_hud_button_press");
+	lua_pushlstring(L, btn.c_str(), btn.size());
+
+	runCallbacks(1, RUN_CALLBACKS_MODE_FIRST);
+}
+
 void ScriptApiClient::setEnv(ClientEnvironment *env)
 {
 	ScriptApiBase::setEnv(env);
