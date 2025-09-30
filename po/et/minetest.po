@@ -1912,6 +1912,14 @@ msgstr "Lülita HUD sisse/välja"
 msgid "Toggle nametags"
 msgstr "Numbrilehtede vahetamine"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Peida liides"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Kasutage liidese kuvamiseks topeltpuudutust"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Lülita vestluslogi sisse/välja"

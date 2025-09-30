@@ -1915,6 +1915,14 @@ msgstr "Togol papar pandu (HUD)"
 msgid "Toggle nametags"
 msgstr ""
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr ""
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr ""
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Togol log sembang"

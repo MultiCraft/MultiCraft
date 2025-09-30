@@ -1938,6 +1938,14 @@ msgstr "mu'e co'a jonai mo'u vofli"
 msgid "Toggle nametags"
 msgstr ""
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr ""
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr ""
+
 #: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"

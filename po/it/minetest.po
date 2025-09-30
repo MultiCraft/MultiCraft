@@ -1913,6 +1913,14 @@ msgstr "HUD sì/no"
 msgid "Toggle nametags"
 msgstr "Targhette con i nomi"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Nascondere l'interfaccia"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Utilizzare il doppio tocco per mostrare l'interfaccia"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Log chat sì/no"

@@ -1990,6 +1990,14 @@ msgstr "Įjungti skrydį"
 msgid "Toggle nametags"
 msgstr "Perjungti vardų etiketes"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Paslėpti sąsają"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Dvigubu bakstelėjimu parodykite sąsają"
+
 #: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"

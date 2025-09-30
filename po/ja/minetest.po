@@ -1909,6 +1909,14 @@ msgstr "HUD表示切替"
 msgid "Toggle nametags"
 msgstr "名札を切り替える"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "インターフェイスを非表示にします"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "ダブルタップを使用してインターフェイスを表示します"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "チャット表示切替"

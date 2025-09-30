@@ -1955,6 +1955,14 @@ msgstr "สลับ HUD"
 msgid "Toggle nametags"
 msgstr "สลับป้ายชื่อ"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "ซ่อนอินเทอร์เฟซ"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "ใช้การแตะสองครั้งเพื่อแสดงอินเทอร์เฟซ"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "บันทึกสนทนาสลับ"

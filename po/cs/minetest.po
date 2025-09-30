@@ -1937,6 +1937,14 @@ msgstr "Zapnout/Vypnout ovládací prvky"
 msgid "Toggle nametags"
 msgstr "Přepínání jmenovek"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Skrýt rozhraní"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Dvojitým klepnutím zobrazíte rozhraní"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Zapnout/Vypnout záznam chatu"

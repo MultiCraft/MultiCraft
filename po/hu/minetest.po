@@ -1916,6 +1916,14 @@ msgstr "HUD váltása"
 msgid "Toggle nametags"
 msgstr "Névtáblák váltása"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Interface elrejtése"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "A kettős koppintással jelenítse meg az interfészt"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Csevegésnapló váltása"

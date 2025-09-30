@@ -1913,6 +1913,14 @@ msgstr "Alih HUD"
 msgid "Toggle nametags"
 msgstr "Alihkan label nama"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Sembunyikan antarmuka"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Gunakan ketuk dua kali untuk menampilkan antarmuka"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Alih log obrolan"

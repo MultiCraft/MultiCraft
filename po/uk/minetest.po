@@ -1921,7 +1921,15 @@ msgstr "Увімкнути позначки на екрані"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle nametags"
-msgstr "Перемключити теги імен"
+msgstr "Переключити теги імен"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Сховати інтерфейс"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Двічі торкніться, щоб відобразити інтерфейс"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
