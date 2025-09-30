@@ -266,7 +266,7 @@ public:
 	void close() { m_close = true; }
 
 	touch_gui_state getCurrentState() { return m_current_state; }
-	void setCurrentState(touch_gui_state state);
+	void changeCurrentState(touch_gui_state state);
 
 	void resetHud();
 	void registerHudItem(s32 index, const rect<s32> &button_rect);

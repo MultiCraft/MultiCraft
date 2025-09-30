@@ -2602,7 +2602,7 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 		if (g_touchscreengui) {
 			if (g_touchscreengui->getCurrentState() == STATE_HIDDEN &&
 					(yaw != 0 || pitch != 0))
-				g_touchscreengui->setCurrentState(STATE_DEFAULT);
+				g_touchscreengui->changeCurrentState(STATE_DEFAULT);
 		}
 #endif
 	}

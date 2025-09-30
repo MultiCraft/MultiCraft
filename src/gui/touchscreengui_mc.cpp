@@ -698,14 +698,14 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 	if (m_current_state == STATE_HIDDEN) {
 		if (event.EventType == EET_MOUSE_INPUT_EVENT) {
-			setCurrentState(STATE_DEFAULT);
+			changeCurrentState(STATE_DEFAULT);
 		} else if (event.EventType == EET_KEY_INPUT_EVENT) {
 			std::string keyname = g_settings->get("keymap_screenshot");
 			irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
 
 			if (event.KeyInput.Key != KEY_SNAPSHOT &&
 					event.KeyInput.Key != button_keycode)
-				setCurrentState(STATE_DEFAULT);
+				changeCurrentState(STATE_DEFAULT);
 		}
 	}
 
@@ -852,7 +852,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			new_state = m_previous_state;
 
 		if (m_current_state != new_state)
-			setCurrentState(new_state);
+			changeCurrentState(new_state);
 
 		result = true;
 
@@ -1057,7 +1057,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			restoreAllValues();
 
 		if (m_current_state != new_state)
-			setCurrentState(new_state);
+			changeCurrentState(new_state);
 
 		result = true;
 
@@ -1165,9 +1165,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 				if (overflow_btn_pressed) {
 					if (m_current_state == STATE_DEFAULT)
-						setCurrentState(STATE_OVERFLOW);
+						changeCurrentState(STATE_OVERFLOW);
 					else
-						setCurrentState(m_previous_state);
+						changeCurrentState(m_previous_state);
 				}
 			}
 		}
@@ -1378,7 +1378,7 @@ void TouchScreenGUI::step(float dtime)
 	}
 
 	if (m_current_state == STATE_OVERFLOW && m_overflow_close_schedule)
-		setCurrentState(m_previous_state);
+		changeCurrentState(m_previous_state);
 
 	if (m_camera.event_id != -1 && (!m_camera.has_really_moved) &&
 			m_current_state == STATE_DEFAULT) {
@@ -1456,7 +1456,7 @@ void TouchScreenGUI::setVisible(bool visible)
 		reset();
 }
 
-void TouchScreenGUI::setCurrentState(touch_gui_state state)
+void TouchScreenGUI::changeCurrentState(touch_gui_state state)
 {
 	m_previous_state = m_current_state;
 
@@ -1479,7 +1479,7 @@ void TouchScreenGUI::openEditor()
 	m_editor.reset();
 	updateEditorButtonsState();
 
-	setCurrentState(STATE_EDITOR);
+	changeCurrentState(STATE_EDITOR);
 }
 
 void TouchScreenGUI::hide()
