@@ -32,3 +32,8 @@ public func getUpgrade(key: UnsafePointer<CChar>) -> Bool {
 public func getSecretKey(key: UnsafePointer<CChar>) -> UnsafePointer<CChar> {
 	return ("dummy" as NSString).utf8String!
 }
+
+public func finishGame(msg: UnsafePointer<CChar>) -> Never {
+	AppLogic.log(message: String(cString: msg))
+	NSApplication.shared.terminate(nil)
+}

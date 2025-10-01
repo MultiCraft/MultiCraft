@@ -361,6 +361,8 @@ bool upgrade(const std::string &item);
 std::string getSecretKey(const std::string &key);
 
 float getScreenScale();
+
+NORETURN void finishGame(const std::string &exc);
 #endif
 
 /**

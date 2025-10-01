@@ -762,6 +762,11 @@ float getScreenScale()
 	static const float retval = MultiCraft::getScreenScale();
 	return retval;
 }
+
+void finishGame(const std::string &exc)
+{
+	MultiCraft::finishGame(exc.c_str());
+}
 #endif
 
 int getTotalSystemMemory()
