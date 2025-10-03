@@ -193,4 +193,7 @@ private:
 	bool m_load_bg_clouds = false;
 	std::string m_load_bg_texture = "";
 	video::SColor m_sky_color;
+	u64 m_last_time = 0;
+	float m_load_screen_dtime = 0;
+	int m_percent = 0;
 };

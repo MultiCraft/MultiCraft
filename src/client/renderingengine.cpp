@@ -189,6 +189,8 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	// We can get real screen size only after device initialization finished
 	set_default_settings();
 #endif
+
+	m_last_time = porting::getTimeMs();
 }
 
 RenderingEngine::~RenderingEngine()
@@ -543,6 +545,18 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 			return;
 #endif
 
+	float fps_max = std::min(g_settings->getFloat("fps_max"), 30.0f);
+	u64 cur_time = porting::getTimeMs();
+	m_load_screen_dtime += dtime;
+
+	if (cur_time - m_last_time < 1000.0f / fps_max && percent == m_percent)
+		return;
+
+	dtime = m_load_screen_dtime;
+	m_load_screen_dtime = 0;
+	m_last_time = cur_time;
+	m_percent = percent;
+
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
 
 	v2s32 textsize(g_fontengine->getTextWidth(text), g_fontengine->getLineHeight());
@@ -719,6 +733,9 @@ void RenderingEngine::_draw_load_cleanup()
 		if (texture)
 			driver->removeTexture(texture);
 	}
+
+	m_load_screen_dtime = 0;
+	m_percent = 0;
 }
 
 std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
