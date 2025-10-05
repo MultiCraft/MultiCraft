@@ -1,6 +1,5 @@
 plugins {
 	id 'com.android.library'
-	id 'de.undercouch.download'
 }
 
 android {
@@ -54,25 +53,37 @@ android {
 
 // get precompiled deps
 def buildDirectory = layout.buildDirectory.get().asFile
+def depsZip = new File(buildDirectory, "deps.zip")
+def depsDir = file("deps")
 
-tasks.register('downloadDeps', Download) {
-	src "https://github.com/MultiCraft/deps_android/releases/latest/download/deps_android.zip"
-	dest new File(buildDirectory, 'deps.zip')
-	overwrite false
-}
-
-tasks.register('getDeps', Copy) {
-	dependsOn downloadDeps
-	def deps = file('deps')
-	def f = file("$buildDirectory/deps_android")
-
-	if (!f.exists()) {
-		from zipTree(downloadDeps.dest)
-		into deps
+tasks.register('downloadDeps') {
+	doLast {
+		if (!depsZip.exists()) {
+			println "Downloading dependencies..."
+			depsZip.parentFile.mkdirs()
+			new URL("https://github.com/MultiCraft/deps_android/releases/latest/download/deps_android.zip")
+					.withInputStream { i -> depsZip.withOutputStream { it << i } }
+			println "Downloaded to ${depsZip}"
+		}
 	}
 }
 
-preBuild.dependsOn getDeps
+tasks.register('getDeps', Copy) {
+	dependsOn 'downloadDeps'
+
+	from { zipTree(depsZip) }
+	into depsDir
+
+	onlyIf {
+		!depsDir.exists()
+	}
+
+	doLast {
+		println "Dependencies unpacked into ${depsDir}"
+	}
+}
+
+preBuild.dependsOn 'getDeps'
 
 android.defaultConfig.externalNativeBuild.ndkBuild {
 	arguments 'prebuilt=$(if $(strip $(wildcard $(prebuilt_path))),$(prebuilt_path),.)'

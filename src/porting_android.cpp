@@ -138,30 +138,16 @@ static std::string readJavaString(jstring j_str)
 	return str;
 }
 
-std::string getCacheDir()
-{
-	jmethodID getCacheDirMethod = jnienv->GetMethodID(activityClass, "getCacheDir", "()Ljava/io/File;");
-	jobject fileObject = jnienv->CallObjectMethod(activityObj, getCacheDirMethod);
-	jclass fileClass = jnienv->FindClass("java/io/File");
-	jmethodID getAbsolutePathMethod = jnienv->GetMethodID(fileClass, "getAbsolutePath", "()Ljava/lang/String;");
-	jstring pathString = (jstring) jnienv->CallObjectMethod(fileObject, getAbsolutePathMethod);
-
-	const char *pathChars = jnienv->GetStringUTFChars(pathString, nullptr);
-	std::string path(pathChars);
-	jnienv->ReleaseStringUTFChars(pathString, pathChars);
-
-	return path;
-}
-
 void initializePaths()
 {
 	const char *path_storage = SDL_GetAndroidExternalStoragePath();
 	const char *path_data = SDL_GetAndroidInternalStoragePath();
+	const char *path_acache = SDL_GetAndroidCachePath(); // not a typo
 
 	path_user = path_storage;
 	path_share = path_data;
 	path_locale = path_share + DIR_DELIM + "locale";
-	path_cache = getCacheDir();
+	path_cache = path_acache;
 }
 
 void showInputDialog(const std::string &hint, const std::string &current, int editType, std::string owner)
@@ -277,6 +263,10 @@ void notifyExitGame()
 
 void showToast(const std::string &msg)
 {
+	const int ver = SDL_GetAndroidSDKVersion();
+	if (ver >= 33 && msg == "Copied to clipboard")
+		return;
+
 	SDL_ShowAndroidToast(msg.c_str(), 1, -1, 0, 0);
 }
 
