@@ -21,6 +21,7 @@ core.features = {
 	use_texture_alpha_string_modes = true,
 	abm_min_max_y = true,
 	compress_zstd = true,
+	item_meta_range = true,
 }
 
 function core.has_feature(arg)
