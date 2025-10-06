@@ -2205,6 +2205,13 @@ Elements
 * For information on converting forms to the new coordinate system, see `Migrating
   to Real Coordinates`.
 
+### `acknowledge_open[]`
+
+When used with the inventory formspec, the client will send an `"open"` field
+back to the server when the inventory is opened.
+
+Does not support formspecs other than the inventory.
+
 ### `container[<X>,<Y>]`
 
 * Start of a container block, moves all physical elements in the container by
