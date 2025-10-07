@@ -2212,7 +2212,14 @@ void Game::openInventory()
 	GUIFormSpecMenu::create(formspec, client, &input->joystick, fs_src,
 		txt_dst, client->getFormspecPrepend(), sound);
 
-	formspec->setFormSpec(fs_src->getForm(), inventoryloc);
+	const std::string form = fs_src->getForm();
+	formspec->setFormSpec(form, inventoryloc);
+
+	if (form.find("acknowledge_open[]") != std::string::npos) {
+		StringMap fields;
+		fields["open"] = "true";
+		txt_dst->gotText(fields);
+	}
 }
 
 
