@@ -131,8 +131,7 @@ TouchScreenGUI::~TouchScreenGUI()
 	delete m_settings;
 }
 
-void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode,
-		ISoundManager *sound_manager)
+void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manager)
 {
 	assert(tsrc);
 	m_texturesource = tsrc;
@@ -150,13 +149,8 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, bool simple_singleplayer_m
 	initButton(escape_id, getButtonRect(escape_id));
 	initButton(minimap_id, getButtonRect(minimap_id));
 	initButton(camera_id, getButtonRect(camera_id));
-
-	if (simple_singleplayer_mode) {
-		initButton(chat_id, getButtonRect(chat_id), STATE_DEFAULT, "chat_btn.png");
-	} else {
-		initButton(chat_id, getButtonRect(chat_id), STATE_DEFAULT, "chat_mp_btn.png");
-		initButton(tab_id, getButtonRect(tab_id));
-	}
+	initButton(chat_id, getButtonRect(chat_id));
+	initButton(tab_id, getButtonRect(tab_id));
 
 	initButton(overflow_id, getButtonRect(overflow_id));
 

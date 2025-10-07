@@ -225,8 +225,7 @@ public:
 	TouchScreenGUI(IrrlichtDevice *device);
 	~TouchScreenGUI();
 
-	void init(ISimpleTextureSource *tsrc, bool simple_singleplayer_mode,
-			ISoundManager *sound_manage);
+	void init(ISimpleTextureSource *tsrc, ISoundManager *sound_manage);
 	bool preprocessEvent(const SEvent &event);
 	bool isButtonPressed(irr::EKEY_CODE keycode);
 	bool immediateRelease(irr::EKEY_CODE keycode);
