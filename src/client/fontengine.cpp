@@ -392,7 +392,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 			"file in the proper location";
 	errorstream << msg << std::endl;
 
-#if !defined(__ANDROID__) && !defined(__IOS__)
+#if !defined(__ANDROID__) && !defined(__APPLE__)
 	abort();
 #else
 	porting::finishGame(msg);

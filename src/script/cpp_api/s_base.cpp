@@ -208,7 +208,7 @@ void ScriptApiBase::loadMod(const std::string &script_path,
 	loadScript(script_path);
 }
 
-void ScriptApiBase::loadScript(const std::string &script_path)
+void ScriptApiBase::loadScript(const std::string &script_path, bool unsafe)
 {
 	verbosestream << "Loading and running script from " << script_path << std::endl;
 
@@ -217,7 +217,7 @@ void ScriptApiBase::loadScript(const std::string &script_path)
 	int error_handler = PUSH_ERROR_HANDLER(L);
 
 	bool ok;
-	if (m_secure) {
+	if (m_secure && !unsafe) {
 		ok = ScriptApiSecurity::safeLoadFile(L, script_path.c_str());
 	} else {
 		ok = !luaL_loadfile(L, script_path.c_str());

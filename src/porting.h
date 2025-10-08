@@ -41,7 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gettime.h"
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 #ifdef _MSC_VER
@@ -361,6 +361,8 @@ bool upgrade(const std::string &item);
 std::string getSecretKey(const std::string &key);
 
 float getScreenScale();
+
+NORETURN void finishGame(const std::string &exc);
 #endif
 
 /**

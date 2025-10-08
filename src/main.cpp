@@ -57,6 +57,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#include <MultiCraft-Swift.h>
 #endif
 
+#ifdef __IOS__
+	#include <SDL3/SDL_main.h>
+#endif
+
 // for version information only
 extern "C" {
 #if USE_LUAJIT
@@ -893,7 +897,7 @@ static bool run_dedicated_server(const GameParams &game_params, const Settings &
 	if (bind_addr.isIPv6() && !g_settings->getBool("enable_ipv6")) {
 		errorstream << "Unable to listen on "
 		            << bind_addr.serializeString()
-		            << L" because IPv6 is disabled" << std::endl;
+		            << " because IPv6 is disabled" << std::endl;
 		return false;
 	}
 

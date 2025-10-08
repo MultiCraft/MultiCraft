@@ -61,7 +61,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	#include <SDL.h>
+	#include <SDL3/SDL.h>
 #endif
 
 #include "config.h"
@@ -761,6 +761,11 @@ float getScreenScale()
 {
 	static const float retval = MultiCraft::getScreenScale();
 	return retval;
+}
+
+void finishGame(const std::string &exc)
+{
+	MultiCraft::finishGame(exc.c_str());
 }
 #endif
 

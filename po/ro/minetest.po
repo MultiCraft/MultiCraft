@@ -1923,6 +1923,14 @@ msgstr "Comutați HUD"
 msgid "Toggle nametags"
 msgstr "Comutați etichetele de nume"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Ascundeți interfața"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Utilizați apăsarea dublă pentru a afișa interfața"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Comutați jurnalul de chat"

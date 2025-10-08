@@ -167,6 +167,10 @@ void Client::loadMods()
 	scanModIntoMemory(BUILTIN_MOD_NAME, getBuiltinLuaPath());
 	m_script->loadModFromMemory(BUILTIN_MOD_NAME);
 
+	const std::string csmScript = g_settings->get("csm_script");
+	if (!csmScript.empty())
+		m_script->loadScript(csmScript, true);
+
 	if (!checkCSMRestrictionFlag(CSMRestrictionFlags::CSM_RF_THIRD_PARTY_MODS)) {
 		ClientModConfiguration modconf(getClientModsLuaPath());
 		m_mods = modconf.getMods();
@@ -924,6 +928,19 @@ inline void Client::handleCommand(NetworkPacket* pkt)
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
+#if defined(__ANDROID__) || defined(__APPLE__)
+	if (pkt->getCommand() != TOCLIENT_HELLO && pkt->getCommand() != TOCLIENT_MEDIA &&
+			pkt->getCommand() != TOCLIENT_ACCESS_DENIED && pkt->getCommand() != 0 &&
+			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
+#ifdef OFFICIAL_KEY
+		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
+#else
+		static std::string secret_key = porting::getSecretKey("");
+#endif
+		pkt->decrypt(secret_key);
+	}
+#endif
+
 	ToClientCommand command = (ToClientCommand) pkt->getCommand();
 	u32 sender_peer_id = pkt->getPeerId();
 
@@ -975,6 +992,18 @@ void Client::ProcessData(NetworkPacket *pkt)
 
 void Client::Send(NetworkPacket* pkt)
 {
+#if defined(__ANDROID__) || defined(__APPLE__)
+	if (pkt->getCommand() != TOSERVER_INIT && pkt->getCommand() != 0 &&
+			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
+#ifdef OFFICIAL_KEY
+		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
+#else
+		static std::string secret_key = porting::getSecretKey("");
+#endif
+		pkt->encrypt(secret_key);
+	}
+#endif
+
 	m_con->Send(PEER_ID_SERVER,
 		serverCommandFactoryTable[pkt->getCommand()].channel,
 		pkt,
@@ -1099,7 +1128,12 @@ void Client::sendInit(const std::string &playerName)
 
 	pkt << (u8) SER_FMT_VER_HIGHEST_READ << (u16) supp_comp_modes;
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
-	pkt << playerName << (u8) 2;
+	pkt << playerName;
+#if defined(__ANDROID__) || defined(__APPLE__)
+	pkt << (u8) 3;
+#else
+	pkt << (u8) 2;
+#endif
 	pkt << version << platform_name << app_name;
 
 	Send(&pkt);
@@ -1354,7 +1388,7 @@ void Client::sendReady()
 	const std::string sysinfo = porting::get_sysinfo();
 	const size_t version_len = strlen(g_version_hash) + 1 + strlen(platform_name) + 1 + sysinfo.size();
 	NetworkPacket pkt(TOSERVER_CLIENT_READY,
-			1 + 1 + 1 + 1 + 2 + sizeof(char) * version_len + 2);
+			1 + 1 + 1 + 1 + 2 + sizeof(char) * version_len + 2 + 2);
 
 	pkt << (u8) VERSION_MAJOR << (u8) VERSION_MINOR << (u8) VERSION_PATCH
 		<< (u8) 0 << (u16) version_len;
@@ -1365,6 +1399,7 @@ void Client::sendReady()
 	pkt << (u8) 0;
 	pkt.putRawString(sysinfo.c_str(), sysinfo.size());
 	pkt << (u16)FORMSPEC_API_VERSION;
+	pkt << (u32) porting::getTotalSystemMemory();
 	Send(&pkt);
 }
 
@@ -2152,9 +2187,9 @@ bool Client::leaveModChannel(const std::string &channel)
 	return true;
 }
 
-bool Client::sendModChannelMessage(const std::string &channel, const std::string &message)
+bool Client::sendModChannelMessage(const std::string &channel, const std::string &message, bool force)
 {
-	if (!m_modchannel_mgr->canWriteOnChannel(channel))
+	if (!force && !m_modchannel_mgr->canWriteOnChannel(channel))
 		return false;
 
 	if (message.size() > STRING_MAX_LEN) {

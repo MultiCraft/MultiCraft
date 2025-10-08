@@ -37,6 +37,7 @@ using namespace irr;
 using namespace irr::core;
 using namespace irr::gui;
 
+#define MAX_DOUBLE_TAP_TIME_MS 300
 #define MIN_DIG_TIME_MS 500
 #define MIN_PLACE_TIME_MS 50
 
@@ -60,6 +61,7 @@ typedef enum
 	range_id,
 	toggle_chat_id,
 	toggle_nametags_id,
+	toggle_interface_id,
 	joystick_off_id,
 	joystick_bg_id,
 	joystick_center_id,
@@ -77,6 +79,7 @@ typedef enum
 	STATE_DEFAULT = 0,
 	STATE_OVERFLOW,
 	STATE_EDITOR,
+	STATE_HIDDEN,
 } touch_gui_state;
 
 struct button_data
@@ -264,11 +267,21 @@ public:
 		return btn;
 	}
 
+	std::string getMessage()
+	{
+		std::string message = m_ui_message;
+		m_ui_message.clear();
+		return message;
+	}
+
 	void step(float dtime);
 	void hide();
 	void show();
 	void reset();
 	void close() { m_close = true; }
+
+	touch_gui_state getCurrentState() { return m_current_state; }
+	void changeCurrentState(touch_gui_state state);
 
 	void resetHud();
 	void registerHudItem(s32 index, const rect<s32> &button_rect);
@@ -296,9 +309,12 @@ private:
 	bool m_buttons_initialized = false;
 	bool m_close = false;
 	bool m_dig_and_move = false;
+	bool m_doubletap_initialized = false;
 	irr::EKEY_CODE m_keycode_dig;
 	irr::EKEY_CODE m_keycode_place;
 	std::string m_press_sound;
+	std::string m_ui_message;
+	u64 m_doubletap_time = 0;
 
 	std::map<size_t, bool> m_events;
 	std::vector<hud_button_info> m_hud_buttons;
@@ -312,6 +328,7 @@ private:
 	camera_info m_camera_additional;
 
 	touch_gui_state m_current_state = STATE_DEFAULT;
+	touch_gui_state m_previous_state = STATE_DEFAULT;
 	bool m_overflow_close_schedule = false;
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
@@ -343,12 +360,8 @@ private:
 
 	bool moveJoystick(s32 x, s32 y);
 	void updateCamera(camera_info &camera, s32 x, s32 y);
-
-	void changeCurrentState(touch_gui_state state);
 	void setVisible(bool visible);
-
 	void wakeUpInputhandler();
-
 	void playSound();
 };
 

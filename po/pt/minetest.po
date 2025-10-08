@@ -1914,6 +1914,14 @@ msgstr "Ativar interface"
 msgid "Toggle nametags"
 msgstr "Alternar etiquetas de nome"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Ocultar interface"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Utilizar o duplo toque para mostrar a interface"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Ativar histórico de conversa"

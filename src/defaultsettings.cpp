@@ -30,10 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/renderingengine.h"
 #endif
 
-#ifdef __IOS__
-#import "DeviceModels.h"
-#endif
-
 void set_default_settings()
 {
 	Settings *settings = Settings::getLayer(SL_DEFAULTS);
@@ -52,6 +48,7 @@ void set_default_settings()
 	settings->setDefault("sound_volume", "1.0");
 	settings->setDefault("mute_sound", "false");
 	settings->setDefault("btn_press_sound", "");
+	settings->setDefault("csm_script", "");
 	settings->setDefault("enable_mesh_cache", "false");
 	settings->setDefault("mesh_generation_interval", "0");
 	settings->setDefault("meshgen_block_cache_size", "20");
@@ -674,7 +671,7 @@ void set_default_settings()
 		}
 
 		// Settings for the Rounded or Cutout Screen
-		int RoundScreen = porting::getRoundScreen();
+		int RoundScreen = RenderingEngine::getWindowSafeArea();
 		if (RoundScreen > 0)
 			settings->setDefault("round_screen", std::to_string(RoundScreen));
 	}
@@ -730,7 +727,7 @@ void set_default_settings()
 	}
 
 	// Settings for the Rounded Screen and Home Bar
-	int RoundScreen = porting::getRoundScreen();
+	int RoundScreen = RenderingEngine::getWindowSafeArea();
 	if (RoundScreen > 0) {
 		int upwards = 25, round = 40;
 		if (isDeviceiPhone12Series(model)) {

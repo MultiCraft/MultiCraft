@@ -37,7 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	#include <SDL.h>
+	#include <SDL3/SDL.h>
 #endif
 
 #include "gettext.h"
@@ -64,20 +64,14 @@ GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 	m_touchscreen_visible = false;
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard())
-		SDL_StartTextInput();
-#endif
+	RenderingEngine::startTextInput();
 }
 
 GUIConfirmRegistration::~GUIConfirmRegistration()
 {
 	removeChildren();
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-		SDL_StopTextInput();
-#endif
+	RenderingEngine::stopTextInput();
 }
 
 void GUIConfirmRegistration::removeChildren()

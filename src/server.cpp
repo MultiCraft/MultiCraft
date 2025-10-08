@@ -68,9 +68,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server/player_sao.h"
 #include "server/serverinventorymgr.h"
 #include "translation.h"
-#if USE_ZSTD
 #include <zstd.h>
-#endif
 #if defined(__ANDROID__) || defined(__APPLE__)
 #include "util/encryption.h"
 #endif
@@ -1301,6 +1299,8 @@ bool Server::getClientInfo(session_t peer_id, ClientInfo &ret)
 	ret.platform = client->getPlatform();
 	ret.sysinfo = client->getSysInfo();
 
+	ret.system_ram = client->getSystemRAM();
+
 	ret.lang_code = client->getLangCode();
 
 	m_clients.unlock();
@@ -2361,12 +2361,8 @@ void Server::SendBlockNoLock(session_t peer_id, MapBlock *block, u8 ver,
 	/*
 		Create a packet with the block in the right format
 	*/
-#if USE_ZSTD
 	thread_local const int net_compression_level = m_simple_singleplayer_mode ? -1 :
 			rangelim(g_settings->getS16("map_compression_level_net"), ZSTD_minCLevel(), ZSTD_maxCLevel());
-#else
-	thread_local const int net_compression_level = rangelim(g_settings->getS16("map_compression_level_net"), -1, 9);
-#endif
 	std::ostringstream os(std::ios_base::binary);
 	block->serialize(os, ver, false, net_compression_level);
 	block->serializeNetworkSpecific(os);
@@ -3894,9 +3890,9 @@ bool Server::leaveModChannel(const std::string &channel)
 	return m_modchannel_mgr->leaveChannel(channel, PEER_ID_SERVER);
 }
 
-bool Server::sendModChannelMessage(const std::string &channel, const std::string &message)
+bool Server::sendModChannelMessage(const std::string &channel, const std::string &message, bool force)
 {
-	if (!m_modchannel_mgr->canWriteOnChannel(channel))
+	if (!force && !m_modchannel_mgr->canWriteOnChannel(channel))
 		return false;
 
 	broadcastModChannelMessage(channel, message, PEER_ID_SERVER);

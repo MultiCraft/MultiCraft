@@ -52,8 +52,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
-#include <SDL_syswm.h>
+#include <SDL3/SDL.h>
 #endif
 
 #ifdef _WIN32
@@ -190,6 +189,8 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	// We can get real screen size only after device initialization finished
 	set_default_settings();
 #endif
+
+	m_last_time = porting::getTimeMs();
 }
 
 RenderingEngine::~RenderingEngine()
@@ -292,15 +293,13 @@ void RenderingEngine::setupTopLevelXorgWindow(const std::string &name)
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11)
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0)
 		return;
 
-	Display *x11_dpl = info.info.x11.display;
-	Window x11_win = info.info.x11.window;
+	Display *x11_dpl = (Display *)SDL_GetPointerProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+	Window x11_win = (Window)SDL_GetNumberProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
 #else
 	Display *x11_dpl = reinterpret_cast<Display *>(exposedData.OpenGLLinux.X11Display);
 	Window x11_win = reinterpret_cast<Window>(exposedData.OpenGLLinux.X11Window);
@@ -497,17 +496,15 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11) {
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0) {
 		delete[] icon_buffer;
 		return false;
 	}
 
-	Display *x11_dpl = info.info.x11.display;
-	Window x11_win = info.info.x11.window;
+	Display *x11_dpl = (Display *)SDL_GetPointerProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+	Window x11_win = (Window)SDL_GetNumberProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
 #else
 	Display *x11_dpl = (Display *)exposedData.OpenGLLinux.X11Display;
 	Window x11_win = (Window)exposedData.OpenGLLinux.X11Window;
@@ -547,6 +544,18 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		if (!m_device->isWindowFocused())
 			return;
 #endif
+
+	float fps_max = std::min(g_settings->getFloat("fps_max"), 30.0f);
+	u64 cur_time = porting::getTimeMs();
+	m_load_screen_dtime += dtime;
+
+	if (cur_time - m_last_time < 1000.0f / fps_max && percent == m_percent)
+		return;
+
+	dtime = m_load_screen_dtime;
+	m_load_screen_dtime = 0;
+	m_last_time = cur_time;
+	m_percent = percent;
 
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
 
@@ -724,6 +733,9 @@ void RenderingEngine::_draw_load_cleanup()
 		if (texture)
 			driver->removeTexture(texture);
 	}
+
+	m_load_screen_dtime = 0;
+	m_percent = 0;
 }
 
 std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
@@ -833,11 +845,7 @@ static float calcDisplayDensity(irr::video::IVideoDriver *driver)
 
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11)
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0)
 		return g_settings->getFloat("screen_dpi") / 96.0;
 #endif
 
@@ -938,6 +946,34 @@ v2u32 RenderingEngine::getDisplaySize()
 		return v2u32(0, 0);
 	return engine->getWindowSize();
 }
+
+int RenderingEngine::getWindowSafeArea()
+{
+#ifdef __IOS__
+	// don't make it static
+	return MultiCraft::getScreenRound();
+#elif defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	if (engine) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			SDL_Rect safe;
+			if (window && SDL_GetWindowSafeArea(window, &safe))
+				return (safe.x > safe.y) ? safe.x : safe.y;
+		}
+	}
+
+	return 0;
+#else
+	return 0;
+#endif
+}
+
 #endif // __ANDROID__/__IOS__
 
 #ifdef HAVE_TOUCHSCREENGUI
@@ -961,5 +997,44 @@ bool RenderingEngine::isHighDpi()
 	return isTablet() ? (density >= 2) : (density >= 3);
 #else
 	return RenderingEngine::getDisplayDensity() >= 3;
+#endif
+}
+
+void RenderingEngine::startTextInput()
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, porting::hasRealKeyboard() ? "0" : "1");
+
+	if (engine && porting::hasRealKeyboard()) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			if (window)
+				SDL_StartTextInput(window);
+		}
+	}
+#endif
+}
+
+void RenderingEngine::stopTextInput()
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	if (engine && porting::hasRealKeyboard()) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			if (window && SDL_TextInputActive(window))
+				SDL_StopTextInput(window);
+		}
+	}
 #endif
 }

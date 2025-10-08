@@ -31,7 +31,7 @@ extern "C" void external_pause_game();
 #endif
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 void KeyCache::populate_nonchanging()
@@ -145,7 +145,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 
 #ifdef HAVE_TOUCHSCREENGUI
 	// Always send touch events to the touchscreen gui, so it has up-to-date information
-	if (m_touchscreengui && event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
+	if (m_touchscreengui) {
 		bool result = m_touchscreengui->preprocessEvent(event);
 
 		if (result) {
@@ -213,15 +213,6 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 
 			return true;
 		}
-
-#ifdef __IOS__
-	} else if (event.EventType == irr::EET_APPLICATION_EVENT) {
-		int AppEvent = event.ApplicationEvent.EventType;
-		if (AppEvent == irr::EAET_WILL_PAUSE)
-			external_pause_game();
-		return true;
-#endif
-
 	} else if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
 		/* TODO add a check like:
 		if (event.JoystickEvent != joystick_we_listen_for)
@@ -291,6 +282,40 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 	/* always return false in order to continue processing events */
 	return false;
 }
+
+RealInputHandler::RealInputHandler(MyEventReceiver *receiver) : m_receiver(receiver)
+{
+	m_receiver->joystick = &joystick;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	m_receiver->sdl_game_controller = &sdl_game_controller;
+	m_receiver->input = this;
+
+#ifdef __IOS__
+	SDL_AddEventWatch(SdlEventWatcher, nullptr);
+#endif
+#endif
+}
+
+RealInputHandler::~RealInputHandler()
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+#ifdef __IOS__
+	SDL_RemoveEventWatch(SdlEventWatcher, nullptr);
+#endif
+#endif
+}
+
+#ifdef __IOS__
+bool RealInputHandler::SdlEventWatcher(void *userdata, SDL_Event *event)
+{
+	if (event->type == SDL_EVENT_WILL_ENTER_BACKGROUND) {
+		external_pause_game();
+		return true;
+	}
+
+	return false;
+}
+#endif
 
 /*
  * RandomInputHandler

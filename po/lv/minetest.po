@@ -1931,6 +1931,14 @@ msgstr "Spēles saskarne"
 msgid "Toggle nametags"
 msgstr "Pārslēgt uzvārdu birkas"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Slēpt saskarni"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Izmantojiet dubulto piesitienu, lai parādītu saskarni"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Čata logs"

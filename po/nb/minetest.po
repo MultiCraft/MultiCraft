@@ -1918,6 +1918,14 @@ msgstr "HUD (hurtigtilgang) av/på"
 msgid "Toggle nametags"
 msgstr "Bytt navneskilt"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Skjul grensesnitt"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Bruk dobbelttrykk for å vise grensesnittet"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Chattehistorikk av/på"

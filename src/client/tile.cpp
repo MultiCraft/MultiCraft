@@ -2334,9 +2334,21 @@ std::vector<std::string> getTextureDirs()
 {
 	if (g_disable_texture_packs)
 		return {};
-	return fs::GetRecursiveDirs(g_settings->get("texture_path"));
-}
 
+	static std::mutex mtx;
+	const std::string current_path = g_settings->get("texture_path");
+	static std::string last_texture_path = current_path;
+	static std::vector<std::string> dirs = fs::GetRecursiveDirs(current_path);
+
+	MutexAutoLock lock(mtx);
+
+	if (last_texture_path != current_path) {
+		dirs = fs::GetRecursiveDirs(current_path);
+		last_texture_path = current_path;
+	}
+
+	return dirs;
+}
 
 void setDisableTexturePacks(const bool disable_texture_packs)
 {

@@ -626,7 +626,7 @@ struct GameRunData {
 	float repeat_place_timer;
 	float object_hit_delay_timer;
 	float time_from_last_punch;
-	float pause_game_timer;
+	u64 pause_game_timer;
 	ClientActiveObject *selected_object;
 
 	float jump_timer;
@@ -655,6 +655,10 @@ struct ClientEventHandler
  ****************************************************************************/
 
 using PausedNodesList = std::vector<std::pair<irr_ptr<scene::IAnimatedMeshSceneNode>, float>>;
+
+#if defined(__ANDROID__) || defined(__IOS__)
+static std::atomic<bool> g_pause_menu_schedule(false);
+#endif
 
 /* This is not intended to be a public class. If a public class becomes
  * desirable then it may be better to create another 'wrapper' class that
@@ -1117,6 +1121,13 @@ void Game::run()
 		//  + Sleep time until the wanted FPS are reached
 		limitFps(&draw_times, &dtime);
 
+#if defined(__ANDROID__) || defined(__IOS__)
+		if (g_pause_menu_schedule) {
+			g_pause_menu_schedule = false;
+			pauseGame();
+		}
+#endif
+
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
 		if (!device->isWindowFocused()) {
 			if (m_does_lost_focus_pause_game && !isMenuActive())
@@ -1462,9 +1473,9 @@ bool Game::createClient(const GameStartData &start_data)
 	/* Set window caption
 	 */
 	std::wstring str = utf8_to_wide(PROJECT_NAME_C);
+#ifndef NDEBUG
 	str += L" ";
 	str += utf8_to_wide(g_version_hash);
-#ifndef NDEBUG
 	str += L" [";
 	str += driver->getName();
 	str += L"]";
@@ -2207,7 +2218,14 @@ void Game::openInventory()
 	GUIFormSpecMenu::create(formspec, client, &input->joystick, fs_src,
 		txt_dst, client->getFormspecPrepend(), sound);
 
-	formspec->setFormSpec(fs_src->getForm(), inventoryloc);
+	const std::string form = fs_src->getForm();
+	formspec->setFormSpec(form, inventoryloc);
+
+	if (form.find("acknowledge_open[]") != std::string::npos) {
+		StringMap fields;
+		fields["open"] = "true";
+		txt_dst->gotText(fields);
+	}
 }
 
 
@@ -2591,12 +2609,25 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 
 	if (m_cache_enable_joysticks) {
 		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime;
+		f32 yaw = 0;
+		f32 pitch = 0;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		cam->camera_yaw -= input->sdl_game_controller.getCameraYaw() * c;
-		cam->camera_pitch += input->sdl_game_controller.getCameraPitch() * c;
+		yaw = input->sdl_game_controller.getCameraYaw();
+		pitch = input->sdl_game_controller.getCameraPitch();
+		cam->camera_yaw -= yaw * c;
+		cam->camera_pitch += pitch * c;
 #else
-		cam->camera_yaw -= input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL) * c;
-		cam->camera_pitch += input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL) * c;
+		yaw = input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL);
+		pitch = input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL)
+		cam->camera_yaw -= yaw * c;
+		cam->camera_pitch += pitch * c;
+#endif
+#ifdef HAVE_TOUCHSCREENGUI
+		if (g_touchscreengui) {
+			if (g_touchscreengui->getCurrentState() == STATE_HIDDEN &&
+					(yaw != 0 || pitch != 0))
+				g_touchscreengui->changeCurrentState(STATE_DEFAULT);
+		}
 #endif
 	}
 
@@ -3232,7 +3263,7 @@ void Game::processPlayerInteraction(f32 dtime, bool show_hud)
 	const ItemStack &tool_item = player->getWieldedItem(&selected_item, &hand_item);
 
 	const ItemDefinition &selected_def = selected_item.getDefinition(itemdef_manager);
-	f32 d = getToolRange(selected_def, hand_item.getDefinition(itemdef_manager));
+	f32 d = getToolRange(selected_item, hand_item, itemdef_manager);
 
 	core::line3d<f32> shootline;
 
@@ -4073,6 +4104,14 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		runData.update_draw_list_last_cam_dir = camera_direction;
 	}
 
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui) {
+		std::string message = g_touchscreengui->getMessage();
+		if (!message.empty())
+			m_game_ui->showTranslatedStatusText(message.c_str(), 4.0f);
+	}
+#endif
+
 	m_game_ui->update(*stats, client, draw_control, cam, runData.pointed_old, gui_chat_console, dtime);
 
 	/*
@@ -4135,8 +4174,15 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 				scene::ESNRP_SHADOW;
 	}
 
-	RenderingEngine::draw_scene(skycolor, m_game_ui->m_flags.show_hud,
-			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair, m_game_ui->m_flags.show_nametags);
+	bool show_hud = m_game_ui->m_flags.show_hud;
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui)
+		show_hud = (g_touchscreengui->getCurrentState() != STATE_HIDDEN);
+#endif
+
+	RenderingEngine::draw_scene(skycolor, show_hud,
+			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair,
+			m_game_ui->m_flags.show_nametags);
 
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
 	mat.EnableFlags = 0;
@@ -4280,15 +4326,17 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (g_menumgr.pausesGame()) {
-		runData.pause_game_timer += *dtime;
-		float disconnect_time = 180.0f;
+		u64 cur_time = porting::getTimeMs();
+		if (runData.pause_game_timer == 0)
+			runData.pause_game_timer = cur_time;
+		u64 disconnect_time = 180000;
 #ifdef __IOS__
-		disconnect_time = simple_singleplayer_mode ? 60.0f : 120.0f;
+		disconnect_time = simple_singleplayer_mode ? 60000 : 120000;
 #endif
-		if (runData.pause_game_timer > disconnect_time) {
+		if (cur_time - runData.pause_game_timer > disconnect_time)
 			g_gamecallback->disconnect();
-			return;
-		}
+	} else {
+		runData.pause_game_timer = 0;
 	}
 #endif
 }
@@ -4348,7 +4396,6 @@ void Game::pauseGame()
 		g_touchscreengui->reset();
 #endif
 	showPauseMenu();
-	runData.pause_game_timer = 0;
 }
 #endif
 
@@ -4401,7 +4448,44 @@ void Game::showDeathFormspec()
 	formspec->setFocus("btn_respawn");
 }
 
-#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
+void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple<const char*, std::string,
+		std::string, bool>> &buttons, float center_y, float btn_h, float gap)
+{
+	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
+	float y = center_y + gap * 0.5f - total_height * 0.5f;
+	float icon_size = btn_h - 0.25f;
+
+	if (buttons.size() <= 4)
+		y = y - gap * 3;
+
+	for (auto &[id, text, icon, is_exit] : buttons) {
+		if (is_exit)
+			os << "image_button_exit[3," << y << ";5," << btn_h
+			<< ";;" << id << ";" << text << ";;false]";
+		else
+			os << "image_button[3," << y << ";5," << btn_h
+			<< ";;" << id << ";" << text << ";;false]";
+		os << "image[3.12," << (y + 0.1f) << ";" << icon_size << "," << icon_size << ";" << icon << "]";
+		y += btn_h + gap;
+	}
+}
+
+void getButtonStyle(std::ostringstream &os)
+{
+	const bool high_dpi = RenderingEngine::isHighDpi();
+	const std::string x2 = high_dpi ? ".x2" : "";
+	std::string sound_name = g_settings->get("btn_press_sound");
+	str_formspec_escape(sound_name);
+	// image_button_exit inherits image_button's styles, no need to explicitly
+	// specify it here
+	os << "style_type[image_button;bgimg=gui/gui_button" << x2
+		<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20")
+		<< ";sound=" << sound_name << "]"
+		<< "style_type[image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
+		<< "style_type[image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]";
+}
+
+//#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
 void Game::showPauseMenu()
 {
 /*#ifdef HAVE_TOUCHSCREENGUI
@@ -4462,52 +4546,42 @@ void Game::showPauseMenu()
 		ypos -= 0.6f;
 	ypos += 0.5f;
 #endif
-	const bool high_dpi = RenderingEngine::isHighDpi();
-	const std::string x2 = high_dpi ? ".x2" : "";
-	std::string sound_name = g_settings->get("btn_press_sound");
-	str_formspec_escape(sound_name);
+
 	std::ostringstream os;
-
-	os << "formspec_version[1]" << SIZE_TAG
+	os << "formspec_version[1]" << "size[11,6]"
 		<< "no_prepend[]"
-		<< "bgcolor[#00000060;true]"
+		<< "bgcolor[#00000060;true]";
+	getButtonStyle(os);
 
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2 <<
-			".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") <<
-			";sound=" << sound_name << "]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
+	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
+	auto buttons = std::vector<std::tuple<const char*, std::string, std::string, bool>>{
+		{"btn_continue", strgettext("Continue"), sheet + "0,0", true}
+	};
 
-		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
-		<< strgettext("Continue") << ";;false]";
-
-	if (!simple_singleplayer_mode) {
-		os << "image_button[3.5," << (ypos++) << ";4,0.9;;btn_change_password;"
-			<< strgettext("Change Password") << ";;false]";
-	}
+	if (!simple_singleplayer_mode)
+		buttons.emplace_back("btn_change_password", strgettext("Change Password"), sheet + "0,2", false);
 
 #if USE_SOUND
-	if (g_settings->getBool("enable_sound")) {
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_sound;"
-			<< strgettext("Sound Volume") << ";;false]";
-	}
+	if (g_settings->getBool("enable_sound"))
+		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), sheet + "0,3", true);
 #endif
-	if (hasRealKeyboard)
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
-			<< strgettext("Change Keys")  << ";;false]";
+
+	if (porting::hasRealKeyboard())
+		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
 #ifdef HAVE_TOUCHSCREENGUI
-	else if (g_touchscreengui) {
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_touchscreen_edit;"
-			<< strgettext("Change Keys") << strgettext(" (Touch)") << ";;false]";
-	}
+	else if (g_touchscreengui)
+		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), sheet + "0,1", true);
 #endif
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
-		<< strgettext("Exit to Menu") << ";;false]";
+
+	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), sheet + "1,0", true);
+
 #if !defined(__ANDROID__) && !defined(__IOS__)
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_os;"
-		<< strgettext("Exit to OS")   << ";;false]";
+	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), sheet + "1,2", true);
 #endif
-/*		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
+
+	createPauseMenuButtons(os, buttons, 3.0f, 0.95f, 0.2f);
+
+/*	os	<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
 		<< "textarea[0.4,0.25;3.9,6.25;;" << PROJECT_NAME_C " " VERSION_STRING "\n"
 		<< "\n"
 		<<  strgettext("Game info:") << "\n";
@@ -4559,7 +4633,6 @@ void Game::showPauseMenu()
 	formspec->setFocus("btn_continue");
 	formspec->doPause = true;
 
-	runData.pause_game_timer = 0;
 	if (simple_singleplayer_mode)
 		pauseAnimation();
 }
@@ -4571,11 +4644,6 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 	str_formspec_escape(new_pw);
 	str_formspec_escape(confirm_pw);
 
-	const bool high_dpi = RenderingEngine::isHighDpi();
-	const std::string x2 = high_dpi ? ".x2" : "";
-	std::string sound_name = g_settings->get("btn_press_sound");
-	str_formspec_escape(sound_name);
-
 	std::ostringstream os;
 	os << "formspec_version[5]"
 		<< "size[10.5,7.5]"
@@ -4584,13 +4652,10 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "background9[0,0;0,0;bg_common.png;true;40]"
 		<< "pwdfield[1,1.2;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
 		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
-		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2
-			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << ";"
-			<< "sound=" << sound_name << "]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
-		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
+		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]";
+
+	getButtonStyle(os);
+	os << "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
 		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
 	if (new_pw != confirm_pw)
@@ -4613,8 +4678,6 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
  ****************************************************************************/
 /****************************************************************************/
 
-static Game *g_game = NULL;
-
 void the_game(bool *kill,
 		InputHandler *input,
 		const GameStartData &start_data,
@@ -4623,7 +4686,9 @@ void the_game(bool *kill,
 		bool *reconnect_requested) // Used for local game
 {
 	Game game;
-	g_game = &game;
+#if defined(__ANDROID__) || defined(__IOS__)
+	g_pause_menu_schedule = false;
+#endif
 
 	/* Make a copy of the server address because if a local singleplayer server
 	 * is created then this is updated and we don't want to change the value
@@ -4656,15 +4721,12 @@ void the_game(bool *kill,
 		porting::handleError("ModError", error_message);
 #endif
 	}
-	g_game = NULL;
 	game.shutdown();
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
 extern "C" void external_pause_game()
 {
-	if (!g_game)
-		return;
-	g_game->pauseGame();
+	g_pause_menu_schedule = true;
 }
 #endif

@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2024 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2024 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2025 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2025 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -25,7 +25,9 @@ import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.text.InputType
 import android.view.*
-import android.view.WindowManager.LayoutParams.*
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
+import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
@@ -34,7 +36,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.net.toUri
-import com.multicraft.game.MainActivity.Companion.radius
 import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
@@ -67,12 +68,12 @@ class GameActivity : SDLActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		try {
 			super.onCreate(savedInstanceState)
-		} catch (e: Error) {
+		} catch (_: Error) {
 			exitProcess(0)
-		} catch (e: Exception) {
+		} catch (_: Exception) {
 			exitProcess(0)
 		}
-		window.addFlags(FLAG_KEEP_SCREEN_ON)
+		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		isExtract = intent.getBooleanExtra("update", false)
 		if (isExtract) {
 			val container = FrameLayout(this).apply {
@@ -88,19 +89,14 @@ class GameActivity : SDLActivity() {
 				ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
 			)
 		}
-		hasKeyboard = hasHardKeyboard()
 		val prefs = PreferenceHelper.init(this)
 		prefs[TAG_BUILD_VER] = BuildConfig.VERSION_CODE
+		hasKeyboard = hasHardKeyboard()
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
 		super.onWindowFocusChanged(hasFocus)
 		if (hasFocus) window.makeFullScreen()
-	}
-
-	@Deprecated("Deprecated in Java")
-	override fun onBackPressed() {
-		// Ignore the back press so MultiCraft can handle it
 	}
 
 	override fun onPause() {
@@ -110,7 +106,12 @@ class GameActivity : SDLActivity() {
 
 	override fun onResume() {
 		super.onResume()
-		if (hasKeyboard) keyboardEvent(true)
+		if (hasKeyboard) {
+			try {
+				keyboardEvent(true)
+			} catch (_: UnsatisfiedLinkError) {
+			}
+		}
 		window.makeFullScreen()
 	}
 
@@ -194,7 +195,7 @@ class GameActivity : SDLActivity() {
 		// should be above `show()`
 		alertWindow.setSoftInputMode(SOFT_INPUT_STATE_VISIBLE)
 		alertDialog.show()
-		if (!isTablet())
+		if (!isTabletDp())
 			alertWindow.makeFullScreenAlert()
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
@@ -258,7 +259,7 @@ class GameActivity : SDLActivity() {
 		val alertWindow = alertDialog.window!!
 		alertWindow.setSoftInputMode(SOFT_INPUT_STATE_VISIBLE)
 		alertDialog.show()
-		if (!isTablet())
+		if (!isTabletDp())
 			alertWindow.makeFullScreenAlert()
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
@@ -286,7 +287,9 @@ class GameActivity : SDLActivity() {
 
 	fun openURI(uri: String?) {
 		val builder = CustomTabsIntent.Builder()
-		builder.setShareState(SHARE_STATE_OFF)
+			.setShareState(SHARE_STATE_OFF)
+			.setShowTitle(true)
+			.setUrlBarHidingEnabled(true)
 			.setStartAnimations(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
 			.setExitAnimations(this, R.anim.slide_in_top, R.anim.slide_out_bottom)
 		val customTabsIntent = builder.build()
@@ -305,22 +308,15 @@ class GameActivity : SDLActivity() {
 		print(exc)
 	}
 
-	fun upgrade(item: String): Boolean {
-		print(item)
-		return false
+	fun upgrade(item: String?): Boolean {
+		return item?.isEmpty() ?: false
 	}
 
-	fun getSecretKey(key: String): String {
-		return key
+	fun getSecretKey(secret: String?): String {
+		return secret ?: ""
 	}
 
-	fun getRoundScreen(): Int {
-		return radius
-	}
-
-	fun getCpuArchitecture(): String {
-		return System.getProperty("os.arch") ?: "null"
-	}
+	fun getCpuArchitecture(): String = System.getProperty("os.arch") ?: "null"
 
 	fun hideSplashScreen() {
 		runOnUiThread {

@@ -30,7 +30,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/string.h"
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 GUIEditBox::~GUIEditBox()
@@ -224,11 +224,13 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 		case EET_SDL_TEXT_EVENT:
 			if (event.SDLTextEvent.Type == irr::ESDLET_TEXTINPUT) {
-				core::stringw text =
-						utf8_to_stringw(event.SDLTextEvent.Text);
+				if (event.SDLTextEvent.Text) {
+					core::stringw text = utf8_to_stringw(
+							event.SDLTextEvent.Text);
 
-				for (size_t i = 0; i < text.size(); i++)
-					inputChar(text[i]);
+					for (size_t i = 0; i < text.size(); i++)
+						inputChar(text[i]);
+				}
 
 				return true;
 			}
@@ -299,7 +301,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 	bool altPressed = false;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	SDL_Keymod keymod = SDL_GetModState();
-	altPressed = keymod & KMOD_ALT;
+	altPressed = keymod & SDL_KMOD_ALT;
 #endif
 
 	// control shortcut handling

@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cpp_api/s_async.h"
 #include "serialization.h"
 #include <json/json.h>
+#include <zstd.h>
 #include "cpp_api/s_security.h"
 #include "porting.h"
 #include "convert_json.h"
@@ -270,6 +271,34 @@ int ModApiUtil::l_get_user_path(lua_State *L)
 	return 1;
 }
 
+enum LuaCompressMethod
+{
+	LUA_COMPRESS_METHOD_DEFLATE,
+	LUA_COMPRESS_METHOD_ZSTD,
+};
+
+static const struct EnumString es_LuaCompressMethod[] =
+{
+	{LUA_COMPRESS_METHOD_DEFLATE, "deflate"},
+	{LUA_COMPRESS_METHOD_ZSTD, "zstd"},
+	{0, nullptr},
+};
+
+static LuaCompressMethod get_compress_method(lua_State *L, int index)
+{
+	if (lua_isnoneornil(L, index))
+		return LUA_COMPRESS_METHOD_DEFLATE;
+	const char *name = luaL_checkstring(L, index);
+	int value;
+	if (!string_to_enum(es_LuaCompressMethod, value, name)) {
+		// Pretend it's deflate if we don't know, for compatibility reasons.
+		log_deprecated(L, "Unknown compression method \"" + std::string(name)
+			+ "\", defaulting to \"deflate\". You should pass a valid value.");
+		return LUA_COMPRESS_METHOD_DEFLATE;
+	}
+	return (LuaCompressMethod) value;
+}
+
 // compress(data, method, level)
 int ModApiUtil::l_compress(lua_State *L)
 {
@@ -278,12 +307,23 @@ int ModApiUtil::l_compress(lua_State *L)
 	size_t size;
 	const char *data = luaL_checklstring(L, 1, &size);
 
-	int level = -1;
-	if (!lua_isnone(L, 3) && !lua_isnil(L, 3))
-		level = readParam<float>(L, 3);
+	LuaCompressMethod method = get_compress_method(L, 2);
 
-	std::ostringstream os;
-	compressZlib(std::string(data, size), os, level);
+	std::ostringstream os(std::ios_base::binary);
+
+	if (method == LUA_COMPRESS_METHOD_DEFLATE) {
+		int level = -1;
+		if (!lua_isnoneornil(L, 3))
+			level = readParam<int>(L, 3);
+
+		compressZlib(reinterpret_cast<const u8 *>(data), size, os, level);
+	} else if (method == LUA_COMPRESS_METHOD_ZSTD) {
+		int level = ZSTD_CLEVEL_DEFAULT;
+		if (!lua_isnoneornil(L, 3))
+			level = readParam<int>(L, 3);
+
+		compressZstd(reinterpret_cast<const u8 *>(data), size, os, level);
+	}
 
 	std::string out = os.str();
 
@@ -299,9 +339,16 @@ int ModApiUtil::l_decompress(lua_State *L)
 	size_t size;
 	const char *data = luaL_checklstring(L, 1, &size);
 
-	std::istringstream is(std::string(data, size));
-	std::ostringstream os;
-	decompressZlib(is, os);
+	LuaCompressMethod method = get_compress_method(L, 2);
+
+	std::istringstream is(std::string(data, size), std::ios_base::binary);
+	std::ostringstream os(std::ios_base::binary);
+
+	if (method == LUA_COMPRESS_METHOD_DEFLATE) {
+		decompressZlib(is, os);
+	} else if (method == LUA_COMPRESS_METHOD_ZSTD) {
+		decompressZstd(is, os);
+	}
 
 	std::string out = os.str();
 
@@ -608,6 +655,12 @@ void ModApiUtil::Initialize(lua_State *L, int top)
 	API_FCT(get_version);
 	API_FCT(sha1);
 
+#ifndef SERVER
+	API_FCT(upgrade);
+	API_FCT(get_secret_key);
+	API_FCT(get_system_ram);
+#endif
+
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
 }
@@ -634,6 +687,7 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(sha1);
 
 	API_FCT(get_screen_info);
+	API_FCT(get_system_ram);
 	API_FCT(copy_to_clipboard);
 	API_FCT(get_translated_string);
 

@@ -30,6 +30,7 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <IGUIFont.h>
 #include "settings.h"
 #include "StyleSpec.h"
+#include "porting.h"
 
 #include "gettext.h"
 #include "client/renderingengine.h"
@@ -92,7 +93,15 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 	*/
 	float s = MYMIN(screensize.X / 380.f, screensize.Y / 180.f);
 #if HAVE_TOUCHSCREENGUI
+#ifdef __IOS__
+	const char *model = MultiCraft::getDeviceModel();
+	if (!isDevice11Inch(model) && !isDevice12and9Inch(model))
+		s *= 0.5f;
+	else
+		s *= 0.4f;
+#else
 	s *= RenderingEngine::isTablet() ? 0.4f : 0.5f;
+#endif
 #else
 	s *= 0.35f;
 #endif

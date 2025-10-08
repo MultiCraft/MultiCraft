@@ -1895,7 +1895,15 @@ msgstr "启用/禁用HUD"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle nametags"
-msgstr ""
+msgstr "切换姓名标签"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "隐藏界面"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "双击显示界面"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"

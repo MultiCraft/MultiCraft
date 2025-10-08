@@ -137,6 +137,7 @@ struct ClientInfo {
 	u16 prot_vers;
 	u8 major, minor, patch;
 	std::string vers_string, platform, sysinfo, lang_code;
+	u32 system_ram;
 };
 
 class Server : public con::PeerHandler, public MapEventReceiver,
@@ -363,7 +364,7 @@ public:
 
 	bool joinModChannel(const std::string &channel);
 	bool leaveModChannel(const std::string &channel);
-	bool sendModChannelMessage(const std::string &channel, const std::string &message);
+	bool sendModChannelMessage(const std::string &channel, const std::string &message, bool force = false);
 	ModChannel *getModChannel(const std::string &channel);
 
 	// Send block to specific player only

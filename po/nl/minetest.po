@@ -1920,6 +1920,14 @@ msgstr "Schakel HUD in/uit"
 msgid "Toggle nametags"
 msgstr "Naamplaatjes schakelen"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Verberg interface"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Gebruik dubbeltikken om interface te tonen"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Chatlogboek wisselen"

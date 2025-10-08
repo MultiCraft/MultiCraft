@@ -392,11 +392,15 @@ void Server::handleCommand_ClientReady(NetworkPacket* pkt)
 	std::string full_ver;
 	*pkt >> major_ver >> minor_ver >> patch_ver >> reserved >> full_ver;
 
-	m_clients.setClientVersion(peer_id, major_ver, minor_ver, patch_ver,
-		full_ver);
-
 	if (pkt->getRemainingBytes() >= 2)
 		*pkt >> playersao->getPlayer()->formspec_version;
+
+	u32 ram = 0;
+	if (pkt->getRemainingBytes() >= 4)
+		*pkt >> ram;
+
+	m_clients.setClientVersion(peer_id, major_ver, minor_ver, patch_ver,
+		full_ver, ram);
 
 	const std::vector<std::string> &players = m_clients.getPlayerNames();
 	NetworkPacket list_pkt(TOCLIENT_UPDATE_PLAYER_LIST, 0, peer_id);
@@ -890,8 +894,7 @@ bool Server::checkInteractDistance(RemotePlayer *player, const f32 d, const std:
 {
 	ItemStack selected_item, hand_item;
 	player->getWieldedItem(&selected_item, &hand_item);
-	f32 max_d = BS * getToolRange(selected_item.getDefinition(m_itemdef),
-			hand_item.getDefinition(m_itemdef));
+	f32 max_d = BS * getToolRange(selected_item, hand_item, m_itemdef);
 
 	// Cube diagonal * 1.5 for maximal supported node extents:
 	// sqrt(3) * 1.5 ≅ 2.6
