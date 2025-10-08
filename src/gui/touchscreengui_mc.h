@@ -146,6 +146,13 @@ struct hud_button_info
 	bool pressed = false;
 };
 
+struct csm_button_info
+{
+	std::string name;
+	rect<s32> button_rect;
+	bool pressed = false;
+};
+
 struct camera_info
 {
 	double yaw_change = 0.0;
@@ -252,6 +259,14 @@ public:
 		}
 	}
 
+	std::string getPressingCSMButton() { return m_pressing_csm_button; }
+	std::string getLastPressedCSMButton()
+	{
+		std::string btn = m_last_pressed_csm_button;
+		m_last_pressed_csm_button.clear();
+		return btn;
+	}
+
 	std::string getMessage()
 	{
 		std::string message = m_ui_message;
@@ -270,6 +285,8 @@ public:
 
 	void resetHud();
 	void registerHudItem(s32 index, const rect<s32> &button_rect);
+	void clearCSMButtons() { m_csm_buttons.clear(); };
+	void registerCSMButton(const std::string &name, const rect<s32> &button_rect);
 
 	void openEditor();
 
@@ -301,6 +318,9 @@ private:
 
 	std::map<size_t, bool> m_events;
 	std::vector<hud_button_info> m_hud_buttons;
+	std::vector<csm_button_info> m_csm_buttons;
+	std::string m_pressing_csm_button = "";
+	std::string m_last_pressed_csm_button = "";
 	std::vector<button_info *> m_buttons;
 	joystick_info m_joystick;
 	camera_info m_camera;

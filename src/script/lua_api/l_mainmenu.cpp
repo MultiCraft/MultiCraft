@@ -1138,15 +1138,6 @@ int ModApiMainMenu::l_load_translation(lua_State *L)
 }
 
 /******************************************************************************/
-int ModApiMainMenu::l_get_translated_string(lua_State * L)
-{
-	std::string string = luaL_checkstring(L, 1);
-	string = wide_to_utf8(translate_string(utf8_to_wide(string), g_client_translations));
-	lua_pushstring(L, string.c_str());
-	return 1;
-}
-
-/******************************************************************************/
 void ModApiMainMenu::Initialize(lua_State *L, int top)
 {
 	API_FCT(update_formspec);
@@ -1200,7 +1191,6 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(open_dir);
 	API_FCT(do_async_callback);
 	API_FCT(load_translation);
-	API_FCT(get_translated_string);
 }
 
 /******************************************************************************/

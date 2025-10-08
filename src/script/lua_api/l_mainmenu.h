@@ -177,8 +177,6 @@ private:
 
 	static int l_sleep_ms(lua_State *L);
 
-	static int l_get_translated_string(lua_State *L);
-
 public:
 
 	/**

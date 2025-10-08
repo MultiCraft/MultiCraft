@@ -787,6 +787,15 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 
 			if (!m_events[id]) {
+				for (auto &csm_button : m_csm_buttons) {
+					if (csm_button.button_rect.isPointInside(v2s32(x, y))) {
+						m_events[id] = true;
+						m_pressing_csm_button = csm_button.name;
+					}
+				}
+			}
+
+			if (!m_events[id]) {
 				if (m_camera.event_id == -1) {
 					m_events[id] = true;
 					m_camera.downtime = porting::getTimeMs();
@@ -1055,6 +1064,19 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 		if (restore_all_values)
 			restoreAllValues();
+
+		if (!m_pressing_csm_button.empty()) {
+			for (auto &csm_button : m_csm_buttons) {
+				if (m_pressing_csm_button == csm_button.name) {
+					// If the touch is still inside the button, trigger it
+					if (csm_button.button_rect.isPointInside(v2s32(x, y)))
+						m_last_pressed_csm_button = m_pressing_csm_button;
+					break;
+				}
+			}
+
+			m_pressing_csm_button.clear();
+		}
 
 		if (m_current_state != new_state)
 			changeCurrentState(new_state);
@@ -1410,6 +1432,12 @@ void TouchScreenGUI::registerHudItem(s32 index, const rect<s32> &button_rect)
 
 	hud_button_info hud_button = {index, button_rect};
 	m_hud_buttons.push_back(hud_button);
+}
+
+void TouchScreenGUI::registerCSMButton(const std::string &name, const rect<s32> &button_rect)
+{
+	csm_button_info csm_button = {name, button_rect};
+	m_csm_buttons.push_back(csm_button);
 }
 
 void TouchScreenGUI::resetHud()

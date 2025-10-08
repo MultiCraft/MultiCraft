@@ -41,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/hex.h"
 #include "util/hashing.h"
 #include <algorithm>
+#include "translation.h"
 
 #ifndef SERVER
 #include "client/renderingengine.h"
@@ -608,6 +609,15 @@ int ModApiUtil::l_copy_to_clipboard(lua_State *L)
 #endif
 	return 0;
 }
+
+// Note: This is the main menu & CSM get_translated_string, the server-side one
+int ModApiUtil::l_get_translated_string(lua_State * L)
+{
+	std::string string = luaL_checkstring(L, 1);
+	string = wide_to_utf8(translate_string(utf8_to_wide(string), g_client_translations));
+	lua_pushstring(L, string.c_str());
+	return 1;
+}
 #endif
 
 void ModApiUtil::Initialize(lua_State *L, int top)
@@ -679,6 +689,7 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(get_screen_info);
 	API_FCT(get_system_ram);
 	API_FCT(copy_to_clipboard);
+	API_FCT(get_translated_string);
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
@@ -725,6 +736,7 @@ void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	API_FCT(get_screen_info);
 	API_FCT(get_system_ram);
 	API_FCT(copy_to_clipboard);
+	API_FCT(get_translated_string);
 #else
 	FATAL_ERROR("InitializeMainMenu called from server");
 #endif

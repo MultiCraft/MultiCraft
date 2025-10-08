@@ -115,6 +115,9 @@ private:
 
 	// copy_to_clipboard(text)
 	static int l_copy_to_clipboard(lua_State *L);
+
+	// get_translated_string(text) (client & main menu, not server)
+	static int l_get_translated_string(lua_State *L);
 #endif
 
 public:

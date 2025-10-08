@@ -1474,6 +1474,15 @@ Displays a minimap on the HUD.
 * `alignment`: The alignment of the minimap.
 * `offset`: offset in pixels from position.
 
+### `csm_button`
+
+Displays a pressable image on the HUD. Takes the same parameters as `image`,
+plus passes the name field to `core.register_on_hud_button_press` CSM callbacks.
+The `text2` field may be used for a pressed texture.
+
+Only works on touchscreens, this acts exactly like a regular image on other
+devices.
+
 Representations of simple things
 ================================
 
