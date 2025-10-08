@@ -609,7 +609,6 @@ int ModApiUtil::l_copy_to_clipboard(lua_State *L)
 #endif
 	return 0;
 }
-#endif
 
 // Note: This is the main menu & CSM get_translated_string, the server-side one
 int ModApiUtil::l_get_translated_string(lua_State * L)
@@ -619,6 +618,7 @@ int ModApiUtil::l_get_translated_string(lua_State * L)
 	lua_pushstring(L, string.c_str());
 	return 1;
 }
+#endif
 
 void ModApiUtil::Initialize(lua_State *L, int top)
 {
