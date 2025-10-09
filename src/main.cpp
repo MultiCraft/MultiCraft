@@ -835,9 +835,11 @@ static bool determine_subgame(GameParams *game_params)
 			gamespec = findSubgame(g_settings->get("default_game"));
 			infostream << "Using default gameid [" << gamespec.id << "]" << std::endl;
 			if (!gamespec.isValid()) {
+#ifdef SERVER
 				warningstream << "Game specified in default_game ["
 				            << g_settings->get("default_game")
 				            << "] is invalid." << std::endl;
+#endif
 				return false;
 			}
 		}
