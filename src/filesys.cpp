@@ -785,8 +785,11 @@ bool extractZipFileInternal(io::IFileSystem *fs, irr_ptr<io::IFileArchive> &open
 		if (files_in_zip->isDirectory(i))
 			continue; // ignore, we create dirs as necessary
 
-		if (!fs::PathExists(fullpath_dir) && !fs::CreateAllDirs(fullpath_dir))
+		if (!fs::PathExists(fullpath_dir) && !fs::CreateAllDirs(fullpath_dir)) {
+			if (errorMessage != nullptr)
+				*errorMessage = "failed to create directory: " + fullpath_dir;
 			return false;
+		}
 
 		irr_ptr<io::IReadFile> toread(opened_zip->createAndOpenFile(i));
 
@@ -799,8 +802,11 @@ bool extractZipFileInternal(io::IFileSystem *fs, irr_ptr<io::IFileArchive> &open
 		}
 
 		std::ofstream os(fullpath.c_str(), std::ios::binary);
-		if (!os.good())
+		if (!os.good()) {
+			if (errorMessage != nullptr)
+				*errorMessage = "failed to open file for writing: " + fullpath;
 			return false;
+		}
 
 		char buffer[4096];
 		long total_read = 0;
@@ -815,6 +821,8 @@ bool extractZipFileInternal(io::IFileSystem *fs, irr_ptr<io::IFileArchive> &open
 			if (error) {
 				os.close();
 				remove(fullpath.c_str());
+				if (errorMessage != nullptr)
+					*errorMessage = "failed to write to file: " + fullpath;
 				return false;
 			}
 			total_read += bytes_read;
@@ -841,6 +849,8 @@ bool extractZipFile(io::IFileSystem *fs, const char *filename,
 	if (!zip_loader) {
 		warningstream << "fs::extractZipFile(): Irrlicht said it doesn't support ZIPs."
 		              << std::endl;
+		if (errorMessage != nullptr)
+			*errorMessage = "Irrlicht said it doesn't support ZIPs.";
 		return false;
 	}
 
