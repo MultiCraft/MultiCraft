@@ -743,7 +743,7 @@ bool open_url(const std::string &url, bool untrusted)
 		return false;
 	}
 
-	return open_uri(url);
+	return open_uri(url, untrusted);
 }
 
 #if defined(__APPLE__)
