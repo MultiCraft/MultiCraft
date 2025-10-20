@@ -709,7 +709,7 @@ int mt_snprintf(char *buf, const size_t buf_size, const char *fmt, ...)
 	return c;
 }
 
-static bool open_uri(const std::string &uri)
+static bool open_uri(const std::string &uri, bool untrusted = false)
 {
 	if (uri.find_first_of("\r\n") != std::string::npos) {
 		errorstream << "Unable to open URI as it is invalid, contains new line: " << uri << std::endl;
@@ -736,7 +736,7 @@ static bool open_uri(const std::string &uri)
 #endif
 }
 
-bool open_url(const std::string &url)
+bool open_url(const std::string &url, bool untrusted)
 {
 	if (url.substr(0, 7) != "http://" && url.substr(0, 8) != "https://") {
 		errorstream << "Unable to open browser as URL is missing schema: " << url << std::endl;
