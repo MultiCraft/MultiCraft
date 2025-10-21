@@ -62,7 +62,7 @@ std::string getInputDialogOwner();
 
 bool isInputDialogActive();
 
-void openURIAndroid(const std::string &url);
+bool openURIAndroid(const std::string &url, bool untrusted);
 
 /**
  * get text in current input dialog

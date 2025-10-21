@@ -719,12 +719,10 @@ static bool open_uri(const std::string &uri, bool untrusted = false)
 #if defined(_WIN32)
 	return (intptr_t)ShellExecuteA(NULL, NULL, uri.c_str(), NULL, NULL, SW_SHOWNORMAL) > 32;
 #elif defined(__ANDROID__)
-	openURIAndroid(uri);
-	return true;
+	return openURIAndroid(uri, untrusted);
 #elif defined(__APPLE__)
 #ifdef __IOS__
-	MultiCraft::openURL(uri.c_str());
-	return true;
+	return MultiCraft::openURI(uri.c_str(), untrusted);
 #else
 	const char *argv[] = {"open", uri.c_str(), NULL};
 	return posix_spawnp(NULL, "open", NULL, NULL, (char**)argv,
