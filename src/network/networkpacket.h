@@ -36,6 +36,9 @@ public:
 
 	void putRawPacket(const u8 *data, u32 datasize, session_t peer_id);
 	void clear();
+	void clearData();
+	u32 getReadOffset() { return m_read_offset; }
+	void setReadOffset(u32 read_offset) { m_read_offset = read_offset; }
 
 	// Getters
 	u32 getSize() const { return m_datasize; }
