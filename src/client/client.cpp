@@ -853,6 +853,14 @@ void Client::request_media(const std::vector<std::string> &file_requests)
 		pkt << file_request;
 	}
 
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode) {
+		std::string datastring(pkt.getString(0), pkt.getSize());
+		std::ostringstream tmp_os2(std::ios::binary);
+		compressZstd(datastring, tmp_os2);
+		pkt.clearData();
+		pkt.putLongString(tmp_os2.str());
+	}
+
 	Send(&pkt);
 
 	infostream << "Client: Sending media request list to server ("
@@ -1130,7 +1138,7 @@ void Client::sendInit(const std::string &playerName)
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
 	pkt << playerName;
 #if defined(__ANDROID__) || defined(__APPLE__)
-	pkt << (u8) 3;
+	pkt << (u8) 4;
 #else
 	pkt << (u8) 2;
 #endif
@@ -1313,9 +1321,30 @@ void Client::sendChatMessage(const std::wstring &message)
 {
 	// Exempt SSCSM com messages from limits
 	if (message.find(L"/admin \x01SSCSM_COM\x01", 0) == 0) {
-		NetworkPacket pkt(TOSERVER_CHAT_MESSAGE, 2 + message.size() * sizeof(u16));
-		pkt << message;
-		Send(&pkt);
+		if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode) {
+			bool use_compression = false;
+			if (message.size() > 64)
+				use_compression = true;
+
+			u8 version = use_compression ? 101 : 1;
+			NetworkPacket pkt(TOSERVER_CHAT_MESSAGE, 0);
+			pkt << version;
+			
+			if (use_compression) {
+				std::string datastring((const char*)message.data(), message.size() * sizeof(wchar_t));
+				std::ostringstream tmp_os2(std::ios::binary);
+				compressZstd(datastring, tmp_os2);
+				pkt.putLongString(tmp_os2.str());
+			} else {
+				pkt << message;
+			}
+			
+			Send(&pkt);
+		} else {
+			NetworkPacket pkt(TOSERVER_CHAT_MESSAGE, 2 + message.size() * sizeof(u16));
+			pkt << message;
+			Send(&pkt);
+		}
 		return;
 	}
 
@@ -1331,11 +1360,30 @@ void Client::sendChatMessage(const std::wstring &message)
 
 		m_chat_message_allowance -= 1.0f;
 
-		NetworkPacket pkt(TOSERVER_CHAT_MESSAGE, 2 + message.size() * sizeof(u16));
+		if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode) {
+			bool use_compression = false;
+			if (message.size() > 64)
+				use_compression = true;
 
-		pkt << message;
-
-		Send(&pkt);
+			u8 version = use_compression ? 101 : 1;
+			NetworkPacket pkt(TOSERVER_CHAT_MESSAGE, 0);
+			pkt << version;
+			
+			if (use_compression) {
+				std::string datastring((const char*)message.data(), message.size() * sizeof(wchar_t));
+				std::ostringstream tmp_os2(std::ios::binary);
+				compressZstd(datastring, tmp_os2);
+				pkt.putLongString(tmp_os2.str());
+			} else {
+				pkt << message;
+			}
+			
+			Send(&pkt);
+		} else {
+			NetworkPacket pkt(TOSERVER_CHAT_MESSAGE, 2 + message.size() * sizeof(u16));
+			pkt << message;
+			Send(&pkt);
+		}
 	} else if (m_out_chat_queue.size() < (u16) max_queue_size || max_queue_size == -1) {
 		m_out_chat_queue.push(message);
 	} else {
