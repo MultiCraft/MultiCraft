@@ -159,6 +159,7 @@ struct LocalFormspecHandler : public TextDest
 #ifdef HAVE_TOUCHSCREENGUI
 				if (g_touchscreengui) {
 					g_touchscreengui->openEditor();
+					g_touchscreengui->show();
 				}
 #endif
 				return;
@@ -2624,7 +2625,8 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 #endif
 #ifdef HAVE_TOUCHSCREENGUI
 		if (g_touchscreengui) {
-			if (g_touchscreengui->getCurrentState() == STATE_HIDDEN &&
+			if ((g_touchscreengui->getCurrentState() == STATE_HIDDEN ||
+					g_touchscreengui->getCurrentState() == STATE_EDITOR) &&
 					(yaw != 0 || pitch != 0))
 				g_touchscreengui->changeCurrentState(STATE_DEFAULT);
 		}
@@ -4566,11 +4568,18 @@ void Game::showPauseMenu()
 		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), sheet + "0,3", true);
 #endif
 
-	if (porting::hasRealKeyboard())
-		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
 #ifdef HAVE_TOUCHSCREENGUI
-	else if (g_touchscreengui)
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	if (input->last_input_device == IDT_GAMEPAD) {
+		// We don't have possibility to change gamepad keys
+	} else
+#endif
+	if ((input->last_input_device == IDT_KEYBOARD || input->last_input_device == IDT_MOUSE) && porting::hasRealKeyboard())
+		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
+	else
 		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), sheet + "0,1", true);
+#else
+	buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
 #endif
 
 	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), sheet + "1,0", true);

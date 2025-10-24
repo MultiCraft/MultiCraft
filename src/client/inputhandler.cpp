@@ -111,6 +111,8 @@ void KeyCache::populate()
 
 bool MyEventReceiver::OnEvent(const SEvent &event)
 {
+	setLastInputDevice(event);
+
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT ||
 			event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
@@ -138,7 +140,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
 			(sdl_game_controller && sdl_game_controller->isActive())) {
 		TouchScreenGUI::setActive(false);
-		if (m_touchscreengui && !isMenuActive())
+		if (m_touchscreengui && m_touchscreengui->getCurrentState() != STATE_EDITOR && !isMenuActive())
 			m_touchscreengui->hide();
 	}
 #endif
@@ -281,6 +283,48 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 	}
 	/* always return false in order to continue processing events */
 	return false;
+}
+
+void MyEventReceiver::setLastInputDevice(const SEvent &event)
+{
+	if (!input)
+		return;
+
+	InputDeviceType input_device = IDT_NONE;
+
+	if (g_settings->getBool("enable_joysticks")) {
+		if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT) {
+			input_device = IDT_GAMEPAD;
+		} else if (event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
+			const s16* value = event.SDLControllerAxisEvent.Value;
+			int deadzone = g_settings->getU16("joystick_deadzone");
+
+			if (value[SDL_GAMEPAD_AXIS_LEFT_TRIGGER] > deadzone ||
+					value[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER] > deadzone ||
+					std::abs(value[SDL_GAMEPAD_AXIS_LEFTX]) > deadzone ||
+					std::abs(value[SDL_GAMEPAD_AXIS_LEFTY]) > deadzone ||
+					std::abs(value[SDL_GAMEPAD_AXIS_RIGHTX]) > deadzone ||
+					std::abs(value[SDL_GAMEPAD_AXIS_RIGHTY]) > deadzone)
+				input_device = IDT_GAMEPAD;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		} else if (sdl_game_controller && sdl_game_controller->isFakeEvent()) {
+			input_device = IDT_GAMEPAD;
+#endif
+		}
+	}
+
+	if (input_device == IDT_NONE) {
+		if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
+			input_device = IDT_KEYBOARD;
+		} else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
+			input_device = IDT_MOUSE;
+		} else if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
+			input_device = IDT_TOUCH;
+		}
+	}
+
+	if (input_device != IDT_NONE)
+		input->last_input_device = input_device;
 }
 
 RealInputHandler::RealInputHandler(MyEventReceiver *receiver) : m_receiver(receiver)
