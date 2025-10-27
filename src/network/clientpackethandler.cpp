@@ -264,7 +264,10 @@ void Client::handleCommand_NodemetaChanged(NetworkPacket *pkt)
 
 	std::istringstream is(pkt->readLongString(), std::ios::binary);
 	std::stringstream sstr;
-	decompressZlib(is, sstr);
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
+		decompressZstd(is, sstr);
+	else
+		decompressZlib(is, sstr);
 
 	NodeMetadataList meta_updates_list(false);
 	meta_updates_list.deSerialize(sstr, m_itemdef, true);
@@ -780,7 +783,10 @@ void Client::handleCommand_NodeDef(NetworkPacket* pkt)
 	// Decompress node definitions
 	std::istringstream tmp_is(pkt->readLongString(), std::ios::binary);
 	std::ostringstream tmp_os;
-	decompressZlib(tmp_is, tmp_os);
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
+		decompressZstd(tmp_is, tmp_os);
+	else
+		decompressZlib(tmp_is, tmp_os);
 
 	// Deserialize node definitions
 	std::istringstream tmp_is2(tmp_os.str());
@@ -800,7 +806,10 @@ void Client::handleCommand_ItemDef(NetworkPacket* pkt)
 	// Decompress item definitions
 	std::istringstream tmp_is(pkt->readLongString(), std::ios::binary);
 	std::ostringstream tmp_os;
-	decompressZlib(tmp_is, tmp_os);
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
+		decompressZstd(tmp_is, tmp_os);
+	else
+		decompressZlib(tmp_is, tmp_os);
 
 	// Deserialize node definitions
 	std::istringstream tmp_is2(tmp_os.str());
