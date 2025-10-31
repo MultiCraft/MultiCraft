@@ -169,17 +169,19 @@ void showInputDialog(const std::string &hint, const std::string &current, int ed
 	jnienv->DeleteLocalRef(jcurrent);
 }
 
-void openURIAndroid(const std::string &url)
+bool openURIAndroid(const std::string &url, bool untrusted)
 {
 	jmethodID url_open = jnienv->GetMethodID(activityClass, "openURI",
-		"(Ljava/lang/String;)V");
+		"(Ljava/lang/String;Z)Z");
 
 	FATAL_ERROR_IF(url_open == nullptr,
 		"porting::openURIAndroid unable to find Java openURI method");
 
 	jstring jurl = jnienv->NewStringUTF(url.c_str());
-	jnienv->CallVoidMethod(activityObj, url_open, jurl);
+	jboolean result = jnienv->CallBooleanMethod(activityObj, url_open, jurl, (jboolean) untrusted);
 	jnienv->DeleteLocalRef(jurl);
+
+	return result == JNI_TRUE;
 }
 
 std::string getInputDialogOwner()

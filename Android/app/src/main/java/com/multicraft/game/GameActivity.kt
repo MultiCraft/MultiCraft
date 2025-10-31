@@ -285,18 +285,20 @@ class GameActivity : SDLActivity() {
 	fun notifyExitGame() {
 	}
 
-	fun openURI(uri: String?) {
+	@Suppress("unused")
+	fun openURI(uri: String?, untrusted: Boolean): Boolean {
+		if (uri == null) return false
+
 		val builder = CustomTabsIntent.Builder()
 			.setShareState(SHARE_STATE_OFF)
 			.setShowTitle(true)
 			.setUrlBarHidingEnabled(true)
 			.setStartAnimations(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
 			.setExitAnimations(this, R.anim.slide_in_top, R.anim.slide_out_bottom)
-		val customTabsIntent = builder.build()
-		try {
-			customTabsIntent.launchUrl(this, uri!!.toUri())
-		} catch (_: Exception) {
-		}
+			.build()
+		builder.launchUrl(this, uri.toUri())
+
+		return true
 	}
 
 	fun finishGame(exc: String?) {

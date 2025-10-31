@@ -28,7 +28,7 @@
 	float getDensity();
 	void notifyServerConnect(boolean);
 	void notifyExitGame();
-	void openURI(java.lang.String);
+	boolean openURI(java.lang.String, boolean);
 	void finishGame(java.lang.String);
 	void handleError(java.lang.String);
 	boolean upgrade(java.lang.String);

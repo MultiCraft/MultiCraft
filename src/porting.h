@@ -344,7 +344,7 @@ int mt_snprintf(char *buf, const size_t buf_size, const char *fmt, ...);
  * @param url The URL
  * @return true on success, false on failure
  */
-bool open_url(const std::string &url);
+bool open_url(const std::string &url, bool untrusted = false);
 
 /**
  * Opens a directory in the default file manager
