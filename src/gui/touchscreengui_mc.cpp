@@ -701,6 +701,11 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					event.KeyInput.Key != button_keycode)
 				changeCurrentState(STATE_DEFAULT);
 		}
+	} else if (m_current_state == STATE_EDITOR) {
+		if (event.EventType == EET_MOUSE_INPUT_EVENT ||
+				event.EventType == EET_KEY_INPUT_EVENT) {
+			changeCurrentState(STATE_DEFAULT);
+		}
 	}
 
 	if (!m_visible)

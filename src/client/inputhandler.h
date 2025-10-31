@@ -31,6 +31,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 class InputHandler;
 
+enum InputDeviceType
+{
+	IDT_NONE = 0,
+	IDT_KEYBOARD,
+	IDT_MOUSE,
+	IDT_GAMEPAD,
+	IDT_TOUCH
+};
+
 /****************************************************************************
  Fast key cache for main game loop
  ****************************************************************************/
@@ -189,6 +198,8 @@ public:
 #endif
 	}
 
+	void setLastInputDevice(const SEvent &event);
+
 	s32 mouse_wheel = 0;
 
 	JoystickController *joystick = nullptr;
@@ -267,6 +278,7 @@ public:
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	SDLGameController sdl_game_controller;
 #endif
+	InputDeviceType last_input_device = IDT_NONE;
 };
 /*
 	Separated input handler
