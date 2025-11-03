@@ -314,13 +314,12 @@ void MyEventReceiver::setLastInputDevice(const SEvent &event)
 	}
 
 	if (input_device == IDT_NONE) {
-		if (event.EventType == irr::EET_KEY_INPUT_EVENT) {
+		if (event.EventType == irr::EET_KEY_INPUT_EVENT)
 			input_device = IDT_KEYBOARD;
-		} else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT) {
+		else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
 			input_device = IDT_MOUSE;
-		} else if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
+		else if (event.EventType == irr::EET_TOUCH_INPUT_EVENT)
 			input_device = IDT_TOUCH;
-		}
 	}
 
 	if (input_device != IDT_NONE)
