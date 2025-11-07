@@ -1509,7 +1509,7 @@ void Server::SendInventory(PlayerSAO *sao, bool incremental)
 	sao->getInventory()->setModified(false);
 	player->setModified(true);
 
-	if (m_simple_singleplayer_mode) {
+	if (m_clients.getMulticraftProtocolVersion(sao->getPeerID()) > 4 || m_simple_singleplayer_mode) {
 		std::ostringstream tmp_os2(std::ios::binary);
 		compressZstd(os.str(), tmp_os2);
 		const std::string &s = tmp_os2.str();
@@ -1526,7 +1526,7 @@ void Server::SendChatMessage(session_t peer_id, const ChatMessage &message)
 {
 	bool use_compression = false;
 
-	if (m_simple_singleplayer_mode &&
+	if ((m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) &&
 			(message.sender.length() + message.message.length() > 64))
 		use_compression = true;
 
@@ -1954,7 +1954,7 @@ void Server::SendPlayerInventoryFormspec(session_t peer_id)
 
 	NetworkPacket pkt(TOCLIENT_INVENTORY_FORMSPEC, 0, peer_id);
 
-	if (m_simple_singleplayer_mode) {
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
 		std::ostringstream tmp_os2(std::ios::binary);
 		compressZstd(player->inventory_formspec, tmp_os2);
 		pkt.putLongString(tmp_os2.str());
@@ -2069,7 +2069,7 @@ void Server::SendActiveObjectRemoveAdd(RemoteClient *client, PlayerSAO *playersa
 
 	NetworkPacket pkt(TOCLIENT_ACTIVE_OBJECT_REMOVE_ADD, data.size(), client->peer_id);
 
-	if (m_simple_singleplayer_mode) {
+	if (m_clients.getMulticraftProtocolVersion(client->peer_id) > 4 || m_simple_singleplayer_mode) {
 		std::ostringstream tmp_os2(std::ios::binary);
 		compressZstd(data, tmp_os2);
 		const std::string &s = tmp_os2.str();
@@ -2091,7 +2091,7 @@ void Server::SendActiveObjectMessages(session_t peer_id, const std::string &data
 	NetworkPacket pkt(TOCLIENT_ACTIVE_OBJECT_MESSAGES,
 			datas.size(), peer_id);
 
-	if (m_simple_singleplayer_mode) {
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
 		std::ostringstream tmp_os2(std::ios::binary);
 		compressZstd(datas, tmp_os2);
 		const std::string &s = tmp_os2.str();
@@ -2635,7 +2635,7 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 	if (g_settings->getBool("disable_texture_packs"))
 		pkt << true;
 
-	if (m_simple_singleplayer_mode) {
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
 		std::string datastring(pkt.getString(0), pkt.getSize());
 		std::ostringstream tmp_os2(std::ios::binary);
 		compressZstd(datastring, tmp_os2);

@@ -348,7 +348,7 @@ void Server::handleCommand_RequestMedia(NetworkPacket* pkt)
 	u16 numfiles;
 	session_t peer_id = pkt->getPeerId();
 
-	if (m_simple_singleplayer_mode) {
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
 		std::istringstream is(pkt->readLongString(), std::ios::binary);
 		std::stringstream sstr;
 		decompressZstd(is, sstr);
@@ -776,7 +776,7 @@ void Server::handleCommand_ChatMessage(NetworkPacket* pkt)
 	std::wstring message;
 	session_t peer_id = pkt->getPeerId();
 
-	if (m_simple_singleplayer_mode) {
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
 		u8 version = 0;
 		*pkt >> version;
 

@@ -1143,7 +1143,7 @@ void Client::sendInit(const std::string &playerName)
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
 	pkt << playerName;
 #if defined(__ANDROID__) || defined(__APPLE__)
-	pkt << (u8) 4;
+	pkt << (u8) 5;
 #else
 	pkt << (u8) 2;
 #endif
