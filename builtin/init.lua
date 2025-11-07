@@ -34,6 +34,11 @@ dofile(commonpath .. "strict.lua")
 dofile(commonpath .. "serialize.lua")
 dofile(commonpath .. "misc_helpers.lua")
 
+if core.global_exists("jit") and jit.status() then
+	jit.opt.start("maxtrace=4000", "maxrecord=8000", "minstitch=2", "maxmcode=8192")
+	core.log("action", "Applied JIT compiler optimizations")
+end
+
 if INIT == "game" then
 	dofile(gamepath .. "init.lua")
 	assert(not core.get_http_api)
