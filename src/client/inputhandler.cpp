@@ -329,7 +329,7 @@ void MyEventReceiver::setLastInputDevice(const SEvent &event)
 void RealInputHandler::settingsCallback(const std::string &name, void *userdata)
 {
 	if (name == "enable_joysticks") {
-		RealInputHandler* input = reinterpret_cast<RealInputHandler*>(userdata);
+		RealInputHandler *input = (RealInputHandler *)userdata;
 		input->m_receiver->joystick_enabled = g_settings->getBool("enable_joysticks");
 	}
 }
