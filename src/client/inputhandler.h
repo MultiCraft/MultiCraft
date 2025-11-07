@@ -213,6 +213,8 @@ public:
 	TouchScreenGUI *m_touchscreengui;
 #endif
 
+	bool joystick_enabled = false;
+
 private:
 	// The current state of keys
 	KeyList keyIsDown;
@@ -373,6 +375,8 @@ private:
 #ifdef __IOS__
 	static bool SdlEventWatcher(void *userdata, SDL_Event *event);
 #endif
+
+	static void settingsCallback(const std::string &name, void *userdata);
 
 	MyEventReceiver *m_receiver = nullptr;
 	v2s32 m_mousepos;

@@ -116,7 +116,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT ||
 			event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
-		if (g_settings->getBool("enable_joysticks") && sdl_game_controller) {
+		if (joystick_enabled && sdl_game_controller) {
 			sdl_game_controller->translateEvent(event);
 			input->setCursorVisible(sdl_game_controller->isCursorVisible());
 		}
@@ -292,7 +292,7 @@ void MyEventReceiver::setLastInputDevice(const SEvent &event)
 
 	InputDeviceType input_device = IDT_NONE;
 
-	if (g_settings->getBool("enable_joysticks")) {
+	if (joystick_enabled) {
 		if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT) {
 			input_device = IDT_GAMEPAD;
 		} else if (event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
@@ -326,6 +326,14 @@ void MyEventReceiver::setLastInputDevice(const SEvent &event)
 		input->last_input_device = input_device;
 }
 
+void RealInputHandler::settingsCallback(const std::string &name, void *userdata)
+{
+	if (name == "enable_joysticks") {
+		RealInputHandler* input = reinterpret_cast<RealInputHandler*>(userdata);
+		input->m_receiver->joystick_enabled = g_settings->getBool("enable_joysticks");
+	}
+}
+
 RealInputHandler::RealInputHandler(MyEventReceiver *receiver) : m_receiver(receiver)
 {
 	m_receiver->joystick = &joystick;
@@ -337,6 +345,9 @@ RealInputHandler::RealInputHandler(MyEventReceiver *receiver) : m_receiver(recei
 	SDL_AddEventWatch(SdlEventWatcher, nullptr);
 #endif
 #endif
+
+	m_receiver->joystick_enabled = g_settings->getBool("enable_joysticks");
+	g_settings->registerChangedCallback("enable_joysticks", settingsCallback, this);
 }
 
 RealInputHandler::~RealInputHandler()
@@ -346,6 +357,8 @@ RealInputHandler::~RealInputHandler()
 	SDL_RemoveEventWatch(SdlEventWatcher, nullptr);
 #endif
 #endif
+
+	g_settings->deregisterChangedCallback("enable_joysticks", settingsCallback, this);
 }
 
 #ifdef __IOS__
