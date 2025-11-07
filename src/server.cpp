@@ -1445,7 +1445,7 @@ void Server::SendItemDef(session_t peer_id,
 	std::ostringstream tmp_os(std::ios::binary);
 	itemdef->serialize(tmp_os, protocol_version);
 	std::ostringstream tmp_os2(std::ios::binary);
-	if (m_simple_singleplayer_mode)
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 3 || m_simple_singleplayer_mode)
 		compressZstd(tmp_os.str(), tmp_os2);
 	else
 		compressZlib(tmp_os.str(), tmp_os2);
@@ -1471,7 +1471,7 @@ void Server::SendNodeDef(session_t peer_id,
 	std::ostringstream tmp_os(std::ios::binary);
 	nodedef->serialize(tmp_os, protocol_version);
 	std::ostringstream tmp_os2(std::ios::binary);
-	if (m_simple_singleplayer_mode)
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 3 || m_simple_singleplayer_mode)
 		compressZstd(tmp_os.str(), tmp_os2);
 	else
 		compressZlib(tmp_os.str(), tmp_os2);
@@ -2395,7 +2395,7 @@ void Server::sendMetadataChanged(const std::list<v3s16> &meta_updates, float far
 		std::ostringstream os(std::ios::binary);
 		meta_updates_list.serialize(os, client->net_proto_version, false, true);
 		std::ostringstream oss(std::ios::binary);
-		if (m_simple_singleplayer_mode)
+		if (m_clients.getMulticraftProtocolVersion(i) > 3 || m_simple_singleplayer_mode)
 			compressZstd(os.str(), oss);
 		else
 			compressZlib(os.str(), oss);

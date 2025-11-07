@@ -34,6 +34,8 @@ using namespace irr::gui;
 #include "hud.h"
 #include "guiHyperText.h"
 #include "util/string.h"
+#include "mainmenumanager.h"
+#include "porting.h"
 
 bool check_color(const std::string &str)
 {
@@ -1174,6 +1176,12 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 							newEvent.GUIEvent.EventType = EGET_BUTTON_CLICKED;
 							Parent->OnEvent(newEvent);
 						}
+
+						auto url_it = tag->attrs.find("url");
+						if (url_it != tag->attrs.end()) {
+							porting::open_url(url_it->second, g_gamecallback != nullptr);
+						}
+
 						break;
 					}
 				}

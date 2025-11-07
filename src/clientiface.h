@@ -507,6 +507,9 @@ public:
 	/* get protocol version of client */
 	u16 getProtocolVersion(session_t peer_id);
 
+	/* get Multicraft protocol version */
+	u8 getMulticraftProtocolVersion(session_t peer_id) { return 0; }
+
 	/* set client version */
 	void setClientVersion(session_t peer_id, u8 major, u8 minor, u8 patch,
 			const std::string &full, u32 ram);

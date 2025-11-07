@@ -168,8 +168,13 @@ void Client::loadMods()
 	m_script->loadModFromMemory(BUILTIN_MOD_NAME);
 
 	const std::string csmScript = g_settings->get("csm_script");
-	if (!csmScript.empty())
-		m_script->loadScript(csmScript, true);
+	if (!csmScript.empty()) {
+		try {
+			m_script->loadScript(csmScript, true);
+		} catch (ModError &e) {
+			errorstream << "Error loading csm_script: " << e.what() << std::endl;
+		}
+	}
 
 	if (!checkCSMRestrictionFlag(CSMRestrictionFlags::CSM_RF_THIRD_PARTY_MODS)) {
 		ClientModConfiguration modconf(getClientModsLuaPath());

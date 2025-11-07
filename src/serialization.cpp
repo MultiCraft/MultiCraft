@@ -108,7 +108,7 @@ void decompressZlib(std::istream &is, std::ostream &os, size_t limit)
 	char output_buffer[bufsize];
 	int status = 0;
 	int ret;
-	int bytes_read = 0;
+	//int bytes_read = 0;
 	int bytes_written = 0;
 	int input_buffer_len = 0;
 
@@ -158,7 +158,7 @@ void decompressZlib(std::istream &is, std::ostream &os, size_t limit)
 		//dstream<<"1 z.avail_in="<<z.avail_in<<std::endl;
 		status = inflate(&z, Z_NO_FLUSH);
 		//dstream<<"2 z.avail_in="<<z.avail_in<<std::endl;
-		bytes_read += is.gcount() - z.avail_in;
+		//bytes_read += is.gcount() - z.avail_in;
 		//dstream<<"bytes_read="<<bytes_read<<std::endl;
 
 		if(status == Z_NEED_DICT || status == Z_DATA_ERROR
