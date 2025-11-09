@@ -170,7 +170,8 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 		case FT_PIXEL_MODE_BGRA:
 		{
 			int font_size = parent->getFontSize();
-			bool needs_scaling = (face->num_fixed_sizes > 0 && bits.rows > 0 && bits.rows > font_size);
+			float scale = parent->getColorEmojiScale(face, font_size, 0);
+			bool needs_scaling = (face->num_fixed_sizes > 0 && scale != 1.0f);
 
 			if (needs_scaling)
 				texture_size = d;
@@ -191,8 +192,6 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 			image->unlock();
 
 			if (needs_scaling) {
-				float scale = (float)font_size / bits.rows;
-
 				core::dimension2du d_new(bits.width * scale, bits.rows * scale);
 
 				irr::video::IImage* scaled_img = driver->createImage(video::ECF_A8R8G8B8, d_new);
@@ -225,6 +224,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		best_fixed_size_index = getBestFixedSizeIndex(face, font_size);
 		FT_Select_Size(face, best_fixed_size_index);
+		scale = parent->getColorEmojiScale(face, font_size, loadFlags);
 	}
 
 	// Attempt to load the glyph.
@@ -233,10 +233,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		return;
 
 	FT_GlyphSlot glyph = face->glyph;
-
-	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0 && glyph->bitmap.rows > 0) {
-		scale = (float)font_size / glyph->bitmap.rows;
-	}
 
 	if (!FT_HAS_COLOR(face)) {
 		if (bold) {
@@ -630,6 +626,35 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 		return false;
 
 	return true;
+}
+
+float CGUITTFont::getColorEmojiScale(FT_Face face, u32 font_size,
+		const FT_Int32 loadFlags)
+{
+	static bool calculated = false;
+	static float scale = 1.0f;
+	
+	if (calculated)
+		return scale;
+	
+	if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0)
+		return 1.0f;
+	
+	u32 best_index = getBestFixedSizeIndex(face, font_size);
+	FT_Select_Size(face, best_index);
+	scale = (float)font_size / face->available_sizes[best_index].height;
+	
+	FT_UInt glyph_index = FT_Get_Char_Index(face, 0x1F600); // smile
+	if (glyph_index == 0)
+		glyph_index = FT_Get_Char_Index(face, 'A');
+	
+	if (FT_Load_Glyph(face, glyph_index, loadFlags) == FT_Err_Ok) {
+		if (face->glyph->bitmap.rows > 0)
+			scale = (float)font_size / face->glyph->bitmap.rows;
+	}
+	
+	calculated = true;
+	return scale;
 }
 
 CGUITTFont::~CGUITTFont()
