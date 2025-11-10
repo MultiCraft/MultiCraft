@@ -365,7 +365,8 @@ namespace gui
 			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
 
 			bool testEmojiFont(const io::path& filename);
-			float getColorEmojiScale(FT_Face face, u32 font_size, const FT_Int32 loadFlags);
+			void calculateColorEmojiScale(FT_Face face, u32 font_size);
+			float getColorEmojiScale() { return color_emoji_scale; }
 
 		protected:
 			bool use_monochrome;
@@ -429,6 +430,7 @@ namespace gui
 			u32 shadow_alpha;
 			bool bold;
 			bool italic;
+			float color_emoji_scale = 1.0f;
 	};
 
 } // end namespace gui
