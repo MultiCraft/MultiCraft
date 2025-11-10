@@ -769,17 +769,14 @@ core.register_chatcommand("spawnentity", {
 			return false, "EntityName required"
 		end
 		entityname = guess_mod_name(entityname, core.registered_entities)
-		core.log("action", ("%s invokes /spawnentity, entityname=%q")
-				:format(name, entityname))
-		local player = core.get_player_by_name(name)
-		if player == nil then
-			core.log("error", "Unable to spawn entity, player is nil")
-			return false, "Unable to spawn entity, player is nil"
-		end
 		if not core.registered_entities[entityname] then
 			return false, "Cannot spawn an unknown entity"
 		end
 		if p == "" then
+			local player = core.get_player_by_name(name)
+			if player == nil then
+				return false, "Unable to spawn entity, player is nil"
+			end
 			p = player:get_pos()
 		else
 			p = core.string_to_pos(p)
@@ -787,6 +784,8 @@ core.register_chatcommand("spawnentity", {
 				return false, "Invalid parameters ('" .. param .. "')"
 			end
 		end
+		core.log("action", ("%s invokes /spawnentity, entityname=%s, pos=%s")
+				:format(name, entityname, core.pos_to_string(p)))
 		p.y = p.y + 1
 		local obj = core.add_entity(p, entityname)
 		local msg = obj and "%q spawned." or "%q failed to spawn."
