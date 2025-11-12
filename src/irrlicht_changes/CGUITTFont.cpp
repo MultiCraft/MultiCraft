@@ -265,13 +265,8 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	advance.x *= scale;
 	advance.y *= scale;
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-		int bitmap_top = glyph->bitmap_top;
-		// If bitmap top is equal to total bitmap height then font most likely
-		// doesn't contain proper information where to place glyphs. Use fixed
-		// factor in this case.
-		if (glyph->bitmap_top == bits.rows)
-			bitmap_top = bits.rows * 0.85f;
-		offset = core::vector2di(glyph->bitmap_left * scale, bitmap_top * scale);
+		int bitmap_top = parent->getColorEmojiOffset();
+		offset = core::vector2di(glyph->bitmap_left * scale, bitmap_top);
 	} else {
 		offset = core::vector2di(glyph->bitmap_left * scale, glyph->bitmap_top * scale);
 	}
@@ -588,7 +583,7 @@ bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font
 	}
 
 	if (face)
-		calculateColorEmojiScale(face, size);
+		calculateColorEmojiParams(face, size);
 
 	return true;
 }
@@ -650,29 +645,41 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	return true;
 }
 
-void CGUITTFont::calculateColorEmojiScale(FT_Face face, u32 font_size)
+void CGUITTFont::calculateColorEmojiParams(FT_Face face, u32 font_size)
 {
 	float scale = 1.0f;
+	u32 bitmap_top = font_size;
 
-	if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0)
-		return;
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+		u32 best_index = getBestFixedSizeIndex(face, font_size);
+		FT_Select_Size(face, best_index);
+		scale = (float)font_size / face->available_sizes[best_index].height;
 
-	u32 best_index = getBestFixedSizeIndex(face, font_size);
-	FT_Select_Size(face, best_index);
-	scale = (float)font_size / face->available_sizes[best_index].height;
+		FT_UInt glyph_index = FT_Get_Char_Index(face, 0x1F600); // smile
+		if (glyph_index == 0)
+			glyph_index = FT_Get_Char_Index(face, 'A');
 
-	FT_UInt glyph_index = FT_Get_Char_Index(face, 0x1F600); // smile
-	if (glyph_index == 0)
-		glyph_index = FT_Get_Char_Index(face, 'A');
+		FT_Int32 flags = load_flags | FT_LOAD_COLOR;
 
-	FT_Int32 flags = load_flags | FT_LOAD_COLOR;
-
-	if (FT_Load_Glyph(face, glyph_index, flags) == FT_Err_Ok) {
-		if (face->glyph->bitmap.rows > 0)
-			scale = (float)font_size / face->glyph->bitmap.rows;
+		if (FT_Load_Glyph(face, glyph_index, flags) == FT_Err_Ok) {
+			if (face->glyph->bitmap.rows > 0) {
+				scale = (float)font_size / face->glyph->bitmap.rows;
+			}
+		}
 	}
 
 	color_emoji_scale = scale;
+
+	FT_UInt glyph_index = FT_Get_Char_Index(tt_faces[0], 'A');
+	FT_Int32 flags = load_flags | FT_LOAD_DEFAULT;
+
+	if (FT_Load_Glyph(tt_faces[0], glyph_index, flags) == FT_Err_Ok) {
+		if (tt_faces[0]->glyph->bitmap_top > 0)
+			bitmap_top = tt_faces[0]->glyph->bitmap_top +
+					(font_size - tt_faces[0]->glyph->bitmap.rows) / 2;
+	}
+
+	color_emoji_offset = bitmap_top;
 }
 
 CGUITTFont::~CGUITTFont()
