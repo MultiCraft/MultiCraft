@@ -78,6 +78,17 @@ int main(int argc, char *argv[])
 	_Exit(0);
 }
 
+static std::string readJavaString(jstring j_str)
+{
+	// Get string as a UTF-8 C string
+	const char *c_str = jnienv->GetStringUTFChars(j_str, nullptr);
+	// Save it
+	std::string str(c_str);
+	// And free the C string
+	jnienv->ReleaseStringUTFChars(j_str, c_str);
+	return str;
+}
+
 extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
 			JNIEnv *env, jclass clazz)
@@ -93,8 +104,8 @@ extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_update(
 		JNIEnv *env, jclass clazz, jstring key, jstring value)
 	{
-		const std::string key_str = porting::readJavaString(key);
-		const std::string value_str = porting::readJavaString(value);
+		const std::string key_str = readJavaString(key);
+		const std::string value_str = readJavaString(value);
 		external_update(key_str.c_str(), value_str.c_str());
 	}
 }
@@ -133,17 +144,6 @@ void cleanupAndroid()
 	setenv("CPUPROFILE", (path_user + DIR_DELIM + "gmon.out").c_str(), 1);
 	moncleanup();
 #endif
-}
-
-static std::string readJavaString(jstring j_str)
-{
-	// Get string as a UTF-8 C string
-	const char *c_str = jnienv->GetStringUTFChars(j_str, nullptr);
-	// Save it
-	std::string str(c_str);
-	// And free the C string
-	jnienv->ReleaseStringUTFChars(j_str, c_str);
-	return str;
 }
 
 void initializePaths()
