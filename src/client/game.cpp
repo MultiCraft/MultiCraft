@@ -659,6 +659,9 @@ using PausedNodesList = std::vector<std::pair<irr_ptr<scene::IAnimatedMeshSceneN
 
 #if defined(__ANDROID__) || defined(__IOS__)
 static std::atomic<bool> g_pause_menu_schedule(false);
+static std::mutex g_update_mutex;
+static std::string g_update_key;
+static std::string g_update_value;
 #endif
 
 /* This is not intended to be a public class. If a public class becomes
@@ -1126,6 +1129,15 @@ void Game::run()
 		if (g_pause_menu_schedule) {
 			g_pause_menu_schedule = false;
 			pauseGame();
+		}
+
+		if (client->modsLoaded()) {
+			MutexAutoLock lock(g_update_mutex);
+			if (!g_update_key.empty()) {
+				client->getScript()->on_update(g_update_key, g_update_value);
+				g_update_key.clear();
+				g_update_value.clear();
+			}
 		}
 #endif
 
@@ -4748,5 +4760,12 @@ void the_game(bool *kill,
 extern "C" void external_pause_game()
 {
 	g_pause_menu_schedule = true;
+}
+
+extern "C" void external_update(const char* key, const char* value)
+{
+	MutexAutoLock lock(g_update_mutex);
+	g_update_key = key;
+	g_update_value = value;
 }
 #endif

@@ -50,6 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern int real_main(int argc, char *argv[]);
 extern "C" void external_pause_game();
+extern "C" void external_update(const char* key, const char* value);
 
 static std::atomic<bool> ran = {false};
 
@@ -88,6 +89,13 @@ extern "C" {
 			JNIEnv *env, jclass clazz, jboolean hasKeyboard)
 	{
 		device_has_keyboard = hasKeyboard;
+	}
+	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_update(
+		JNIEnv *env, jclass clazz, jstring key, jstring value)
+	{
+		const std::string key = readJavaString(key);
+		const std::string value = readJavaString(value);
+		external_update(key.c_str(), value.c_str());
 	}
 }
 
