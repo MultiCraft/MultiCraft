@@ -93,9 +93,9 @@ extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_update(
 		JNIEnv *env, jclass clazz, jstring key, jstring value)
 	{
-		const std::string key = readJavaString(key);
-		const std::string value = readJavaString(value);
-		external_update(key.c_str(), value.c_str());
+		const std::string key_str = porting::readJavaString(key);
+		const std::string value_str = porting::readJavaString(value);
+		external_update(key_str.c_str(), value_str.c_str());
 	}
 }
 
