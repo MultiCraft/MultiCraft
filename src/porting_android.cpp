@@ -81,11 +81,11 @@ int main(int argc, char *argv[])
 static std::string readJavaString(jstring j_str)
 {
 	// Get string as a UTF-8 C string
-	const char *c_str = jnienv->GetStringUTFChars(j_str, nullptr);
+	const char *c_str = porting::jnienv->GetStringUTFChars(j_str, nullptr);
 	// Save it
 	std::string str(c_str);
 	// And free the C string
-	jnienv->ReleaseStringUTFChars(j_str, c_str);
+	porting::jnienv->ReleaseStringUTFChars(j_str, c_str);
 	return str;
 }
 
