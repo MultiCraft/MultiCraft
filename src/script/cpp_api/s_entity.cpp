@@ -175,7 +175,13 @@ std::string ScriptApiEntity::luaentity_GetStaticdata(u16 id)
 	lua_pushvalue(L, object); // self
 
 	setOriginFromTable(object);
-	PCALL_RES(lua_pcall(L, 1, 1, error_handler));
+	try {
+		PCALL_RES(lua_pcall(L, 1, 1, error_handler));
+	} catch (LuaError &e) {
+		getServer()->setAsyncFatalError(
+				std::string("get_staticdata: ") + e.what() + "\n"
+				+ script_get_backtrace(L));
+	}
 
 	lua_remove(L, object);
 	lua_remove(L, error_handler);
