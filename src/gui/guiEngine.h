@@ -156,6 +156,10 @@ public:
 
 	static float g_timeofday;
 
+#if defined(__ANDROID__) || defined(__IOS__)
+	static bool readUpdate(std::string *key_to, std::string *value_to);
+#endif
+
 private:
 
 	/** find and run the main menu script */
@@ -287,6 +291,5 @@ private:
 	s32 playSound(const SimpleSoundSpec &spec, bool looped);
 	/** stop playing a sound started with playSound() */
 	void stopSound(s32 handle);
-
 
 };

@@ -1127,6 +1127,12 @@ void Game::run()
 			g_pause_menu_schedule = false;
 			pauseGame();
 		}
+
+		if (client->modsLoaded()) {
+			std::string key, value;
+			if (GUIEngine::readUpdate(&key, &value))
+				client->getScript()->on_update(key, value);
+		}
 #endif
 
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
