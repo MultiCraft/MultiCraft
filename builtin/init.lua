@@ -38,6 +38,7 @@ if INIT == "game" then
 	dofile(gamepath .. "init.lua")
 	assert(not core.get_http_api)
 elseif INIT == "mainmenu" then
+	dofile(core.get_mainmenu_path() .. DIR_DELIM .. "register.lua")
 	local mm_script = core.settings:get("main_menu_script")
 	if not mm_script or mm_script == "" then
 		mm_script = scriptdir .. ".." .. DIR_DELIM .. "menu" .. DIR_DELIM .. "init.lua"
