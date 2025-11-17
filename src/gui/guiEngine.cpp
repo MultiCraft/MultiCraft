@@ -326,7 +326,7 @@ void GUIEngine::run()
 
 		m_script->step();
 
-#if defined(__ANDROID__) || defined(__IOS__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 		std::string key, value;
 		if (readUpdate(&key, &value))
 			m_script->handleUpdate(key, value);
@@ -681,7 +681,7 @@ unsigned int GUIEngine::queueAsync(const std::string &serialized_func,
 
 
 /******************************************************************************/
-#if defined(__ANDROID__) || defined(__IOS__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 static std::mutex g_update_mutex;
 static std::string g_update_key;
 static std::string g_update_value;

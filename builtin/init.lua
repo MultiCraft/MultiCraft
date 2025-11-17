@@ -38,7 +38,8 @@ if INIT == "game" then
 	dofile(gamepath .. "init.lua")
 	assert(not core.get_http_api)
 elseif INIT == "mainmenu" then
-	dofile(core.get_mainmenu_path() .. DIR_DELIM .. "register.lua")
+	local mainmenudir = core.get_mainmenu_path() .. DIR_DELIM
+	dofile(mainmenudir .. "register.lua")
 	local mm_script = core.settings:get("main_menu_script")
 	if not mm_script or mm_script == "" then
 		mm_script = scriptdir .. ".." .. DIR_DELIM .. "menu" .. DIR_DELIM .. "init.lua"
@@ -57,7 +58,7 @@ elseif INIT == "mainmenu" then
 		end
 	end
 	if not custom_loaded then
-		dofile(core.get_mainmenu_path() .. DIR_DELIM .. "init.lua")
+		dofile(mainmenudir .. "init.lua")
 	end
 elseif INIT == "async" then
 	dofile(asyncpath .. "init.lua")
