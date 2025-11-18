@@ -78,14 +78,14 @@ int main(int argc, char *argv[])
 	_Exit(0);
 }
 
-static std::string readJavaString(jstring j_str)
+static std::string readJavaString(JNIEnv *env, jstring j_str)
 {
 	// Get string as a UTF-8 C string
-	const char *c_str = porting::jnienv->GetStringUTFChars(j_str, nullptr);
+	const char *c_str = env->GetStringUTFChars(j_str, nullptr);
 	// Save it
 	std::string str(c_str);
 	// And free the C string
-	porting::jnienv->ReleaseStringUTFChars(j_str, c_str);
+	env->ReleaseStringUTFChars(j_str, c_str);
 	return str;
 }
 
@@ -104,8 +104,8 @@ extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_update(
 		JNIEnv *env, jclass clazz, jstring key, jstring value)
 	{
-		const std::string key_str = readJavaString(key);
-		const std::string value_str = readJavaString(value);
+		const std::string key_str = readJavaString(env, key);
+		const std::string value_str = readJavaString(env, value);
 		external_update(key_str.c_str(), value_str.c_str());
 	}
 }
@@ -219,7 +219,7 @@ std::string getInputDialogValue()
 		"porting::getInputDialogValue unable to find Java getDialogValue method");
 
 	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, dialogvalue);
-	std::string returnValue = readJavaString(result);
+	std::string returnValue = readJavaString(porting::jnienv, result);
 	jnienv->DeleteLocalRef(result);
 
 	return returnValue;
@@ -389,7 +389,7 @@ std::string getSecretKey(const std::string &key)
 
 	jstring jkey = jnienv->NewStringUTF(key.c_str());
 	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
-	std::string returnValue = readJavaString(result);
+	std::string returnValue = readJavaString(porting::jnienv, result);
 
 	jnienv->DeleteLocalRef(jkey);
 	jnienv->DeleteLocalRef(result);
