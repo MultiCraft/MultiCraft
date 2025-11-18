@@ -54,6 +54,7 @@ public:
 		PADDING,
 		FONT,
 		FONT_SIZE,
+		FONT_OUTLINE,
 		COLORS,
 		BORDERCOLORS,
 		BORDERWIDTHS,
@@ -152,6 +153,8 @@ public:
 			return FONT;
 		} else if (name == "font_size") {
 			return FONT_SIZE;
+		} else if (name == "font_outline") {
+			return FONT_OUTLINE;
 		} else if (name == "colors") {
 			return COLORS;
 		} else if (name == "bordercolors") {
@@ -359,10 +362,11 @@ public:
 
 	gui::IGUIFont *getFont() const
 	{
-		FontSpec spec(FONT_SIZE_UNSPECIFIED, FM_Standard, false, false);
+		FontSpec spec(FONT_SIZE_UNSPECIFIED, FM_Standard, false, false, 0);
 
 		const std::string &font = properties[FONT];
 		const std::string &size = properties[FONT_SIZE];
+		const std::string &outline = properties[FONT_OUTLINE];
 
 		if (font.empty() && size.empty())
 			return nullptr;
@@ -393,6 +397,11 @@ public:
 			}
 
 			spec.size = (unsigned)std::min(std::max(calc_size, 1), 999);
+		}
+		
+		if (!outline.empty()) {
+			int outline_int = stoi(outline);
+			spec.outline = (unsigned)std::min(std::max(outline_int, 1), 255);
 		}
 
 		return g_fontengine->getFont(spec);

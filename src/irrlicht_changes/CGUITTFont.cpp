@@ -212,7 +212,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 
 void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags,
-		bool bold, bool italic)
+		bool bold, bool italic, u16 outline)
 {
 	if (isLoaded) return;
 
@@ -251,6 +251,12 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 			italic_matrix.yy = 0x10000;
 
 			FT_Outline_Transform(&(glyph->outline), &italic_matrix);
+		}
+		
+		if (outline > 0) {
+			errorstream << "!!! outline " << outline << std::endl;
+		    FT_Pos outline_strength = outline * 64;
+		    FT_Outline_Embolden(&(glyph->outline), outline_strength);
 		}
 	}
 
@@ -322,7 +328,7 @@ void SGUITTGlyph::unload()
 CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 		const io::path& filename, const u32 size, const bool antialias,
 		const bool transparency, const bool bold, const bool italic,
-		const u32 shadow, const u32 shadow_alpha)
+		u16 outline, const u32 shadow, const u32 shadow_alpha)
 {
 	if (!c_libraryLoaded)
 	{
@@ -336,6 +342,7 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 	font->shadow_alpha = shadow_alpha;
 	font->bold = bold;
 	font->italic = italic;
+	font->outline = outline;
 
 	bool ret = font->load(filename, size, antialias, transparency, shadow);
 	if (!ret)
@@ -349,7 +356,8 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 
 CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
 		const io::path& filename, const u32 size, const bool antialias,
-		const bool transparency, const bool bold, const bool italic)
+		const bool transparency, const bool bold, const bool italic,
+		u16 outline)
 {
 	if (!c_libraryLoaded)
 	{
@@ -362,6 +370,7 @@ CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
 
 	font->bold = bold;
 	font->italic = italic;
+	font->outline = outline;
 	font->Device = device;
 
 	bool ret = font->load(filename, size, antialias, transparency, false);
@@ -376,7 +385,7 @@ CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
 
 CGUITTFont* CGUITTFont::create(IGUIEnvironment *env, const io::path& filename,
 		const u32 size, const bool antialias, const bool transparency,
-		const bool bold, const bool italic)
+		const bool bold, const bool italic, u16 outline)
 {
 	return CGUITTFont::createTTFont(env, filename, size, antialias,
 			transparency, bold, italic);
@@ -384,10 +393,10 @@ CGUITTFont* CGUITTFont::create(IGUIEnvironment *env, const io::path& filename,
 
 CGUITTFont* CGUITTFont::create(IrrlichtDevice *device, const io::path& filename,
 		const u32 size, const bool antialias, const bool transparency,
-		const bool bold, const bool italic)
+		const bool bold, const bool italic, u16 outline)
 {
 	return CGUITTFont::createTTFont(device, filename, size, antialias,
-			transparency, bold, italic);
+			transparency, bold, italic, outline);
 }
 
 //////////////////////
@@ -1137,7 +1146,7 @@ begin:
 					flags |= FT_LOAD_DEFAULT;
 
 				glyph->preload(char_index, tt_face, Driver, size, flags, bold,
-						italic);
+						italic, outline);
 
 				if (!glyph->isLoaded && current_face < tt_faces.size()) {
 					current_face++;

@@ -74,7 +74,7 @@ namespace gui
 		//! before the batch draw call.
 		void preload(u32 char_index, FT_Face face, video::IVideoDriver* driver,
 				u32 font_size, const FT_Int32 loadFlags, bool bold,
-				bool italic);
+				bool italic, u16 outline);
 
 		//! Unloads the glyph.
 		void unload();
@@ -236,20 +236,20 @@ namespace gui
 			static CGUITTFont* createTTFont(IGUIEnvironment *env,
 					const io::path& filename, const u32 size,
 					const bool antialias = true, const bool transparency = true,
-					const bool bold = false, const bool italic = false,
+					const bool bold = false, const bool italic = false, u16 outline = 0,
 					const u32 shadow = 0, const u32 shadow_alpha = 255);
 			static CGUITTFont* createTTFont(IrrlichtDevice *device,
 					const io::path& filename, const u32 size,
 					const bool antialias = true, const bool transparency = true,
-					const bool bold = false, const bool italic = false);
+					const bool bold = false, const bool italic = false, u16 outline = 0);
 			static CGUITTFont* create(IGUIEnvironment *env,
 					const io::path& filename, const u32 size,
 					const bool antialias = true, const bool transparency = true,
-					const bool bold = false, const bool italic = false);
+					const bool bold = false, const bool italic = false, u16 outline = 0);
 			static CGUITTFont* create(IrrlichtDevice *device,
 					const io::path& filename, const u32 size,
 					const bool antialias = true, const bool transparency = true,
-					const bool bold = false, const bool italic = false);
+					const bool bold = false, const bool italic = false, u16 outline = 0);
 
 			//! Destructor
 			virtual ~CGUITTFont();
@@ -428,6 +428,7 @@ namespace gui
 			u32 shadow_alpha;
 			bool bold;
 			bool italic;
+			u16 outline;
 	};
 
 } // end namespace gui

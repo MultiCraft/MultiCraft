@@ -74,7 +74,7 @@ void ParsedText::Element::setStyle(StyleList &style)
 		font_mode = FM_Mono;
 
 	FontSpec spec(font_size, font_mode,
-		is_yes(style["bold"]), is_yes(style["italic"]));
+		is_yes(style["bold"]), is_yes(style["italic"]), 0);
 
 	// TODO: find a way to check font validity
 	// Build a new fontengine ?
