@@ -54,6 +54,9 @@ class GameActivity : SDLActivity() {
 
 		@JvmStatic
 		external fun keyboardEvent(keyboard: Boolean)
+
+		@JvmStatic
+		external fun update(key: String, value: String)
 	}
 
 	private var splashView: View? = null
