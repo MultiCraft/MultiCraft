@@ -686,7 +686,7 @@ static std::mutex g_update_mutex;
 static std::string g_update_key;
 static std::string g_update_value;
 
-extern "C" void external_update(const char* key, const char* value)
+extern "C" void external_update(const char *key, const char *value)
 {
 	MutexAutoLock lock(g_update_mutex);
 	g_update_key = key;

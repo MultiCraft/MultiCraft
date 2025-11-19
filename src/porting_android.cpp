@@ -219,7 +219,7 @@ std::string getInputDialogValue()
 		"porting::getInputDialogValue unable to find Java getDialogValue method");
 
 	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, dialogvalue);
-	std::string returnValue = readJavaString(porting::jnienv, result);
+	std::string returnValue = readJavaString(jnienv, result);
 	jnienv->DeleteLocalRef(result);
 
 	return returnValue;
@@ -389,7 +389,7 @@ std::string getSecretKey(const std::string &key)
 
 	jstring jkey = jnienv->NewStringUTF(key.c_str());
 	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
-	std::string returnValue = readJavaString(porting::jnienv, result);
+	std::string returnValue = readJavaString(jnienv, result);
 
 	jnienv->DeleteLocalRef(jkey);
 	jnienv->DeleteLocalRef(result);
