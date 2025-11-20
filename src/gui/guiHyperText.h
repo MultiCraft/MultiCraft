@@ -96,7 +96,7 @@ public:
 
 		FloatType floating = FLOAT_NONE;
 
-		ValignType valign;
+		ValignType valign = VALIGN_TOP;
 
 		gui::IGUIFont *font;
 

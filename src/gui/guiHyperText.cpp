@@ -549,6 +549,15 @@ u32 ParsedText::parseTag(const wchar_t *text, u32 cursor)
 			}
 		}
 
+		if (attrs.count("valign")) {
+			if (attrs["valign"] == "top")
+				m_element->valign = ParsedText::VALIGN_TOP;
+			else if (attrs["valign"] == "bottom")
+				m_element->valign = ParsedText::VALIGN_BOTTOM;
+			else if (attrs["valign"] == "middle")
+				m_element->valign = ParsedText::VALIGN_MIDDLE;
+		}
+
 		endElement();
 
 	} else if (name == "tag") {
@@ -880,6 +889,18 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 				case ParsedText::ELEMENT_IMAGE:
 				case ParsedText::ELEMENT_ITEM:
 					x += e->dim.Width;
+
+					switch (e->valign) {
+					case ParsedText::VALIGN_BOTTOM:
+						e->pos.Y += charsheight - e->dim.Height;
+						break;
+					case ParsedText::VALIGN_MIDDLE:
+						e->pos.Y += (charsheight - e->dim.Height) / 2;
+						break;
+					case ParsedText::VALIGN_TOP:
+						// No action needed
+						break;
+					}
 					break;
 				}
 
