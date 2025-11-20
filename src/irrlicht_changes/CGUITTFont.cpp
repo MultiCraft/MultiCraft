@@ -98,7 +98,7 @@ u32 getBestFixedSizeIndex(FT_Face face, u32 font_size)
 	return index;
 }
 
-video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const
+video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver, video::SColor color) const
 {
 	// Make sure our casts to s32 in the loops below will not cause problems
 	checkFontBitmapSize(bits);
@@ -118,11 +118,11 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 			// Create a blank image and fill it with transparent pixels.
 			texture_size = d.getOptimalSize(true, true);
 			image = driver->createImage(video::ECF_A1R5G5B5, texture_size);
-			image->fill(video::SColor(0, 255, 255, 255));
+			image->fill(color);
 
 			// Load the monochrome data in.
 			const u32 image_pitch = image->getPitch() / sizeof(u16);
-			u16* image_data = (u16*)image->lock();
+			u16* image_data = (u16*)image->getData();
 			u8* glyph_data = bits.buffer;
 
 			for (s32 y = 0; y < (s32)bits.rows; ++y)
@@ -138,7 +138,6 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 				}
 				image_data += image_pitch;
 			}
-			image->unlock();
 			break;
 		}
 
@@ -147,12 +146,12 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 			// Create our blank image.
 			texture_size = d.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
 			image = driver->createImage(video::ECF_A8R8G8B8, texture_size);
-			image->fill(video::SColor(0, 255, 255, 255));
+			image->fill(color);
 
 			// Load the grayscale data in.
 			const float gray_count = static_cast<float>(bits.num_grays);
 			const u32 image_pitch = image->getPitch() / sizeof(u32);
-			u32* image_data = (u32*)image->lock();
+			u32* image_data = (u32*)image->getData();
 			u8* glyph_data = bits.buffer;
 			for (s32 y = 0; y < (s32)bits.rows; ++y)
 			{
@@ -164,7 +163,6 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 				}
 				glyph_data += bits.pitch;
 			}
-			image->unlock();
 			break;
 		}
 		case FT_PIXEL_MODE_BGRA:
@@ -178,17 +176,16 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 				texture_size = d.getOptimalSize(!driver->queryFeature(video::EVDF_TEXTURE_NPOT), !driver->queryFeature(video::EVDF_TEXTURE_NSQUARE), true, 0);
 
 			image = driver->createImage(video::ECF_A8R8G8B8, texture_size);
-			image->fill(video::SColor(0, 255, 255, 255));
+			image->fill(color);
 
 			const u32 image_pitch = image->getPitch();
-			u8* image_data = (u8*)image->lock();
+			u8* image_data = (u8*)image->getData();
 			u8* glyph_data = bits.buffer;
 			for (s32 y = 0; y < (s32)bits.rows; ++y)
 			{
 				std::memcpy((void*)(&image_data[y * image_pitch]), glyph_data, bits.width * 4);
 				glyph_data += bits.pitch;
 			}
-			image->unlock();
 
 			if (needs_scaling) {
 				float scale = (float)font_size / face->available_sizes[best_fixed_size_index].height;
@@ -254,9 +251,9 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		}
 		
 		if (outline > 0) {
-			errorstream << "!!! outline " << outline << std::endl;
-		    FT_Pos outline_strength = outline * 64;
-		    FT_Outline_Embolden(&(glyph->outline), outline_strength);
+			//~ errorstream << "!!! outline " << outline << std::endl;
+			//~ FT_Pos outline_strength = outline * 64;
+			//~ FT_Outline_Embolden(&(glyph->outline), outline_strength);
 		}
 	}
 
@@ -303,8 +300,57 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	page->used_width += bits.width * scale;
 	page->line_height = std::max(page->line_height, (u32)(bits.rows * scale));
 
+	video::SColor color;
+	if (outline > 0 && !FT_HAS_COLOR(face))
+		color = video::SColor(0,0,0,0);
+	else
+		color = video::SColor(0,255,255,255);
+	
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
-	surface = createGlyphImage(face, bits, driver);
+	surface = createGlyphImage(face, bits, driver, color);
+	
+	if (outline > 0 && !FT_HAS_COLOR(face)) {
+		if (FT_Load_Glyph(face, char_index, loadFlags) != FT_Err_Ok)
+			return;
+	
+		FT_GlyphSlot glyph = face->glyph;
+
+		if (bold) {
+			float embolden_amount = (float)font_size * 2.0f;
+			bold_offset = embolden_amount * 2.0f;
+			FT_Outline_Embolden(&(glyph->outline), embolden_amount);
+		}
+
+		if (italic) {
+			FT_Matrix italic_matrix;
+			float slant = 0.2;
+			italic_matrix.xx = 0x10000;
+			italic_matrix.xy = (FT_Fixed)(slant * 0x10000);
+			italic_matrix.yx = 0;
+			italic_matrix.yy = 0x10000;
+
+			FT_Outline_Transform(&(glyph->outline), &italic_matrix);
+		}
+
+		FT_Pos outline_strength = outline * 64;
+		FT_Outline_Embolden(&(glyph->outline), -outline_strength);
+	
+		if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0) {
+			FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
+		}
+	
+		FT_Bitmap bits = glyph->bitmap;
+		video::IImage* image = createGlyphImage(face, bits, driver, video::SColor(0,255,255,255));
+		
+		core::dimension2du surface_size = surface->getDimension();
+		core::dimension2du image_size = image->getDimension();
+		s32 pos_x = std::round(((float)(surface_size.Width - image_size.Width)) / 2);
+		s32 pos_y = std::round(((float)(surface_size.Height - image_size.Height)) / 2);
+		core::position2d<s32> pos = core::position2d<s32>(pos_x, pos_y);
+		core::rect<s32> source_rect = core::rect<s32>(core::position2d<s32>(0, 0), image->getDimension());
+		video::SColor color = video::SColor(255,255,255,255);
+		image->copyToWithAlpha(surface, pos, source_rect, color, nullptr, true);
+	}
 
 	// Set our glyph as loaded.
 	if (surface) {
