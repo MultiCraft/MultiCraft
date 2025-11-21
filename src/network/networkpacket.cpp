@@ -76,6 +76,13 @@ void NetworkPacket::clear()
 	m_peer_id = 0;
 }
 
+void NetworkPacket::clearData()
+{
+	m_data.clear();
+	m_datasize = 0;
+	m_read_offset = 0;
+}
+
 const char* NetworkPacket::getString(u32 from_offset)
 {
 	checkReadOffset(from_offset, 0);
