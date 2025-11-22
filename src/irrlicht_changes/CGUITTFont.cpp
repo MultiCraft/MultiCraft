@@ -231,23 +231,12 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		return;
 
 	FT_Glyph glyph;
-	if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok) {
-		errorstream << "get glyph error" << std::endl;
+	if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok)
 		return;
-	}
-	
-	FT_Glyph glyph_copy = nullptr;
-	if (outline > 0 && !FT_HAS_COLOR(face)) {
-		if (FT_Get_Glyph(face->glyph, &glyph_copy) != FT_Err_Ok) {
-			errorstream << "get glyph copy error" << std::endl;
-			FT_Done_Glyph(glyph);
-			return;
-		}
-	}
 
 	if (!FT_HAS_COLOR(face)) {
 		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
-		
+
 		if (bold) {
 			float embolden_amount = (float)font_size * 2.0f;
 			bold_offset = embolden_amount * 2.0f;
@@ -264,32 +253,26 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 			FT_Outline_Transform(&(glyph_outline->outline), &italic_matrix);
 		}
-		
+
 		if (outline > 0) {
-			//errorstream << "!!! outline " << outline << std::endl;
 			FT_Pos outline_strength = outline * 64;
+			//bold_offset += outline_strength * 2.0f;
 			FT_Outline_Embolden(&(glyph_outline->outline), outline_strength);
 
 		}
 	}
-	
+
 	FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
 	FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
 
-	//~ if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0) {
-		//~ FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
-	//~ }
-
 	FT_Bitmap bits = bitmap_glyph->bitmap;
-	errorstream << "bits.width " << bits.width << std::endl;
 
 	// Setup the glyph information here:
-	advance = glyph->advance;
+	advance = face->glyph->advance;
 	advance.x += bold_offset;
 	advance.x *= scale;
 	advance.y *= scale;
 	offset = core::vector2di(bitmap_glyph->left * scale, bitmap_glyph->top * scale);
-	errorstream << "advance.x " << advance.x << std::endl;
 
 	// Try to get the last page with available slots.
 	CGUITTGlyphPage* page = parent->getLastGlyphPage();
@@ -326,29 +309,44 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		color = video::SColor(0,0,0,0);
 	else
 		color = video::SColor(0,255,255,255);
-	
+
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
 	surface = createGlyphImage(face, bits, driver, color);
-	
+
 	FT_Done_Glyph(glyph);
-	
+
 	if (outline > 0 && !FT_HAS_COLOR(face)) {
-		//~ // Copy the glyph instead of loading again
-		//~ FT_Glyph glyph_copy;
-		//~ if (FT_Get_Glyph(face->glyph, &glyph_copy) != FT_Err_Ok) {
-			//~ errorstream << "get glyph error" << std::endl;
-			//~ return;
-		//~ }
-		
-		FT_Outline_Embolden(&((FT_OutlineGlyph)glyph_copy)->outline, 0);
-		
-		// Render the copied glyph
-		FT_Glyph_To_Bitmap(&glyph_copy, FT_RENDER_MODE_NORMAL, nullptr, 1);
-		FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph_copy;
-		
+		FT_Glyph glyph;
+		if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok)
+			return;
+
+		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
+
+		if (bold) {
+			float embolden_amount = (float)font_size * 2.0f;
+			bold_offset = embolden_amount * 2.0f;
+			FT_Outline_Embolden(&(glyph_outline->outline), embolden_amount);
+		}
+
+		if (italic) {
+			FT_Matrix italic_matrix;
+			float slant = 0.2;
+			italic_matrix.xx = 0x10000;
+			italic_matrix.xy = (FT_Fixed)(slant * 0x10000);
+			italic_matrix.yx = 0;
+			italic_matrix.yy = 0x10000;
+
+			FT_Outline_Transform(&(glyph_outline->outline), &italic_matrix);
+		}
+
+		FT_Outline_Embolden(&(glyph_outline->outline), 0);
+
+		FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
+		FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
+
 		FT_Bitmap bits = bitmap_glyph->bitmap;
 		video::IImage* image = createGlyphImage(face, bits, driver, video::SColor(0,255,255,255));
-		
+
 		core::dimension2du surface_size = surface->getDimension();
 		core::dimension2du image_size = image->getDimension();
 		s32 pos_x = std::round(((float)(surface_size.Width - image_size.Width)) / 2);
@@ -357,10 +355,9 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		core::rect<s32> source_rect = core::rect<s32>(core::position2d<s32>(0, 0), image->getDimension());
 		video::SColor color = video::SColor(255,255,255,255);
 		image->copyToWithAlpha(surface, pos, source_rect, color, nullptr, true);
-		
-		// Cleanup
+
 		image->drop();
-		FT_Done_Glyph(glyph_copy);
+		FT_Done_Glyph(glyph);
 	}
 
 	// Set our glyph as loaded.
