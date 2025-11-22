@@ -39,6 +39,7 @@
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
 #include FT_GLYPH_H
+#include FT_STROKER_H
 
 namespace irr
 {
@@ -363,6 +364,8 @@ namespace gui
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
+			FT_Stroker getStroker() { return stroker; }
+
 			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
 
 			bool testEmojiFont(const io::path& filename);
@@ -380,6 +383,7 @@ namespace gui
 			// Manages the FreeType library.
 			static FT_Library c_library;
 			static core::map<io::path, SGUITTFace*> c_faces;
+			static FT_Stroker stroker;
 			static bool c_libraryLoaded;
 			static scene::IMesh* shared_plane_ptr_;
 			static scene::SMesh  shared_plane_;

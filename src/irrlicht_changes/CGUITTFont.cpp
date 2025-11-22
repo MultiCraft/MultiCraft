@@ -61,6 +61,7 @@ struct SGUITTFace : public virtual irr::IReferenceCounted
 
 // Static variables.
 FT_Library CGUITTFont::c_library;
+FT_Stroker CGUITTFont::stroker;
 core::map<io::path, SGUITTFace*> CGUITTFont::c_faces;
 bool CGUITTFont::c_libraryLoaded = false;
 scene::IMesh* CGUITTFont::shared_plane_ptr_ = 0;
@@ -256,9 +257,18 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 		if (outline > 0) {
 			FT_Pos outline_strength = outline * 64;
-			//bold_offset += outline_strength * 2.0f;
-			FT_Outline_Embolden(&(glyph_outline->outline), outline_strength);
+			bold_offset += outline_strength * 2.0f;
 
+			FT_Stroker stroker = parent->getStroker();
+			FT_Stroker_Set(stroker, outline_strength,
+			               FT_STROKER_LINECAP_BUTT,
+			               FT_STROKER_LINEJOIN_MITER_FIXED,
+			               2 << 16);
+			//FT_Stroker_Set(stroker, outline * 64,
+			//               FT_STROKER_LINECAP_ROUND,
+			//               FT_STROKER_LINEJOIN_BEVEL,
+			//               0);
+			FT_Glyph_Stroke(&glyph, stroker, 0);
 		}
 	}
 
@@ -339,8 +349,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 			FT_Outline_Transform(&(glyph_outline->outline), &italic_matrix);
 		}
 
-		FT_Outline_Embolden(&(glyph_outline->outline), 0);
-
 		FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
 		FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
 
@@ -391,6 +399,8 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 		c_libraryLoaded = true;
 	}
 
+	FT_Stroker_New(c_library, &stroker);
+
 	CGUITTFont* font = new CGUITTFont(env);
 
 	font->shadow_alpha = shadow_alpha;
@@ -419,6 +429,8 @@ CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
 			return 0;
 		c_libraryLoaded = true;
 	}
+
+	FT_Stroker_New(c_library, &stroker);
 
 	CGUITTFont* font = new CGUITTFont(device->getGUIEnvironment());
 
@@ -718,6 +730,8 @@ CGUITTFont::~CGUITTFont()
 			// If there are no more faces referenced by FreeType, clean up.
 			if (c_faces.size() == 0)
 			{
+				FT_Stroker_Done(stroker);
+
 				FT_Done_FreeType(c_library);
 				c_libraryLoaded = false;
 			}

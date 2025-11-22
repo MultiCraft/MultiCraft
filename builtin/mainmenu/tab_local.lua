@@ -111,7 +111,7 @@ local function get_formspec(tabview, name, tabdata)
 	local retval = ""
 	retval = retval ..
 			"real_coordinates[true]" ..
-			"style[test;font=bold,italic;font_size=100;font_outline=10]" ..
+			"style[test;font=italic;font_size=100;font_outline=10]" ..
 			string.format("field[0.5,2;8,1.8;test;;%s]", ('w'):rep(4096)) ..
 
 			string.format("hypertext[0.5,5;5,1;test;<b>hypertext</b> normal text <i>italic text</i> or <b><i>both at once</b></i>]") ..
