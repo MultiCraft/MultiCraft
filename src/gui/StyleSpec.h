@@ -398,7 +398,7 @@ public:
 
 			spec.size = (unsigned)std::min(std::max(calc_size, 1), 999);
 		}
-		
+
 		if (!outline.empty()) {
 			int outline_int = stoi(outline);
 			spec.outline = (unsigned)std::min(std::max(outline_int, 1), 255);

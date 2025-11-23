@@ -231,11 +231,13 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		// TODO: error message?
 		return;
 
-	FT_Glyph glyph;
-	if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok)
-		return;
+	FT_Glyph glyph = nullptr;
+	FT_Bitmap bits;
 
 	if (!FT_HAS_COLOR(face)) {
+		if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok)
+			return;
+
 		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
 
 		if (bold) {
@@ -270,19 +272,26 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 			//               0);
 			FT_Glyph_Stroke(&glyph, stroker, 0);
 		}
+
+		FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
+		FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
+		bits = bitmap_glyph->bitmap;
+		offset = core::vector2di(bitmap_glyph->left * scale, bitmap_glyph->top * scale);
+	} else {
+		FT_GlyphSlot glyph_slot = face->glyph;
+
+		if (face->num_fixed_sizes == 0)
+			FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
+
+		bits = glyph_slot->bitmap;
+		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
 	}
-
-	FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
-	FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
-
-	FT_Bitmap bits = bitmap_glyph->bitmap;
 
 	// Setup the glyph information here:
 	advance = face->glyph->advance;
 	advance.x += bold_offset;
 	advance.x *= scale;
 	advance.y *= scale;
-	offset = core::vector2di(bitmap_glyph->left * scale, bitmap_glyph->top * scale);
 
 	// Try to get the last page with available slots.
 	CGUITTGlyphPage* page = parent->getLastGlyphPage();
@@ -323,7 +332,8 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
 	surface = createGlyphImage(face, bits, driver, color);
 
-	FT_Done_Glyph(glyph);
+	if (glyph)
+		FT_Done_Glyph(glyph);
 
 	if (outline > 0 && !FT_HAS_COLOR(face)) {
 		FT_Glyph glyph;
