@@ -42,16 +42,17 @@ enum FontMode : u8 {
 
 struct FontSpec {
 	FontSpec(unsigned int font_size, FontMode mode, bool bold, bool italic,
-			u8 outline) :
+			u8 outline, u8 outline_type = 0) :
 		size(font_size),
 		mode(mode),
 		bold(bold),
 		italic(italic),
-		outline(outline) {}
+		outline(outline),
+		outline_type(outline_type) {}
 
-	u16 getHash()
+	u32 getHash()
 	{
-		return (static_cast<u16>(outline) << 5) | (mode << 2) | (static_cast<u8>(bold) << 1) | static_cast<u8>(italic);
+		return (static_cast<u32>(outline) << 8) | (outline_type << 5 ) | (mode << 2) | (static_cast<u8>(bold) << 1) | static_cast<u8>(italic);
 	}
 
 	unsigned int size;
@@ -59,6 +60,7 @@ struct FontSpec {
 	bool bold;
 	bool italic;
 	u8 outline;
+	u8 outline_type;
 };
 
 class FontEngine
@@ -160,7 +162,7 @@ private:
 	gui::IGUIEnvironment* m_env = nullptr;
 
 	/** internal storage for caching fonts of different size */
-	std::map<u16, std::map<unsigned int, irr::gui::IGUIFont*>> m_font_cache;
+	std::map<u32, std::map<unsigned int, irr::gui::IGUIFont*>> m_font_cache;
 
 	/** default font size to use */
 	unsigned int m_default_size[FM_MaxMode];

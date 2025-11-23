@@ -55,6 +55,7 @@ public:
 		FONT,
 		FONT_SIZE,
 		FONT_OUTLINE,
+		FONT_OUTLINE_TYPE,
 		COLORS,
 		BORDERCOLORS,
 		BORDERWIDTHS,
@@ -155,6 +156,8 @@ public:
 			return FONT_SIZE;
 		} else if (name == "font_outline") {
 			return FONT_OUTLINE;
+		} else if (name == "outline_type") {
+			return FONT_OUTLINE_TYPE;
 		} else if (name == "colors") {
 			return COLORS;
 		} else if (name == "bordercolors") {
@@ -367,6 +370,7 @@ public:
 		const std::string &font = properties[FONT];
 		const std::string &size = properties[FONT_SIZE];
 		const std::string &outline = properties[FONT_OUTLINE];
+		const std::string &outline_type = properties[FONT_OUTLINE_TYPE];
 
 		if (font.empty() && size.empty())
 			return nullptr;
@@ -402,6 +406,11 @@ public:
 		if (!outline.empty()) {
 			int outline_int = stoi(outline);
 			spec.outline = (unsigned)std::min(std::max(outline_int, 1), 255);
+		}
+
+		if (!outline_type.empty()) {
+			int outline_int = stoi(outline_type);
+			spec.outline_type = (unsigned)std::min(std::max(outline_int, 0), 7);
 		}
 
 		return g_fontengine->getFont(spec);

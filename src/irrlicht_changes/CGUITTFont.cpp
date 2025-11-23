@@ -210,7 +210,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 
 void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags,
-		bool bold, bool italic, u16 outline)
+		bool bold, bool italic, u16 outline, u8 outline_type)
 {
 	if (isLoaded) return;
 
@@ -262,14 +262,39 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 			bold_offset += outline_strength * 2.0f;
 
 			FT_Stroker stroker = parent->getStroker();
-			FT_Stroker_Set(stroker, outline_strength,
-			               FT_STROKER_LINECAP_BUTT,
-			               FT_STROKER_LINEJOIN_MITER_FIXED,
-			               2 << 16);
-			//FT_Stroker_Set(stroker, outline * 64,
-			//               FT_STROKER_LINECAP_ROUND,
-			//               FT_STROKER_LINEJOIN_BEVEL,
-			//               0);
+
+			if (outline_type == 1) {
+				FT_Stroker_Set(stroker, outline * 64,
+						FT_STROKER_LINECAP_ROUND,
+						FT_STROKER_LINEJOIN_BEVEL,
+						0);
+			} else if (outline_type == 2) {
+				FT_Stroker_Set(stroker, outline_strength,
+						FT_STROKER_LINECAP_BUTT,
+						FT_STROKER_LINEJOIN_BEVEL,
+						0);
+			} else if (outline_type == 3) {
+				FT_Stroker_Set(stroker, outline_strength,
+						FT_STROKER_LINECAP_BUTT,
+						FT_STROKER_LINEJOIN_MITER_VARIABLE,
+						8 << 16);
+			} else if (outline_type == 4) {
+				FT_Stroker_Set(stroker, outline_strength,
+						FT_STROKER_LINECAP_ROUND,
+						FT_STROKER_LINEJOIN_MITER_FIXED,
+						2 << 16);
+			} else if (outline_type == 5) {
+				FT_Stroker_Set(stroker, outline_strength,
+						FT_STROKER_LINECAP_SQUARE,
+						FT_STROKER_LINEJOIN_ROUND,
+						0);
+			} else {
+				FT_Stroker_Set(stroker, outline_strength,
+						FT_STROKER_LINECAP_BUTT,
+						FT_STROKER_LINEJOIN_MITER_FIXED,
+						2 << 16);
+			}
+
 			FT_Glyph_Stroke(&glyph, stroker, 0);
 		}
 
@@ -400,7 +425,8 @@ void SGUITTGlyph::unload()
 CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 		const io::path& filename, const u32 size, const bool antialias,
 		const bool transparency, const bool bold, const bool italic,
-		u16 outline, const u32 shadow, const u32 shadow_alpha)
+		const u16 outline, const u8 outline_type, const u32 shadow,
+		const u32 shadow_alpha)
 {
 	if (!c_libraryLoaded)
 	{
@@ -417,6 +443,7 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 	font->bold = bold;
 	font->italic = italic;
 	font->outline = outline;
+	font->outline_type = outline_type;
 
 	bool ret = font->load(filename, size, antialias, transparency, shadow);
 	if (!ret)
@@ -431,7 +458,7 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
 		const io::path& filename, const u32 size, const bool antialias,
 		const bool transparency, const bool bold, const bool italic,
-		u16 outline)
+		const u16 outline, const u8 outline_type)
 {
 	if (!c_libraryLoaded)
 	{
@@ -447,6 +474,7 @@ CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
 	font->bold = bold;
 	font->italic = italic;
 	font->outline = outline;
+	font->outline_type = outline_type;
 	font->Device = device;
 
 	bool ret = font->load(filename, size, antialias, transparency, false);
@@ -461,18 +489,20 @@ CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
 
 CGUITTFont* CGUITTFont::create(IGUIEnvironment *env, const io::path& filename,
 		const u32 size, const bool antialias, const bool transparency,
-		const bool bold, const bool italic, u16 outline)
+		const bool bold, const bool italic, const u16 outline,
+		const u8 outline_type)
 {
 	return CGUITTFont::createTTFont(env, filename, size, antialias,
-			transparency, bold, italic);
+			transparency, bold, italic, outline, outline_type);
 }
 
 CGUITTFont* CGUITTFont::create(IrrlichtDevice *device, const io::path& filename,
 		const u32 size, const bool antialias, const bool transparency,
-		const bool bold, const bool italic, u16 outline)
+		const bool bold, const bool italic, const u16 outline,
+		const u8 outline_type)
 {
 	return CGUITTFont::createTTFont(device, filename, size, antialias,
-			transparency, bold, italic, outline);
+			transparency, bold, italic, outline, outline_type);
 }
 
 //////////////////////
@@ -1224,7 +1254,7 @@ begin:
 					flags |= FT_LOAD_DEFAULT;
 
 				glyph->preload(char_index, tt_face, Driver, size, flags, bold,
-						italic, outline);
+						italic, outline, outline_type);
 
 				if (!glyph->isLoaded && current_face < tt_faces.size()) {
 					current_face++;
