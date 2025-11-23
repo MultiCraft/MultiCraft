@@ -3084,7 +3084,7 @@ When clicked, the formspec is send to the server. The value of the text field
 sent to `on_player_receive_fields` will be "action:" concatenated to the action
 name.
 
-`<img name=... float=... width=... height=...>`
+`<img name=... float=... width=... height=... valign=...>`
 
 Draws an image which is present in the client media cache.
 
@@ -3092,10 +3092,12 @@ Draws an image which is present in the client media cache.
 * `float`: If present, makes the image floating (`left` or `right`).
 * `width`: Force image width instead of taking texture width.
 * `height`: Force image height instead of taking texture height.
+* `valign`: How to vertically align the image relative to the text next to it.
+Only effective if the image is smaller than the text. Defaults to "top".
 
 If only width or height given, texture aspect is kept.
 
-`<item name=... float=... width=... height=... rotate=...>`
+`<item name=... float=... width=... height=... rotate=... valign=...>`
 
 Draws an item image.
 
@@ -3109,6 +3111,8 @@ rotation speeds in percent of standard speed (-1000 to 1000). Works only if
 * `angle`: Angle in which the item image is shown. Value has `X,Y,Z` form.
 X, Y and Z being angles around each three axes. Works only if
 `inventory_items_animations` is set to true.
+* `valign`: How to vertically align the image relative to the text next to it.
+Only effective if the image is smaller than the text. Defaults to "top".
 
 Inventory
 =========
