@@ -583,7 +583,7 @@ bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font
 	}
 
 	if (face)
-		calculateColorEmojiParams(face, size);
+		calculateColorEmojiParams(face);
 
 	return true;
 }
@@ -645,15 +645,16 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	return true;
 }
 
-void CGUITTFont::calculateColorEmojiParams(FT_Face face, u32 font_size)
+void CGUITTFont::calculateColorEmojiParams(FT_Face face)
 {
+	u32 height = std::round((float)(getMaxFontHeight()) * 0.9f);
 	float scale = 1.0f;
-	u32 bitmap_top = font_size;
+	u32 bitmap_top = height;
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-		u32 best_index = getBestFixedSizeIndex(face, font_size);
+		u32 best_index = getBestFixedSizeIndex(face, height);
 		FT_Select_Size(face, best_index);
-		scale = (float)font_size / face->available_sizes[best_index].height;
+		scale = (float)height / face->available_sizes[best_index].height;
 
 		FT_UInt glyph_index = FT_Get_Char_Index(face, 0x1F600); // smile
 		if (glyph_index == 0)
@@ -663,7 +664,7 @@ void CGUITTFont::calculateColorEmojiParams(FT_Face face, u32 font_size)
 
 		if (FT_Load_Glyph(face, glyph_index, flags) == FT_Err_Ok) {
 			if (face->glyph->bitmap.rows > 0) {
-				scale = (float)font_size / face->glyph->bitmap.rows;
+				scale = (float)height / face->glyph->bitmap.rows;
 			}
 		}
 	}
@@ -676,7 +677,7 @@ void CGUITTFont::calculateColorEmojiParams(FT_Face face, u32 font_size)
 	if (FT_Load_Glyph(tt_faces[0], glyph_index, flags) == FT_Err_Ok) {
 		if (tt_faces[0]->glyph->bitmap_top > 0)
 			bitmap_top = tt_faces[0]->glyph->bitmap_top +
-					(font_size - tt_faces[0]->glyph->bitmap.rows) / 2;
+					(height - tt_faces[0]->glyph->bitmap.rows) / 2;
 	}
 
 	color_emoji_offset = bitmap_top;
@@ -985,7 +986,7 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
 	return getDimension(core::ustring(text));
 }
 
-core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
+u32 CGUITTFont::getMaxFontHeight() const
 {
 	// Get the maximum font height.  Unfortunately, we have to do this hack as
 	// Irrlicht will draw things wrong.  In FreeType, the font size is the
@@ -994,10 +995,17 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 	// Irrlicht does not understand this concept when drawing fonts.  Also, I
 	// add +1 to give it a 1 pixel blank border.  This makes things like
 	// tooltips look nicer.
-	s32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
-	s32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
-	s32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
-	s32 max_font_height = core::max_(test1, core::max_(test2, test3));
+	u32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
+	u32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
+	u32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
+	u32 max_font_height = core::max_(test1, core::max_(test2, test3));
+
+	return max_font_height;
+}
+
+core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
+{
+	s32 max_font_height = getMaxFontHeight();
 
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
@@ -1054,20 +1062,16 @@ core::dimension2d<u32> CGUITTFont::getTotalDimension(const wchar_t* text) const
 core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) const
 {
 	core::dimension2d<u32> text_dimension = getDimension(text);
-
-	s32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
-	s32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
-	s32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
-	s32 max_font_height = core::max_(test1, core::max_(test2, test3));
+	u32 max_font_height = getMaxFontHeight();
 
 	if (italic) {
 		float slant = 0.2f;
-		s32 italic_extra_width = static_cast<s32>(max_font_height * slant);
+		u32 italic_extra_width = static_cast<u32>(max_font_height * slant);
 		text_dimension.Width += italic_extra_width;
 	}
 
 	if (bold) {
-		s32 bold_extra_width = size * 0.1f;
+		u32 bold_extra_width = size * 0.1f;
 		text_dimension.Width += bold_extra_width;
 	}
 
