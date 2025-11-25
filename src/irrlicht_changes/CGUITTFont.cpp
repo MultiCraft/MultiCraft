@@ -1110,6 +1110,12 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 	if (text_dimension.Width < line.Width)
 		text_dimension.Width = line.Width;
 
+	// Each character has spacing added to it so that the next character will
+	// be properly spaced, so we need to subtract character_spacing from the
+	// calculated width to get the actual width.
+	if (text_dimension.Width > 0)
+		text_dimension.Width -= character_spacing;
+
 	return text_dimension;
 }
 
