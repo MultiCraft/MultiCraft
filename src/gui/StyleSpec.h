@@ -56,6 +56,7 @@ public:
 		FONT_SIZE,
 		FONT_OUTLINE,
 		FONT_OUTLINE_TYPE,
+		CHARACTER_SPACING,
 		COLORS,
 		BORDERCOLORS,
 		BORDERWIDTHS,
@@ -158,6 +159,8 @@ public:
 			return FONT_OUTLINE;
 		} else if (name == "outline_type") {
 			return FONT_OUTLINE_TYPE;
+		} else if (name == "character_spacing") {
+			return CHARACTER_SPACING;
 		} else if (name == "colors") {
 			return COLORS;
 		} else if (name == "bordercolors") {
@@ -371,6 +374,7 @@ public:
 		const std::string &size = properties[FONT_SIZE];
 		const std::string &outline = properties[FONT_OUTLINE];
 		const std::string &outline_type = properties[FONT_OUTLINE_TYPE];
+		const std::string &char_spacing = properties[CHARACTER_SPACING];
 
 		if (font.empty() && size.empty())
 			return nullptr;
@@ -404,13 +408,30 @@ public:
 		}
 
 		if (!outline.empty()) {
-			int outline_int = stoi(outline);
+			int outline_int;
+			if (outline[0] == '*') {
+				std::string new_outline = outline.substr(1);
+				outline_int = stof(new_outline) * spec.size;
+			} else {
+				outline_int = stoi(outline);
+			}
 			spec.outline = (unsigned)std::min(std::max(outline_int, 1), 255);
 		}
 
 		if (!outline_type.empty()) {
 			int outline_int = stoi(outline_type);
 			spec.outline_type = (unsigned)std::min(std::max(outline_int, 0), 7);
+		}
+
+		if (!char_spacing.empty()) {
+			int spacing;
+			if (char_spacing[0] == '*') {
+				std::string new_char_spacing = char_spacing.substr(1);
+				spacing = stof(new_char_spacing) * spec.size;
+			} else {
+				spacing = stoi(char_spacing);
+			}
+			spec.character_spacing = std::min(127, std::max(spacing, -128));
 		}
 
 		return g_fontengine->getFont(spec);

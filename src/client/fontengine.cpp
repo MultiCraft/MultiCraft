@@ -330,6 +330,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 
 	u16 outline = spec.outline;
 	u8 outline_type = spec.outline_type;
+	s8 character_spacing = spec.character_spacing;
 
 	/*if (size == 0) {
 		errorstream << "FontEngine: attempt to use font size 0" << std::endl;
@@ -360,7 +361,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	for (const std::string &font_path : fallback_settings) {
 		irr::gui::CGUITTFont *font = gui::CGUITTFont::createTTFont(m_env,
 				font_path.c_str(), size, true, true, bold, italic, outline,
-				outline_type, font_shadow, font_shadow_alpha);
+				outline_type, character_spacing, font_shadow, font_shadow_alpha);
 
 		if (font) {
 			std::vector<std::string> emoji_paths = split(emoji_font_system_paths, ',');

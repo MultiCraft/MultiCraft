@@ -42,17 +42,24 @@ enum FontMode : u8 {
 
 struct FontSpec {
 	FontSpec(unsigned int font_size, FontMode mode, bool bold, bool italic,
-			u8 outline, u8 outline_type = 0) :
+			u8 outline, u8 outline_type = 0, s8 character_spacing = 0) :
 		size(font_size),
 		mode(mode),
 		bold(bold),
 		italic(italic),
 		outline(outline),
-		outline_type(outline_type) {}
+		outline_type(outline_type),
+		character_spacing(character_spacing) {}
 
 	u32 getHash()
 	{
-		return (static_cast<u32>(outline) << 8) | (outline_type << 5 ) | (mode << 2) | (static_cast<u8>(bold) << 1) | static_cast<u8>(italic);
+		return
+			(static_cast<u32>(character_spacing) << 16) |
+			(static_cast<u32>(outline) << 8) |
+			(outline_type << 5) |
+			(mode << 2) |
+			(static_cast<u8>(bold) << 1) |
+			static_cast<u8>(italic);
 	}
 
 	unsigned int size;
@@ -61,6 +68,7 @@ struct FontSpec {
 	bool italic;
 	u8 outline;
 	u8 outline_type;
+	s8 character_spacing;
 };
 
 class FontEngine
