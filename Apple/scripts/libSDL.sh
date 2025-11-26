@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-SDL_VERSION=release-3.2.22
+SDL_VERSION=release-3.2.26
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
@@ -20,8 +20,7 @@ do
 	mkdir -p build; cd build
 	cmake .. \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
-		-DCMAKE_ASM_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
+		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH -ffp-model=precise" \
 		-DCMAKE_OBJC_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
 		-DCMAKE_INSTALL_PREFIX="." \
 		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
@@ -30,6 +29,10 @@ do
 		-DSDL_RENDER=OFF \
 		-DSDL_CAMERA=OFF \
 		-DSDL_METAL=OFF \
+		-DSDL_GPU=OFF \
+		-DSDL_HAPTIC=OFF \
+		-DSDL_POWER=OFF \
+		-DSDL_DIALOG=OFF \
 		-DSDL_TESTS=OFF \
 		-DSDL_EXAMPLES=OFF
 
@@ -37,10 +40,8 @@ do
 
 	if [ $ARCH = "x86_64" ]; then
 		cp -rv ../include ../../libSDL
-		cp -v libSDL3.a ../../libSDL/templib_$ARCH.a
-	else
-		cp -v libSDL3.a ../../libSDL/templib_$ARCH.a
 	fi
+	cp -v libSDL3.a ../../libSDL/templib_$ARCH.a
 
 	cd ..; rm -rf build
 done

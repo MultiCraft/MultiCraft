@@ -50,6 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern int real_main(int argc, char *argv[]);
 extern "C" void external_pause_game();
+extern "C" void external_update(const char* key, const char* value);
 
 static std::atomic<bool> ran = {false};
 
@@ -77,6 +78,17 @@ int main(int argc, char *argv[])
 	_Exit(0);
 }
 
+static std::string readJavaString(JNIEnv *env, jstring j_str)
+{
+	// Get string as a UTF-8 C string
+	const char *c_str = env->GetStringUTFChars(j_str, nullptr);
+	// Save it
+	std::string str(c_str);
+	// And free the C string
+	env->ReleaseStringUTFChars(j_str, c_str);
+	return str;
+}
+
 extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
 			JNIEnv *env, jclass clazz)
@@ -88,6 +100,13 @@ extern "C" {
 			JNIEnv *env, jclass clazz, jboolean hasKeyboard)
 	{
 		device_has_keyboard = hasKeyboard;
+	}
+	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_update(
+		JNIEnv *env, jclass clazz, jstring key, jstring value)
+	{
+		const std::string key_str = readJavaString(env, key);
+		const std::string value_str = readJavaString(env, value);
+		external_update(key_str.c_str(), value_str.c_str());
 	}
 }
 
@@ -125,17 +144,6 @@ void cleanupAndroid()
 	setenv("CPUPROFILE", (path_user + DIR_DELIM + "gmon.out").c_str(), 1);
 	moncleanup();
 #endif
-}
-
-static std::string readJavaString(jstring j_str)
-{
-	// Get string as a UTF-8 C string
-	const char *c_str = jnienv->GetStringUTFChars(j_str, nullptr);
-	// Save it
-	std::string str(c_str);
-	// And free the C string
-	jnienv->ReleaseStringUTFChars(j_str, c_str);
-	return str;
 }
 
 void initializePaths()
@@ -211,7 +219,7 @@ std::string getInputDialogValue()
 		"porting::getInputDialogValue unable to find Java getDialogValue method");
 
 	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, dialogvalue);
-	std::string returnValue = readJavaString(result);
+	std::string returnValue = readJavaString(jnienv, result);
 	jnienv->DeleteLocalRef(result);
 
 	return returnValue;
@@ -381,7 +389,7 @@ std::string getSecretKey(const std::string &key)
 
 	jstring jkey = jnienv->NewStringUTF(key.c_str());
 	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
-	std::string returnValue = readJavaString(result);
+	std::string returnValue = readJavaString(jnienv, result);
 
 	jnienv->DeleteLocalRef(jkey);
 	jnienv->DeleteLocalRef(result);

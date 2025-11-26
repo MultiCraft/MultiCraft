@@ -4,14 +4,14 @@ import Foundation
 final class AppLogic: NSObject {
 	static let shared = AppLogic()
 
-	public func initialize() {
+	func initialize() {
 		Self.log(message: "[INIT] initialized")
 	}
 
 	static func log(message: String, object: Any? = nil, function: String = #function) {
-		#if DEBUG
+#if DEBUG
 		print("\(Date()) [\(function)] - \(message) \(object ?? "")")
-		#endif
+#endif
 	}
 }
 
@@ -35,5 +35,13 @@ public func getSecretKey(key: UnsafePointer<CChar>) -> UnsafePointer<CChar> {
 
 public func finishGame(msg: UnsafePointer<CChar>) -> Never {
 	AppLogic.log(message: String(cString: msg))
-	NSApplication.shared.terminate(nil)
+
+	DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+		NSApplication.shared.terminate(nil)
+	}
+
+	// run the run loop to ensure the app doesn't exit prematurely
+	while true {
+		RunLoop.current.run(until: Date.distantFuture)
+	}
 }

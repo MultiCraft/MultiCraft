@@ -6,9 +6,8 @@ LUAJIT_VERSION=2.1
 export MACOSX_DEPLOYMENT_TARGET=11.0
 mkdir -p deps; cd deps
 
-if [ ! -d luajit-src ]; then
+[ ! -d luajit-src ] && \
 	git clone -b v$LUAJIT_VERSION --depth 1 -c core.autocrlf=false https://github.com/LuaJIT/LuaJIT luajit-src
-fi
 
 rm -rf luajit
 

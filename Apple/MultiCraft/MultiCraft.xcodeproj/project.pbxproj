@@ -554,7 +554,6 @@
 		84A1F9BA252E617D00000717 /* scripting_server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_server.h; path = ../../../src/script/scripting_server.h; sourceTree = "<group>"; };
 		84A5FD902E57319F009F0F5A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		84BDEE602C471AD500A1571D /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; usesTabs = 1; };
-		84BDEE622C471AE500A1571D /* MultiCraft.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MultiCraft.entitlements; sourceTree = "<group>"; };
 		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		84C2AB5228DA7770001968EE /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../deps/libpng/libpng.a; sourceTree = "<group>"; };
@@ -1053,7 +1052,6 @@
 				845856B224B1322D0040BA4F /* Assets.xcassets */,
 				845856B724B1322D0040BA4F /* Info.plist */,
 				84BDEE602C471AD500A1571D /* Localizable.xcstrings */,
-				84BDEE622C471AE500A1571D /* MultiCraft.entitlements */,
 				84E33D852A7BBEA200609F77 /* Supporting Files */,
 				84585CD524B138F50040BA4F /* src */,
 				84D4D9082A93707F00CACCC7 /* lib */,
@@ -1705,7 +1703,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1600;
+				LastUpgradeCheck = 2610;
 				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
@@ -1773,11 +1771,11 @@
 			files = (
 				8458617F24B1C3BC0040BA4F /* builtin in Resources */,
 				8453A49E24DB22F00087ECF9 /* client in Resources */,
-				8458618024B1C3BC0040BA4F /* textures in Resources */,
 				84287CA7291ED0F000E30F96 /* fonts in Resources */,
 				84287CA6291ED0F000E30F96 /* locale in Resources */,
-				84BDEE612C471AD500A1571D /* Localizable.xcstrings in Resources */,
+				8458618024B1C3BC0040BA4F /* textures in Resources */,
 				845856B324B1322D0040BA4F /* Assets.xcassets in Resources */,
+				84BDEE612C471AD500A1571D /* Localizable.xcstrings in Resources */,
 			);
 		};
 /* End PBXResourcesBuildPhase section */
@@ -2068,6 +2066,7 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
 			};
@@ -2085,6 +2084,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
 				ENABLE_INCREMENTAL_DISTILL = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
@@ -2107,6 +2107,7 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
@@ -2118,13 +2119,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = NO;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 80;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_RESOURCE_ACCESS_USB = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"RUN_IN_PLACE=0",
@@ -2150,15 +2157,15 @@
 					"${SRCROOT}/../deps/freetype/include",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
-					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/libjpeg/include",
+					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/luajit/include",
-					"${SRCROOT}/../deps/libcurl/include",
 					"${SRCROOT}/../deps/libogg/include",
+					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
 					"${SRCROOT}/../deps/libSDL/include",
 					"${SRCROOT}/../deps/libvorbis/include",
-					"${SRCROOT}/../deps/openal/include",
+					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
@@ -2173,19 +2180,21 @@
 					"-L${SRCROOT}/../deps/freetype",
 					"-L${SRCROOT}/../deps/gettext",
 					"-L${SRCROOT}/../deps/irrlicht",
-					"-L${SRCROOT}/../deps/leveldb",
-					"-L${SRCROOT}/../deps/libcurl",
 					"-L${SRCROOT}/../deps/libjpeg",
+					"-L${SRCROOT}/../deps/leveldb",
+					"-L${SRCROOT}/../deps/luajit",
 					"-L${SRCROOT}/../deps/libogg",
+					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/libSDL",
 					"-L${SRCROOT}/../deps/libvorbis",
-					"-L${SRCROOT}/../deps/luajit",
-					"-L${SRCROOT}/../deps/openal",
+					"-L${SRCROOT}/../deps/libcurl",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Debug;
@@ -2194,13 +2203,19 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = NO;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 80;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_RESOURCE_ACCESS_USB = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"NDEBUG=1",
@@ -2227,15 +2242,15 @@
 					"${SRCROOT}/../deps/freetype/include",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
-					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/libjpeg/include",
+					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/luajit/include",
-					"${SRCROOT}/../deps/libcurl/include",
 					"${SRCROOT}/../deps/libogg/include",
+					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
 					"${SRCROOT}/../deps/libSDL/include",
 					"${SRCROOT}/../deps/libvorbis/include",
-					"${SRCROOT}/../deps/openal/include",
+					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
@@ -2243,7 +2258,6 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 2.0.12;
 				OTHER_LDFLAGS = (
@@ -2251,18 +2265,21 @@
 					"-L${SRCROOT}/../deps/freetype",
 					"-L${SRCROOT}/../deps/gettext",
 					"-L${SRCROOT}/../deps/irrlicht",
-					"-L${SRCROOT}/../deps/leveldb",
-					"-L${SRCROOT}/../deps/libcurl",
 					"-L${SRCROOT}/../deps/libjpeg",
+					"-L${SRCROOT}/../deps/leveldb",
+					"-L${SRCROOT}/../deps/luajit",
 					"-L${SRCROOT}/../deps/libogg",
+					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/libSDL",
 					"-L${SRCROOT}/../deps/libvorbis",
-					"-L${SRCROOT}/../deps/luajit",
-					"-L${SRCROOT}/../deps/openal",
+					"-L${SRCROOT}/../deps/libcurl",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
