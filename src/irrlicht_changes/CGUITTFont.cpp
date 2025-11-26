@@ -233,8 +233,9 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	FT_Glyph glyph = nullptr;
 	FT_Bitmap bits;
 
+	FT_GlyphSlot glyph_slot = face->glyph;
 	if (!FT_HAS_COLOR(face)) {
-		if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok)
+		if (FT_Get_Glyph(glyph_slot, &glyph) != FT_Err_Ok)
 			return;
 
 		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
@@ -302,8 +303,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		bits = bitmap_glyph->bitmap;
 		offset = core::vector2di(bitmap_glyph->left * scale, bitmap_glyph->top * scale);
 	} else {
-		FT_GlyphSlot glyph_slot = face->glyph;
-
 		if (face->num_fixed_sizes == 0)
 			FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
 
@@ -312,15 +311,15 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	}
 
 	// Setup the glyph information here:
-	advance = face->glyph->advance;
+	advance = glyph_slot->advance;
 	advance.x += bold_offset;
 	advance.x *= scale;
 	advance.y *= scale;
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		int bitmap_top = parent->getColorEmojiOffset();
-		offset = core::vector2di(glyph->bitmap_left * scale, bitmap_top);
+		offset = core::vector2di(glyph_slot->bitmap_left * scale, bitmap_top);
 	} else {
-		offset = core::vector2di(glyph->bitmap_left * scale, glyph->bitmap_top * scale);
+		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
 	}
 
 	// Try to get the last page with available slots.
@@ -367,7 +366,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	if (outline > 0 && !FT_HAS_COLOR(face)) {
 		FT_Glyph glyph;
-		if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok)
+		if (FT_Get_Glyph(glyph_slot, &glyph) != FT_Err_Ok)
 			return;
 
 		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
