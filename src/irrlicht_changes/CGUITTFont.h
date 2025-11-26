@@ -38,6 +38,8 @@
 #include "util/enriched_string.h"
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
+#include FT_GLYPH_H
+#include FT_STROKER_H
 
 namespace irr
 {
@@ -74,13 +76,13 @@ namespace gui
 		//! before the batch draw call.
 		void preload(u32 char_index, FT_Face face, video::IVideoDriver* driver,
 				u32 font_size, const FT_Int32 loadFlags, bool bold,
-				bool italic);
+				bool italic, u16 outline, u8 outline_type, s8 character_spacing);
 
 		//! Unloads the glyph.
 		void unload();
 
 		//! Creates the IImage object from the FT_Bitmap.
-		video::IImage* createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const;
+		video::IImage* createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver, video::SColor color) const;
 
 		//! If true, the glyph has been loaded.
 		bool isLoaded;
@@ -237,19 +239,27 @@ namespace gui
 					const io::path& filename, const u32 size,
 					const bool antialias = true, const bool transparency = true,
 					const bool bold = false, const bool italic = false,
+					const u16 outline = 0, const u8 outline_type = 0,
+					const s8 character_spacing = 0,
 					const u32 shadow = 0, const u32 shadow_alpha = 255);
 			static CGUITTFont* createTTFont(IrrlichtDevice *device,
 					const io::path& filename, const u32 size,
 					const bool antialias = true, const bool transparency = true,
-					const bool bold = false, const bool italic = false);
+					const bool bold = false, const bool italic = false,
+					const u16 outline = 0, const u8 outline_type = 0,
+					const s8 character_spacing = 0);
 			static CGUITTFont* create(IGUIEnvironment *env,
 					const io::path& filename, const u32 size,
 					const bool antialias = true, const bool transparency = true,
-					const bool bold = false, const bool italic = false);
+					const bool bold = false, const bool italic = false,
+					const u16 outline = 0, const u8 outline_type = 0,
+					const s8 character_spacing = 0);
 			static CGUITTFont* create(IrrlichtDevice *device,
 					const io::path& filename, const u32 size,
 					const bool antialias = true, const bool transparency = true,
-					const bool bold = false, const bool italic = false);
+					const bool bold = false, const bool italic = false,
+					const u16 outline = 0, const u8 outline_type = 0,
+					const s8 character_spacing = 0);
 
 			//! Destructor
 			virtual ~CGUITTFont();
@@ -362,6 +372,8 @@ namespace gui
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
+			FT_Stroker getStroker() { return stroker; }
+
 			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
 
 			bool testEmojiFont(const io::path& filename);
@@ -382,6 +394,7 @@ namespace gui
 			// Manages the FreeType library.
 			static FT_Library c_library;
 			static core::map<io::path, SGUITTFace*> c_faces;
+			static FT_Stroker stroker;
 			static bool c_libraryLoaded;
 			static scene::IMesh* shared_plane_ptr_;
 			static scene::SMesh  shared_plane_;
@@ -432,6 +445,9 @@ namespace gui
 			u32 shadow_alpha;
 			bool bold;
 			bool italic;
+			u16 outline;
+			u8 outline_type;
+			s8 character_spacing;
 			float color_emoji_scale = 1.0f;
 			u32 color_emoji_offset;
 	};

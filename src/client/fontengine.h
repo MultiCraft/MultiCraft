@@ -41,21 +41,34 @@ enum FontMode : u8 {
 };
 
 struct FontSpec {
-	FontSpec(unsigned int font_size, FontMode mode, bool bold, bool italic) :
+	FontSpec(unsigned int font_size, FontMode mode, bool bold, bool italic,
+			u8 outline, u8 outline_type = 0, s8 character_spacing = 0) :
 		size(font_size),
 		mode(mode),
 		bold(bold),
-		italic(italic) {}
+		italic(italic),
+		outline(outline),
+		outline_type(outline_type),
+		character_spacing(character_spacing) {}
 
-	u16 getHash()
+	u32 getHash()
 	{
-		return (mode << 2) | (static_cast<u8>(bold) << 1) | static_cast<u8>(italic);
+		return
+			(static_cast<u32>(character_spacing) << 16) |
+			(static_cast<u32>(outline) << 8) |
+			(outline_type << 5) |
+			(mode << 2) |
+			(static_cast<u8>(bold) << 1) |
+			static_cast<u8>(italic);
 	}
 
 	unsigned int size;
 	FontMode mode;
 	bool bold;
 	bool italic;
+	u8 outline;
+	u8 outline_type;
+	s8 character_spacing;
 };
 
 class FontEngine
@@ -72,7 +85,7 @@ public:
 	irr::gui::IGUIFont *getFont(unsigned int font_size=FONT_SIZE_UNSPECIFIED,
 			FontMode mode=FM_Unspecified)
 	{
-		FontSpec spec(font_size, mode, m_default_bold, m_default_italic);
+		FontSpec spec(font_size, mode, m_default_bold, m_default_italic, 0);
 		return getFont(spec);
 	}
 
@@ -84,7 +97,7 @@ public:
 			unsigned int font_size=FONT_SIZE_UNSPECIFIED,
 			FontMode mode=FM_Unspecified)
 	{
-		FontSpec spec(font_size, mode, m_default_bold, m_default_italic);
+		FontSpec spec(font_size, mode, m_default_bold, m_default_italic, 0);
 		return getTextHeight(spec);
 	}
 
@@ -95,7 +108,7 @@ public:
 			unsigned int font_size=FONT_SIZE_UNSPECIFIED,
 			FontMode mode=FM_Unspecified)
 	{
-		FontSpec spec(font_size, mode, m_default_bold, m_default_italic);
+		FontSpec spec(font_size, mode, m_default_bold, m_default_italic, 0);
 		return getTextWidth(text, spec);
 	}
 
@@ -108,7 +121,7 @@ public:
 			unsigned int font_size=FONT_SIZE_UNSPECIFIED,
 			FontMode mode=FM_Unspecified)
 	{
-		FontSpec spec(font_size, mode, m_default_bold, m_default_italic);
+		FontSpec spec(font_size, mode, m_default_bold, m_default_italic, 0);
 		return getTextWidth(utf8_to_wide(text), spec);
 	}
 
@@ -118,7 +131,7 @@ public:
 	unsigned int getLineHeight(unsigned int font_size=FONT_SIZE_UNSPECIFIED,
 			FontMode mode=FM_Unspecified)
 	{
-		FontSpec spec(font_size, mode, m_default_bold, m_default_italic);
+		FontSpec spec(font_size, mode, m_default_bold, m_default_italic, 0);
 		return getLineHeight(spec);
 	}
 
@@ -157,7 +170,7 @@ private:
 	gui::IGUIEnvironment* m_env = nullptr;
 
 	/** internal storage for caching fonts of different size */
-	std::map<unsigned int, irr::gui::IGUIFont*> m_font_cache[FM_MaxMode << 2];
+	std::map<u32, std::map<unsigned int, irr::gui::IGUIFont*>> m_font_cache;
 
 	/** default font size to use */
 	unsigned int m_default_size[FM_MaxMode];
