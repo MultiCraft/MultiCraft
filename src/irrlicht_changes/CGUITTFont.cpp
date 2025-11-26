@@ -169,7 +169,8 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 		case FT_PIXEL_MODE_BGRA:
 		{
 			int font_size = parent->getFontSize();
-			bool needs_scaling = (face->num_fixed_sizes > 0 && face->available_sizes[best_fixed_size_index].height > font_size);
+			float scale = parent->getColorEmojiScale();
+			bool needs_scaling = (face->num_fixed_sizes > 0 && scale != 1.0f);
 
 			if (needs_scaling)
 				texture_size = d;
@@ -189,8 +190,6 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 			}
 
 			if (needs_scaling) {
-				float scale = (float)font_size / face->available_sizes[best_fixed_size_index].height;
-
 				core::dimension2du d_new(bits.width * scale, bits.rows * scale);
 
 				irr::video::IImage* scaled_img = driver->createImage(video::ECF_A8R8G8B8, d_new);
@@ -222,8 +221,8 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		best_fixed_size_index = getBestFixedSizeIndex(face, font_size);
-		scale = std::min((float)font_size / face->available_sizes[best_fixed_size_index].height, 1.0f);
 		FT_Select_Size(face, best_fixed_size_index);
+		scale = parent->getColorEmojiScale();
 	}
 
 	// Attempt to load the glyph.
@@ -234,8 +233,9 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	FT_Glyph glyph = nullptr;
 	FT_Bitmap bits;
 
+	FT_GlyphSlot glyph_slot = face->glyph;
 	if (!FT_HAS_COLOR(face)) {
-		if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok)
+		if (FT_Get_Glyph(glyph_slot, &glyph) != FT_Err_Ok)
 			return;
 
 		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
@@ -303,8 +303,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		bits = bitmap_glyph->bitmap;
 		offset = core::vector2di(bitmap_glyph->left * scale, bitmap_glyph->top * scale);
 	} else {
-		FT_GlyphSlot glyph_slot = face->glyph;
-
 		if (face->num_fixed_sizes == 0)
 			FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
 
@@ -313,10 +311,16 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	}
 
 	// Setup the glyph information here:
-	advance = face->glyph->advance;
+	advance = glyph_slot->advance;
 	advance.x += bold_offset;
 	advance.x *= scale;
 	advance.y *= scale;
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+		int bitmap_top = parent->getColorEmojiOffset();
+		offset = core::vector2di(glyph_slot->bitmap_left * scale, bitmap_top);
+	} else {
+		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
+	}
 
 	// Try to get the last page with available slots.
 	CGUITTGlyphPage* page = parent->getLastGlyphPage();
@@ -362,7 +366,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	if (outline > 0 && !FT_HAS_COLOR(face)) {
 		FT_Glyph glyph;
-		if (FT_Get_Glyph(face->glyph, &glyph) != FT_Err_Ok)
+		if (FT_Get_Glyph(glyph_slot, &glyph) != FT_Err_Ok)
 			return;
 
 		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
@@ -687,6 +691,18 @@ bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font
 		return false;
 	}
 
+	FT_Face face = nullptr;
+
+	for (size_t i = 0; i < filenames.size(); i++) {
+		if (filenames[i] == filename) {
+			face = tt_faces[i];
+			break;
+		}
+	}
+
+	if (face)
+		calculateColorEmojiParams(face);
+
 	return true;
 }
 
@@ -745,6 +761,44 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 		return false;
 
 	return true;
+}
+
+void CGUITTFont::calculateColorEmojiParams(FT_Face face)
+{
+	u32 height = std::round((float)(getMaxFontHeight()) * 0.9f);
+	float scale = 1.0f;
+	u32 bitmap_top = height;
+
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+		u32 best_index = getBestFixedSizeIndex(face, height);
+		FT_Select_Size(face, best_index);
+		scale = (float)height / face->available_sizes[best_index].height;
+
+		FT_UInt glyph_index = FT_Get_Char_Index(face, 0x1F600); // smile
+		if (glyph_index == 0)
+			glyph_index = FT_Get_Char_Index(face, 'A');
+
+		FT_Int32 flags = load_flags | FT_LOAD_COLOR;
+
+		if (FT_Load_Glyph(face, glyph_index, flags) == FT_Err_Ok) {
+			if (face->glyph->bitmap.rows > 0) {
+				scale = (float)height / face->glyph->bitmap.rows;
+			}
+		}
+	}
+
+	color_emoji_scale = scale;
+
+	FT_UInt glyph_index = FT_Get_Char_Index(tt_faces[0], 'A');
+	FT_Int32 flags = load_flags | FT_LOAD_DEFAULT;
+
+	if (FT_Load_Glyph(tt_faces[0], glyph_index, flags) == FT_Err_Ok) {
+		if (tt_faces[0]->glyph->bitmap_top > 0)
+			bitmap_top = tt_faces[0]->glyph->bitmap_top +
+					(height - tt_faces[0]->glyph->bitmap.rows) / 2;
+	}
+
+	color_emoji_offset = bitmap_top;
 }
 
 CGUITTFont::~CGUITTFont()
@@ -1052,7 +1106,7 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
 	return getDimension(core::ustring(text));
 }
 
-core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
+u32 CGUITTFont::getMaxFontHeight() const
 {
 	// Get the maximum font height.  Unfortunately, we have to do this hack as
 	// Irrlicht will draw things wrong.  In FreeType, the font size is the
@@ -1061,10 +1115,17 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 	// Irrlicht does not understand this concept when drawing fonts.  Also, I
 	// add +1 to give it a 1 pixel blank border.  This makes things like
 	// tooltips look nicer.
-	s32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
-	s32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
-	s32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
-	s32 max_font_height = core::max_(test1, core::max_(test2, test3));
+	u32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
+	u32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
+	u32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
+	u32 max_font_height = core::max_(test1, core::max_(test2, test3));
+
+	return max_font_height;
+}
+
+core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
+{
+	s32 max_font_height = getMaxFontHeight();
 
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
@@ -1127,20 +1188,16 @@ core::dimension2d<u32> CGUITTFont::getTotalDimension(const wchar_t* text) const
 core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) const
 {
 	core::dimension2d<u32> text_dimension = getDimension(text);
-
-	s32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
-	s32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
-	s32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
-	s32 max_font_height = core::max_(test1, core::max_(test2, test3));
+	u32 max_font_height = getMaxFontHeight();
 
 	if (italic) {
 		float slant = 0.2f;
-		s32 italic_extra_width = static_cast<s32>(max_font_height * slant);
+		u32 italic_extra_width = static_cast<u32>(max_font_height * slant);
 		text_dimension.Width += italic_extra_width;
 	}
 
 	if (bold) {
-		s32 bold_extra_width = size * 0.1f;
+		u32 bold_extra_width = size * 0.1f;
 		text_dimension.Width += bold_extra_width;
 	}
 

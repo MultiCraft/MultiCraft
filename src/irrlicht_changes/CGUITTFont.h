@@ -377,6 +377,9 @@ namespace gui
 			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
 
 			bool testEmojiFont(const io::path& filename);
+			void calculateColorEmojiParams(FT_Face face);
+			float getColorEmojiScale() { return color_emoji_scale; }
+			float getColorEmojiOffset() { return color_emoji_offset; }
 
 		protected:
 			bool use_monochrome;
@@ -418,6 +421,7 @@ namespace gui
 			s32 getFaceIndexByChar(uchar32_t c) const;
 			core::vector2di getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const;
 			core::vector2di getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const;
+			u32 getMaxFontHeight() const;
 			core::dimension2d<u32> getDimensionUntilEndOfLine(const wchar_t* p) const;
 
 			void createSharedPlane();
@@ -444,6 +448,8 @@ namespace gui
 			u16 outline;
 			u8 outline_type;
 			s8 character_spacing;
+			float color_emoji_scale = 1.0f;
+			u32 color_emoji_offset;
 	};
 
 } // end namespace gui
