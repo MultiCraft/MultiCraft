@@ -93,11 +93,11 @@ extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_update(
 		JNIEnv *env, jclass clazz, jstring key, jstring value)
 	{
-		const char *key_str = jnienv->GetStringUTFChars(key, nullptr);
-		const char *value_str = jnienv->GetStringUTFChars(value, nullptr);
+		const char *key_str = env->GetStringUTFChars(key, nullptr);
+		const char *value_str = env->GetStringUTFChars(value, nullptr);
 		external_update(key_str, value_str);
-		jnienv->ReleaseStringUTFChars(key, key_str);
-		jnienv->ReleaseStringUTFChars(value, value_str);
+		env->ReleaseStringUTFChars(key, key_str);
+		env->ReleaseStringUTFChars(value, value_str);
 	}
 }
 
