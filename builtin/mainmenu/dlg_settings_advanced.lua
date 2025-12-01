@@ -378,7 +378,7 @@ local function parse_config_file(read_all, parse_mods)
 		-- Parse mods
 		local mods_category_initialized = false
 		local mods = {}
-		get_mods(core.get_modpath(), "mods", mods)
+		get_mods(core.get_modpath(), mods)
 		for _, mod in ipairs(mods) do
 			local path = mod.path .. DIR_DELIM .. FILENAME
 			local file = io.open(path, "r")
@@ -408,7 +408,7 @@ local function parse_config_file(read_all, parse_mods)
 		-- Parse client mods
 		local clientmods_category_initialized = false
 		local clientmods = {}
-		get_mods(core.get_clientmodpath(), "clientmods", clientmods)
+		get_mods(core.get_clientmodpath(), clientmods)
 		for _, mod in ipairs(clientmods) do
 			local path = mod.path .. DIR_DELIM .. FILENAME
 			local file = io.open(path, "r")
