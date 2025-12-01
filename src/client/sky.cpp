@@ -326,7 +326,7 @@ void Sky::render()
 
 		// Draw sunrise/sunset horizon glow texture
 		// (textures/base/pack/sunrisebg.png)
-		if (m_sun_params.sunrise_visible && !m_use_custom_sky_body_pos) {
+		if (m_sun_params.sunrise_visible && !m_use_custom_sky_body_pos && !m_is_mainmenu) {
 			driver->setMaterial(m_materials[2]);
 			float mid1 = 0.25;
 			float mid = wicked_time_of_day < 0.5 ? mid1 : (1.0 - mid1);
