@@ -103,6 +103,10 @@ val prepareAssetsFiles by tasks.registering {
 			into("$assetsFolder/client/shaders/Irrlicht")
 		}
 		copy {
+			from("$projRoot/client/cacert.pem")
+			into("$assetsFolder/client")
+		}
+		copy {
 			from(
 				"$projRoot/fonts/DroidSansFallback.ttf",
 				"$projRoot/fonts/MultiCraftFont.ttf",
@@ -114,10 +118,6 @@ val prepareAssetsFiles by tasks.registering {
 			from("$projRoot/textures")
 			into("$assetsFolder/textures")
 			exclude("*.txt")
-		}
-		copy {
-			from("$projRoot/cacert.pem")
-			into("$assetsFolder")
 		}
 	}
 }

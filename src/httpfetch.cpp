@@ -36,6 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "version.h"
 #include "settings.h"
 #include "noise.h"
+#include "filesys.h"
 
 std::mutex g_httpfetch_mutex;
 std::map<unsigned long, std::queue<HTTPFetchResult> > g_httpfetch_results;
@@ -349,7 +350,7 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 
 #if defined(__ANDROID__)
 	// Set certificate info
-	std::string cainfo_path = porting::getDataPath("cacert.pem");
+	std::string cainfo_path = porting::getDataPath("client" DIR_DELIM "cacert.pem");
 	CURLcode error = curl_easy_setopt(curl, CURLOPT_CAINFO, cainfo_path.c_str());
 	if (error != CURLE_OK) {
 		errorstream << "Cannot set CAINFO: " << curl_easy_strerror(error) << std::endl;
