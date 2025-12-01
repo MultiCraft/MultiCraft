@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/minimap.h"
 
 #ifdef HAVE_TOUCHSCREENGUI
-#include "gui/touchscreengui.h"
+#include "gui/touchscreengui_mc.h"
 #endif
 
 #define OBJECT_CROSSHAIR_LINE_SIZE 16
@@ -336,6 +336,11 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 	u32 text_height = g_fontengine->getTextHeight();
 	irr::gui::IGUIFont* font = g_fontengine->getFont();
 
+#if HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui)
+		g_touchscreengui->clearCSMButtons();
+#endif
+
 	// Reorder elements by z_index
 	std::vector<HudElement*> elems;
 	elems.reserve(player->maxHudId());
@@ -447,8 +452,15 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				if (!calculateScreenPos(camera_offset, e, &pos))
 					break;
 			}
-			case HUD_ELEM_IMAGE: {
+			case HUD_ELEM_IMAGE:
+			case HUD_ELEM_CSM_BUTTON: {
 				video::ITexture *texture = tsrc->getTexture(e->text);
+#if HAVE_TOUCHSCREENGUI
+				if (e->type == HUD_ELEM_CSM_BUTTON && g_touchscreengui &&
+						g_touchscreengui->getPressingCSMButton() == e->name &&
+						!e->text2.empty())
+					texture = tsrc->getTexture(e->text2);
+#endif
 				if (!texture)
 					continue;
 
@@ -473,6 +485,12 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				draw2DImageFilterScaled(driver, texture, rect,
 					core::rect<s32>(core::position2d<s32>(0,0), imgsize),
 					NULL, colors, true);
+
+#if HAVE_TOUCHSCREENGUI
+				if (e->type == HUD_ELEM_CSM_BUTTON && g_touchscreengui)
+					g_touchscreengui->registerCSMButton(e->name, rect);
+#endif
+
 				break; }
 			case HUD_ELEM_COMPASS: {
 				video::ITexture *texture = tsrc->getTexture(e->text);

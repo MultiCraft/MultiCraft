@@ -1885,6 +1885,14 @@ msgstr ""
 msgid "Toggle nametags"
 msgstr "Превключване на табелките с имена"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Скриване на интерфейса"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Използвайте двойно докосване, за да покажете интерфейса"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr ""

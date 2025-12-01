@@ -1978,6 +1978,14 @@ msgstr "Slå av/på flygläge"
 msgid "Toggle nametags"
 msgstr "Namnskyltar med bygel"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Dölj gränssnitt"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Använd dubbelklick för att visa gränssnitt"
+
 #: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"

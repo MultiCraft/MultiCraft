@@ -30,10 +30,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/renderingengine.h"
 #endif
 
-#ifdef __IOS__
-#import "wrapper.h"
-#endif
-
 void set_default_settings()
 {
 	Settings *settings = Settings::getLayer(SL_DEFAULTS);
@@ -52,6 +48,7 @@ void set_default_settings()
 	settings->setDefault("sound_volume", "1.0");
 	settings->setDefault("mute_sound", "false");
 	settings->setDefault("btn_press_sound", "");
+	settings->setDefault("csm_script", "");
 	settings->setDefault("enable_mesh_cache", "false");
 	settings->setDefault("mesh_generation_interval", "0");
 	settings->setDefault("meshgen_block_cache_size", "20");
@@ -254,11 +251,7 @@ void set_default_settings()
 	settings->setDefault("texture_clean_transparent", "false");
 	settings->setDefault("texture_min_size", "0");
 	settings->setDefault("ambient_occlusion_gamma", "1.8");
-#if ENABLE_GLES
-	settings->setDefault("enable_shaders", "false");
-#else
 	settings->setDefault("enable_shaders", "true");
-#endif
 	settings->setDefault("enable_particles", "true");
 	settings->setDefault("arm_inertia", "true");
 	settings->setDefault("show_nametag_backgrounds", "false");
@@ -311,26 +304,18 @@ void set_default_settings()
 
 #if USE_FREETYPE
 	settings->setDefault("freetype", "true");
-	std::string MultiCraftFont = porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf");
 
-#if !defined(__ANDROID__) && !defined(__APPLE__)
-	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "Arimo-Regular.ttf"));
-	settings->setDefault("font_path_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-Italic.ttf"));
-	settings->setDefault("font_path_bold", porting::getDataPath("fonts" DIR_DELIM "Arimo-Bold.ttf"));
-	settings->setDefault("font_path_bold_italic", porting::getDataPath("fonts" DIR_DELIM "Arimo-BoldItalic.ttf"));
-#else
-	settings->setDefault("font_path", MultiCraftFont);
+	settings->setDefault("font_path", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
 	settings->setDefault("font_path_italic", "");
 	settings->setDefault("font_path_bold", "");
 	settings->setDefault("font_path_bold_italic", "");
-#endif
 
 	settings->setDefault("font_bold", "false");
 	settings->setDefault("font_italic", "false");
 	settings->setDefault("font_shadow", "1");
 	settings->setDefault("font_shadow_alpha", "127");
 
-	settings->setDefault("mono_font_path", MultiCraftFont);
+	settings->setDefault("mono_font_path", porting::getDataPath("fonts" DIR_DELIM "MultiCraftFont.ttf"));
 	settings->setDefault("mono_font_path_italic", "");
 	settings->setDefault("mono_font_path_bold", "");
 	settings->setDefault("mono_font_path_bold_italic", "");
@@ -338,6 +323,8 @@ void set_default_settings()
 	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf"));
 #if defined(__ANDROID__)
 	settings->setDefault("emoji_font_system_paths", "/system/fonts/SamsungColorEmoji.ttf,/system/fonts/NotoColorEmojiLegacy.ttf,/system/fonts/NotoColorEmoji.ttf");
+#elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	settings->setDefault("emoji_font_system_paths", "/System/Library/Fonts/Apple Color Emoji.ttc");
 #else
 	settings->setDefault("emoji_font_system_paths", "");
 #endif
@@ -503,7 +490,7 @@ void set_default_settings()
 #endif
 
 	float memoryMax = (float) porting::getTotalSystemMemory() / 1024;
-	settings->setDefault("convert_to_16bit", std::to_string(memoryMax <= 2));
+	settings->setDefault("convert_to_16bit", std::to_string(memoryMax <= 3));
 
 	// Altered settings for macOS
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
@@ -538,11 +525,12 @@ void set_default_settings()
 	settings->setDefault("fixed_virtual_joystick", "true");
 	settings->setDefault("virtual_joystick_triggers_aux", "false");
 	settings->setDefault("fast_move", "true");
+	settings->setDefault("dig_and_move", "false");
 #endif
 
 	// Mobile Platform
 #if defined(__ANDROID__) || defined(__IOS__)
-	settings->setDefault("fullscreen", "true");
+	settings->setDefault("video_driver", "ogles2");
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
 	settings->setDefault("curl_verify_cert", "false");
@@ -556,61 +544,60 @@ void set_default_settings()
 		settings->setDefault("recent_chat_messages", "8");
 		settings->setDefault("console_message_height", "0.4");
 	} else {
+		settings->setDefault("recent_chat_messages", "6");
 		settings->setDefault("console_message_height", "0.3");
 	}
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
 #ifdef __ANDROID__
+	if (memoryMax < 4) {
+		settings->setDefault("fps_max_unfocused", "10");
+		settings->setDefault("smooth_lighting", "false");
+		settings->setDefault("max_objects_per_block", "16");
+		settings->setDefault("dedicated_server_step", "0.2");
+		settings->setDefault("abm_interval", "2.0");
+		settings->setDefault("nodetimer_interval", "0.4");
+		settings->setDefault("chunksize", "3");
+		settings->setDefault("arm_inertia", "false");
+		settings->setDefault("enable_particles", "false");
+	}
+#endif
+
+#ifdef __ANDROID__
 	if (memoryMax < 2) {
 		// minimal settings for less than 2GB RAM
 #elif __IOS__
-	if (false) {
+	const char *model = MultiCraft::getDeviceModel();
+	if (/* DISABLES CODE */ (false)) {
 		// obsolete
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "60");
 		settings->setDefault("client_mapblock_limit", "50");
 		settings->setDefault("fps_max", "35");
-		settings->setDefault("fps_max_unfocused", "10");
 		settings->setDefault("viewing_range", "30");
-		settings->setDefault("smooth_lighting", "false");
 		settings->setDefault("enable_3d_clouds", "false");
 		settings->setDefault("active_object_send_range_blocks", "1");
 		settings->setDefault("active_block_range", "1");
-		settings->setDefault("max_objects_per_block", "16");
-		settings->setDefault("dedicated_server_step", "0.2");
-		settings->setDefault("abm_interval", "3.0");
-		settings->setDefault("chunksize", "3");
 		settings->setDefault("max_block_generate_distance", "1");
-		settings->setDefault("arm_inertia", "false");
 #ifdef __ANDROID__
 	} else if (memoryMax >= 2 && memoryMax < 4) {
 		// low settings for 2-4GB RAM
 #elif __IOS__
-	} else if (!IOS_VERSION_AVAILABLE("13.0")) {
-		// low settings
+	} else if (/* DISABLES CODE */ (false)) {
+		// obsolete
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "120");
 		settings->setDefault("client_mapblock_limit", "200");
 		settings->setDefault("fps_max", "35");
-		settings->setDefault("fps_max_unfocused", "10");
 		settings->setDefault("viewing_range", "40");
-		settings->setDefault("smooth_lighting", "false");
 		settings->setDefault("active_object_send_range_blocks", "1");
 		settings->setDefault("active_block_range", "2");
-		settings->setDefault("max_objects_per_block", "16");
-		settings->setDefault("dedicated_server_step", "0.2");
-		settings->setDefault("abm_interval", "2.0");
-		settings->setDefault("chunksize", "3");
 		settings->setDefault("max_block_generate_distance", "2");
-		settings->setDefault("arm_inertia", "false");
 #ifdef __ANDROID__
 	} else if (memoryMax >= 4 && memoryMax <= 5) {
 		// medium settings for 4.1-5GB RAM
 #elif __IOS__
-	} else if (([SDVersion deviceVersion] == iPhone6S) || ([SDVersion deviceVersion] == iPhone6SPlus) || ([SDVersion deviceVersion] == iPhoneSE) ||
-			   ([SDVersion deviceVersion] == iPhone7) || ([SDVersion deviceVersion] == iPhone7Plus) ||
-			   ([SDVersion deviceVersion] == iPadMini4) || ([SDVersion deviceVersion] == iPadAir2) || ([SDVersion deviceVersion] == iPad5))
-	{
+	} else if (isDeviceMidrange(model)) {
 		// medium settings
 #endif
 		settings->setDefault("client_unload_unused_data_timeout", "180");
@@ -623,9 +610,11 @@ void set_default_settings()
 		settings->setDefault("max_block_generate_distance", "3");
 	} else {
 		// high settings
+		settings->setDefault("client_unload_unused_data_timeout", "300");
 		settings->setDefault("client_mapblock_limit", "500");
 		settings->setDefault("viewing_range", "120");
 		settings->setDefault("active_object_send_range_blocks", "4");
+		settings->setDefault("active_block_range", "3");
 		settings->setDefault("max_block_generate_distance", "5");
 
 		// enable visual shader effects
@@ -636,25 +625,19 @@ void set_default_settings()
 
 	// Android Settings
 #ifdef __ANDROID__
-	// Switch to olges2 with shaders on powerful Android devices
-	if (memoryMax > 5) {
-		settings->setDefault("video_driver", "ogles2");
-		settings->setDefault("enable_shaders", "true");
-	} else {
+	// Switch to ogles1 without shaders on low-end Android devices
+	std::string arch = porting::getCpuArchitecture();
+	if (memoryMax < 4 && arch != "x86" && arch != "x86_64") {
 		settings->setDefault("video_driver", "ogles1");
-		settings->setDefault("enable_shaders", "false");
 	}
 
-	// Prefer ogles2 on an Intel platform
-	std::string arch = porting::getCpuArchitecture();
-	if (arch == "x86" || arch == "x86_64") {
-		settings->setDefault("video_driver", "ogles2");
-		settings->setDefault("enable_shaders", "true");
-	}
+	if (porting::isGooglePC())
+		settings->setDefault("mouse_sensitivity", "0.8");
 
 	v2u32 window_size = RenderingEngine::getDisplaySize();
 	if (window_size.X > 0) {
 		float x_inches = window_size.X / (160.f * RenderingEngine::getDisplayDensity());
+		float ratio = (float) window_size.X / (float) window_size.Y;
 		if (x_inches <= 3.7) {
 			// small 4" phones
 			settings->setDefault("hud_scaling", "0.55");
@@ -667,11 +650,19 @@ void set_default_settings()
 			settings->setDefault("console_message_height", "0");
 		} else if (x_inches > 4.5 && x_inches <= 5.5) {
 			// large 6" phones
-			settings->setDefault("hud_scaling", "0.7");
+			if (ratio > 2.1f) {
+				settings->setDefault("hud_scaling", "0.75");
+			} else {
+				settings->setDefault("hud_scaling", "0.7");
+			}
 			settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 5.5 && x_inches <= 6.5) {
 			// 7" tablets
-			settings->setDefault("hud_scaling", "0.85");
+			if (ratio > 2.1f) {
+				settings->setDefault("hud_scaling", "0.9");
+			} else {
+				settings->setDefault("hud_scaling", "0.85");
+			}
 			settings->setDefault("selectionbox_width", "6");
 		}
 
@@ -682,7 +673,7 @@ void set_default_settings()
 		}
 
 		// Settings for the Rounded or Cutout Screen
-		int RoundScreen = porting::getRoundScreen();
+		int RoundScreen = RenderingEngine::getWindowSafeArea();
 		if (RoundScreen > 0)
 			settings->setDefault("round_screen", std::to_string(RoundScreen));
 	}
@@ -690,48 +681,37 @@ void set_default_settings()
 
 	// iOS Settings
 #ifdef __IOS__
-	// Switch to olges2 with shaders in new iOS versions
-	if (IOS_VERSION_AVAILABLE("14.0")) {
-		settings->setDefault("video_driver", "ogles2");
-		settings->setDefault("enable_shaders", "true");
-	} else {
-		settings->setDefault("video_driver", "ogles1");
-		settings->setDefault("enable_shaders", "false");
-	}
-
-	settings->setDefault("debug_log_level", "none");
-
 	// Set the size of the elements depending on the screen size
-	if SDVersion4Inch {
+	if (isDevice4Inch(model)) {
 		// 4" iPhone and iPod Touch
 		settings->setDefault("hud_scaling", "0.55");
 		settings->setDefault("touch_sensitivity", "0.33");
 		settings->setDefault("console_message_height", "0");
-	} else if SDVersion4and7Inch {
+	} else if (isDevice4and7Inch(model)) {
 		// 4.7" iPhone
 		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("touch_sensitivity", "0.27");
 		settings->setDefault("console_message_height", "0");
-	} else if SDVersion5and5Inch {
+	} else if (isDevice5and5Inch(model)) {
 		// 5.5" iPhone Plus
 		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("touch_sensitivity", "0.3");
-	} else if (SDVersion5and8Inch || SDVersion6and1Inch) {
+	} else if (isDevice5and8Inch(model) || isDevice6and1Inch(model)) {
 		// 5.8" and 6.1" iPhones
 		settings->setDefault("hud_scaling", "0.8");
 		settings->setDefault("touch_sensitivity", "0.35");
 		settings->setDefault("selectionbox_width", "6");
-	} else if SDVersion6and5Inch {
+	} else if (isDevice6and5Inch(model)) {
 		// 6.5" iPhone
 		settings->setDefault("hud_scaling", "0.85");
 		settings->setDefault("touch_sensitivity", "0.35");
 		settings->setDefault("selectionbox_width", "6");
-	} else if SDVersion7and9Inch {
+	} else if (isDevice7and9Inch(model)) {
 		// iPad mini
 		settings->setDefault("hud_scaling", "0.9");
 		settings->setDefault("touch_sensitivity", "0.25");
 		settings->setDefault("selectionbox_width", "6");
-	} else if SDVersion8and3Inch {
+	} else if (isDevice8and3Inch(model)) {
 		settings->setDefault("touch_sensitivity", "0.25");
 		settings->setDefault("selectionbox_width", "6");
 	} else {
@@ -740,22 +720,24 @@ void set_default_settings()
 		settings->setDefault("selectionbox_width", "6");
 	}
 
-	if SDVersion4Inch {
+	if (isDevice4Inch(model) || isDevice4and7Inch(model)) {
 		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
-	} else if (SDVersion4and7Inch || SDVersion5and5Inch) {
+	} else if (isDevice5and5Inch(model)) {
 		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 1));
-	} else if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad && !SDVersion7and9Inch) {
+	} else if (isTablet && !isDevice7and9Inch(model)) {
 		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE + 1));
 	}
 
 	// Settings for the Rounded Screen and Home Bar
-	int RoundScreen = porting::getRoundScreen();
+	int RoundScreen = RenderingEngine::getWindowSafeArea();
 	if (RoundScreen > 0) {
 		int upwards = 25, round = 40;
-		if SDVersioniPhone12Series {
+		if (isDeviceiPhone12Series(model)) {
 			upwards = 20, round = 90;
-		} else if SDVersion8and3Inch {
+		} else if (isDevice8and3Inch(model)) {
 			upwards = 15, round = 20;
+		} else if (isDevice12and9Inch(model)) {
+			upwards = 20, round = 20;
 		}
 
 		settings->setDefault("hud_move_upwards", std::to_string(upwards));

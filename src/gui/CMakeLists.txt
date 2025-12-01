@@ -1,6 +1,6 @@
 set(extra_gui_SRCS "")
 if(ENABLE_TOUCH)
-	set(extra_gui_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/touchscreengui.cpp)
+	set(extra_gui_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/touchscreengui_mc.cpp)
 endif()
 
 set(gui_SRCS

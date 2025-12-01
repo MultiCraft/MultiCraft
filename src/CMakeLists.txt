@@ -31,33 +31,27 @@ if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 	set(BUILD_SERVER TRUE)
 endif()
 
-option(USE_SDL "Use SDL2 for window management" FALSE)
-option(USE_ZSTD "Use Zstandard for MapBlock compression" TRUE)
+option(USE_SDL "Use SDL for window management" FALSE)
 option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
 
 if(USE_SDL)
 	if(NOT USE_STATIC_BUILD)
-		find_package(SDL2)
-	else()
-		set(SDL2_FOUND TRUE)
+		find_library(SDL_LIBRARIES NAMES SDL3 libSDL3)
+		find_path(SDL_INCLUDE_DIRS NAMES SDL.h PATH_SUFFIXES SDL3 include/SDL3 include PATHS)
 	endif()
-	if (SDL2_FOUND)
-		message(STATUS "SDL2 found.")
-		include_directories(${SDL2_INCLUDE_DIRS})
+	if (SDL_LIBRARIES AND SDL_INCLUDE_DIRS)
+		message(STATUS "SDL found.")
+		include_directories(${SDL_INCLUDE_DIRS})
 	else()
-		message(FATAL_ERROR "SDL2 not found.")
+		message(FATAL_ERROR "SDL not found.")
 	endif()
-endif()
-
-if(USE_ZSTD)
-	add_definitions(-DUSE_ZSTD=1)
 endif()
 
 option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
 set(USE_CURL FALSE)
 
 if(ENABLE_CURL)
-	find_package(CURL)
+	find_package(CURL 7.28.0)
 	if (CURL_FOUND)
 		message(STATUS "cURL support enabled.")
 		set(USE_CURL TRUE)
@@ -638,7 +632,7 @@ if(BUILD_CLIENT)
 	if(USE_SDL)
 		target_link_libraries(
 			${PROJECT_NAME}
-			${SDL2_LIBRARIES}
+			${SDL_LIBRARIES}
 		)
 		if(USE_STATIC_BUILD AND WIN32)
 			target_link_libraries(
@@ -755,7 +749,7 @@ if(BUILD_SERVER)
 	if(USE_SDL)
 		target_link_libraries(
 			${PROJECT_NAME}server
-			${SDL2_LIBRARIES}
+			${SDL_LIBRARIES}
 		)
 		if(USE_STATIC_BUILD AND WIN32)
 			target_link_libraries(

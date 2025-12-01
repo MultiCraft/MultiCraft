@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-OGG_VERSION=1.3.5
+OGG_VERSION=1.3.6
 
 if [ ! -d libogg-src ]; then
 	git clone -b v$OGG_VERSION --depth 1 https://github.com/xiph/ogg libogg-src

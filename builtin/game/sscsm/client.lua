@@ -2,9 +2,8 @@
 -- SSCSM: Server-Sent Client-Side Mods
 -- Initial code sent to the client
 --
--- Copyright © 2019-2021 by luk3yx
--- Copyright © 2020-2021 MultiCraft Development Team
--- License: GNU LGPL 3.0+
+-- Copyright © 2019-2025 by luk3yx
+-- Copyright © 2020-2025 MultiCraft Development Team
 --
 -- This program is free software; you can redistribute it and/or modify
 -- it under the terms of the GNU Lesser General Public License as published by
@@ -21,30 +20,12 @@
 -- Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 --
 
--- Make sure both table.unpack and unpack exist.
-if table.unpack then
-	unpack = table.unpack
-else
-	table.unpack = unpack -- luacheck: ignore
-end
-
--- Make sure a few basic functions exist, these may have been blocked because
--- of security or laziness.
+-- For some reason when I first made the SSCSM mod I made the sandbox set table.unpack and not unpack
+-- and not include raw*, so we're stuck with these for now
+unpack = table.unpack or unpack
 if not rawget   then function rawget(n, name) return n[name] end end
 if not rawset   then function rawset(n, k, v) n[k] = v end end
 if not rawequal then function rawequal(a, b) return a == b end end
-
--- Older versions of the CSM don't provide assert(), this function exists for
--- compatibility.
-if not assert then
-	function assert(value, ...)
-		if value then
-			return value, ...
-		else
-			error(... or 'assertion failed!', 2)
-		end
-	end
-end
 
 -- Create the API
 sscsm = {}
@@ -52,15 +33,20 @@ function sscsm.global_exists(name)
 	return rawget(_G, name) ~= nil
 end
 
+-- We are stuck with this until all clients get
+-- https://github.com/MultiCraft/MultiCraft/commit/9c6d57b99bb18c363bf79a1d8308506ac7f53b90
+-- (At which point it can become minetest = assert(core))
 if sscsm.global_exists('minetest') then
 	core = minetest
 else
-	minetest = assert(core, 'No "minetest" global found!')
+	minetest = assert(core)
 end
 
 core.global_exists = sscsm.global_exists
 
 -- Add print()
+-- luacheck: globals print
+-- luacheck: push ignore 131
 function print(...)
 	local msg = '[SSCSM] '
 	for i = 1, select('#', ...) do
@@ -69,6 +55,7 @@ function print(...)
 	end
 	core.log('none', msg)
 end
+-- luacheck: pop
 
 -- Add register_on_mods_loaded
 do
@@ -225,7 +212,7 @@ end
 
 -- Load split messages
 local incoming_messages = {}
-local function load_split_message(chan, msg)
+local function load_split_message(_, msg)
 	local id, i, l, pkt = msg:match('^\1([^\1]+)\1([^\1]+)\1([^\1]+)\1(.*)$')
 	id, i, l = tonumber(id), tonumber(i), tonumber(l)
 
@@ -270,8 +257,9 @@ core.register_on_receiving_chat_message(function(message)
 	end
 
 	-- Decompress messages
-	if prefix == 3 then
-		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)))
+	if prefix == 3 or prefix == 4 then
+		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)),
+			prefix == 4 and "zstd" or "deflate")
 		prefix = msg:byte(1)
 	end
 
@@ -298,6 +286,8 @@ end)
 
 -- Call leave_mod_channel for legacy clients
 if sscsm.global_exists('leave_mod_channel') then
+	-- luacheck: globals join_mod_channel leave_mod_channel
+	-- luacheck: ignore 131
 	sscsm.register_on_mods_loaded(leave_mod_channel)
 	join_mod_channel = nil
 	leave_mod_channel = nil

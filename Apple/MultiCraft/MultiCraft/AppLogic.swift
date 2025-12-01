@@ -4,14 +4,14 @@ import Foundation
 final class AppLogic: NSObject {
 	static let shared = AppLogic()
 
-	public func initialize() {
+	func initialize() {
 		Self.log(message: "[INIT] initialized")
 	}
 
 	static func log(message: String, object: Any? = nil, function: String = #function) {
-		#if DEBUG
+#if DEBUG
 		print("\(Date()) [\(function)] - \(message) \(object ?? "")")
-		#endif
+#endif
 	}
 }
 
@@ -24,10 +24,24 @@ public func getScreenScale() -> Float {
 	return Float(scale)
 }
 
-public func getUpgrade(key: UnsafePointer<CChar>) {
+public func getUpgrade(key: UnsafePointer<CChar>) -> Bool {
 	AppLogic.log(message: "[EVENT] got upgrade event: \(key)")
+	return false
 }
 
 public func getSecretKey(key: UnsafePointer<CChar>) -> UnsafePointer<CChar> {
 	return ("dummy" as NSString).utf8String!
+}
+
+public func finishGame(msg: UnsafePointer<CChar>) -> Never {
+	AppLogic.log(message: String(cString: msg))
+
+	DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+		NSApplication.shared.terminate(nil)
+	}
+
+	// run the run loop to ensure the app doesn't exit prematurely
+	while true {
+		RunLoop.current.run(until: Date.distantFuture)
+	}
 }

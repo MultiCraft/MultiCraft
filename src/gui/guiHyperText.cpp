@@ -34,6 +34,8 @@ using namespace irr::gui;
 #include "hud.h"
 #include "guiHyperText.h"
 #include "util/string.h"
+#include "mainmenumanager.h"
+#include "porting.h"
 
 bool check_color(const std::string &str)
 {
@@ -72,7 +74,7 @@ void ParsedText::Element::setStyle(StyleList &style)
 		font_mode = FM_Mono;
 
 	FontSpec spec(font_size, font_mode,
-		is_yes(style["bold"]), is_yes(style["italic"]));
+		is_yes(style["bold"]), is_yes(style["italic"]), 0);
 
 	// TODO: find a way to check font validity
 	// Build a new fontengine ?
@@ -547,6 +549,15 @@ u32 ParsedText::parseTag(const wchar_t *text, u32 cursor)
 			}
 		}
 
+		if (attrs.count("valign")) {
+			if (attrs["valign"] == "top")
+				m_element->valign = ParsedText::VALIGN_TOP;
+			else if (attrs["valign"] == "bottom")
+				m_element->valign = ParsedText::VALIGN_BOTTOM;
+			else if (attrs["valign"] == "middle")
+				m_element->valign = ParsedText::VALIGN_MIDDLE;
+		}
+
 		endElement();
 
 	} else if (name == "tag") {
@@ -604,8 +615,7 @@ u32 ParsedText::parseTag(const wchar_t *text, u32 cursor)
 
 TextDrawer::TextDrawer(const wchar_t *text, Client *client,
 		gui::IGUIEnvironment *environment, ISimpleTextureSource *tsrc) :
-		m_text(text),
-		m_client(client), m_environment(environment)
+		m_text(text), m_client(client), m_tsrc(tsrc), m_guienv(environment)
 {
 	// Size all elements
 	for (auto &p : m_text.m_paragraphs) {
@@ -638,7 +648,7 @@ TextDrawer::TextDrawer(const wchar_t *text, Client *client,
 
 				if (e.type == ParsedText::ELEMENT_IMAGE) {
 					video::ITexture *texture =
-						m_client->getTextureSource()->
+						m_tsrc->
 							getTexture(stringw_to_utf8(e.text));
 					if (texture)
 						dim = texture->getOriginalSize();
@@ -879,6 +889,18 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 				case ParsedText::ELEMENT_IMAGE:
 				case ParsedText::ELEMENT_ITEM:
 					x += e->dim.Width;
+
+					switch (e->valign) {
+					case ParsedText::VALIGN_BOTTOM:
+						e->pos.Y += charsheight - e->dim.Height;
+						break;
+					case ParsedText::VALIGN_MIDDLE:
+						e->pos.Y += (charsheight - e->dim.Height) / 2;
+						break;
+					case ParsedText::VALIGN_TOP:
+						// No action needed
+						break;
+					}
 					break;
 				}
 
@@ -920,7 +942,7 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 void TextDrawer::draw(const core::rect<s32> &clip_rect,
 		const core::position2d<s32> &dest_offset)
 {
-	irr::video::IVideoDriver *driver = m_environment->getVideoDriver();
+	irr::video::IVideoDriver *driver = m_guienv->getVideoDriver();
 	core::position2d<s32> offset = dest_offset;
 	offset.Y += m_voffset;
 
@@ -964,10 +986,10 @@ void TextDrawer::draw(const core::rect<s32> &clip_rect,
 
 			case ParsedText::ELEMENT_IMAGE: {
 				video::ITexture *texture =
-						m_client->getTextureSource()->getTexture(
+						m_tsrc->getTexture(
 								stringw_to_utf8(el.text));
 				if (texture != 0)
-					m_environment->getVideoDriver()->draw2DImage(
+					m_guienv->getVideoDriver()->draw2DImage(
 							texture, rect,
 							irr::core::rect<s32>(
 									core::position2d<s32>(0, 0),
@@ -976,15 +998,15 @@ void TextDrawer::draw(const core::rect<s32> &clip_rect,
 			} break;
 
 			case ParsedText::ELEMENT_ITEM: {
-				IItemDefManager *idef = m_client->idef();
-				ItemStack item;
-				item.deSerialize(stringw_to_utf8(el.text), idef);
+				if (m_client) {
+					IItemDefManager *idef = m_client->idef();
+					ItemStack item;
+					item.deSerialize(stringw_to_utf8(el.text), idef);
 
-				drawItemStack(
-						m_environment->getVideoDriver(),
-						g_fontengine->getFont(), item, rect, &clip_rect,
-						m_client, IT_ROT_OTHER, el.angle, el.rotation
-				);
+					drawItemStack(m_guienv->getVideoDriver(),
+							g_fontengine->getFont(), item, rect, &clip_rect, m_client,
+							IT_ROT_OTHER, el.angle, el.rotation);
+				}
 			} break;
 			}
 		}
@@ -1001,7 +1023,7 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 		Client *client, ISimpleTextureSource *tsrc, const StyleSpec &style,
 		ISoundManager *sound_manager) :
 		IGUIElement(EGUIET_CUSTOM_HYPERTEXT, environment, parent, id, rectangle),
-		m_client(client), m_vscrollbar(nullptr),
+		m_tsrc(tsrc), m_vscrollbar(nullptr),
 		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
 #else
 GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
@@ -1009,7 +1031,7 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 		Client *client, ISimpleTextureSource *tsrc, const StyleSpec &style,
 		ISoundManager *sound_manager) :
 		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
-		m_client(client), m_vscrollbar(nullptr),
+		m_tsrc(tsrc), m_vscrollbar(nullptr),
 		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
 #endif
 {
@@ -1174,6 +1196,12 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 							newEvent.GUIEvent.EventType = EGET_BUTTON_CLICKED;
 							Parent->OnEvent(newEvent);
 						}
+
+						auto url_it = tag->attrs.find("url");
+						if (url_it != tag->attrs.end()) {
+							porting::open_url(url_it->second, g_gamecallback != nullptr);
+						}
+
 						break;
 					}
 				}

@@ -1958,6 +1958,14 @@ msgstr "Preklopi HUD"
 msgid "Toggle nametags"
 msgstr "Preklopite oznake z imeni"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Skrijte vmesnik"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Z dvojnim tapom prikažite vmesnik"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Preklopi beleženje pogovora"

@@ -37,12 +37,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "content_cao.h"
 #include "content/subgames.h"
 #include "client/event_manager.h"
+#include "daynightratio.h"
 #include "fontengine.h"
 #include "itemdef.h"
 #include "log.h"
 #include "filesys.h"
 #include "gameparams.h"
 #include "gettext.h"
+#include "gui/guiEngine.h"
 #include "gui/guiChatConsole.h"
 #include "gui/guiConfirmRegistration.h"
 #include "gui/guiFormSpecMenu.h"
@@ -61,7 +63,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server.h"
 #include "settings.h"
 #include "shader.h"
-#include "sky.h"
 #include "translation.h"
 #include "util/basic_macros.h"
 #include "util/directiontables.h"
@@ -151,6 +152,16 @@ struct LocalFormspecHandler : public TextDest
 
 			if (fields.find("btn_key_config") != fields.end()) {
 				g_gamecallback->keyConfig();
+				return;
+			}
+
+			if (fields.find("btn_key_touchscreen_edit") != fields.end()) {
+#ifdef HAVE_TOUCHSCREENGUI
+				if (g_touchscreengui) {
+					g_touchscreengui->openEditor();
+					g_touchscreengui->show();
+				}
+#endif
 				return;
 			}
 
@@ -424,118 +435,91 @@ public:
 	}
 };
 
-
-// before 1.8 there isn't a "integer interface", only float
-#if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
-typedef f32 SamplerLayer_t;
-#else
-typedef s32 SamplerLayer_t;
-#endif
-
-
-class GameGlobalShaderConstantSetter : public IShaderConstantSetter
+void GameGlobalShaderConstantSetter::onSettingsChange(const std::string &name)
 {
-	Sky *m_sky;
-	bool *m_force_fog_off;
-	f32 *m_fog_range;
-	bool m_fog_enabled;
-	CachedPixelShaderSetting<float, 4> m_sky_bg_color;
-	CachedPixelShaderSetting<float> m_fog_distance;
-	CachedVertexShaderSetting<float> m_animation_timer_vertex;
-	CachedPixelShaderSetting<float> m_animation_timer_pixel;
-	CachedPixelShaderSetting<float, 3> m_day_light;
-	CachedPixelShaderSetting<float, 4> m_star_color;
-	CachedPixelShaderSetting<float, 3> m_eye_position_pixel;
-	CachedVertexShaderSetting<float, 3> m_eye_position_vertex;
-	CachedPixelShaderSetting<float, 3> m_minimap_yaw;
-	CachedPixelShaderSetting<float, 3> m_camera_offset_pixel;
-	CachedPixelShaderSetting<float, 3> m_camera_offset_vertex;
-	CachedPixelShaderSetting<SamplerLayer_t> m_base_texture;
-	CachedPixelShaderSetting<SamplerLayer_t> m_normal_texture;
-	Client *m_client;
-
-public:
-	void onSettingsChange(const std::string &name)
-	{
-		if (name == "enable_fog")
-			m_fog_enabled = g_settings->getBool("enable_fog");
-	}
-
-	static void settingsCallback(const std::string &name, void *userdata)
-	{
-		reinterpret_cast<GameGlobalShaderConstantSetter*>(userdata)->onSettingsChange(name);
-	}
-
-	void setSky(Sky *sky) { m_sky = sky; }
-
-	GameGlobalShaderConstantSetter(Sky *sky, bool *force_fog_off,
-			f32 *fog_range, Client *client) :
-		m_sky(sky),
-		m_force_fog_off(force_fog_off),
-		m_fog_range(fog_range),
-		m_sky_bg_color("skyBgColor"),
-		m_fog_distance("fogDistance"),
-		m_animation_timer_vertex("animationTimer"),
-		m_animation_timer_pixel("animationTimer"),
-		m_day_light("dayLight"),
-		m_star_color("starColor"),
-		m_eye_position_pixel("eyePosition"),
-		m_eye_position_vertex("eyePosition"),
-		m_minimap_yaw("yawVec"),
-		m_camera_offset_pixel("cameraOffset"),
-		m_camera_offset_vertex("cameraOffset"),
-		m_base_texture("baseTexture"),
-		m_normal_texture("normalTexture"),
-		m_client(client)
-	{
-		g_settings->registerChangedCallback("enable_fog", settingsCallback, this);
+	if (name == "enable_fog")
 		m_fog_enabled = g_settings->getBool("enable_fog");
-	}
+}
 
-	~GameGlobalShaderConstantSetter()
-	{
-		g_settings->deregisterChangedCallback("enable_fog", settingsCallback, this);
-	}
+void GameGlobalShaderConstantSetter::settingsCallback(const std::string &name, void *userdata)
+{
+	reinterpret_cast<GameGlobalShaderConstantSetter*>(userdata)->onSettingsChange(name);
+}
 
-	void onSetConstants(video::IMaterialRendererServices *services) override
-	{
-		// Background color
-		video::SColor bgcolor = m_sky->getBgColor();
-		video::SColorf bgcolorf(bgcolor);
-		float bgcolorfa[4] = {
-			bgcolorf.r,
-			bgcolorf.g,
-			bgcolorf.b,
-			bgcolorf.a,
-		};
-		m_sky_bg_color.set(bgcolorfa, services);
+GameGlobalShaderConstantSetter::GameGlobalShaderConstantSetter(Sky *sky, bool *force_fog_off,
+		f32 *fog_range, Client *client) :
+	m_sky(sky),
+	m_force_fog_off(force_fog_off),
+	m_fog_range(fog_range),
+	m_sky_bg_color("skyBgColor"),
+	m_fog_distance("fogDistance"),
+	m_animation_timer_vertex("animationTimer"),
+	m_animation_timer_pixel("animationTimer"),
+	m_day_light("dayLight"),
+	m_star_color("starColor"),
+	m_eye_position_pixel("eyePosition"),
+	m_eye_position_vertex("eyePosition"),
+	m_minimap_yaw("yawVec"),
+	m_camera_offset_pixel("cameraOffset"),
+	m_camera_offset_vertex("cameraOffset"),
+	m_base_texture("baseTexture"),
+	m_normal_texture("normalTexture"),
+	m_client(client)
+{
+	g_settings->registerChangedCallback("enable_fog", settingsCallback, this);
+	m_fog_enabled = g_settings->getBool("enable_fog");
+}
 
-		// Fog distance
-		float fog_distance = -1.0f; // sentinel for disabled fog
+GameGlobalShaderConstantSetter::~GameGlobalShaderConstantSetter()
+{
+	g_settings->deregisterChangedCallback("enable_fog", settingsCallback, this);
+}
 
-		if (m_fog_enabled && !*m_force_fog_off)
-			fog_distance = *m_fog_range;
+void GameGlobalShaderConstantSetter::onSetConstants(video::IMaterialRendererServices *services)
+{
+	// Background color
+	video::SColor bgcolor = m_sky->getBgColor();
+	video::SColorf bgcolorf(bgcolor);
+	float bgcolorfa[4] = {
+		bgcolorf.r,
+		bgcolorf.g,
+		bgcolorf.b,
+		bgcolorf.a,
+	};
+	m_sky_bg_color.set(bgcolorfa, services);
 
-		m_fog_distance.set(&fog_distance, services);
+	// Fog distance
+	float fog_distance = -1.0f; // sentinel for disabled fog
 
-		u32 daynight_ratio = (float)m_client->getEnv().getDayNightRatio();
-		video::SColorf sunlight;
-		get_sunlight_color(&sunlight, daynight_ratio);
-		float dnc[3] = {
-			sunlight.r,
-			sunlight.g,
-			sunlight.b };
-		m_day_light.set(dnc, services);
+	if (m_fog_enabled && !*m_force_fog_off)
+		fog_distance = *m_fog_range;
 
-		video::SColorf star_color = m_sky->getCurrentStarColor();
-		float clr[4] = {star_color.r, star_color.g, star_color.b, star_color.a};
-		m_star_color.set(clr, services);
+	m_fog_distance.set(&fog_distance, services);
 
-		u32 animation_timer = porting::getTimeMs() % 1000000;
-		float animation_timer_f = (float)animation_timer / 100000.f;
-		m_animation_timer_vertex.set(&animation_timer_f, services);
-		m_animation_timer_pixel.set(&animation_timer_f, services);
+	u32 daynight_ratio = 0;
+	if (m_client)
+		daynight_ratio = m_client->getEnv().getDayNightRatio();
+	else
+		daynight_ratio = time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);
 
+	video::SColorf sunlight;
+	get_sunlight_color(&sunlight, daynight_ratio);
+	float dnc[3] = {
+		sunlight.r,
+		sunlight.g,
+		sunlight.b };
+	m_day_light.set(dnc, services);
+
+	video::SColorf star_color = m_sky->getCurrentStarColor();
+	float clr[4] = {star_color.r, star_color.g, star_color.b, star_color.a};
+	m_star_color.set(clr, services);
+
+	u32 animation_timer = porting::getTimeMs() % 1000000;
+	float animation_timer_f = (float)animation_timer / 100000.f;
+	m_animation_timer_vertex.set(&animation_timer_f, services);
+	m_animation_timer_pixel.set(&animation_timer_f, services);
+
+	if (m_client) {
 		float eye_position_array[3];
 		v3f epos = m_client->getEnv().getLocalPlayer()->getEyePosition();
 #if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
@@ -547,20 +531,22 @@ public:
 #endif
 		m_eye_position_pixel.set(eye_position_array, services);
 		m_eye_position_vertex.set(eye_position_array, services);
+	}
 
-		if (m_client->getMinimap()) {
-			float minimap_yaw_array[3];
-			v3f minimap_yaw = m_client->getMinimap()->getYawVec();
+	if (m_client && m_client->getMinimap()) {
+		float minimap_yaw_array[3];
+		v3f minimap_yaw = m_client->getMinimap()->getYawVec();
 #if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
-			minimap_yaw_array[0] = minimap_yaw.X;
-			minimap_yaw_array[1] = minimap_yaw.Y;
-			minimap_yaw_array[2] = minimap_yaw.Z;
+		minimap_yaw_array[0] = minimap_yaw.X;
+		minimap_yaw_array[1] = minimap_yaw.Y;
+		minimap_yaw_array[2] = minimap_yaw.Z;
 #else
-			minimap_yaw.getAs3Values(minimap_yaw_array);
+		minimap_yaw.getAs3Values(minimap_yaw_array);
 #endif
-			m_minimap_yaw.set(minimap_yaw_array, services);
-		}
+		m_minimap_yaw.set(minimap_yaw_array, services);
+	}
 
+	if (m_client) {
 		float camera_offset_array[3];
 		v3f offset = intToFloat(m_client->getCamera()->getOffset(), BS);
 #if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
@@ -577,42 +563,33 @@ public:
 		m_base_texture.set(&base_tex, services);
 		m_normal_texture.set(&normal_tex, services);
 	}
-};
+}
 
 
-class GameGlobalShaderConstantSetterFactory : public IShaderConstantSetterFactory
+GameGlobalShaderConstantSetterFactory::GameGlobalShaderConstantSetterFactory(bool *force_fog_off,
+		f32 *fog_range, Client *client) :
+	m_sky(NULL),
+	m_force_fog_off(force_fog_off),
+	m_fog_range(fog_range),
+	m_client(client)
+{}
+
+void GameGlobalShaderConstantSetterFactory::setSky(Sky *sky) {
+	m_sky = sky;
+	for (GameGlobalShaderConstantSetter *ggscs : created_nosky) {
+		ggscs->setSky(m_sky);
+	}
+	created_nosky.clear();
+}
+
+IShaderConstantSetter* GameGlobalShaderConstantSetterFactory::create()
 {
-	Sky *m_sky;
-	bool *m_force_fog_off;
-	f32 *m_fog_range;
-	Client *m_client;
-	std::vector<GameGlobalShaderConstantSetter *> created_nosky;
-public:
-	GameGlobalShaderConstantSetterFactory(bool *force_fog_off,
-			f32 *fog_range, Client *client) :
-		m_sky(NULL),
-		m_force_fog_off(force_fog_off),
-		m_fog_range(fog_range),
-		m_client(client)
-	{}
-
-	void setSky(Sky *sky) {
-		m_sky = sky;
-		for (GameGlobalShaderConstantSetter *ggscs : created_nosky) {
-			ggscs->setSky(m_sky);
-		}
-		created_nosky.clear();
-	}
-
-	virtual IShaderConstantSetter* create()
-	{
-		auto *scs = new GameGlobalShaderConstantSetter(
-				m_sky, m_force_fog_off, m_fog_range, m_client);
-		if (!m_sky)
-			created_nosky.push_back(scs);
-		return scs;
-	}
-};
+	auto *scs = new GameGlobalShaderConstantSetter(
+			m_sky, m_force_fog_off, m_fog_range, m_client);
+	if (!m_sky)
+		created_nosky.push_back(scs);
+	return scs;
+}
 
 #define SIZE_TAG "size[11,5.5]"
 
@@ -650,7 +627,7 @@ struct GameRunData {
 	float repeat_place_timer;
 	float object_hit_delay_timer;
 	float time_from_last_punch;
-	float pause_game_timer;
+	u64 pause_game_timer;
 	ClientActiveObject *selected_object;
 
 	float jump_timer;
@@ -679,6 +656,10 @@ struct ClientEventHandler
  ****************************************************************************/
 
 using PausedNodesList = std::vector<std::pair<irr_ptr<scene::IAnimatedMeshSceneNode>, float>>;
+
+#if defined(__ANDROID__) || defined(__IOS__)
+static std::atomic<bool> g_pause_menu_schedule(false);
+#endif
 
 /* This is not intended to be a public class. If a public class becomes
  * desirable then it may be better to create another 'wrapper' class that
@@ -720,9 +701,8 @@ protected:
 	bool initGui();
 
 	// Client connection
-	bool connectToServer(const GameStartData &start_data,
-			bool *connect_ok, bool *aborted);
-	bool getServerContent(bool *aborted);
+	bool connectToServer(const GameStartData &start_data, bool *connect_ok);
+	bool getServerContent();
 
 	// Main loop
 
@@ -956,6 +936,10 @@ private:
 #ifdef HAVE_TOUCHSCREENGUI
 	bool m_cache_touchtarget;
 #endif
+
+	bool m_connect_aborted = false;
+	u64 load_last_time_ms = 0;
+	u64 load_time_ms = 0;
 };
 
 Game::Game() :
@@ -1138,6 +1122,19 @@ void Game::run()
 		//  + Sleep time until the wanted FPS are reached
 		limitFps(&draw_times, &dtime);
 
+#if defined(__ANDROID__) || defined(__IOS__)
+		if (g_pause_menu_schedule) {
+			g_pause_menu_schedule = false;
+			pauseGame();
+		}
+
+		if (client->modsLoaded()) {
+			std::string key, value;
+			if (GUIEngine::readUpdate(&key, &value))
+				client->getScript()->on_update(key, value);
+		}
+#endif
+
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
 		if (!device->isWindowFocused()) {
 			if (m_does_lost_focus_pause_game && !isMenuActive())
@@ -1208,7 +1205,10 @@ void Game::shutdown()
 		formspec->quitMenu();
 
 #ifdef HAVE_TOUCHSCREENGUI
-	g_touchscreengui->hide();
+	if (g_touchscreengui) {
+		g_touchscreengui->hide();
+		g_touchscreengui->close();
+	}
 #endif
 
 	showOverlayMessage(N_("Shutting down..."), 0, 100);
@@ -1263,6 +1263,12 @@ bool Game::init(
 {
 	texture_src = createTextureSource(false);
 
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_time_ms = porting::getTimeMs();
+	load_last_time_ms = load_time_ms;
 	showOverlayMessage(N_("Loading..."), 0, 0);
 
 	shader_src = createShaderSource();
@@ -1319,7 +1325,14 @@ bool Game::initSound()
 bool Game::createSingleplayerServer(const std::string &map_dir,
 		const SubgameSpec &gamespec, u16 port)
 {
-	showOverlayMessage(N_("Loading..."), 0, 5);
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Loading..."), dtime, 5);
 
 	std::string bind_str = g_settings->get("bind_address");
 	Address bind_addr(0, 0, 0, 0, port);
@@ -1375,18 +1388,26 @@ void Game::copyServerClientCache()
 
 bool Game::createClient(const GameStartData &start_data)
 {
-	showOverlayMessage(N_("Creating client..."), 0, 10);
+	bool could_connect = false;
+
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Creating client..."), dtime, 10);
 
 	draw_control = new MapDrawControl;
 	if (!draw_control)
 		return false;
 
-	bool could_connect, connect_aborted;
-	if (!connectToServer(start_data, &could_connect, &connect_aborted))
+	if (!connectToServer(start_data, &could_connect))
 		return false;
 
 	if (!could_connect) {
-		if (error_message->empty() && !connect_aborted) {
+		if (error_message->empty() && !m_connect_aborted) {
 			// Should not happen if error messages are set properly
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
@@ -1398,8 +1419,8 @@ bool Game::createClient(const GameStartData &start_data)
 	porting::notifyServerConnect(!simple_singleplayer_mode);
 #endif
 
-	if (!getServerContent(&connect_aborted)) {
-		if (error_message->empty() && !connect_aborted) {
+	if (!getServerContent()) {
+		if (error_message->empty() && !m_connect_aborted) {
 			// Should not happen if error messages are set properly
 			*error_message = "Connection failed for unknown reason";
 			errorstream << *error_message << std::endl;
@@ -1412,7 +1433,10 @@ bool Game::createClient(const GameStartData &start_data)
 	shader_src->addShaderConstantSetterFactory(scsf);
 
 	// Update cached textures, meshes and materials
-	client->afterContentReceived();
+	if (!client->afterContentReceived()) {
+		infostream << "Connect aborted [Escape]" << std::endl;
+		return false;
+	}
 
 	RenderingEngine::draw_load_cleanup();
 
@@ -1456,9 +1480,9 @@ bool Game::createClient(const GameStartData &start_data)
 	/* Set window caption
 	 */
 	std::wstring str = utf8_to_wide(PROJECT_NAME_C);
+#ifndef NDEBUG
 	str += L" ";
 	str += utf8_to_wide(g_version_hash);
-#ifndef NDEBUG
 	str += L" [";
 	str += driver->getName();
 	str += L"]";
@@ -1495,7 +1519,7 @@ bool Game::initGui()
 
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui) {
-		g_touchscreengui->init(texture_src, simple_singleplayer_mode);
+		g_touchscreengui->init(texture_src, sound);
 		if (g_touchscreengui->isActive())
 			g_touchscreengui->show();
 	}
@@ -1504,14 +1528,18 @@ bool Game::initGui()
 	return true;
 }
 
-bool Game::connectToServer(const GameStartData &start_data,
-		bool *connect_ok, bool *connection_aborted)
+bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 {
-	*connect_ok = false;	// Let's not be overly optimistic
-	*connection_aborted = false;
 	bool local_server_mode = false;
 
-	showOverlayMessage(N_("Resolving address..."), 0, 15);
+	bool result = RenderingEngine::run();
+	if (!result)
+		return false;
+
+	load_last_time_ms = load_time_ms;
+	load_time_ms = porting::getTimeMs();
+	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+	showOverlayMessage(N_("Resolving address..."), dtime, 15);
 
 	Address connect_address(0, 0, 0, 0, start_data.socket_port);
 
@@ -1550,6 +1578,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			connect_address.isIPv6(), m_game_ui.get());
 
 	client->m_simple_singleplayer_mode = simple_singleplayer_mode;
+	client->m_connect_aborted = &m_connect_aborted;
 
 	infostream << "Connecting to server at ";
 	connect_address.print(&infostream);
@@ -1562,7 +1591,6 @@ bool Game::connectToServer(const GameStartData &start_data,
 		Wait for server to accept connection
 	*/
 
-	bool result = true;
 	const f32 connect_timeout = start_data.reconnecting ?
 			g_settings->getFloat("reconnect_timeout") :
 			g_settings->getFloat("connect_timeout");
@@ -1593,7 +1621,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			// Break conditions
-			if (*connection_aborted)
+			if (m_connect_aborted)
 				break;
 
 			if (client->accessDenied()) {
@@ -1605,7 +1633,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 			}
 
 			if (input->cancelPressed()) {
-				*connection_aborted = true;
+				m_connect_aborted = true;
 				infostream << "Connect aborted [Escape]" << std::endl;
 				break;
 			}
@@ -1619,7 +1647,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
 						   &g_menumgr, client, start_data.name, start_data.password,
-						   connection_aborted, texture_src, sound))->drop();
+						   &m_connect_aborted, texture_src, sound))->drop();
 				}
 			} else {
 				wait_time += dtime;
@@ -1643,7 +1671,7 @@ bool Game::connectToServer(const GameStartData &start_data,
 	return result;
 }
 
-bool Game::getServerContent(bool *aborted)
+bool Game::getServerContent()
 {
 	input->clear();
 
@@ -1679,8 +1707,13 @@ bool Game::getServerContent(bool *aborted)
 			return false;
 		}
 
+		if (m_connect_aborted) {
+			infostream << "Connect aborted [Escape]" << std::endl;
+			return false;
+		}
+
 		if (input->cancelPressed()) {
-			*aborted = true;
+			m_connect_aborted = true;
 			infostream << "Connect aborted [Escape]" << std::endl;
 			return false;
 		}
@@ -1987,11 +2020,6 @@ void Game::processKeyInput()
 			showPauseMenu();
 		}
 	} else if (wasKeyDown(KeyType::CHAT)) {
-#if defined(__ANDROID__) || defined(__IOS__)
-		if (isKeyDown(KeyType::SNEAK))
-			m_game_ui->toggleChat();
-		else
- #endif
 		openConsole(core::clamp(g_settings->getFloat("console_message_height"), 0.1f, 1.0f), L"");
 	} else if (wasKeyDown(KeyType::CMD)) {
 		openConsole(core::clamp(g_settings->getFloat("console_message_height"), 0.1f, 1.0f), L"/");
@@ -2009,7 +2037,7 @@ void Game::processKeyInput()
 		if (isKeyDown(KeyType::SNEAK) && client->checkPrivilege("fly"))
 			toggleFast();
 		else
- #endif
+#endif
 		toggleFreeMoveAlt();
 	} else if (wasKeyDown(KeyType::PITCHMOVE)) {
 		togglePitchMove();
@@ -2104,6 +2132,12 @@ void Game::processKeyInput()
 		runData.jump_timer = 0.0f;
 	}
 
+#if HAVE_TOUCHSCREENGUI
+	std::string btn = g_touchscreengui->getLastPressedCSMButton();
+	if (!btn.empty() && client->modsLoaded())
+		client->getScript()->on_hud_button_press(btn);
+#endif
+
 	if (quicktune->hasMessage()) {
 		m_game_ui->showStatusText(utf8_to_wide(quicktune->getMessage()));
 	}
@@ -2191,7 +2225,14 @@ void Game::openInventory()
 	GUIFormSpecMenu::create(formspec, client, &input->joystick, fs_src,
 		txt_dst, client->getFormspecPrepend(), sound);
 
-	formspec->setFormSpec(fs_src->getForm(), inventoryloc);
+	const std::string form = fs_src->getForm();
+	formspec->setFormSpec(form, inventoryloc);
+
+	if (form.find("acknowledge_open[]") != std::string::npos) {
+		StringMap fields;
+		fields["open"] = "true";
+		txt_dst->gotText(fields);
+	}
 }
 
 
@@ -2575,12 +2616,26 @@ void Game::updateCameraOrientation(CameraOrientation *cam, float dtime)
 
 	if (m_cache_enable_joysticks) {
 		f32 c = m_cache_joystick_frustum_sensitivity * (1.f / 32767.f) * dtime;
+		f32 yaw = 0;
+		f32 pitch = 0;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		cam->camera_yaw -= input->sdl_game_controller.getCameraYaw() * c;
-		cam->camera_pitch += input->sdl_game_controller.getCameraPitch() * c;
+		yaw = input->sdl_game_controller.getCameraYaw();
+		pitch = input->sdl_game_controller.getCameraPitch();
+		cam->camera_yaw -= yaw * c;
+		cam->camera_pitch += pitch * c;
 #else
-		cam->camera_yaw -= input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL) * c;
-		cam->camera_pitch += input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL) * c;
+		yaw = input->joystick.getAxisWithoutDead(JA_FRUSTUM_HORIZONTAL);
+		pitch = input->joystick.getAxisWithoutDead(JA_FRUSTUM_VERTICAL)
+		cam->camera_yaw -= yaw * c;
+		cam->camera_pitch += pitch * c;
+#endif
+#ifdef HAVE_TOUCHSCREENGUI
+		if (g_touchscreengui) {
+			if ((g_touchscreengui->getCurrentState() == STATE_HIDDEN ||
+					g_touchscreengui->getCurrentState() == STATE_EDITOR) &&
+					(yaw != 0 || pitch != 0))
+				g_touchscreengui->changeCurrentState(STATE_DEFAULT);
+		}
 #endif
 	}
 
@@ -3216,7 +3271,7 @@ void Game::processPlayerInteraction(f32 dtime, bool show_hud)
 	const ItemStack &tool_item = player->getWieldedItem(&selected_item, &hand_item);
 
 	const ItemDefinition &selected_def = selected_item.getDefinition(itemdef_manager);
-	f32 d = getToolRange(selected_def, hand_item.getDefinition(itemdef_manager));
+	f32 d = getToolRange(selected_item, hand_item, itemdef_manager);
 
 	core::line3d<f32> shootline;
 
@@ -4057,6 +4112,14 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		runData.update_draw_list_last_cam_dir = camera_direction;
 	}
 
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui) {
+		std::string message = g_touchscreengui->getMessage();
+		if (!message.empty())
+			m_game_ui->showTranslatedStatusText(message.c_str(), 4.0f);
+	}
+#endif
+
 	m_game_ui->update(*stats, client, draw_control, cam, runData.pointed_old, gui_chat_console, dtime);
 
 	/*
@@ -4119,8 +4182,15 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 				scene::ESNRP_SHADOW;
 	}
 
-	RenderingEngine::draw_scene(skycolor, m_game_ui->m_flags.show_hud,
-			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair, m_game_ui->m_flags.show_nametags);
+	bool show_hud = m_game_ui->m_flags.show_hud;
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui)
+		show_hud = (g_touchscreengui->getCurrentState() != STATE_HIDDEN);
+#endif
+
+	RenderingEngine::draw_scene(skycolor, show_hud,
+			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair,
+			m_game_ui->m_flags.show_nametags);
 
 #if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
 	mat.EnableFlags = 0;
@@ -4264,15 +4334,17 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 
 #if defined(__ANDROID__) || defined(__IOS__)
 	if (g_menumgr.pausesGame()) {
-		runData.pause_game_timer += *dtime;
-		float disconnect_time = 180.0f;
+		u64 cur_time = porting::getTimeMs();
+		if (runData.pause_game_timer == 0)
+			runData.pause_game_timer = cur_time;
+		u64 disconnect_time = 180000;
 #ifdef __IOS__
-		disconnect_time = simple_singleplayer_mode ? 60.0f : 120.0f;
+		disconnect_time = simple_singleplayer_mode ? 60000 : 120000;
 #endif
-		if (runData.pause_game_timer > disconnect_time) {
+		if (cur_time - runData.pause_game_timer > disconnect_time)
 			g_gamecallback->disconnect();
-			return;
-		}
+	} else {
+		runData.pause_game_timer = 0;
 	}
 #endif
 }
@@ -4332,7 +4404,6 @@ void Game::pauseGame()
 		g_touchscreengui->reset();
 #endif
 	showPauseMenu();
-	runData.pause_game_timer = 0;
 }
 #endif
 
@@ -4385,7 +4456,44 @@ void Game::showDeathFormspec()
 	formspec->setFocus("btn_respawn");
 }
 
-#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
+void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple<const char*, std::string,
+		std::string, bool>> &buttons, float center_y, float btn_h, float gap)
+{
+	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
+	float y = center_y + gap * 0.5f - total_height * 0.5f;
+	float icon_size = btn_h - 0.25f;
+
+	if (buttons.size() <= 4)
+		y = y - gap * 3;
+
+	for (auto &[id, text, icon, is_exit] : buttons) {
+		if (is_exit)
+			os << "image_button_exit[3," << y << ";5," << btn_h
+			<< ";;" << id << ";" << text << ";;false]";
+		else
+			os << "image_button[3," << y << ";5," << btn_h
+			<< ";;" << id << ";" << text << ";;false]";
+		os << "image[3.12," << (y + 0.1f) << ";" << icon_size << "," << icon_size << ";" << icon << "]";
+		y += btn_h + gap;
+	}
+}
+
+void getButtonStyle(std::ostringstream &os)
+{
+	const bool high_dpi = RenderingEngine::isHighDpi();
+	const std::string x2 = high_dpi ? ".x2" : "";
+	std::string sound_name = g_settings->get("btn_press_sound");
+	str_formspec_escape(sound_name);
+	// image_button_exit inherits image_button's styles, no need to explicitly
+	// specify it here
+	os << "style_type[image_button;bgimg=gui/gui_button" << x2
+		<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20")
+		<< ";sound=" << sound_name << "]"
+		<< "style_type[image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
+		<< "style_type[image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]";
+}
+
+//#define GET_KEY_NAME(KEY) gettext(getKeySetting(#KEY).name())
 void Game::showPauseMenu()
 {
 /*#ifdef HAVE_TOUCHSCREENGUI
@@ -4440,54 +4548,55 @@ void Game::showPauseMenu()
 #endif*/
 
 	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
-#if defined(__ANDROID__) || defined(__IOS__)
 	bool hasRealKeyboard = porting::hasRealKeyboard();
-	if (simple_singleplayer_mode && hasRealKeyboard)
+#if defined(__ANDROID__) || defined(__IOS__)
+	if (simple_singleplayer_mode && (hasRealKeyboard || g_touchscreengui))
 		ypos -= 0.6f;
 	ypos += 0.5f;
 #endif
-	const bool high_dpi = RenderingEngine::isHighDpi();
-	const std::string x2 = high_dpi ? ".x2" : "";
-	std::string sound_name = g_settings->get("btn_press_sound");
-	str_formspec_escape(sound_name);
+
 	std::ostringstream os;
-
-	os << "formspec_version[1]" << SIZE_TAG
+	os << "formspec_version[1]" << "size[11,6]"
 		<< "no_prepend[]"
-		<< "bgcolor[#00000060;true]"
+		<< "bgcolor[#00000060;true]";
+	getButtonStyle(os);
 
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2 <<
-			".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") <<
-			";sound=" << sound_name << "]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
+	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
+	auto buttons = std::vector<std::tuple<const char*, std::string, std::string, bool>>{
+		{"btn_continue", strgettext("Continue"), sheet + "0,0", true}
+	};
 
-		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_continue;"
-		<< strgettext("Continue") << ";;false]";
-
-	if (!simple_singleplayer_mode) {
-		os << "image_button[3.5," << (ypos++) << ";4,0.9;;btn_change_password;"
-			<< strgettext("Change Password") << ";;false]";
-	}
+	if (!simple_singleplayer_mode)
+		buttons.emplace_back("btn_change_password", strgettext("Change Password"), sheet + "0,2", false);
 
 #if USE_SOUND
-	if (g_settings->getBool("enable_sound")) {
-		os << "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_sound;"
-			<< strgettext("Sound Volume") << ";;false]";
-	}
+	if (g_settings->getBool("enable_sound"))
+		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), sheet + "0,3", true);
 #endif
-#if defined(__ANDROID__) || defined(__IOS__)
-	if (hasRealKeyboard)
+
+#ifdef HAVE_TOUCHSCREENGUI
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	if (input->last_input_device == IDT_GAMEPAD) {
+		// We don't have possibility to change gamepad keys
+	} else
 #endif
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_key_config;"
-		<< strgettext("Change Keys")  << ";;false]";
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_menu;"
-		<< strgettext("Exit to Menu") << ";;false]";
+	if ((input->last_input_device == IDT_KEYBOARD || input->last_input_device == IDT_MOUSE) && porting::hasRealKeyboard())
+		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
+	else
+		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), sheet + "0,1", true);
+#else
+	buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
+#endif
+
+	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), sheet + "1,0", true);
+
 #if !defined(__ANDROID__) && !defined(__IOS__)
-	os		<< "image_button_exit[3.5," << (ypos++) << ";4,0.9;;btn_exit_os;"
-		<< strgettext("Exit to OS")   << ";;false]";
+	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), sheet + "1,2", true);
 #endif
-/*		<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
+
+	createPauseMenuButtons(os, buttons, 3.0f, 0.95f, 0.2f);
+
+/*	os	<< "textarea[7.5,0.25;3.9,6.25;;" << control_text << ";]"
 		<< "textarea[0.4,0.25;3.9,6.25;;" << PROJECT_NAME_C " " VERSION_STRING "\n"
 		<< "\n"
 		<<  strgettext("Game info:") << "\n";
@@ -4539,7 +4648,6 @@ void Game::showPauseMenu()
 	formspec->setFocus("btn_continue");
 	formspec->doPause = true;
 
-	runData.pause_game_timer = 0;
 	if (simple_singleplayer_mode)
 		pauseAnimation();
 }
@@ -4551,11 +4659,6 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 	str_formspec_escape(new_pw);
 	str_formspec_escape(confirm_pw);
 
-	const bool high_dpi = RenderingEngine::isHighDpi();
-	const std::string x2 = high_dpi ? ".x2" : "";
-	std::string sound_name = g_settings->get("btn_press_sound");
-	str_formspec_escape(sound_name);
-
 	std::ostringstream os;
 	os << "formspec_version[5]"
 		<< "size[10.5,7.5]"
@@ -4564,13 +4667,10 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
 		<< "background9[0,0;0,0;bg_common.png;true;40]"
 		<< "pwdfield[1,1.2;8.5,0.8;old_pw;" << strgettext("Old Password") << ":;" << old_pw << "]"
 		<< "pwdfield[1,2.8;8.5,0.8;new_pw;" << strgettext("New Password") << ":;" << new_pw << "]"
-		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]"
-		<< "style_type[image_button_exit,image_button;bgimg=gui/gui_button" << x2
-			<< ".png;bgimg_middle=" << (high_dpi ? "48" : "32") << ";padding=" << (high_dpi ? "-30" : "-20") << ";"
-			<< "sound=" << sound_name << "]"
-		<< "style_type[image_button_exit,image_button:hovered;bgimg=gui/gui_button_hovered" << x2 << ".png]"
-		<< "style_type[image_button_exit,image_button:pressed;bgimg=gui/gui_button_pressed" << x2 << ".png]"
-		<< "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
+		<< "pwdfield[1,4.4;8.5,0.8;confirm_pw;" << strgettext("Confirm Password") << ":;" << confirm_pw << "]";
+
+	getButtonStyle(os);
+	os << "image_button[1,5.9;4.1,0.8;;btn_change_pw;" << strgettext("Change") << ";;false]"
 		<< "image_button_exit[5.4,5.9;4.1,0.8;;btn_cancel;" << strgettext("Cancel") << ";;false]";
 
 	if (new_pw != confirm_pw)
@@ -4593,8 +4693,6 @@ void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,
  ****************************************************************************/
 /****************************************************************************/
 
-static Game *g_game = NULL;
-
 void the_game(bool *kill,
 		InputHandler *input,
 		const GameStartData &start_data,
@@ -4603,7 +4701,9 @@ void the_game(bool *kill,
 		bool *reconnect_requested) // Used for local game
 {
 	Game game;
-	g_game = &game;
+#if defined(__ANDROID__) || defined(__IOS__)
+	g_pause_menu_schedule = false;
+#endif
 
 	/* Make a copy of the server address because if a local singleplayer server
 	 * is created then this is updated and we don't want to change the value
@@ -4635,16 +4735,24 @@ void the_game(bool *kill,
 #ifdef __ANDROID__
 		porting::handleError("ModError", error_message);
 #endif
+	} catch (con::PeerNotFoundException &e) {
+			error_message = gettext("Connection error (timed out?)");
+			errorstream << error_message << std::endl;
 	}
-	g_game = NULL;
+#ifdef NDEBUG
+	catch (std::exception &e) {
+		std::string error_message = "Some exception: \"";
+		error_message += e.what();
+		error_message += "\"";
+		errorstream << error_message << std::endl;
+	}
+#endif
 	game.shutdown();
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
 extern "C" void external_pause_game()
 {
-	if (!g_game)
-		return;
-	g_game->pauseGame();
+	g_pause_menu_schedule = true;
 }
 #endif

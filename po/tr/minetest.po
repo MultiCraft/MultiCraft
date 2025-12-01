@@ -1909,6 +1909,14 @@ msgstr "HUD'ı aç/kapa"
 msgid "Toggle nametags"
 msgstr "İsim etiketlerini değiştir"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Arayüzü gizle"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Arayüzü göstermek için çift dokunun"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Sohbet günlüğünü aç/kapa"

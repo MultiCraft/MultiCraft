@@ -33,14 +33,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sound.h"
 #include "client/sound_openal.h"
 #include "client/clouds.h"
+#include "client/game.h"
 #include "httpfetch.h"
 #include "log.h"
 #include "client/fontengine.h"
 #include "client/guiscalingfilter.h"
 #include "irrlicht_changes/static_text.h"
+#include "threading/mutex_auto_lock.h"
 #include "translation.h"
 #include "client/tile.h"
+#include "daynightratio.h"
+#include "light.h"
 
+float GUIEngine::g_timeofday = 0.5f;
 
 /******************************************************************************/
 void TextDestGuiEngine::gotText(const StringMap &fields)
@@ -172,7 +177,8 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	const texture_layer layer = m_clouds_enabled ? TEX_LAYER_OVERLAY : TEX_LAYER_BACKGROUND;
 	const video::ITexture* texture = m_textures[layer].texture;
 	RenderingEngine::setLoadScreenBackground(m_clouds_enabled,
-			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "");
+			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "",
+			g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245));
 
 	m_menu->quitMenu();
 	m_menu->drop();
@@ -231,25 +237,28 @@ void GUIEngine::run()
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
 
-	static const video::SColor sky_color(255, 5, 155, 245);
-
 	// Reset fog color
-	{
-		video::SColor fog_color;
-		video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
-		f32 fog_start = 0;
-		f32 fog_end = 0;
-		f32 fog_density = 0;
-		bool fog_pixelfog = false;
-		bool fog_rangefog = false;
-		driver->getFog(fog_color, fog_type, fog_start, fog_end, fog_density,
-				fog_pixelfog, fog_rangefog);
+	video::SColor fog_color;
+	video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
+	f32 fog_start = 0;
+	f32 fog_end = 0;
+	f32 fog_density = 0;
+	bool fog_pixelfog = false;
+	bool fog_rangefog = false;
+	driver->getFog(fog_color, fog_type, fog_start, fog_end, fog_density,
+			fog_pixelfog, fog_rangefog);
 
+	{
+		const video::SColor sky_color = video::SColor(255, 5, 155, 245);
 		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
-				fog_pixelfog, fog_rangefog);
+					   fog_pixelfog, fog_rangefog);
 	}
 
 	while (RenderingEngine::run() && (!m_startgame) && (!m_kill)) {
+		const video::SColor sky_color = g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245);
+		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
+				fog_pixelfog, fog_rangefog);
+
 		IrrlichtDevice *device = RenderingEngine::get_raw_device();
 #ifdef __IOS__
 		if (device->isWindowMinimized())
@@ -286,6 +295,14 @@ void GUIEngine::run()
 
 		if (m_clouds_enabled)
 		{
+			m_cloud.camera->setAspectRatio((float)(current_screen_size.Width) / current_screen_size.Height);
+			if (g_menusky) {
+				u32 daynight_ratio = time_to_daynight_ratio(g_timeofday * 24000.0f, true);
+				float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
+				g_menusky->update(g_timeofday, time_brightness, time_brightness, true, CAMERA_MODE_FIRST, 3, 0);
+				g_menusky->render();
+				m_cloud.clouds->update(v3f(0, 0, 0), g_menusky->getCloudColor());
+			}
 			cloudPreProcess();
 			drawOverlay(driver);
 		}
@@ -308,6 +325,12 @@ void GUIEngine::run()
 			sleep_ms(frametime_min);
 
 		m_script->step();
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		std::string key, value;
+		if (readUpdate(&key, &value))
+			m_script->handleUpdate(key, value);
+#endif
 
 		// Update sound volume
 		// Note when rebasing onto MT 5.9.0+: This code can be removed since
@@ -354,9 +377,7 @@ void GUIEngine::cloudInit()
 //	m_cloud.clouds->setHeight(100.0f); // 120 is default value
 //	m_cloud.clouds->update(v3f(0, 0, 0), video::SColor(255,240,240,255));
 
-	m_cloud.camera = m_smgr->addCameraSceneNode(0,
-				v3f(0,0,0), v3f(0, 60, 100));
-	m_cloud.camera->setFarValue(10000);
+	m_cloud.camera = m_smgr->getActiveCamera();
 
 	m_cloud.lasttime = RenderingEngine::get_timer_time();
 }
@@ -657,3 +678,31 @@ unsigned int GUIEngine::queueAsync(const std::string &serialized_func,
 {
 	return m_script->queueAsync(serialized_func, serialized_params);
 }
+
+
+/******************************************************************************/
+#if defined(__ANDROID__) || defined(__APPLE__)
+static std::mutex g_update_mutex;
+static std::string g_update_key;
+static std::string g_update_value;
+
+extern "C" void external_update(const char *key, const char *value)
+{
+	MutexAutoLock lock(g_update_mutex);
+	g_update_key = key;
+	g_update_value = value;
+}
+
+bool GUIEngine::readUpdate(std::string *key_to, std::string *value_to)
+{
+	MutexAutoLock lock(g_update_mutex);
+	if (g_update_key.empty())
+		return false;
+
+	*key_to = g_update_key;
+	*value_to = g_update_value;
+	g_update_key.clear();
+	g_update_value.clear();
+	return true;
+}
+#endif

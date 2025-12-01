@@ -322,6 +322,11 @@ enum ToClientCommand
 
 	// (oops, there is some gap here)
 
+	TOCLIENT_COPY_TO_CLIPBOARD = 0x2E,
+	/*
+		std::string text
+	*/
+
 	TOCLIENT_CHAT_MESSAGE = 0x2F,
 	/*
 		u8 version
@@ -1013,6 +1018,7 @@ enum AccessDeniedCode : u8 {
 
 enum NetProtoCompressionMode {
 	NETPROTO_COMPRESSION_NONE = 0,
+	NETPROTO_COMPRESSION_ENC = 1001,
 };
 
 const static std::string accessDeniedStrings[SERVER_ACCESSDENIED_MAX] = {

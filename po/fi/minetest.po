@@ -1873,6 +1873,14 @@ msgstr ""
 msgid "Toggle nametags"
 msgstr "Vaihda nimilappuja"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Piilota käyttöliittymä"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Näytä liitäntä kaksoisnapauttamalla"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr ""

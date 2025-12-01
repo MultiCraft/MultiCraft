@@ -43,29 +43,24 @@ void Semaphore::post(unsigned int num)
 {
 	assert(num > 0);
 	for (unsigned i = 0; i < num; i++) {
-		int ret = SDL_SemPost(semaphore);
-		assert(!ret);
-		UNUSED(ret);
+		SDL_SignalSemaphore(semaphore);
 	}
 }
 
 void Semaphore::wait()
 {
-	int ret = SDL_SemWait(semaphore);
-	assert(!ret);
-	UNUSED(ret);
+	SDL_WaitSemaphore(semaphore);
 }
 
 bool Semaphore::wait(unsigned int time_ms)
 {
-	int ret;
+	bool ret;
 	if (time_ms > 0) {
-		ret = SDL_SemWaitTimeout(semaphore, time_ms);
+		ret = SDL_WaitSemaphoreTimeout(semaphore, time_ms);
 	} else {
-		ret = SDL_SemTryWait(semaphore);
+		ret = SDL_TryWaitSemaphore(semaphore);
 	}
-	assert(!ret || ret == SDL_MUTEX_TIMEDOUT);
-	return !ret;
+	return ret;
 }
 
 #endif

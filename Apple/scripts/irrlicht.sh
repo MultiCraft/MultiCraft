@@ -4,7 +4,7 @@
 mkdir -p deps; cd deps
 
 [ ! -d irrlicht-src ] && \
-	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht-src
+	git clone --depth 1 -b SDL https://github.com/MoNTE48/Irrlicht irrlicht-src
 
 rm -rf irrlicht
 

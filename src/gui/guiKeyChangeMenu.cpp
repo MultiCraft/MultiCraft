@@ -142,7 +142,15 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	float s = MYMIN(screensize.X / 835.f, screensize.Y / 430.f);
 #if HAVE_TOUCHSCREENGUI
+#ifdef __IOS__
+	const char *model = MultiCraft::getDeviceModel();
+	if (!isDevice11Inch(model) && !isDevice12and9Inch(model))
+		s *= 0.9f;
+	else
+		s *= 0.8f;
+#else
 	s *= RenderingEngine::isTablet() ? 0.8f : 0.9f;
+#endif
 #else
 	s *= 0.75f;
 #endif

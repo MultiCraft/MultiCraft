@@ -25,7 +25,6 @@ cmake ../ \
 	-DENABLE_OPENSSL=1 \
 	-DUSE_SDL=1 \
 	-DUSE_STATIC_BUILD=1 \
-	-DUSE_ZSTD=0 \
 	-DCMAKE_C_FLAGS="-static \
 		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
 		-DNO_IRR_COMPILE_WITH_OGLES2_ \
@@ -46,8 +45,8 @@ cmake ../ \
 		-D_WIN32_WINNT=0x0600" \
 	-DIRRLICHT_LIBRARY="$DEPS_ROOT/irrlicht/lib/libIrrlicht.a" \
 	-DIRRLICHT_INCLUDE_DIR="$DEPS_ROOT/irrlicht/include" \
-	-DSDL2_LIBRARIES="$DEPS_ROOT/sdl2/lib/libSDL2.a" \
-	-DSDL2_INCLUDE_DIRS="$DEPS_ROOT/sdl2/include" \
+	-DSDL_LIBRARIES="$DEPS_ROOT/libSDL/lib/libSDL.a" \
+	-DSDL_INCLUDE_DIRS="$DEPS_ROOT/libSDL/include" \
 	-DCURL_LIBRARY="$DEPS_ROOT/libcurl/lib/libcurl.a" \
 	-DCURL_INCLUDE_DIR="$DEPS_ROOT/libcurl/include" \
 	-DLUA_LIBRARY="$DEPS_ROOT/luajit/lib/libluajit.a" \
@@ -73,7 +72,9 @@ cmake ../ \
 	-DOPENAL_LIBRARY="$DEPS_ROOT/openal/lib/libOpenAL32.a" \
 	-DOPENAL_INCLUDE_DIR="$DEPS_ROOT/openal/include/AL" \
 	-DOPENSSL_LIBRARY="$DEPS_ROOT/openssl/lib/libcrypto.a" \
-	-DOPENSSL_INCLUDE_DIR="$DEPS_ROOT/openssl/include"
+	-DOPENSSL_INCLUDE_DIR="$DEPS_ROOT/openssl/include" \
+	-DZSTD_LIBRARY="$DEPS_ROOT/zstd/lib/libzstd.a" \
+	-DZSTD_INCLUDE_DIR="$DEPS_ROOT/zstd/include"
 
 echo
 echo "Build with 'cmake --build . -j'"

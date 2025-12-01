@@ -89,14 +89,15 @@ FontEngine::~FontEngine()
 /******************************************************************************/
 void FontEngine::cleanCache()
 {
-	for (auto &font_cache_it : m_font_cache) {
+	for (auto &font_cache_pair : m_font_cache) {
 
-		for (auto &font_it : font_cache_it) {
+		for (auto &font_it : font_cache_pair.second) {
 			font_it.second->drop();
 			font_it.second = NULL;
 		}
-		font_cache_it.clear();
+		font_cache_pair.second.clear();
 	}
+	m_font_cache.clear();
 }
 
 /******************************************************************************/
@@ -298,8 +299,8 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	}
 
 	std::string setting_suffix = "";
-	bool bold_outline = false;
-	bool italic_outline = false;
+	bool bold = false;
+	bool italic = false;
 
 	std::string bold_path = g_settings->get(setting_prefix + "font_path_bold");
 	std::string italic_path = g_settings->get(setting_prefix + "font_path_italic");
@@ -307,25 +308,29 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 
 	if (spec.bold && spec.italic) {
 		if (bold_italic_path.empty()) {
-			bold_outline = true;
-			italic_outline = true;
+			bold = true;
+			italic = true;
 		} else {
 			setting_suffix.append("_bold_italic");
 		}
 	} else if (spec.bold) {
 		if (bold_path.empty())
-			bold_outline = true;
+			bold = true;
 		else
 			setting_suffix.append("_bold");
 	} else if (spec.italic) {
 		if (italic_path.empty())
-			italic_outline = true;
+			italic = true;
 		else
 			setting_suffix.append("_italic");
 	}
 
 	u32 size = std::max(std::floor(RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("gui_scaling") * spec.size), 1.0f);
+
+	u16 outline = spec.outline;
+	u8 outline_type = spec.outline_type;
+	s8 character_spacing = spec.character_spacing;
 
 	/*if (size == 0) {
 		errorstream << "FontEngine: attempt to use font size 0" << std::endl;
@@ -355,8 +360,8 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 #if USE_FREETYPE
 	for (const std::string &font_path : fallback_settings) {
 		irr::gui::CGUITTFont *font = gui::CGUITTFont::createTTFont(m_env,
-				font_path.c_str(), size, true, true, bold_outline, italic_outline,
-				font_shadow, font_shadow_alpha);
+				font_path.c_str(), size, true, true, bold, italic, outline,
+				outline_type, character_spacing, font_shadow, font_shadow_alpha);
 
 		if (font) {
 			std::vector<std::string> emoji_paths = split(emoji_font_system_paths, ',');
@@ -371,9 +376,15 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				}
 			}
 
-			// Load fallback emoji font if system fonts are not available
+			// Load fallback emoji font if system fonts are not available.
+			// For macOS always load fallback font because we can't load
+			// some emojis from apple font atm.
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+			font->loadAdditionalFont(emoji_font_path.c_str(), true);
+#else
 			if (!success)
 				font->loadAdditionalFont(emoji_font_path.c_str(), true);
+#endif
 
 			if (font_path != fallback_font_path)
 				font->loadAdditionalFont(fallback_font_path.c_str(), false);
@@ -387,14 +398,22 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 
 
 	// give up
-	errorstream << "MultiCraft can not continue without a valid font. "
+	std::string msg = "MultiCraft can not continue without a valid font. "
 			"Please correct the 'font_path' setting or install the font "
-			"file in the proper location" << std::endl;
+			"file in the proper location";
+	errorstream << msg << std::endl;
+
+#if !defined(__ANDROID__) && !defined(__APPLE__)
+	abort();
+#else
+	porting::finishGame(msg);
+#endif
+
 #else
 	errorstream << "FontEngine: Tried to load freetype fonts but MultiCraft was"
 			" not compiled with that library." << std::endl;
-#endif
 	abort();
+#endif
 }
 
 /** initialize a font without freetype */

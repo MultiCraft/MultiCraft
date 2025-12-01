@@ -1919,6 +1919,14 @@ msgstr "Alternar el HUD"
 msgid "Toggle nametags"
 msgstr "Conmutar etiquetas"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Ocultar interfaz"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Pulse dos veces para mostrar la interfaz"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Alternar el registro del chat"

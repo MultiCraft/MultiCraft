@@ -41,7 +41,11 @@ bool ScriptApiEntity::luaentity_Add(u16 id, const char *name)
 	// Should be a table, which we will use as a prototype
 	//luaL_checktype(L, -1, LUA_TTABLE);
 	if (lua_type(L, -1) != LUA_TTABLE){
+#ifdef NDEBUG
+		warningstream<<"LuaEntity name \""<<name<<"\" not defined and will be removed"<<std::endl;
+#else
 		errorstream<<"LuaEntity name \""<<name<<"\" not defined"<<std::endl;
+#endif
 		return false;
 	}
 	int prototype_table = lua_gettop(L);
@@ -171,7 +175,13 @@ std::string ScriptApiEntity::luaentity_GetStaticdata(u16 id)
 	lua_pushvalue(L, object); // self
 
 	setOriginFromTable(object);
-	PCALL_RES(lua_pcall(L, 1, 1, error_handler));
+	try {
+		PCALL_RES(lua_pcall(L, 1, 1, error_handler));
+	} catch (LuaError &e) {
+		getServer()->setAsyncFatalError(
+				std::string("get_staticdata: ") + e.what() + "\n"
+				+ script_get_backtrace(L));
+	}
 
 	lua_remove(L, object);
 	lua_remove(L, error_handler);

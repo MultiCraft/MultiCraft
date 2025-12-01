@@ -33,8 +33,8 @@ LOCAL_SRC_FILES := deps/libjpeg/lib/$(APP_ABI)/libjpeg.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := SDL2
-LOCAL_SRC_FILES := deps/sdl2/lib/$(APP_ABI)/libSDL2.a
+LOCAL_MODULE := SDL
+LOCAL_SRC_FILES := deps/libSDL/lib/$(APP_ABI)/libSDL.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -87,8 +87,6 @@ LOCAL_CFLAGS += \
 	-DUSE_LUAJIT=1                                 \
 	-DUSE_GETTEXT=1                                \
 	-DUSE_OPENSSL=1                                \
-	-DUSE_ZSTD=1                                   \
-	-DZSTD_MAP_SAVING=0                            \
 	-DVERSION_MAJOR=${versionMajor}                \
 	-DVERSION_MINOR=${versionMinor}                \
 	-DVERSION_PATCH=${versionPatch}                \
@@ -117,7 +115,7 @@ LOCAL_C_INCLUDES := \
 	deps/irrlicht/include                          \
 	deps/libpng/include                            \
 	deps/libjpeg/include                           \
-	deps/sdl2/include                              \
+	deps/libSDL/include                            \
 	deps/leveldb/include                           \
 	deps/libcurl/include                           \
 	deps/luajit/include                            \
@@ -137,7 +135,32 @@ LOCAL_SRC_FILES := \
 	../../src/database/database-dummy.cpp          \
 	../../src/database/database-files.cpp          \
 	../../src/database/database-leveldb.cpp        \
-	$(wildcard ../../src/gui/*.cpp)                \
+	../../src/gui/guiAnimatedImage.cpp             \
+	../../src/gui/guiBackgroundImage.cpp           \
+	../../src/gui/guiBox.cpp                       \
+	../../src/gui/guiButton.cpp                    \
+	../../src/gui/guiButtonImage.cpp               \
+	../../src/gui/guiButtonItemImage.cpp           \
+	../../src/gui/guiChatConsole.cpp               \
+	../../src/gui/guiConfirmRegistration.cpp       \
+	../../src/gui/guiEditBox.cpp                   \
+	../../src/gui/guiEditBoxWithScrollbar.cpp      \
+	../../src/gui/guiEngine.cpp                    \
+	../../src/gui/guiFormSpecMenu.cpp              \
+	../../src/gui/guiInventoryList.cpp             \
+	../../src/gui/guiItemImage.cpp                 \
+	../../src/gui/guiKeyChangeMenu.cpp             \
+	../../src/gui/guiPathSelectMenu.cpp            \
+	../../src/gui/guiScene.cpp                     \
+	../../src/gui/guiScrollBar.cpp                 \
+	../../src/gui/guiScrollContainer.cpp           \
+	../../src/gui/guiSkin.cpp                      \
+	../../src/gui/guiTable.cpp                     \
+	../../src/gui/guiHyperText.cpp                 \
+	../../src/gui/guiVolumeChange.cpp              \
+	../../src/gui/modalMenu.cpp                    \
+	../../src/gui/profilergraph.cpp                \
+	../../src/gui/touchscreengui_mc.cpp            \
 	$(wildcard ../../src/irrlicht_changes/*.cpp)   \
 	$(wildcard ../../src/mapgen/*.cpp)             \
 	$(wildcard ../../src/network/*.cpp)            \
@@ -260,7 +283,7 @@ LOCAL_STATIC_LIBRARIES += \
 	Freetype \
 	OpenAL \
 	Gettext \
-	Irrlicht libpng libjpeg SDL2 \
+	Irrlicht libpng libjpeg SDL \
 	LevelDB \
 	Vorbis \
 	LuaJIT \

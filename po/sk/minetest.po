@@ -1922,6 +1922,14 @@ msgstr "Prepni HUD"
 msgid "Toggle nametags"
 msgstr "Prepínanie menoviek"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Skryť rozhranie"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Pomocou dvojitého ťuknutia zobrazíte rozhranie"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Prepni logovanie komunikácie"

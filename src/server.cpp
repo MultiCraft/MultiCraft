@@ -68,9 +68,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server/player_sao.h"
 #include "server/serverinventorymgr.h"
 #include "translation.h"
-#if USE_ZSTD
 #include <zstd.h>
-#endif
 #if defined(__ANDROID__) || defined(__APPLE__)
 #include "util/encryption.h"
 #endif
@@ -1301,6 +1299,8 @@ bool Server::getClientInfo(session_t peer_id, ClientInfo &ret)
 	ret.platform = client->getPlatform();
 	ret.sysinfo = client->getSysInfo();
 
+	ret.system_ram = client->getSystemRAM();
+
 	ret.lang_code = client->getLangCode();
 
 	m_clients.unlock();
@@ -1445,7 +1445,10 @@ void Server::SendItemDef(session_t peer_id,
 	std::ostringstream tmp_os(std::ios::binary);
 	itemdef->serialize(tmp_os, protocol_version);
 	std::ostringstream tmp_os2(std::ios::binary);
-	compressZlib(tmp_os.str(), tmp_os2);
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 3 || m_simple_singleplayer_mode)
+		compressZstd(tmp_os.str(), tmp_os2);
+	else
+		compressZlib(tmp_os.str(), tmp_os2);
 	pkt.putLongString(tmp_os2.str());
 
 	// Make data buffer
@@ -1468,7 +1471,10 @@ void Server::SendNodeDef(session_t peer_id,
 	std::ostringstream tmp_os(std::ios::binary);
 	nodedef->serialize(tmp_os, protocol_version);
 	std::ostringstream tmp_os2(std::ios::binary);
-	compressZlib(tmp_os.str(), tmp_os2);
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 3 || m_simple_singleplayer_mode)
+		compressZstd(tmp_os.str(), tmp_os2);
+	else
+		compressZlib(tmp_os.str(), tmp_os2);
 
 	pkt.putLongString(tmp_os2.str());
 
@@ -2343,7 +2349,10 @@ void Server::sendMetadataChanged(const std::list<v3s16> &meta_updates, float far
 		std::ostringstream os(std::ios::binary);
 		meta_updates_list.serialize(os, client->net_proto_version, false, true);
 		std::ostringstream oss(std::ios::binary);
-		compressZlib(os.str(), oss);
+		if (m_clients.getMulticraftProtocolVersion(i) > 3 || m_simple_singleplayer_mode)
+			compressZstd(os.str(), oss);
+		else
+			compressZlib(os.str(), oss);
 
 		NetworkPacket pkt(TOCLIENT_NODEMETA_CHANGED, 0);
 		pkt.putLongString(oss.str());
@@ -2361,12 +2370,8 @@ void Server::SendBlockNoLock(session_t peer_id, MapBlock *block, u8 ver,
 	/*
 		Create a packet with the block in the right format
 	*/
-#if USE_ZSTD
-	thread_local const int net_compression_level = m_simple_singleplayer_mode ? ZSTD_minCLevel() :
+	thread_local const int net_compression_level = m_simple_singleplayer_mode ? -1 :
 			rangelim(g_settings->getS16("map_compression_level_net"), ZSTD_minCLevel(), ZSTD_maxCLevel());
-#else
-	thread_local const int net_compression_level = rangelim(g_settings->getS16("map_compression_level_net"), -1, 9);
-#endif
 	std::ostringstream os(std::ios_base::binary);
 	block->serialize(os, ver, false, net_compression_level);
 	block->serializeNetworkSpecific(os);
@@ -3274,6 +3279,13 @@ bool Server::showFormspec(const char *playername, const std::string &formspec,
 	return true;
 }
 
+void Server::copyToClipboard(RemotePlayer *player, const std::string &text)
+{
+	NetworkPacket pkt(TOCLIENT_COPY_TO_CLIPBOARD, 0, player->getPeerId());
+	pkt << text;
+	Send(&pkt);
+}
+
 u32 Server::hudAdd(RemotePlayer *player, HudElement *form)
 {
 	if (!player)
@@ -3887,9 +3899,9 @@ bool Server::leaveModChannel(const std::string &channel)
 	return m_modchannel_mgr->leaveChannel(channel, PEER_ID_SERVER);
 }
 
-bool Server::sendModChannelMessage(const std::string &channel, const std::string &message)
+bool Server::sendModChannelMessage(const std::string &channel, const std::string &message, bool force)
 {
-	if (!m_modchannel_mgr->canWriteOnChannel(channel))
+	if (!force && !m_modchannel_mgr->canWriteOnChannel(channel))
 		return false;
 
 	broadcastModChannelMessage(channel, message, PEER_ID_SERVER);

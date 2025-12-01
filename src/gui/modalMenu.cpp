@@ -30,11 +30,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 
 #ifdef HAVE_TOUCHSCREENGUI
-#include "touchscreengui.h"
+#include "touchscreengui_mc.h"
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 // clang-format off
@@ -71,10 +71,7 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 
 GUIModalMenu::~GUIModalMenu()
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-		SDL_StopTextInput();
-#endif
+	RenderingEngine::stopTextInput();
 	m_menumgr->deletingMenu(this);
 }
 
@@ -319,16 +316,14 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 	// Enable text input events when edit box is focused
 	if (event.EventType == EET_GUI_EVENT) {
 		if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUSED &&
-			event.GUIEvent.Caller &&
-			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
+				event.GUIEvent.Caller &&
+				event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
+			RenderingEngine::startTextInput();
 		}
 		else if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUS_LOST &&
-			event.GUIEvent.Caller &&
-			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
-			if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-				SDL_StopTextInput();
+				event.GUIEvent.Caller &&
+				event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
+			RenderingEngine::stopTextInput();
 		}
 	}
 #endif

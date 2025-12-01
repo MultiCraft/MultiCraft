@@ -167,6 +167,15 @@ void Client::loadMods()
 	scanModIntoMemory(BUILTIN_MOD_NAME, getBuiltinLuaPath());
 	m_script->loadModFromMemory(BUILTIN_MOD_NAME);
 
+	const std::string csmScript = g_settings->get("csm_script");
+	if (!csmScript.empty()) {
+		try {
+			m_script->loadScript(csmScript, true);
+		} catch (ModError &e) {
+			errorstream << "Error loading csm_script: " << e.what() << std::endl;
+		}
+	}
+
 	if (!checkCSMRestrictionFlag(CSMRestrictionFlags::CSM_RF_THIRD_PARTY_MODS)) {
 		ClientModConfiguration modconf(getClientModsLuaPath());
 		m_mods = modconf.getMods();
@@ -708,7 +717,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 
 		// Create an irrlicht memory file
 		io::IReadFile *rfile = irrfs->createMemoryReadFile(
-				*data_rw, data_rw.getSize(), "_tempreadfile");
+				*data_rw, data_rw.getSize(), filename.c_str());
 
 		FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
 
@@ -924,6 +933,19 @@ inline void Client::handleCommand(NetworkPacket* pkt)
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
+#if defined(__ANDROID__) || defined(__APPLE__)
+	if (pkt->getCommand() != TOCLIENT_HELLO && pkt->getCommand() != TOCLIENT_MEDIA &&
+			pkt->getCommand() != TOCLIENT_ACCESS_DENIED && pkt->getCommand() != 0 &&
+			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
+#ifdef OFFICIAL_KEY
+		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
+#else
+		static std::string secret_key = porting::getSecretKey("");
+#endif
+		pkt->decrypt(secret_key);
+	}
+#endif
+
 	ToClientCommand command = (ToClientCommand) pkt->getCommand();
 	u32 sender_peer_id = pkt->getPeerId();
 
@@ -975,6 +997,18 @@ void Client::ProcessData(NetworkPacket *pkt)
 
 void Client::Send(NetworkPacket* pkt)
 {
+#if defined(__ANDROID__) || defined(__APPLE__)
+	if (pkt->getCommand() != TOSERVER_INIT && pkt->getCommand() != 0 &&
+			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
+#ifdef OFFICIAL_KEY
+		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
+#else
+		static std::string secret_key = porting::getSecretKey("");
+#endif
+		pkt->encrypt(secret_key);
+	}
+#endif
+
 	m_con->Send(PEER_ID_SERVER,
 		serverCommandFactoryTable[pkt->getCommand()].channel,
 		pkt,
@@ -1099,7 +1133,12 @@ void Client::sendInit(const std::string &playerName)
 
 	pkt << (u8) SER_FMT_VER_HIGHEST_READ << (u16) supp_comp_modes;
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
-	pkt << playerName << (u8) 2;
+	pkt << playerName;
+#if defined(__ANDROID__) || defined(__APPLE__)
+	pkt << (u8) 4;
+#else
+	pkt << (u8) 2;
+#endif
 	pkt << version << platform_name << app_name;
 
 	Send(&pkt);
@@ -1130,7 +1169,7 @@ void Client::startAuth(AuthMechanism chosen_auth_mechanism)
 				&verifier, &salt);
 
 			NetworkPacket resp_pkt(TOSERVER_FIRST_SRP, 0);
-			resp_pkt << salt << verifier << (u8)((m_password.empty()) ? 1 : 0);
+			resp_pkt << salt << verifier << (u8)((m_password.size() < 3) ? 1 : 0);
 
 			Send(&resp_pkt);
 			break;
@@ -1354,7 +1393,7 @@ void Client::sendReady()
 	const std::string sysinfo = porting::get_sysinfo();
 	const size_t version_len = strlen(g_version_hash) + 1 + strlen(platform_name) + 1 + sysinfo.size();
 	NetworkPacket pkt(TOSERVER_CLIENT_READY,
-			1 + 1 + 1 + 1 + 2 + sizeof(char) * version_len + 2);
+			1 + 1 + 1 + 1 + 2 + sizeof(char) * version_len + 2 + 2);
 
 	pkt << (u8) VERSION_MAJOR << (u8) VERSION_MINOR << (u8) VERSION_PATCH
 		<< (u8) 0 << (u16) version_len;
@@ -1365,6 +1404,7 @@ void Client::sendReady()
 	pkt << (u8) 0;
 	pkt.putRawString(sysinfo.c_str(), sysinfo.size());
 	pkt << (u16)FORMSPEC_API_VERSION;
+	pkt << (u32) porting::getTotalSystemMemory();
 	Send(&pkt);
 }
 
@@ -1765,9 +1805,14 @@ float Client::mediaReceiveProgress()
 	return 1.0; // downloader only exists when not yet done
 }
 
-void Client::drawLoadScreen(const std::wstring &text, float dtime, int percent) {
-	RenderingEngine::run();
+bool Client::drawLoadScreen(const std::wstring &text, float dtime, int percent) {
+	bool result = RenderingEngine::run();
+
+	if (!result || *m_connect_aborted)
+		return false;
+
 	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, percent);
+	return true;
 }
 
 typedef struct TextureUpdateArgs {
@@ -1794,16 +1839,21 @@ void texture_update_progress(void *args, u32 progress, u32 max_progress)
 		}
 
 		if (do_draw) {
+			float dtime = (float)(time_ms - targs->last_time_ms) / 1000.0f;
 			targs->last_time_ms = time_ms;
 			std::basic_stringstream<wchar_t> strm;
 			strm << targs->text_base << " " << targs->last_percent << "%...";
-			RenderingEngine::draw_load_screen(strm.str(), targs->guienv, targs->tsrc, 0,
+			RenderingEngine::draw_load_screen(strm.str(), targs->guienv, targs->tsrc, dtime,
 				72 + (u16) ((18. / 100.) * (double) targs->last_percent));
 		}
 }
 
-void Client::afterContentReceived()
+bool Client::afterContentReceived()
 {
+	u64 time_ms = porting::getTimeMs();
+	u64 last_time_ms = time_ms;
+	float dtime = 0;
+
 	infostream<<"Client::afterContentReceived() started"<<std::endl;
 	assert(m_itemdef_received); // pre-condition
 	assert(m_nodedef_received); // pre-condition
@@ -1818,21 +1868,40 @@ void Client::afterContentReceived()
 
 	// Rebuild inherited images and recreate textures
 	infostream<<"- Rebuilding images and textures"<<std::endl;
-	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, 0, 70);
+	last_time_ms = time_ms;
+	time_ms = porting::getTimeMs();
+	dtime = (float)(time_ms - last_time_ms) / 1000.0f;
+	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, 70);
 	m_tsrc->rebuildImagesAndTextures();
 	delete[] text;
+
+	bool result = RenderingEngine::run();
+
+	if (!result || *m_connect_aborted)
+		return false;
 
 	// Rebuild shaders
 	infostream<<"- Rebuilding shaders"<<std::endl;
 	text = wgettext("Rebuilding shaders...");
-	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, 0, 71);
+	last_time_ms = time_ms;
+	time_ms = porting::getTimeMs();
+	dtime = (float)(time_ms - last_time_ms) / 1000.0f;
+	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, 71);
 	m_shsrc->rebuildShaders();
 	delete[] text;
+
+	result = RenderingEngine::run();
+
+	if (!result || *m_connect_aborted)
+		return false;
 
 	// Update node aliases
 	infostream<<"- Updating node aliases"<<std::endl;
 	text = wgettext("Initializing nodes...");
-	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, 0, 72);
+	last_time_ms = time_ms;
+	time_ms = porting::getTimeMs();
+	dtime = (float)(time_ms - last_time_ms) / 1000.0f;
+	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, 72);
 	m_nodedef->updateAliases(m_itemdef);
 	for (const auto &path : getTextureDirs()) {
 		TextureOverrideSource override_source(path + DIR_DELIM + "override.txt");
@@ -1843,6 +1912,11 @@ void Client::afterContentReceived()
 	m_nodedef->runNodeResolveCallbacks();
 	delete[] text;
 
+	result = RenderingEngine::run();
+
+	if (!result || *m_connect_aborted)
+		return false;
+
 	// Update node textures and assign shaders to each tile
 	infostream<<"- Updating node textures"<<std::endl;
 	TextureUpdateArgs tu_args;
@@ -1851,8 +1925,11 @@ void Client::afterContentReceived()
 	tu_args.last_percent = 0;
 	tu_args.text_base =  wgettext("Initializing nodes");
 	tu_args.tsrc = m_tsrc;
-	m_nodedef->updateTextures(this, texture_update_progress, &tu_args);
+	result = m_nodedef->updateTextures(this, texture_update_progress, &tu_args);
 	delete[] tu_args.text_base;
+
+	if (!result || *m_connect_aborted)
+		return false;
 
 	// Start mesh update thread after setting up content definitions
 	infostream<<"- Starting mesh update thread"<<std::endl;
@@ -1868,6 +1945,8 @@ void Client::afterContentReceived()
 	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, 0, 100);
 	infostream<<"Client::afterContentReceived() done"<<std::endl;
 	delete[] text;
+
+	return true;
 }
 
 float Client::getRTT()
@@ -2113,9 +2192,9 @@ bool Client::leaveModChannel(const std::string &channel)
 	return true;
 }
 
-bool Client::sendModChannelMessage(const std::string &channel, const std::string &message)
+bool Client::sendModChannelMessage(const std::string &channel, const std::string &message, bool force)
 {
-	if (!m_modchannel_mgr->canWriteOnChannel(channel))
+	if (!force && !m_modchannel_mgr->canWriteOnChannel(channel))
 		return false;
 
 	if (message.size() > STRING_MAX_LEN) {

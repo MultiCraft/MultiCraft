@@ -1914,7 +1914,15 @@ msgstr "HUD 토글"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle nametags"
-msgstr ""
+msgstr "이름표 표시/숨기기"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "인터페이스 숨기기"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "더블 탭으로 인터페이스 표시"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"

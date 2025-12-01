@@ -1971,6 +1971,14 @@ msgstr "Omstil flyvning"
 msgid "Toggle nametags"
 msgstr "Skift navneskilt"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Skjul grænseflade"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Brug dobbelttryk for at vise interface"
+
 #: src/gui/guiKeyChangeMenu.cpp
 #, fuzzy
 msgid "Toggle chat log"

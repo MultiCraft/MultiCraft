@@ -1942,6 +1942,14 @@ msgstr "Przełącz HUD"
 msgid "Toggle nametags"
 msgstr "Przełączanie identyfikatorów"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Ukryj interfejs"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Użyj dwukrotnego dotknięcia, aby wyświetlić interfejs"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Przełącz historię czatu"

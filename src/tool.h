@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <json/json.h>
 
 struct ItemDefinition;
+class IItemDefManager;
 
 struct ToolGroupCap
 {
@@ -138,4 +139,5 @@ PunchDamageResult getPunchDamage(
 		float time_from_last_punch
 );
 
-f32 getToolRange(const ItemDefinition &def_selected, const ItemDefinition &def_hand);
+f32 getToolRange(const ItemStack &wielded_item, const ItemStack &hand_item,
+		IItemDefManager *itemdef_manager);
