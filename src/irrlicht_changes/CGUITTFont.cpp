@@ -207,7 +207,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 	return image;
 }
 
-void SGUITTGlyph::preload(u32 char_index, FT_Face face,
+void SGUITTGlyph::preload(uchar32_t c, u32 char_index, FT_Face face,
 		video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags,
 		bool bold, bool italic, u16 outline, u8 outline_type, s8 character_spacing)
 {
@@ -309,6 +309,10 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		bits = glyph_slot->bitmap;
 		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
 	}
+
+	// Don't allow empty textures for emoji letters so the fallback glyphs are used
+	if ((c >= 0x1F1E6 && c <= 0x1F1FF) && (bits.width < 1 || bits.rows < 1))
+		return;
 
 	// Setup the glyph information here:
 	advance = glyph_slot->advance;
@@ -765,6 +769,9 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 
 void CGUITTFont::calculateColorEmojiParams(FT_Face face)
 {
+	if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0)
+		return;
+
 	u32 height = std::round((float)(getMaxFontHeight()) * 0.9f);
 	float scale = 1.0f;
 	u32 bitmap_top = height;
@@ -1319,8 +1326,8 @@ begin:
 				else
 					flags |= FT_LOAD_DEFAULT;
 
-				glyph->preload(char_index, tt_face, Driver, size, flags, bold,
-						italic, outline, outline_type, character_spacing);
+				glyph->preload(c, char_index, tt_face, Driver, size, flags,
+						bold, italic, outline, outline_type, character_spacing);
 
 				if (!glyph->isLoaded && current_face < tt_faces.size()) {
 					current_face++;
