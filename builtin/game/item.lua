@@ -7,9 +7,6 @@ local abs, atan2, cos, floor, max, sin, random =
 local vnew = vector.new
 local tcopy = table.copy
 
-local creative_mode = core.settings:get_bool("creative_mode")
-local node_drop = core.settings:get_bool("node_drop")
-
 local function copy_pointed_thing(pointed_thing)
 	return {
 		type  = pointed_thing.type,
@@ -537,7 +534,7 @@ function core.handle_node_drops(pos, drops, digger)
 	-- Add dropped items to object's inventory
 	local inv = digger and digger:get_inventory()
 	local give_item
-	if (not node_drop or creative_mode) and inv then
+	if inv then
 		give_item = function(item)
 			return inv:add_item("main", item)
 		end
