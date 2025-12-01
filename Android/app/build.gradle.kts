@@ -115,6 +115,10 @@ val prepareAssetsFiles by tasks.registering {
 			into("$assetsFolder/textures")
 			exclude("*.txt")
 		}
+		copy {
+			from("$projRoot/cacert.pem")
+			into("$assetsFolder")
+		}
 	}
 }
 

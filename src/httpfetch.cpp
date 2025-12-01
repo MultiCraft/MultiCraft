@@ -347,8 +347,19 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 	}
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, http_header);
 
-	if (!g_settings->getBool("curl_verify_cert")) {
-		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+	if (g_settings->getBool("curl_verify_cert")) {
+		// Set certificate info
+		std::string cainfo_path = porting::getDataPath("cacert.pem");
+		CURLcode error = curl_easy_setopt(curl, CURLOPT_CAINFO, cainfo_path.c_str());
+		if (error != CURLE_OK) {
+			errorstream << "Cannot set CAINFO: " << curl_easy_strerror(error) << std::endl;
+		}
+
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+	} else {
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 	}
 }
 

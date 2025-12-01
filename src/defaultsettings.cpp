@@ -533,7 +533,6 @@ void set_default_settings()
 	settings->setDefault("video_driver", "ogles2");
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
-	settings->setDefault("curl_verify_cert", "false");
 	settings->setDefault("gui_scaling_filter_txr2img", "false");
 	settings->setDefault("autosave_screensize", "false");
 	settings->setDefault("recent_chat_messages", "6");
