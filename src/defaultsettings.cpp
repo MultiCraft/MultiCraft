@@ -550,6 +550,8 @@ void set_default_settings()
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
 #ifdef __ANDROID__
+	settings->setDefault("max_simultaneous_block_sends_per_client", "10");
+
 	if (memoryMax < 4) {
 		settings->setDefault("fps_max_unfocused", "10");
 		settings->setDefault("smooth_lighting", "false");
