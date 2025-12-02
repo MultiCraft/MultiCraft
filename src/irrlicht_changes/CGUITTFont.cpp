@@ -168,7 +168,6 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 		}
 		case FT_PIXEL_MODE_BGRA:
 		{
-			int font_size = parent->getFontSize();
 			float scale = parent->getColorEmojiScale();
 			bool needs_scaling = (face->num_fixed_sizes > 0 && scale != 1.0f);
 
