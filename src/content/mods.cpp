@@ -27,7 +27,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "content/subgames.h"
 #include "settings.h"
 #include "porting.h"
+#include "filesys.h"
 #include "convert_json.h"
+
+bool ModSpec::isTrusted() const
+{
+	return fs::PathStartsWith(path, porting::path_cache);
+}
 
 bool parseDependsString(std::string &dep, std::unordered_set<char> &symbols)
 {

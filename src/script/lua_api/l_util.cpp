@@ -42,6 +42,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/hashing.h"
 #include <algorithm>
 #include "translation.h"
+#include "content/mods.h"
+#include "cpp_api/s_base.h"
 
 #ifndef SERVER
 #include "client/renderingengine.h"
@@ -471,17 +473,21 @@ int ModApiUtil::l_request_insecure_environment(lua_State *L)
 		return 0;
 	}
 
-	// Check secure.trusted_mods
 	std::string mod_name = readParam<std::string>(L, -1);
-	std::string trusted_mods = g_settings->get("secure.trusted_mods");
-	trusted_mods.erase(std::remove_if(trusted_mods.begin(),
-			trusted_mods.end(), static_cast<int(*)(int)>(&std::isspace)),
-			trusted_mods.end());
-	std::vector<std::string> mod_list = str_split(trusted_mods, ',');
-	mod_list.emplace_back("dummy");
-	if (std::find(mod_list.begin(), mod_list.end(), mod_name) ==
-			mod_list.end()) {
-		return 0;
+
+	const IGameDef *gamedef = getScriptApiBase(L)->getGameDef();
+	const ModSpec *mod = gamedef ? gamedef->getModSpec(mod_name) : nullptr;
+	if (mod == nullptr || !mod->isTrusted()) {
+		// Check secure.trusted_mods
+		std::string trusted_mods = g_settings->get("secure.trusted_mods");
+		trusted_mods.erase(std::remove_if(trusted_mods.begin(),
+				trusted_mods.end(), static_cast<int(*)(int)>(&std::isspace)),
+				trusted_mods.end());
+		std::vector<std::string> mod_list = str_split(trusted_mods, ',');
+		if (std::find(mod_list.begin(), mod_list.end(), mod_name) ==
+				mod_list.end()) {
+			return 0;
+		}
 	}
 
 	// Push insecure environment

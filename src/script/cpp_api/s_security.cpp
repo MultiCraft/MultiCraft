@@ -534,14 +534,13 @@ bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 
 		// Allow paths in mod path
 		// Don't bother if write access isn't important, since it will be handled later
-		if (write_required || write_allowed != NULL) {
-			const ModSpec *mod = gamedef->getModSpec(mod_name);
-			if (mod) {
-				str = fs::AbsolutePath(mod->path);
-				if (!str.empty() && fs::PathStartsWith(abs_path, str)) {
-					if (write_allowed) *write_allowed = true;
-					return true;
-				}
+		const ModSpec *mod = gamedef->getModSpec(mod_name);
+		if (mod && (write_required || write_allowed != nullptr || mod->isTrusted())) {
+			str = fs::AbsolutePath(mod->path);
+			if (!str.empty() && fs::PathStartsWith(abs_path, str)) {
+				if (write_allowed && !mod->isTrusted())
+					*write_allowed = true;
+				return true;
 			}
 		}
 	}
@@ -551,6 +550,9 @@ bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 	if (!write_required) {
 		const std::vector<ModSpec> &mods = gamedef->getMods();
 		for (const ModSpec &mod : mods) {
+			if (mod.isTrusted())
+				continue;
+
 			str = fs::AbsolutePath(mod.path);
 			if (!str.empty() && fs::PathStartsWith(abs_path, str)) {
 				return true;

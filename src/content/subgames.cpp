@@ -112,6 +112,7 @@ SubgameSpec findSubgame(const std::string &id)
 	mods_paths["mods"] = user + DIR_DELIM + "mods";
 	if (!user_game && user != share)
 		mods_paths["share"] = share + DIR_DELIM + "mods";
+	mods_paths["cache"] = porting::path_cache + DIR_DELIM + "mods";
 
 	// Get meta
 	std::string conf_path = game_path + DIR_DELIM + "game.conf";
