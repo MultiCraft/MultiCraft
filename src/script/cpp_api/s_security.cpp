@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server.h"
 #include "client/client.h"
 #include "settings.h"
+#include "util/encryption.h"
 
 #include <cerrno>
 #include <string>
@@ -458,7 +459,36 @@ bool ScriptApiSecurity::safeLoadFile(lua_State *L, const char *path, const char 
 		return false;
 	}
 
-	bool result = safeLoadString(L, code, chunk_name);
+	bool load_normally = true;
+	bool result = false;
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+	auto script = ModApiBase::getScriptApiBase(L);
+	if (script->getType() == ScriptingType::Server && code.rfind("ENC1", 0) == 0) {
+		lua_rawgeti(L, LUA_REGISTRYINDEX, CUSTOM_RIDX_CURRENT_MOD_NAME);
+		if (lua_isstring(L, -1)) {
+			std::string mod_name = readParam<std::string>(L, -1);
+			lua_pop(L, 1);
+
+			const IGameDef *gamedef = script->getGameDef();
+			const ModSpec *mod = gamedef ? gamedef->getModSpec(mod_name) : nullptr;
+			if (mod && mod->isTrusted()) {
+				std::string decrypted_code;
+				if (Encryption::decryptSimple(code, decrypted_code)) {
+					load_normally = false;
+					result = !luaL_loadbuffer(L, decrypted_code.data(),
+							decrypted_code.size(), chunk_name);
+				}
+			}
+		} else {
+			lua_pop(L, 1);
+		}
+	}
+#endif
+
+	if (load_normally)
+		result = safeLoadString(L, code, chunk_name);
+
 	if (path)
 		delete [] chunk_name;
 	return result;
