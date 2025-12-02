@@ -771,8 +771,8 @@ void httpfetch_init(int parallel_limit)
 		} else {
 			errorstream << "Couldn't create asset manager to read CA bundle" << std::endl;
 		}
-#endif
 	}
+#endif
 }
 
 void httpfetch_cleanup()
