@@ -78,6 +78,8 @@ struct ModSpec
 			name(name), path(path), part_of_modpack(part_of_modpack), virtual_path(virtual_path)
 	{
 	}
+
+	bool isTrusted() const;
 };
 
 // Retrieves depends, optdepends, is_modpack and modpack_content

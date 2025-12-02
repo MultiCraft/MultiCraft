@@ -25,6 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "debug.h"
 #include "log.h"
+#include "filesys.h"
+#include "porting.h"
+#include "content/mods.h"
+#include "cpp_api/s_base.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -191,18 +195,23 @@ int ModApiHttp::l_request_http_api(lua_State *L)
 	}
 
 	std::string mod_name = readParam<std::string>(L, -1);
-	std::string http_mods = g_settings->get("secure.http_mods");
-	http_mods.erase(std::remove(http_mods.begin(), http_mods.end(), ' '), http_mods.end());
-	std::vector<std::string> mod_list_http = str_split(http_mods, ',');
 
-	std::string trusted_mods = g_settings->get("secure.trusted_mods");
-	trusted_mods.erase(std::remove(trusted_mods.begin(), trusted_mods.end(), ' '), trusted_mods.end());
-	std::vector<std::string> mod_list_trusted = str_split(trusted_mods, ',');
+	const IGameDef *gamedef = getScriptApiBase(L)->getGameDef();
+	const ModSpec *mod = gamedef ? gamedef->getModSpec(mod_name) : nullptr;
+	if (mod == nullptr || !mod->isTrusted()) {
+		std::string http_mods = g_settings->get("secure.http_mods");
+		http_mods.erase(std::remove(http_mods.begin(), http_mods.end(), ' '), http_mods.end());
+		std::vector<std::string> mod_list_http = str_split(http_mods, ',');
 
-	mod_list_http.insert(mod_list_http.end(), mod_list_trusted.begin(), mod_list_trusted.end());
-	if (std::find(mod_list_http.begin(), mod_list_http.end(), mod_name) == mod_list_http.end()) {
-		lua_pushnil(L);
-		return 1;
+		std::string trusted_mods = g_settings->get("secure.trusted_mods");
+		trusted_mods.erase(std::remove(trusted_mods.begin(), trusted_mods.end(), ' '), trusted_mods.end());
+		std::vector<std::string> mod_list_trusted = str_split(trusted_mods, ',');
+
+		mod_list_http.insert(mod_list_http.end(), mod_list_trusted.begin(), mod_list_trusted.end());
+		if (std::find(mod_list_http.begin(), mod_list_http.end(), mod_name) == mod_list_http.end()) {
+			lua_pushnil(L);
+			return 1;
+		}
 	}
 
 	lua_getglobal(L, "core");

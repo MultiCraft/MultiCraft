@@ -112,6 +112,9 @@ SubgameSpec findSubgame(const std::string &id)
 	mods_paths["mods"] = user + DIR_DELIM + "mods";
 	if (!user_game && user != share)
 		mods_paths["share"] = share + DIR_DELIM + "mods";
+	char *mod_path = getenv("MINETEST_MODS_PATH");
+	if (mod_path && *mod_path)
+		mods_paths["cache"] = mod_path;
 
 	// Get meta
 	std::string conf_path = game_path + DIR_DELIM + "game.conf";
