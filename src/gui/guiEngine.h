@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/tile.h"
 #include "util/enriched_string.h"
 #include "client/sky.h"
+#include "httpfetch.h"
 
 /******************************************************************************/
 /* Structs and macros                                                         */
@@ -239,10 +240,10 @@ private:
 
 	/**
 	 * download a file using curl
-	 * @param url url to download
+	 * @param fetch_request the request to download
 	 * @param target file to store to
 	 */
-	static bool downloadFile(const std::string &url, const std::string &target);
+	static bool downloadFile(HTTPFetchRequest fetch_request, const std::string &target);
 
 	static void cancelAllDownloadFiles()
 	{
