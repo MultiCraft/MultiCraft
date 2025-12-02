@@ -41,7 +41,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 std::mutex g_httpfetch_mutex;
 std::map<unsigned long, std::queue<HTTPFetchResult> > g_httpfetch_results;
 PcgRandom g_callerid_randomness;
+#if defined(__ANDROID__) && defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 static std::string g_ca_cert_data;
+#endif
 
 HTTPFetchRequest::HTTPFetchRequest() :
 	timeout(g_settings->getS32("curl_timeout")),
@@ -349,7 +351,7 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 	}
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, http_header);
 
-#if defined(__ANDROID__)
+#if defined(__ANDROID__) && defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	// Set certificate info
 	struct curl_blob blob;
 	blob.data = (void*)(g_ca_cert_data.data());
@@ -361,9 +363,6 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 		errorstream << "Cannot set CAINFO_BLOB: " << curl_easy_strerror(error) << std::endl;
 	}
 #endif
-
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
-	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 }
 
 CURLcode HTTPFetchOngoing::start(CURLM *multi_)
@@ -752,9 +751,9 @@ void httpfetch_init(int parallel_limit)
 	porting::secure_rand_fill_buf(randbuf, sizeof(u64) * 2);
 	g_callerid_randomness = PcgRandom(randbuf[0], randbuf[1]);
 
+#if defined(__ANDROID__) && defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	// Load cacert from file
 	if (g_ca_cert_data.empty()) {
-#if defined(__ANDROID__) && defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 		bool result = porting::createAssetManager();
 
 		if (result) {
@@ -772,13 +771,6 @@ void httpfetch_init(int parallel_limit)
 		} else {
 			errorstream << "Couldn't create asset manager to read CA bundle" << std::endl;
 		}
-//#else
-//		std::string cainfo_path = porting::getDataPath("client" DIR_DELIM "cacert.pem");
-//		bool success = fs::ReadFile(cainfo_path, g_ca_cert_data);
-//
-//		if (!success) {
-//			errorstream << "Cannot read CA bundle from " << cainfo_path << std::endl;
-//		}
 #endif
 	}
 }
