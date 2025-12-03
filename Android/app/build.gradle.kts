@@ -123,6 +123,12 @@ val zipAssetsFiles by tasks.registering(Zip::class) {
 	archiveFileName.set("assets.zip")
 	destinationDirectory.set(file("src/main/assets"))
 	from("build/assets/Files")
+
+	val projRoot = "../../"
+	copy {
+		from("$projRoot/client/cacert.pem")
+		into(file("src/main/assets"))
+	}
 }
 
 tasks.named("preBuild") {

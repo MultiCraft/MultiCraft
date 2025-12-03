@@ -36,10 +36,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "version.h"
 #include "settings.h"
 #include "noise.h"
+#include "filesys.h"
 
 std::mutex g_httpfetch_mutex;
 std::map<unsigned long, std::queue<HTTPFetchResult> > g_httpfetch_results;
 PcgRandom g_callerid_randomness;
+#if defined(__ANDROID__) && defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+static std::string g_ca_cert_data;
+#endif
 
 HTTPFetchRequest::HTTPFetchRequest() :
 	timeout(g_settings->getS32("curl_timeout")),
@@ -347,9 +351,18 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 	}
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, http_header);
 
-	if (!g_settings->getBool("curl_verify_cert")) {
-		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, false);
+#if defined(__ANDROID__) && defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	// Set certificate info
+	struct curl_blob blob;
+	blob.data = (void*)(g_ca_cert_data.data());
+	blob.len = g_ca_cert_data.size();
+	blob.flags = CURL_BLOB_NOCOPY;
+
+	CURLcode error = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+	if (error != CURLE_OK) {
+		errorstream << "Cannot set CAINFO_BLOB: " << curl_easy_strerror(error) << std::endl;
 	}
+#endif
 }
 
 CURLcode HTTPFetchOngoing::start(CURLM *multi_)
@@ -737,6 +750,29 @@ void httpfetch_init(int parallel_limit)
 	u64 randbuf[2];
 	porting::secure_rand_fill_buf(randbuf, sizeof(u64) * 2);
 	g_callerid_randomness = PcgRandom(randbuf[0], randbuf[1]);
+
+#if defined(__ANDROID__) && defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	// Load cacert from file
+	if (g_ca_cert_data.empty()) {
+		bool result = porting::createAssetManager();
+
+		if (result) {
+			size_t cert_size = 0;
+			void *cert_data = fs::ReadFileFromAssets("cacert.pem", &cert_size);
+
+			if (cert_data && cert_size > 0) {
+				g_ca_cert_data.assign((char*)cert_data, cert_size);
+				SDL_free(cert_data);
+			} else {
+				errorstream << "Cannot read CA bundle from Android assets" << std::endl;
+			}
+
+			porting::destroyAssetManager();
+		} else {
+			errorstream << "Couldn't create asset manager to read CA bundle" << std::endl;
+		}
+	}
+#endif
 }
 
 void httpfetch_cleanup()
