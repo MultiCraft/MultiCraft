@@ -3142,7 +3142,7 @@ void Game::updateChat(f32 dtime)
 	auto &buf = chat_backend->getRecentBuffer();
 	if (buf.getLinesModified()) {
 		buf.resetLinesModified();
-		m_game_ui->setChatText(chat_backend->getRecentChat(), buf.getLineCount());
+		m_game_ui->setChatText(chat_backend->getRecentChat(true), buf.getLineCount());
 		gui_chat_console->onLinesModified();
 	}
 

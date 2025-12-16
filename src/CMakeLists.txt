@@ -795,13 +795,13 @@ endif(BUILD_SERVER)
 
 # Blacklisted locales that don't work.
 # see issue #4638
-set(GETTEXT_BLACKLISTED_LOCALES
-	ar
-	he
-	ky
-	ms_Arab
-	th
-)
+#set(GETTEXT_BLACKLISTED_LOCALES
+#	ar
+#	he
+#	ky
+#	ms_Arab
+#	th
+#)
 
 option(APPLY_LOCALE_BLACKLIST "Use a blacklist to avoid broken locales" TRUE)
 

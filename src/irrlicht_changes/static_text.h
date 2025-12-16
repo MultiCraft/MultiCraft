@@ -38,7 +38,7 @@ namespace gui
 		// No need to use translate_string()
 		StaticText(const EnrichedString &text, bool border, IGUIEnvironment* environment,
 			IGUIElement* parent, s32 id, const core::rect<s32>& rectangle,
-			bool background = false);
+			bool background = false, bool applyBidiReordering = true);
 
 		//! destructor
 		virtual ~StaticText();
@@ -51,7 +51,8 @@ namespace gui
 			bool wordWrap = true,
 			irr::gui::IGUIElement *parent = NULL,
 			s32 id = -1,
-			bool fillBackground = false)
+			bool fillBackground = false,
+			bool applyBidiReordering = true)
 		{
 			if (parent == NULL) {
 				// parent is NULL, so we must find one, or we need not to drop
@@ -76,7 +77,7 @@ namespace gui
 			}
 			irr::gui::IGUIStaticText *result = new irr::gui::StaticText(
 				text, border, guienv, parent,
-				id, rectangle, fillBackground);
+				id, rectangle, fillBackground, applyBidiReordering);
 
 			result->setWordWrap(wordWrap);
 			result->drop();
@@ -91,10 +92,11 @@ namespace gui
 			bool wordWrap = true,
 			irr::gui::IGUIElement *parent = NULL,
 			s32 id = -1,
-			bool fillBackground = false)
+			bool fillBackground = false,
+			bool applyBidiReordering = true)
 		{
 			return add(guienv, EnrichedString(text), rectangle, border, wordWrap, parent,
-				id, fillBackground);
+				id, fillBackground, applyBidiReordering);
 		}
 
 		//! draws the element and its children
@@ -215,6 +217,7 @@ namespace gui
 		bool RestrainTextInside;
 		bool RightToLeft;
 		bool CenterEachLine;
+		bool ApplyBidiReordering;
 
 		gui::IGUIFont* OverrideFont;
 		gui::IGUIFont* LastBreakFont; // stored because: if skin changes, line break must be recalculated.

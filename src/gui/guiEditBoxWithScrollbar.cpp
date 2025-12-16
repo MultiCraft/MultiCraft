@@ -12,6 +12,7 @@
 #include "rect.h"
 #include "porting.h"
 #include "Keycodes.h"
+#include "bidi.h"
 
 /*
 todo:
@@ -123,17 +124,12 @@ void GUIEditBoxWithScrollBar::draw()
 
 	IGUIFont* font = getActiveFont();
 
-	s32 cursor_line = 0;
-	s32 charcursorpos = 0;
-
 	if (font) {
 		if (m_last_break_font != font) {
 			breakText();
 		}
 
-		// calculate cursor pos
-
-		core::stringw *txt_line = &Text;
+		const core::stringw *txt_line = &Text;
 		s32 start_pos = 0;
 
 		core::stringw s, s2;
@@ -184,31 +180,48 @@ void GUIEditBoxWithScrollBar::draw()
 					start_pos = ml ? m_broken_text_positions[i] : 0;
 				}
 
+				core::TextBidiData text_bidi = applyBidiReordering(*txt_line);
+				core::stringw txt_line_bidi = text_bidi.TextBidi;
+
 				// draw mark and marked text
 				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
 					s32 mbegin = 0, mend = 0;
-					s32 mark_start_pos = 0; 
-					s32 mark_end_pos = txt_line->size();
+					s32 mark_start_pos = 0;
+					s32 mark_end_pos = txt_line_bidi.size();
+					s32 visual_mark_begin = 0;
+					s32 visual_mark_end = txt_line_bidi.size();
 
 					if (i == hline_start) {
 						// highlight start is on this line
-						s = txt_line->subString(0, m_real_mark_begin - start_pos);
+						s32 logical_pos_in_line = m_real_mark_begin - start_pos;
+						visual_mark_begin = text_bidi.visualCursorPos(logical_pos_in_line);
+
+						s = txt_line_bidi.subString(0, visual_mark_begin);
 						mbegin = font->getDimension(s.c_str()).Width;
 
 						// deal with kerning
-						mbegin += font->getKerningWidth(
-							&((*txt_line)[m_real_mark_begin - start_pos]),
-							m_real_mark_begin - start_pos > 0 ? &((*txt_line)[m_real_mark_begin - start_pos - 1]) : 0);
+						const wchar_t* this_letter = visual_mark_begin < (s32)txt_line_bidi.size() ? &(txt_line_bidi[visual_mark_begin]) : 0;
+						const wchar_t* previous_letter = visual_mark_begin > 0 ? &(txt_line_bidi[visual_mark_begin - 1]) : 0;
+						mbegin += font->getKerningWidth(this_letter, previous_letter);
 
-						mark_start_pos = m_real_mark_begin - start_pos;
+						mark_start_pos = visual_mark_begin;
 					}
+
 					if (i == hline_start + hline_count - 1) {
 						// highlight end is on this line
-						s2 = txt_line->subString(0, m_real_mark_end - start_pos);
+						s32 logical_pos_in_line = m_real_mark_end - start_pos;
+						visual_mark_end = text_bidi.visualCursorPos(logical_pos_in_line);
+
+						s2 = txt_line_bidi.subString(0, visual_mark_end);
 						mend = font->getDimension(s2.c_str()).Width;
-						mark_end_pos = (s32)s2.size();
+						mark_end_pos = visual_mark_end;
 					} else {
-						mend = font->getDimension(txt_line->c_str()).Width;
+						mend = font->getDimension(txt_line_bidi.c_str()).Width;
+					}
+
+					if (mark_start_pos > mark_end_pos) {
+						core::swap(mark_start_pos, mark_end_pos);
+						core::swap(mbegin, mend);
 					}
 
 					core::rect<s32> mark_rect = m_current_text_rect;
@@ -221,35 +234,35 @@ void GUIEditBoxWithScrollBar::draw()
 					// draw text before marked
 					core::rect<s32> before_rect = m_current_text_rect;
 					before_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X;
-					s = txt_line->subString(0, mark_start_pos);
+					s = txt_line_bidi.subString(0, mark_start_pos);
 
 					if (s.size())
 						font->draw(s.c_str(), before_rect,
 							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-							false, true, &local_clip_rect);
+							false, true, &local_clip_rect, false);
 
 					// draw marked text
-					s = txt_line->subString(mark_start_pos, mark_end_pos - mark_start_pos);
+					s = txt_line_bidi.subString(mark_start_pos, mark_end_pos - mark_start_pos);
 
 					if (s.size())
 						font->draw(s.c_str(), mark_rect,
 							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_HIGH_LIGHT_TEXT),
-							false, true, &local_clip_rect);
+							false, true, &local_clip_rect, false);
 
 					// draw text after marked
 					core::rect<s32> after_rect = m_current_text_rect;
 					after_rect.UpperLeftCorner.X = mark_rect.LowerRightCorner.X;
-					s = txt_line->subString(mark_end_pos, txt_line->size() - mark_end_pos);
+					s = txt_line_bidi.subString(mark_end_pos, txt_line_bidi.size() - mark_end_pos);
 
 					if (s.size())
 						font->draw(s.c_str(), after_rect,
 							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-							false, true, &local_clip_rect);
+							false, true, &local_clip_rect, false);
 				} else {
 					// draw normal text
-					font->draw(txt_line->c_str(), m_current_text_rect,
+					font->draw(txt_line_bidi, m_current_text_rect,
 						m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-						false, true, &local_clip_rect);
+						false, true, &local_clip_rect, false);
 				}
 			}
 
@@ -260,14 +273,25 @@ void GUIEditBoxWithScrollBar::draw()
 
 		// draw cursor
 		if (IsEnabled && m_writable) {
+			s32 cursor_line = 0;
+			s32 charcursorpos = 0;
+
 			if (m_word_wrap || m_multiline) {
 				cursor_line = getLineFromPos(m_cursor_pos);
 				txt_line = &m_broken_text[cursor_line];
 				start_pos = m_broken_text_positions[cursor_line];
 			}
-			s = txt_line->subString(0, m_cursor_pos - start_pos);
+
+			core::TextBidiData text_bidi = applyBidiReordering(*txt_line);
+			s32 rtl_cursor_pos = text_bidi.visualCursorPos(m_cursor_pos - start_pos);
+
+			if (text_bidi.CharIsRtl.size() > 0 && text_bidi.CharIsRtl[0] && rtl_cursor_pos > 0)
+				rtl_cursor_pos--;
+
+			s = text_bidi.TextBidi.subString(0, rtl_cursor_pos);
+
 			charcursorpos = font->getDimension(s.c_str()).Width +
-				font->getKerningWidth(L"_", m_cursor_pos - start_pos > 0 ? &((*txt_line)[m_cursor_pos - start_pos - 1]) : 0);
+				font->getKerningWidth(L"_", rtl_cursor_pos > 0 ? &(text_bidi.TextBidi[rtl_cursor_pos-1]) : 0);
 
 			if (focus && (porting::getTimeMs() - m_blink_start_time) % 700 < 350) {
 				setTextRect(cursor_line);
@@ -275,7 +299,7 @@ void GUIEditBoxWithScrollBar::draw()
 
 				font->draw(L"_", m_current_text_rect,
 					m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-					false, true, &local_clip_rect);
+					false, true, &local_clip_rect, false);
 			}
 		}
 	}
@@ -317,14 +341,16 @@ s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 	if (!txt_line)
 		return 0;
 
-	s32 idx = font->getCharacterFromPos(txt_line->c_str(), x - m_current_text_rect.UpperLeftCorner.X);
+	core::TextBidiData text_bidi = applyBidiReordering(*txt_line);
+	s32 visual_pos = font->getCharacterFromPos(text_bidi.TextBidi.c_str(), x - m_current_text_rect.UpperLeftCorner.X);
 
-	// click was on or left of the line
-	if (idx != -1)
-		return idx + start_pos;
+	s32 logical_pos = text_bidi.logicalCursorPos(visual_pos);
+	if (logical_pos < 0)
+		logical_pos = 0;
+	if (logical_pos > (s32)txt_line->size())
+		logical_pos = txt_line->size();
 
-	// click was off the right edge of the line, go to end.
-	return txt_line->size() + start_pos;
+	return logical_pos + start_pos;
 }
 
 
@@ -532,10 +558,17 @@ void GUIEditBoxWithScrollBar::calculateScrollPos()
 		// get cursor area
 		irr::u32 cursor_width = font->getDimension(L"_").Width;
 		core::stringw *txt_line = has_broken_text ? &m_broken_text[curs_line] : &Text;
-		s32 cpos = has_broken_text ? m_cursor_pos - m_broken_text_positions[curs_line] : m_cursor_pos;	// column
-		s32 cstart = font->getDimension(txt_line->subString(0, cpos).c_str()).Width;		// pixels from text-start
+		s32 logical_cpos = has_broken_text ? m_cursor_pos - m_broken_text_positions[curs_line] : m_cursor_pos;
+
+		core::TextBidiData text_bidi = applyBidiReordering(*txt_line);
+		s32 rtl_cursor_pos = text_bidi.visualCursorPos(logical_cpos);
+
+		if (text_bidi.CharIsRtl.size() > 0 && text_bidi.CharIsRtl[0] && rtl_cursor_pos > 0)
+			rtl_cursor_pos--;
+
+		s32 cstart = font->getDimension(text_bidi.TextBidi.subString(0, rtl_cursor_pos).c_str()).Width;
 		s32 cend = cstart + cursor_width;
-		s32 txt_width = font->getDimension(txt_line->c_str()).Width;
+		s32 txt_width = font->getDimension(text_bidi.TextBidi.c_str()).Width;
 
 		if (txt_width < m_frame_rect.getWidth()) {
 			// TODO: Needs a clean left and right gap removal depending on HAlign, similar to vertical scrolling tests for top/bottom.

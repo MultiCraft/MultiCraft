@@ -30,7 +30,7 @@ namespace gui
 StaticText::StaticText(const EnrichedString &text, bool border,
 			IGUIEnvironment* environment, IGUIElement* parent,
 			s32 id, const core::rect<s32>& rectangle,
-			bool background)
+			bool background, bool applyBidiReordering)
 : IGUIStaticText(environment, parent, id, rectangle),
 	HAlign(EGUIA_UPPERLEFT), VAlign(EGUIA_UPPERLEFT),
 	Border(border), WordWrap(false), Background(background),
@@ -40,6 +40,8 @@ StaticText::StaticText(const EnrichedString &text, bool border,
 	#ifdef _DEBUG
 	setDebugName("StaticText");
 	#endif
+
+	applyBidiReordering = true;
 
 	setText(text);
 }
@@ -117,7 +119,7 @@ void StaticText::draw()
 				irr::gui::CGUITTFont *tmp = static_cast<irr::gui::CGUITTFont*>(font);
 				tmp->draw(str,
 					r, HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
-					(RestrainTextInside ? &AbsoluteClippingRect : NULL));
+					(RestrainTextInside ? &AbsoluteClippingRect : NULL), ApplyBidiReordering);
 			} else
 #endif
 			{
@@ -125,7 +127,7 @@ void StaticText::draw()
 				font->draw(str.c_str(),
 					r, str.getDefaultColor(), // TODO: Implement colorization
 					HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
-					(RestrainTextInside ? &AbsoluteClippingRect : NULL));
+					(RestrainTextInside ? &AbsoluteClippingRect : NULL), ApplyBidiReordering);
 			}
 
 

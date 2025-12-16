@@ -183,6 +183,9 @@ private:
 	void animate(u32 msec);
 	void drawBackground();
 	void drawText();
+	core::rect<s32> getPromptFrameRect();
+	core::rect<s32> getPromptTextRect();
+	void calculatePromptScrollPos();
 	void drawPrompt();
 
 	ChatSelection getCursorPos(s32 x, s32 y);
@@ -252,4 +255,5 @@ private:
 	s32 m_bottom_scroll_pos = 0;
 
 	u16 m_round_screen_offset = 0;
+	s32 m_hscroll_pos = 0;
 };

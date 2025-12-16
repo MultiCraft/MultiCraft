@@ -247,6 +247,7 @@ public:
 	//     deletes the word to the left of the cursor.
 	void cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope scope);
 
+	s32 getCursorPos() { return m_cursor; }
 	void setCursorPos(int cursor_pos);
 	void setViewPosition(int view);
 
@@ -307,7 +308,7 @@ public:
 	// Get the recent messages buffer
 	ChatBuffer& getRecentBuffer();
 	// Concatenate all recent messages
-	EnrichedString getRecentChat() const;
+	EnrichedString getRecentChat(bool bidi_reordering) const;
 	// Get the console prompt
 	ChatPrompt& getPrompt();
 
