@@ -581,14 +581,20 @@ void GUIChatConsole::drawPrompt()
 				s32 logical_start = real_mark_begin.scroll + real_mark_begin.character;
 				s32 logical_end = real_mark_end.scroll + real_mark_end.character;
 
-				std::vector<std::pair<s32, s32>> visual_ranges =
+				if (real_mark_end.x_max)
+					logical_end++;
+
+				std::vector<SelectionBidiRange> visual_ranges =
 						text_bidi.getSelectionRanges(logical_start, logical_end);
 
 				IGUISkin* skin = Environment->getSkin();
 
 				for (const auto& range : visual_ranges) {
-					s32 visual_start = range.first;
-					s32 visual_end = range.second;
+					if (!range.Selected)
+						continue;
+
+					s32 visual_start = range.Start;
+					s32 visual_end = range.End;
 
 					s = txt_line_bidi.subString(0, visual_start);
 					s32 mbegin = m_font->getDimension(s.c_str()).Width;

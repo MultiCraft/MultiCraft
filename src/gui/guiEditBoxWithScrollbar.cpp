@@ -185,79 +185,78 @@ void GUIEditBoxWithScrollBar::draw()
 
 				// draw mark and marked text
 				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
-					s32 mbegin = 0, mend = 0;
-					s32 mark_start_pos = 0;
-					s32 mark_end_pos = txt_line_bidi.size();
-					s32 visual_mark_begin = 0;
-					s32 visual_mark_end = txt_line_bidi.size();
-
+					s32 logical_start_in_line = 0;
+					s32 logical_end_in_line = txt_line_bidi.size();
+					
 					if (i == hline_start) {
-						// highlight start is on this line
-						s32 logical_pos_in_line = m_real_mark_begin - start_pos;
-						visual_mark_begin = text_bidi.visualCursorPos(logical_pos_in_line);
-
-						s = txt_line_bidi.subString(0, visual_mark_begin);
-						mbegin = font->getDimension(s.c_str()).Width;
-
-						// deal with kerning
-						const wchar_t* this_letter = visual_mark_begin < (s32)txt_line_bidi.size() ? &(txt_line_bidi[visual_mark_begin]) : 0;
-						const wchar_t* previous_letter = visual_mark_begin > 0 ? &(txt_line_bidi[visual_mark_begin - 1]) : 0;
-						mbegin += font->getKerningWidth(this_letter, previous_letter);
-
-						mark_start_pos = visual_mark_begin;
+						logical_start_in_line = m_real_mark_begin - start_pos;
 					}
-
+				
 					if (i == hline_start + hline_count - 1) {
-						// highlight end is on this line
-						s32 logical_pos_in_line = m_real_mark_end - start_pos;
-						visual_mark_end = text_bidi.visualCursorPos(logical_pos_in_line);
-
-						s2 = txt_line_bidi.subString(0, visual_mark_end);
-						mend = font->getDimension(s2.c_str()).Width;
-						mark_end_pos = visual_mark_end;
-					} else {
-						mend = font->getDimension(txt_line_bidi.c_str()).Width;
+						logical_end_in_line = m_real_mark_end - start_pos;
 					}
+					
+					logical_start_in_line = core::max_(logical_start_in_line, 0);
+					logical_end_in_line = core::min_(logical_end_in_line, (s32)txt_line_bidi.size());
+					
+					std::vector<core::SelectionBidiRange> visual_ranges = 
+							text_bidi.getSelectionRanges(logical_start_in_line, logical_end_in_line);
+					
+					for (const auto& range : visual_ranges) {
+						if (!range.Selected)
+							continue;
 
-					if (mark_start_pos > mark_end_pos) {
-						core::swap(mark_start_pos, mark_end_pos);
-						core::swap(mbegin, mend);
+						s32 visual_start = range.Start;
+						s32 visual_end = range.End;
+						
+						s = txt_line_bidi.subString(0, visual_start);
+						s32 mbegin = font->getDimension(s.c_str()).Width;
+						
+						// deal with kerning
+						const wchar_t* this_letter = visual_start < (s32)txt_line_bidi.size() ? &(txt_line_bidi[visual_start]) : 0;
+						const wchar_t* previous_letter = visual_start > 0 ? &(txt_line_bidi[visual_start - 1]) : 0;
+						mbegin += font->getKerningWidth(this_letter, previous_letter);
+						
+						s2 = txt_line_bidi.subString(0, visual_end);
+						s32 mend = font->getDimension(s2.c_str()).Width;
+						
+						core::rect<s32> mark_rect = m_current_text_rect;
+						mark_rect.UpperLeftCorner.X += mbegin;
+						mark_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X + mend - mbegin;
+						
+						// draw mark
+						skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), mark_rect, &local_clip_rect);
 					}
-
-					core::rect<s32> mark_rect = m_current_text_rect;
-					mark_rect.UpperLeftCorner.X += mbegin;
-					mark_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X + mend - mbegin;
-
-					// draw mark
-					skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), mark_rect, &local_clip_rect);
-
-					// draw text before marked
-					core::rect<s32> before_rect = m_current_text_rect;
-					before_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X;
-					s = txt_line_bidi.subString(0, mark_start_pos);
-
-					if (s.size())
-						font->draw(s.c_str(), before_rect,
-							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-							false, true, &local_clip_rect, false);
-
-					// draw marked text
-					s = txt_line_bidi.subString(mark_start_pos, mark_end_pos - mark_start_pos);
-
-					if (s.size())
-						font->draw(s.c_str(), mark_rect,
-							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_HIGH_LIGHT_TEXT),
-							false, true, &local_clip_rect, false);
-
-					// draw text after marked
-					core::rect<s32> after_rect = m_current_text_rect;
-					after_rect.UpperLeftCorner.X = mark_rect.LowerRightCorner.X;
-					s = txt_line_bidi.subString(mark_end_pos, txt_line_bidi.size() - mark_end_pos);
-
-					if (s.size())
-						font->draw(s.c_str(), after_rect,
-							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-							false, true, &local_clip_rect, false);
+					
+					// draw text
+					for (const auto& range : visual_ranges) {
+						s32 visual_start = range.Start;
+						s32 visual_end = range.End;
+						
+						s32 mbegin = 0;
+						if (visual_start > 0) {
+							s = txt_line_bidi.subString(0, visual_start);
+							mbegin = font->getDimension(s.c_str()).Width;
+						}
+						
+						s = txt_line_bidi.subString(visual_start, visual_end - visual_start);
+						
+						core::rect<s32> text_rect = m_current_text_rect;
+						text_rect.UpperLeftCorner.X += mbegin;
+						
+						video::SColor color;
+						if (m_override_color_enabled)
+							color = m_override_color;
+						else if (range.Selected)
+							color = skin->getColor(EGDC_HIGH_LIGHT_TEXT);
+						else
+							color = skin->getColor(EGDC_BUTTON_TEXT);
+							
+						if (s.size()) {
+							font->draw(s.c_str(), text_rect, color,
+								false, true, &local_clip_rect, false);
+						}
+					}
 				} else {
 					// draw normal text
 					font->draw(txt_line_bidi, m_current_text_rect,
