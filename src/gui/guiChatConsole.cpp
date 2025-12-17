@@ -578,83 +578,41 @@ void GUIChatConsole::drawPrompt()
 					real_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
 					real_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
 
-				s32 mbegin = 0, mend = 0;
-				s32 mark_start_pos = 0;
-				s32 mark_end_pos = txt_line_bidi.size();
-				s32 visual_mark_begin = 0;
-				s32 visual_mark_end = txt_line_bidi.size();
+				s32 logical_start = real_mark_begin.scroll + real_mark_begin.character;
+				s32 logical_end = real_mark_end.scroll + real_mark_end.character;
 
-				// highlight start is on this line
-				s32 logical_pos_in_line = real_mark_begin.scroll + real_mark_begin.character;
-				visual_mark_begin = text_bidi.visualCursorPos(logical_pos_in_line);
+				std::vector<std::pair<s32, s32>> visual_ranges =
+						text_bidi.getSelectionRanges(logical_start, logical_end);
 
-				s = txt_line_bidi.subString(0, visual_mark_begin);
-				mbegin = m_font->getDimension(s.c_str()).Width;
-
-				// deal with kerning
-				const wchar_t* this_letter = visual_mark_begin < (s32)txt_line_bidi.size() ? &(txt_line_bidi[visual_mark_begin]) : 0;
-				const wchar_t* previous_letter = visual_mark_begin > 0 ? &(txt_line_bidi[visual_mark_begin - 1]) : 0;
-				mbegin += m_font->getKerningWidth(this_letter, previous_letter);
-
-				mark_start_pos = visual_mark_begin;
-
-				// highlight end is on this line
-				logical_pos_in_line = real_mark_end.scroll + real_mark_end.character;
-				visual_mark_end = text_bidi.visualCursorPos(logical_pos_in_line);
-
-				if (real_mark_end.x_max)
-					visual_mark_end++;
-
-				s2 = txt_line_bidi.subString(0, visual_mark_end);
-				mend = m_font->getDimension(s2.c_str()).Width;
-				mark_end_pos = visual_mark_end;
-
-				if (mark_start_pos > mark_end_pos) {
-					core::swap(mark_start_pos, mark_end_pos);
-					core::swap(mbegin, mend);
-				}
-
-				core::rect<s32> mark_rect = text_rect;
-				mark_rect.UpperLeftCorner.X += mbegin;
-				mark_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X + mend - mbegin;
-
-				// draw mark
 				IGUISkin* skin = Environment->getSkin();
-				skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), mark_rect, &local_clip_rect);
 
-				// draw text before marked
-				core::rect<s32> before_rect = text_rect;
-				before_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X;
-				s = txt_line_bidi.subString(0, mark_start_pos);
+				for (const auto& range : visual_ranges) {
+					s32 visual_start = range.first;
+					s32 visual_end = range.second;
 
-				if (s.size())
-					m_font->draw(s.c_str(), before_rect,
-						video::SColor(255, 255, 255, 255),
-						false, true, &local_clip_rect, false);
+					s = txt_line_bidi.subString(0, visual_start);
+					s32 mbegin = m_font->getDimension(s.c_str()).Width;
 
-				// draw marked text
-				s = txt_line_bidi.subString(mark_start_pos, mark_end_pos - mark_start_pos);
+					// deal with kerning
+					const wchar_t* this_letter = visual_start < (s32)txt_line_bidi.size() ? &(txt_line_bidi[visual_start]) : 0;
+					const wchar_t* previous_letter = visual_start > 0 ? &(txt_line_bidi[visual_start - 1]) : 0;
+					mbegin += m_font->getKerningWidth(this_letter, previous_letter);
 
-				if (s.size())
-					m_font->draw(s.c_str(), mark_rect,
-						video::SColor(255, 255, 255, 255),
-						false, true, &local_clip_rect, false);
+					s2 = txt_line_bidi.subString(0, visual_end);
+					s32 mend = m_font->getDimension(s2.c_str()).Width;
 
-				// draw text after marked
-				core::rect<s32> after_rect = text_rect;
-				after_rect.UpperLeftCorner.X = mark_rect.LowerRightCorner.X;
-				s = txt_line_bidi.subString(mark_end_pos, txt_line_bidi.size() - mark_end_pos);
+					core::rect<s32> mark_rect = text_rect;
+					mark_rect.UpperLeftCorner.X += mbegin;
+					mark_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X + mend - mbegin;
 
-				if (s.size())
-					m_font->draw(s.c_str(), after_rect,
-						video::SColor(255, 255, 255, 255),
-						false, true, &local_clip_rect, false);
-			} else {
-				// draw normal text
-				m_font->draw(txt_line_bidi, text_rect,
-					video::SColor(255, 255, 255, 255),
-					false, true, &local_clip_rect, false);
+					// draw mark
+					skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), mark_rect, &local_clip_rect);
+				}
 			}
+
+			m_font->draw(txt_line_bidi, text_rect,
+				video::SColor(255, 255, 255, 255),
+				false, true, &local_clip_rect, false);
 		}
 	}
 
