@@ -58,6 +58,11 @@ LOCAL_SRC_FILES := deps/openssl/lib/$(APP_ABI)/libcrypto.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := nghttp2
+LOCAL_SRC_FILES := deps/nghttp2/lib/$(APP_ABI)/libnghttp2.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := OpenAL
 LOCAL_SRC_FILES := deps/openal/lib/$(APP_ABI)/libopenal.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -279,7 +284,7 @@ LOCAL_SRC_FILES += ../../lib/luautf8/lutf8lib.c
 LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
 
 LOCAL_STATIC_LIBRARIES += \
-	Curl libssl libcrypto \
+	Curl libssl libcrypto libnghttp2 \
 	Freetype \
 	OpenAL \
 	Gettext \
