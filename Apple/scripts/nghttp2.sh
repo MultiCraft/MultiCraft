@@ -1,0 +1,57 @@
+#!/bin/bash -e
+
+NGHTTP2_VERSION=1.68.0
+
+. scripts/sdk.sh
+mkdir -p deps; cd deps
+
+if [ ! -d nghttp2-src ]; then
+	if [ ! -f "release-$NGHTTP2_VERSION.tar.gz" ]; then
+		wget -O nghttp2-v$NGHTTP2_VERSION.tar.gz https://github.com/nghttp2/nghttp2/archive/v$NGHTTP2_VERSION.tar.gz
+	fi
+	tar -xzf nghttp2-v$NGHTTP2_VERSION.tar.gz
+	mv nghttp2-$NGHTTP2_VERSION nghttp2-src
+fi
+
+rm -rf nghttp2
+
+cd nghttp2-src
+
+for ARCH in x86_64 arm64
+do
+	echo "Building nghttp2 for $ARCH"
+	mkdir -p build; cd build
+	cmake .. \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH -ffp-model=precise" \
+		-DCMAKE_OBJC_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
+		-DCMAKE_INSTALL_PREFIX="." \
+		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
+		-DBUILD_SHARED_LIBS=0 \
+		-DBUILD_STATIC_LIBS=1 \
+		-DENABLE_APP=0 \
+		-DENABLE_HPACK_TOOLS=0 \
+		-DENABLE_EXAMPLES=0 \
+		-DENABLE_FAILMALLOC=0 \
+		-DENABLE_LIB_ONLY=1 \
+		-DENABLE_DOC=0 \
+		-DBUILD_TESTING=0
+
+	cmake --build . -j
+
+	if [ $ARCH = "x86_64" ]; then
+		mkdir -p ../../nghttp2/include/nghttp2
+		cp -r ../lib/includes/nghttp2/*.h ../../nghttp2/include/nghttp2
+		cp -r lib/includes/nghttp2/*.h ../../nghttp2/include/nghttp2
+	fi
+	cp -v lib/libnghttp2.a ../../nghttp2/templib_$ARCH.a
+
+	cd ..; rm -rf build
+done
+
+# repack into one .a
+cd ../nghttp2
+lipo -create templib_*.a -output libnghttp2.a
+rm templib_*.a
+
+echo "nghttp2 build successful"
