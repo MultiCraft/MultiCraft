@@ -380,55 +380,62 @@ void GUIChatConsole::drawText()
 				(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll &&
 				(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll) {
 
-			unsigned int fragment_first_id = 0;
-			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll &&
-					real_mark_begin.fragment < line.fragments.size()) {
-				fragment_first_id = real_mark_begin.fragment;
+			s32 pos_x = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
+
+			for (u32 i = 0; i < line.fragments.size(); i++) {
+				const ChatFormattedFragment &fragment = line.fragments[i];
+				core::stringw frag_text = fragment.text.getString().c_str();
+				s32 logical_start = 0;
+				s32 logical_end = frag_text.size();
+
+				if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll) {
+					if (real_mark_begin.fragment == i) {
+						logical_start = real_mark_begin.character;
+						if (real_mark_begin.x_max)
+							logical_start = frag_text.size();
+					} else if (real_mark_begin.fragment > i) {
+						pos_x += m_font->getDimension(frag_text.c_str()).Width;
+						continue;
+					}
+				}
+
+				if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll) {
+					if (real_mark_end.fragment == i) {
+						logical_end = real_mark_end.character;
+						if (real_mark_end.x_max)
+							logical_end = frag_text.size();
+					} else if (real_mark_end.fragment < i) {
+						break;
+					}
+				}
+
+				TextBidiData text_bidi = applyBidiReordering(frag_text);
+				std::vector<core::SelectionBidiRange> visual_ranges =
+						text_bidi.getSelectionRanges(logical_start, logical_end);
+
+				for (const auto& range : visual_ranges) {
+					if (!range.Selected)
+						continue;
+
+					s32 x_begin = pos_x;
+					s32 x_end = pos_x;
+
+					if (range.Start > 0) {
+						core::stringw text = text_bidi.TextBidi.subString(0, range.Start);
+						x_begin += m_font->getDimension(text.c_str()).Width;
+					}
+
+					core::stringw text = text_bidi.TextBidi.subString(0, range.End);
+					x_end += m_font->getDimension(text.c_str()).Width;
+
+					core::rect<s32> destrect(x_begin, y, x_end, y + m_fontsize.Y);
+					video::IVideoDriver* driver = Environment->getVideoDriver();
+					IGUISkin* skin = Environment->getSkin();
+					driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
+				}
+
+				pos_x += m_font->getDimension(frag_text.c_str()).Width;
 			}
-
-			unsigned int fragment_last_id = line.fragments.size() - 1;
-			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
-					real_mark_end.fragment < line.fragments.size()) {
-				fragment_last_id = real_mark_end.fragment;
-			}
-
-			ChatFormattedFragment fragment_first = line.fragments[fragment_first_id];
-			ChatFormattedFragment fragment_last = line.fragments[fragment_last_id];
-
-			s32 x_begin = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
-			for (unsigned int i = 0; i < fragment_first_id; i++) {
-				x_begin += m_font->getDimension(line.fragments[i].text.c_str()).Width;
-			}
-
-			s32 x_end = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
-			for (unsigned int i = 0; i <= fragment_last_id; i++) {
-				x_end += m_font->getDimension(line.fragments[i].text.c_str()).Width;
-			}
-
-			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll) {
-				irr::core::stringw text = fragment_first.text.c_str();
-				text = text.subString(0, real_mark_begin.character);
-				s32 text_size = m_font->getDimension(text.c_str()).Width;
-				x_begin += text_size;
-
-				if (real_mark_begin.x_max)
-					x_begin = x_end;
-			}
-
-			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
-					(real_mark_end.character < fragment_last.text.size()) &&
-					!real_mark_end.x_max) {
-				irr::core::stringw text = fragment_last.text.c_str();
-				s32 text_size = m_font->getDimension(text.c_str()).Width;
-				text = text.subString(0, real_mark_end.character);
-				text_size -= m_font->getDimension(text.c_str()).Width;
-				x_end -= text_size;
-			}
-
-			core::rect<s32> destrect(x_begin, y, x_end, y + m_fontsize.Y);
-			video::IVideoDriver* driver = Environment->getVideoDriver();
-			IGUISkin* skin = Environment->getSkin();
-			driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
 		}
 
 		s32 x = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
@@ -723,11 +730,25 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 			if (x >= fragment_x)
 				continue;
 		}
-
-		s32 index = m_font->getCharacterFromPos(fragment.text.c_str(), x - current_fragment_x);
-
+		
+		core::stringw frag_text = fragment.text.getString().c_str();
+		TextBidiData text_bidi = applyBidiReordering(frag_text);
+		
+		s32 visual_index = m_font->getCharacterFromPos(text_bidi.TextBidi.c_str(), x - current_fragment_x);
+		
+		s32 logical_index;
+		if (visual_index == -1) {
+			logical_index = frag_text.size();
+		} else {
+			logical_index = text_bidi.logicalCursorPos(visual_index);
+			if (logical_index < 0)
+				logical_index = 0;
+			if (logical_index > (s32)frag_text.size())
+				logical_index = frag_text.size();
+		}
+		
 		selection.fragment = i;
-		selection.character = index > -1 ? index : fragment.text.size() - 1;
+		selection.character = logical_index;
 		return selection;
 	}
 
