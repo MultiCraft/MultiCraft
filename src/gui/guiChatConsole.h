@@ -44,7 +44,6 @@ struct ChatSelection
 		line = 0;
 		fragment = 0;
 		character = 0;
-		x_max = false;
 	}
 
 	bool operator== (const ChatSelection &other) const {

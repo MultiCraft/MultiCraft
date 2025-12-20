@@ -391,8 +391,6 @@ void GUIChatConsole::drawText()
 				if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll) {
 					if (real_mark_begin.fragment == i) {
 						logical_start = real_mark_begin.character;
-						if (real_mark_begin.x_max)
-							logical_start = frag_text.size();
 					} else if (real_mark_begin.fragment > i) {
 						pos_x += m_font->getDimension(frag_text.c_str()).Width;
 						continue;
@@ -402,8 +400,6 @@ void GUIChatConsole::drawText()
 				if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll) {
 					if (real_mark_end.fragment == i) {
 						logical_end = real_mark_end.character;
-						if (real_mark_end.x_max)
-							logical_end = frag_text.size();
 					} else if (real_mark_end.fragment < i) {
 						break;
 					}
@@ -592,9 +588,6 @@ void GUIChatConsole::drawPrompt()
 				s32 logical_start = real_mark_begin.scroll + real_mark_begin.character;
 				s32 logical_end = real_mark_end.scroll + real_mark_end.character;
 
-				if (real_mark_end.x_max)
-					logical_end++;
-
 				std::vector<SelectionBidiRange> visual_ranges =
 						text_bidi.getSelectionRanges(logical_start, logical_end);
 
@@ -711,13 +704,6 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	s32 x_max = x_min;
 	for (const ChatFormattedFragment &fragment : line.fragments) {
 		x_max += m_font->getDimension(fragment.text.c_str()).Width;
-	}
-
-	if (x < x_min) {
-		x = x_min;
-	} else if (x > x_max) {
-		x = x_max;
-		selection.x_max = true;
 	}
 
 	s32 fragment_x = x_min;
@@ -854,16 +840,13 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 			for (unsigned int j = 0; j < line.fragments.size(); j++) {
 				const ChatFormattedFragment &fragment = line.fragments[j];
 
-				for (unsigned int k = 0; k < fragment.text.size(); k++) {
+				for (unsigned int k = 0; k <= fragment.text.size(); k++) {
 					if (!add_to_string &&
 							row == mark_begin_row_buf &&
 							i == real_mark_begin.line &&
 							j == real_mark_begin.fragment &&
 							k == real_mark_begin.character) {
 						add_to_string = true;
-
-						if (real_mark_begin.x_max)
-							continue;
 					}
 
 					if (add_to_string) {
@@ -871,15 +854,14 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 								i == real_mark_end.line &&
 								j == real_mark_end.fragment &&
 								k == real_mark_end.character) {
-							if (real_mark_end.x_max)
-								text += fragment.text.c_str()[k];
 
 							irr::core::stringc text_c;
 							text_c = wide_to_utf8(text.c_str()).c_str();
 							return text_c;
 						}
 
-						text += fragment.text.c_str()[k];
+						if (k < fragment.text.size())
+							text += fragment.text.c_str()[k];
 					}
 				}
 			}
@@ -916,8 +898,6 @@ irr::core::stringc GUIChatConsole::getPromptSelectedText()
 	irr::core::stringw text = prompt_text.c_str();
 	int begin = real_mark_begin.scroll + real_mark_begin.character;
 	int length = real_mark_end.scroll + real_mark_end.character - begin;
-	if (real_mark_end.x_max)
-		length++;
 	text = text.subString(begin, length);
 
 	irr::core::stringc text_c;
@@ -930,8 +910,6 @@ void GUIChatConsole::movePromptCursor(s32 x, s32 y)
 	ChatSelection selection = getPromptCursorPos(x, y);
 
 	int cursor_pos = selection.scroll + selection.character;
-	if (selection.x_max)
-		cursor_pos++;
 
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	prompt.setCursorPos(cursor_pos);
@@ -952,8 +930,6 @@ void GUIChatConsole::deletePromptSelection()
 
 	int pos_begin = real_mark_begin.scroll + real_mark_begin.character;
 	int pos_end = real_mark_end.scroll + real_mark_end.character;
-	if (real_mark_end.x_max)
-		pos_end++;
 
 	std::wstring prompt_text = prompt.getLine();
 	std::wstring new_text;
@@ -1201,8 +1177,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				m_mark_end.reset();
 				m_mark_end.selection_type = ChatSelection::SELECTION_PROMPT;
 				m_mark_end.scroll = 0;
-				m_mark_end.character = prompt.getLine().size() - 1;
-				m_mark_end.x_max = true;
+				m_mark_end.character = prompt.getLine().size();
 
 				prompt.cursorOperation(
 					ChatPrompt::CURSOROP_MOVE,
