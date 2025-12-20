@@ -495,6 +495,8 @@ core::rect<s32> GUIChatConsole::getPromptTextRect()
 
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring text = prompt.getLine();
+	std::replace_if(text.begin(), text.end(),
+			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
 	core::dimension2du d = m_font->getDimension(text.c_str());
 	d.Height += m_font->getKerningHeight();
 
@@ -518,6 +520,8 @@ void GUIChatConsole::calculatePromptScrollPos()
 	irr::u32 cursor_width = m_font->getDimension(L"_").Width;
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring text = prompt.getLine();
+	std::replace_if(text.begin(), text.end(),
+			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
 	core::stringw txt_line = text.c_str();
 	s32 logical_cpos = prompt.getCursorPos();
 
@@ -764,6 +768,8 @@ ChatSelection GUIChatConsole::getPromptCursorPos(s32 x, s32 y)
 
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring text = prompt.getLine();
+	std::replace_if(text.begin(), text.end(),
+			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
 	core::stringw txt_line = text.c_str();
 
 	if (txt_line.empty())
