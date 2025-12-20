@@ -41,7 +41,7 @@ StaticText::StaticText(const EnrichedString &text, bool border,
 	setDebugName("StaticText");
 	#endif
 
-	applyBidiReordering = true;
+	ApplyBidiReordering = applyBidiReordering;
 
 	setText(text);
 }
