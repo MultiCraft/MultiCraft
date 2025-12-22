@@ -5,13 +5,8 @@ NGHTTP2_VERSION=1.68.0
 . scripts/sdk.sh
 mkdir -p deps; cd deps
 
-if [ ! -d nghttp2-src ]; then
-	if [ ! -f "release-$NGHTTP2_VERSION.tar.gz" ]; then
-		wget -O nghttp2-v$NGHTTP2_VERSION.tar.gz https://github.com/nghttp2/nghttp2/archive/v$NGHTTP2_VERSION.tar.gz
-	fi
-	tar -xzf nghttp2-v$NGHTTP2_VERSION.tar.gz
-	mv nghttp2-$NGHTTP2_VERSION nghttp2-src
-fi
+[ ! -d nghttp2-src ] && \
+	git clone -b v$NGHTTP2_VERSION --depth 1 https://github.com/nghttp2/nghttp2 nghttp2-src
 
 rm -rf nghttp2
 
