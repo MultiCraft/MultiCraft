@@ -45,7 +45,7 @@ static inline int SHA224_Update(SHA256_CTX *c, const void *data, size_t len)
 
 static inline int SHA224_Final(unsigned char *md, SHA256_CTX *c)
 {
-    return CC_SHA224_Final(md, c);
+	return CC_SHA224_Final(md, c);
 }
 
 static inline unsigned char *SHA224(const unsigned char *d, size_t n, unsigned char *md)
