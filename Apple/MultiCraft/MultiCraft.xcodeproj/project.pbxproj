@@ -225,7 +225,6 @@
 		84F20E8625D52868009562A9 /* serialize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6225D52867009562A9 /* serialize.cpp */; };
 		84F20E8725D52868009562A9 /* areastore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6525D52867009562A9 /* areastore.cpp */; };
 		84F20E8825D52868009562A9 /* ieee_float.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6625D52867009562A9 /* ieee_float.cpp */; };
-		84F20E8925D52868009562A9 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6925D52867009562A9 /* sha256.c */; };
 		84F20E8A25D52868009562A9 /* quicktune.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6C25D52867009562A9 /* quicktune.cpp */; };
 		84F20E8B25D52868009562A9 /* enriched_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6E25D52867009562A9 /* enriched_string.cpp */; };
 		84F20E8C25D52868009562A9 /* timetaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E7025D52868009562A9 /* timetaker.cpp */; };
@@ -721,8 +720,7 @@
 		84F20E6425D52867009562A9 /* metricsbackend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = metricsbackend.h; path = ../../../src/util/metricsbackend.h; sourceTree = "<group>"; };
 		84F20E6525D52867009562A9 /* areastore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = areastore.cpp; path = ../../../src/util/areastore.cpp; sourceTree = "<group>"; };
 		84F20E6625D52867009562A9 /* ieee_float.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ieee_float.cpp; path = ../../../src/util/ieee_float.cpp; sourceTree = "<group>"; };
-		84F20E6825D52867009562A9 /* sha2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sha2.h; path = ../../../src/util/sha2.h; sourceTree = "<group>"; };
-		84F20E6925D52867009562A9 /* sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sha256.c; path = ../../../src/util/sha256.c; sourceTree = "<group>"; };
+		84F20E6825D52867009562A9 /* sha2_apple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sha2_apple.h; path = ../../../src/util/sha2_apple.h; sourceTree = "<group>"; };
 		84F20E6A25D52867009562A9 /* directiontables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = directiontables.h; path = ../../../src/util/directiontables.h; sourceTree = "<group>"; };
 		84F20E6B25D52867009562A9 /* timetaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timetaker.h; path = ../../../src/util/timetaker.h; sourceTree = "<group>"; };
 		84F20E6C25D52867009562A9 /* quicktune.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = quicktune.cpp; path = ../../../src/util/quicktune.cpp; sourceTree = "<group>"; };
@@ -1425,8 +1423,7 @@
 				84F20E7F25D52868009562A9 /* quicktune.h */,
 				84F20E6225D52867009562A9 /* serialize.cpp */,
 				84F20E7325D52868009562A9 /* serialize.h */,
-				84F20E6825D52867009562A9 /* sha2.h */,
-				84F20E6925D52867009562A9 /* sha256.c */,
+				84F20E6825D52867009562A9 /* sha2_apple.h */,
 				84F20E5825D52866009562A9 /* srp.cpp */,
 				84F20E7425D52868009562A9 /* srp.h */,
 				84F20E7125D52868009562A9 /* strfnd.h */,
@@ -1914,7 +1911,6 @@
 				84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */,
 				84135B9F25D5264C00CA4DCF /* staticobject.cpp in Sources */,
 				84F20E2F25D5282A009562A9 /* l_particles_local.cpp in Sources */,
-				84F20E8925D52868009562A9 /* sha256.c in Sources */,
 				8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */,
 				84F20F3F25D52975009562A9 /* mapgen_v7p.cpp in Sources */,
 				84F20F4225D52975009562A9 /* mapgen_valleys.cpp in Sources */,
