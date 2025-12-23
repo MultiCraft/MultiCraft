@@ -513,7 +513,7 @@ void ClientMediaDownloader::startRemoteMediaTransfers()
 							break;
 					}
 
-					actionstream << "Client: "
+					verbosestream << "Client: "
 						<< "Requesting " << files.size()
 						<< " remote media files "
 						<< "from \"" << url << "\"" << std::endl;
