@@ -714,7 +714,6 @@
 		84F20E5D25D52867009562A9 /* auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = auth.h; path = ../../../src/util/auth.h; sourceTree = "<group>"; };
 		84F20E5E25D52867009562A9 /* metricsbackend.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metricsbackend.cpp; path = ../../../src/util/metricsbackend.cpp; sourceTree = "<group>"; };
 		84F20E5F25D52867009562A9 /* numeric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = numeric.cpp; path = ../../../src/util/numeric.cpp; sourceTree = "<group>"; };
-		84F20E6125D52867009562A9 /* md32_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = md32_common.h; path = ../../../src/util/md32_common.h; sourceTree = "<group>"; };
 		84F20E6225D52867009562A9 /* serialize.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = serialize.cpp; path = ../../../src/util/serialize.cpp; sourceTree = "<group>"; };
 		84F20E6325D52867009562A9 /* pointedthing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pointedthing.h; path = ../../../src/util/pointedthing.h; sourceTree = "<group>"; };
 		84F20E6425D52867009562A9 /* metricsbackend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = metricsbackend.h; path = ../../../src/util/metricsbackend.h; sourceTree = "<group>"; };
@@ -1410,7 +1409,6 @@
 				84F20E7C25D52868009562A9 /* hex.h */,
 				84F20E6625D52867009562A9 /* ieee_float.cpp */,
 				84F20E7925D52868009562A9 /* ieee_float.h */,
-				84F20E6125D52867009562A9 /* md32_common.h */,
 				84F20E5E25D52867009562A9 /* metricsbackend.cpp */,
 				84F20E6425D52867009562A9 /* metricsbackend.h */,
 				84F20E5F25D52867009562A9 /* numeric.cpp */,
