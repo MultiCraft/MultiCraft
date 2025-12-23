@@ -66,6 +66,16 @@ private:
 	float m_last_pos = 0;
 	float m_velocity = 0;
 
+	struct VelocitySample
+	{
+	    float position;
+	    u64 timestamp;
+	};
+
+	static const u32 MAX_VELOCITY_SAMPLES = 5;
+	VelocitySample m_velocity_samples[MAX_VELOCITY_SAMPLES];
+	u32 m_sample_count = 0;
+	u32 m_sample_index = 0;
 
 	void updateScrolling();
 	void updateScrollCoasting();

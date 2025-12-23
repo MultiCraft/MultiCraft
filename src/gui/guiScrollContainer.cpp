@@ -81,7 +81,31 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			m_swipe_start_px = -1;
 			if (m_swipe_started) {
 				m_swipe_started = false;
-				m_is_coasting = true;
+
+				if (m_sample_count > 1) {
+					u32 last_sample_index = (m_sample_index - 1 + MAX_VELOCITY_SAMPLES) % MAX_VELOCITY_SAMPLES;
+					VelocitySample last_sample = m_velocity_samples[last_sample_index];
+
+					VelocitySample first_sample = last_sample;
+					for (u32 i = 0; i < m_sample_count; i++) {
+						VelocitySample& sample = m_velocity_samples[i];
+
+						if (m_last_time - sample.timestamp > 150)
+							continue;
+
+						if (sample.timestamp < first_sample.timestamp)
+							first_sample = sample;
+					}
+
+					u64 dt = last_sample.timestamp - first_sample.timestamp;
+					if (dt > 0) {
+						float distance = last_sample.position - first_sample.position;
+						m_velocity = distance / dt;
+						m_velocity = std::max(std::min(m_velocity, 2.0f), -2.0f);
+						m_is_coasting = true;
+					}
+				}
+
 				return true;
 			}
 		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
@@ -94,21 +118,23 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 							0.1 * screen_dpi) {
 				m_swipe_started = true;
 				Environment->setFocus(this);
-				m_last_time = porting::getTimeMs();
+				m_sample_count = 0;
+				m_sample_index = 0;
 			}
 			if (m_swipe_started) {
 				m_swipe_pos = (float)(mouse_pos - m_swipe_start_px) /
 					      m_scrollfactor;
-				
+
 				u64 current_time = porting::getTimeMs();
-				u64 dt = current_time - m_last_time;
-				
-				if (dt > 0) {
-					m_velocity = (float)(m_swipe_pos - m_last_pos) / dt;
-					m_last_pos = m_swipe_pos;
-					m_last_time = current_time;
+
+				m_velocity_samples[m_sample_index].position = m_swipe_pos;
+				m_velocity_samples[m_sample_index].timestamp = current_time;
+				m_sample_index = (m_sample_index + 1) % MAX_VELOCITY_SAMPLES;
+				if (m_sample_count < MAX_VELOCITY_SAMPLES) {
+					m_sample_count++;
 				}
-				
+
+				m_last_time = current_time;
 				m_scrollbar->setPos((int)m_swipe_pos);
 				SEvent e;
 				e.EventType = EET_GUI_EVENT;
@@ -136,15 +162,15 @@ void GUIScrollContainer::updateScrollCoasting()
 	u64 current_time = porting::getTimeMs();
 	u64 dt = current_time - m_last_time;
 	m_last_time = current_time;
-	
+
 	if (dt == 0)
 		return;
-	
-	const float DECELERATION = 0.002f;
+
+	const float SLOWING_FACTOR = 0.0015f;
 	const float VELOCITY_FACTOR = 1.0f;
 	const float MIN_VELOCITY = 0.01f;
-	
-	float velocity_decrease = DECELERATION * dt;
+
+	float velocity_decrease = SLOWING_FACTOR * dt;
 	if (m_velocity > 0) {
 		m_velocity -= velocity_decrease;
 		if (m_velocity < MIN_VELOCITY) {
@@ -160,9 +186,9 @@ void GUIScrollContainer::updateScrollCoasting()
 			return;
 		}
 	}
-	
+
 	m_swipe_pos += m_velocity * VELOCITY_FACTOR * dt;
-	
+
 	if (m_swipe_pos <= m_scrollbar->getMin()) {
 		m_swipe_pos = m_scrollbar->getMin();
 		m_velocity = 0;
@@ -172,7 +198,7 @@ void GUIScrollContainer::updateScrollCoasting()
 		m_velocity = 0;
 		m_is_coasting = false;
 	}
-	
+
 	m_scrollbar->setPos((int)m_swipe_pos);
 	SEvent e;
 	e.EventType = EET_GUI_EVENT;
