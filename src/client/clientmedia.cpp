@@ -352,6 +352,14 @@ void ClientMediaDownloader::remoteHashSetReceived(
 	}
 }
 
+// Skip copying during bulk media download
+// (Class from https://github.com/luanti-org/luanti/issues/13559)
+struct ZeroCopyBuf : public std::streambuf
+{
+ 	ZeroCopyBuf(const std::string &s) : ZeroCopyBuf(const_cast<char*>(s.c_str()), s.length()) {}
+	ZeroCopyBuf(char *c, std::size_t l) { setg(c, c, c + l); }
+};
+
 void ClientMediaDownloader::remoteMediaReceived(
 		const HTTPFetchResult &fetch_result,
 		Client *client)
@@ -394,8 +402,8 @@ void ClientMediaDownloader::remoteMediaReceived(
 
 	if (remote->supports_bulk_download) {
 		try {
-			// https://github.com/luanti-org/luanti/issues/13559 ???
-			std::istringstream is(fetch_result.data, std::ios::binary);
+			ZeroCopyBuf buf(fetch_result.data);
+			std::istream is(&buf);
 			for (const std::string &name : names) {
 				FileStatus *filestatus = m_files[name];
 				bool success = checkAndLoad(name, filestatus->sha1,
