@@ -135,6 +135,7 @@ void ClientMediaDownloader::addRemoteServer(const std::string &baseurl)
 		RemoteServerStatus *remote = new RemoteServerStatus();
 		remote->baseurl = baseurl;
 		remote->active_count = 0;
+		remote->supports_bulk_download = false;
 		m_remotes.push_back(remote);
 	}
 
@@ -328,7 +329,8 @@ void ClientMediaDownloader::remoteHashSetReceived(
 			// available on it, try to parse the list
 
 			std::set<std::string> sha1_set;
-			deSerializeHashSet(fetch_result.data, sha1_set);
+			remote->supports_bulk_download =
+				deSerializeHashSet(fetch_result.data, sha1_set);
 
 			// Parsing succeeded: For every file that is
 			// available on this server, add this server
@@ -359,29 +361,62 @@ void ClientMediaDownloader::remoteMediaReceived(
 	// -> mark file as received if fetch succeeded
 	// -> try to load media
 
-	std::string name;
+	std::vector<std::string> names;
 	{
-		std::unordered_map<unsigned long, std::string>::iterator it =
-			m_remote_file_transfers.find(fetch_result.request_id);
+		auto it = m_remote_file_transfers.find(fetch_result.request_id);
 		assert(it != m_remote_file_transfers.end());
-		name = it->second;
+		names = it->second;
 		m_remote_file_transfers.erase(it);
 	}
 
-	sanity_check(m_files.count(name) != 0);
+	RemoteServerStatus *remote = nullptr;
+	for (const std::string &name : names) {
+		sanity_check(m_files.count(name) != 0);
 
-	FileStatus *filestatus = m_files[name];
-	sanity_check(!filestatus->received);
-	sanity_check(filestatus->current_remote >= 0);
+		FileStatus *filestatus = m_files[name];
+		sanity_check(!filestatus->received);
+		sanity_check(filestatus->current_remote >= 0);
 
-	RemoteServerStatus *remote = m_remotes[filestatus->current_remote];
+		if (remote)
+			sanity_check(remote == m_remotes[filestatus->current_remote]);
+		else
+			remote = m_remotes[filestatus->current_remote];
 
-	filestatus->current_remote = -1;
-	remote->active_count--;
+		filestatus->current_remote = -1;
+	}
+
+	sanity_check(remote != nullptr);
+	remote->active_count -= names.size();
 
 	// If fetch succeeded, try to load media file
+	if (!fetch_result.succeeded)
+		return;
 
-	if (fetch_result.succeeded) {
+	if (remote->supports_bulk_download) {
+		try {
+			// https://github.com/luanti-org/luanti/issues/13559 ???
+			std::istringstream is(fetch_result.data, std::ios::binary);
+			for (const std::string &name : names) {
+				FileStatus *filestatus = m_files[name];
+				bool success = checkAndLoad(name, filestatus->sha1,
+						deSerializeString32(is), false, client);
+				if (success) {
+					filestatus->received = true;
+					assert(m_uncached_received_count < m_uncached_count);
+					m_uncached_received_count++;
+				}
+			}
+		}
+		catch (SerializationError &e) {
+			warningstream << "Client: Remote server \""
+				<< remote->baseurl << "\" sent invalid bulk-download response: "
+				<< e.what() << std::endl;
+		}
+	} else {
+		sanity_check(names.size() == 1);
+
+		const std::string &name = names[0];
+		FileStatus *filestatus = m_files[name];
 		bool success = checkAndLoad(name, filestatus->sha1,
 				fetch_result.data, false, client);
 		if (success) {
@@ -451,14 +486,47 @@ void ClientMediaDownloader::startRemoteMediaTransfers()
 				RemoteServerStatus *remote =
 					m_remotes[remote_id];
 
-				std::string url = remote->baseurl +
-					hex_encode(filestatus->sha1);
-				verbosestream << "Client: "
-					<< "Requesting remote media file "
-					<< "\"" << name << "\" "
-					<< "\"" << url << "\"" << std::endl;
-
 				HTTPFetchRequest fetch_request;
+
+				std::string url = remote->baseurl;
+				std::vector<std::string> files;
+				files.push_back(name);
+				filestatus->current_remote = remote_id;
+
+				if (remote->supports_bulk_download) {
+					url += "bulk-download";
+
+					std::ostringstream os(std::ios::binary);
+					os << filestatus->sha1;
+
+					// Find a few more files to add to the bulk download request
+					for (auto it = m_files.upper_bound(m_name_bound); it != m_files.end(); ++it) {
+						if (it->second->received || it->second->current_remote >= 0)
+							continue;
+
+						files.push_back(it->first);
+						os << it->second->sha1;
+						it->second->current_remote = remote_id;
+
+						// Only fetch up to 50 files in a single request
+						if (files.size() >= 50)
+							break;
+					}
+
+					actionstream << "Client: "
+						<< "Requesting " << files.size()
+						<< " remote media files "
+						<< "from \"" << url << "\"" << std::endl;
+					fetch_request.raw_data = os.str();
+					fetch_request.method = HTTP_POST;
+				} else {
+					url += hex_encode(filestatus->sha1);
+					verbosestream << "Client: "
+						<< "Requesting remote media file "
+						<< "\"" << name << "\" "
+						<< "\"" << url << "\"" << std::endl;
+				}
+
 				fetch_request.url = url;
 				fetch_request.caller = m_httpfetch_caller;
 				fetch_request.request_id = m_httpfetch_next_id;
@@ -469,10 +537,9 @@ void ClientMediaDownloader::startRemoteMediaTransfers()
 
 				m_remote_file_transfers.insert(std::make_pair(
 							m_httpfetch_next_id,
-							name));
+							files));
 
-				filestatus->current_remote = remote_id;
-				remote->active_count++;
+				remote->active_count += files.size();
 				m_httpfetch_active++;
 				m_httpfetch_next_id++;
 			}
@@ -630,7 +697,7 @@ std::string ClientMediaDownloader::serializeRequiredHashSet()
 	return os.str();
 }
 
-void ClientMediaDownloader::deSerializeHashSet(const std::string &data,
+bool ClientMediaDownloader::deSerializeHashSet(const std::string &data,
 		std::set<std::string> &result)
 {
 	if (data.size() < 6 || data.size() % 20 != 6) {
@@ -649,7 +716,11 @@ void ClientMediaDownloader::deSerializeHashSet(const std::string &data,
 	}
 
 	u16 version = readU16(&data_cstr[4]);
-	if (version != 1) {
+	bool supports_bulk_download = false;
+	if (version == 2) {
+		// Version 2 is the bulk download API
+		supports_bulk_download = true;
+	} else if (version != 1) {
 		throw SerializationError(
 				"ClientMediaDownloader::deSerializeHashSet: "
 				"unsupported hash set file version");
@@ -658,4 +729,6 @@ void ClientMediaDownloader::deSerializeHashSet(const std::string &data,
 	for (u32 pos = 6; pos < data.size(); pos += 20) {
 		result.insert(data.substr(pos, 20));
 	}
+
+	return supports_bulk_download;
 }
