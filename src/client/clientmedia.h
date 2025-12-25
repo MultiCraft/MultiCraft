@@ -101,6 +101,7 @@ private:
 	struct RemoteServerStatus {
 		std::string baseurl;
 		s32 active_count;
+		bool supports_bulk_download;
 	};
 
 	void initialStep(Client *client);
@@ -116,7 +117,7 @@ private:
 			Client *client);
 
 	std::string serializeRequiredHashSet();
-	static void deSerializeHashSet(const std::string &data,
+	static bool deSerializeHashSet(const std::string &data,
 			std::set<std::string> &result);
 
 	// Maps filename to file status
@@ -145,7 +146,7 @@ private:
 	s32 m_httpfetch_active = 0;
 	s32 m_httpfetch_active_limit = 0;
 	s32 m_outstanding_hash_sets = 0;
-	std::unordered_map<unsigned long, std::string> m_remote_file_transfers;
+	std::unordered_map<unsigned long, std::vector<std::string>> m_remote_file_transfers;
 
 	// All files up to this name have either been received from a
 	// remote server or failed on all remote servers, so those files
