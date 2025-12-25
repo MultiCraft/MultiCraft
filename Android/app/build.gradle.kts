@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-	buildToolsVersion = "36.0.0"
+	buildToolsVersion = "36.1.0"
 	compileSdk = 36
 	ndkVersion = "29.0.14206865"
 	namespace = "com.multicraft.game"
@@ -143,6 +143,6 @@ dependencies {
 	implementation("androidx.appcompat:appcompat:1.7.1")
 	implementation("androidx.appcompat:appcompat-resources:1.7.1")
 	implementation("androidx.browser:browser:1.9.0")
-	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.4")
+	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
 	implementation("com.google.android.material:material:1.13.0")
 }
