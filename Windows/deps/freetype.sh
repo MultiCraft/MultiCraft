@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-FREETYPE_VERSION=2.13.3
+FREETYPE_VERSION=2.14.1
 
 . ./sdk.sh
 

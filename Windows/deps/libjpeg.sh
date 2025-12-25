@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-JPEG_VERSION=3.1.1
+JPEG_VERSION=3.1.3
 
 if [ ! -d libjpeg-src ]; then
 	git clone -b $JPEG_VERSION --depth 1 https://github.com/libjpeg-turbo/libjpeg-turbo libjpeg-src
