@@ -36,3 +36,4 @@ dofile(gamepath .. "knockback.lua")
 dofile(gamepath .. "sscsm" .. DIR_DELIM .. "init.lua")
 
 profiler = nil
+string.dump = nil -- luacheck: ignore

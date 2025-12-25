@@ -95,8 +95,9 @@ core.get_temp_path() -> path of temp folder
 HTTP Requests
 -------------
 
-* core.download_file(url, target) (possible in async calls)
-    * url to download, and target to store to
+* core.download_file(request, target) (possible in async calls)
+    * request can either be a HTTPRequest or a URL (string)
+    * target is the file to write to
     * returns true/false
 * core.cancel_all_download_files() (possible in async calls)
     * Cancels all calls to core.download_file running in other threads

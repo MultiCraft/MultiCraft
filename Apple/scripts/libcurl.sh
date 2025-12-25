@@ -16,8 +16,12 @@ rm -rf libcurl
 
 cd libcurl-src
 
-CFLAGS="$OSX_FLAGS $OSX_ARCH" \
+INCLUDE_DIRS="-I$(pwd)/../nghttp2/include"
+LIBRARY_DIRS="-L$(pwd)/../nghttp2"
+
+CFLAGS="$INCLUDE_DIRS $LIBRARY_DIRS $CFLAGS $OSX_FLAGS $OSX_ARCH" \
 ./configure --host=arm-apple-darwin --prefix=/ --disable-shared --enable-static \
+	--with-nghttp2 \
 	--disable-debug --disable-verbose --disable-versioned-symbols \
 	--with-secure-transport --disable-dependency-tracking \
 	--disable-ares --disable-cookies --disable-manual \
@@ -25,8 +29,7 @@ CFLAGS="$OSX_FLAGS $OSX_ARCH" \
 	--disable-ftp --disable-ldap --disable-ldaps --disable-rtsp \
 	--disable-dict --disable-telnet --disable-tftp --disable-pop3 \
 	--disable-imap --disable-smtp --disable-gopher --disable-sspi \
-	--disable-libcurl-option --without-libidn2 --without-nghttp2 \
-	--without-libpsl
+	--disable-libcurl-option --without-libidn2 --without-libpsl
 
 make -j
 

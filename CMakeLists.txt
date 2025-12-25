@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.12)
 project(multicraft)
 set(PROJECT_NAME_CAPITALIZED "MultiCraft")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(GCC_MINIMUM_VERSION "5.1")
 set(CLANG_MINIMUM_VERSION "3.5")
@@ -12,7 +12,7 @@ set(CLANG_MINIMUM_VERSION "3.5")
 # Also remember to set PROTOCOL_VERSION in network/networkprotocol.h when releasing
 set(VERSION_MAJOR 2)
 set(VERSION_MINOR 0)
-set(VERSION_PATCH 12)
+set(VERSION_PATCH 13)
 set(VERSION_EXTRA "" CACHE STRING "Stuff to append to version string")
 
 # Change to false for releases

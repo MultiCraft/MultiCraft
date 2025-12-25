@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "lua_api/l_mainmenu.h"
+#include "lua_api/l_http.h"
 #include "lua_api/l_internal.h"
 #include "common/c_converter.h"
 #include "common/c_content.h"
@@ -562,9 +563,9 @@ int ModApiMainMenu::l_get_games(lua_State *L)
 		lua_newtable(L);
 		int table2 = lua_gettop(L);
 		int internal_index = 1;
-		for (const std::string &addon_mods_path : game.addon_mods_paths) {
+		for (const auto &addon_mods_path : game.addon_mods_paths) {
 			lua_pushnumber(L, internal_index);
-			lua_pushstring(L, addon_mods_path.c_str());
+			lua_pushstring(L, addon_mods_path.second.c_str());
 			lua_settable(L,   table2);
 			internal_index++;
 		}
@@ -979,14 +980,23 @@ int ModApiMainMenu::l_show_path_select_dialog(lua_State *L)
 /******************************************************************************/
 int ModApiMainMenu::l_download_file(lua_State *L)
 {
-	const char *url    = luaL_checkstring(L, 1);
 	const char *target = luaL_checkstring(L, 2);
+
+	HTTPFetchRequest req;
+	req.timeout = g_settings->getS32("curl_file_download_timeout");
+	if (lua_istable(L, 1)) {
+		// read_http_fetch_request requires only a single item on the stack
+		lua_pop(L, lua_gettop(L) - 1);
+		ModApiHttp::read_http_fetch_request(L, req);
+	} else {
+		req.url = luaL_checkstring(L, 1);
+	}
 
 	//check path
 	std::string absolute_destination = fs::RemoveRelativePathComponents(target);
 
 	if (ModApiMainMenu::mayModifyPath(absolute_destination)) {
-		if (GUIEngine::downloadFile(url,absolute_destination)) {
+		if (GUIEngine::downloadFile(req, absolute_destination)) {
 			lua_pushboolean(L,true);
 			return 1;
 		}

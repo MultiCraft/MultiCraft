@@ -134,6 +134,8 @@ bool extractZipFile(irr::io::IFileSystem *fs, const char *filename,
 		const std::string &destination, const char *password = "",
 		std::string *errorMessage = nullptr);
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+void *ReadFileFromAssets(const char *filename, size_t *size);
+
 bool extractZipFileFromAssets(irr::io::IFileSystem *fs,
 		const std::string &destination, const char *password = "",
 		std::string *errorMessage = nullptr);

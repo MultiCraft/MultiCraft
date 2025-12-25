@@ -376,9 +376,15 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				}
 			}
 
-			// Load fallback emoji font if system fonts are not available
+			// Load fallback emoji font if system fonts are not available.
+			// For macOS always load fallback font because we can't load
+			// some emojis from apple font atm.
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+			font->loadAdditionalFont(emoji_font_path.c_str(), true);
+#else
 			if (!success)
 				font->loadAdditionalFont(emoji_font_path.c_str(), true);
+#endif
 
 			if (font_path != fallback_font_path)
 				font->loadAdditionalFont(fallback_font_path.c_str(), false);

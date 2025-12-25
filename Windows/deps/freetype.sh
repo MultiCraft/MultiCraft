@@ -1,14 +1,14 @@
 #!/bin/bash -e
 
-FREETYPE_VERSION=2.13.3
+FREETYPE_VERSION=2.14.1
 
 . ./sdk.sh
 
 if [ ! -d freetype-src ]; then
-	wget https://download-mirror.savannah.gnu.org/releases/freetype/freetype-$FREETYPE_VERSION.tar.gz
-	tar -xzf freetype-$FREETYPE_VERSION.tar.gz
+	wget https://sourceforge.net/projects/freetype/files/freetype2/$FREETYPE_VERSION/freetype-$FREETYPE_VERSION.tar.xz
+	tar -xaf freetype-$FREETYPE_VERSION.tar.xz
 	mv freetype-$FREETYPE_VERSION freetype-src
-	rm freetype-$FREETYPE_VERSION.tar.gz
+	rm freetype-$FREETYPE_VERSION.tar.xz
 	mkdir freetype-src/build
 fi
 

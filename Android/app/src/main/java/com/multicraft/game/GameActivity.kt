@@ -98,6 +98,9 @@ class GameActivity : SDLActivity() {
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
+		if (!hasFocus && isInputActive)
+			return
+
 		super.onWindowFocusChanged(hasFocus)
 		if (hasFocus) window.makeFullScreen()
 	}

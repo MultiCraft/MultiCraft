@@ -1127,7 +1127,9 @@ void Game::run()
 			g_pause_menu_schedule = false;
 			pauseGame();
 		}
+#endif
 
+#if defined(__ANDROID__) || defined(__APPLE__)
 		if (client->modsLoaded()) {
 			std::string key, value;
 			if (GUIEngine::readUpdate(&key, &value))

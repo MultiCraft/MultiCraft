@@ -66,7 +66,6 @@ void set_default_settings()
 	settings->setDefault("curl_timeout", "5000");
 	settings->setDefault("curl_parallel_limit", "8");
 	settings->setDefault("curl_file_download_timeout", "300000");
-	settings->setDefault("curl_verify_cert", "true");
 	settings->setDefault("enable_remote_media_server", "true");
 	settings->setDefault("enable_client_modding", "true");
 	settings->setDefault("max_out_chat_queue_size", "20");
@@ -533,7 +532,6 @@ void set_default_settings()
 	settings->setDefault("video_driver", "ogles2");
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
-	settings->setDefault("curl_verify_cert", "false");
 	settings->setDefault("gui_scaling_filter_txr2img", "false");
 	settings->setDefault("autosave_screensize", "false");
 	settings->setDefault("recent_chat_messages", "6");
@@ -550,6 +548,8 @@ void set_default_settings()
 
 	// Set the optimal settings depending on the memory size [Android] | model [iOS]
 #ifdef __ANDROID__
+	settings->setDefault("max_simultaneous_block_sends_per_client", "10");
+
 	if (memoryMax < 4) {
 		settings->setDefault("fps_max_unfocused", "10");
 		settings->setDefault("smooth_lighting", "false");
