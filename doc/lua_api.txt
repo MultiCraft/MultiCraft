@@ -1474,6 +1474,15 @@ Displays a minimap on the HUD.
 * `alignment`: The alignment of the minimap.
 * `offset`: offset in pixels from position.
 
+### `csm_button`
+
+Displays a pressable image on the HUD. Takes the same parameters as `image`,
+plus passes the name field to `core.register_on_hud_button_press` CSM callbacks.
+The `text2` field may be used for a pressed texture.
+
+Only works on touchscreens, this acts exactly like a regular image on other
+devices.
+
 Representations of simple things
 ================================
 
@@ -2205,6 +2214,13 @@ Elements
 * For information on converting forms to the new coordinate system, see `Migrating
   to Real Coordinates`.
 
+### `acknowledge_open[]`
+
+When used with the inventory formspec, the client will send an `"open"` field
+back to the server when the inventory is opened.
+
+Does not support formspecs other than the inventory.
+
 ### `container[<X>,<Y>]`
 
 * Start of a container block, moves all physical elements in the container by
@@ -2461,6 +2477,16 @@ Elements
   centred on `H`. With the new coordinate system, `H` will modify the height.
 * `label` is the text on the button
 
+### `button_url[<X>,<Y>;<W>,<H>;<name>;<label>;<url>]`
+
+* Clickable button. When clicked, fields will be sent and the user will be given the
+  option to open the URL in a browser.
+* With the old coordinate system, buttons are a set height, but will be vertically
+  centered on `H`. With the new coordinate system, `H` will modify the height.
+* To make this into an `image_button`, you can use formspec styling.
+* `label` is the text on the button.
+* `url` must be a valid web URL, starting with `http://` or `https://`.
+
 ### `image_button[<X>,<Y>;<W>,<H>;<texture name>;<name>;<label>]`
 
 * `texture name` is the filename of an image
@@ -2485,6 +2511,11 @@ Elements
 
 * When clicked, fields will be sent and the form will quit.
 * Same as `button` in all other respects.
+
+### `button_url_exit[<X>,<Y>;<W>,<H>;<name>;<label>;<url>]`
+
+* When clicked, fields will be sent and the form will quit.
+* Same as `button_url` in all other respects.
 
 ### `image_button_exit[<X>,<Y>;<W>,<H>;<texture name>;<name>;<label>]`
 
@@ -3053,7 +3084,7 @@ When clicked, the formspec is send to the server. The value of the text field
 sent to `on_player_receive_fields` will be "action:" concatenated to the action
 name.
 
-`<img name=... float=... width=... height=...>`
+`<img name=... float=... width=... height=... valign=...>`
 
 Draws an image which is present in the client media cache.
 
@@ -3061,10 +3092,12 @@ Draws an image which is present in the client media cache.
 * `float`: If present, makes the image floating (`left` or `right`).
 * `width`: Force image width instead of taking texture width.
 * `height`: Force image height instead of taking texture height.
+* `valign`: How to vertically align the image relative to the text next to it.
+Only effective if the image is smaller than the text. Defaults to "top".
 
 If only width or height given, texture aspect is kept.
 
-`<item name=... float=... width=... height=... rotate=...>`
+`<item name=... float=... width=... height=... rotate=... valign=...>`
 
 Draws an item image.
 
@@ -3078,6 +3111,8 @@ rotation speeds in percent of standard speed (-1000 to 1000). Works only if
 * `angle`: Angle in which the item image is shown. Value has `X,Y,Z` form.
 X, Y and Z being angles around each three axes. Works only if
 `inventory_items_animations` is set to true.
+* `valign`: How to vertically align the image relative to the text next to it.
+Only effective if the image is smaller than the text. Defaults to "top".
 
 Inventory
 =========
@@ -3184,6 +3219,10 @@ For the following functions, `v`, `v1`, `v2` are vectors,
     * Returns a vector.
     * A copy of `a` if `a` is a vector.
     * `{x = a, y = b, z = c}`, if all of `a`, `b`, `c` are defined numbers.
+* `vector.zero()`:
+    * Returns a new vector `(0, 0, 0)`.
+* `vector.copy(v)`:
+    * Returns a copy of the vector `v`.
 * `vector.direction(p1, p2)`:
     * Returns a vector of length 1 with direction `p1` to `p2`.
     * If `p1` and `p2` are identical, returns `{x = 0, y = 0, z = 0}`.
@@ -4544,6 +4583,8 @@ Utilities
           degrotate_240_steps = true,
           -- ABM supports min_y and max_y fields in definition (5.5.0)
           abm_min_max_y = true,
+          -- "zstd" method for compress/decompress (5.7.0)
+          compress_zstd = true,
       }
 
 * `minetest.has_feature(arg)`: returns `boolean, missing_features`
@@ -4574,6 +4615,7 @@ Utilities
           version_string = "0.4.9-git", -- full version string
           platform = "Linux",           -- Equivalent to the "PLATFORM" variable
           sysinfo = "Linux/5.4.0-109-generic x86_64",
+          system_ram = 4096,            -- System ram in MiB, 0 if unknown
           state = "Active"              -- current client state
       }
 
@@ -5867,11 +5909,15 @@ Misc.
     * `method` is a string identifying the compression method to be used.
     * Supported compression methods:
         * Deflate (zlib): `"deflate"`
+        * Zstandard: `"zstd"`
     * `...` indicates method-specific arguments. Currently defined arguments
       are:
         * Deflate: `level` - Compression level, `0`-`9` or `nil`.
+        * Zstandard: `level` - Compression level. Integer or `nil`. Default `3`.
+        Note any supported Zstandard compression level could be used here,
+        but these are subject to change between Zstandard versions.
 * `minetest.decompress(compressed_data, method, ...)`: returns data
-    * Decompress a string of data (using ZLib).
+    * Decompress a string of data using the algorithm specified by `method`.
     * See documentation on `minetest.compress()` for supported compression
       methods.
     * `...` indicates method-specific arguments. Currently, no methods use this
@@ -6561,6 +6607,7 @@ object you are working with still exists.
       bgcolor[], any non-style elements (eg: label) may result in weird behaviour.
     * Only affects formspecs shown after this is called.
 * `get_formspec_prepend(formspec)`: returns a formspec string.
+* `copy_to_clipboard(text)`: Copies text to the player's clipboard.
 * `get_player_control()`: returns table with player pressed keys
     * The table consists of fields with the following boolean values
       representing the pressed keys: `up`, `down`, `left`, `right`, `jump`,

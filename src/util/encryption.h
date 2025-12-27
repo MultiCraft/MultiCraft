@@ -19,8 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
-#include "ecrypt-sync.h"
+#if defined(__APPLE__)
+#include "util/sha2_apple.h"
+#else
 #include "util/sha2.h"
+#endif
 
 #include <cstdint>
 #include <cstring>
@@ -36,7 +39,6 @@ private:
 
 	static void hmacInit(SHA256_CTX *ctx, const uint8_t *key);
 	static void hmacFinal(SHA256_CTX *ctx, const uint8_t *key, uint8_t *hash);
-	static void generateSalt(unsigned char *salt, unsigned int size);
 
 public:
 	struct EncryptedData
@@ -97,9 +99,6 @@ public:
 					&raw_data[sizeof(id) + salt_size + mac_size],
 					sizeof(uint64_t));
 
-			if (filename_size == 0)
-				return false;
-
 			if (raw_data.size() < sizeof(id) + salt_size + mac_size +
 							      sizeof(uint64_t) +
 							      filename_size)
@@ -142,4 +141,9 @@ public:
 	static void setKey(std::string new_key);
 	static void setSalt(uint8_t new_salt[SHA256_DIGEST_LENGTH]);
 	static void setSalt(std::string new_salt);
+	static void generateSalt(unsigned char *salt, unsigned int size);
+#if defined(__ANDROID__) || defined(__APPLE__)
+	static bool decryptSimple(const std::string &data, std::string &decrypted_data,
+			std::string *filename_to = nullptr);
+#endif
 };

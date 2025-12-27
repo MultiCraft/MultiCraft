@@ -45,6 +45,10 @@ Database_LevelDB::Database_LevelDB(const std::string &savedir)
 {
 	leveldb::Options options;
 	options.create_if_missing = true;
+#ifdef SERVER
+	options.write_buffer_size = 16 * 1024 * 1024; // x4 from default
+	options.max_file_size = 8 * 1024 * 1024; // x4 from default
+#endif
 	leveldb::Status status = leveldb::DB::Open(options,
 		savedir + DIR_DELIM + "map.db", &m_database);
 	ENSURE_STATUS_OK(status);
@@ -98,6 +102,11 @@ void Database_LevelDB::listAllLoadableBlocks(std::vector<v3s16> &dst)
 	}
 	ENSURE_STATUS_OK(it->status());  // Check for any errors found during the scan
 	delete it;
+}
+
+void Database_LevelDB::compact()
+{
+	m_database->CompactRange(nullptr, nullptr);
 }
 
 PlayerDatabaseLevelDB::PlayerDatabaseLevelDB(const std::string &savedir)

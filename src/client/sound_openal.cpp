@@ -324,6 +324,7 @@ private:
 	ALCdevice *m_device;
 	ALCcontext *m_context;
 	int m_next_id;
+	std::unordered_map<std::string, std::vector<std::string>> m_sound_files;
 	std::unordered_map<std::string, std::vector<SoundBuffer*>> m_buffers;
 	std::unordered_map<int, PlayingSound*> m_sounds_playing;
 	struct FadeState {
@@ -402,8 +403,30 @@ public:
 	{
 		std::unordered_map<std::string, std::vector<SoundBuffer*>>::iterator i =
 				m_buffers.find(name);
-		if(i == m_buffers.end())
-			return nullptr;
+		if (i == m_buffers.end()) {
+			auto filedatas = m_sound_files.find(name);
+			if (filedatas == m_sound_files.end())
+				return nullptr;
+
+			// Load in sounds
+			std::vector<SoundBuffer*> bufs;
+			for (const std::string &filedata : filedatas->second) {
+				SoundBuffer *buf = load_ogg_from_buffer(filedata, name);
+				if (buf)
+					bufs.push_back(buf);
+				else
+					errorstream << "Failed to load sound file " << name <<
+							std::endl;
+			}
+			m_sound_files.erase(name);
+
+			if (bufs.size() == 0)
+				// Oops, no sounds could be loaded
+				return nullptr;
+
+			m_buffers[name] = bufs;
+			i = m_buffers.find(name);
+		}
 		std::vector<SoundBuffer*> &bufs = i->second;
 		int j = myrand() % bufs.size();
 		return bufs[j];
@@ -559,10 +582,15 @@ public:
 	bool loadSoundData(const std::string &name,
 			const std::string &filedata)
 	{
-		SoundBuffer *buf = load_ogg_from_buffer(filedata, name);
-		if (buf)
-			addBuffer(name, buf);
-		return !!buf;
+		auto i = m_sound_files.find(name);
+		if (i != m_sound_files.end()) {
+			i->second.push_back(filedata);
+			return true;
+		}
+		std::vector<std::string> files;
+		files.push_back(filedata);
+		m_sound_files[name] = files;
+		return true;
 	}
 
 	void updateListener(const v3f &pos, const v3f &vel, const v3f &at, const v3f &up)

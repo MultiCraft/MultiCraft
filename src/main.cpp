@@ -50,11 +50,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "translation.h"
 #endif
 #ifdef HAVE_TOUCHSCREENGUI
-	#include "gui/touchscreengui.h"
+	#include "gui/touchscreengui_mc.h"
 #endif
 
 #ifdef __APPLE__
 	#include <MultiCraft-Swift.h>
+#endif
+
+#ifdef __IOS__
+	#include <SDL3/SDL_main.h>
 #endif
 
 // for version information only
@@ -831,9 +835,11 @@ static bool determine_subgame(GameParams *game_params)
 			gamespec = findSubgame(g_settings->get("default_game"));
 			infostream << "Using default gameid [" << gamespec.id << "]" << std::endl;
 			if (!gamespec.isValid()) {
+#ifdef SERVER
 				warningstream << "Game specified in default_game ["
 				            << g_settings->get("default_game")
 				            << "] is invalid." << std::endl;
+#endif
 				return false;
 			}
 		}
@@ -893,7 +899,7 @@ static bool run_dedicated_server(const GameParams &game_params, const Settings &
 	if (bind_addr.isIPv6() && !g_settings->getBool("enable_ipv6")) {
 		errorstream << "Unable to listen on "
 		            << bind_addr.serializeString()
-		            << L" because IPv6 is disabled" << std::endl;
+		            << " because IPv6 is disabled" << std::endl;
 		return false;
 	}
 
@@ -1077,6 +1083,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 	u64 last_update_time = 0;
 	bool &kill = *porting::signal_handler_killstatus();
 	const u8 serialize_as_ver = SER_FMT_VER_HIGHEST_WRITE;
+	const s16 map_compression_level = rangelim(g_settings->getS16("map_compression_level_disk"), -1, 9);
 
 	// This is ok because the server doesn't actually run
 	std::vector<v3s16> blocks;
@@ -1104,7 +1111,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 		oss.str("");
 		oss.clear();
 		writeU8(oss, serialize_as_ver);
-		mb.serialize(oss, serialize_as_ver, true, -1);
+		mb.serialize(oss, serialize_as_ver, true, map_compression_level);
 
 		db->saveBlock(*it, oss.str());
 
@@ -1119,6 +1126,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 	}
 	std::cerr << std::endl;
 	db->endSave();
+	db->compact();
 
 	actionstream << "Done, " << count << " blocks were recompressed." << std::endl;
 	return true;

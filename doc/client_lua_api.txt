@@ -656,6 +656,7 @@ Minetest namespace reference
    * If a flag in this table is set to true, the feature is RESTRICTED.
    * Possible flags: `load_client_mods`, `chat_messages`, `read_itemdefs`,
                    `read_nodedefs`, `lookup_nodes`, `read_playerinfo`
+* `minetest.copy_to_clipboard(text)`: Copies text to the clipboard
 
 ### Logging
 * `minetest.debug(...)`
@@ -734,6 +735,9 @@ Call these functions only at load time!
     * Called when the local player open inventory
     * Newest functions are called first
     * If any function returns true, inventory doesn't open
+* `minetest.register_on_hud_button_press(function(btn_name))`
+    * Called when a `csm_button` HUD element is pressed
+    * If function returns `true`, remaining functions are not called
 * `minetest.register_on_tab(function())`
     * Called when tab key pressed
 ### Sounds
@@ -895,14 +899,19 @@ Call these functions only at load time!
     * Compress a string of data.
     * `method` is a string identifying the compression method to be used.
     * Supported compression methods:
-    *     Deflate (zlib): `"deflate"`
-    * `...` indicates method-specific arguments.  Currently defined arguments are:
-    *     Deflate: `level` - Compression level, `0`-`9` or `nil`.
+        * Deflate (zlib): `"deflate"`
+        * Zstandard: `"zstd"`
+    * `...` indicates method-specific arguments. Currently defined arguments
+      are:
+        * Deflate: `level` - Compression level, `0`-`9` or `nil`.
+        * Zstandard: `level` - Compression level. Integer or `nil`. Default `3`.
+        Note any supported Zstandard compression level could be used here,
+        but these are subject to change between Zstandard versions.
 * `minetest.decompress(compressed_data, method, ...)`: returns data
-    * Decompress a string of data (using ZLib).
-    * See documentation on `minetest.compress()` for supported compression methods.
-    * currently supported.
-    * `...` indicates method-specific arguments. Currently, no methods use this.
+    * Decompress a string of data using the algorithm specified by `method`.
+    * See documentation on `minetest.compress()` for supported compression
+      methods.
+    * `...` indicates method-specific arguments. Currently, no methods use this
 * `minetest.rgba(red, green, blue[, alpha])`: returns a string
     * Each argument is a 8 Bit unsigned integer
     * Returns the ColorString from rgb or rgba values
@@ -1464,6 +1473,15 @@ Same as `image`, but does not accept a `position`; the position is instead deter
 * `alignment`: The alignment of the image.
 * `world_pos`: World position of the waypoint.
 * `offset`: offset in pixels from position.
+
+### `csm_button`
+
+Displays a pressable image on the HUD. Takes the same parameters as `image`,
+plus passes the name field to `core.register_on_hud_button_press` CSM callbacks.
+The `text2` field may be used for a pressed texture.
+
+Only works on touchscreens, this acts exactly like a regular image on other
+devices.
 
 ### Particle definition (`add_particle`)
 

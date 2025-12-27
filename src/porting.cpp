@@ -61,7 +61,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	#include <SDL.h>
+	#include <SDL3/SDL.h>
 #endif
 
 #include "config.h"
@@ -709,7 +709,7 @@ int mt_snprintf(char *buf, const size_t buf_size, const char *fmt, ...)
 	return c;
 }
 
-static bool open_uri(const std::string &uri)
+static bool open_uri(const std::string &uri, bool untrusted = false)
 {
 	if (uri.find_first_of("\r\n") != std::string::npos) {
 		errorstream << "Unable to open URI as it is invalid, contains new line: " << uri << std::endl;
@@ -719,12 +719,10 @@ static bool open_uri(const std::string &uri)
 #if defined(_WIN32)
 	return (intptr_t)ShellExecuteA(NULL, NULL, uri.c_str(), NULL, NULL, SW_SHOWNORMAL) > 32;
 #elif defined(__ANDROID__)
-	openURIAndroid(uri);
-	return true;
+	return openURIAndroid(uri, untrusted);
 #elif defined(__APPLE__)
 #ifdef __IOS__
-	MultiCraft::openURL(uri.c_str());
-	return true;
+	return MultiCraft::openURI(uri.c_str(), untrusted);
 #else
 	const char *argv[] = {"open", uri.c_str(), NULL};
 	return posix_spawnp(NULL, "open", NULL, NULL, (char**)argv,
@@ -736,20 +734,20 @@ static bool open_uri(const std::string &uri)
 #endif
 }
 
-bool open_url(const std::string &url)
+bool open_url(const std::string &url, bool untrusted)
 {
 	if (url.substr(0, 7) != "http://" && url.substr(0, 8) != "https://") {
 		errorstream << "Unable to open browser as URL is missing schema: " << url << std::endl;
 		return false;
 	}
 
-	return open_uri(url);
+	return open_uri(url, untrusted);
 }
 
 #if defined(__APPLE__)
-void upgrade(const std::string &item)
+bool upgrade(const std::string &item)
 {
-	MultiCraft::getUpgrade(item.c_str());
+	return MultiCraft::getUpgrade(item.c_str());
 }
 
 std::string getSecretKey(const std::string &key)
@@ -762,12 +760,17 @@ float getScreenScale()
 	static const float retval = MultiCraft::getScreenScale();
 	return retval;
 }
+
+void finishGame(const std::string &exc)
+{
+	MultiCraft::finishGame(exc.c_str());
+}
 #endif
 
-float getTotalSystemMemory()
+int getTotalSystemMemory()
 {
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-	static const float retval = SDL_GetSystemRAM();
+	static const int retval = SDL_GetSystemRAM();
 	return retval;
 #else
 	return 0;

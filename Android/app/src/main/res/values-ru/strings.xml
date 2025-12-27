@@ -2,9 +2,7 @@
 <resources>
 	<!-- подготовка к запуску -->
 	<string name="preparing">Подготовка к запуску&#8230;</string>
-	<string name="loading">Загрузка&#8230;</string>
-	<string name="notification_title">Загрузка MultiCraft</string>
-	<string name="notification_description">Осталось меньше минуты&#8230;</string>
+
 	<string name="input_text">Введите текст</string>
 	<string name="input_password">Введите пароль</string>
 

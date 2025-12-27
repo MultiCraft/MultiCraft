@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-PNG_VERSION=1.6.46
+PNG_VERSION=1.6.50
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
@@ -30,7 +30,7 @@ do
 		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
 		-DPNG_SHARED=OFF \
 		-DPNG_TESTS=OFF \
-		-DPNG_EXECUTABLES=OFF
+		-DPNG_TOOLS=OFF
 
 	cmake --build . -j
 	make install -s

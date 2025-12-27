@@ -148,8 +148,12 @@ void ToolCapabilities::serializeJson(std::ostream &os) const
 void ToolCapabilities::deserializeJson(std::istream &is)
 {
 	Json::Value root;
-	is >> root;
-	if (root.isObject()) {
+	Json::CharReaderBuilder builder;
+	std::string errs;
+
+	if (!Json::parseFromStream(builder, is, &root, &errs)) {
+		warningstream << "ToolCapabilities: failed to parse metadata " << errs << std::endl;
+	} else {
 		if (root["full_punch_interval"].isDouble())
 			full_punch_interval = root["full_punch_interval"].asFloat();
 		if (root["max_drop_level"].isInt())
@@ -294,10 +298,16 @@ PunchDamageResult getPunchDamage(
 	return result;
 }
 
-f32 getToolRange(const ItemDefinition &def_selected, const ItemDefinition &def_hand)
+f32 getToolRange(const ItemStack &wielded_item, const ItemStack &hand_item,
+		IItemDefManager *itemdef_manager)
 {
-	float max_d = def_selected.range;
-	float max_d_hand = def_hand.range;
+	const std::string &wielded_meta_range = wielded_item.metadata.getString("range");
+	const std::string &hand_meta_range = hand_item.metadata.getString("range");
+
+	f32 max_d = wielded_meta_range.empty() ? wielded_item.getDefinition(itemdef_manager).range :
+			stof(wielded_meta_range);
+	f32 max_d_hand = hand_meta_range.empty() ? hand_item.getDefinition(itemdef_manager).range :
+			stof(hand_meta_range);
 
 	if (max_d < 0 && max_d_hand >= 0)
 		max_d = max_d_hand;

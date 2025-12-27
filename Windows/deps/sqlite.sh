@@ -1,14 +1,11 @@
 #!/bin/bash -e
 
-SQLITE_VERSION=3.42.0
+SQLITE_VERSION=3.51.1
 
 . ./sdk.sh
 
 if [ ! -d sqlite-src ]; then
-	wget https://www.sqlite.org/src/tarball/sqlite.tar.gz?r=version-$SQLITE_VERSION
-	tar -xzf sqlite.tar.gz?r=version-$SQLITE_VERSION
-	mv sqlite sqlite-src
-	rm sqlite.tar.gz?r=version-$SQLITE_VERSION
+	git clone -b version-$SQLITE_VERSION --depth 1 https://github.com/sqlite/sqlite.git sqlite-src
 	mkdir sqlite-src/build
 fi
 
@@ -27,6 +24,6 @@ cp -a ./sqlite3*.h ../../sqlite/include
 # update lib
 rm -rf ../../sqlite/lib
 mkdir -p ../../sqlite/lib
-cp .libs/libsqlite3.a ../../sqlite/lib
+cp ./libsqlite3.a ../../sqlite/lib
 
 echo "SQLite build successful"

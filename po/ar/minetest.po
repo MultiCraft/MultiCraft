@@ -1962,6 +1962,14 @@ msgstr "بدّل عرض الواجهة"
 msgid "Toggle nametags"
 msgstr "تبديل علامات الأسماء"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "إخفاء الواجهة"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "استخدم النقر المزدوج لإظهار الواجهة"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "بدّل عرض سجل المحادثة"

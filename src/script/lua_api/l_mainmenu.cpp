@@ -18,7 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "lua_api/l_mainmenu.h"
+#include "lua_api/l_http.h"
 #include "lua_api/l_internal.h"
+#include "common/c_converter.h"
 #include "common/c_content.h"
 #include "cpp_api/s_async.h"
 #include "gui/guiEngine.h"
@@ -35,6 +37,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "mapgen/mapgen.h"
 #include "settings.h"
 #include "translation.h"
+#if defined(__ANDROID__) || defined(__APPLE__)
+#include "util/encryption.h"
+#endif
 
 #include <IFileArchive.h>
 #include <IFileSystem.h>
@@ -224,6 +229,226 @@ int ModApiMainMenu::l_set_clouds(lua_State *L)
 }
 
 /******************************************************************************/
+int ModApiMainMenu::l_set_sky(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	SkyboxParams skybox;
+
+	lua_getfield(L, 1, "base_color");
+	if (!lua_isnil(L, -1)) {
+		video::SColor bgcolor;
+		read_color(L, -1, &bgcolor);
+		sky->setFallbackBgColor(bgcolor);
+	}
+	lua_pop(L, 1);
+
+	lua_getfield(L, 1, "type");
+	if (!lua_isnil(L, -1)) {
+		const std::string type = luaL_checkstring(L, -1);
+		if (type == "regular") {
+			sky->setVisible(true);
+		} else {
+			throw LuaError("Unsupported sky type: " + type);
+		}
+	}
+	lua_pop(L, 1);
+
+	engine->m_clouds_enabled = getboolfield_default(L, 1, "clouds",
+			engine->m_clouds_enabled);
+
+	lua_getfield(L, 1, "sky_color");
+	if (lua_istable(L, -1)) {
+		SkyboxDefaults sky_defaults;
+		SkyColor sky_color = sky_defaults.getSkyColorDefaults();
+
+		lua_getfield(L, -1, "day_sky");
+		read_color(L, -1, &sky_color.day_sky);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "day_horizon");
+		read_color(L, -1, &sky_color.day_horizon);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "dawn_sky");
+		read_color(L, -1, &sky_color.dawn_sky);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "dawn_horizon");
+		read_color(L, -1, &sky_color.dawn_horizon);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "night_sky");
+		read_color(L, -1, &sky_color.night_sky);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "night_horizon");
+		read_color(L, -1, &sky_color.night_horizon);
+		lua_pop(L, 1);
+
+		lua_getfield(L, -1, "indoors");
+		read_color(L, -1, &sky_color.indoors);
+		lua_pop(L, 1);
+
+		sky->setSkyColors(sky_color);
+	}
+	lua_pop(L, 1);
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_stars(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	luaL_checktype(L, 1, LUA_TTABLE);
+
+	bool visible;
+	if (getboolfield(L, 1, "visible", visible))
+		sky->setStarsVisible(visible);
+
+	u16 count;
+	if (getintfield(L, 1, "count", count))
+		sky->setStarCount(count, false);
+
+	lua_getfield(L, 1, "star_color");
+	if (!lua_isnil(L, -1)) {
+		video::SColor starcolor;
+		read_color(L, -1, &starcolor);
+		sky->setStarColor(starcolor);
+	}
+	lua_pop(L, 1);
+
+	f32 star_scale;
+	if (getfloatfield(L, 1, "scale", star_scale))
+		sky->setStarScale(star_scale);
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_sky_body_pos(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	float moon_horizon_pos = readParam<float>(L, 1);
+	float moon_day_pos = readParam<float>(L, 2);
+	float moon_angle= readParam<float>(L, 3);
+	float sun_horizon_pos = readParam<float>(L, 4);
+	float sun_day_pos = readParam<float>(L, 5);
+	float sun_angle = readParam<float>(L, 6);
+
+	sky->setCustomSkyBodyPos(moon_horizon_pos, moon_day_pos, moon_angle,
+			sun_horizon_pos, sun_day_pos, sun_angle);
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_moon(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	std::string texture;
+	lua_getfield(L, 1, "texture");
+	if (!lua_isnil(L, -1)) {
+		texture = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	std::string tonemap;
+	lua_getfield(L, 1, "tonemap");
+	if (!lua_isnil(L, -1)) {
+		tonemap = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	sky->setMoonTexture(texture, tonemap, engine->getTextureSource());
+
+	float scale = 1.0f;
+	if (getfloatfield(L, 1, "scale", scale)) {
+		sky->setMoonScale(scale);
+	}
+
+	bool visible = true;
+	if (getboolfield(L, 1, "visible", visible)) {
+		sky->setMoonVisible(visible);
+	}
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_sun(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+	Sky *sky = g_menusky;
+	if (!sky)
+		return 0;
+
+	std::string texture;
+	lua_getfield(L, 1, "texture");
+	if (!lua_isnil(L, -1)) {
+		texture = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	std::string tonemap;
+	lua_getfield(L, 1, "tonemap");
+	if (!lua_isnil(L, -1)) {
+		tonemap = luaL_checkstring(L, -1);
+	}
+	lua_pop(L, 1);
+
+	sky->setSunTexture(texture, tonemap, engine->getTextureSource());
+
+	float scale = 1.0f;
+	if (getfloatfield(L, 1, "scale", scale)) {
+		sky->setSunScale(scale);
+	}
+
+	bool visible = true;
+	if (getboolfield(L, 1, "visible", visible)) {
+		sky->setSunVisible(visible);
+	}
+
+	return 0;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_set_timeofday(lua_State *L)
+{
+	GUIEngine* engine = getGuiEngine(L);
+	sanity_check(engine != NULL);
+
+	float timeofday_f = readParam<float>(L, 1);
+	luaL_argcheck(L, timeofday_f >= 0.0f && timeofday_f <= 1.0f, 1,
+				  "value must be between 0 and 1");
+
+	engine->g_timeofday = timeofday_f;
+	return 0;
+}
+
+/******************************************************************************/
 int ModApiMainMenu::l_get_textlist_index(lua_State *L)
 {
 	// get_table_index accepts both tables and textlists
@@ -338,9 +563,9 @@ int ModApiMainMenu::l_get_games(lua_State *L)
 		lua_newtable(L);
 		int table2 = lua_gettop(L);
 		int internal_index = 1;
-		for (const std::string &addon_mods_path : game.addon_mods_paths) {
+		for (const auto &addon_mods_path : game.addon_mods_paths) {
 			lua_pushnumber(L, internal_index);
-			lua_pushstring(L, addon_mods_path.c_str());
+			lua_pushstring(L, addon_mods_path.second.c_str());
 			lua_settable(L,   table2);
 			internal_index++;
 		}
@@ -755,23 +980,39 @@ int ModApiMainMenu::l_show_path_select_dialog(lua_State *L)
 /******************************************************************************/
 int ModApiMainMenu::l_download_file(lua_State *L)
 {
-	const char *url    = luaL_checkstring(L, 1);
 	const char *target = luaL_checkstring(L, 2);
+
+	HTTPFetchRequest req;
+	req.timeout = g_settings->getS32("curl_file_download_timeout");
+	if (lua_istable(L, 1)) {
+		// read_http_fetch_request requires only a single item on the stack
+		lua_pop(L, lua_gettop(L) - 1);
+		ModApiHttp::read_http_fetch_request(L, req);
+	} else {
+		req.url = luaL_checkstring(L, 1);
+	}
 
 	//check path
 	std::string absolute_destination = fs::RemoveRelativePathComponents(target);
 
 	if (ModApiMainMenu::mayModifyPath(absolute_destination)) {
-		if (GUIEngine::downloadFile(url,absolute_destination)) {
+		if (GUIEngine::downloadFile(req, absolute_destination)) {
 			lua_pushboolean(L,true);
 			return 1;
 		}
 	} else {
 		errorstream << "DOWNLOAD denied: " << absolute_destination
-				<< " isn't a allowed path" << std::endl;
+		<< " isn't a allowed path" << std::endl;
 	}
 	lua_pushboolean(L,false);
 	return 1;
+}
+
+/******************************************************************************/
+int ModApiMainMenu::l_cancel_all_download_files(lua_State *L)
+{
+	GUIEngine::cancelAllDownloadFiles();
+	return 0;
 }
 
 /******************************************************************************/
@@ -888,18 +1129,22 @@ int ModApiMainMenu::l_sleep_ms(lua_State *L)
 /******************************************************************************/
 int ModApiMainMenu::l_load_translation(lua_State *L)
 {
-	const std::string tr_data = luaL_checkstring(L, 1);
+	size_t tr_data_length;
+	const char *tr_data_raw = luaL_checklstring(L, 1, &tr_data_length);
+	sanity_check(tr_data_raw != NULL);
+
+	std::string tr_data = std::string(tr_data_raw, tr_data_length);
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+	std::string decrypted_data;
+	if (Encryption::decryptSimple(tr_data, decrypted_data)) {
+		g_client_translations->loadTranslation(decrypted_data);
+		return 0;
+	}
+#endif
+
 	g_client_translations->loadTranslation(tr_data);
 	return 0;
-}
-
-/******************************************************************************/
-int ModApiMainMenu::l_get_translated_string(lua_State * L)
-{
-	std::string string = luaL_checkstring(L, 1);
-	string = wide_to_utf8(translate_string(utf8_to_wide(string), g_client_translations));
-	lua_pushstring(L, string.c_str());
-	return 1;
 }
 
 /******************************************************************************/
@@ -908,6 +1153,12 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(update_formspec);
 	API_FCT(set_formspec_prepend);
 	API_FCT(set_clouds);
+	API_FCT(set_sky);
+	API_FCT(set_stars);
+	API_FCT(set_sky_body_pos);
+	API_FCT(set_moon);
+	API_FCT(set_sun);
+	API_FCT(set_timeofday);
 	API_FCT(get_textlist_index);
 	API_FCT(get_table_index);
 	API_FCT(get_worlds);
@@ -940,6 +1191,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(get_mainmenu_path);
 	API_FCT(show_path_select_dialog);
 	API_FCT(download_file);
+	API_FCT(cancel_all_download_files);
 	API_FCT(gettext);
 	API_FCT(get_video_drivers);
 	API_FCT(get_video_modes);
@@ -949,7 +1201,6 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(open_dir);
 	API_FCT(do_async_callback);
 	API_FCT(load_translation);
-	API_FCT(get_translated_string);
 }
 
 /******************************************************************************/
@@ -974,6 +1225,7 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(extract_zip);
 	API_FCT(may_modify_path);
 	API_FCT(download_file);
+	API_FCT(cancel_all_download_files);
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);
 	//API_FCT(gettext); (gettext lib isn't threadsafe)

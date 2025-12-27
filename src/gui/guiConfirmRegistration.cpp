@@ -32,16 +32,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h"
 #include "settings.h"
 
-#if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
-	#include "intlGUIEditBox.h"
-#endif
-
 #ifdef HAVE_TOUCHSCREENGUI
 	#include "client/renderingengine.h"
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	#include <SDL.h>
+	#include <SDL3/SDL.h>
 #endif
 
 #include "gettext.h"
@@ -68,20 +64,14 @@ GUIConfirmRegistration::GUIConfirmRegistration(gui::IGUIEnvironment *env,
 	m_touchscreen_visible = false;
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard())
-		SDL_StartTextInput();
-#endif
+	RenderingEngine::startTextInput();
 }
 
 GUIConfirmRegistration::~GUIConfirmRegistration()
 {
 	removeChildren();
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-		SDL_StopTextInput();
-#endif
+	RenderingEngine::stopTextInput();
 }
 
 void GUIConfirmRegistration::removeChildren()
@@ -151,13 +141,8 @@ void GUIConfirmRegistration::regenerateGui(v2u32 screensize)
 				info_text_template.c_str(), m_playername.c_str());
 
 		wchar_t *info_text_buf_wide = utf8_to_wide_c(info_text_buf);
-#if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
-		gui::IGUIEditBox *e = new gui::intlGUIEditBox(info_text_buf_wide, true,
-				Environment, this, ID_intotext, rect2, false, true);
-#else
 		gui::IGUIEditBox *e = new GUIEditBoxWithScrollBar(info_text_buf_wide, true,
 				Environment, this, ID_intotext, rect2, false, true);
-#endif
 		delete[] info_text_buf_wide;
 		e->drop();
 		e->setMultiLine(true);

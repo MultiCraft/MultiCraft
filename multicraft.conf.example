@@ -730,7 +730,7 @@
 
 #    Vertical screen synchronization.
 #    type: bool
-# vsync = false
+# vsync = true
 
 #    Field of view in degrees.
 #    type: int min: 45 max: 160
@@ -1026,16 +1026,16 @@
 #    If “freetype” setting is disabled: Must be a bitmap or XML vectors font.
 #    The fallback font will be used if the font cannot be loaded.
 #    type: filepath
-# font_path = fonts/Arimo-Regular.ttf
+# font_path = fonts/MultiCraftFont.ttf
 
 #    type: filepath
-# font_path_bold = fonts/Arimo-Bold.ttf
+# font_path_bold =
 
 #    type: filepath
-# font_path_italic = fonts/Arimo-Italic.ttf
+# font_path_italic =
 
 #    type: filepath
-# font_path_bolditalic = fonts/Arimo-BoldItalic.ttf
+# font_path_bolditalic =
 
 #    Font size of the monospace font in point (pt).
 #    type: int min: 1
@@ -1046,16 +1046,16 @@
 #    If “freetype” setting is disabled: Must be a bitmap or XML vectors font.
 #    This font is used for e.g. the console and profiler screen.
 #    type: filepath
-# mono_font_path = fonts/Cousine-Regular.ttf
+# mono_font_path = fonts/MultiCraftFont.ttf
 
 #    type: filepath
-# mono_font_path_bold = fonts/Cousine-Bold.ttf
+# mono_font_path_bold =
 
 #    type: filepath
-# mono_font_path_italic = fonts/Cousine-Italic.ttf
+# mono_font_path_italic =
 
 #    type: filepath
-# mono_font_path_bolditalic = fonts/Cousine-BoldItalic.ttf
+# mono_font_path_bolditalic =
 
 #    Font size of the fallback font in point (pt).
 #    type: int min: 1
@@ -1074,7 +1074,7 @@
 #    If “freetype” setting is disabled: Must be a bitmap or XML vectors font.
 #    This font will be used for certain languages or if the default font is unavailable.
 #    type: filepath
-# fallback_font_path = fonts/DroidSansFallbackFull.ttf
+# fallback_font_path = fonts/DroidSansFallback.ttf
 
 #    Font size of the recent chat text and chat prompt in point (pt).
 #    Value 0 will use the default font size.
@@ -1087,7 +1087,7 @@
 # screenshot_path = screenshots
 
 #    Format of screenshots.
-#    type: enum values: png, jpg, bmp, pcx, ppm, tga
+#    type: enum values: png, jpg, bmp, tga
 # screenshot_format = png
 
 #    Screenshot quality. Only used for JPEG format.

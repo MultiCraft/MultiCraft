@@ -36,7 +36,7 @@ DEALINGS IN THE SOFTWARE.
 #include <atomic>
 #include <mutex>
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 class Thread
 {
@@ -70,12 +70,12 @@ public:
 	/*
 	 * Returns true if the calling thread is this Thread object.
 	 */
-	bool isCurrentThread() { return SDL_ThreadID() == getThreadId(); }
+	bool isCurrentThread() { return SDL_GetCurrentThreadID() == getThreadId(); }
 
 	bool isRunning() { return m_running; }
 	bool stopRequested() { return m_request_stop; }
 
-	SDL_threadID getThreadId() { return SDL_GetThreadID(m_thread_obj); }
+	SDL_ThreadID getThreadId() { return SDL_GetThreadID(m_thread_obj); }
 
 	/*
 	 * Gets the thread return value.
@@ -97,6 +97,11 @@ public:
 	 * SDL_THREAD_PRIORITY_HIGH.
 	 */
 	bool setPriority(SDL_ThreadPriority prio);
+
+	/*
+	 * Returns the thread object of the current thread if it exists.
+	 */
+	static Thread *getCurrentThread();
 
 	/*
 	 * Sets the currently executing thread's name to where supported; useful

@@ -31,6 +31,8 @@ DEALINGS IN THE SOFTWARE.
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
+thread_local Thread *current_thread = nullptr;
+
 Thread::Thread(const std::string &name) :
 		m_name(name), m_request_stop(false), m_running(false)
 {
@@ -108,6 +110,7 @@ bool Thread::getReturnValue(void **ret)
 int Thread::threadProc(void *data)
 {
 	Thread *thr = (Thread *)data;
+	current_thread = thr;
 
 	g_logger.registerThread(thr->m_name);
 	thr->m_running = true;
@@ -128,6 +131,11 @@ int Thread::threadProc(void *data)
 	return 0;
 }
 
+Thread *Thread::getCurrentThread()
+{
+	return current_thread;
+}
+
 void Thread::setName(const std::string &name)
 {
 	// Name can be set only during thread creation.
@@ -135,7 +143,7 @@ void Thread::setName(const std::string &name)
 
 unsigned int Thread::getNumberOfProcessors()
 {
-	return SDL_GetCPUCount();
+	return SDL_GetNumLogicalCPUCores();
 }
 
 bool Thread::bindToProcessor(unsigned int proc_number)
@@ -146,7 +154,7 @@ bool Thread::bindToProcessor(unsigned int proc_number)
 
 bool Thread::setPriority(SDL_ThreadPriority prio)
 {
-	int result = SDL_SetThreadPriority(prio);
+	int result = SDL_SetCurrentThreadPriority(prio);
 	return result == 0;
 }
 

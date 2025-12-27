@@ -1670,7 +1670,7 @@ void GenericCAO::processMessage(const std::string &data)
 			expireVisuals();
 		} else {
 			infostream << "GenericCAO: properties updated but expiring visuals"
-				<< " not necessary" << std::endl;
+				<< " not necessary " << m_prop.textures[0] << std::endl;
 			if (textures_changed) {
 				// don't update while punch texture modifier is active
 				if (m_reset_textures_timer < 0)
@@ -1875,13 +1875,6 @@ bool GenericCAO::directReportPunch(v3f dir, const ItemStack *punchitem,
 			toolcap,
 			punchitem,
 			time_from_last_punch);
-
-	if (!itemgroup_get(m_armor_groups, "silent")) {
-		SimpleSoundSpec spec;
-		spec.name = "player_punch";
-		spec.gain = 1.0f;
-		m_client->sound()->playSoundAt(spec, false, getPosition());
-	}
 
 	s16 damage = result.damage;
 	if(result.did_punch && damage != 0)

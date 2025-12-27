@@ -34,13 +34,20 @@ dofile(commonpath .. "strict.lua")
 dofile(commonpath .. "serialize.lua")
 dofile(commonpath .. "misc_helpers.lua")
 
+if core.global_exists("jit") and jit.status() then
+	jit.opt.start("maxtrace=4000", "maxrecord=8000", "minstitch=2", "maxmcode=8192")
+	core.log("action", "Applied JIT compiler optimizations")
+end
+
 if INIT == "game" then
 	dofile(gamepath .. "init.lua")
 	assert(not core.get_http_api)
 elseif INIT == "mainmenu" then
+	local mainmenudir = core.get_mainmenu_path() .. DIR_DELIM
+	dofile(mainmenudir .. "register.lua")
 	local mm_script = core.settings:get("main_menu_script")
 	if not mm_script or mm_script == "" then
-		mm_script = scriptdir .. "hosting" .. DIR_DELIM .. "init.lua"
+		mm_script = scriptdir .. ".." .. DIR_DELIM .. "menu" .. DIR_DELIM .. "init.lua"
 	end
 	local custom_loaded = false
 	if mm_script and mm_script ~= "" then
@@ -56,7 +63,7 @@ elseif INIT == "mainmenu" then
 		end
 	end
 	if not custom_loaded then
-		dofile(core.get_mainmenu_path() .. DIR_DELIM .. "init.lua")
+		dofile(mainmenudir .. "init.lua")
 	end
 elseif INIT == "async" then
 	dofile(asyncpath .. "init.lua")

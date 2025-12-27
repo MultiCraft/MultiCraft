@@ -1867,6 +1867,14 @@ msgstr ""
 msgid "Toggle nametags"
 msgstr "Εναλλαγή ετικετών ονομάτων"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Απόκρυψη διεπαφής"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Χρησιμοποιήστε διπλό πάτημα για να εμφανίσετε τη διασύνδεση"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr ""

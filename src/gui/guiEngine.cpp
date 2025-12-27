@@ -33,17 +33,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sound.h"
 #include "client/sound_openal.h"
 #include "client/clouds.h"
+#include "client/game.h"
 #include "httpfetch.h"
 #include "log.h"
 #include "client/fontengine.h"
 #include "client/guiscalingfilter.h"
 #include "irrlicht_changes/static_text.h"
+#include "threading/mutex_auto_lock.h"
 #include "translation.h"
-
-#if ENABLE_GLES && !defined(__APPLE__)
 #include "client/tile.h"
-#endif
+#include "daynightratio.h"
+#include "light.h"
 
+float GUIEngine::g_timeofday = 0.5f;
 
 /******************************************************************************/
 void TextDestGuiEngine::gotText(const StringMap &fields)
@@ -59,49 +61,6 @@ void TextDestGuiEngine::gotText(const StringMap &fields)
 void TextDestGuiEngine::gotText(const std::wstring &text)
 {
 	m_engine->getScriptIface()->handleMainMenuEvent(wide_to_utf8(text));
-}
-
-/******************************************************************************/
-MenuTextureSource::~MenuTextureSource()
-{
-	for (const std::string &texture_to_delete : m_to_delete) {
-		const char *tname = texture_to_delete.c_str();
-		video::ITexture *texture = m_driver->getTexture(tname);
-		m_driver->removeTexture(texture);
-	}
-}
-
-/******************************************************************************/
-video::ITexture *MenuTextureSource::getTexture(const std::string &name, u32 *id)
-{
-	if (id)
-		*id = 0;
-
-	if (name.empty())
-		return NULL;
-
-#if ENABLE_GLES && !defined(__APPLE__)
-	if (hasNPotSupport())
-		return m_driver->getTexture(name.c_str());
-
-	video::ITexture *retval = m_driver->findTexture(name.c_str());
-	if (retval)
-		return retval;
-
-	video::IImage *image = m_driver->createImageFromFile(name.c_str());
-	if (!image)
-		return NULL;
-
-	// Verified by the profiler - it reduces memory usage!
-	video::IImage *newimage = Align2Npot2(image, m_driver);
-	retval = m_driver->addTexture(name.c_str(), newimage);
-	image = NULL;
-	m_to_delete.insert(name);
-	newimage->drop();
-	return retval;
-#else
-	return m_driver->getTexture(name.c_str());
-#endif
 }
 
 /******************************************************************************/
@@ -148,7 +107,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	m_buttonhandler = new TextDestGuiEngine(this);
 
 	//create texture source
-	m_texture_source = new MenuTextureSource(RenderingEngine::get_video_driver());
+	m_texture_source = createTextureSource(true);
 
 	//create soundmanager
 	MenuMusicFetcher soundfetcher;
@@ -218,7 +177,8 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	const texture_layer layer = m_clouds_enabled ? TEX_LAYER_OVERLAY : TEX_LAYER_BACKGROUND;
 	const video::ITexture* texture = m_textures[layer].texture;
 	RenderingEngine::setLoadScreenBackground(m_clouds_enabled,
-			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "");
+			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "",
+			g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245));
 
 	m_menu->quitMenu();
 	m_menu->drop();
@@ -277,25 +237,28 @@ void GUIEngine::run()
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
 
-	static const video::SColor sky_color(255, 5, 155, 245);
-
 	// Reset fog color
-	{
-		video::SColor fog_color;
-		video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
-		f32 fog_start = 0;
-		f32 fog_end = 0;
-		f32 fog_density = 0;
-		bool fog_pixelfog = false;
-		bool fog_rangefog = false;
-		driver->getFog(fog_color, fog_type, fog_start, fog_end, fog_density,
-				fog_pixelfog, fog_rangefog);
+	video::SColor fog_color;
+	video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
+	f32 fog_start = 0;
+	f32 fog_end = 0;
+	f32 fog_density = 0;
+	bool fog_pixelfog = false;
+	bool fog_rangefog = false;
+	driver->getFog(fog_color, fog_type, fog_start, fog_end, fog_density,
+			fog_pixelfog, fog_rangefog);
 
+	{
+		const video::SColor sky_color = video::SColor(255, 5, 155, 245);
 		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
-				fog_pixelfog, fog_rangefog);
+					   fog_pixelfog, fog_rangefog);
 	}
 
 	while (RenderingEngine::run() && (!m_startgame) && (!m_kill)) {
+		const video::SColor sky_color = g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245);
+		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
+				fog_pixelfog, fog_rangefog);
+
 		IrrlichtDevice *device = RenderingEngine::get_raw_device();
 #ifdef __IOS__
 		if (device->isWindowMinimized())
@@ -320,6 +283,8 @@ void GUIEngine::run()
 			previous_screen_size = current_screen_size;
 		}
 
+		g_fontengine->handleReload();
+
 		//check if we need to update the "upper left corner"-text
 		if (text_height != g_fontengine->getTextHeight()) {
 			updateTopLeftTextSize();
@@ -330,6 +295,14 @@ void GUIEngine::run()
 
 		if (m_clouds_enabled)
 		{
+			m_cloud.camera->setAspectRatio((float)(current_screen_size.Width) / current_screen_size.Height);
+			if (g_menusky) {
+				u32 daynight_ratio = time_to_daynight_ratio(g_timeofday * 24000.0f, true);
+				float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
+				g_menusky->update(g_timeofday, time_brightness, time_brightness, true, CAMERA_MODE_FIRST, 3, 0);
+				g_menusky->render();
+				m_cloud.clouds->update(v3f(0, 0, 0), g_menusky->getCloudColor());
+			}
 			cloudPreProcess();
 			drawOverlay(driver);
 		}
@@ -352,6 +325,12 @@ void GUIEngine::run()
 			sleep_ms(frametime_min);
 
 		m_script->step();
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		std::string key, value;
+		if (readUpdate(&key, &value))
+			m_script->handleUpdate(key, value);
+#endif
 
 		// Update sound volume
 		// Note when rebasing onto MT 5.9.0+: This code can be removed since
@@ -398,9 +377,7 @@ void GUIEngine::cloudInit()
 //	m_cloud.clouds->setHeight(100.0f); // 120 is default value
 //	m_cloud.clouds->update(v3f(0, 0, 0), video::SColor(255,240,240,255));
 
-	m_cloud.camera = m_smgr->addCameraSceneNode(0,
-				v3f(0,0,0), v3f(0, 60, 100));
-	m_cloud.camera->setFarValue(10000);
+	m_cloud.camera = m_smgr->getActiveCamera();
 
 	m_cloud.lasttime = RenderingEngine::get_timer_time();
 }
@@ -624,7 +601,10 @@ bool GUIEngine::setTexture(texture_layer layer, const std::string &texturepath,
 }
 
 /******************************************************************************/
-bool GUIEngine::downloadFile(const std::string &url, const std::string &target)
+std::atomic<unsigned int> GUIEngine::s_download_file_reset_counter = {0};
+
+/******************************************************************************/
+bool GUIEngine::downloadFile(HTTPFetchRequest fetch_request, const std::string &target)
 {
 #if USE_CURL
 	std::ofstream target_file(target.c_str(), std::ios::out | std::ios::binary);
@@ -632,18 +612,22 @@ bool GUIEngine::downloadFile(const std::string &url, const std::string &target)
 		return false;
 	}
 
-	HTTPFetchRequest fetch_request;
-	HTTPFetchResult fetch_result;
-	fetch_request.url = url;
-	fetch_request.caller = HTTPFETCH_SYNC;
-	fetch_request.timeout = g_settings->getS32("curl_file_download_timeout");
-	httpfetch_sync(fetch_request, fetch_result);
+	unsigned int counter = s_download_file_reset_counter.load();
+	auto is_cancelled = [&]() -> bool {
+		return s_download_file_reset_counter != counter;
+	};
 
-	if (!fetch_result.succeeded) {
+	HTTPFetchResult fetch_result;
+	fetch_request.caller = HTTPFETCH_SYNC;
+	bool completed = httpfetch_sync_interruptible(fetch_request, fetch_result, 100, is_cancelled);
+
+	if (!completed || !fetch_result.succeeded) {
 		target_file.close();
 		fs::DeleteSingleFileOrEmptyDirectory(target);
 		return false;
 	}
+	// TODO: directly stream the response data into the file instead of first
+	// storing the complete response in memory
 	target_file << fetch_result.data;
 
 	return true;
@@ -691,3 +675,31 @@ unsigned int GUIEngine::queueAsync(const std::string &serialized_func,
 {
 	return m_script->queueAsync(serialized_func, serialized_params);
 }
+
+
+/******************************************************************************/
+#if defined(__ANDROID__) || defined(__APPLE__)
+static std::mutex g_update_mutex;
+static std::string g_update_key;
+static std::string g_update_value;
+
+extern "C" void external_update(const char *key, const char *value)
+{
+	MutexAutoLock lock(g_update_mutex);
+	g_update_key = key;
+	g_update_value = value;
+}
+
+bool GUIEngine::readUpdate(std::string *key_to, std::string *value_to)
+{
+	MutexAutoLock lock(g_update_mutex);
+	if (g_update_key.empty())
+		return false;
+
+	*key_to = g_update_key;
+	*value_to = g_update_value;
+	g_update_key.clear();
+	g_update_value.clear();
+	return true;
+}
+#endif

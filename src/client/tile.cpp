@@ -22,8 +22,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <algorithm>
 #include <ICameraSceneNode.h>
 #include <IrrCompileConfig.h>
+#include <IFileSystem.h>
 #include "util/string.h"
 #include "util/container.h"
+#include "util/encryption.h"
 #include "util/thread.h"
 #include "filesys.h"
 #include "settings.h"
@@ -93,7 +95,6 @@ std::string getImagePath(std::string path)
 	// A NULL-ended list of possible image extensions
 	const char *extensions[] = {
 		"png", "jpg", "bmp", "tga",
-		"pcx", "ppm", "psd", "wal", "rgb",
 		NULL
 	};
 	// If there is no extension, add one
@@ -202,7 +203,7 @@ struct TextureInfo
 class SourceImageCache
 {
 public:
-	SourceImageCache() {
+	SourceImageCache(bool main_menu) : m_main_menu(main_menu) {
 		m_convert_to_16bit = g_settings->getBool("convert_to_16bit");
 	}
 	~SourceImageCache() {
@@ -300,15 +301,48 @@ public:
 		}
 
 		video::IVideoDriver *driver = RenderingEngine::get_video_driver();
-		std::string path = getTexturePath(name);
+		std::string path = m_main_menu ? name : getTexturePath(name);
 		if (path.empty()) {
 			infostream<<"SourceImageCache::getOrLoad(): No path found for \""
 					<<name<<"\""<<std::endl;
-			return NULL;
+			return nullptr;
 		}
 		infostream<<"SourceImageCache::getOrLoad(): Loading path \""<<path
 				<<"\""<<std::endl;
-		video::IImage *img = driver->createImageFromFile(path.c_str());
+		video::IImage *img;
+#if defined(__ANDROID__) || defined(__APPLE__)
+		if (m_main_menu && path.compare(path.size() - 2, 2, ".e") == 0) {
+			std::string data;
+			if (!fs::ReadFile(path, data))
+				return nullptr;
+
+			std::string decrypted_data;
+			if (!Encryption::decryptSimple(data, decrypted_data))
+				return nullptr;
+
+			// Silly irrlicht's const-incorrectness
+			Buffer<char> data_rw(decrypted_data.c_str(), decrypted_data.size());
+
+			// Create an irrlicht memory file
+			io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
+			io::IReadFile *rfile = irrfs->createMemoryReadFile(
+					*data_rw, data_rw.getSize(), "_tempreadfile");
+
+			FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
+
+			// Read image
+			img = driver->createImageFromFile(rfile);
+			rfile->drop();
+		} else
+#endif
+		img = driver->createImageFromFile(path.c_str());
+
+		// If it fails when using just texture name then try to create it
+		// with texture path
+		if (!img && m_main_menu) {
+			path = getTexturePath(name);
+			img = driver->createImageFromFile(path.c_str());
+		}
 
 		if (img){
 			m_images[name] = img;
@@ -319,8 +353,9 @@ public:
 private:
 	std::map<std::string, video::IImage*> m_images;
 	std::unordered_map<std::string, std::string> m_image_files;
-
+	bool m_main_menu;
 	bool m_convert_to_16bit;
+
 	video::IImage* loadImageFromString(const std::string &filename, const std::string &data) {
 		TRACESTREAM(<< "Client: Attempting to process image "
 			<< "file \"" << filename << "\" from RAM" << std::endl);
@@ -333,7 +368,7 @@ private:
 
 		// Create an irrlicht memory file
 		io::IReadFile *rfile = irrfs->createMemoryReadFile(
-				*data_rw, data_rw.getSize(), "_tempreadfile");
+				*data_rw, data_rw.getSize(), filename.c_str());
 
 		FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
 
@@ -392,7 +427,7 @@ private:
 class TextureSource : public IWritableTextureSource
 {
 public:
-	TextureSource();
+	TextureSource(bool main_menu);
 	virtual ~TextureSource();
 
 	/*
@@ -539,12 +574,12 @@ private:
 	bool m_setting_bilinear_filter;
 };
 
-IWritableTextureSource *createTextureSource()
+IWritableTextureSource *createTextureSource(bool main_menu)
 {
-	return new TextureSource();
+	return new TextureSource(main_menu);
 }
 
-TextureSource::TextureSource()
+TextureSource::TextureSource(bool main_menu) : m_sourcecache(SourceImageCache(main_menu))
 {
 	m_main_thread = std::this_thread::get_id();
 
@@ -2413,9 +2448,21 @@ std::vector<std::string> getTextureDirs()
 {
 	if (g_disable_texture_packs)
 		return {};
-	return fs::GetRecursiveDirs(g_settings->get("texture_path"));
-}
 
+	static std::mutex mtx;
+	const std::string current_path = g_settings->get("texture_path");
+	static std::string last_texture_path = current_path;
+	static std::vector<std::string> dirs = fs::GetRecursiveDirs(current_path);
+
+	MutexAutoLock lock(mtx);
+
+	if (last_texture_path != current_path) {
+		dirs = fs::GetRecursiveDirs(current_path);
+		last_texture_path = current_path;
+	}
+
+	return dirs;
+}
 
 void setDisableTexturePacks(const bool disable_texture_packs)
 {

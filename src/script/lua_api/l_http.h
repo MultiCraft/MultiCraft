@@ -29,7 +29,6 @@ class ModApiHttp : public ModApiBase {
 private:
 #if USE_CURL
 	// Helpers for HTTP fetch functions
-	static void read_http_fetch_request(lua_State *L, HTTPFetchRequest &req);
 	static void push_http_fetch_result(lua_State *L, HTTPFetchResult &res, bool completed = true);
 
 	// http_fetch_sync({url=, timeout=, data=})
@@ -51,4 +50,5 @@ private:
 public:
 	static void Initialize(lua_State *L, int top);
 	static void InitializeAsync(lua_State *L, int top);
+	static void read_http_fetch_request(lua_State *L, HTTPFetchRequest &req);
 };

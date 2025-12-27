@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/minimap.h"
 
 #ifdef HAVE_TOUCHSCREENGUI
-#include "gui/touchscreengui.h"
+#include "gui/touchscreengui_mc.h"
 #endif
 
 #define OBJECT_CROSSHAIR_LINE_SIZE 16
@@ -336,6 +336,11 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 	u32 text_height = g_fontengine->getTextHeight();
 	irr::gui::IGUIFont* font = g_fontengine->getFont();
 
+#if HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui)
+		g_touchscreengui->clearCSMButtons();
+#endif
+
 	// Reorder elements by z_index
 	std::vector<HudElement*> elems;
 	elems.reserve(player->maxHudId());
@@ -352,7 +357,16 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 		elems.insert(it, e);
 	}
 
+	// Note when rebasing: This can just be removed when the Lua HUD hotbar is
+	// added.
+	bool hotbar_added = false;
+
 	for (HudElement *e : elems) {
+		if (!hotbar_added && e->z_index >= 0) {
+			// Add the hotbar at z_index = 0
+			hotbar_added = true;
+			drawHotbar();
+		}
 
 		v2s32 pos(floor(e->pos.X * (float) m_screensize.X + 0.5),
 				floor(e->pos.Y * (float) m_screensize.Y + 0.5));
@@ -438,8 +452,15 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				if (!calculateScreenPos(camera_offset, e, &pos))
 					break;
 			}
-			case HUD_ELEM_IMAGE: {
+			case HUD_ELEM_IMAGE:
+			case HUD_ELEM_CSM_BUTTON: {
 				video::ITexture *texture = tsrc->getTexture(e->text);
+#if HAVE_TOUCHSCREENGUI
+				if (e->type == HUD_ELEM_CSM_BUTTON && g_touchscreengui &&
+						g_touchscreengui->getPressingCSMButton() == e->name &&
+						!e->text2.empty())
+					texture = tsrc->getTexture(e->text2);
+#endif
 				if (!texture)
 					continue;
 
@@ -455,7 +476,8 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				v2s32 offset((e->align.X - 1.0) * dstsize.X / 2,
 				             (e->align.Y - 1.0) * dstsize.Y / 2);
 
-				if ((dstsize.Y + pos.Y + offset.Y + e->offset.Y * m_scale_factor) > m_displaycenter.Y)
+				if ((dstsize.Y + pos.Y + offset.Y + e->offset.Y * m_scale_factor) > m_displaycenter.Y &&
+						e->scale.X >= 0 && e->scale.Y >= 0)
 					offset.Y -= m_hud_move_upwards;
 				core::rect<s32> rect(0, 0, dstsize.X, dstsize.Y);
 				rect += pos + offset + v2s32(e->offset.X * m_scale_factor,
@@ -463,6 +485,12 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				draw2DImageFilterScaled(driver, texture, rect,
 					core::rect<s32>(core::position2d<s32>(0,0), imgsize),
 					NULL, colors, true);
+
+#if HAVE_TOUCHSCREENGUI
+				if (e->type == HUD_ELEM_CSM_BUTTON && g_touchscreengui)
+					g_touchscreengui->registerCSMButton(e->name, rect);
+#endif
+
 				break; }
 			case HUD_ELEM_COMPASS: {
 				video::ITexture *texture = tsrc->getTexture(e->text);
@@ -532,6 +560,9 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 					<< " due to unrecognized type" << std::endl;
 		}
 	}
+
+	if (!hotbar_added)
+		drawHotbar();
 }
 
 void Hud::drawCompassTranslate(HudElement *e, video::ITexture *texture,
@@ -742,7 +773,7 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 }
 
 
-void Hud::drawHotbar(u16 playeritem) {
+void Hud::drawHotbar() {
 
 	v2s32 centerlowerpos(m_displaycenter.X, m_screensize.Y);
 
@@ -752,6 +783,7 @@ void Hud::drawHotbar(u16 playeritem) {
 		return;
 	}
 
+	u16 playeritem = player->getWieldIndex();
 	s32 hotbar_itemcount = player->hud_hotbar_itemcount;
 	s32 width = hotbar_itemcount * (m_hotbar_imagesize + m_padding * 2);
 	v2s32 pos = centerlowerpos - v2s32(width / 2, m_hotbar_imagesize + m_padding * 2.4);

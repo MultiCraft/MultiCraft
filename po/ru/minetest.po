@@ -1917,6 +1917,14 @@ msgstr "Вкл/выкл игровой интерфейс"
 msgid "Toggle nametags"
 msgstr "Вкл/выкл именные тэги"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Скрыть интерфейс"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Дважды коснитесь для отображения интерфейса"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Вкл/выкл историю чата"

@@ -26,10 +26,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "renderingengine.h"
 
 #ifdef HAVE_TOUCHSCREENGUI
-#include "gui/touchscreengui.h"
+#include "gui/touchscreengui_mc.h"
 #endif
 
 class InputHandler;
+
+enum InputDeviceType
+{
+	IDT_NONE = 0,
+	IDT_KEYBOARD,
+	IDT_MOUSE,
+	IDT_GAMEPAD,
+	IDT_TOUCH
+};
 
 /****************************************************************************
  Fast key cache for main game loop
@@ -189,6 +198,8 @@ public:
 #endif
 	}
 
+	void setLastInputDevice(const SEvent &event);
+
 	s32 mouse_wheel = 0;
 
 	JoystickController *joystick = nullptr;
@@ -201,6 +212,8 @@ public:
 #ifdef HAVE_TOUCHSCREENGUI
 	TouchScreenGUI *m_touchscreengui;
 #endif
+
+	bool joystick_enabled = false;
 
 private:
 	// The current state of keys
@@ -267,6 +280,7 @@ public:
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	SDLGameController sdl_game_controller;
 #endif
+	InputDeviceType last_input_device = IDT_NONE;
 };
 /*
 	Separated input handler
@@ -275,14 +289,9 @@ public:
 class RealInputHandler : public InputHandler
 {
 public:
-	RealInputHandler(MyEventReceiver *receiver) : m_receiver(receiver)
-	{
-		m_receiver->joystick = &joystick;
-#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-		m_receiver->sdl_game_controller = &sdl_game_controller;
-		m_receiver->input = this;
-#endif
-	}
+	RealInputHandler(MyEventReceiver *receiver);
+	virtual ~RealInputHandler();
+
 	virtual bool isKeyDown(GameKeyType k)
 	{
 		return m_receiver->IsKeyDown(keycache.key[k]) || joystick.isKeyDown(k);
@@ -363,6 +372,12 @@ public:
 	}
 
 private:
+#ifdef __IOS__
+	static bool SdlEventWatcher(void *userdata, SDL_Event *event);
+#endif
+
+	static void settingsCallback(const std::string &name, void *userdata);
+
 	MyEventReceiver *m_receiver = nullptr;
 	v2s32 m_mousepos;
 };

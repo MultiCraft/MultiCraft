@@ -37,6 +37,9 @@
 #include "irrUString.h"
 #include "util/enriched_string.h"
 #include FT_FREETYPE_H
+#include FT_OUTLINE_H
+#include FT_GLYPH_H
+#include FT_STROKER_H
 
 namespace irr
 {
@@ -71,13 +74,15 @@ namespace gui
 		//! However, it simply defines the SGUITTGlyph's properties and will only create the page
 		//! textures if necessary.  The actual creation of the textures should only occur right
 		//! before the batch draw call.
-		void preload(u32 char_index, FT_Face face, video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags);
+		void preload(uchar32_t c, u32 char_index, FT_Face face, video::IVideoDriver* driver,
+				u32 font_size, const FT_Int32 loadFlags, bool bold,
+				bool italic, u16 outline, u8 outline_type, s8 character_spacing);
 
 		//! Unloads the glyph.
 		void unload();
 
 		//! Creates the IImage object from the FT_Bitmap.
-		video::IImage* createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver) const;
+		video::IImage* createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver, video::SColor color) const;
 
 		//! If true, the glyph has been loaded.
 		bool isLoaded;
@@ -230,10 +235,31 @@ namespace gui
 			//! \param antialias set the use_monochrome (opposite to antialias) flag
 			//! \param transparency set the use_transparency flag
 			//! \return Returns a pointer to a CGUITTFont.  Will return 0 if the font failed to load.
-			static CGUITTFont* createTTFont(IGUIEnvironment *env, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true, const u32 shadow = 0, const u32 shadow_alpha = 255);
-			static CGUITTFont* createTTFont(IrrlichtDevice *device, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
-			static CGUITTFont* create(IGUIEnvironment *env, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
-			static CGUITTFont* create(IrrlichtDevice *device, const io::path& filename, const u32 size, const bool antialias = true, const bool transparency = true);
+			static CGUITTFont* createTTFont(IGUIEnvironment *env,
+					const io::path& filename, const u32 size,
+					const bool antialias = true, const bool transparency = true,
+					const bool bold = false, const bool italic = false,
+					const u16 outline = 0, const u8 outline_type = 0,
+					const s8 character_spacing = 0,
+					const u32 shadow = 0, const u32 shadow_alpha = 255);
+			static CGUITTFont* createTTFont(IrrlichtDevice *device,
+					const io::path& filename, const u32 size,
+					const bool antialias = true, const bool transparency = true,
+					const bool bold = false, const bool italic = false,
+					const u16 outline = 0, const u8 outline_type = 0,
+					const s8 character_spacing = 0);
+			static CGUITTFont* create(IGUIEnvironment *env,
+					const io::path& filename, const u32 size,
+					const bool antialias = true, const bool transparency = true,
+					const bool bold = false, const bool italic = false,
+					const u16 outline = 0, const u8 outline_type = 0,
+					const s8 character_spacing = 0);
+			static CGUITTFont* create(IrrlichtDevice *device,
+					const io::path& filename, const u32 size,
+					const bool antialias = true, const bool transparency = true,
+					const bool bold = false, const bool italic = false,
+					const u16 outline = 0, const u8 outline_type = 0,
+					const s8 character_spacing = 0);
 
 			//! Destructor
 			virtual ~CGUITTFont();
@@ -293,6 +319,10 @@ namespace gui
 			virtual core::dimension2d<u32> getDimension(const wchar_t* text) const;
 			virtual core::dimension2d<u32> getDimension(const core::ustring& text) const;
 
+			//! Returns the dimension of a text string with keep in mind that italic/bold text is slightly longer.
+			virtual core::dimension2d<u32> getTotalDimension(const wchar_t* text) const;
+			virtual core::dimension2d<u32> getTotalDimension(const core::ustring& text) const;
+
 			//! Calculates the index of the character in the text which is on a specific position.
 			virtual s32 getCharacterFromPos(const wchar_t* text, s32 pixel_x) const;
 			virtual s32 getCharacterFromPos(const core::ustring& text, s32 pixel_x) const;
@@ -342,9 +372,14 @@ namespace gui
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
+			FT_Stroker getStroker() { return stroker; }
+
 			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
 
 			bool testEmojiFont(const io::path& filename);
+			void calculateColorEmojiParams(FT_Face face);
+			float getColorEmojiScale() { return color_emoji_scale; }
+			float getColorEmojiOffset() { return color_emoji_offset; }
 
 		protected:
 			bool use_monochrome;
@@ -359,6 +394,7 @@ namespace gui
 			// Manages the FreeType library.
 			static FT_Library c_library;
 			static core::map<io::path, SGUITTFace*> c_faces;
+			static FT_Stroker stroker;
 			static bool c_libraryLoaded;
 			static scene::IMesh* shared_plane_ptr_;
 			static scene::SMesh  shared_plane_;
@@ -385,6 +421,7 @@ namespace gui
 			s32 getFaceIndexByChar(uchar32_t c) const;
 			core::vector2di getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const;
 			core::vector2di getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const;
+			u32 getMaxFontHeight() const;
 			core::dimension2d<u32> getDimensionUntilEndOfLine(const wchar_t* p) const;
 
 			void createSharedPlane();
@@ -406,6 +443,13 @@ namespace gui
 			core::ustring Invisible;
 			std::vector<u32> shadow_offsets;
 			u32 shadow_alpha;
+			bool bold;
+			bool italic;
+			u16 outline;
+			u8 outline_type;
+			s8 character_spacing;
+			float color_emoji_scale = 1.0f;
+			u32 color_emoji_offset;
 	};
 
 } // end namespace gui

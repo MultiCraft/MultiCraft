@@ -132,7 +132,7 @@ public:
 	virtual video::ITexture *getShaderFlagsTexture(bool normalmap_present)=0;
 };
 
-IWritableTextureSource *createTextureSource();
+IWritableTextureSource *createTextureSource(bool main_menu);
 
 #if ENABLE_GLES && !defined(__APPLE__)
 bool hasNPotSupport();

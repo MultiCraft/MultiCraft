@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -54,7 +54,6 @@
 		84135B9125D5264C00CA4DCF /* tileanimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3525D5264000CA4DCF /* tileanimation.cpp */; };
 		84135B9225D5264C00CA4DCF /* pathfinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3725D5264100CA4DCF /* pathfinder.cpp */; };
 		84135B9325D5264C00CA4DCF /* serverlist.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3825D5264100CA4DCF /* serverlist.cpp */; };
-		84135B9425D5264C00CA4DCF /* ban.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3925D5264100CA4DCF /* ban.cpp */; };
 		84135B9525D5264C00CA4DCF /* hud.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3A25D5264200CA4DCF /* hud.cpp */; };
 		84135B9625D5264C00CA4DCF /* map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B3E25D5264300CA4DCF /* map.cpp */; };
 		84135B9825D5264C00CA4DCF /* light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84135B4325D5264400CA4DCF /* light.cpp */; };
@@ -113,35 +112,39 @@
 		84287CA6291ED0F000E30F96 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA4291ED0F000E30F96 /* locale */; };
 		84287CA7291ED0F000E30F96 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA5291ED0F000E30F96 /* fonts */; };
 		844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844436EE28DA80C100662A9D /* libfreetype.a */; };
-		84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458617724B1BF2D0040BA4F /* AppKit.framework */; };
 		84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0024B1347B0040BA4F /* Foundation.framework */; };
 		8453A49E24DB22F00087ECF9 /* client in Resources */ = {isa = PBXBuildFile; fileRef = 8453A49D24DB22F00087ECF9 /* client */; };
 		845856B324B1322D0040BA4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 845856B224B1322D0040BA4F /* Assets.xcassets */; };
-		84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0624B1348B0040BA4F /* libcurl.tbd */; };
 		8458610724B13BDF0040BA4F /* mini-gmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 8458610524B13BDF0040BA4F /* mini-gmp.c */; };
 		8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8458610924B13BF90040BA4F /* jsoncpp.cpp */; };
 		8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8458616724B1B7990040BA4F /* libIrrlicht.a */; };
 		8458617F24B1C3BC0040BA4F /* builtin in Resources */ = {isa = PBXBuildFile; fileRef = 8458617B24B1C3BB0040BA4F /* builtin */; };
 		8458618024B1C3BC0040BA4F /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 8458617C24B1C3BB0040BA4F /* textures */; };
+		8463C2992E46BC22002D5BB3 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8463C2982E46BC22002D5BB3 /* AppKit.framework */; };
 		8467285B2C45F27F00269215 /* AppLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846728512C45F27F00269215 /* AppLogic.swift */; };
 		846F883B27A59704007B6210 /* libluajit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 846F883A27A596F9007B6210 /* libluajit.a */; };
 		847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4A25D6F483008F5FC8 /* lutf8lib.c */; };
 		8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8488539E28DA4851004AD90F /* libjpeg.a */; };
 		848920FD29984994001CB194 /* sdl_semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FA29984994001CB194 /* sdl_semaphore.cpp */; };
 		848920FE29984994001CB194 /* sdl_thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FB29984994001CB194 /* sdl_thread.cpp */; };
+		848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848A7CE22DD8042E00CC49EB /* AVFoundation.framework */; };
+		848A7CE52DD8048500CC49EB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848A7CE42DD8048400CC49EB /* CoreMedia.framework */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
-		8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL2.a */; };
+		8495BD1628B80B14009FCF4D /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
 		8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD2928B81170009FCF4D /* Carbon.framework */; };
 		849D0847278AC1B200471354 /* lchacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 849D0845278AC1B200471354 /* lchacha.c */; };
+		849FD2C82DFD8FCE00C8B942 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 849FD2C72DFD8FCE00C8B942 /* libcurl.a */; };
 		84A1F9BB252E617D00000717 /* scripting_mainmenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B5252E617D00000717 /* scripting_mainmenu.cpp */; };
 		84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B8252E617D00000717 /* scripting_client.cpp */; };
 		84A1F9BD252E617D00000717 /* scripting_server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9B9252E617D00000717 /* scripting_server.cpp */; };
+		84A5FD912E57319F009F0F5A /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84A5FD902E57319F009F0F5A /* SystemConfiguration.framework */; };
 		84BDEE612C471AD500A1571D /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 84BDEE602C471AD500A1571D /* Localizable.xcstrings */; };
 		84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974228CA1291004E8CEC /* GameController.framework */; };
 		84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84BE974428CA129C004E8CEC /* CoreHaptics.framework */; };
 		84C2AB5328DA7776001968EE /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C2AB5228DA7770001968EE /* libpng.a */; };
 		84C9A9592B228D9A00909EFF /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 84C9A9562B228D9A00909EFF /* chacha.c */; };
+		84CA12AF2EF4B8BA004899E0 /* libnghttp2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */; };
 		84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */ = {isa = PBXBuildFile; productRef = 84D1BF552CD7EFF10077DD47 /* libzstd */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
 		84E97FC72D1393F800C85934 /* hashing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E97FC52D1393F800C85934 /* hashing.cpp */; };
@@ -222,7 +225,6 @@
 		84F20E8625D52868009562A9 /* serialize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6225D52867009562A9 /* serialize.cpp */; };
 		84F20E8725D52868009562A9 /* areastore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6525D52867009562A9 /* areastore.cpp */; };
 		84F20E8825D52868009562A9 /* ieee_float.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6625D52867009562A9 /* ieee_float.cpp */; };
-		84F20E8925D52868009562A9 /* sha256.c in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6925D52867009562A9 /* sha256.c */; };
 		84F20E8A25D52868009562A9 /* quicktune.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6C25D52867009562A9 /* quicktune.cpp */; };
 		84F20E8B25D52868009562A9 /* enriched_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6E25D52867009562A9 /* enriched_string.cpp */; };
 		84F20E8C25D52868009562A9 /* timetaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E7025D52868009562A9 /* timetaker.cpp */; };
@@ -347,7 +349,6 @@
 		84135B0525D5262E00CA4DCF /* translation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = translation.cpp; path = ../../../src/translation.cpp; sourceTree = "<group>"; };
 		84135B0625D5262E00CA4DCF /* chat_interface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chat_interface.h; path = ../../../src/chat_interface.h; sourceTree = "<group>"; };
 		84135B0725D5262F00CA4DCF /* voxel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = voxel.cpp; path = ../../../src/voxel.cpp; sourceTree = "<group>"; };
-		84135B0825D5262F00CA4DCF /* ban.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ban.h; path = ../../../src/ban.h; sourceTree = "<group>"; };
 		84135B0925D5262F00CA4DCF /* version.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = version.cpp; path = ../../../src/version.cpp; sourceTree = "<group>"; };
 		84135B0A25D5263000CA4DCF /* remoteplayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = remoteplayer.h; path = ../../../src/remoteplayer.h; sourceTree = "<group>"; };
 		84135B0B25D5263000CA4DCF /* gettime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gettime.h; path = ../../../src/gettime.h; sourceTree = "<group>"; };
@@ -392,7 +393,6 @@
 		84135B3625D5264000CA4DCF /* nodedef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = nodedef.h; path = ../../../src/nodedef.h; sourceTree = "<group>"; };
 		84135B3725D5264100CA4DCF /* pathfinder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pathfinder.cpp; path = ../../../src/pathfinder.cpp; sourceTree = "<group>"; };
 		84135B3825D5264100CA4DCF /* serverlist.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = serverlist.cpp; path = ../../../src/serverlist.cpp; sourceTree = "<group>"; };
-		84135B3925D5264100CA4DCF /* ban.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ban.cpp; path = ../../../src/ban.cpp; sourceTree = "<group>"; };
 		84135B3A25D5264200CA4DCF /* hud.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hud.cpp; path = ../../../src/hud.cpp; sourceTree = "<group>"; };
 		84135B3B25D5264200CA4DCF /* object_properties.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = object_properties.h; path = ../../../src/object_properties.h; sourceTree = "<group>"; };
 		84135B3C25D5264200CA4DCF /* itemdef.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = itemdef.h; path = ../../../src/itemdef.h; sourceTree = "<group>"; };
@@ -518,15 +518,14 @@
 		845856B724B1322D0040BA4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		84585C0024B1347B0040BA4F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		84585C0424B134850040BA4F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		84585C0624B1348B0040BA4F /* libcurl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcurl.tbd; path = usr/lib/libcurl.tbd; sourceTree = SDKROOT; };
 		8458610524B13BDF0040BA4F /* mini-gmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = "mini-gmp.c"; path = "../../../lib/gmp/mini-gmp.c"; sourceTree = "<group>"; };
 		8458610624B13BDF0040BA4F /* mini-gmp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "mini-gmp.h"; path = "../../../lib/gmp/mini-gmp.h"; sourceTree = "<group>"; };
 		8458610924B13BF90040BA4F /* jsoncpp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = jsoncpp.cpp; path = ../../../lib/jsoncpp/jsoncpp.cpp; sourceTree = "<group>"; };
 		8458610B24B13C090040BA4F /* json.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = json.h; path = ../../../lib/jsoncpp/json/json.h; sourceTree = "<group>"; };
 		8458616724B1B7990040BA4F /* libIrrlicht.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libIrrlicht.a; path = ../deps/irrlicht/libIrrlicht.a; sourceTree = "<group>"; };
-		8458617724B1BF2D0040BA4F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		8458617B24B1C3BB0040BA4F /* builtin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = builtin; path = ../../../builtin; sourceTree = "<group>"; };
 		8458617C24B1C3BB0040BA4F /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = textures; path = ../../../textures; sourceTree = "<group>"; };
+		8463C2982E46BC22002D5BB3 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		846728512C45F27F00269215 /* AppLogic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppLogic.swift; sourceTree = "<group>"; };
 		846F883A27A596F9007B6210 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = ../deps/luajit/libluajit.a; sourceTree = "<group>"; };
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
@@ -536,11 +535,14 @@
 		848920FA29984994001CB194 /* sdl_semaphore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_semaphore.cpp; path = ../../../src/threading/sdl_semaphore.cpp; sourceTree = "<group>"; };
 		848920FB29984994001CB194 /* sdl_thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_thread.cpp; path = ../../../src/threading/sdl_thread.cpp; sourceTree = "<group>"; };
 		848920FC29984994001CB194 /* sdl_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sdl_thread.h; path = ../../../src/threading/sdl_thread.h; sourceTree = "<group>"; };
+		848A7CE22DD8042E00CC49EB /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		848A7CE42DD8048400CC49EB /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
-		8495BD1528B80B00009FCF4D /* libSDL2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL2.a; path = ../deps/SDL2/libSDL2.a; sourceTree = "<group>"; };
+		8495BD1528B80B00009FCF4D /* libSDL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL.a; path = ../deps/libSDL/libSDL.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
 		8495BD2928B81170009FCF4D /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		849D0845278AC1B200471354 /* lchacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lchacha.c; path = ../../../lib/luachacha/lchacha.c; sourceTree = "<group>"; };
+		849FD2C72DFD8FCE00C8B942 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = ../deps/libcurl/libcurl.a; sourceTree = "<group>"; };
 		84A1F9A7252E616A00000717 /* mutex_auto_lock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mutex_auto_lock.h; path = ../../../src/threading/mutex_auto_lock.h; sourceTree = "<group>"; };
 		84A1F9A8252E616A00000717 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = event.cpp; path = ../../../src/threading/event.cpp; sourceTree = "<group>"; };
 		84A1F9AE252E616B00000717 /* event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = event.h; path = ../../../src/threading/event.h; sourceTree = "<group>"; };
@@ -550,8 +552,8 @@
 		84A1F9B8252E617D00000717 /* scripting_client.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_client.cpp; path = ../../../src/script/scripting_client.cpp; sourceTree = "<group>"; };
 		84A1F9B9252E617D00000717 /* scripting_server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scripting_server.cpp; path = ../../../src/script/scripting_server.cpp; sourceTree = "<group>"; };
 		84A1F9BA252E617D00000717 /* scripting_server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scripting_server.h; path = ../../../src/script/scripting_server.h; sourceTree = "<group>"; };
+		84A5FD902E57319F009F0F5A /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		84BDEE602C471AD500A1571D /* Localizable.xcstrings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; usesTabs = 1; };
-		84BDEE622C471AE500A1571D /* MultiCraft.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MultiCraft.entitlements; sourceTree = "<group>"; };
 		84BE974228CA1291004E8CEC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
 		84BE974428CA129C004E8CEC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
 		84C2AB5228DA7770001968EE /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../deps/libpng/libpng.a; sourceTree = "<group>"; };
@@ -560,6 +562,7 @@
 		84C9A9552B228D9A00909EFF /* ecrypt-machine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-machine.h"; path = "../../../lib/chacha/ecrypt-machine.h"; sourceTree = "<group>"; };
 		84C9A9562B228D9A00909EFF /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/chacha/chacha.c; sourceTree = "<group>"; };
 		84C9A9572B228D9A00909EFF /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../lib/chacha/ecrypt-sync.h"; sourceTree = "<group>"; };
+		84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnghttp2.a; path = ../deps/nghttp2/libnghttp2.a; sourceTree = "<group>"; };
 		84E97FC52D1393F800C85934 /* hashing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hashing.cpp; path = ../../../src/util/hashing.cpp; sourceTree = "<group>"; };
 		84E97FC62D1393F800C85934 /* hashing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hashing.h; path = ../../../src/util/hashing.h; sourceTree = "<group>"; };
 		84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -711,14 +714,12 @@
 		84F20E5D25D52867009562A9 /* auth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = auth.h; path = ../../../src/util/auth.h; sourceTree = "<group>"; };
 		84F20E5E25D52867009562A9 /* metricsbackend.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = metricsbackend.cpp; path = ../../../src/util/metricsbackend.cpp; sourceTree = "<group>"; };
 		84F20E5F25D52867009562A9 /* numeric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = numeric.cpp; path = ../../../src/util/numeric.cpp; sourceTree = "<group>"; };
-		84F20E6125D52867009562A9 /* md32_common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = md32_common.h; path = ../../../src/util/md32_common.h; sourceTree = "<group>"; };
 		84F20E6225D52867009562A9 /* serialize.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = serialize.cpp; path = ../../../src/util/serialize.cpp; sourceTree = "<group>"; };
 		84F20E6325D52867009562A9 /* pointedthing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pointedthing.h; path = ../../../src/util/pointedthing.h; sourceTree = "<group>"; };
 		84F20E6425D52867009562A9 /* metricsbackend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = metricsbackend.h; path = ../../../src/util/metricsbackend.h; sourceTree = "<group>"; };
 		84F20E6525D52867009562A9 /* areastore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = areastore.cpp; path = ../../../src/util/areastore.cpp; sourceTree = "<group>"; };
 		84F20E6625D52867009562A9 /* ieee_float.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ieee_float.cpp; path = ../../../src/util/ieee_float.cpp; sourceTree = "<group>"; };
-		84F20E6825D52867009562A9 /* sha2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sha2.h; path = ../../../src/util/sha2.h; sourceTree = "<group>"; };
-		84F20E6925D52867009562A9 /* sha256.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sha256.c; path = ../../../src/util/sha256.c; sourceTree = "<group>"; };
+		84F20E6825D52867009562A9 /* sha2_apple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sha2_apple.h; path = ../../../src/util/sha2_apple.h; sourceTree = "<group>"; };
 		84F20E6A25D52867009562A9 /* directiontables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = directiontables.h; path = ../../../src/util/directiontables.h; sourceTree = "<group>"; };
 		84F20E6B25D52867009562A9 /* timetaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timetaker.h; path = ../../../src/util/timetaker.h; sourceTree = "<group>"; };
 		84F20E6C25D52867009562A9 /* quicktune.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = quicktune.cpp; path = ../../../src/util/quicktune.cpp; sourceTree = "<group>"; };
@@ -855,19 +856,22 @@
 /* Begin PBXFrameworksBuildPhase section */
 		845856A624B1322C0040BA4F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				84EA1B952CA4BC8B00CDCE7C /* AudioToolbox.framework in Frameworks */,
-				84463B8C24B258AA0099DFBD /* AppKit.framework in Frameworks */,
+				84CA12AF2EF4B8BA004899E0 /* libnghttp2.a in Frameworks */,
+				8463C2992E46BC22002D5BB3 /* AppKit.framework in Frameworks */,
+				848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */,
 				8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */,
 				841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */,
 				84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */,
+				848A7CE52DD8048500CC49EB /* CoreMedia.framework in Frameworks */,
 				8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */,
 				84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */,
 				84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */,
 				841AD8BA28D12E7C0042E335 /* OpenGL.framework in Frameworks */,
+				84A5FD912E57319F009F0F5A /* SystemConfiguration.framework in Frameworks */,
 				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
-				84585C0724B134900040BA4F /* libcurl.tbd in Frameworks */,
+				849FD2C82DFD8FCE00C8B942 /* libcurl.a in Frameworks */,
 				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
 				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
 				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
@@ -877,12 +881,11 @@
 				841AD8B128D0DE430042E335 /* libogg.a in Frameworks */,
 				841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */,
 				84C2AB5328DA7776001968EE /* libpng.a in Frameworks */,
-				8495BD1628B80B14009FCF4D /* libSDL2.a in Frameworks */,
+				8495BD1628B80B14009FCF4D /* libSDL.a in Frameworks */,
 				841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */,
 				841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */,
 				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -1049,7 +1052,6 @@
 				845856B224B1322D0040BA4F /* Assets.xcassets */,
 				845856B724B1322D0040BA4F /* Info.plist */,
 				84BDEE602C471AD500A1571D /* Localizable.xcstrings */,
-				84BDEE622C471AE500A1571D /* MultiCraft.entitlements */,
 				84E33D852A7BBEA200609F77 /* Supporting Files */,
 				84585CD524B138F50040BA4F /* src */,
 				84D4D9082A93707F00CACCC7 /* lib */,
@@ -1060,27 +1062,31 @@
 		84585BFF24B1347B0040BA4F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8463C2982E46BC22002D5BB3 /* AppKit.framework */,
 				84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */,
-				8458617724B1BF2D0040BA4F /* AppKit.framework */,
 				841AD8AC28D0D6920042E335 /* AudioUnit.framework */,
+				848A7CE22DD8042E00CC49EB /* AVFoundation.framework */,
 				8495BD2928B81170009FCF4D /* Carbon.framework */,
 				841AD8AE28D0D6A40042E335 /* CoreAudio.framework */,
 				84BE974428CA129C004E8CEC /* CoreHaptics.framework */,
+				848A7CE42DD8048400CC49EB /* CoreMedia.framework */,
 				8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */,
 				84585C0024B1347B0040BA4F /* Foundation.framework */,
 				84BE974228CA1291004E8CEC /* GameController.framework */,
 				84585C0424B134850040BA4F /* OpenGL.framework */,
-				84585C0624B1348B0040BA4F /* libcurl.tbd */,
+				84A5FD902E57319F009F0F5A /* SystemConfiguration.framework */,
+				849FD2C72DFD8FCE00C8B942 /* libcurl.a */,
 				844436EE28DA80C100662A9D /* libfreetype.a */,
 				84EEE5E62782728E00F61929 /* libintl.a */,
 				8458616724B1B7990040BA4F /* libIrrlicht.a */,
 				8488539E28DA4851004AD90F /* libjpeg.a */,
 				841AD8A428D0C1810042E335 /* libleveldb.a */,
 				846F883A27A596F9007B6210 /* libluajit.a */,
+				84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */,
 				841AD8B028D0DE3D0042E335 /* libogg.a */,
 				841AD8A928D0CE7F0042E335 /* libopenal.a */,
 				84C2AB5228DA7770001968EE /* libpng.a */,
-				8495BD1528B80B00009FCF4D /* libSDL2.a */,
+				8495BD1528B80B00009FCF4D /* libSDL.a */,
 				841AD8B428D0E2340042E335 /* libvorbis.a */,
 				841AD8B828D0E2E40042E335 /* libvorbisfile.a */,
 				848CE6E427778E30001D3E0F /* libz.tbd */,
@@ -1104,8 +1110,6 @@
 				8458602F24B13A020040BA4F /* util */,
 				84135AF225D5262500CA4DCF /* activeobject.h */,
 				84135AF825D5262800CA4DCF /* activeobjectmgr.h */,
-				84135B3925D5264100CA4DCF /* ban.cpp */,
-				84135B0825D5262F00CA4DCF /* ban.h */,
 				84135B0625D5262E00CA4DCF /* chat_interface.h */,
 				84135B1325D5263400CA4DCF /* chat.cpp */,
 				84135AC925D5261C00CA4DCF /* chat.h */,
@@ -1405,7 +1409,6 @@
 				84F20E7C25D52868009562A9 /* hex.h */,
 				84F20E6625D52867009562A9 /* ieee_float.cpp */,
 				84F20E7925D52868009562A9 /* ieee_float.h */,
-				84F20E6125D52867009562A9 /* md32_common.h */,
 				84F20E5E25D52867009562A9 /* metricsbackend.cpp */,
 				84F20E6425D52867009562A9 /* metricsbackend.h */,
 				84F20E5F25D52867009562A9 /* numeric.cpp */,
@@ -1418,8 +1421,7 @@
 				84F20E7F25D52868009562A9 /* quicktune.h */,
 				84F20E6225D52867009562A9 /* serialize.cpp */,
 				84F20E7325D52868009562A9 /* serialize.h */,
-				84F20E6825D52867009562A9 /* sha2.h */,
-				84F20E6925D52867009562A9 /* sha256.c */,
+				84F20E6825D52867009562A9 /* sha2_apple.h */,
 				84F20E5825D52866009562A9 /* srp.cpp */,
 				84F20E7425D52868009562A9 /* srp.h */,
 				84F20E7125D52868009562A9 /* strfnd.h */,
@@ -1688,12 +1690,7 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			name = MultiCraft;
-			packageProductDependencies = (
-				84D1BF552CD7EFF10077DD47 /* libzstd */,
-			);
 			productName = MultiCraft;
 			productReference = 845856A924B1322C0040BA4F /* MultiCraft.app */;
 			productType = "com.apple.product-type.application";
@@ -1705,7 +1702,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1540;
+				LastUpgradeCheck = 2610;
 				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
@@ -1714,7 +1711,6 @@
 				};
 			};
 			buildConfigurationList = 845856A424B1322C0040BA4F /* Build configuration list for PBXProject "MultiCraft" */;
-			compatibilityVersion = "Xcode 15.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -1749,11 +1745,16 @@
 				ar,
 				th,
 				Base,
+				ko,
+				"zh-Hans",
+				"zh-Hant",
+				ms,
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			packageReferences = (
 				84D1BF522CD7EC430077DD47 /* XCRemoteSwiftPackageReference "zstd" */,
 			);
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 845856AA24B1322C0040BA4F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1766,24 +1767,21 @@
 /* Begin PBXResourcesBuildPhase section */
 		845856A724B1322C0040BA4F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				8458617F24B1C3BC0040BA4F /* builtin in Resources */,
 				8453A49E24DB22F00087ECF9 /* client in Resources */,
-				8458618024B1C3BC0040BA4F /* textures in Resources */,
 				84287CA7291ED0F000E30F96 /* fonts in Resources */,
 				84287CA6291ED0F000E30F96 /* locale in Resources */,
-				84BDEE612C471AD500A1571D /* Localizable.xcstrings in Resources */,
+				8458618024B1C3BC0040BA4F /* textures in Resources */,
 				845856B324B1322D0040BA4F /* Assets.xcassets in Resources */,
+				84BDEE612C471AD500A1571D /* Localizable.xcstrings in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		845856A524B1322C0040BA4F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				84F20DDF25D52812009562A9 /* s_player.cpp in Sources */,
 				84135C2125D526D700CA4DCF /* sound.cpp in Sources */,
@@ -1911,7 +1909,6 @@
 				84A1F9BC252E617D00000717 /* scripting_client.cpp in Sources */,
 				84135B9F25D5264C00CA4DCF /* staticobject.cpp in Sources */,
 				84F20E2F25D5282A009562A9 /* l_particles_local.cpp in Sources */,
-				84F20E8925D52868009562A9 /* sha256.c in Sources */,
 				8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */,
 				84F20F3F25D52975009562A9 /* mapgen_v7p.cpp in Sources */,
 				84F20F4225D52975009562A9 /* mapgen_valleys.cpp in Sources */,
@@ -1976,7 +1973,6 @@
 				84F20DDA25D52812009562A9 /* s_item.cpp in Sources */,
 				84F20F1525D52958009562A9 /* guiButtonImage.cpp in Sources */,
 				84135C0C25D526D700CA4DCF /* game.cpp in Sources */,
-				84135B9425D5264C00CA4DCF /* ban.cpp in Sources */,
 				84F20E3825D5282A009562A9 /* l_itemstackmeta.cpp in Sources */,
 				84F20F0725D52958009562A9 /* guiSkin.cpp in Sources */,
 				84F20DE025D52812009562A9 /* s_base.cpp in Sources */,
@@ -2030,12 +2026,11 @@
 				84135B9525D5264C00CA4DCF /* hud.cpp in Sources */,
 				84F20E5725D5283F009562A9 /* unit_sao.cpp in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		845856BB24B1322D0040BA4F /* Debug */ = {
+		845856BB24B1322D0040BA4F /* Debug configuration for PBXProject "MultiCraft" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2049,7 +2044,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_INCREMENTAL_DISTILL = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 1;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2057,7 +2052,7 @@
 				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"$(inherited)",
@@ -2069,12 +2064,13 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		845856BC24B1322D0040BA4F /* Release */ = {
+		845856BC24B1322D0040BA4F /* Release configuration for PBXProject "MultiCraft" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2086,9 +2082,10 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
 				ENABLE_INCREMENTAL_DISTILL = YES;
 				ENABLE_NS_ASSERTIONS = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2097,7 +2094,7 @@
 				GCC_WARN_ABOUT_DEPRECATED_FUNCTIONS = NO;
 				LLVM_LTO = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				OTHER_CFLAGS = (
 					"$(inherited)",
 					"-fdata-sections",
@@ -2108,6 +2105,7 @@
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
 				SWIFT_VERSION = 5.0;
@@ -2115,17 +2113,23 @@
 			};
 			name = Release;
 		};
-		845856BE24B1322D0040BA4F /* Debug */ = {
+		845856BE24B1322D0040BA4F /* Debug configuration for PBXNativeTarget "MultiCraft" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = NO;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 70;
+				CURRENT_PROJECT_VERSION = 80;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_RESOURCE_ACCESS_USB = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"RUN_IN_PLACE=0",
@@ -2135,10 +2139,9 @@
 					"USE_FREETYPE=1",
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
-					"USE_ZSTD=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=9",
+					"VERSION_PATCH=13",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=1",
 				);
@@ -2158,17 +2161,18 @@
 					"${SRCROOT}/../deps/libogg/include",
 					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
-					"${SRCROOT}/../deps/SDL2/include",
+					"${SRCROOT}/../deps/libSDL/include",
 					"${SRCROOT}/../deps/libvorbis/include",
+					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.0.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 2.0.13;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
@@ -2180,27 +2184,37 @@
 					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
-					"-L${SRCROOT}/../deps/SDL2",
+					"-L${SRCROOT}/../deps/libSDL",
 					"-L${SRCROOT}/../deps/libvorbis",
+					"-L${SRCROOT}/../deps/libcurl",
+					"-L${SRCROOT}/../deps/nghttp2",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -DDEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Debug;
 		};
-		845856BF24B1322D0040BA4F /* Release */ = {
+		845856BF24B1322D0040BA4F /* Release configuration for PBXNativeTarget "MultiCraft" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = NO;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = MultiCraft/MultiCraft.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 70;
+				CURRENT_PROJECT_VERSION = 80;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
+				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_RESOURCE_ACCESS_USB = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"NDEBUG=1",
@@ -2211,10 +2225,9 @@
 					"USE_FREETYPE=1",
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
-					"USE_ZSTD=1",
 					"VERSION_MAJOR=2",
 					"VERSION_MINOR=0",
-					"VERSION_PATCH=9",
+					"VERSION_PATCH=13",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=0",
 				);
@@ -2234,17 +2247,18 @@
 					"${SRCROOT}/../deps/libogg/include",
 					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
-					"${SRCROOT}/../deps/SDL2/include",
+					"${SRCROOT}/../deps/libSDL/include",
 					"${SRCROOT}/../deps/libvorbis/include",
+					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
-				MARKETING_VERSION = 2.0.9;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MARKETING_VERSION = 2.0.13;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
@@ -2256,11 +2270,16 @@
 					"-L${SRCROOT}/../deps/libogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
-					"-L${SRCROOT}/../deps/SDL2",
+					"-L${SRCROOT}/../deps/libSDL",
 					"-L${SRCROOT}/../deps/libvorbis",
+					"-L${SRCROOT}/../deps/libcurl",
+					"-L${SRCROOT}/../deps/nghttp2",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				RUNTIME_EXCEPTION_ALLOW_JIT = YES;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
@@ -2271,19 +2290,17 @@
 		845856A424B1322C0040BA4F /* Build configuration list for PBXProject "MultiCraft" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				845856BB24B1322D0040BA4F /* Debug */,
-				845856BC24B1322D0040BA4F /* Release */,
+				845856BB24B1322D0040BA4F /* Debug configuration for PBXProject "MultiCraft" */,
+				845856BC24B1322D0040BA4F /* Release configuration for PBXProject "MultiCraft" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		845856BD24B1322D0040BA4F /* Build configuration list for PBXNativeTarget "MultiCraft" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				845856BE24B1322D0040BA4F /* Debug */,
-				845856BF24B1322D0040BA4F /* Release */,
+				845856BE24B1322D0040BA4F /* Debug configuration for PBXNativeTarget "MultiCraft" */,
+				845856BF24B1322D0040BA4F /* Release configuration for PBXNativeTarget "MultiCraft" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */

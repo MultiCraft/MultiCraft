@@ -65,6 +65,7 @@ enum SettingsLayer {
 	SL_GAME,
 	SL_GLOBAL,
 	SL_MAP,
+	SL_TOUCHSCREENGUI,
 	SL_TOTAL_COUNT
 };
 

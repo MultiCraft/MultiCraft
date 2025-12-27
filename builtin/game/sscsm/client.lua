@@ -2,9 +2,8 @@
 -- SSCSM: Server-Sent Client-Side Mods
 -- Initial code sent to the client
 --
--- Copyright © 2019-2021 by luk3yx
--- Copyright © 2020-2021 MultiCraft Development Team
--- License: GNU LGPL 3.0+
+-- Copyright © 2019-2025 by luk3yx
+-- Copyright © 2020-2025 MultiCraft Development Team
 --
 -- This program is free software; you can redistribute it and/or modify
 -- it under the terms of the GNU Lesser General Public License as published by
@@ -21,30 +20,12 @@
 -- Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 --
 
--- Make sure both table.unpack and unpack exist.
-if table.unpack then
-	unpack = table.unpack
-else
-	table.unpack = unpack -- luacheck: ignore
-end
-
--- Make sure a few basic functions exist, these may have been blocked because
--- of security or laziness.
+-- For some reason when I first made the SSCSM mod I made the sandbox set table.unpack and not unpack
+-- and not include raw*, so we're stuck with these for now
+unpack = table.unpack or unpack
 if not rawget   then function rawget(n, name) return n[name] end end
 if not rawset   then function rawset(n, k, v) n[k] = v end end
 if not rawequal then function rawequal(a, b) return a == b end end
-
--- Older versions of the CSM don't provide assert(), this function exists for
--- compatibility.
-if not assert then
-	function assert(value, ...)
-		if value then
-			return value, ...
-		else
-			error(... or 'assertion failed!', 2)
-		end
-	end
-end
 
 -- Create the API
 sscsm = {}
@@ -52,27 +33,20 @@ function sscsm.global_exists(name)
 	return rawget(_G, name) ~= nil
 end
 
+-- We are stuck with this until all clients get
+-- https://github.com/MultiCraft/MultiCraft/commit/9c6d57b99bb18c363bf79a1d8308506ac7f53b90
+-- (At which point it can become minetest = assert(core))
 if sscsm.global_exists('minetest') then
 	core = minetest
 else
-	minetest = assert(core, 'No "minetest" global found!')
+	minetest = assert(core)
 end
 
 core.global_exists = sscsm.global_exists
 
--- Check if join_mod_channel and leave_mod_channel exist.
-if sscsm.global_exists('join_mod_channel')
-		and sscsm.global_exists('leave_mod_channel') then
-	sscsm.join_mod_channel  = join_mod_channel
-	sscsm.leave_mod_channel = leave_mod_channel
-	join_mod_channel, leave_mod_channel = nil, nil
-else
-	local dummy = function() end
-	sscsm.join_mod_channel  = dummy
-	sscsm.leave_mod_channel = dummy
-end
-
 -- Add print()
+-- luacheck: globals print
+-- luacheck: push ignore 131
 function print(...)
 	local msg = '[SSCSM] '
 	for i = 1, select('#', ...) do
@@ -81,6 +55,7 @@ function print(...)
 	end
 	core.log('none', msg)
 end
+-- luacheck: pop
 
 -- Add register_on_mods_loaded
 do
@@ -148,46 +123,11 @@ function sscsm.unregister_chatcommand(cmd)
 	sscsm.registered_chatcommands[cmd] = nil
 end
 
--- A proper get_player_control didn't exist before Minetest 5.3.0.
-if core.localplayer.get_control then
-	-- Preserve API compatibility
-	if core.localplayer:get_control().LMB == nil then
-		-- MT 5.4+
-		function sscsm.get_player_control()
-			local c = core.localplayer:get_control()
-			c.LMB, c.RMB = c.dig, c.place
-			return c
-		end
-	else
-		-- MT 5.3
-		function sscsm.get_player_control()
-			local c = core.localplayer:get_control()
-			c.dig, c.place = c.LMB, c.RMB
-			return c
-		end
-	end
-else
-	-- MT 5.0 to 5.2
-	local floor = math.floor
-	function sscsm.get_player_control()
-		local n = core.localplayer:get_key_pressed()
-		return {
-			up    = n % 2 == 1,
-			down  = floor(n / 2) % 2 == 1,
-			left  = floor(n / 4) % 2 == 1,
-			right = floor(n / 8) % 2 == 1,
-			jump  = floor(n / 16) % 2 == 1,
-			aux1  = floor(n / 32) % 2 == 1,
-			sneak = floor(n / 64) % 2 == 1,
-			LMB   = floor(n / 128) % 2 == 1,
-			RMB   = floor(n / 256) % 2 == 1,
-			dig   = floor(n / 128) % 2 == 1,
-			place = floor(n / 256) % 2 == 1,
-		}
-	end
-
-	-- In Minetest 5.2.0, core.get_node_light() segfaults.
-	core.get_node_light = nil
+-- This function exists for backwards compatibility reasons
+function sscsm.get_player_control()
+	local c = core.localplayer:get_control()
+	c.LMB, c.RMB = c.dig, c.place
+	return c
 end
 
 -- Call func(...) every <interval> seconds.
@@ -272,7 +212,7 @@ end
 
 -- Load split messages
 local incoming_messages = {}
-local function load_split_message(chan, msg)
+local function load_split_message(_, msg)
 	local id, i, l, pkt = msg:match('^\1([^\1]+)\1([^\1]+)\1([^\1]+)\1(.*)$')
 	id, i, l = tonumber(id), tonumber(i), tonumber(l)
 
@@ -317,8 +257,9 @@ core.register_on_receiving_chat_message(function(message)
 	end
 
 	-- Decompress messages
-	if prefix == 3 then
-		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)))
+	if prefix == 3 or prefix == 4 then
+		msg = minetest.decompress(minetest.decode_base64(msg:sub(2)),
+			prefix == 4 and "zstd" or "deflate")
 		prefix = msg:byte(1)
 	end
 
@@ -340,9 +281,17 @@ core.register_on_receiving_chat_message(function(message)
 end)
 
 sscsm.register_on_mods_loaded(function()
-	sscsm.leave_mod_channel()
 	sscsm.com_send('sscsm:com_test', {flags = sscsm.restriction_flags})
 end)
+
+-- Call leave_mod_channel for legacy clients
+if sscsm.global_exists('leave_mod_channel') then
+	-- luacheck: globals join_mod_channel leave_mod_channel
+	-- luacheck: ignore 131
+	sscsm.register_on_mods_loaded(leave_mod_channel)
+	join_mod_channel = nil
+	leave_mod_channel = nil
+end
 
 if core.global_exists("set_error_handler") then
 	set_error_handler(function(err)

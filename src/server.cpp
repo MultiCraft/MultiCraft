@@ -68,8 +68,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server/player_sao.h"
 #include "server/serverinventorymgr.h"
 #include "translation.h"
-#if USE_ZSTD
 #include <zstd.h>
+#if defined(__ANDROID__) || defined(__APPLE__)
+#include "util/encryption.h"
 #endif
 
 class ClientNotFoundException : public BaseException
@@ -124,6 +125,12 @@ void *ServerThread::run()
 		} catch (LuaError &e) {
 			m_server->setAsyncFatalError(
 					"ServerThread::run Lua: " + std::string(e.what()));
+		} catch (SerializationError &e) {
+			m_server->setAsyncFatalError(
+					"ServerThread::run: " + std::string(e.what()));
+		} catch (DatabaseException &e) {
+			m_server->setAsyncFatalError(
+					"ServerThread::run: " + std::string(e.what()));
 		}
 	}
 
@@ -290,7 +297,9 @@ Server::~Server()
 		MutexAutoLock envlock(m_env_mutex);
 
 		infostream << "Server: Saving players" << std::endl;
-		m_env->saveLoadedPlayers();
+		try {
+			m_env->saveLoadedPlayers();
+		} catch (DatabaseException &e) {}
 
 		infostream << "Server: Kicking players" << std::endl;
 		std::string kick_msg;
@@ -302,7 +311,9 @@ Server::~Server()
 		if (kick_msg.empty()) {
 			kick_msg = g_settings->get("kick_msg_shutdown");
 		}
-		m_env->saveLoadedPlayers(true);
+		try {
+			m_env->saveLoadedPlayers(true);
+		} catch (DatabaseException &e) {}
 		m_env->kickAllPlayers(SERVER_ACCESSDENIED_SHUTDOWN,
 			kick_msg, reconnect);
 	}
@@ -335,7 +346,17 @@ Server::~Server()
 		}
 
 		infostream << "Server: Saving environment metadata" << std::endl;
-		m_env->saveMeta();
+		try {
+			m_env->saveMeta();
+		} catch (SerializationError &e) {
+			if (m_on_shutdown_errmsg) {
+				if (m_on_shutdown_errmsg->empty()) {
+					*m_on_shutdown_errmsg = std::string("ServerEnvironment: ") + e.what();
+				} else {
+					*m_on_shutdown_errmsg += std::string("\nServerEnvironment: ") + e.what();
+				}
+			}
+		}
 	}
 
 	// Stop threads
@@ -350,7 +371,9 @@ Server::~Server()
 #if USE_SQLITE
 	delete m_rollback;
 #endif
+#if BAN_MANAGER
 	delete m_banmanager;
+#endif
 	delete m_itemdef;
 	delete m_nodedef;
 	delete m_craftdef;
@@ -391,9 +414,11 @@ void Server::init()
 	// Create emerge manager
 	m_emerge = new EmergeManager(this);
 
+#if BAN_MANAGER
 	// Create ban manager
 	std::string ban_path = m_path_world + DIR_DELIM "ipban.txt";
 	m_banmanager = new BanManager(ban_path);
+#endif
 
 	m_modmgr = std::unique_ptr<ServerModManager>(new ServerModManager(m_path_world));
 	std::vector<ModSpec> unsatisfied_mods = m_modmgr->getUnsatisfiedMods();
@@ -970,10 +995,12 @@ void Server::AsyncRunStep(bool initial_step)
 
 			ScopeProfiler sp(g_profiler, "Server: map saving (sum)");
 
+#if BAN_MANAGER
 			// Save ban file
 			if (m_banmanager->isModified()) {
 				m_banmanager->save();
 			}
+#endif
 
 			// Save changed parts of map
 			m_env->getMap().save(MOD_STATE_WRITE_NEEDED);
@@ -1122,6 +1149,7 @@ void Server::ProcessData(NetworkPacket *pkt)
 	ScopeProfiler sp(g_profiler, "Server: Process network packet (sum)");
 	u32 peer_id = pkt->getPeerId();
 
+#if BAN_MANAGER
 	try {
 		Address address = getPeerAddress(peer_id);
 		std::string addr_s = address.serializeString();
@@ -1146,6 +1174,7 @@ void Server::ProcessData(NetworkPacket *pkt)
 				<< peer_id << " not found" << std::endl;
 		return;
 	}
+#endif
 
 	try {
 		ToServerCommand command = (ToServerCommand) pkt->getCommand();
@@ -1269,6 +1298,8 @@ bool Server::getClientInfo(session_t peer_id, ClientInfo &ret)
 	ret.vers_string = client->getFullVer();
 	ret.platform = client->getPlatform();
 	ret.sysinfo = client->getSysInfo();
+
+	ret.system_ram = client->getSystemRAM();
 
 	ret.lang_code = client->getLangCode();
 
@@ -1414,7 +1445,10 @@ void Server::SendItemDef(session_t peer_id,
 	std::ostringstream tmp_os(std::ios::binary);
 	itemdef->serialize(tmp_os, protocol_version);
 	std::ostringstream tmp_os2(std::ios::binary);
-	compressZlib(tmp_os.str(), tmp_os2);
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 3 || m_simple_singleplayer_mode)
+		compressZstd(tmp_os.str(), tmp_os2);
+	else
+		compressZlib(tmp_os.str(), tmp_os2);
 	pkt.putLongString(tmp_os2.str());
 
 	// Make data buffer
@@ -1437,7 +1471,10 @@ void Server::SendNodeDef(session_t peer_id,
 	std::ostringstream tmp_os(std::ios::binary);
 	nodedef->serialize(tmp_os, protocol_version);
 	std::ostringstream tmp_os2(std::ios::binary);
-	compressZlib(tmp_os.str(), tmp_os2);
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 3 || m_simple_singleplayer_mode)
+		compressZstd(tmp_os.str(), tmp_os2);
+	else
+		compressZlib(tmp_os.str(), tmp_os2);
 
 	pkt.putLongString(tmp_os2.str());
 
@@ -2312,7 +2349,10 @@ void Server::sendMetadataChanged(const std::list<v3s16> &meta_updates, float far
 		std::ostringstream os(std::ios::binary);
 		meta_updates_list.serialize(os, client->net_proto_version, false, true);
 		std::ostringstream oss(std::ios::binary);
-		compressZlib(os.str(), oss);
+		if (m_clients.getMulticraftProtocolVersion(i) > 3 || m_simple_singleplayer_mode)
+			compressZstd(os.str(), oss);
+		else
+			compressZlib(os.str(), oss);
 
 		NetworkPacket pkt(TOCLIENT_NODEMETA_CHANGED, 0);
 		pkt.putLongString(oss.str());
@@ -2330,12 +2370,8 @@ void Server::SendBlockNoLock(session_t peer_id, MapBlock *block, u8 ver,
 	/*
 		Create a packet with the block in the right format
 	*/
-#if USE_ZSTD
-	thread_local const int net_compression_level = m_simple_singleplayer_mode ? ZSTD_minCLevel() :
+	thread_local const int net_compression_level = m_simple_singleplayer_mode ? -1 :
 			rangelim(g_settings->getS16("map_compression_level_net"), ZSTD_minCLevel(), ZSTD_maxCLevel());
-#else
-	thread_local const int net_compression_level = rangelim(g_settings->getS16("map_compression_level_net"), -1, 9);
-#endif
 	std::ostringstream os(std::ios_base::binary);
 	block->serialize(os, ver, false, net_compression_level);
 	block->serializeNetworkSpecific(os);
@@ -2446,9 +2482,8 @@ bool Server::addMediaFile(const std::string &filename,
 	// If name is not in a supported format, ignore it
 	const char *supported_ext[] = {
 		".png", ".jpg", ".bmp", ".tga",
-		".pcx", ".ppm", ".psd", ".wal", ".rgb",
 		".ogg",
-		".x", ".b3d", ".md2", ".obj",
+		".x", ".b3d", ".obj",
 		// Custom translation file format
 		".tr",
 		".e",
@@ -3187,17 +3222,25 @@ void Server::reportFormspecPrependModified(const std::string &name)
 
 void Server::setIpBanned(const std::string &ip, const std::string &name)
 {
+#if BAN_MANAGER
 	m_banmanager->add(ip, name);
+#endif
 }
 
 void Server::unsetIpBanned(const std::string &ip_or_name)
 {
+#if BAN_MANAGER
 	m_banmanager->remove(ip_or_name);
+#endif
 }
 
 std::string Server::getBanDescription(const std::string &ip_or_name)
 {
+#if BAN_MANAGER
 	return m_banmanager->getBanDescription(ip_or_name);
+#else
+	return "";
+#endif
 }
 
 void Server::notifyPlayer(const char *name, const std::wstring &msg)
@@ -3234,6 +3277,13 @@ bool Server::showFormspec(const char *playername, const std::string &formspec,
 
 	SendShowFormspecMessage(player->getPeerId(), formspec, formname);
 	return true;
+}
+
+void Server::copyToClipboard(RemotePlayer *player, const std::string &text)
+{
+	NetworkPacket pkt(TOCLIENT_COPY_TO_CLIPBOARD, 0, player->getPeerId());
+	pkt << text;
+	Send(&pkt);
 }
 
 u32 Server::hudAdd(RemotePlayer *player, HudElement *form)
@@ -3849,9 +3899,9 @@ bool Server::leaveModChannel(const std::string &channel)
 	return m_modchannel_mgr->leaveChannel(channel, PEER_ID_SERVER);
 }
 
-bool Server::sendModChannelMessage(const std::string &channel, const std::string &message)
+bool Server::sendModChannelMessage(const std::string &channel, const std::string &message, bool force)
 {
-	if (!m_modchannel_mgr->canWriteOnChannel(channel))
+	if (!force && !m_modchannel_mgr->canWriteOnChannel(channel))
 		return false;
 
 	broadcastModChannelMessage(channel, message, PEER_ID_SERVER);
@@ -3918,6 +3968,17 @@ Translations *Server::getTranslationLanguage(const std::string &lang_code)
 				translations->loadTranslation(data);
 			}
 		}
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		else if (str_ends_with(i.first, suffix + ".e")) {
+			std::string data;
+			if (fs::ReadFile(i.second.path, data)) {
+				std::string decrypted_data;
+				if (Encryption::decryptSimple(data, decrypted_data))
+					translations->loadTranslation(decrypted_data);
+			}
+		}
+#endif
 	}
 
 	return translations;

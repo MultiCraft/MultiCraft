@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2024 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2024 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2025 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2025 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -21,22 +21,26 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.multicraft.game
 
 import android.content.res.Configuration
-import android.net.Uri
+import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
 import android.text.InputType
 import android.view.*
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN
 import android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
-import com.multicraft.game.MainActivity.Companion.radius
+import androidx.core.net.toUri
 import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
+import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
+import com.multicraft.game.helpers.PreferenceHelper.set
 import org.libsdl.app.SDLActivity
 import kotlin.system.exitProcess
 
@@ -50,8 +54,13 @@ class GameActivity : SDLActivity() {
 
 		@JvmStatic
 		external fun keyboardEvent(keyboard: Boolean)
+
+		@JvmStatic
+		external fun update(key: String, value: String)
 	}
 
+	private var splashView: View? = null
+	private var isExtract: Boolean = false
 	private var messageReturnValue = ""
 	private var hasKeyboard = false
 	override fun getLibraries() = arrayOf("MultiCraft")
@@ -62,23 +71,38 @@ class GameActivity : SDLActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		try {
 			super.onCreate(savedInstanceState)
-		} catch (e: Error) {
+		} catch (_: Error) {
 			exitProcess(0)
-		} catch (e: Exception) {
+		} catch (_: Exception) {
 			exitProcess(0)
 		}
 		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+		isExtract = intent.getBooleanExtra("update", false)
+		if (isExtract) {
+			val container = FrameLayout(this).apply {
+				layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+				setBackgroundResource(R.drawable.bg)
+			}
+			val binding = ActivityMainBinding.inflate(layoutInflater)
+			container.addView(binding.root)
+			splashView = container
+			(binding.loadingAnim.drawable as AnimationDrawable).start()
+			window.addContentView(
+				container,
+				ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+			)
+		}
+		val prefs = PreferenceHelper.init(this)
+		prefs[TAG_BUILD_VER] = BuildConfig.VERSION_CODE
 		hasKeyboard = hasHardKeyboard()
 	}
 
 	override fun onWindowFocusChanged(hasFocus: Boolean) {
+		if (!hasFocus && isInputActive)
+			return
+
 		super.onWindowFocusChanged(hasFocus)
 		if (hasFocus) window.makeFullScreen()
-	}
-
-	@Deprecated("Deprecated in Java")
-	override fun onBackPressed() {
-		// Ignore the back press so MultiCraft can handle it
 	}
 
 	override fun onPause() {
@@ -88,7 +112,12 @@ class GameActivity : SDLActivity() {
 
 	override fun onResume() {
 		super.onResume()
-		if (hasKeyboard) keyboardEvent(true)
+		if (hasKeyboard) {
+			try {
+				keyboardEvent(true)
+			} catch (_: UnsatisfiedLinkError) {
+			}
+		}
 		window.makeFullScreen()
 	}
 
@@ -101,7 +130,6 @@ class GameActivity : SDLActivity() {
 		}
 	}
 
-	@Suppress("unused")
 	fun showDialog(hint: String?, current: String?, editType: Int) {
 		isInputActive = true
 		messageReturnValue = ""
@@ -173,7 +201,7 @@ class GameActivity : SDLActivity() {
 		// should be above `show()`
 		alertWindow.setSoftInputMode(SOFT_INPUT_STATE_VISIBLE)
 		alertDialog.show()
-		if (!isTablet())
+		if (!isTabletDp())
 			alertWindow.makeFullScreenAlert()
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
@@ -237,7 +265,7 @@ class GameActivity : SDLActivity() {
 		val alertWindow = alertDialog.window!!
 		alertWindow.setSoftInputMode(SOFT_INPUT_STATE_VISIBLE)
 		alertDialog.show()
-		if (!isTablet())
+		if (!isTabletDp())
 			alertWindow.makeFullScreenAlert()
 		alertDialog.setOnCancelListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
@@ -246,66 +274,66 @@ class GameActivity : SDLActivity() {
 		}
 	}
 
-	@Suppress("unused")
 	fun isDialogActive() = isInputActive
 
-	@Suppress("unused")
 	fun getDialogValue(): String {
 		val value = messageReturnValue
 		messageReturnValue = ""
 		return value
 	}
 
-	@Suppress("unused")
 	fun getDensity() = resources.displayMetrics.density
 
-	@Suppress("unused")
 	fun notifyServerConnect(multiplayer: Boolean) {
 		isMultiPlayer = multiplayer
 	}
 
-	@Suppress("unused")
 	fun notifyExitGame() {
 	}
 
 	@Suppress("unused")
-	fun openURI(uri: String?) {
+	fun openURI(uri: String?, untrusted: Boolean): Boolean {
+		if (uri == null) return false
+
 		val builder = CustomTabsIntent.Builder()
-		builder.setShareState(SHARE_STATE_OFF)
+			.setShareState(SHARE_STATE_OFF)
+			.setShowTitle(true)
+			.setUrlBarHidingEnabled(true)
 			.setStartAnimations(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
 			.setExitAnimations(this, R.anim.slide_in_top, R.anim.slide_out_bottom)
-		val customTabsIntent = builder.build()
-		try {
-			customTabsIntent.launchUrl(this, Uri.parse(uri))
-		} catch (ignored: Exception) {
-		}
+			.build()
+		builder.launchUrl(this, uri.toUri())
+
+		return true
 	}
 
-	@Suppress("unused")
 	fun finishGame(exc: String?) {
+		print(exc)
 		finishApp(true)
 	}
 
-	@Suppress("unused")
 	fun handleError(exc: String?) {
+		print(exc)
 	}
 
-	@Suppress("unused")
-	fun upgrade(item: String) {
+	fun upgrade(item: String?): Boolean {
+		return item?.isEmpty() ?: false
 	}
 
-	@Suppress("unused")
-	fun getSecretKey(key: String): String {
-		return key
+	fun getSecretKey(secret: String?): String {
+		return secret ?: ""
 	}
 
-	@Suppress("unused")
-	fun getRoundScreen(): Int {
-		return radius
+	fun getCpuArchitecture(): String = System.getProperty("os.arch") ?: "null"
+
+	fun hideSplashScreen() {
+		runOnUiThread {
+			splashView?.let { view ->
+				(view.parent as? ViewGroup)?.removeView(view)
+				splashView = null
+			}
+		}
 	}
 
-	@Suppress("unused")
-	fun getCpuArchitecture(): String {
-		return System.getProperty("os.arch") ?: "null"
-	}
+	fun needsExtractAssets() = isExtract
 }

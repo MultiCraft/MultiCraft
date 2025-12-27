@@ -1874,6 +1874,14 @@ msgstr ""
 msgid "Toggle nametags"
 msgstr "Chuyển đổi thẻ tên"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Ẩn giao diện"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Sử dụng gõ đôi để hiển thị giao diện"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr ""

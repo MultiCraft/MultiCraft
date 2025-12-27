@@ -96,7 +96,7 @@ public:
 
 		FloatType floating = FLOAT_NONE;
 
-		ValignType valign;
+		ValignType valign = VALIGN_TOP;
 
 		gui::IGUIFont *font;
 
@@ -189,8 +189,9 @@ protected:
 	};
 
 	ParsedText m_text;
-	Client *m_client;
-	gui::IGUIEnvironment *m_environment;
+	Client *m_client; ///< null in the mainmenu
+	ISimpleTextureSource *m_tsrc;
+	gui::IGUIEnvironment *m_guienv;
 	s32 m_height;
 	s32 m_voffset;
 	std::vector<RectWithMargin> m_floating;
@@ -218,7 +219,7 @@ public:
 
 protected:
 	// GUI members
-	Client *m_client;
+	ISimpleTextureSource *m_tsrc;
 	GUIScrollBar *m_vscrollbar;
 	TextDrawer m_drawer;
 
@@ -233,4 +234,5 @@ protected:
 	bool m_swipe_started;
 	int m_swipe_start_y;
 	float m_swipe_pos;
+	ParsedText::Element *m_pressed_element = nullptr;
 };

@@ -83,3 +83,5 @@ core.registered_on_modchannel_message, core.register_on_modchannel_message = mak
 core.registered_on_modchannel_signal, core.register_on_modchannel_signal = make_registration()
 core.registered_on_inventory_open, core.register_on_inventory_open = make_registration()
 core.registered_on_tab, core.register_on_tab = make_registration()
+core.registered_on_hud_button_press, core.register_on_hud_button_press = make_registration()
+core.registered_on_update, core.register_on_update = make_registration()

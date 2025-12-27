@@ -39,7 +39,7 @@ sqlite3_version=3.41.2
 luajit_version=20230221
 leveldb_version=1.23
 zlib_version=1.2.13
-sdl_version=2.28.5
+sdl_version=3.2.20
 jpeg_version=3.0.1
 png_version=1.6.42
 zstd_version=1.4.9
@@ -74,8 +74,8 @@ cd $builddir
 	-c -O $packagedir/libleveldb-$leveldb_version.zip
 [ -e $packagedir/openal_stripped.zip ] || wget http://minetest.kitsunemimi.pw/openal_stripped.zip \
 	-c -O $packagedir/openal_stripped.zip
-[ -e $packagedir/SDL2-devel-$sdl_version-mingw.zip ] || wget https://github.com/libsdl-org/SDL/releases/download/release-$sdl_version/SDL2-devel-$sdl_version-mingw.zip \
-	-c -O $packagedir/SDL2-devel-$sdl_version-mingw.zip
+[ -e $packagedir/SDL3-devel-$sdl_version-mingw.zip ] || wget https://github.com/libsdl-org/SDL/releases/download/release-$sdl_version/SDL3-devel-$sdl_version-mingw.zip \
+	-c -O $packagedir/SDL3-devel-$sdl_version-mingw.zip
 
 # Extract stuff
 cd $libdir
@@ -91,7 +91,7 @@ cd $libdir
 [ -d openal_stripped ] || unzip -o $packagedir/openal_stripped.zip
 [ -d luajit ] || unzip -o $packagedir/luajit-$luajit_version.zip -d luajit
 [ -d leveldb ] || unzip -o $packagedir/libleveldb-$leveldb_version.zip -d leveldb
-[ -d SDL2 ] || (unzip -o $packagedir/SDL2-devel-$sdl_version-mingw.zip SDL2-$sdl_version/i686-w64-mingw32/* -d SDL2 && mv SDL2/SDL2-$sdl_version/i686-w64-mingw32/* SDL2)
+[ -d libSDL ] || (unzip -o $packagedir/SDL3-devel-$sdl_version-mingw.zip SDL3-$sdl_version/i686-w64-mingw32/* -d libSDL && mv libSDL/SDL3-$sdl_version/i686-w64-mingw32/* libSDL && mv libSDL/lib/libSDL3.a libSDL/lib/libSDL.a)
 
 # Get libjpeg
 if [ ! -d libjpeg ]; then
@@ -142,7 +142,7 @@ fi
 
 # Get irrlicht
 if [ ! -d irrlicht ]; then
-	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
+	git clone --depth 1 -b SDL https://github.com/MoNTE48/Irrlicht irrlicht
 
 	cd irrlicht/source/Irrlicht
 
@@ -154,7 +154,7 @@ if [ ! -d irrlicht ]; then
 		-DNO_IRR_COMPILE_WITH_OGLES2_ \
 		-DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
 		-I/usr/i686-w64-mingw32/include \
-		-I$libdir/SDL2/include/SDL2 \
+		-I$libdir/libSDL/include \
 		-I$libdir/zlib/include \
 		-I$libdir/libjpeg \
 		-I$libdir/libjpeg/build \
@@ -201,8 +201,8 @@ cmake .. \
 	\
 	-DUSE_STATIC_BUILD=1 \
 	-DUSE_SDL=1 \
-	-DSDL2_LIBRARIES="$libdir/SDL2/lib/libSDL2.a" \
-	-DSDL2_INCLUDE_DIRS="$libdir/SDL2/include/SDL2" \
+	-DSDL_LIBRARIES="$libdir/libSDL/lib/libSDL.a" \
+	-DSDL_INCLUDE_DIRS="$libdir/libSDL/include" \
 	\
 	-DCMAKE_C_FLAGS=" \
 		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \

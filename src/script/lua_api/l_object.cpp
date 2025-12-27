@@ -745,7 +745,7 @@ int ObjectRef::l_set_nametag_attributes(lua_State *L)
 			if (read_color(L, -1, &color))
 				prop->nametag_bgcolor = color;
 		} else {
-			prop->nametag_bgcolor = nullopt;
+			prop->nametag_bgcolor = std::nullopt;
 		}
 	}
 	lua_pop(L, 1);
@@ -1377,6 +1377,20 @@ int ObjectRef::l_get_formspec_prepend(lua_State *L)
 
 	lua_pushlstring(L, formspec.c_str(), formspec.size());
 	return 1;
+}
+
+// copy_to_clipboard(self, text)
+int ObjectRef::l_copy_to_clipboard(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+	ObjectRef *ref = checkobject(L, 1);
+	RemotePlayer *player = getplayer(ref);
+	if (player == nullptr)
+		return 0;
+
+	std::string text = luaL_checkstring(L, 2);
+	getServer(L)->copyToClipboard(player, text);
+	return 0;
 }
 
 // get_player_control(self)
@@ -2383,6 +2397,7 @@ luaL_Reg ObjectRef::methods[] = {
 	luamethod(ObjectRef, get_inventory_formspec),
 	luamethod(ObjectRef, set_formspec_prepend),
 	luamethod(ObjectRef, get_formspec_prepend),
+	luamethod(ObjectRef, copy_to_clipboard),
 	luamethod(ObjectRef, get_player_control),
 	luamethod(ObjectRef, get_player_control_bits),
 	luamethod(ObjectRef, set_physics_override),

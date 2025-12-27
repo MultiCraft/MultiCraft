@@ -50,7 +50,9 @@ struct ChatInterface;
 class IWritableItemDefManager;
 class NodeDefManager;
 class IWritableCraftDefManager;
+#if BAN_MANAGER
 class BanManager;
+#endif
 class EventManager;
 class Inventory;
 class ModChannelMgr;
@@ -135,6 +137,7 @@ struct ClientInfo {
 	u16 prot_vers;
 	u8 major, minor, patch;
 	std::string vers_string, platform, sysinfo, lang_code;
+	u32 system_ram;
 };
 
 class Server : public con::PeerHandler, public MapEventReceiver,
@@ -304,6 +307,7 @@ public:
 	Map & getMap() { return m_env->getMap(); }
 	ServerEnvironment & getEnv() { return *m_env; }
 	v3f findSpawnPos();
+	void copyToClipboard(RemotePlayer *player, const std::string &text);
 
 	u32 hudAdd(RemotePlayer *player, HudElement *element);
 	bool hudRemove(RemotePlayer *player, u32 id);
@@ -360,7 +364,7 @@ public:
 
 	bool joinModChannel(const std::string &channel);
 	bool leaveModChannel(const std::string &channel);
-	bool sendModChannelMessage(const std::string &channel, const std::string &message);
+	bool sendModChannelMessage(const std::string &channel, const std::string &message, bool force = false);
 	ModChannel *getModChannel(const std::string &channel);
 
 	// Send block to specific player only
@@ -557,8 +561,10 @@ private:
 	// server connection
 	std::shared_ptr<con::Connection> m_con;
 
+#if BAN_MANAGER
 	// Ban checking
 	BanManager *m_banmanager = nullptr;
+#endif
 
 	// Rollback manager (behind m_env_mutex)
 	IRollbackManager *m_rollback = nullptr;

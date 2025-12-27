@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-OGG_VERSION=1.3.5
+OGG_VERSION=1.3.6
 
 if [ ! -d libogg-src ]; then
 	git clone -b v$OGG_VERSION --depth 1 https://github.com/xiph/ogg libogg-src
@@ -13,7 +13,8 @@ cd libogg-src/build
 cmake .. \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS" \
-	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC"
+	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC" \
+	-DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 cmake --build . -j${NPROC}
 

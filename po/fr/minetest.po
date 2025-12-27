@@ -1918,6 +1918,14 @@ msgstr "Interface"
 msgid "Toggle nametags"
 msgstr "Porte-noms à bascule"
 
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Cacher l'interface"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Double-tap pour afficher l'interface"
+
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
 msgstr "Afficher le tchat"

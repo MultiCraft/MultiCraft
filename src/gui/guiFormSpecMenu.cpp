@@ -50,6 +50,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/client.h"
 #include "client/fontengine.h"
 #include "client/sound.h"
+#include "util/encryption.h"
 #include "util/hex.h"
 #include "util/numeric.h"
 #include "util/string.h" // for parseColorString()
@@ -65,17 +66,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "guiInventoryList.h"
 #include "guiItemImage.h"
 #include "guiScrollContainer.h"
-#include "intlGUIEditBox.h"
 #include "guiHyperText.h"
 #include "guiScene.h"
-#include "touchscreengui.h"
-
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
+#ifdef HAVE_TOUCHSCREENGUI
+#include "touchscreengui_mc.h"
 #endif
 
-#ifdef __IOS__
-#import "wrapper.h"
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#include <SDL3/SDL.h>
 #endif
 
 #define MY_CHECKPOS(a,b)													\
@@ -220,10 +218,7 @@ void GUIFormSpecMenu::setInitialFocus()
 		if (it->getType() == gui::EGUIET_EDIT_BOX
 				&& it->getText()[0] == 0) {
 			Environment->setFocus(it);
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
-#endif
+			RenderingEngine::startTextInput();
 			return;
 		}
 	}
@@ -232,10 +227,7 @@ void GUIFormSpecMenu::setInitialFocus()
 	for (gui::IGUIElement *it : children) {
 		if (it->getType() == gui::EGUIET_EDIT_BOX) {
 			Environment->setFocus(it);
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
-#endif
+			RenderingEngine::startTextInput();
 			return;
 		}
 	}
@@ -629,7 +621,7 @@ void GUIFormSpecMenu::parseCheckbox(parserData* data, const std::string &element
 			fselected = true;
 
 		std::wstring wlabel = translate_string(utf8_to_wide(unescape_string(label)));
-		const core::dimension2d<u32> label_size = m_font->getDimension(wlabel.c_str());
+		const core::dimension2d<u32> label_size = ((CGUITTFont *)m_font)->getTotalDimension(wlabel.c_str());
 		s32 cb_size = Environment->getSkin()->getSize(gui::EGDS_CHECK_BOX_WIDTH);
 		s32 y_center = (std::max(label_size.Height, (u32)cb_size) + 1) / 2;
 
@@ -850,12 +842,12 @@ void GUIFormSpecMenu::parseImage(parserData* data, const std::string &element)
 		}
 
 		std::string name = unescape_string(parts[1 + offset]);
-		video::ITexture *texture = m_tsrc->getTexture(name);
 
 		v2s32 pos;
 		v2s32 geom;
 
 		if (parts.size() < 3) {
+			video::ITexture *texture = m_tsrc->getTexture(name);
 			if (texture != nullptr) {
 				core::dimension2du dim = texture->getOriginalSize();
 				geom.X = dim.Width;
@@ -894,26 +886,11 @@ void GUIFormSpecMenu::parseImage(parserData* data, const std::string &element)
 		if (parts.size() >= 4)
 			parseMiddleRect(parts[3], &middle);
 
-		// Temporary fix for issue #12581 in 5.6.0.
-		// Use legacy image when not rendering 9-slice image because GUIAnimatedImage
-		// uses NNAA filter which causes visual artifacts when image uses alpha blending.
+		GUIAnimatedImage *e = new GUIAnimatedImage(Environment, data->current_parent,
+			spec.fid, rect, m_tsrc);
 
-		gui::IGUIElement *e;
-		if (middle.getArea() > 0) {
-			GUIAnimatedImage *image = new GUIAnimatedImage(Environment, data->current_parent,
-				spec.fid, rect);
-
-			image->setTexture(texture);
-			image->setMiddleRect(middle);
-			e = image;
-		}
-		else {
-			gui::IGUIImage *image = Environment->addImage(rect, data->current_parent, spec.fid, nullptr, true);
-			image->setImage(texture);
-			image->setScaleImage(true);
-			image->grab(); // compensate for drop in addImage
-			e = image;
-		}
+		e->setTextureName(name);
+		e->setMiddleRect(middle);
 
 		auto style = getDefaultStyleForElement("image", spec.fname);
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, m_formspec_version < 3));
@@ -980,9 +957,9 @@ void GUIFormSpecMenu::parseAnimatedImage(parserData *data, const std::string &el
 		parseMiddleRect(parts[7], &middle);
 
 	GUIAnimatedImage *e = new GUIAnimatedImage(Environment, data->current_parent,
-		spec.fid, rect);
+		spec.fid, rect, m_tsrc);
 
-	e->setTexture(m_tsrc->getTexture(texture_name));
+	e->setTextureName(texture_name);
 	e->setMiddleRect(middle);
 	e->setFrameDuration(frame_duration);
 	e->setFrameCount(frame_count);
@@ -1053,15 +1030,19 @@ void GUIFormSpecMenu::parseItemImage(parserData* data, const std::string &elemen
 void GUIFormSpecMenu::parseButton(parserData* data, const std::string &element,
 		const std::string &type)
 {
+	int expected_parts = (type == "button_url" || type == "button_url_exit") ? 5 : 4;
 	std::vector<std::string> parts = split(element,';');
 
-	if ((parts.size() == 4) ||
-		((parts.size() > 4) && (m_formspec_version > FORMSPEC_API_VERSION)))
+	if ((parts.size() == expected_parts) ||
+		((parts.size() > expected_parts) && (m_formspec_version > FORMSPEC_API_VERSION)))
 	{
 		std::vector<std::string> v_pos = split(parts[0],',');
 		std::vector<std::string> v_geom = split(parts[1],',');
 		std::string name = parts[2];
 		std::string label = parts[3];
+		std::string url;
+		if (type == "button_url" || type == "button_url_exit")
+			url = parts[4];
 
 		MY_CHECKPOS("button",0);
 		MY_CHECKGEOM("button",1);
@@ -1096,8 +1077,10 @@ void GUIFormSpecMenu::parseButton(parserData* data, const std::string &element,
 			258 + m_fields.size()
 		);
 		spec.ftype = f_Button;
-		if(type == "button_exit")
+		if(type == "button_exit" || type == "button_url_exit")
 			spec.is_exit = true;
+		if (type == "button_url" || type == "button_url_exit")
+			spec.url = url;
 
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc,
 				data->current_parent, spec.fid, spec.flabel.c_str());
@@ -1625,22 +1608,16 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 	GUIEditBox *box = nullptr;
 	gui::IGUIEditBox *e = nullptr;
 
-#if USE_FREETYPE && IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 9
-		box = new gui::intlGUIEditBox(spec.fdefault.c_str(), true, Environment,
-				data->current_parent, spec.fid, rect, is_editable, is_multiline);
+	if (is_multiline) {
+		box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
+				data->current_parent, spec.fid, rect, is_editable, !is_editable,
+				m_sound_manager);
 		e = box;
-#else
-		if (is_multiline) {
-			box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
-					data->current_parent, spec.fid, rect, is_editable, !is_editable,
-					m_sound_manager);
-			e = box;
-		} else if (is_editable) {
-			e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
-					data->current_parent, spec.fid);
-			e->grab();
-		}
-#endif
+	} else if (is_editable) {
+		e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
+				data->current_parent, spec.fid);
+		e->grab();
+	}
 
 	auto style = getDefaultStyleForElement(is_multiline ? "textarea" : "field", spec.fname);
 
@@ -1924,7 +1901,7 @@ void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 
 				rect = core::rect<s32>(
 					pos.X, pos.Y,
-					pos.X + font->getDimension(wlabel_plain.c_str()).Width,
+					pos.X + ((CGUITTFont *)font)->getTotalDimension(wlabel_plain.c_str()).Width,
 					pos.Y + imgsize.Y);
 
 			} else {
@@ -1946,7 +1923,7 @@ void GUIFormSpecMenu::parseLabel(parserData* data, const std::string &element)
 
 				rect = core::rect<s32>(
 					pos.X, pos.Y - m_btn_height,
-					pos.X + font->getDimension(wlabel_plain.c_str()).Width,
+					pos.X + ((CGUITTFont *)font)->getTotalDimension(wlabel_plain.c_str()).Width,
 					pos.Y + m_btn_height);
 			}
 
@@ -2876,8 +2853,29 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 		warningstream << "invalid use of model without a size[] element" << std::endl;
 
 	scene::ISceneManager *smgr = RenderingEngine::get_scene_manager();
-	scene::IAnimatedMesh *mesh = m_client == nullptr ? smgr->getMesh(meshstr.c_str()) :
-			m_client->getMesh(meshstr);
+
+	scene::IAnimatedMesh *mesh;
+	if (m_client != nullptr) {
+		mesh = m_client->getMesh(meshstr);
+#if defined(__ANDROID__) || defined(__APPLE__)
+	} else if (meshstr.compare(meshstr.size() - 2, 2, ".e") == 0) {
+		std::string data, decrypted_data, filename;
+		if (fs::ReadFile(meshstr, data) &&
+				Encryption::decryptSimple(data, decrypted_data, &filename)) {
+			Buffer<char> data_rw(decrypted_data.c_str(), decrypted_data.size());
+			io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
+			io::IReadFile *rfile = irrfs->createMemoryReadFile(
+				*data_rw, data_rw.getSize(), filename.c_str());
+			FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
+			mesh = smgr->getMesh(rfile);
+			rfile->drop();
+		} else {
+			mesh = nullptr;
+		}
+#endif
+	} else {
+		mesh = smgr->getMesh(meshstr.c_str());
+	}
 
 	if (!mesh) {
 		errorstream << "Invalid model element: Unable to load mesh:"
@@ -2982,7 +2980,7 @@ void GUIFormSpecMenu::parseElement(parserData* data, const std::string &element)
 		return;
 	}
 
-	if (type == "button" || type == "button_exit") {
+	if (type == "button" || type == "button_exit" || type == "button_url" || type == "button_url_exit") {
 		parseButton(data, description, type);
 		return;
 	}
@@ -3420,7 +3418,8 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 #ifdef __IOS__
 				// Prefer Desktop size on large tablets.
-				if (!Device7and9Inch && !Device8and3Inch && !Device10and5Inch)
+				const char *model = MultiCraft::getDeviceModel();
+				if (isDevice11Inch(model) || isDevice12and9Inch(model))
 					prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
 #endif
 			}
@@ -3809,7 +3808,7 @@ void GUIFormSpecMenu::drawMenu()
 		m_zero_pointer = AbsoluteClippingRect.UpperLeftCorner;
 		m_pointer = m_zero_pointer;
 	}
-	
+
 	/*
 		Draw fields/buttons tooltips and update the mouse cursor
 	*/
@@ -4814,6 +4813,11 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 						m_sound_manager->playSound(s.sound, false, 1.0f);
 
 					s.send = true;
+
+					if (!s.url.empty()) {
+						porting::open_url(s.url, m_client != nullptr);
+					}
+
 					if (s.is_exit) {
 						if (m_allowclose) {
 							acceptInput(quit_mode_accept);
