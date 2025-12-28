@@ -426,9 +426,12 @@ void ScriptApiBase::removeObjectReference(ServerActiveObject *cobj)
 	// Get object_refs[id]
 	lua_pushnumber(L, cobj->getId()); // Push id
 	lua_gettable(L, objectstable);
-	// Set object reference to NULL
-	ObjectRef::set_null(L);
-	lua_pop(L, 1); // pop object
+	// Only set to NULL if we actually have a userdata
+	if (lua_isuserdata(L, -1)) {
+		ObjectRef::set_null(L);
+	}
+	// pop object (either userdata or nil)
+	lua_pop(L, 1);
 
 	// Set object_refs[id] = nil
 	lua_pushnumber(L, cobj->getId()); // Push id
