@@ -984,7 +984,12 @@ static bool run_dedicated_server(const GameParams &game_params, const Settings &
 
 			// Run server
 			bool &kill = *porting::signal_handler_killstatus();
-			dedicated_server_loop(server, kill);
+			try {
+				dedicated_server_loop(server, kill);
+			} catch (const std::exception &e) {
+				errorstream << "Got C++ exception: " << e.what() << std::endl;
+				throw;
+			}
 
 		} catch (const ModError &e) {
 			errorstream << "ModError: " << e.what() << std::endl;
