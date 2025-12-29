@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cctype>
 #include <sstream>
 
+#include "bidi.h"
 #include "config.h"
 #include "debug.h"
 #include "util/strfnd.h"
@@ -735,7 +736,7 @@ ChatBuffer& ChatBackend::getRecentBuffer()
 	return m_recent_buffer;
 }
 
-EnrichedString ChatBackend::getRecentChat() const
+EnrichedString ChatBackend::getRecentChat(bool bidi_reordering) const
 {
 	EnrichedString result;
 	for (u32 i = 0; i < m_recent_buffer.getLineCount(); ++i) {
@@ -747,7 +748,17 @@ EnrichedString ChatBackend::getRecentChat() const
 			result += line.name;
 			result += L"> ";
 		}
-		result += line.text;
+		if (bidi_reordering) {
+			std::wstring text_std = line.text.getString();
+			std::replace_if(text_std.begin(), text_std.end(),
+					[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
+
+			core::stringw text_irr(text_std.c_str());
+			irr::core::TextBidiData text_bidi = applyBidiReordering(text_irr);
+			result += text_bidi.TextBidi.c_str();
+		} else {
+			result += line.text;
+		}
 	}
 	return result;
 }
