@@ -648,8 +648,11 @@ void ServerEnvironment::saveMeta()
 		m_lbm_mgr.createIntroductionTimesString());
 	args.setU64("day_count", m_day_count);
 
-	if (m_has_world_spawnpoint)
+	if (m_has_world_spawnpoint) {
 		args.setV3F("static_spawnpoint", m_world_spawnpoint);
+		args.setFloat("static_spawnpoint_yaw", m_world_spawnpoint_yaw);
+		args.setFloat("static_spawnpoint_pitch", m_world_spawnpoint_pitch);
+	}
 
 	args.writeLines(ss);
 
@@ -726,6 +729,10 @@ void ServerEnvironment::loadMeta()
 		args.getU64("day_count") : 0;
 
 	m_has_world_spawnpoint = args.getV3FNoEx("static_spawnpoint", m_world_spawnpoint);
+	if (m_has_world_spawnpoint) {
+		args.getFloatNoEx("static_spawnpoint_yaw", m_world_spawnpoint_yaw);
+		args.getFloatNoEx("static_spawnpoint_pitch", m_world_spawnpoint_pitch);
+	}
 }
 
 /**

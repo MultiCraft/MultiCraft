@@ -370,14 +370,21 @@ public:
 	 */
 	void loadDefaultMeta();
 
-	bool getWorldSpawnpoint(v3f &spawnpoint) {
-		if (m_has_world_spawnpoint)
+	bool getWorldSpawnpoint(v3f &spawnpoint, float *yaw_to = nullptr, float *pitch_to = nullptr) {
+		if (m_has_world_spawnpoint) {
 			spawnpoint = m_world_spawnpoint;
+			if (yaw_to != nullptr)
+				*yaw_to = m_world_spawnpoint_yaw;
+			if (pitch_to != nullptr)
+				*pitch_to = m_world_spawnpoint_pitch;
+		}
 		return m_has_world_spawnpoint;
 	}
 
-	void setWorldSpawnpoint(const v3f &spawnpoint) {
+	void setWorldSpawnpoint(const v3f &spawnpoint, const float yaw, const float pitch) {
 		m_world_spawnpoint = spawnpoint;
+		m_world_spawnpoint_yaw = yaw;
+		m_world_spawnpoint_pitch = pitch;
 		m_has_world_spawnpoint = true;
 	}
 
@@ -494,6 +501,8 @@ private:
 	std::unordered_map<u32, u16> m_particle_spawner_attachments;
 
 	v3f m_world_spawnpoint = v3f(0.f, 0.f, 0.f);
+	float m_world_spawnpoint_yaw = 0.0f;
+	float m_world_spawnpoint_pitch = 0.0f;
 	bool m_has_world_spawnpoint = false;
 
 	ServerActiveObject* createSAO(ActiveObjectType type, v3f pos, const std::string &data);

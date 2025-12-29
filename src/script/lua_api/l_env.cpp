@@ -1430,11 +1430,14 @@ int ModApiEnvMod::l_get_world_spawnpoint(lua_State * L)
 	GET_ENV_PTR;
 
 	v3f spawnpoint;
-	if (!env->getWorldSpawnpoint(spawnpoint))
+	float yaw, pitch;
+	if (!env->getWorldSpawnpoint(spawnpoint, &yaw, &pitch))
 		return 0;
 
 	push_v3f(L, spawnpoint);
-	return 1;
+	lua_pushnumber(L, yaw);
+	lua_pushnumber(L, pitch);
+	return 3;
 }
 
 // set_world_spawnpoint(spawnpoint)
@@ -1442,11 +1445,13 @@ int ModApiEnvMod::l_set_world_spawnpoint(lua_State * L)
 {
 	GET_ENV_PTR;
 
-	if (lua_isnil(L, 1)) {
+	if (lua_isnoneornil(L, 1)) {
 		env->resetWorldSpawnpoint();
 	} else {
 		const v3f spawnpoint = read_v3f(L, 1);
-		env->setWorldSpawnpoint(spawnpoint);
+		const float yaw = lua_isnoneornil(L, 2) ? 0.0f : readParam<float>(L, 2);
+		const float pitch = lua_isnoneornil(L, 3) ? 0.0f : readParam<float>(L, 3);
+		env->setWorldSpawnpoint(spawnpoint, yaw, pitch);
 	}
 
 	return 0;
