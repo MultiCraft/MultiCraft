@@ -99,9 +99,12 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 
 					u64 dt = last_sample.timestamp - first_sample.timestamp;
 					if (dt > 0) {
-						float distance = last_sample.position - first_sample.position;
-						m_velocity = distance / dt;
-						m_velocity = std::max(std::min(m_velocity, 2.0f), -2.0f);
+						double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+						float distance = (last_sample.position - first_sample.position) * m_scrollfactor;
+						float distance_in = distance * 1000 / screen_dpi;
+
+						m_velocity = distance_in / dt;
+						m_velocity = std::max(std::min(m_velocity, 20.0f), -20.0f);
 						m_is_coasting = true;
 					}
 				}
@@ -166,28 +169,30 @@ void GUIScrollContainer::updateScrollCoasting()
 	if (dt == 0)
 		return;
 
-	const float SLOWING_FACTOR = 0.0015f;
+	const float SLOWING_FACTOR = 0.02f;
 	const float VELOCITY_FACTOR = 1.0f;
-	const float MIN_VELOCITY = 0.01f;
 
 	float velocity_decrease = SLOWING_FACTOR * dt;
 	if (m_velocity > 0) {
 		m_velocity -= velocity_decrease;
-		if (m_velocity < MIN_VELOCITY) {
+		if (m_velocity < 0) {
 			m_velocity = 0;
 			m_is_coasting = false;
 			return;
 		}
 	} else if (m_velocity < 0) {
 		m_velocity += velocity_decrease;
-		if (m_velocity > -MIN_VELOCITY) {
+		if (m_velocity > 0) {
 			m_velocity = 0;
 			m_is_coasting = false;
 			return;
 		}
 	}
 
-	m_swipe_pos += m_velocity * VELOCITY_FACTOR * dt;
+	double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+	float pixel_velocity = m_velocity * screen_dpi / m_scrollfactor / 1000;
+
+	m_swipe_pos += pixel_velocity * VELOCITY_FACTOR * dt;
 
 	if (m_swipe_pos <= m_scrollbar->getMin()) {
 		m_swipe_pos = m_scrollbar->getMin();
