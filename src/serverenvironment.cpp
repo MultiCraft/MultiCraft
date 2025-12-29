@@ -1184,7 +1184,12 @@ void ServerEnvironment::clearObjects(ClearObjectsMode mode)
 
 		// If known by some client, don't delete immediately
 		if (obj->m_known_by_count > 0) {
-			obj->markForRemoval();
+			try {
+				obj->markForRemoval();
+			} catch (LuaError &e) {
+				m_server->setAsyncFatalError(
+						std::string("Lua error in clearObjects: ") + e.what());
+			}
 			return false;
 		}
 
@@ -2091,7 +2096,13 @@ void ServerEnvironment::deactivateFarObjects(bool _force_delete)
 
 		// Regardless of what happens to the object at this point, deactivate it first.
 		// This ensures that LuaEntity on_deactivate is always called.
-		obj->markForDeactivation();
+		try {
+			obj->markForDeactivation();
+		} catch (LuaError &e) {
+			m_server->setAsyncFatalError(
+					std::string("Lua error while deactivating object: ") + e.what());
+			return false;
+		}
 
 		/*
 			If known by some client, set pending deactivation.
