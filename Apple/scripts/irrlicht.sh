@@ -12,7 +12,7 @@ cd irrlicht-src/source/Irrlicht
 
 xcodebuild build \
 	 ARCHS="$OSX_ARCHES" \
-	 OTHER_CFLAGS="-I../../../libpng/include -I../../../libjpeg/include" \
+	 OTHER_CFLAGS='$(inherited) -I../../../libpng/include -I../../../libjpeg/include' \
 	-project Irrlicht.xcodeproj \
 	-configuration Release \
 	-scheme Irrlicht_OSX

@@ -796,10 +796,8 @@ endif(BUILD_SERVER)
 # Blacklisted locales that don't work.
 # see issue #4638
 set(GETTEXT_BLACKLISTED_LOCALES
-	ar
 	he
 	ky
-	ms_Arab
 	th
 )
 
