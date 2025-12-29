@@ -68,8 +68,8 @@ private:
 
 	struct VelocitySample
 	{
-	    float position;
-	    u64 timestamp;
+		float position;
+		u64 timestamp;
 	};
 
 	static const u32 MAX_VELOCITY_SAMPLES = 5;
@@ -79,4 +79,5 @@ private:
 
 	void updateScrolling();
 	void updateScrollCoasting();
+	void calculateCoastingVelocity();
 };

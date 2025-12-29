@@ -81,34 +81,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			m_swipe_start_px = -1;
 			if (m_swipe_started) {
 				m_swipe_started = false;
-
-				if (m_sample_count > 1) {
-					u32 last_sample_index = (m_sample_index - 1 + MAX_VELOCITY_SAMPLES) % MAX_VELOCITY_SAMPLES;
-					VelocitySample last_sample = m_velocity_samples[last_sample_index];
-
-					VelocitySample first_sample = last_sample;
-					for (u32 i = 0; i < m_sample_count; i++) {
-						VelocitySample& sample = m_velocity_samples[i];
-
-						if (m_last_time - sample.timestamp > 150)
-							continue;
-
-						if (sample.timestamp < first_sample.timestamp)
-							first_sample = sample;
-					}
-
-					u64 dt = last_sample.timestamp - first_sample.timestamp;
-					if (dt > 0) {
-						double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
-						float distance = (last_sample.position - first_sample.position) * m_scrollfactor;
-						float distance_in = distance * 1000 / screen_dpi;
-
-						m_velocity = distance_in / dt;
-						m_velocity = std::max(std::min(m_velocity, 20.0f), -20.0f);
-						m_is_coasting = true;
-					}
-				}
-
+				calculateCoastingVelocity();
 				return true;
 			}
 		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
@@ -131,8 +104,10 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 				u64 current_time = porting::getTimeMs();
 
 				m_velocity_samples[m_sample_index].position = m_swipe_pos;
-				m_velocity_samples[m_sample_index].timestamp = current_time;
-				m_sample_index = (m_sample_index + 1) % MAX_VELOCITY_SAMPLES;
+				m_velocity_samples[m_sample_index].timestamp =
+						current_time;
+				m_sample_index = (m_sample_index + 1) %
+						 MAX_VELOCITY_SAMPLES;
 				if (m_sample_count < MAX_VELOCITY_SAMPLES) {
 					m_sample_count++;
 				}
@@ -153,6 +128,39 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 #endif
 
 	return IGUIElement::OnEvent(event);
+}
+
+void GUIScrollContainer::calculateCoastingVelocity()
+{
+	if (m_sample_count < 1)
+		return;
+
+	u32 last_sample_index = (m_sample_index - 1 + MAX_VELOCITY_SAMPLES) %
+				MAX_VELOCITY_SAMPLES;
+	VelocitySample last_sample = m_velocity_samples[last_sample_index];
+
+	VelocitySample first_sample = last_sample;
+	for (u32 i = 0; i < m_sample_count; i++) {
+		VelocitySample &sample = m_velocity_samples[i];
+
+		if (m_last_time - sample.timestamp > 150)
+			continue;
+
+		if (sample.timestamp < first_sample.timestamp)
+			first_sample = sample;
+	}
+
+	u64 dt = last_sample.timestamp - first_sample.timestamp;
+	if (dt > 0) {
+		double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+		float distance = (last_sample.position - first_sample.position) *
+				 m_scrollfactor;
+		float distance_in = distance * 1000 / screen_dpi;
+
+		m_velocity = distance_in / dt;
+		m_velocity = std::max(std::min(m_velocity, 20.0f), -20.0f);
+		m_is_coasting = true;
+	}
 }
 
 void GUIScrollContainer::updateScrollCoasting()
