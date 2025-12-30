@@ -445,7 +445,8 @@ void GUIChatConsole::drawText()
 					destrect,
 					false,
 					false,
-					&AbsoluteClippingRect);
+					&AbsoluteClippingRect,
+					false);
 			} else
 #endif
 			{
@@ -456,7 +457,8 @@ void GUIChatConsole::drawText()
 					video::SColor(255, 255, 255, 255),
 					false,
 					false,
-					&AbsoluteClippingRect);
+					&AbsoluteClippingRect,
+					false);
 			}
 		}
 	}
@@ -529,7 +531,8 @@ void GUIChatConsole::drawPrompt()
 		video::SColor(255, 255, 255, 255),
 		false,
 		false,
-		&AbsoluteClippingRect);
+		&AbsoluteClippingRect,
+		false);
 
 	// Draw the cursor during on periods
 	if ((m_cursor_blink & 0x8000) != 0)
