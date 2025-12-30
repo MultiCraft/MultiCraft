@@ -1191,8 +1191,10 @@ core.register_chatcommand("spawn", {
 
 		if spawnpoint then
 			player:set_pos(spawnpoint)
-			player:set_look_horizontal(yaw)
-			player:set_look_vertical(pitch)
+			if yaw and pitch then
+				player:set_look_horizontal(yaw)
+				player:set_look_vertical(pitch)
+			end
 			return true, "Teleporting to spawn..."
 		else
 			return false, "The spawn point is not set!"

@@ -27,6 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/numeric.h"
 #include <set>
 #include <random>
+#include <optional>
 
 class IGameDef;
 class ServerMap;
@@ -370,26 +371,30 @@ public:
 	 */
 	void loadDefaultMeta();
 
-	bool getWorldSpawnpoint(v3f &spawnpoint, float *yaw_to = nullptr, float *pitch_to = nullptr) {
-		if (m_has_world_spawnpoint) {
-			spawnpoint = m_world_spawnpoint;
+	bool getWorldSpawnpoint(v3f &spawnpoint,
+			std::optional<float> *yaw_to = nullptr,
+			std::optional<float> *pitch_to = nullptr) {
+		if (m_world_spawnpoint.has_value()) {
+			spawnpoint = m_world_spawnpoint.value();
 			if (yaw_to != nullptr)
 				*yaw_to = m_world_spawnpoint_yaw;
 			if (pitch_to != nullptr)
 				*pitch_to = m_world_spawnpoint_pitch;
 		}
-		return m_has_world_spawnpoint;
+		return m_world_spawnpoint.has_value();
 	}
 
-	void setWorldSpawnpoint(const v3f &spawnpoint, const float yaw, const float pitch) {
+	void setWorldSpawnpoint(const v3f &spawnpoint,
+			const std::optional<float> yaw, const std::optional<float> pitch) {
 		m_world_spawnpoint = spawnpoint;
 		m_world_spawnpoint_yaw = yaw;
 		m_world_spawnpoint_pitch = pitch;
-		m_has_world_spawnpoint = true;
 	}
 
 	void resetWorldSpawnpoint() {
-		m_has_world_spawnpoint = false;
+		m_world_spawnpoint = std::nullopt;
+		m_world_spawnpoint_yaw = std::nullopt;
+		m_world_spawnpoint_pitch = std::nullopt;
 	}
 
 private:
@@ -500,10 +505,9 @@ private:
 	std::unordered_map<u32, float> m_particle_spawners;
 	std::unordered_map<u32, u16> m_particle_spawner_attachments;
 
-	v3f m_world_spawnpoint = v3f(0.f, 0.f, 0.f);
-	float m_world_spawnpoint_yaw = 0.0f;
-	float m_world_spawnpoint_pitch = 0.0f;
-	bool m_has_world_spawnpoint = false;
+	std::optional<v3f> m_world_spawnpoint = v3f(0.f, 0.f, 0.f);
+	std::optional<float> m_world_spawnpoint_yaw = std::nullopt;
+	std::optional<float> m_world_spawnpoint_pitch = std::nullopt;
 
 	ServerActiveObject* createSAO(ActiveObjectType type, v3f pos, const std::string &data);
 };

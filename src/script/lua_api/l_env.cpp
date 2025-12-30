@@ -1430,13 +1430,16 @@ int ModApiEnvMod::l_get_world_spawnpoint(lua_State * L)
 	GET_ENV_PTR;
 
 	v3f spawnpoint;
-	float yaw, pitch;
+	std::optional<float> yaw, pitch;
 	if (!env->getWorldSpawnpoint(spawnpoint, &yaw, &pitch))
 		return 0;
 
 	push_v3f(L, spawnpoint);
-	lua_pushnumber(L, yaw);
-	lua_pushnumber(L, pitch);
+	if (!yaw.has_value() || !pitch.has_value())
+		return 1;
+
+	lua_pushnumber(L, yaw.value());
+	lua_pushnumber(L, pitch.value());
 	return 3;
 }
 
@@ -1449,9 +1452,14 @@ int ModApiEnvMod::l_set_world_spawnpoint(lua_State * L)
 		env->resetWorldSpawnpoint();
 	} else {
 		const v3f spawnpoint = read_v3f(L, 1);
-		const float yaw = lua_isnoneornil(L, 2) ? 0.0f : readParam<float>(L, 2);
-		const float pitch = lua_isnoneornil(L, 3) ? 0.0f : readParam<float>(L, 3);
-		env->setWorldSpawnpoint(spawnpoint, yaw, pitch);
+		// If either yaw or pitch is specified, both are expected to be present
+		if (!lua_isnoneornil(L, 2) || !lua_isnoneornil(L, 3)) {
+			const float yaw = readParam<float>(L, 2);
+			const float pitch = readParam<float>(L, 3);
+			env->setWorldSpawnpoint(spawnpoint, yaw, pitch);
+		} else {
+			env->setWorldSpawnpoint(spawnpoint, std::nullopt, std::nullopt);
+		}
 	}
 
 	return 0;
