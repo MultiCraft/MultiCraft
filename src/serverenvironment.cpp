@@ -1118,6 +1118,13 @@ u8 ServerEnvironment::findSunlight(v3s16 pos) const
 
 		for (const v3s16& off : dirs) {
 			v3s16 neighborPos = currentPos + off;
+
+			// Do not walk nodes that are outside the map
+			if (abs(neighborPos.X) > MAX_MAP_GENERATION_LIMIT ||
+					abs(neighborPos.Y) > MAX_MAP_GENERATION_LIMIT ||
+					abs(neighborPos.Z) > MAX_MAP_GENERATION_LIMIT)
+				continue;
+
 			s64 neighborHash = MapDatabase::getBlockAsInteger(neighborPos);
 
 			// Do not walk neighborPos multiple times unless the distance to the start
