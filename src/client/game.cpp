@@ -1141,11 +1141,13 @@ void Game::run()
 		if (!device->isWindowFocused()) {
 			if (m_does_lost_focus_pause_game && !isMenuActive())
 				showPauseMenu();
+			sound->setListenerGain(0.0f);
 			sleep_ms(50);
 			continue;
 		}
 #else
 		if (device->isWindowMinimized()) {
+			sound->setListenerGain(0.0f);
 			sleep_ms(50);
 			continue;
 		}
