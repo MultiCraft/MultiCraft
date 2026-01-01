@@ -4555,6 +4555,9 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 						drop_amount = MYMIN(m_selected_amount, 10);
 					else  // left
 						drop_amount = m_selected_amount;
+				} else {
+					// Mouse down on an empty space, start dragging again
+					m_selected_dragging = true;
 				}
 			}
 		break;
