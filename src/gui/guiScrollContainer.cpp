@@ -177,24 +177,14 @@ void GUIScrollContainer::updateScrollCoasting()
 	if (dt == 0)
 		return;
 
-	const float SLOWING_FACTOR = 0.02f;
+	const float SLOWING_FACTOR = 0.95f;
 	const float VELOCITY_FACTOR = 1.0f;
 
-	float velocity_decrease = SLOWING_FACTOR * dt;
-	if (m_velocity > 0) {
-		m_velocity -= velocity_decrease;
-		if (m_velocity < 0) {
-			m_velocity = 0;
-			m_is_coasting = false;
-			return;
-		}
-	} else if (m_velocity < 0) {
-		m_velocity += velocity_decrease;
-		if (m_velocity > 0) {
-			m_velocity = 0;
-			m_is_coasting = false;
-			return;
-		}
+	// We want SLOWING_FACTOR to be added every frame assuming 60 FPS
+	m_velocity *= std::pow(SLOWING_FACTOR, dt / (1000.0f/60.0f));
+	if (std::abs(m_velocity) < 0.1f) {
+		m_is_coasting = false;
+		return;
 	}
 
 	double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
