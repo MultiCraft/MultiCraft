@@ -1138,20 +1138,17 @@ void Game::run()
 #endif
 
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
-		if (!device->isWindowFocused()) {
+		if (!device->isWindowFocused())
+#else
+		if (device->isWindowMinimized())
+#endif
+		{
 			if (m_does_lost_focus_pause_game && !isMenuActive())
 				showPauseMenu();
 			sound->setListenerGain(0.0f);
 			sleep_ms(50);
 			continue;
 		}
-#else
-		if (device->isWindowMinimized()) {
-			sound->setListenerGain(0.0f);
-			sleep_ms(50);
-			continue;
-		}
-#endif
 
 		// Prepare render data for next iteration
 
