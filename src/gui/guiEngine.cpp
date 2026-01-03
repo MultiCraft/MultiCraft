@@ -266,6 +266,7 @@ void GUIEngine::run()
 		if (!device->isWindowFocused())
 #endif
 		{
+			m_sound_manager->setListenerGain(0.0f);
 			sleep_ms(50);
 			continue;
 		}
