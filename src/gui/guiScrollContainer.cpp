@@ -143,7 +143,7 @@ void GUIScrollContainer::calculateCoastingVelocity()
 	for (u32 i = 0; i < m_sample_count; i++) {
 		VelocitySample &sample = m_velocity_samples[i];
 
-		if (m_last_time - sample.timestamp > 150)
+		if (m_last_time - sample.timestamp > 100)
 			continue;
 
 		if (sample.timestamp < first_sample.timestamp)
@@ -158,7 +158,7 @@ void GUIScrollContainer::calculateCoastingVelocity()
 		float distance_in = distance * 1000 / screen_dpi;
 
 		m_velocity = distance_in / dt;
-		m_velocity = std::max(std::min(m_velocity, 20.0f), -20.0f);
+		m_velocity = std::max(std::min(m_velocity, 50.0f), -50.0f);
 		m_is_coasting = true;
 	}
 }
@@ -177,7 +177,7 @@ void GUIScrollContainer::updateScrollCoasting()
 	if (dt == 0)
 		return;
 
-	const float SLOWING_FACTOR = 0.95f;
+	const float SLOWING_FACTOR = 0.97f;
 	const float VELOCITY_FACTOR = 1.0f;
 
 	// We want SLOWING_FACTOR to be added every frame assuming 60 FPS
