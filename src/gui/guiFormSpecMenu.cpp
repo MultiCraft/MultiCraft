@@ -4244,21 +4244,23 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 #endif
 #endif
 
+	handleSelectedItem(event);
+
 	// Mouse wheel and move events: send to hovered element instead of focused
 	if (event.EventType == EET_MOUSE_INPUT_EVENT &&
 			(event.MouseInput.Event == EMIE_MOUSE_WHEEL ||
 			(event.MouseInput.Event == EMIE_MOUSE_MOVED &&
 			event.MouseInput.ButtonStates == 0))) {
- 		s32 x = event.MouseInput.X;
- 		s32 y = event.MouseInput.Y;
- 		gui::IGUIElement *hovered =
- 			Environment->getRootGUIElement()->getElementFromPoint(
- 				core::position2d<s32>(x, y));
- 		if (hovered && isMyChild(hovered)) {
+		s32 x = event.MouseInput.X;
+		s32 y = event.MouseInput.Y;
+		gui::IGUIElement *hovered =
+			Environment->getRootGUIElement()->getElementFromPoint(
+				core::position2d<s32>(x, y));
+		if (hovered && isMyChild(hovered)) {
 			hovered->OnEvent(event);
 			return event.MouseInput.Event == EMIE_MOUSE_WHEEL;
- 		}
- 	}
+		}
+	}
 
 	if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
 		/* TODO add a check like:
@@ -4315,57 +4317,8 @@ void GUIFormSpecMenu::clearSelection()
 	m_selected_dragging = false;
 }
 
-bool GUIFormSpecMenu::OnEvent(const SEvent& event)
+bool GUIFormSpecMenu::handleSelectedItem(const SEvent& event)
 {
-	if (event.EventType==EET_KEY_INPUT_EVENT) {
-		KeyPress kp(event.KeyInput);
-		if (event.KeyInput.PressedDown && (
-				(kp == EscapeKey) || (kp == CancelKey) ||
-				((m_client != NULL) && (kp == getKeySetting("keymap_inventory"))))) {
-			tryClose();
-			return true;
-		}
-
-		if (m_client != NULL && event.KeyInput.PressedDown &&
-				(kp == getKeySetting("keymap_screenshot"))) {
-			m_client->makeScreenshot();
-		}
-
-		if (event.KeyInput.PressedDown && kp == getKeySetting("keymap_toggle_debug"))
-			m_show_debug = !m_show_debug;
-
-		if (event.KeyInput.PressedDown &&
-			(event.KeyInput.Key==KEY_RETURN ||
-			 event.KeyInput.Key==KEY_UP ||
-			 event.KeyInput.Key==KEY_DOWN)
-			) {
-			switch (event.KeyInput.Key) {
-				case KEY_RETURN:
-					current_keys_pending.key_enter = true;
-					break;
-				case KEY_UP:
-					current_keys_pending.key_up = true;
-					break;
-				case KEY_DOWN:
-					current_keys_pending.key_down = true;
-					break;
-				break;
-				default:
-					//can't happen at all!
-					FATAL_ERROR("Reached a source line that can't ever been reached");
-					break;
-			}
-			if (current_keys_pending.key_enter && m_allowclose) {
-				acceptInput(quit_mode_accept);
-				quitMenu();
-			} else {
-				acceptInput();
-			}
-			return true;
-		}
-
-	}
-
 	/* Mouse event other than movement, or crossing the border of inventory
 	  field while holding right mouse button
 	 */
@@ -4486,6 +4439,7 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 			//	<< std::endl;
 
 			m_selected_dragging = false;
+			m_selected_last_item = s;
 
 			if (s.isValid() && s.listname == "craftpreview") {
 				// Craft preview has been clicked: craft
@@ -4517,6 +4471,7 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 				}
 			} else { // m_selected_item != NULL
 				assert(m_selected_amount >= 1);
+				m_selected_dragging = button != BET_WHEEL_DOWN;
 
 				if (s.isValid()) {
 					// Clicked a slot: move
@@ -4566,15 +4521,21 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 
 			if (m_selected_dragging && m_selected_item) {
 				if (s.isValid()) {
-					if (!identical) {
+					if (!identical && (s.i != m_selected_last_item.i ||
+							s.listname != m_selected_last_item.listname)) {
 						// Dragged to different slot: move all selected
 						move_amount = m_selected_amount;
+					} else if (identical && m_bet_up_with_item) {
+						m_selected_amount = 0;
 					}
 				} else if (!getAbsoluteClippingRect().isPointInside(m_pointer)) {
 					// Dragged outside of window: drop all selected
 					drop_amount = m_selected_amount;
 				}
 			}
+
+			if (m_selected_amount > 0)
+				m_bet_up_with_item = true;
 
 			m_selected_dragging = false;
 			// Keep track of whether the mouse button be released
@@ -4630,10 +4591,8 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 			// they are swapped
 			if (leftover.count == stack_from.count &&
 					leftover.name == stack_from.name) {
-
 				if (m_selected_swap.empty()) {
 					m_selected_amount = stack_to.count;
-					m_selected_dragging = false;
 
 					// WARNING: BLACK MAGIC, BUT IN A REDUCED SET
 					// Skip next validation checks due async inventory calls
@@ -4748,8 +4707,63 @@ bool GUIFormSpecMenu::OnEvent(const SEvent& event)
 			m_selected_item = nullptr;
 			m_selected_amount = 0;
 			m_selected_dragging = false;
+			m_bet_up_with_item = false;
 		}
 		m_old_pointer = m_pointer;
+	}
+
+	return false;
+}
+
+bool GUIFormSpecMenu::OnEvent(const SEvent& event)
+{
+	if (event.EventType==EET_KEY_INPUT_EVENT) {
+		KeyPress kp(event.KeyInput);
+		if (event.KeyInput.PressedDown && (
+				(kp == EscapeKey) || (kp == CancelKey) ||
+				((m_client != NULL) && (kp == getKeySetting("keymap_inventory"))))) {
+			tryClose();
+			return true;
+		}
+
+		if (m_client != NULL && event.KeyInput.PressedDown &&
+				(kp == getKeySetting("keymap_screenshot"))) {
+			m_client->makeScreenshot();
+		}
+
+		if (event.KeyInput.PressedDown && kp == getKeySetting("keymap_toggle_debug"))
+			m_show_debug = !m_show_debug;
+
+		if (event.KeyInput.PressedDown &&
+			(event.KeyInput.Key==KEY_RETURN ||
+			 event.KeyInput.Key==KEY_UP ||
+			 event.KeyInput.Key==KEY_DOWN)
+			) {
+			switch (event.KeyInput.Key) {
+				case KEY_RETURN:
+					current_keys_pending.key_enter = true;
+					break;
+				case KEY_UP:
+					current_keys_pending.key_up = true;
+					break;
+				case KEY_DOWN:
+					current_keys_pending.key_down = true;
+					break;
+				break;
+				default:
+					//can't happen at all!
+					FATAL_ERROR("Reached a source line that can't ever been reached");
+					break;
+			}
+			if (current_keys_pending.key_enter && m_allowclose) {
+				acceptInput(quit_mode_accept);
+				quitMenu();
+			} else {
+				acceptInput();
+			}
+			return true;
+		}
+
 	}
 
 	if (event.EventType == EET_GUI_EVENT) {
