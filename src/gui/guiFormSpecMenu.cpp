@@ -3704,7 +3704,7 @@ void GUIFormSpecMenu::drawSelectedItem()
 
 	core::rect<s32> imgrect(0,0,imgsize.X,imgsize.Y);
 	core::rect<s32> rect = imgrect + (m_pointer - imgrect.getCenter());
-	if (!m_selected_dragging)
+	if (m_pointer_is_zero)
 		rect = imgrect + m_pointer;
 	rect.constrainTo(driver->getViewPort());
 	drawItemStack(driver, m_font, stack, rect, NULL, m_client, IT_ROT_DRAGGED);
@@ -3804,11 +3804,13 @@ void GUIFormSpecMenu::drawMenu()
 #endif
 	{
 		m_pointer = RenderingEngine::get_raw_device()->getCursorControl()->getPosition();
+		m_pointer_is_zero = false;
 	}
 
 	if (m_zero_pointer != AbsoluteClippingRect.UpperLeftCorner) {
 		m_zero_pointer = AbsoluteClippingRect.UpperLeftCorner;
 		m_pointer = m_zero_pointer;
+		m_pointer_is_zero = true;
 	}
 
 	/*
