@@ -86,6 +86,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			}
 		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
 			double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+
 			if (!m_swipe_started && m_orientation != UNDEFINED &&
 					m_swipe_start_px != -1 &&
 					std::abs(m_swipe_start_px - mouse_pos +
@@ -97,6 +98,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 				m_sample_count = 0;
 				m_sample_index = 0;
 			}
+
 			if (m_swipe_started) {
 				m_swipe_pos = (float)(mouse_pos - m_swipe_start_px) /
 					      m_scrollfactor;
@@ -120,6 +122,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 				e.GUIEvent.Element = nullptr;
 				e.GUIEvent.EventType = EGET_SCROLL_BAR_CHANGED;
 				OnEvent(e);
+
 				return true;
 			}
 		}
