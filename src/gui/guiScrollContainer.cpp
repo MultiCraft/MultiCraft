@@ -211,7 +211,7 @@ void GUIScrollContainer::updateScrollCoasting()
 
 	s32 old_pos = m_scrollbar->getPos();
 	m_scrollbar->setPos((int)m_swipe_pos);
-	
+
 	if (old_pos != m_scrollbar->getPos()) {
 		SEvent e;
 		e.EventType = EET_GUI_EVENT;
