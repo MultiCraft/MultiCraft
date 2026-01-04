@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-PNG_VERSION=1.6.50
+PNG_VERSION=1.6.53
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
@@ -25,7 +25,6 @@ do
 	cmake .. \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
-		-DCMAKE_ASM_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
 		-DCMAKE_INSTALL_PREFIX="." \
 		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
 		-DPNG_SHARED=OFF \
