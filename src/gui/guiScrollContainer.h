@@ -58,9 +58,26 @@ private:
 	OrientationEnum m_orientation;
 	f32 m_scrollfactor;
 
-	bool m_swipe_started;
-	int m_swipe_start_px;
-	float m_swipe_pos;
+	bool m_swipe_started = false;
+	bool m_is_coasting = false;
+	int m_swipe_start_px = -1;
+	u64 m_last_time = 0;
+	float m_swipe_pos = 0;
+	float m_last_pos = 0;
+	float m_velocity = 0;
+
+	struct VelocitySample
+	{
+		float position;
+		u64 timestamp;
+	};
+
+	static const u32 MAX_VELOCITY_SAMPLES = 10;
+	VelocitySample m_velocity_samples[MAX_VELOCITY_SAMPLES];
+	u32 m_sample_count = 0;
+	u32 m_sample_index = 0;
 
 	void updateScrolling();
+	void updateScrollCoasting();
+	void calculateCoastingVelocity();
 };
