@@ -4315,6 +4315,7 @@ void GUIFormSpecMenu::clearSelection()
 	m_selected_item = nullptr;
 	m_selected_amount = 0;
 	m_selected_dragging = false;
+	m_bet_up_with_item = false;
 }
 
 bool GUIFormSpecMenu::handleSelectedItem(const SEvent& event)
