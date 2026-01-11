@@ -137,7 +137,7 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manag
 	m_texturesource = tsrc;
 	m_sound_manager = sound_manager;
 
-	initSettings();
+	initSettings(true);
 
 	initJoystickButton();
 
@@ -495,7 +495,7 @@ void TouchScreenGUI::rebuildOverflowMenu()
 	}
 }
 
-void TouchScreenGUI::initSettings()
+void TouchScreenGUI::initSettings(bool init)
 {
 	m_settings = Settings::getLayer(SL_TOUCHSCREENGUI);
 	if (m_settings == nullptr)
@@ -504,6 +504,24 @@ void TouchScreenGUI::initSettings()
 	m_settings_path = porting::path_user + DIR_DELIM + "touchscreengui.conf";
 
 	m_settings->readConfigFile(m_settings_path.c_str());
+
+	if (init) {
+		if (!m_settings->exists("button_size")) {
+			m_settings->setS32("button_size", m_button_size);
+			m_settings->updateConfigFile(m_settings_path.c_str());
+		} else {
+			s32 old_button_size = m_settings->getS32("button_size");
+	
+			if (m_button_size != old_button_size) {
+				for (auto name : m_settings->getNames()) {
+					m_settings->remove(name);
+				}
+	
+				m_settings->setS32("button_size", m_button_size);
+				m_settings->updateConfigFile(m_settings_path.c_str());
+			}
+		}
+	}
 
 	setDefaultValues(jump_id,
 			m_screensize.X - m_button_size * 3.375, m_screensize.Y - m_button_size * 2.75,
@@ -684,6 +702,7 @@ void TouchScreenGUI::restoreAllValues()
 		m_settings->remove(name);
 	}
 
+	m_settings->setS32("button_size", m_button_size);
 	m_settings->updateConfigFile(m_settings_path.c_str());
 
 	initSettings();
