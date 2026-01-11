@@ -1137,15 +1137,18 @@ void Game::run()
 		}
 #endif
 
+		bool isMinimized = device->isWindowMinimized();
+		if (isMinimized)
+			sound->setListenerGain(0.0f);
+
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
 		if (!device->isWindowFocused())
 #else
-		if (device->isWindowMinimized())
+		if (isMinimized)
 #endif
 		{
 			if (m_does_lost_focus_pause_game && !isMenuActive())
 				showPauseMenu();
-			sound->setListenerGain(0.0f);
 			sleep_ms(50);
 			continue;
 		}
