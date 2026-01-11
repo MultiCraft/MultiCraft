@@ -331,7 +331,7 @@ bool Hud::calculateScreenPos(const v3s16 &camera_offset, HudElement *e, v2s32 *p
 	return true;
 }
 
-void Hud::drawLuaElements(const v3s16 &camera_offset)
+void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 {
 	u32 text_height = g_fontengine->getTextHeight();
 	irr::gui::IGUIFont* font = g_fontengine->getFont();
@@ -350,6 +350,10 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 		if (!e)
 			continue;
 
+		// Skip showing HUDs that aren't unhideable
+		if (!show_hud && !e->unhideable)
+			continue;
+
 		auto it = elems.begin();
 		while (it != elems.end() && (*it)->z_index <= e->z_index)
 			++it;
@@ -359,7 +363,7 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 
 	// Note when rebasing: This can just be removed when the Lua HUD hotbar is
 	// added.
-	bool hotbar_added = false;
+	bool hotbar_added = !show_hud;
 
 	for (HudElement *e : elems) {
 		if (!hotbar_added && e->z_index >= 0) {

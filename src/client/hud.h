@@ -82,7 +82,7 @@ public:
 
 	bool hasElementOfType(HudElementType type);
 
-	void drawLuaElements(const v3s16 &camera_offset);
+	void drawLuaElements(const v3s16 &camera_offset, bool show_hud);
 
 private:
 	bool calculateScreenPos(const v3s16 &camera_offset, HudElement *e, v2s32 *pos);
