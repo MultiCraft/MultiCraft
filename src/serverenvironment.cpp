@@ -648,8 +648,12 @@ void ServerEnvironment::saveMeta()
 		m_lbm_mgr.createIntroductionTimesString());
 	args.setU64("day_count", m_day_count);
 
-	if (m_has_world_spawnpoint)
-		args.setV3F("static_spawnpoint", m_world_spawnpoint);
+	if (m_world_spawnpoint.has_value())
+		args.setV3F("static_spawnpoint", m_world_spawnpoint.value());
+	if (m_world_spawnpoint_yaw.has_value())
+		args.setFloat("static_spawnpoint_yaw", m_world_spawnpoint_yaw.value());
+	if (m_world_spawnpoint_pitch.has_value())
+		args.setFloat("static_spawnpoint_pitch", m_world_spawnpoint_pitch.value());
 
 	args.writeLines(ss);
 
@@ -725,7 +729,15 @@ void ServerEnvironment::loadMeta()
 	m_day_count = args.exists("day_count") ?
 		args.getU64("day_count") : 0;
 
-	m_has_world_spawnpoint = args.getV3FNoEx("static_spawnpoint", m_world_spawnpoint);
+	try {
+		// static_spawnpoint must be read before yaw and pitch as yaw/pitch may
+		// not exist.
+		m_world_spawnpoint = args.getV3F("static_spawnpoint");
+		m_world_spawnpoint_yaw = args.getFloat("static_spawnpoint_yaw");
+		m_world_spawnpoint_pitch = args.getFloat("static_spawnpoint_pitch");
+	} catch (SettingNotFoundException &e) {
+		// The spawnpoint or yaw/pitch does not exist, this is expected
+	}
 }
 
 /**
