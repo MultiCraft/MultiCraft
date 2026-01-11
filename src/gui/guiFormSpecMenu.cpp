@@ -3960,7 +3960,6 @@ void GUIFormSpecMenu::updateSelectedItem()
 			m_selected_item->listname = "craftresult";
 			m_selected_item->i = 0;
 			m_selected_amount = item.count;
-			m_selected_dragging = false;
 			break;
 		}
 	}
@@ -4449,6 +4448,7 @@ bool GUIFormSpecMenu::handleSelectedItem(const SEvent& event)
 			if (s.isValid() && s.listname == "craftpreview") {
 				// Craft preview has been clicked: craft
 				craft_amount = (button == BET_MIDDLE ? 10 : 1);
+				m_selected_dragging = button != BET_WHEEL_DOWN;
 			} else if (!m_selected_item) {
 				if (s_count && button != BET_WHEEL_UP) {
 					// Non-empty stack has been clicked: select or shift-move it
@@ -4525,7 +4525,7 @@ bool GUIFormSpecMenu::handleSelectedItem(const SEvent& event)
 			//	<<p.X<<","<<p.Y<<")"<<std::endl;
 
 			if (m_selected_dragging && m_selected_item) {
-				if (s.isValid()) {
+				if (s.isValid() && s.listname != "craftpreview") {
 					if (!identical && (s.i != m_selected_last_item.i ||
 							s.listname != m_selected_last_item.listname)) {
 						// Dragged to different slot: move all selected
@@ -4706,7 +4706,7 @@ bool GUIFormSpecMenu::handleSelectedItem(const SEvent& event)
 		}
 
 		// If m_selected_amount has been decreased to zero, deselect
-		if (m_selected_amount == 0) {
+		if (m_selected_amount == 0 && m_selected_item) {
 			m_selected_swap.clear();
 			delete m_selected_item;
 			m_selected_item = nullptr;
