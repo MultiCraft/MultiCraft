@@ -674,6 +674,8 @@ void TouchScreenGUI::resetAllValues()
 
 		updateButtons();
 	}
+
+	restoreAllValues();
 }
 
 void TouchScreenGUI::restoreAllValues()
@@ -681,6 +683,8 @@ void TouchScreenGUI::restoreAllValues()
 	for (auto name : m_settings->getNames()) {
 		m_settings->remove(name);
 	}
+
+	m_settings->updateConfigFile(m_settings_path.c_str());
 
 	initSettings();
 }
