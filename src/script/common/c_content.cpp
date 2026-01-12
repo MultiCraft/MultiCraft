@@ -2065,6 +2065,8 @@ HudElementStat read_hud_change(lua_State *L, HudElement *elem, void **value)
 			elem->text2 = luaL_checkstring(L, 4);
 			*value = &elem->text2;
 			break;
+		case HUD_STAT_STYLE:
+			break;
 		case HUD_STAT_UNHIDEABLE:
 			elem->unhideable = lua_toboolean(L, 4);
 			*value = &elem->unhideable;
