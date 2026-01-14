@@ -505,7 +505,7 @@ private:
 	std::unordered_map<u32, float> m_particle_spawners;
 	std::unordered_map<u32, u16> m_particle_spawner_attachments;
 
-	std::optional<v3f> m_world_spawnpoint = v3f(0.f, 0.f, 0.f);
+	std::optional<v3f> m_world_spawnpoint = std::nullopt;
 	std::optional<float> m_world_spawnpoint_yaw = std::nullopt;
 	std::optional<float> m_world_spawnpoint_pitch = std::nullopt;
 
