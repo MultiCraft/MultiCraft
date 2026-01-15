@@ -335,7 +335,7 @@ private:
 	Settings *m_settings = nullptr;
 	std::string m_settings_path;
 
-	void initSettings();
+	void initSettings(bool init = false);
 	void setDefaultValues(
 			touch_gui_button_id id, float x1, float y1, float x2, float y2);
 	void setValues(touch_gui_button_id id, float x1, float y1, float x2, float y2);
