@@ -22,6 +22,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 void ScrollSwipe::calculateCoastingVelocity()
 {
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
 	if (m_sample_count < 1)
 		return;
 
@@ -51,6 +53,8 @@ void ScrollSwipe::calculateCoastingVelocity()
 		m_velocity = std::max(std::min(m_velocity, 40.0f), -40.0f);
 		m_is_coasting = true;
 	}
+#endif
+#endif
 }
 
 void ScrollSwipe::updateScrollCoasting()
