@@ -419,8 +419,13 @@ int ModApiClient::l_upgrade(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
 #if defined(__ANDROID__) || defined(__APPLE__)
-	const std::string item_name = std::string("CSM/") + luaL_checkstring(L, 1);
-	const bool res = porting::upgrade(item_name);
+	std::string item_name = luaL_checkstring(L, 1);
+	if (!getClient(L)->m_simple_singleplayer_mode)
+		item_name = "CSM/" + item_name;
+	std::string extra;
+	if (lua_gettop(L) >= 2 && lua_isstring(L, 2))
+		extra = lua_tostring(L, 2);
+	const bool res = porting::upgrade(item_name, extra);
 	lua_pushboolean(L, res);
 #else
 	// Not implemented on other platforms
@@ -434,7 +439,9 @@ int ModApiClient::l_get_secret_key(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
 #if defined(__ANDROID__) || defined(__APPLE__)
-	const std::string secret_name = std::string("CSM/") + luaL_checkstring(L, 1);
+	std::string secret_name = luaL_checkstring(L, 1);
+	if (!getClient(L)->m_simple_singleplayer_mode)
+		secret_name = "CSM/" + secret_name;
 	const std::string res = porting::getSecretKey(secret_name);
 	lua_pushlstring(L, res.c_str(), res.size());
 #else

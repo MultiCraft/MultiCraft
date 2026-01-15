@@ -316,15 +316,14 @@ class GameActivity : SDLActivity() {
 		print(exc)
 	}
 
-	fun upgrade(item: String?): Boolean {
+	fun upgrade(item: String?, extra: String?): Boolean {
+		if (extra != "") return true
 		return item?.isEmpty() ?: false
 	}
 
 	fun getSecretKey(secret: String?): String {
 		return secret ?: ""
 	}
-
-	fun getCpuArchitecture(): String = System.getProperty("os.arch") ?: "null"
 
 	fun hideSplashScreen() {
 		runOnUiThread {

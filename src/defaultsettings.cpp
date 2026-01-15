@@ -626,10 +626,8 @@ void set_default_settings()
 	// Android Settings
 #ifdef __ANDROID__
 	// Switch to ogles1 without shaders on low-end Android devices
-	std::string arch = porting::getCpuArchitecture();
-	if (memoryMax < 4 && arch != "x86" && arch != "x86_64") {
+	if (memoryMax < 4 && !porting::isIntelDevice())
 		settings->setDefault("video_driver", "ogles1");
-	}
 
 	if (porting::isGooglePC())
 		settings->setDefault("mouse_sensitivity", "0.8");

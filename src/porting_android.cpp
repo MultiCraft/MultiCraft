@@ -1,8 +1,8 @@
 /*
 Minetest
 Copyright (C) 2014 celeron55, Perttu Ahola <celeron55@gmail.com>
-Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
-Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2026 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
+Copyright (C) 2023-2026 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -179,15 +179,24 @@ void showInputDialog(const std::string &hint, const std::string &current, int ed
 
 bool openURIAndroid(const std::string &url, bool untrusted)
 {
-	jmethodID url_open = jnienv->GetMethodID(activityClass, "openURI",
+	JNIEnv *env = (JNIEnv*) SDL_GetAndroidJNIEnv();
+	jobject activity = (jobject) SDL_GetAndroidActivity();
+	if (!env || !activity)
+		return false; // something really bad happened
+
+	jclass clazz(env->GetObjectClass(activity));
+	jmethodID url_open = env->GetMethodID(clazz, "openURI",
 		"(Ljava/lang/String;Z)Z");
 
 	FATAL_ERROR_IF(url_open == nullptr,
 		"porting::openURIAndroid unable to find Java openURI method");
 
-	jstring jurl = jnienv->NewStringUTF(url.c_str());
-	jboolean result = jnienv->CallBooleanMethod(activityObj, url_open, jurl, (jboolean) untrusted);
-	jnienv->DeleteLocalRef(jurl);
+	jstring jurl = env->NewStringUTF(url.c_str());
+	jboolean result = env->CallBooleanMethod(activity, url_open, jurl, (jboolean) untrusted);
+
+	env->DeleteLocalRef(jurl);
+	env->DeleteLocalRef(clazz);
+	env->DeleteLocalRef(activity);
 
 	return result == JNI_TRUE;
 }
@@ -344,55 +353,92 @@ jstring getJniString(const std::string &message)
 	return jMessage;
 }
 
-bool upgrade(const std::string &item)
+bool upgrade(const std::string &item, const std::string &extra)
 {
-	jmethodID upgradeGame = jnienv->GetMethodID(activityClass,
-			"upgrade", "(Ljava/lang/String;)Z");
+	JNIEnv *env = (JNIEnv*) SDL_GetAndroidJNIEnv();
+	jobject activity = (jobject) SDL_GetAndroidActivity();
+	if (!env || !activity)
+		return false; // something really bad happened
+
+	jclass clazz(env->GetObjectClass(activity));
+	jmethodID upgradeGame = env->GetMethodID(clazz,
+			"upgrade", "(Ljava/lang/String;Ljava/lang/String;)Z");
 
 	FATAL_ERROR_IF(upgradeGame == nullptr,
 		"porting::upgrade unable to find Java upgrade method");
 
-	jstring jitem = jnienv->NewStringUTF(item.c_str());
-	jboolean res = jnienv->CallBooleanMethod(activityObj, upgradeGame, jitem);
-	jnienv->DeleteLocalRef(jitem);
+	jstring jitem = env->NewStringUTF(item.c_str());
+	jstring jextra = env->NewStringUTF(extra.c_str());
+	jboolean res = env->CallBooleanMethod(activity, upgradeGame, jitem, jextra);
+
+	env->DeleteLocalRef(jitem);
+	env->DeleteLocalRef(jextra);
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
 
 	return res == JNI_TRUE;
 }
 
-std::string getCpuArchitecture()
+bool isIntelDevice()
 {
-	static std::string arch = [](){
-		jmethodID getArch = jnienv->GetMethodID(activityClass,
-				"getCpuArchitecture", "()Ljava/lang/String;");
+	if (jnienv == nullptr)
+		return false;
 
-		FATAL_ERROR_IF(getArch == nullptr,
-			"porting::getCpuArchitecture unable to find Java getCpuArchitecture method");
+	static const bool value = []() {
+		jclass buildClass = jnienv->FindClass("android/os/Build");
+		jfieldID abisField = jnienv->GetStaticFieldID(buildClass,
+				"SUPPORTED_ABIS", "[Ljava/lang/String;");
 
-		jstring javaString = (jstring) jnienv->CallObjectMethod(activityObj, getArch);
-		const char *str = jnienv->GetStringUTFChars(javaString, nullptr);
-		std::string cppStr(str);
-		jnienv->ReleaseStringUTFChars(javaString, str);
+		jobjectArray abisArray = (jobjectArray)jnienv->GetStaticObjectField(buildClass, abisField);
+		jsize abiCount = jnienv->GetArrayLength(abisArray);
 
-		return cppStr;
+		for (jsize index = 0; index < abiCount; ++index) {
+			jstring abiString = (jstring) jnienv->GetObjectArrayElement(abisArray,index);
+			const char* abiCString = jnienv->GetStringUTFChars(abiString, nullptr);
+			std::string abiStringCpp(abiCString);
+
+			bool isIntelAbi = abiStringCpp == "x86" || abiStringCpp == "x86_64";
+
+			jnienv->ReleaseStringUTFChars(abiString, abiCString);
+			jnienv->DeleteLocalRef(abiString);
+
+			if (isIntelAbi) {
+				jnienv->DeleteLocalRef(abisArray);
+				jnienv->DeleteLocalRef(buildClass);
+				return true;
+			}
+		}
+
+		jnienv->DeleteLocalRef(abisArray);
+		jnienv->DeleteLocalRef(buildClass);
+		return false;
 	}();
 
-	return arch;
+	return value;
 }
 
 std::string getSecretKey(const std::string &key)
 {
-	jmethodID getKey = jnienv->GetMethodID(activityClass,
+	JNIEnv *env = (JNIEnv*) SDL_GetAndroidJNIEnv();
+	jobject activity = (jobject) SDL_GetAndroidActivity();
+	if (!env || !activity)
+		return ""; // something really bad happened
+
+	jclass clazz(env->GetObjectClass(activity));
+	jmethodID getKey = env->GetMethodID(clazz,
 			"getSecretKey", "(Ljava/lang/String;)Ljava/lang/String;");
 
 	FATAL_ERROR_IF(getKey == nullptr,
 		"porting::getSecretKey unable to find Java getSecretKey method");
 
-	jstring jkey = jnienv->NewStringUTF(key.c_str());
-	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
-	std::string returnValue = readJavaString(jnienv, result);
+	jstring jkey = env->NewStringUTF(key.c_str());
+	jstring result = (jstring) env->CallObjectMethod(activity, getKey, jkey);
+	std::string returnValue = readJavaString(env, result);
 
-	jnienv->DeleteLocalRef(jkey);
-	jnienv->DeleteLocalRef(result);
+	env->DeleteLocalRef(jkey);
+	env->DeleteLocalRef(result);
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
 
 	return returnValue;
 }
@@ -403,15 +449,15 @@ bool isGooglePC()
 		return false;
 
 	static const bool value = [](){
-		jmethodID googlePC = jnienv->GetMethodID(activityClass,
+		jmethodID packageManager = jnienv->GetMethodID(activityClass,
 				"getPackageManager", "()Landroid/content/pm/PackageManager;");
 
-		if (googlePC == nullptr) {
+		if (packageManager == nullptr) {
 			errorstream << "porting::isGooglePC unable to find Java getPackageManager method" << std::endl;
 			return false;
 		}
 
-		jobject pm = jnienv->CallObjectMethod(activityObj, googlePC);
+		jobject pm = jnienv->CallObjectMethod(activityObj, packageManager);
 		jclass pmCls = jnienv->GetObjectClass(pm);
 		jmethodID hasFeat = jnienv->GetMethodID(pmCls, "hasSystemFeature", "(Ljava/lang/String;)Z");
 		jstring feat = jnienv->NewStringUTF("com.google.android.play.feature.HPE_EXPERIENCE");

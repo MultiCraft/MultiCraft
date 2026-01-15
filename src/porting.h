@@ -356,7 +356,7 @@ bool open_url(const std::string &url, bool untrusted = false);
  */
 
 #if defined(__APPLE__)
-bool upgrade(const std::string &item);
+bool upgrade(const std::string &item, const std::string &extra = "");
 
 std::string getSecretKey(const std::string &key);
 
