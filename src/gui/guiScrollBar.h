@@ -57,6 +57,8 @@ public:
 	void setTextures(const std::vector<video::ITexture *> &textures);
 	void setStyle(const StyleSpec &style, ISimpleTextureSource *tsrc);
 
+	bool isHorizontal() { return is_horizontal; }
+
 private:
 	void refreshControls();
 	s32 getPosFromMousePos(const core::position2di &p) const;

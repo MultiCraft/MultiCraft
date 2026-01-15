@@ -98,9 +98,13 @@ GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
 			relative_rect.LowerRightCorner.X,relative_rect.LowerRightCorner.Y
 			));
 
-	m_swipe_started = false;
-	m_swipe_start_y = -1;
-	m_swipe_pos = 0;
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	m_scroll_swipe = new ScrollSwipe(env, this);
+	m_scroll_swipe->setScrollBar(m_scrollbar);
+	m_scroll_swipe->setScrollFactor(-1.0f / scale);
+#endif
+#endif
 }
 
 GUITable::~GUITable()
@@ -667,6 +671,9 @@ void GUITable::draw()
 	if (!IsVisible)
 		return;
 
+	if (m_scroll_swipe)
+		m_scroll_swipe->updateScrollCoasting();
+
 	gui::IGUISkin *skin = Environment->getSkin();
 
 	// draw background
@@ -928,41 +935,16 @@ bool GUITable::OnEvent(const SEvent &event)
 				return false;
 		}
 
-#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
-		// Handle swipe gesture
-		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-			if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y))) {
-				s32 totalheight = m_rowheight * m_visible_rows.size();
-				float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
-						(m_scrollbar->getMax() - m_scrollbar->getMin());
-				m_swipe_start_y = event.MouseInput.Y + m_scrollbar->getPos() / scale;
-			}
-		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
-			m_swipe_start_y = -1;
-			if (m_swipe_started) {
-				m_swipe_started = false;
-				return true;
-			}
-		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
-			double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+		if (m_scroll_swipe) {
 			s32 totalheight = m_rowheight * m_visible_rows.size();
 			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
 					(m_scrollbar->getMax() - m_scrollbar->getMin());
+			m_scroll_swipe->setScrollFactor(-1.0f / scale);
 
-			if (!m_swipe_started && m_swipe_start_y != -1 &&
-					std::abs(m_swipe_start_y - event.MouseInput.Y - m_scrollbar->getPos() / scale) > 0.1 * screen_dpi) {
-				m_swipe_started = true;
-				Environment->setFocus(this);
-			}
-
-			if (m_swipe_started) {
-				m_swipe_pos = (float)(m_swipe_start_y - event.MouseInput.Y) * scale;
-				m_scrollbar->setPos((int)m_swipe_pos);
-
+			bool retval = m_scroll_swipe->onEvent(event);
+			if (retval)
 				return true;
-			}
 		}
-#endif
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
 		if (isPointInside(p) && (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP ||
