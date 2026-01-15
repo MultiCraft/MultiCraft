@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "scrollSwipe.h"
 #include "porting.h"
 
-
 void ScrollSwipe::calculateCoastingVelocity()
 {
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
@@ -118,7 +117,7 @@ bool ScrollSwipe::onEvent(const SEvent &event)
 							  : event.MouseInput.Y;
 	if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 		if (m_parent->isPointInside(core::position2d<s32>(
-					event.MouseInput.X, event.MouseInput.Y))) {
+				    event.MouseInput.X, event.MouseInput.Y))) {
 			m_swipe_start_px = mouse_pos -
 					   m_scrollbar->getPos() * m_scrollfactor;
 			m_velocity = 0;
@@ -137,8 +136,7 @@ bool ScrollSwipe::onEvent(const SEvent &event)
 
 		if (!m_swipe_started && m_swipe_start_px != -1 &&
 				std::abs(m_swipe_start_px - mouse_pos +
-						m_scrollbar->getPos() *
-								m_scrollfactor) >
+						m_scrollbar->getPos() * m_scrollfactor) >
 						0.1 * screen_dpi) {
 			m_swipe_started = true;
 			m_env->setFocus(m_parent);
@@ -148,15 +146,13 @@ bool ScrollSwipe::onEvent(const SEvent &event)
 
 		if (m_swipe_started) {
 			m_swipe_pos = (float)(mouse_pos - m_swipe_start_px) /
-					  m_scrollfactor;
+				      m_scrollfactor;
 
 			u64 current_time = porting::getTimeMs();
 
 			m_velocity_samples[m_sample_index].position = m_swipe_pos;
-			m_velocity_samples[m_sample_index].timestamp =
-					current_time;
-			m_sample_index = (m_sample_index + 1) %
-					 MAX_VELOCITY_SAMPLES;
+			m_velocity_samples[m_sample_index].timestamp = current_time;
+			m_sample_index = (m_sample_index + 1) % MAX_VELOCITY_SAMPLES;
 			if (m_sample_count < MAX_VELOCITY_SAMPLES) {
 				m_sample_count++;
 			}

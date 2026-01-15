@@ -27,7 +27,7 @@ using namespace irr::core;
 class ScrollSwipe
 {
 public:
-	ScrollSwipe(gui::IGUIEnvironment *env, gui::IGUIElement* parent)
+	ScrollSwipe(gui::IGUIEnvironment *env, gui::IGUIElement *parent)
 	{
 		m_env = env;
 		m_parent = parent;
