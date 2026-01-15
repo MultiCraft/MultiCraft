@@ -102,7 +102,7 @@ private:
 	static int l_sha1(lua_State *L);
 
 #ifndef SERVER
-	// upgrade(string)
+	// upgrade(string, string)
 	static int l_upgrade(lua_State *L);
 
 	// get_secret_key(string)
