@@ -389,29 +389,26 @@ bool isIntelDevice()
 		jfieldID abisField = jnienv->GetStaticFieldID(buildClass,
 				"SUPPORTED_ABIS", "[Ljava/lang/String;");
 
-		jobjectArray abisArray = (jobjectArray)jnienv->GetStaticObjectField(buildClass, abisField);
+		jobjectArray abisArray = (jobjectArray) jnienv->GetStaticObjectField(buildClass, abisField);
 		jsize abiCount = jnienv->GetArrayLength(abisArray);
+		bool isIntel = false;
 
 		for (jsize index = 0; index < abiCount; ++index) {
-			jstring abiString = (jstring) jnienv->GetObjectArrayElement(abisArray,index);
-			const char* abiCString = jnienv->GetStringUTFChars(abiString, nullptr);
-			std::string abiStringCpp(abiCString);
-
-			bool isIntelAbi = abiStringCpp == "x86" || abiStringCpp == "x86_64";
+			jstring abiString = (jstring) jnienv->GetObjectArrayElement(abisArray, index);
+			const char *abiCString = jnienv->GetStringUTFChars(abiString, nullptr);
+			isIntel = (strcmp(abiCString, "x86") == 0 || strcmp(abiCString, "x86_64") == 0);
 
 			jnienv->ReleaseStringUTFChars(abiString, abiCString);
 			jnienv->DeleteLocalRef(abiString);
 
-			if (isIntelAbi) {
-				jnienv->DeleteLocalRef(abisArray);
-				jnienv->DeleteLocalRef(buildClass);
-				return true;
-			}
+			if (isIntel)
+				break;
 		}
 
 		jnienv->DeleteLocalRef(abisArray);
 		jnienv->DeleteLocalRef(buildClass);
-		return false;
+
+		return isIntel;
 	}();
 
 	return value;
