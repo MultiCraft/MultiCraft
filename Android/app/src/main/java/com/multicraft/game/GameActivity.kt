@@ -324,8 +324,6 @@ class GameActivity : SDLActivity() {
 		return secret ?: ""
 	}
 
-	fun getCpuArchitecture(): String = System.getProperty("os.arch") ?: "null"
-
 	fun hideSplashScreen() {
 		runOnUiThread {
 			splashView?.let { view ->
