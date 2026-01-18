@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include "util/string.h"
 #include "guiScrollBar.h"
+#include "scrollSwipe.h"
 
 class GUIScrollContainer : public gui::IGUIElement
 {
@@ -43,41 +44,15 @@ public:
 	inline void setScrollBar(GUIScrollBar *scrollbar)
 	{
 		m_scrollbar = scrollbar;
+		if (m_scroll_swipe)
+			m_scroll_swipe->setScrollBar(m_scrollbar);
 		updateScrolling();
 	}
 
 private:
-	enum OrientationEnum
-	{
-		VERTICAL,
-		HORIZONTAL,
-		UNDEFINED
-	};
-
 	GUIScrollBar *m_scrollbar;
-	OrientationEnum m_orientation;
+	ScrollSwipe *m_scroll_swipe;
 	f32 m_scrollfactor;
 
-	bool m_swipe_started = false;
-	bool m_is_coasting = false;
-	int m_swipe_start_px = -1;
-	u64 m_last_time = 0;
-	float m_swipe_pos = 0;
-	float m_last_pos = 0;
-	float m_velocity = 0;
-
-	struct VelocitySample
-	{
-		float position;
-		u64 timestamp;
-	};
-
-	static const u32 MAX_VELOCITY_SAMPLES = 10;
-	VelocitySample m_velocity_samples[MAX_VELOCITY_SAMPLES];
-	u32 m_sample_count = 0;
-	u32 m_sample_index = 0;
-
 	void updateScrolling();
-	void updateScrollCoasting();
-	void calculateCoastingVelocity();
 };

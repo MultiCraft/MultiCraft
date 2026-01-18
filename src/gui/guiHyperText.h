@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "config.h" // for USE_FREETYPE
 #include "StyleSpec.h"
+#include "scrollSwipe.h"
 
 using namespace irr;
 
@@ -221,6 +222,7 @@ protected:
 	// GUI members
 	ISimpleTextureSource *m_tsrc;
 	GUIScrollBar *m_vscrollbar;
+	ScrollSwipe *m_scroll_swipe;
 	TextDrawer m_drawer;
 
 	// Positioning
@@ -231,8 +233,5 @@ protected:
 	ParsedText::Element *getElementAt(s32 X, s32 Y);
 	void checkHover(s32 X, s32 Y);
 
-	bool m_swipe_started;
-	int m_swipe_start_y;
-	float m_swipe_pos;
 	ParsedText::Element *m_pressed_element = nullptr;
 };
