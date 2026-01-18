@@ -100,6 +100,7 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 			}
 
 			if (m_swipe_started) {
+				s32 old_pos = m_scrollbar->getPos();
 				m_swipe_pos = (float)(mouse_pos - m_swipe_start_px) /
 					      m_scrollfactor;
 
@@ -116,12 +117,15 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 
 				m_last_time = current_time;
 				m_scrollbar->setPos((int)m_swipe_pos);
-				SEvent e;
-				e.EventType = EET_GUI_EVENT;
-				e.GUIEvent.Caller = m_scrollbar;
-				e.GUIEvent.Element = nullptr;
-				e.GUIEvent.EventType = EGET_SCROLL_BAR_CHANGED;
-				OnEvent(e);
+
+				if (old_pos != m_scrollbar->getPos()) {
+					SEvent e;
+					e.EventType = EET_GUI_EVENT;
+					e.GUIEvent.Caller = m_scrollbar;
+					e.GUIEvent.Element = nullptr;
+					e.GUIEvent.EventType = EGET_SCROLL_BAR_CHANGED;
+					OnEvent(e);
+				}
 
 				return true;
 			}
@@ -205,13 +209,17 @@ void GUIScrollContainer::updateScrollCoasting()
 		m_is_coasting = false;
 	}
 
+	s32 old_pos = m_scrollbar->getPos();
 	m_scrollbar->setPos((int)m_swipe_pos);
-	SEvent e;
-	e.EventType = EET_GUI_EVENT;
-	e.GUIEvent.Caller = m_scrollbar;
-	e.GUIEvent.Element = nullptr;
-	e.GUIEvent.EventType = EGET_SCROLL_BAR_CHANGED;
-	OnEvent(e);
+
+	if (old_pos != m_scrollbar->getPos()) {
+		SEvent e;
+		e.EventType = EET_GUI_EVENT;
+		e.GUIEvent.Caller = m_scrollbar;
+		e.GUIEvent.Element = nullptr;
+		e.GUIEvent.EventType = EGET_SCROLL_BAR_CHANGED;
+		OnEvent(e);
+	}
 #endif
 #endif
 }

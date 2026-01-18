@@ -329,6 +329,8 @@ protected:
 	GUIInventoryList::ItemSpec *m_selected_item = nullptr;
 	u16 m_selected_amount = 0;
 	bool m_selected_dragging = false;
+	bool m_bet_up_with_item = false;
+	GUIInventoryList::ItemSpec m_selected_last_item;
 	ItemStack m_selected_swap;
 
 	gui::IGUIStaticText *m_tooltip_element = nullptr;
@@ -466,6 +468,8 @@ private:
 	 * This function sorts the elements in the old order for backwards compatibility.
 	 */
 	void legacySortElements(core::list<IGUIElement *>::Iterator from);
+
+	bool handleSelectedItem(const SEvent& event);
 
 	int m_btn_height;
 	gui::IGUIFont *m_font = nullptr;
