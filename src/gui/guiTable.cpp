@@ -100,7 +100,13 @@ GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #ifdef HAVE_TOUCHSCREENGUI
-	m_scroll_swipe = new ScrollSwipe(env, this);
+	ScrollSwipe::OrientationEnum orientation;
+	if (m_scrollbar->isHorizontal())
+		orientation = ScrollSwipe::OrientationEnum::HORIZONTAL;
+	else
+		orientation = ScrollSwipe::OrientationEnum::VERTICAL;
+
+	m_scroll_swipe = new ScrollSwipe(env, this, orientation);
 	m_scroll_swipe->setScrollBar(m_scrollbar);
 	m_scroll_swipe->setScrollFactor(-1.0f / scale);
 #endif

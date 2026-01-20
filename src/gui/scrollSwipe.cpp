@@ -19,6 +19,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "scrollSwipe.h"
 #include "porting.h"
 
+ScrollSwipe::ScrollSwipe(gui::IGUIEnvironment *env, gui::IGUIElement *parent,
+		OrientationEnum orientation)
+{
+	m_env = env;
+	m_parent = parent;
+	m_orientation = orientation;
+}
+
 void ScrollSwipe::calculateCoastingVelocity()
 {
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
@@ -113,7 +121,7 @@ bool ScrollSwipe::onEvent(const SEvent &event)
 	if (event.EventType != EET_MOUSE_INPUT_EVENT || !m_scrollbar)
 		return false;
 
-	const int mouse_pos = m_scrollbar->isHorizontal() ? event.MouseInput.X
+	const int mouse_pos = m_orientation == HORIZONTAL ? event.MouseInput.X
 							  : event.MouseInput.Y;
 	if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
 		if (m_parent->isPointInside(core::position2d<s32>(
@@ -134,7 +142,8 @@ bool ScrollSwipe::onEvent(const SEvent &event)
 	} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
 		double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
 
-		if (!m_swipe_started && m_swipe_start_px != -1 &&
+		if (!m_swipe_started && m_orientation != UNDEFINED &&
+				m_swipe_start_px != -1 &&
 				std::abs(m_swipe_start_px - mouse_pos +
 						m_scrollbar->getPos() * m_scrollfactor) >
 						0.1 * screen_dpi) {

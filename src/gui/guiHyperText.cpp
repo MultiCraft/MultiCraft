@@ -1061,7 +1061,13 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 	float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
 			(m_vscrollbar->getMax() - m_vscrollbar->getMin());
 
-	m_scroll_swipe = new ScrollSwipe(environment, this);
+	ScrollSwipe::OrientationEnum orientation;
+	if (m_vscrollbar->isHorizontal())
+		orientation = ScrollSwipe::OrientationEnum::HORIZONTAL;
+	else
+		orientation = ScrollSwipe::OrientationEnum::VERTICAL;
+
+	m_scroll_swipe = new ScrollSwipe(environment, this, orientation);
 	m_scroll_swipe->setScrollBar(m_vscrollbar);
 	m_scroll_swipe->setScrollFactor(-1.0f / scale);
 #endif

@@ -27,11 +27,15 @@ using namespace irr::core;
 class ScrollSwipe
 {
 public:
-	ScrollSwipe(gui::IGUIEnvironment *env, gui::IGUIElement *parent)
+	enum OrientationEnum
 	{
-		m_env = env;
-		m_parent = parent;
-	}
+		VERTICAL,
+		HORIZONTAL,
+		UNDEFINED
+	};
+
+	ScrollSwipe(gui::IGUIEnvironment *env, gui::IGUIElement *parent,
+			OrientationEnum orientation);
 
 	~ScrollSwipe();
 
@@ -47,6 +51,7 @@ private:
 	gui::IGUIElement *m_parent = nullptr;
 	GUIScrollBar *m_scrollbar = nullptr;
 
+	OrientationEnum m_orientation = UNDEFINED;
 	bool m_swipe_started = false;
 	bool m_is_coasting = false;
 	int m_swipe_start_px = -1;

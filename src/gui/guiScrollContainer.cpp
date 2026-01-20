@@ -36,9 +36,17 @@ GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 		m_scrollfactor(scrollfactor)
 #endif
 {
+	if (orientation == "vertical")
+		m_orientation = VERTICAL;
+	else if (orientation == "horizontal")
+		m_orientation = HORIZONTAL;
+	else
+		m_orientation = UNDEFINED;
+
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #ifdef HAVE_TOUCHSCREENGUI
-	m_scroll_swipe = new ScrollSwipe(env, this);
+	m_scroll_swipe = new ScrollSwipe(
+			env, this, (ScrollSwipe::OrientationEnum)m_orientation);
 	m_scroll_swipe->setScrollFactor(m_scrollfactor);
 #endif
 #endif
@@ -93,10 +101,10 @@ void GUIScrollContainer::updateScrolling()
 	s32 pos = m_scrollbar->getPos();
 	core::rect<s32> rect = getRelativePosition();
 
-	if (m_scrollbar->isHorizontal())
-		rect.UpperLeftCorner.X = pos * m_scrollfactor;
-	else
+	if (m_orientation == VERTICAL)
 		rect.UpperLeftCorner.Y = pos * m_scrollfactor;
+	else if (m_orientation == HORIZONTAL)
+		rect.UpperLeftCorner.X = pos * m_scrollfactor;
 
 	setRelativePosition(rect);
 }

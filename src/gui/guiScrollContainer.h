@@ -50,8 +50,16 @@ public:
 	}
 
 private:
+	enum OrientationEnum
+	{
+		VERTICAL,
+		HORIZONTAL,
+		UNDEFINED
+	};
+
 	GUIScrollBar *m_scrollbar;
 	ScrollSwipe *m_scroll_swipe;
+	OrientationEnum m_orientation;
 	f32 m_scrollfactor;
 
 	void updateScrolling();
