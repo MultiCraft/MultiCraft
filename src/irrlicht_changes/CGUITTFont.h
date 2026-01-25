@@ -34,6 +34,7 @@
 #include <irrlicht.h>
 #include <ft2build.h>
 #include <vector>
+#include <map>
 #include "irrUString.h"
 #include "util/enriched_string.h"
 #include FT_FREETYPE_H
@@ -41,12 +42,41 @@
 #include FT_GLYPH_H
 #include FT_STROKER_H
 
+#include <harfbuzz/hb.h>
+#include <harfbuzz/hb-ft.h>
+
 namespace irr
 {
 namespace gui
 {
 	struct SGUITTFace;
 	class CGUITTFont;
+
+	struct ShapedGlyph
+	{
+		u32 glyph_index;
+		u32 cluster;
+		s32 x_offset;
+		s32 y_offset;
+		s32 x_advance;
+		s32 y_advance;
+		size_t face_index;
+	};
+
+	struct ShapedRun
+	{
+		std::vector<ShapedGlyph> glyphs;
+		size_t face_index;
+		u32 start_char;
+		u32 end_char;
+	};
+
+	struct TextRun
+	{
+		size_t face_index;
+		u32 start;
+		u32 length;
+	};
 
 	//! Class to assist in deleting glyphs.
 	class CGUITTAssistDelete
@@ -426,6 +456,12 @@ namespace gui
 
 			void createSharedPlane();
 
+			std::vector<ShapedRun> shapeText(const core::ustring& text) const;
+			std::vector<TextRun> splitIntoFontRuns(const std::vector<uint32_t>& text) const;
+			ShapedRun shapeRun(const TextRun& run, const std::vector<uint32_t>& text, u32 cluster_offset) const;
+			void loadGlyphsForShapedText(const std::vector<ShapedRun>& runs);
+			u64 makeGlyphKey(u32 face_index, u32 glyph_index);
+
 			irr::IrrlichtDevice* Device;
 			gui::IGUIEnvironment* Environment;
 			video::IVideoDriver* Driver;
@@ -436,7 +472,7 @@ namespace gui
 			FT_Int32 load_flags;
 
 			mutable core::array<CGUITTGlyphPage*> Glyph_Pages;
-			mutable core::array<SGUITTGlyph*> Glyphs;
+			std::map<u64, SGUITTGlyph*> Glyphs;
 
 			s32 GlobalKerningWidth;
 			s32 GlobalKerningHeight;

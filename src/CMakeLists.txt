@@ -613,6 +613,7 @@ if(BUILD_CLIENT)
 		luautf8
 		luachacha
 		chacha
+		harfbuzz
 	)
 	if(NOT USE_LUAJIT)
 		set_target_properties(${PROJECT_NAME} PROPERTIES
