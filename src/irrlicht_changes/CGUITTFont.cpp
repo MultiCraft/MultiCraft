@@ -206,7 +206,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 	return image;
 }
 
-void SGUITTGlyph::preload(uchar32_t c, u32 char_index, FT_Face face,
+void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags,
 		bool bold, bool italic, u16 outline, u8 outline_type, s8 character_spacing)
 {
@@ -308,10 +308,6 @@ void SGUITTGlyph::preload(uchar32_t c, u32 char_index, FT_Face face,
 		bits = glyph_slot->bitmap;
 		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
 	}
-
-	// Don't allow empty textures for emoji letters so the fallback glyphs are used
-	if ((c >= 0x1F1E6 && c <= 0x1F1FF) && (bits.width < 1 || bits.rows < 1))
-		return;
 
 	// Setup the glyph information here:
 	advance = glyph_slot->advance;
@@ -780,8 +776,7 @@ void CGUITTFont::calculateColorEmojiParams(FT_Face face)
 	if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0)
 		return;
 
-	//~ u32 height = std::round((float)(getMaxFontHeight()) * 0.9f);
-	u32 height = std::round((float)(size) * 0.9f); //todo
+	u32 height = std::round((float)(getMaxFontHeight()) * 0.9f);
 	float scale = 1.0f;
 	u32 bitmap_top = height;
 
@@ -883,6 +878,8 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 
 	FT_Face face = tt_faces[run.face_index];
 
+	FT_Set_Pixel_Sizes(face, 0, size);
+
 	hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
 	hb_buffer_t* buf = hb_buffer_create();
 
@@ -951,7 +948,7 @@ void CGUITTFont::loadGlyphsForShapedText(const std::vector<ShapedRun>& runs)
 				if (FT_HAS_COLOR(face))
 					flags |= FT_LOAD_COLOR;
 
-				glyph->preload(0, glyph_idx, face, Driver, size, flags,
+				glyph->preload(glyph_idx, face, Driver, size, flags,
 						bold, italic, outline, outline_type, character_spacing);
 				glyph->shadow_offset = shadow_offsets[run.face_index];
 				Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
@@ -1227,7 +1224,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 
 core::dimension2d<u32> CGUITTFont::getCharDimension(const wchar_t ch) const
 {
-	return core::dimension2d<u32>(getWidthFromCharacter(ch), getHeightFromCharacter(ch));
+	return getDimension(core::ustring(ch));
 }
 
 core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
@@ -1237,19 +1234,7 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
 
 u32 CGUITTFont::getMaxFontHeight() const
 {
-	// Get the maximum font height.  Unfortunately, we have to do this hack as
-	// Irrlicht will draw things wrong.  In FreeType, the font size is the
-	// maximum size for a single glyph, but that glyph may hang "under" the
-	// draw line, increasing the total font height to beyond the set size.
-	// Irrlicht does not understand this concept when drawing fonts.  Also, I
-	// add +1 to give it a 1 pixel blank border.  This makes things like
-	// tooltips look nicer.
-	u32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
-	u32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
-	u32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
-	u32 max_font_height = core::max_(test1, core::max_(test2, test3));
-
-	return max_font_height;
+	return font_metrics.height / 64;
 }
 
 core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
@@ -1258,8 +1243,7 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 
 	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
 
-	s32 max_font_height = font_metrics.height / 64;
-	//~ s32 max_font_height = getMaxFontHeight(); //todo
+	s32 max_font_height = getMaxFontHeight();
 
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
@@ -1332,46 +1316,6 @@ core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) 
 	return text_dimension;
 }
 
-inline u32 CGUITTFont::getWidthFromCharacter(wchar_t c) const
-{
-	return getWidthFromCharacter((uchar32_t)c);
-}
-
-u32 CGUITTFont::getWidthFromCharacter(uchar32_t c) const
-{
-	std::vector<ShapedRun> shaped = shapeText(core::ustring(c));
-
-	if (!shaped.empty() && !shaped[0].glyphs.empty()) {
-		return shaped[0].glyphs[0].x_advance;
-	}
-
-	if (c >= 0xFE00 && c <= 0xFE0F) // variation selectors
-		return 0;
-	else if (c >= 0x2000)
-		return (font_metrics.ascender / 64);
-	else return (font_metrics.ascender / 64) / 2;
-}
-
-inline u32 CGUITTFont::getHeightFromCharacter(wchar_t c) const
-{
-	return getHeightFromCharacter((uchar32_t)c);
-}
-
-u32 CGUITTFont::getHeightFromCharacter(uchar32_t c) const
-{
-	std::vector<ShapedRun> shaped = shapeText(core::ustring(c));
-
-	if (!shaped.empty() && !shaped[0].glyphs.empty()) {
-		return shaped[0].glyphs[0].y_advance;
-	}
-
-	if (c >= 0xFE00 && c <= 0xFE0F) // variation selectors
-		return 0;
-	else if (c >= 0x2000)
-		return (font_metrics.ascender / 64);
-	else return (font_metrics.ascender / 64) / 2;
-}
-
 u32 CGUITTFont::getGlyphIndexByChar(wchar_t c) const
 {
 	return getGlyphIndexByChar((uchar32_t)c);
@@ -1409,12 +1353,10 @@ s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) cons
 	
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
-			s32 glyph_center = x + (glyph.x_advance / 2);
-			
-			if (pixel_x < glyph_center)
-				return glyph.cluster;
-			
 			x += glyph.x_advance;
+			
+			if (x >= pixel_x)
+				return glyph.cluster;
 		}
 	}
 
@@ -1433,24 +1375,17 @@ void CGUITTFont::setKerningHeight(s32 kerning)
 
 s32 CGUITTFont::getKerningWidth(const wchar_t* thisLetter, const wchar_t* previousLetter) const
 {
-	if (tt_faces[0] == 0)
-		return GlobalKerningWidth;
-	if (thisLetter == 0 || previousLetter == 0)
-		return 0;
-
-	return getKerningWidth((uchar32_t)*thisLetter, (uchar32_t)*previousLetter);
+	return 0;
 }
 
 s32 CGUITTFont::getKerningWidth(const uchar32_t thisLetter, const uchar32_t previousLetter) const
 {
-	// Return only the kerning width.
-	return getKerning(thisLetter, previousLetter).X;
+	return 0;
 }
 
 s32 CGUITTFont::getKerningHeight() const
 {
-	// FreeType 2 currently doesn't return any height kerning information.
-	return GlobalKerningHeight;
+	return 0;
 }
 
 core::vector2di CGUITTFont::getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const
@@ -1460,52 +1395,7 @@ core::vector2di CGUITTFont::getKerning(const wchar_t thisLetter, const wchar_t p
 
 core::vector2di CGUITTFont::getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const
 {
-	if (tt_faces[0] == 0 || thisLetter == 0 || previousLetter == 0)
-		return core::vector2di();
-
-	// Set the size of the face.
-	// This is because we cache faces and the face may have been set to a different size.
-	for (auto tt_face : tt_faces) {
-		FT_Set_Pixel_Sizes(tt_face, 0, size);
-	}
-
-	core::vector2di ret(GlobalKerningWidth, GlobalKerningHeight);
-
-	// Use global kerning if chars come from two different faces
-	s32 first_face_index = getFaceIndexByChar(previousLetter);
-	s32 second_face_index = getFaceIndexByChar(thisLetter);
-	if (first_face_index != -1 && second_face_index != -1 &&
-			first_face_index != second_face_index) {
-		return ret;
-	}
-
-	u32 face_index = 0;
-	if (first_face_index != -1)
-		face_index = first_face_index;
-	else if (second_face_index != -1)
-		face_index = second_face_index;
-
-	// If we don't have kerning, no point in continuing.
-	if (!FT_HAS_KERNING(tt_faces[face_index]))
-		return ret;
-
-	// Get the kerning information.
-	FT_Vector v;
-	FT_Get_Kerning(tt_faces[face_index], getGlyphIndexByChar(previousLetter), getGlyphIndexByChar(thisLetter), FT_KERNING_DEFAULT, &v);
-
-	// If we have a scalable font, the return value will be in font points.
-	if (FT_IS_SCALABLE(tt_faces[face_index]))
-	{
-		// Font points, so divide by 64.
-		ret.X += (v.x / 64);
-		ret.Y += (v.y / 64);
-	}
-	else
-	{
-		// Pixel units.
-		ret.X += v.x;
-		ret.Y += v.y;
-	}
+	core::vector2di ret(0, 0);
 	return ret;
 }
 
@@ -1712,7 +1602,7 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 
 				container.push_back(current_node);
 			}
-			offset.X += getWidthFromCharacter(current_char);
+			offset.X += getCharDimension(current_char).Width;
 			previous_char = current_char;
 			++text;
 		}

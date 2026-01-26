@@ -104,7 +104,7 @@ namespace gui
 		//! However, it simply defines the SGUITTGlyph's properties and will only create the page
 		//! textures if necessary.  The actual creation of the textures should only occur right
 		//! before the batch draw call.
-		void preload(uchar32_t c, u32 char_index, FT_Face face, video::IVideoDriver* driver,
+		void preload(u32 char_index, FT_Face face, video::IVideoDriver* driver,
 				u32 font_size, const FT_Int32 loadFlags, bool bold,
 				bool italic, u16 outline, u8 outline_type, s8 character_spacing);
 
@@ -442,10 +442,6 @@ namespace gui
 				if (useMonochrome()) load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_TARGET_MONO;
 				else load_flags |= FT_LOAD_TARGET_NORMAL;
 			}
-			u32 getWidthFromCharacter(wchar_t c) const;
-			u32 getWidthFromCharacter(uchar32_t c) const;
-			u32 getHeightFromCharacter(wchar_t c) const;
-			u32 getHeightFromCharacter(uchar32_t c) const;
 			u32 getGlyphIndexByChar(wchar_t c) const;
 			u32 getGlyphIndexByChar(uchar32_t c) const;
 			s32 getFaceIndexByChar(uchar32_t c) const;
