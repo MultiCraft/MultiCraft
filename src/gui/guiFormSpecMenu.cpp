@@ -4162,12 +4162,12 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 	// font while the IGUITabControl is processing the event.
 	if (event.EventType == EET_MOUSE_INPUT_EVENT &&
 			event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
-		s32 x = event.MouseInput.X;
-		s32 y = event.MouseInput.Y;
-		gui::IGUIElement *hovered =
-			Environment->getRootGUIElement()->getElementFromPoint(
-				core::position2d<s32>(x, y));
-		if (hovered && isMyChild(hovered) &&
+ 		s32 x = event.MouseInput.X;
+ 		s32 y = event.MouseInput.Y;
+ 		gui::IGUIElement *hovered =
+ 			Environment->getRootGUIElement()->getElementFromPoint(
+ 				core::position2d<s32>(x, y));
+ 		if (hovered && isMyChild(hovered) &&
 				hovered->getType() == gui::EGUIET_TAB_CONTROL) {
 			gui::IGUISkin* skin = Environment->getSkin();
 			sanity_check(skin != NULL);
@@ -4262,8 +4262,8 @@ bool GUIFormSpecMenu::preprocessEvent(const SEvent& event)
 		if (hovered && isMyChild(hovered)) {
 			hovered->OnEvent(event);
 			return event.MouseInput.Event == EMIE_MOUSE_WHEEL;
-		}
-	}
+ 		}
+ 	}
 
 	if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
 		/* TODO add a check like:
