@@ -66,6 +66,8 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 	m_pointer = v2s32(0, 0);
 	m_old_pointer = v2s32(0, 0);
 	m_zero_pointer = v2s32(0, 0);
+
+	m_pointer_is_zero = true;
 }
 // clang-format on
 
@@ -376,8 +378,10 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 
 		switch ((int)event.TouchInput.touchedCount) {
 		case 1: {
-			if (event.TouchInput.Event == ETIE_PRESSED_DOWN || event.TouchInput.Event == ETIE_MOVED)
+			if (event.TouchInput.Event == ETIE_PRESSED_DOWN || event.TouchInput.Event == ETIE_MOVED) {
 				m_pointer = v2s32(event.TouchInput.X, event.TouchInput.Y);
+				m_pointer_is_zero = false;
+			}
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
 				m_old_pointer = m_pointer;
 			gui::IGUIElement *hovered = Environment->getRootGUIElement()->getElementFromPoint(core::position2d<s32>(m_pointer));
@@ -405,6 +409,7 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 				ret = m_hovered->OnEvent(mouse_event);
 			if (event.TouchInput.Event == ETIE_LEFT_UP) {
 				m_pointer = AbsoluteClippingRect.UpperLeftCorner;
+				m_pointer_is_zero = true;
 				leave();
 			}
 			return ret;
