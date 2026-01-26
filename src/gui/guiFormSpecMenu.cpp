@@ -160,7 +160,6 @@ void GUIFormSpecMenu::create(GUIFormSpecMenu *&cur_formspec, Client *client,
 		cur_formspec = new GUIFormSpecMenu(joystick, guiroot, -1, &g_menumgr,
 			client, client->getTextureSource(), sound_manager, fs_src,
 			txt_dest, formspecPrepend);
-		cur_formspec->doPause = false;
 
 		/*
 			Caution: do not call (*cur_formspec)->drop() here --
@@ -169,12 +168,13 @@ void GUIFormSpecMenu::create(GUIFormSpecMenu *&cur_formspec, Client *client,
 			remaining reference (i.e. the menu was removed)
 			and delete it in that case.
 		*/
-
 	} else {
 		cur_formspec->setFormspecPrepend(formspecPrepend);
 		cur_formspec->setFormSource(fs_src);
 		cur_formspec->setTextDest(txt_dest);
 	}
+
+	cur_formspec->doPause = false;
 }
 
 void GUIFormSpecMenu::removeChildren()

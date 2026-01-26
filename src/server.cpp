@@ -1674,6 +1674,12 @@ void Server::SendHUDAdd(session_t peer_id, u32 id, HudElement *form)
 			<< form->align << form->offset << form->world_pos << form->size
 			<< form->z_index << form->text2;
 
+	// Only send unhideable if it is specified for maximum compatibility
+	if (form->unhideable) {
+		pkt << (u32)0 // Style (used by recent MT versions, remove when rebasing)
+			<< (u8)1;
+	}
+
 	Send(&pkt);
 }
 
@@ -1706,6 +1712,12 @@ void Server::SendHUDChange(session_t peer_id, u32 id, HudElementStat stat, void 
 			break;
 		case HUD_STAT_SIZE:
 			pkt << *(v2s32 *) value;
+			break;
+		case HUD_STAT_UNHIDEABLE:
+			{
+				bool b = *(bool *)value;
+				pkt << (u32) b;
+			}
 			break;
 		case HUD_STAT_NUMBER:
 		case HUD_STAT_ITEM:

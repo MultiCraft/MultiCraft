@@ -1137,19 +1137,21 @@ void Game::run()
 		}
 #endif
 
+		bool isMinimized = device->isWindowMinimized();
+		if (isMinimized)
+			sound->setListenerGain(0.0f);
+
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
-		if (!device->isWindowFocused()) {
+		if (!device->isWindowFocused())
+#else
+		if (isMinimized)
+#endif
+		{
 			if (m_does_lost_focus_pause_game && !isMenuActive())
 				showPauseMenu();
 			sleep_ms(50);
 			continue;
 		}
-#else
-		if (device->isWindowMinimized()) {
-			sleep_ms(50);
-			continue;
-		}
-#endif
 
 		// Prepare render data for next iteration
 
@@ -2903,6 +2905,7 @@ void Game::handleClientEvent_HudAdd(ClientEvent *event, CameraOrientation *cam)
 	e->size = *event->hudadd.size;
 	e->z_index = event->hudadd.z_index;
 	e->text2  = *event->hudadd.text2;
+	e->unhideable = event->hudadd.unhideable;
 	m_hud_server_to_client[server_id] = player->addHud(e);
 
 	delete event->hudadd.pos;
@@ -2999,6 +3002,13 @@ void Game::handleClientEvent_HudChange(ClientEvent *event, CameraOrientation *ca
 
 		case HUD_STAT_TEXT2:
 			e->text2 = *event->hudchange.sdata;
+			break;
+
+		case HUD_STAT_STYLE:
+			break;
+
+		case HUD_STAT_UNHIDEABLE:
+			e->unhideable = event->hudchange.data;
 			break;
 	}
 

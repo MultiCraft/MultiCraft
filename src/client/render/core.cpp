@@ -84,11 +84,12 @@ void RenderingCore::draw3D()
 
 void RenderingCore::drawHUD()
 {
-	if (show_hud) {
-		if (draw_crosshair)
-			hud->drawCrosshair();
+	if (show_hud && draw_crosshair)
+		hud->drawCrosshair();
 	
-		hud->drawLuaElements(camera->getOffset());
+	hud->drawLuaElements(camera->getOffset(), show_hud);
+
+	if (show_hud) {
 		if (draw_nametags)
 			camera->drawNametags();
 		if (mapper && show_minimap)

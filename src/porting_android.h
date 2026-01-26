@@ -110,9 +110,9 @@ jstring getJniString(const std::string &message);
 bool upgrade(const std::string &item);
 
 /**
- * get actual CPU architecture
+ * returns true if game running on Intel CPU
  */
-std::string getCpuArchitecture();
+bool isIntelDevice();
 
 /**
  * get encrypted key for further actions

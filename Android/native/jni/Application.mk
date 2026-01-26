@@ -10,7 +10,7 @@ else
 APP_CFLAGS := -g -D_DEBUG -O1 -fno-omit-frame-pointer
 endif
 
-APP_CFLAGS += -fexceptions
+APP_CFLAGS += -flto -fexceptions -std=gnu17
 
 APP_CXXFLAGS := $(APP_CFLAGS) -frtti -std=gnu++17 #-Werror=shorten-64-to-32
 
@@ -20,5 +20,5 @@ APP_CXXFLAGS += -Wno-deprecated-declarations -Wno-inconsistent-missing-override
 APP_CPPFLAGS := $(APP_CXXFLAGS)
 
 ifdef NDEBUG
-APP_LDFLAGS := -Wl,--gc-sections,--icf=all
+APP_LDFLAGS := -Wl,--gc-sections,--icf=all -Wl,-O2 -flto
 endif

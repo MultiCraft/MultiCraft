@@ -51,6 +51,7 @@ const struct EnumString es_HudElementStat[] =
 	{HUD_STAT_SIZE,    "size"},
 	{HUD_STAT_Z_INDEX, "z_index"},
 	{HUD_STAT_TEXT2,   "text2"},
+	{HUD_STAT_UNHIDEABLE, "unhideable"},
 	{0, NULL},
 };
 
