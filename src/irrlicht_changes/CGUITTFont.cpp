@@ -876,13 +876,21 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 
 	FT_Set_Pixel_Sizes(face, 0, size);
 
+	float emoji_scale = 1.0f;
+
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+		u32 best_index = getBestFixedSizeIndex(face, size);
+		FT_Select_Size(face, best_index);
+		emoji_scale = const_cast<CGUITTFont*>(this)->getColorEmojiScale();
+	}
+
 	hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
 	hb_buffer_t* buf = hb_buffer_create();
 
 	hb_buffer_add_utf32(buf, text.data() + run.start, run.length, 0, run.length);
 
 	hb_buffer_guess_segment_properties(buf);
-	//~ hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
+	hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
 	//~ hb_buffer_set_script(buf, HB_SCRIPT_COMMON);
 	//~ hb_buffer_set_language(buf, hb_language_get_default());
 
@@ -901,13 +909,21 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	hb_glyph_position_t* glyph_pos = hb_buffer_get_glyph_positions(buf, &glyph_count);
 
 	for (unsigned int i = 0; i < glyph_count; i++) {
+		s32 x_advance = glyph_pos[i].x_advance >> 6;
+		s32 y_advance = glyph_pos[i].y_advance >> 6;
+
+		if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+			x_advance *= emoji_scale;
+			y_advance *= emoji_scale;
+		}
+
 		ShapedGlyph glyph;
 		glyph.glyph_index = glyph_info[i].codepoint;
 		glyph.cluster = glyph_info[i].cluster + cluster_offset;
 		glyph.x_offset = glyph_pos[i].x_offset >> 6;
 		glyph.y_offset = glyph_pos[i].y_offset >> 6;
-		glyph.x_advance = (glyph_pos[i].x_advance >> 6) + spacing_offset;
-		glyph.y_advance = glyph_pos[i].y_advance >> 6;
+		glyph.x_advance = x_advance + spacing_offset;
+		glyph.y_advance = y_advance;
 		glyph.face_index = run.face_index;
 
 		result.glyphs.push_back(glyph);
