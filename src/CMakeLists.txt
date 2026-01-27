@@ -148,6 +148,13 @@ if(ENABLE_FREETYPE)
 		message(STATUS "Freetype enabled.")
 		set(USE_FREETYPE TRUE)
 	endif()
+
+	find_library(HARFBUZZ_LIBRARY NAMES harfbuzz libharfbuzz)
+	find_path(HARFBUZZ_INCLUDE_DIR NAMES harfbuzz/hb.h hb.h PATHS)
+	if (HARFBUZZ_LIBRARY AND HARFBUZZ_INCLUDE_DIR)
+		message(STATUS "HarfBuzz found.")
+		include_directories(${HARFBUZZ_INCLUDE_DIR})
+	endif()
 endif(ENABLE_FREETYPE)
 
 option(ENABLE_CURSES "Enable ncurses console" TRUE)
@@ -613,7 +620,6 @@ if(BUILD_CLIENT)
 		luautf8
 		luachacha
 		chacha
-		harfbuzz
 	)
 	if(NOT USE_LUAJIT)
 		set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -698,6 +704,7 @@ if(BUILD_CLIENT)
 		target_link_libraries(
 			${PROJECT_NAME}
 			${FREETYPE_LIBRARY}
+			${HARFBUZZ_LIBRARY}
 		)
 	endif()
 	if (USE_CURSES)
