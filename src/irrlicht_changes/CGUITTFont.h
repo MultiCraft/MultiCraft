@@ -135,9 +135,6 @@ namespace gui
 		//! The shadow offset of glyph
 		u32 shadow_offset;
 
-		//! Glyph advance information.
-		FT_Vector advance;
-
 		//! This is just the temporary image holder.  After this glyph is paged,
 		//! it will be dropped.
 		mutable video::IImage* surface;

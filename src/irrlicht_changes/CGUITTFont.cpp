@@ -310,10 +310,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	}
 
 	// Setup the glyph information here:
-	advance = glyph_slot->advance;
-	advance.x += bold_offset;
-	advance.x *= scale;
-	advance.y *= scale;
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		int bitmap_top = parent->getColorEmojiOffset();
 		offset = core::vector2di(glyph_slot->bitmap_left * scale, bitmap_top);
@@ -890,6 +886,14 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	//~ hb_buffer_set_script(buf, HB_SCRIPT_COMMON);
 	//~ hb_buffer_set_language(buf, hb_language_get_default());
 
+	float bold_offset = 0;
+	if (bold) {
+		float embolden_amount = (float)size * 2.0f;
+		bold_offset = (embolden_amount * 2.0f) / 64.0f;
+	}
+
+	s32 spacing_offset = character_spacing + bold_offset;
+
 	hb_shape(hb_font, buf, nullptr, 0);
 
 	unsigned int glyph_count;
@@ -902,7 +906,7 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 		glyph.cluster = glyph_info[i].cluster + cluster_offset;
 		glyph.x_offset = glyph_pos[i].x_offset >> 6;
 		glyph.y_offset = glyph_pos[i].y_offset >> 6;
-		glyph.x_advance = glyph_pos[i].x_advance >> 6;
+		glyph.x_advance = (glyph_pos[i].x_advance >> 6) + spacing_offset;
 		glyph.y_advance = glyph_pos[i].y_advance >> 6;
 		glyph.face_index = run.face_index;
 
@@ -937,7 +941,6 @@ void CGUITTFont::loadGlyphsForShapedText(const std::vector<ShapedRun>& runs)
 				glyph->source_rect = core::recti();
 				glyph->offset = core::vector2di();
 				glyph->shadow_offset = 0;
-				glyph->advance = FT_Vector();
 				glyph->surface = 0;
 				glyph->parent = this;
 				Glyphs[key] = glyph;
