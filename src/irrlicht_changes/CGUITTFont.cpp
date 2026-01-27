@@ -1316,16 +1316,6 @@ core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) 
 	return text_dimension;
 }
 
-u32 CGUITTFont::getGlyphIndexByChar(wchar_t c) const
-{
-	return getGlyphIndexByChar((uchar32_t)c);
-}
-
-u32 CGUITTFont::getGlyphIndexByChar(uchar32_t c) const
-{
-	return 0;
-}
-
 s32 CGUITTFont::getFaceIndexByChar(uchar32_t c) const
 {
 	for (size_t i = 0; i < tt_faces.size(); i++) {
@@ -1350,11 +1340,11 @@ s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) cons
 
 	std::vector<ShapedRun> shaped_runs = shapeText(text);
 	s32 x = 0;
-	
+
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
 			x += glyph.x_advance;
-			
+
 			if (x >= pixel_x)
 				return glyph.cluster;
 		}
@@ -1388,17 +1378,6 @@ s32 CGUITTFont::getKerningHeight() const
 	return 0;
 }
 
-core::vector2di CGUITTFont::getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const
-{
-	return getKerning((uchar32_t)thisLetter, (uchar32_t)previousLetter);
-}
-
-core::vector2di CGUITTFont::getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const
-{
-	core::vector2di ret(0, 0);
-	return ret;
-}
-
 void CGUITTFont::setInvisibleCharacters(const wchar_t *s)
 {
 	core::ustring us(s);
@@ -1412,10 +1391,26 @@ void CGUITTFont::setInvisibleCharacters(const core::ustring& s)
 
 video::IImage* CGUITTFont::createTextureFromChar(const uchar32_t& ch)
 {
-	return nullptr; //todo
+	core::ustring temp_text;
+	temp_text.append(ch);
 
-	u32 n = getGlyphIndexByChar(ch);
-	const SGUITTGlyph* glyph = Glyphs[n-1]; //todo
+	std::vector<ShapedRun> shaped = shapeText(temp_text);
+
+	if (shaped.empty() || shaped[0].glyphs.empty()) {
+		return nullptr;
+	}
+
+	loadGlyphsForShapedText(shaped);
+
+	const ShapedGlyph& shaped_glyph = shaped[0].glyphs[0];
+	u64 key = makeGlyphKey(shaped_glyph.face_index, shaped_glyph.glyph_index);
+
+	SGUITTGlyph* glyph = Glyphs[key];
+
+	if (!glyph || !glyph->isLoaded) {
+		return nullptr; // Glyph not loaded
+	}
+
 	CGUITTGlyphPage* page = Glyph_Pages[glyph->glyph_page];
 
 	if (page->dirty)
@@ -1440,6 +1435,7 @@ video::IImage* CGUITTFont::createTextureFromChar(const uchar32_t& ch)
 	pageholder->copyTo(image, core::position2di(0, 0), glyph->source_rect);
 
 	tex->unlock();
+
 	return image;
 }
 
@@ -1496,7 +1492,6 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 	using namespace scene;
 
 	array<scene::ISceneNode*> container;
-	return container; //todo
 
 	if (!Driver || !smgr) return container;
 	if (!parent)
@@ -1507,7 +1502,11 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 	if (!shared_plane_ptr_) //this points to a static mesh that contains the plane
 		createSharedPlane(); //if it's not initialized, we create one.
 
-	dimension2d<s32> text_size(getDimension(text)); //convert from unsigned to signed.
+	core::ustring utext(text);
+	std::vector<ShapedRun> shaped_runs = shapeText(utext);
+	loadGlyphsForShapedText(shaped_runs);
+
+	dimension2d<s32> text_size(getDimension(text));
 	vector3df start_point(0, 0, 0), offset;
 
 	/** NOTICE:
@@ -1518,7 +1517,7 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 	if (center)
 	{
 		offset.X = start_point.X = -text_size.Width / 2.f;
-		offset.Y = start_point.Y = +text_size.Height/ 2.f;
+		offset.Y = start_point.Y = +text_size.Height / 2.f;
 		offset.X += (text_size.Width - getDimensionUntilEndOfLine(text).Width) >> 1;
 	}
 
@@ -1532,53 +1531,55 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 	mat.MaterialTypeParam = 0.01f;
 	mat.DiffuseColor = color;
 
-	wchar_t current_char = 0, previous_char = 0;
-	u32 n = 0;
+	array<u64> glyph_keys;
 
-	array<u32> glyph_indices;
-
-	while (*text)
+	// Process shaped runs
+	for (const auto& run : shaped_runs)
 	{
-		current_char = *text;
-		bool line_break=false;
-		if (current_char == L'\r') // Mac or Windows breaks
+		for (const auto& shaped_glyph : run.glyphs)
 		{
-			line_break = true;
-			if (*(text + 1) == L'\n') // Windows line breaks.
-				current_char = *(++text);
-		}
-		else if (current_char == L'\n') // Unix breaks
-		{
-			line_break = true;
-		}
+			// Check for line breaks
+			uchar32_t currentChar = 0;
+			if (shaped_glyph.cluster < utext.size()) {
+				currentChar = utext[shaped_glyph.cluster];
+			}
 
-		if (line_break)
-		{
-			previous_char = 0;
-			offset.Y -= tt_faces[0]->size->metrics.ascender / 64;
-			offset.X = start_point.X;
-			if (center)
-				offset.X += (text_size.Width - getDimensionUntilEndOfLine(text+1).Width) >> 1;
-			++text;
-		}
-		else
-		{
-			n = getGlyphIndexByChar(current_char);
-			if (n > 0)
+			bool lineBreak = false;
+			if (currentChar == L'\r')
 			{
-				glyph_indices.push_back( n );
+				lineBreak = true;
+			}
+			else if (currentChar == (uchar32_t)'\n')
+			{
+				lineBreak = true;
+			}
+
+			if (lineBreak)
+			{
+				offset.Y -= font_metrics.ascender / 64;
+				offset.X = start_point.X;
+				if (center)
+					offset.X += (text_size.Width - getDimensionUntilEndOfLine(text + shaped_glyph.cluster + 1).Width) >> 1;
+				continue;
+			}
+
+			if (shaped_glyph.glyph_index > 0)
+			{
+				u64 key = makeGlyphKey(shaped_glyph.face_index, shaped_glyph.glyph_index);
+				SGUITTGlyph* glyph = Glyphs[key];
+
+				if (!glyph || !glyph->isLoaded) {
+					offset.X += shaped_glyph.x_advance;
+					continue;
+				}
+
+				glyph_keys.push_back(key);
 
 				// Store glyph size and offset informations.
-				SGUITTGlyph* glyph = Glyphs[n-1]; //todo
 				u32 texw = glyph->source_rect.getWidth();
 				u32 texh = glyph->source_rect.getHeight();
-				s32 offx = glyph->offset.X;
-				s32 offy = (font_metrics.ascender / 64) - glyph->offset.Y;
-
-				// Apply kerning.
-				vector2di k = getKerning(current_char, previous_char);
-				offset.X += k.X;
-				offset.Y += k.Y;
+				s32 offx = glyph->offset.X + shaped_glyph.x_offset;
+				s32 offy = (font_metrics.ascender / 64) - glyph->offset.Y + shaped_glyph.y_offset;
 
 				vector3df current_pos(offset.X + offx, offset.Y - offy, 0);
 				dimension2d<u32> letter_size = dimension2d<u32>(texw, texh);
@@ -1602,19 +1603,23 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 
 				container.push_back(current_node);
 			}
-			offset.X += getCharDimension(current_char).Width;
-			previous_char = current_char;
-			++text;
+
+			offset.X += shaped_glyph.x_advance;
+			offset.Y += shaped_glyph.y_advance;
 		}
 	}
 
 	update_glyph_pages();
 	//only after we update the textures can we use the glyph page textures.
 
-	for (u32 i = 0; i < glyph_indices.size(); ++i)
+	for (u32 i = 0; i < glyph_keys.size(); ++i)
 	{
-		u32 n = glyph_indices[i];
-		SGUITTGlyph* glyph = Glyphs[n-1]; //todo
+		u64 key = glyph_keys[i];
+		SGUITTGlyph* glyph = Glyphs[key];
+
+		if (!glyph)
+			continue;
+
 		ITexture* current_tex = Glyph_Pages[glyph->glyph_page]->texture;
 		f32 page_texture_size = (f32)current_tex->getSize().Width;
 		//Now we calculate the UV position according to the texture size and the source rect.
