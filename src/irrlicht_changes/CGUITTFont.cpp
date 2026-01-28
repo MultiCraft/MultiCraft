@@ -815,11 +815,12 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text) const
 	if (text.size() == 0)
 		return runs;
 
-	core::string<char32_t> wtext = text.toUTF32_s();
-
 	std::vector<uint32_t> utf32_text;
-	for (u32 i = 0; i < wtext.size(); i++) {
-		utf32_text.push_back(wtext[i]);
+	core::ustring::const_iterator iter(text);
+
+	while (!iter.atEnd()) {
+		utf32_text.push_back(*iter);
+		++iter;
 	}
 
 	std::vector<TextRun> font_runs = splitIntoFontRuns(utf32_text);
