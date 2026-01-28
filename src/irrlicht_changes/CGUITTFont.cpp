@@ -1253,7 +1253,32 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
 
 u32 CGUITTFont::getMaxFontHeight() const
 {
-	return font_metrics.height / 64;
+	// Probably better just
+	//     return font_metrics.height / 64;
+	// but for now keep it for compatibility
+
+	const uchar32_t test_chars[] = {'g', 'j', '_'};
+	u32 max_height = font_metrics.height / 64;
+
+	for (uchar32_t c : test_chars) {
+		std::vector<ShapedRun> shaped_runs = shapeText(c);
+		const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
+
+		if (!shaped_runs.empty() && !shaped_runs[0].glyphs.empty()) {
+			const ShapedGlyph& shaped_glyph = shaped_runs[0].glyphs[0];
+			u64 key = const_cast<CGUITTFont*>(this)->makeGlyphKey(
+					shaped_glyph.face_index, shaped_glyph.glyph_index);
+			SGUITTGlyph* glyph = const_cast<CGUITTFont*>(this)->Glyphs[key];
+
+			if (glyph && glyph->isLoaded) {
+				s32 height = (font_metrics.ascender / 64) - glyph->offset.Y +
+						glyph->source_rect.getHeight();
+				max_height = core::max_(max_height, (u32)height);
+			}
+		}
+	}
+
+	return max_height + 1;
 }
 
 core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
