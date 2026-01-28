@@ -1129,14 +1129,6 @@ void Game::run()
 		}
 #endif
 
-#if defined(__ANDROID__) || defined(__APPLE__)
-		if (client->modsLoaded() && !g_menumgr.pausesGame()) {
-			std::string key, value;
-			if (GUIEngine::readUpdate(&key, &value))
-				client->getScript()->on_update(key, value);
-		}
-#endif
-
 		bool isMinimized = device->isWindowMinimized();
 		if (isMinimized)
 			sound->setListenerGain(0.0f);
@@ -1162,6 +1154,14 @@ void Game::run()
 			break;
 		if (!handleCallbacks())
 			break;
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		if (client->modsLoaded() && !g_menumgr.pausesGame()) {
+			std::string key, value;
+			if (GUIEngine::readUpdate(&key, &value))
+				client->getScript()->on_update(key, value);
+		}
+#endif
 
 		processQueues();
 
