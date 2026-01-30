@@ -71,8 +71,6 @@ void set_default_settings()
 	settings->setDefault("max_out_chat_queue_size", "20");
 	settings->setDefault("pause_on_lost_focus", "true");
 	settings->setDefault("enable_register_confirmation", "true");
-	settings->setDefault("connect_timeout", "15");
-	settings->setDefault("reconnect_timeout", "15");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");
@@ -534,8 +532,6 @@ void set_default_settings()
 	settings->setDefault("gui_scaling_filter_txr2img", "false");
 	settings->setDefault("autosave_screensize", "false");
 	settings->setDefault("recent_chat_messages", "6");
-	settings->setDefault("connect_timeout", "10");
-	settings->setDefault("reconnect_timeout", "20");
 
 	if (isTablet) {
 		settings->setDefault("recent_chat_messages", "8");

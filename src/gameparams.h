@@ -45,7 +45,6 @@ struct GameStartData : GameParams
 	std::string password;
 	std::string address;
 	bool local_server;
-	bool reconnecting;
 
 	// "world_path" must be kept in sync!
 	WorldSpec world_spec;
