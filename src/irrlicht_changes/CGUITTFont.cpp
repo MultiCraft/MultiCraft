@@ -982,6 +982,45 @@ u64 CGUITTFont::makeGlyphKey(u32 face_index, u32 glyph_index)
 	return ((u64)face_index << 32) | glyph_index;
 }
 
+s32 CGUITTFont::getPrevClusterPos(const core::stringw& text, s32 pos)
+{
+	if (pos <= 0)
+		return 0;
+	
+	std::vector<ShapedRun> shaped_runs = shapeText(text);
+	
+	s32 prev_cluster = 0;
+	
+	for (const auto& run : shaped_runs) {
+		for (const auto& glyph : run.glyphs) {
+			if ((s32)glyph.cluster >= pos) {
+				return prev_cluster;
+			}
+			prev_cluster = glyph.cluster;
+		}
+	}
+	
+	return prev_cluster;
+}
+
+s32 CGUITTFont::getNextClusterPos(const core::stringw& text, s32 pos)
+{
+	std::vector<ShapedRun> shaped_runs = shapeText(text);
+	bool found_current = false;
+	
+	for (const auto& run : shaped_runs) {
+		for (const auto& glyph : run.glyphs) {
+			if (found_current)
+				return glyph.cluster;
+			
+			if ((s32)glyph.cluster >= pos)
+				found_current = true;
+		}
+	}
+	
+	return text.size();
+}
+
 void CGUITTFont::reset_images()
 {
 	// Delete the glyphs.
