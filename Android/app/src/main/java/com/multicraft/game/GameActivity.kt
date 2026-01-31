@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2025 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2025 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2026 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2026 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.multicraft.game
 
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.AnimationDrawable
 import android.os.Bundle
@@ -48,6 +49,11 @@ class GameActivity : SDLActivity() {
 	companion object {
 		var isMultiPlayer = false
 		var isInputActive = false
+
+		@JvmStatic
+		fun getContext(): Context {
+			return SDLActivity.getContext()
+		}
 
 		@JvmStatic
 		external fun pauseGame()
@@ -323,8 +329,6 @@ class GameActivity : SDLActivity() {
 	fun getSecretKey(secret: String?): String {
 		return secret ?: ""
 	}
-
-	fun getCpuArchitecture(): String = System.getProperty("os.arch") ?: "null"
 
 	fun hideSplashScreen() {
 		runOnUiThread {

@@ -171,6 +171,7 @@ LOCAL_SRC_FILES := \
 	../../src/gui/guiVolumeChange.cpp              \
 	../../src/gui/modalMenu.cpp                    \
 	../../src/gui/profilergraph.cpp                \
+	../../src/gui/scrollSwipe.cpp                  \
 	../../src/gui/touchscreengui_mc.cpp            \
 	$(wildcard ../../src/irrlicht_changes/*.cpp)   \
 	$(wildcard ../../src/mapgen/*.cpp)             \
