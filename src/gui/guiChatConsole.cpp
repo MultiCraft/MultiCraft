@@ -922,6 +922,18 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 		{
 			ChatSelection old_pos = getCurrentPromptCursorPos();
 
+			int cursor_pos = prompt.getCursorPos();
+			core::stringw text = prompt.getLine().c_str();
+			ChatPrompt& prompt = m_chat_backend->getPrompt();
+			s32 cluster_size;
+			if (event.KeyInput.Key == KEY_LEFT) {
+				s32 prev_pos = m_font->getPrevClusterPos(text, cursor_pos);
+				cluster_size = cursor_pos - prev_pos;
+			} else {
+				s32 next_pos = m_font->getNextClusterPos(text, cursor_pos);
+				cluster_size = next_pos - cursor_pos;
+			}
+
 			// Left/right pressed
 			// Move/select character/word to the left depending on control and shift keys
 			ChatPrompt::CursorOp op =  ChatPrompt::CURSOROP_MOVE;
@@ -931,7 +943,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			ChatPrompt::CursorOpScope scope = event.KeyInput.Control ?
 				ChatPrompt::CURSOROP_SCOPE_WORD :
 				ChatPrompt::CURSOROP_SCOPE_CHARACTER;
-			prompt.cursorOperation(op, dir, scope);
+			prompt.cursorOperation(op, dir, scope, cluster_size);
 
 			if (event.KeyInput.Shift) {
 				if (m_mark_begin.selection_type != ChatSelection::SELECTION_PROMPT ||
@@ -1012,6 +1024,12 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				return true;
 			}
 
+			int cursor_pos = prompt.getCursorPos();
+			core::stringw text = prompt.getLine().c_str();
+			ChatPrompt& prompt = m_chat_backend->getPrompt();
+			s32 prev_pos = m_font->getPrevClusterPos(text, cursor_pos);
+			s32 cluster_size = cursor_pos - prev_pos;
+
 			// Backspace or Ctrl-Backspace pressed
 			// delete character / word to the left
 			ChatPrompt::CursorOpScope scope =
@@ -1021,7 +1039,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			prompt.cursorOperation(
 				ChatPrompt::CURSOROP_DELETE,
 				ChatPrompt::CURSOROP_DIR_LEFT,
-				scope);
+				scope, cluster_size);
 			return true;
 		}
 		else if(event.KeyInput.Key == KEY_DELETE)
@@ -1033,6 +1051,12 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 				return true;
 			}
 
+			int cursor_pos = prompt.getCursorPos();
+			core::stringw text = prompt.getLine().c_str();
+			ChatPrompt& prompt = m_chat_backend->getPrompt();
+			s32 next_pos = m_font->getNextClusterPos(text, cursor_pos);
+			s32 cluster_size = next_pos - cursor_pos;
+
 			// Delete or Ctrl-Delete pressed
 			// delete character / word to the right
 			ChatPrompt::CursorOpScope scope =
@@ -1042,7 +1066,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			prompt.cursorOperation(
 				ChatPrompt::CURSOROP_DELETE,
 				ChatPrompt::CURSOROP_DIR_RIGHT,
-				scope);
+				scope, cluster_size);
 			return true;
 		}
 		else if(event.KeyInput.Key == KEY_KEY_A && event.KeyInput.Control)
