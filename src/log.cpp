@@ -283,18 +283,32 @@ void Logger::logRaw(LogLevel lev, const std::string &text)
 
 void Logger::logToOutputsRaw(LogLevel lev, const std::string &line)
 {
-	MutexAutoLock lock(m_mutex);
-	for (size_t i = 0; i != m_outputs[lev].size(); i++)
-		m_outputs[lev][i]->logRaw(lev, line);
+	// Copy output pointers while holding the lock to prevent use-after-free
+	// if an output is removed/destroyed while we're logging
+	std::vector<ILogOutput *> outputs;
+	{
+		MutexAutoLock lock(m_mutex);
+		outputs = m_outputs[lev];
+	}
+	// Call logRaw methods outside the lock to avoid holding it during I/O
+	for (size_t i = 0; i != outputs.size(); i++)
+		outputs[i]->logRaw(lev, line);
 }
 
 void Logger::logToOutputs(LogLevel lev, const std::string &combined,
 	const std::string &time, const std::string &thread_name,
 	const std::string &payload_text)
 {
-	MutexAutoLock lock(m_mutex);
-	for (size_t i = 0; i != m_outputs[lev].size(); i++)
-		m_outputs[lev][i]->log(lev, combined, time, thread_name, payload_text);
+	// Copy output pointers while holding the lock to prevent use-after-free
+	// if an output is removed/destroyed while we're logging
+	std::vector<ILogOutput *> outputs;
+	{
+		MutexAutoLock lock(m_mutex);
+		outputs = m_outputs[lev];
+	}
+	// Call log methods outside the lock to avoid holding it during I/O
+	for (size_t i = 0; i != outputs.size(); i++)
+		outputs[i]->log(lev, combined, time, thread_name, payload_text);
 }
 
 
