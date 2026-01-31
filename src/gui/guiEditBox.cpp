@@ -415,7 +415,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 			}
 			break;
 		case KEY_LEFT: {
-			IGUIFont* font = getActiveFont();
+			IGUIFont *font = getActiveFont();
 			s32 prev_pos = font->getPrevClusterPos(Text, m_cursor_pos);
 
 			if (event.KeyInput.Shift) {
@@ -435,7 +435,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 			m_blink_start_time = porting::getTimeMs();
 		} break;
 		case KEY_RIGHT: {
-			IGUIFont* font = getActiveFont();
+			IGUIFont *font = getActiveFont();
 			s32 next_pos = font->getPrevClusterPos(Text, m_cursor_pos);
 
 			if (event.KeyInput.Shift) {
@@ -685,13 +685,14 @@ bool GUIEditBox::onKeyBack(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 
 		m_cursor_pos = m_real_mark_begin;
 	} else {
-		IGUIFont* font = getActiveFont();
+		IGUIFont *font = getActiveFont();
 		s32 prev_pos = font->getPrevClusterPos(Text, m_cursor_pos);
 
 		// delete text behind cursor
 		if (m_cursor_pos > 0) {
 			s = Text.subString(0, prev_pos);
-			s.append(Text.subString(m_cursor_pos, Text.size() - m_cursor_pos));
+			s.append(Text.subString(
+					m_cursor_pos, Text.size() - m_cursor_pos));
 			m_cursor_pos = prev_pos;
 			Text = s;
 		}
@@ -721,7 +722,7 @@ bool GUIEditBox::onKeyDelete(const SEvent &event, s32 &mark_begin, s32 &mark_end
 
 		m_cursor_pos = m_real_mark_begin;
 	} else {
-		IGUIFont* font = getActiveFont();
+		IGUIFont *font = getActiveFont();
 		s32 next_pos = font->getNextClusterPos(Text, m_cursor_pos);
 		s32 chars_to_delete = next_pos - m_cursor_pos;
 
