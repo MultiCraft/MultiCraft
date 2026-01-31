@@ -1,7 +1,7 @@
 /*
 MultiCraft
-Copyright (C) 2014-2025 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
-Copyright (C) 2014-2025 ubulem,  Bektur Mambetov <berkut87@gmail.com>
+Copyright (C) 2014-2026 MoNTE48, Maksim Gamarnik <Maksym48@pm.me>
+Copyright (C) 2014-2026 ubulem,  Bektur Mambetov <berkut87@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
