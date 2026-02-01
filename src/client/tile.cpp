@@ -230,11 +230,16 @@ public:
 			std::string path = getTexturePath(name, &is_base_pack);
 			// Ignore base pack
 			if (!path.empty() && !is_base_pack) {
-				video::IImage *img2 = RenderingEngine::get_video_driver()->
-					createImageFromFile(path.c_str());
-				if (img2){
-					toadd = img2;
-					need_to_grab = false;
+				video::IVideoDriver *driver = RenderingEngine::get_video_driver();
+				if (driver) {
+					video::IImage *img2 = driver->createImageFromFile(path.c_str());
+					if (img2){
+						toadd = img2;
+						need_to_grab = false;
+					}
+				} else {
+					errorstream << "SourceImageCache::insert(): Video driver is null, "
+							<< "cannot load local texture for \"" << name << "\"" << std::endl;
 				}
 			}
 		}
@@ -261,6 +266,11 @@ public:
 			return n->second;
 		}
 		video::IVideoDriver *driver = RenderingEngine::get_video_driver();
+		if (!driver) {
+			errorstream << "SourceImageCache::getOrLoad(): Video driver is null, "
+					<< "cannot load image \"" << name << "\"" << std::endl;
+			return nullptr;
+		}
 		std::string path = m_main_menu ? name : getTexturePath(name);
 		if (path.empty()) {
 			infostream<<"SourceImageCache::getOrLoad(): No path found for \""
