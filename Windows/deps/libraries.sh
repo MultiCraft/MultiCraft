@@ -2,6 +2,8 @@
 
 # Build libs
 
+sh ./freetype.sh bootstrap
+sh ./harfbuzz.sh
 sh ./freetype.sh
 sh ./gettext.sh
 sh ./sqlite.sh
