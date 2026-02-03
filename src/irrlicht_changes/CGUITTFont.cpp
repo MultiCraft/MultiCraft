@@ -666,6 +666,8 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 		// Store font metrics.
 		FT_Set_Pixel_Sizes(face->face, size, 0);
 		font_metrics = face->face->size->metrics;
+
+		calculateMaxFontHeight();
 	}
 
 	return true;
@@ -772,7 +774,7 @@ void CGUITTFont::calculateColorEmojiParams(FT_Face face)
 	if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0)
 		return;
 
-	u32 height = std::round((float)(getMaxFontHeight()) * 0.9f);
+	u32 height = std::round((float)(max_font_height) * 0.9f);
 	float scale = 1.0f;
 	u32 bitmap_top = height;
 
@@ -806,6 +808,36 @@ void CGUITTFont::calculateColorEmojiParams(FT_Face face)
 	}
 
 	color_emoji_offset = bitmap_top;
+}
+
+void CGUITTFont::calculateMaxFontHeight()
+{
+	// Probably better just
+	//     return font_metrics.height / 64;
+	// but for now keep it for compatibility
+
+	const uchar32_t test_chars[] = {'g', 'j', '_'};
+	u32 max_height = font_metrics.height / 64;
+
+	for (uchar32_t c : test_chars) {
+		std::vector<ShapedRun> shaped_runs = shapeText(c);
+		loadGlyphsForShapedText(shaped_runs);
+
+		if (!shaped_runs.empty() && !shaped_runs[0].glyphs.empty()) {
+			const ShapedGlyph& shaped_glyph = shaped_runs[0].glyphs[0];
+			u64 key = makeGlyphKey(
+					shaped_glyph.face_index, shaped_glyph.glyph_index);
+			SGUITTGlyph* glyph = Glyphs[key];
+
+			if (glyph && glyph->isLoaded) {
+				s32 height = (font_metrics.ascender / 64) - glyph->offset.Y +
+						glyph->source_rect.getHeight();
+				max_height = core::max_(max_height, (u32)height);
+			}
+		}
+	}
+
+	max_font_height = max_height + 1;
 }
 
 std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text) const
@@ -877,12 +909,9 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 
 	FT_Set_Pixel_Sizes(face, 0, size);
 
-	float emoji_scale = 1.0f;
-
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		u32 best_index = getBestFixedSizeIndex(face, size);
 		FT_Select_Size(face, best_index);
-		emoji_scale = const_cast<CGUITTFont*>(this)->getColorEmojiScale();
 	}
 
 	hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
@@ -914,8 +943,8 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 		s32 y_advance = glyph_pos[i].y_advance >> 6;
 
 		if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-			x_advance *= emoji_scale;
-			y_advance *= emoji_scale;
+			x_advance *= color_emoji_scale;
+			y_advance *= color_emoji_scale;
 		}
 
 		ShapedGlyph glyph;
@@ -986,11 +1015,11 @@ s32 CGUITTFont::getPrevClusterPos(const core::stringw& text, s32 pos)
 {
 	if (pos <= 0)
 		return 0;
-	
+
 	std::vector<ShapedRun> shaped_runs = shapeText(text);
-	
+
 	s32 prev_cluster = 0;
-	
+
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
 			if ((s32)glyph.cluster >= pos) {
@@ -999,7 +1028,7 @@ s32 CGUITTFont::getPrevClusterPos(const core::stringw& text, s32 pos)
 			prev_cluster = glyph.cluster;
 		}
 	}
-	
+
 	return prev_cluster;
 }
 
@@ -1007,17 +1036,17 @@ s32 CGUITTFont::getNextClusterPos(const core::stringw& text, s32 pos)
 {
 	std::vector<ShapedRun> shaped_runs = shapeText(text);
 	bool found_current = false;
-	
+
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
 			if (found_current)
 				return glyph.cluster;
-			
+
 			if ((s32)glyph.cluster >= pos)
 				found_current = true;
 		}
 	}
-	
+
 	return text.size();
 }
 
@@ -1291,43 +1320,11 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
 	return getDimension(core::ustring(text));
 }
 
-u32 CGUITTFont::getMaxFontHeight() const
-{
-	// Probably better just
-	//     return font_metrics.height / 64;
-	// but for now keep it for compatibility
-
-	const uchar32_t test_chars[] = {'g', 'j', '_'};
-	u32 max_height = font_metrics.height / 64;
-
-	for (uchar32_t c : test_chars) {
-		std::vector<ShapedRun> shaped_runs = shapeText(c);
-		const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
-
-		if (!shaped_runs.empty() && !shaped_runs[0].glyphs.empty()) {
-			const ShapedGlyph& shaped_glyph = shaped_runs[0].glyphs[0];
-			u64 key = const_cast<CGUITTFont*>(this)->makeGlyphKey(
-					shaped_glyph.face_index, shaped_glyph.glyph_index);
-			SGUITTGlyph* glyph = const_cast<CGUITTFont*>(this)->Glyphs[key];
-
-			if (glyph && glyph->isLoaded) {
-				s32 height = (font_metrics.ascender / 64) - glyph->offset.Y +
-						glyph->source_rect.getHeight();
-				max_height = core::max_(max_height, (u32)height);
-			}
-		}
-	}
-
-	return max_height + 1;
-}
-
 core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 {
 	std::vector<ShapedRun> shaped_runs = shapeText(text);
 
 	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
-
-	s32 max_font_height = getMaxFontHeight();
 
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
@@ -1384,7 +1381,6 @@ core::dimension2d<u32> CGUITTFont::getTotalDimension(const wchar_t* text) const
 core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) const
 {
 	core::dimension2d<u32> text_dimension = getDimension(text);
-	u32 max_font_height = getMaxFontHeight();
 
 	if (italic) {
 		float slant = 0.2f;

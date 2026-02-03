@@ -396,7 +396,7 @@ namespace gui
 			virtual core::array<scene::ISceneNode*> addTextSceneNode
 				(const wchar_t* text, scene::ISceneManager* smgr, scene::ISceneNode* parent = 0,
 				 const video::SColor& color = video::SColor(255, 0, 0, 0), bool center = false );
-			
+
 			virtual s32 getPrevClusterPos(const core::stringw& text, s32 pos);
 			virtual s32 getNextClusterPos(const core::stringw& text, s32 pos);
 
@@ -404,12 +404,10 @@ namespace gui
 
 			FT_Stroker getStroker() { return stroker; }
 
-			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
+			float getColorEmojiOffset() const { return color_emoji_offset; }
+			float getColorEmojiScale() const { return color_emoji_scale; }
 
-			bool testEmojiFont(const io::path& filename);
-			void calculateColorEmojiParams(FT_Face face);
-			float getColorEmojiScale() { return color_emoji_scale; }
-			float getColorEmojiOffset() { return color_emoji_offset; }
+			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
 
 		protected:
 			bool use_monochrome;
@@ -443,10 +441,13 @@ namespace gui
 				else load_flags |= FT_LOAD_TARGET_NORMAL;
 			}
 			s32 getFaceIndexByChar(uchar32_t c) const;
-			u32 getMaxFontHeight() const;
 			core::dimension2d<u32> getDimensionUntilEndOfLine(const wchar_t* p) const;
 
 			void createSharedPlane();
+
+			bool testEmojiFont(const io::path& filename);
+			void calculateColorEmojiParams(FT_Face face);
+			void calculateMaxFontHeight();
 
 			std::vector<ShapedRun> shapeText(const core::ustring& text) const;
 			std::vector<TextRun> splitIntoFontRuns(const std::vector<uint32_t>& text) const;
@@ -478,6 +479,7 @@ namespace gui
 			s8 character_spacing;
 			float color_emoji_scale = 1.0f;
 			u32 color_emoji_offset;
+			u32 max_font_height = 0;
 	};
 
 } // end namespace gui
