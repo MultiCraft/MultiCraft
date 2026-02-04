@@ -23,7 +23,10 @@ else
 	HARFBUZZ_FLAGS=" \
 		-DFT_REQUIRE_HARFBUZZ=TRUE \
 		-DFT_DYNAMIC_HARFBUZZ=FALSE \
+		-DHarfBuzz_FOUND=TRUE \
+		-DHarfBuzz_VERSION=12.3.2 \
 		-DHarfBuzz_LIBRARY=$DEPS_ROOT/harfbuzz/lib/libharfbuzz.a \
+		-DHarfBuzz_INCLUDE_DIR=$DEPS_ROOT/harfbuzz/include \
 		-DHarfBuzz_INCLUDE_DIRS=$DEPS_ROOT/harfbuzz/include"
 fi
 
