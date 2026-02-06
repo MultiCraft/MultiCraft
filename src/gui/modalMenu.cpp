@@ -417,19 +417,31 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 		case 2: {
 			if (event.TouchInput.Event != ETIE_PRESSED_DOWN)
 				return true; // ignore
+
 			auto focused = Environment->getFocus();
 			if (!focused)
 				return true;
+
 			SEvent rclick_event{};
 			rclick_event.EventType = EET_MOUSE_INPUT_EVENT;
 			rclick_event.MouseInput.Event = EMIE_RMOUSE_PRESSED_DOWN;
 			rclick_event.MouseInput.ButtonStates = EMBSM_LEFT | EMBSM_RIGHT;
 			rclick_event.MouseInput.X = m_pointer.X;
 			rclick_event.MouseInput.Y = m_pointer.Y;
-			focused->OnEvent(rclick_event);
+
+			bool ret = preprocessEvent(rclick_event);
+
+			if (!ret && focused)
+				focused->OnEvent(rclick_event);
+				
 			rclick_event.MouseInput.Event = EMIE_RMOUSE_LEFT_UP;
 			rclick_event.MouseInput.ButtonStates = EMBSM_LEFT;
-			focused->OnEvent(rclick_event);
+
+			ret = preprocessEvent(rclick_event);
+
+			if (!ret && focused)
+				focused->OnEvent(rclick_event);
+
 			return true;
 		}
 		default: // ignored
