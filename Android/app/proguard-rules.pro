@@ -35,6 +35,7 @@
 	java.lang.String getSecretKey(java.lang.String);
 	void hideSplashScreen();
 	boolean needsExtractAssets();
+	void vibrationEffect(int, int);
 }
 -keepclasseswithmembernames,includedescriptorclasses class * {
 	native <methods>;

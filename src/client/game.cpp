@@ -3965,6 +3965,8 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 
 		// Send event to trigger sound
 		client->getEventManager()->put(new NodeDugEvent(nodepos, wasnode));
+
+		porting::vibrationEffect(100, 128);
 	}
 
 	if (runData.dig_time_complete < 100000.0) {
