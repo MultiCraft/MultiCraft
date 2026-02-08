@@ -17,6 +17,7 @@ cmake .. \
 	-DBUILD_SHARED_LIBS=FALSE \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS" \
+	-DCMAKE_CXX_FLAGS_RELEASE="$CFLAGS" \
 	-DFREETYPE_LIBRARY="$DEPS_ROOT/freetype/lib/libfreetype.a $DEPS_ROOT/libpng/lib/libpng.a" \
 	-DFREETYPE_INCLUDE_DIRS="$DEPS_ROOT/freetype/include" \
 	-DHB_HAVE_GLIB=OFF \

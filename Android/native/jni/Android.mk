@@ -292,8 +292,7 @@ LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
 
 LOCAL_STATIC_LIBRARIES += \
 	Curl libssl libcrypto libnghttp2 \
-	Freetype \
-	HarfBuzz \
+	Freetype HarfBuzz \
 	OpenAL \
 	Gettext \
 	Irrlicht libpng libjpeg SDL \
