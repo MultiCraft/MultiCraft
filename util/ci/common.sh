@@ -6,7 +6,7 @@ install_linux_deps() {
 		libjpeg-dev libxxf86vm-dev libgl1-mesa-dev libsqlite3-dev \
 		libhiredis-dev libogg-dev libgmp-dev libvorbis-dev libopenal-dev \
 		gettext libpq-dev libleveldb-dev libcurl4-openssl-dev libzstd-dev \
-		libssl-dev)
+		libssl-dev libharfbuzz-dev)
 
 	sudo apt-get update
 	sudo apt-get install -y --no-install-recommends ${pkgs[@]} "$@"

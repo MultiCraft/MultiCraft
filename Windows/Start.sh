@@ -59,6 +59,8 @@ cmake ../ \
 	-DJPEG_INCLUDE_DIR="$DEPS_ROOT/libjpeg/include" \
 	-DFREETYPE_LIBRARY="$DEPS_ROOT/freetype/lib/libfreetype.a" \
 	-DFREETYPE_INCLUDE_DIRS="$DEPS_ROOT/freetype/include" \
+	-DHARFBUZZ_LIBRARY="$DEPS_ROOT/harfbuzz/lib/libharfbuzz.a" \
+	-DHARFBUZZ_INCLUDE_DIR="$DEPS_ROOT/harfbuzz/include" \
 	-DSQLITE3_LIBRARY="$DEPS_ROOT/sqlite/lib/libsqlite3.a" \
 	-DSQLITE3_INCLUDE_DIR="$DEPS_ROOT/sqlite/include" \
 	-DOGG_LIBRARY="$DEPS_ROOT/libogg/lib/libogg.a" \
