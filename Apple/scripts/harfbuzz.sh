@@ -6,7 +6,7 @@ HARFBUZZ_VERSION=12.3.2
 mkdir -p deps; cd deps
 
 if [ ! -d harfbuzz-src ]; then
-	git clone -b $HARFBUZZ_VERSION --depth 1 https://github.com/harfbuzz/harfbuzz.git harfbuzz-src
+	git clone -b $HARFBUZZ_VERSION --depth 1 https://github.com/harfbuzz/harfbuzz harfbuzz-src
 	mkdir harfbuzz-src/build
 fi
 
