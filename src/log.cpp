@@ -458,11 +458,12 @@ void StringBuffer::push_back(char c)
 			flush(std::string(buffer, buffer_index));
 		buffer_index = 0;
 	} else {
-		buffer[buffer_index++] = c;
+		// Check if buffer is full before writing to prevent out-of-bounds access
 		if (buffer_index >= BUFFER_LENGTH) {
 			flush(std::string(buffer, buffer_index));
 			buffer_index = 0;
 		}
+		buffer[buffer_index++] = c;
 	}
 }
 
