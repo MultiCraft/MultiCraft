@@ -11,6 +11,9 @@ if [ ! -d harfbuzz-src ]; then
 fi
 
 rm -rf harfbuzz
+
+FREETYPE_INCLUDE="$(pwd)/freetype/include"
+
 cd harfbuzz-src/build
 
 cmake .. \
@@ -19,7 +22,7 @@ cmake .. \
 	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
 	-DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURES \
 	-DFREETYPE_LIBRARY="../../freetype/lib/$TARGET_ABI/libfreetype.a ../../libpng/lib/$TARGET_ABI/libpng.a" \
-	-DFREETYPE_INCLUDE_DIRS="../../freetype/include" \
+	-DFREETYPE_INCLUDE_DIRS=$FREETYPE_INCLUDE \
 	-DHB_HAVE_GLIB=OFF \
 	-DHB_HAVE_GOBJECT=OFF \
 	-DHB_HAVE_ICU=OFF \
