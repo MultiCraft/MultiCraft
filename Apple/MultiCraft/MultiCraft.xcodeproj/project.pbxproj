@@ -282,8 +282,8 @@
 		84F20F4C25D52975009562A9 /* mapgen_fractal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3A25D52975009562A9 /* mapgen_fractal.cpp */; };
 		84F20F4D25D52975009562A9 /* mapgen_v7.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3B25D52975009562A9 /* mapgen_v7.cpp */; };
 		84F20F4E25D52975009562A9 /* mapgen_v5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3C25D52975009562A9 /* mapgen_v5.cpp */; };
-		84FA0A182F2C10AC00394A7F /* libharfbuzz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FA0A172F2C107600394A7F /* libharfbuzz.a */; };
 		84FA0A162F19178E00394A7F /* scrollSwipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FA0A152F19178E00394A7F /* scrollSwipe.cpp */; };
+		84FA0A182F2C10AC00394A7F /* libharfbuzz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FA0A172F2C107600394A7F /* libharfbuzz.a */; };
 		84FD8E3126A0B01D00EF2BFA /* guiEditBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */; };
 		84FD8E3426A0B04900EF2BFA /* guiScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3326A0B04900EF2BFA /* guiScene.cpp */; };
 /* End PBXBuildFile section */
@@ -849,9 +849,9 @@
 		84F20F3B25D52975009562A9 /* mapgen_v7.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mapgen_v7.cpp; path = ../../../src/mapgen/mapgen_v7.cpp; sourceTree = "<group>"; };
 		84F20F3C25D52975009562A9 /* mapgen_v5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mapgen_v5.cpp; path = ../../../src/mapgen/mapgen_v5.cpp; sourceTree = "<group>"; };
 		84F20F3D25D52975009562A9 /* mapgen_v6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mapgen_v6.h; path = ../../../src/mapgen/mapgen_v6.h; sourceTree = "<group>"; };
-		84FA0A172F2C107600394A7F /* libharfbuzz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libharfbuzz.a; path = ../deps/harfbuzz/libharfbuzz.a; sourceTree = "<group>"; };
 		84FA0A142F19178E00394A7F /* scrollSwipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scrollSwipe.h; path = ../../../src/gui/scrollSwipe.h; sourceTree = "<group>"; };
 		84FA0A152F19178E00394A7F /* scrollSwipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scrollSwipe.cpp; path = ../../../src/gui/scrollSwipe.cpp; sourceTree = "<group>"; };
+		84FA0A172F2C107600394A7F /* libharfbuzz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libharfbuzz.a; path = ../deps/harfbuzz/libharfbuzz.a; sourceTree = "<group>"; };
 		84FD8E2F26A0B01D00EF2BFA /* guiEditBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiEditBox.h; path = ../../../src/gui/guiEditBox.h; sourceTree = "<group>"; };
 		84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiEditBox.cpp; path = ../../../src/gui/guiEditBox.cpp; sourceTree = "<group>"; };
 		84FD8E3226A0B04900EF2BFA /* guiScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiScene.h; path = ../../../src/gui/guiScene.h; sourceTree = "<group>"; };
@@ -862,7 +862,6 @@
 		845856A624B1322C0040BA4F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
-				84FA0A182F2C10AC00394A7F /* libharfbuzz.a in Frameworks */,
 				84EA1B952CA4BC8B00CDCE7C /* AudioToolbox.framework in Frameworks */,
 				84CA12AF2EF4B8BA004899E0 /* libnghttp2.a in Frameworks */,
 				8463C2992E46BC22002D5BB3 /* AppKit.framework in Frameworks */,
@@ -879,6 +878,7 @@
 				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
 				849FD2C82DFD8FCE00C8B942 /* libcurl.a in Frameworks */,
 				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
+				84FA0A182F2C10AC00394A7F /* libharfbuzz.a in Frameworks */,
 				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
 				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
 				841AD8BB28D12E980042E335 /* libintl.a in Frameworks */,

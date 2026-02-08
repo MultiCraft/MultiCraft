@@ -26,7 +26,7 @@ else
 		-DFT_REQUIRE_HARFBUZZ=TRUE \
 		-DFT_DYNAMIC_HARFBUZZ=FALSE \
 		-DHarfBuzz_LIBRARY=../../harfbuzz/lib/$TARGET_ABI/libharfbuzz.a \
-		-DHarfBuzz_INCLUDE_DIR=../../harfbuzz/include"
+		-DHarfBuzz_INCLUDE_DIR=../../harfbuzz/include/harfbuzz"
 fi
 
 cmake .. \
