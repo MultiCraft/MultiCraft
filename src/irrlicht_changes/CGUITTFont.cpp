@@ -34,6 +34,8 @@
 #include <iostream>
 #include "CGUITTFont.h"
 #include "porting.h"
+#include "bidi.h"
+
 
 namespace irr
 {
@@ -1153,12 +1155,12 @@ void CGUITTFont::setFontHinting(const bool enable, const bool enable_auto_hintin
 	reset_images();
 }
 
-void CGUITTFont::draw(const core::stringw& text, const core::rect<s32>& position, video::SColor color, bool hcenter, bool vcenter, const core::rect<s32>* clip)
+void CGUITTFont::draw(const core::stringw& text, const core::rect<s32>& position, video::SColor color, bool hcenter, bool vcenter, const core::rect<s32>* clip, bool use_rtl)
 {
-	draw(EnrichedString(std::wstring(text.c_str()), color), position, hcenter, vcenter, clip);
+	draw(EnrichedString(std::wstring(text.c_str()), color), position, hcenter, vcenter, clip, use_rtl);
 }
 
-void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& position, bool hcenter, bool vcenter, const core::rect<s32>* clip)
+void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& position, bool hcenter, bool vcenter, const core::rect<s32>* clip, bool use_rtl)
 {
 	const std::vector<video::SColor> &colors = text.getColors();
 
@@ -1193,6 +1195,9 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 
 	// Convert to a unicode string.
 	core::ustring utext = text.getString();
+
+	if (use_rtl)
+		utext = applyBidiReorderingMultiline(utext);
 
 	// Shape the text with HarfBuzz
 	std::vector<ShapedRun> shaped_runs = shapeText(utext.c_str());

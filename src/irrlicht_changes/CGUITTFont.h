@@ -333,11 +333,11 @@ namespace gui
 			//! Draws some text and clips it to the specified rectangle if wanted.
 			virtual void draw(const core::stringw& text, const core::rect<s32>& position,
 				video::SColor color, bool hcenter=false, bool vcenter=false,
-				const core::rect<s32>* clip=0);
+				const core::rect<s32>* clip=0, bool use_rtl = true);
 
 			virtual void draw(const EnrichedString& text, const core::rect<s32>& position,
 				bool hcenter=false, bool vcenter=false,
-				const core::rect<s32>* clip=0);
+				const core::rect<s32>* clip=0, bool use_rtl = true);
 
 			//! Returns the dimension of a character produced by this font.
 			virtual core::dimension2d<u32> getCharDimension(const wchar_t ch) const;
