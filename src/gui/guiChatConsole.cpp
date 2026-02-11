@@ -396,18 +396,18 @@ void GUIChatConsole::drawText()
 
 			s32 x_begin = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
 			for (unsigned int i = 0; i < fragment_first_id; i++) {
-				x_begin += m_font->getDimension(line.fragments[i].text.c_str()).Width;
+				x_begin += m_font->getDimension(line.fragments[i].text.c_str(), false).Width;
 			}
 
 			s32 x_end = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
 			for (unsigned int i = 0; i <= fragment_last_id; i++) {
-				x_end += m_font->getDimension(line.fragments[i].text.c_str()).Width;
+				x_end += m_font->getDimension(line.fragments[i].text.c_str(), false).Width;
 			}
 
 			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll) {
 				irr::core::stringw text = fragment_first.text.c_str();
 				text = text.subString(0, real_mark_begin.character);
-				s32 text_size = m_font->getDimension(text.c_str()).Width;
+				s32 text_size = m_font->getDimension(text.c_str(), false).Width;
 				x_begin += text_size;
 
 				if (real_mark_begin.x_max)
@@ -418,9 +418,9 @@ void GUIChatConsole::drawText()
 					(real_mark_end.character < fragment_last.text.size()) &&
 					!real_mark_end.x_max) {
 				irr::core::stringw text = fragment_last.text.c_str();
-				s32 text_size = m_font->getDimension(text.c_str()).Width;
+				s32 text_size = m_font->getDimension(text.c_str(), false).Width;
 				text = text.subString(0, real_mark_end.character);
-				text_size -= m_font->getDimension(text.c_str()).Width;
+				text_size -= m_font->getDimension(text.c_str(), false).Width;
 				x_end -= text_size;
 			}
 
@@ -432,7 +432,7 @@ void GUIChatConsole::drawText()
 
 		s32 x = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
 		for (const ChatFormattedFragment &fragment : line.fragments) {
-			s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
+			s32 text_size = m_font->getDimension(fragment.text.c_str(), false).Width;
 			core::rect<s32> destrect(x, y, x + text_size, y + m_fontsize.Y);
 			x += text_size;
 
@@ -485,11 +485,11 @@ void GUIChatConsole::drawPrompt()
 		real_mark_begin.selection_type == ChatSelection::SELECTION_PROMPT &&
 		real_mark_end.selection_type == ChatSelection::SELECTION_PROMPT) {
 		std::wstring begin_text = L"]";
-		int begin_text_size = m_font->getDimension(begin_text.c_str()).Width;
+		int begin_text_size = m_font->getDimension(begin_text.c_str(), false).Width;
 		int text_pos = m_fontsize.X + begin_text_size + m_round_screen_offset;
 
 		s32 x_begin = text_pos;
-		s32 text_size = m_font->getDimension(prompt_text.c_str()).Width;
+		s32 text_size = m_font->getDimension(prompt_text.c_str(), false).Width;
 		s32 x_end = x_begin + text_size;
 
 		int current_scroll = prompt.getViewPosition();
@@ -499,7 +499,7 @@ void GUIChatConsole::drawPrompt()
 			int length = scroll_offset + real_mark_begin.character;
 			length = MYMIN(MYMAX(length, 0), prompt_text.size() - 1);
 			text = text.subString(1, length);
-			s32 text_size = m_font->getDimension(text.c_str()).Width;
+			s32 text_size = m_font->getDimension(text.c_str(), false).Width;
 			x_begin = text_pos + text_size;
 		}
 
@@ -511,7 +511,7 @@ void GUIChatConsole::drawPrompt()
 				length++;
 			length = MYMIN(MYMAX(length, 0), prompt_text.size() - 1);
 			text = text.subString(1, length);
-			s32 text_size = m_font->getDimension(text.c_str()).Width;
+			s32 text_size = m_font->getDimension(text.c_str(), false).Width;
 			x_end = text_pos + text_size;
 		}
 
@@ -544,7 +544,7 @@ void GUIChatConsole::drawPrompt()
 			video::IVideoDriver* driver = Environment->getVideoDriver();
 			std::wstring text = prompt_text.substr(0, cursor_pos);
 			s32 x = m_font->getDimension(
-					text.c_str()).Width + m_fontsize.X + m_round_screen_offset;
+					text.c_str(), false).Width + m_fontsize.X + m_round_screen_offset;
 
 			core::rect<s32> destrect(
 				x,
@@ -616,7 +616,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	s32 x_min = (fragment_first.column + 1) * m_fontsize.X + m_round_screen_offset;
 	s32 x_max = x_min;
 	for (const ChatFormattedFragment &fragment : line.fragments) {
-		x_max += m_font->getDimension(fragment.text.c_str()).Width;
+		x_max += m_font->getDimension(fragment.text.c_str(), false).Width;
 	}
 
 	if (x < x_min) {
@@ -630,7 +630,7 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	for (unsigned int i = 0; i < line.fragments.size(); i++) {
 		const ChatFormattedFragment &fragment = line.fragments[i];
 		s32 current_fragment_x = fragment_x;
-		s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
+		s32 text_size = m_font->getDimension(fragment.text.c_str(), false).Width;
 		fragment_x += text_size;
 
 		if (x < current_fragment_x)
@@ -668,7 +668,7 @@ ChatSelection GUIChatConsole::getPromptCursorPos(s32 x, s32 y)
 	text = text.subString(1, prompt_text.size() - 1);
 
 	std::wstring begin_text = L"]";
-	int begin_text_size = m_font->getDimension(begin_text.c_str()).Width;
+	int begin_text_size = m_font->getDimension(begin_text.c_str(), false).Width;
 	int text_pos = m_fontsize.X + begin_text_size + m_round_screen_offset;
 	int pos = m_font->getCharacterFromPos(text.c_str(), x - text_pos);
 
