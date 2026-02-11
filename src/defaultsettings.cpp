@@ -320,8 +320,7 @@ void set_default_settings()
 #ifdef __ANDROID__
 	emoji_fonts = "/system/fonts/SamsungColorEmoji.ttf,"
 		"/system/fonts/NotoColorEmojiLegacy.ttf,"
-		"/system/fonts/NotoColorEmoji.ttf," +
-		porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
+		"/system/fonts/NotoColorEmoji.ttf";
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	emoji_fonts = "/System/Library/Fonts/Apple Color Emoji.ttc";
 #else

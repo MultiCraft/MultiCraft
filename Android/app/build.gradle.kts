@@ -106,8 +106,7 @@ val prepareAssetsFiles by tasks.registering {
 		copy {
 			from(
 				"$projRoot/fonts/DroidSansFallback.ttf",
-				"$projRoot/fonts/MultiCraftFont.ttf",
-				"$projRoot/fonts/OpenMoji.ttf"
+				"$projRoot/fonts/MultiCraftFont.ttf"
 			)
 			into("$assetsFolder/fonts")
 		}
