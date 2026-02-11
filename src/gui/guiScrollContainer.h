@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include "util/string.h"
 #include "guiScrollBar.h"
+#include "scrollSwipe.h"
 
 class GUIScrollContainer : public gui::IGUIElement
 {
@@ -43,6 +44,8 @@ public:
 	inline void setScrollBar(GUIScrollBar *scrollbar)
 	{
 		m_scrollbar = scrollbar;
+		if (m_scroll_swipe)
+			m_scroll_swipe->setScrollBar(m_scrollbar);
 		updateScrolling();
 	}
 
@@ -55,12 +58,9 @@ private:
 	};
 
 	GUIScrollBar *m_scrollbar;
+	ScrollSwipe *m_scroll_swipe;
 	OrientationEnum m_orientation;
 	f32 m_scrollfactor;
-
-	bool m_swipe_started;
-	int m_swipe_start_px;
-	float m_swipe_pos;
 
 	void updateScrolling();
 };

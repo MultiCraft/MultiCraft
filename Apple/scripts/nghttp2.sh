@@ -18,8 +18,7 @@ do
 	mkdir -p build; cd build
 	cmake .. \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH -ffp-model=precise" \
-		-DCMAKE_OBJC_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
+		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
 		-DCMAKE_INSTALL_PREFIX="." \
 		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
 		-DBUILD_SHARED_LIBS=0 \

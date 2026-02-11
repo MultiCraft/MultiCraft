@@ -5363,12 +5363,12 @@ Environment access
     * The spawn level returned is for a player spawn in unmodified terrain.
     * The spawn level is intentionally above terrain level to cope with
       full-node biome 'dust' nodes.
- * `minetest.set_world_spawnpoint([pos])`
+ * `minetest.set_world_spawnpoint([pos, yaw, pitch])`
     * Sets the world-specific spawnpoint to pos (or `nil` to reset).
     * If `static_spawnpoint` is specified in multicraft.conf, the
       world-specific spawnpoint will be ignored.
  * `minetest.get_world_spawnpoint()`
-    * Returns the world-specific spawnpoint.
+    * Returns the world-specific spawnpoint (pos, yaw, pitch).
 
 Mod channels
 ------------
@@ -8450,6 +8450,9 @@ Used by `Player:hud_add`. Returned by `Player:hud_get`.
 
         z_index = 0,
         -- Z index : lower z-index HUDs are displayed behind higher z-index HUDs
+
+        unhideable = false,
+        -- If true, this HUD will still be visible if the player hides HUDs.
     }
 
 Particle definition

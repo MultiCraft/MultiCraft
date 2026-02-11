@@ -1129,27 +1129,21 @@ void Game::run()
 		}
 #endif
 
-#if defined(__ANDROID__) || defined(__APPLE__)
-		if (client->modsLoaded()) {
-			std::string key, value;
-			if (GUIEngine::readUpdate(&key, &value))
-				client->getScript()->on_update(key, value);
-		}
-#endif
+		bool isMinimized = device->isWindowMinimized();
+		if (isMinimized)
+			sound->setListenerGain(0.0f);
 
 #if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__) && !defined(__aarch64__)
-		if (!device->isWindowFocused()) {
+		if (!device->isWindowFocused())
+#else
+		if (isMinimized)
+#endif
+		{
 			if (m_does_lost_focus_pause_game && !isMenuActive())
 				showPauseMenu();
 			sleep_ms(50);
 			continue;
 		}
-#else
-		if (device->isWindowMinimized()) {
-			sleep_ms(50);
-			continue;
-		}
-#endif
 
 		// Prepare render data for next iteration
 
@@ -1160,6 +1154,14 @@ void Game::run()
 			break;
 		if (!handleCallbacks())
 			break;
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		if (client->modsLoaded() && !g_menumgr.pausesGame()) {
+			std::string key, value;
+			if (GUIEngine::readUpdate(&key, &value))
+				client->getScript()->on_update(key, value);
+		}
+#endif
 
 		processQueues();
 
@@ -1593,10 +1595,6 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 		Wait for server to accept connection
 	*/
 
-	const f32 connect_timeout = start_data.reconnecting ?
-			g_settings->getFloat("reconnect_timeout") :
-			g_settings->getFloat("connect_timeout");
-
 	try {
 		input->clear();
 
@@ -1654,7 +1652,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 			} else {
 				wait_time += dtime;
 				// Only time out if we aren't waiting for the server we started
-				if (!start_data.address.empty() && wait_time > connect_timeout) {
+				if (!start_data.address.empty() && wait_time > 15) {
 					*error_message = "Connection timed out.";
 					errorstream << *error_message << std::endl;
 					break;
@@ -2903,6 +2901,7 @@ void Game::handleClientEvent_HudAdd(ClientEvent *event, CameraOrientation *cam)
 	e->size = *event->hudadd.size;
 	e->z_index = event->hudadd.z_index;
 	e->text2  = *event->hudadd.text2;
+	e->unhideable = event->hudadd.unhideable;
 	m_hud_server_to_client[server_id] = player->addHud(e);
 
 	delete event->hudadd.pos;
@@ -2999,6 +2998,13 @@ void Game::handleClientEvent_HudChange(ClientEvent *event, CameraOrientation *ca
 
 		case HUD_STAT_TEXT2:
 			e->text2 = *event->hudchange.sdata;
+			break;
+
+		case HUD_STAT_STYLE:
+			break;
+
+		case HUD_STAT_UNHIDEABLE:
+			e->unhideable = event->hudchange.data;
 			break;
 	}
 

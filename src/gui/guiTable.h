@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include "guiScrollBar.h"
 #include "StyleSpec.h"
+#include "scrollSwipe.h"
 
 class ISimpleTextureSource;
 class ISoundManager;
@@ -275,7 +276,5 @@ protected:
 			s32 align);
 
 private:
-	bool m_swipe_started;
-	int m_swipe_start_y;
-	float m_swipe_pos;
+	ScrollSwipe *m_scroll_swipe = nullptr;
 };

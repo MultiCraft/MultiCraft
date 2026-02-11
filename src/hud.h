@@ -85,6 +85,8 @@ enum HudElementStat {
 	HUD_STAT_SIZE,
 	HUD_STAT_Z_INDEX,
 	HUD_STAT_TEXT2,
+	HUD_STAT_STYLE,
+	HUD_STAT_UNHIDEABLE,
 };
 
 enum HudCompassDir {
@@ -109,6 +111,7 @@ struct HudElement {
 	v2s32 size;
 	s16 z_index = 0;
 	std::string text2;
+	bool unhideable = false;
 };
 
 extern const EnumString es_HudElementType[];

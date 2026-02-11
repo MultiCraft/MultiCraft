@@ -1023,7 +1023,7 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 		Client *client, ISimpleTextureSource *tsrc, const StyleSpec &style,
 		ISoundManager *sound_manager) :
 		IGUIElement(EGUIET_CUSTOM_HYPERTEXT, environment, parent, id, rectangle),
-		m_tsrc(tsrc), m_vscrollbar(nullptr),
+		m_tsrc(tsrc), m_vscrollbar(nullptr), m_scroll_swipe(nullptr),
 		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
 #else
 GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
@@ -1031,7 +1031,7 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 		Client *client, ISimpleTextureSource *tsrc, const StyleSpec &style,
 		ISoundManager *sound_manager) :
 		IGUIElement(EGUIET_ELEMENT, environment, parent, id, rectangle),
-		m_tsrc(tsrc), m_vscrollbar(nullptr),
+		m_tsrc(tsrc), m_vscrollbar(nullptr), m_scroll_swipe(nullptr),
 		m_drawer(text, client, environment, tsrc), m_text_scrollpos(0, 0)
 #endif
 {
@@ -1055,9 +1055,23 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 	m_vscrollbar->setVisible(false);
 	m_vscrollbar->setStyle(style, tsrc);
 
-	m_swipe_started = false;
-	m_swipe_start_y = -1;
-	m_swipe_pos = 0;
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	s32 totalheight = m_drawer.getHeight();
+	float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
+			(m_vscrollbar->getMax() - m_vscrollbar->getMin());
+
+	ScrollSwipe::OrientationEnum orientation;
+	if (m_vscrollbar->isHorizontal())
+		orientation = ScrollSwipe::OrientationEnum::HORIZONTAL;
+	else
+		orientation = ScrollSwipe::OrientationEnum::VERTICAL;
+
+	m_scroll_swipe = new ScrollSwipe(environment, this, orientation);
+	m_scroll_swipe->setScrollBar(m_vscrollbar);
+	m_scroll_swipe->setScrollFactor(-1.0f / scale);
+#endif
+#endif
 }
 
 //! destructor
@@ -1123,44 +1137,16 @@ bool GUIHyperText::OnEvent(const SEvent &event)
 #endif
 	}
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#ifdef HAVE_TOUCHSCREENGUI
-	// Handle swipe gesture
-	if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-		if (isPointInside(core::position2d<s32>(event.MouseInput.X, event.MouseInput.Y))) {
-			s32 totalheight = m_drawer.getHeight();
-			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
-					(m_vscrollbar->getMax() - m_vscrollbar->getMin());
-			m_swipe_start_y = event.MouseInput.Y + m_vscrollbar->getPos() / scale;
-		}
-	} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
-		m_swipe_start_y = -1;
-		if (m_swipe_started) {
-			m_swipe_started = false;
-			return true;
-		}
-	} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
-		double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
+	if (m_scroll_swipe) {
 		s32 totalheight = m_drawer.getHeight();
 		float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
 				(m_vscrollbar->getMax() - m_vscrollbar->getMin());
+		m_scroll_swipe->setScrollFactor(-1.0f / scale);
 
-		if (!m_swipe_started && m_swipe_start_y != -1 &&
-				std::abs(m_swipe_start_y - event.MouseInput.Y - m_vscrollbar->getPos() / scale) > 0.1 * screen_dpi) {
-			m_swipe_started = true;
-			Environment->setFocus(this);
-		}
-
-		if (m_swipe_started) {
-			m_swipe_pos = (float)(m_swipe_start_y - event.MouseInput.Y) * scale;
-			m_vscrollbar->setPos((int)m_swipe_pos);
-			m_text_scrollpos.Y = -m_vscrollbar->getPos();
-
+		bool retval = m_scroll_swipe->onEvent(event);
+		if (retval)
 			return true;
-		}
 	}
-#endif
-#endif
 
 	if (event.EventType == EET_MOUSE_INPUT_EVENT) {
 		if (event.MouseInput.Event == EMIE_MOUSE_MOVED)
@@ -1221,6 +1207,9 @@ void GUIHyperText::draw()
 {
 	if (!IsVisible)
 		return;
+
+	if (m_scroll_swipe)
+		m_scroll_swipe->updateScrollCoasting();
 
 	// Text
 	m_display_text_rect = AbsoluteRect;
