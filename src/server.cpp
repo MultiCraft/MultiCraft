@@ -2040,8 +2040,18 @@ void Server::SendActiveObjectRemoveAdd(RemoteClient *client, PlayerSAO *playersa
 		writeU8((u8*)buf, type);
 		data.append(buf, 1);
 
-		data.append(serializeString32(
-			obj->getClientInitializationData(client->net_proto_version)));
+		if (obj == playersao) {
+			// Use the client-provided player name when sending a player their
+			// own object so that the client knows that it's the local player
+			data.append(serializeString32(
+				playersao->getClientInitializationDataWithPlayerName(
+					client->net_proto_version, client->getUncanonicalName()
+				)
+			));
+		} else {
+			data.append(serializeString32(
+				obj->getClientInitializationData(client->net_proto_version)));
+		}
 
 		// Add to known objects
 		client->m_known_objects.insert(id);

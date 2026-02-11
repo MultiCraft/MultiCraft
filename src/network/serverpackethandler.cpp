@@ -156,10 +156,10 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 	/*
 		Validate player name
 	*/
-	const char* playername = playerName.c_str();
 
 	// Get the canonical casing before the checks, but only if it's valid (so
 	// we check the name before and after getCanonicalPlayerName)
+	const std::string uncanonicalPlayerName = playerName;
 	if (playerName.size() > 0 && playerName.size() <= PLAYERNAME_SIZE &&
 			string_allowed(playerName, PLAYERNAME_ALLOWED_CHARS))
 		playerName = m_script->getCanonicalPlayerName(playerName);
@@ -180,10 +180,11 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 		return;
 	}
 
-	m_clients.setPlayerName(peer_id, playername);
+	m_clients.setPlayerName(peer_id, playerName, uncanonicalPlayerName);
 
 	std::string legacyPlayerNameCasing = playerName;
 
+	const char* playername = playerName.c_str();
 	if (!isSingleplayer() && strcasecmp(playername, "Player") == 0) {
 		actionstream << "Server: Player with the name \"Player\" tried "
 			"to connect from " << addr_s << std::endl;
@@ -1636,7 +1637,7 @@ void Server::handleCommand_SrpBytesA(NetworkPacket* pkt)
 
 	if (based_on == 0) {
 
-		generate_srp_verifier_and_salt(client->getName(), client->enc_pwd,
+		generate_srp_verifier_and_salt(client->getUncanonicalName(), client->enc_pwd,
 			&verifier, &salt);
 	} else if (!decode_srp_verifier_and_salt(client->enc_pwd, &verifier, &salt)) {
 		// Non-base64 errors should have been catched in the init handler
@@ -1651,7 +1652,7 @@ void Server::handleCommand_SrpBytesA(NetworkPacket* pkt)
 	size_t len_B = 0;
 
 	client->auth_data = srp_verifier_new(SRP_SHA256, SRP_NG_2048,
-		client->getName().c_str(),
+		client->getUncanonicalName().c_str(),
 		(const unsigned char *) salt.c_str(), salt.size(),
 		(const unsigned char *) verifier.c_str(), verifier.size(),
 		(const unsigned char *) bytes_A.c_str(), bytes_A.size(),

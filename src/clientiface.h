@@ -309,8 +309,12 @@ public:
 	ClientState getState() const { return m_state; }
 
 	std::string getName() const { return m_name; }
+	std::string getUncanonicalName() const { return m_uncanonical_name; }
 
-	void setName(const std::string &name) { m_name = name; }
+	void setName(const std::string &name, const std::string &uncanonical_name) {
+		m_name = name;
+		m_uncanonical_name = uncanonical_name;
+	}
 
 	/* update internal client state */
 	void notifyEvent(ClientStateEvent event);
@@ -434,6 +438,11 @@ private:
 	std::string m_name = "";
 
 	/*
+		Name that the client provided on initial connection
+	*/
+	std::string m_uncanonical_name = "";
+
+	/*
 		client information
 	*/
 	u8 m_version_major = 0;
@@ -502,7 +511,8 @@ public:
 	ClientState getClientState(session_t peer_id);
 
 	/* set client playername */
-	void setPlayerName(session_t peer_id, const std::string &name);
+	void setPlayerName(session_t peer_id, const std::string &name,
+			const std::string &uncanonical_name);
 
 	/* get protocol version of client */
 	u16 getProtocolVersion(session_t peer_id);
