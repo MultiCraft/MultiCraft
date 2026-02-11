@@ -158,6 +158,12 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 	*/
 	const char* playername = playerName.c_str();
 
+	// Get the canonical casing before the checks, but only if it's valid (so
+	// we check the name before and after getCanonicalPlayerName)
+	if (playerName.size() > 0 && playerName.size() <= PLAYERNAME_SIZE &&
+			string_allowed(playerName, PLAYERNAME_ALLOWED_CHARS))
+		playerName = m_script->getCanonicalPlayerName(playerName);
+
 	size_t pns = playerName.size();
 	if (pns == 0 || pns > PLAYERNAME_SIZE) {
 		actionstream << "Server: Player with " <<
@@ -175,7 +181,6 @@ void Server::handleCommand_Init(NetworkPacket* pkt)
 	}
 
 	m_clients.setPlayerName(peer_id, playername);
-	//TODO (later) case insensitivity
 
 	std::string legacyPlayerNameCasing = playerName;
 
