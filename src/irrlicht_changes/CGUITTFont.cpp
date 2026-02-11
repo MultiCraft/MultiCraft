@@ -846,6 +846,16 @@ CGUITTFont::~CGUITTFont()
 		Driver->drop();
 }
 
+s32 CGUITTFont::getPrevClusterPos(const core::stringw& text, s32 pos)
+{
+	return pos - 1;
+}
+
+s32 CGUITTFont::getNextClusterPos(const core::stringw& text, s32 pos)
+{
+	return pos + 1;
+}
+
 void CGUITTFont::reset_images()
 {
 	// Delete the glyphs.

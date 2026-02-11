@@ -180,7 +180,7 @@ public:
 	void draw(const core::rect<s32> &clip_rect,
 			const core::position2d<s32> &dest_offset);
 	ParsedText::Element *getElementAt(core::position2d<s32> pos);
-	ParsedText::Tag *m_hovertag;
+	ParsedText::Tag *m_hovertag = nullptr;
 
 protected:
 	struct RectWithMargin
