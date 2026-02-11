@@ -1320,14 +1320,17 @@ core::dimension2d<u32> CGUITTFont::getCharDimension(const wchar_t ch) const
 	return getDimension(core::ustring(ch));
 }
 
-core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
+core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text, bool use_rtl) const
 {
-	return getDimension(core::ustring(text));
+	return getDimension(core::ustring(text), use_rtl);
 }
 
-core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
+core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text, bool use_rtl) const
 {
-	core::ustring utext = applyBidiReorderingMultiline(text);
+	core::ustring utext = text;
+
+	if (use_rtl)
+		utext = applyBidiReorderingMultiline(text);
 
 	std::vector<ShapedRun> shaped_runs = shapeText(utext);
 

@@ -210,7 +210,7 @@ void GUIEditBoxWithScrollBar::draw()
 						s32 visual_end = range.End;
 						
 						s = txt_line_bidi.subString(0, visual_start);
-						s32 mbegin = font->getDimension(s.c_str()).Width;
+						s32 mbegin = font->getDimension(s.c_str(), false).Width;
 						
 						// deal with kerning
 						const wchar_t* this_letter = visual_start < (s32)txt_line_bidi.size() ? &(txt_line_bidi[visual_start]) : 0;
@@ -218,7 +218,7 @@ void GUIEditBoxWithScrollBar::draw()
 						mbegin += font->getKerningWidth(this_letter, previous_letter);
 						
 						s2 = txt_line_bidi.subString(0, visual_end);
-						s32 mend = font->getDimension(s2.c_str()).Width;
+						s32 mend = font->getDimension(s2.c_str(), false).Width;
 						
 						core::rect<s32> mark_rect = m_current_text_rect;
 						mark_rect.UpperLeftCorner.X += mbegin;
@@ -227,42 +227,12 @@ void GUIEditBoxWithScrollBar::draw()
 						// draw mark
 						skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), mark_rect, &local_clip_rect);
 					}
-					
-					// draw text
-					for (const auto& range : visual_ranges) {
-						s32 visual_start = range.Start;
-						s32 visual_end = range.End;
-						
-						s32 mbegin = 0;
-						if (visual_start > 0) {
-							s = txt_line_bidi.subString(0, visual_start);
-							mbegin = font->getDimension(s.c_str()).Width;
-						}
-						
-						s = txt_line_bidi.subString(visual_start, visual_end - visual_start);
-						
-						core::rect<s32> text_rect = m_current_text_rect;
-						text_rect.UpperLeftCorner.X += mbegin;
-						
-						video::SColor color;
-						if (m_override_color_enabled)
-							color = m_override_color;
-						else if (range.Selected)
-							color = skin->getColor(EGDC_HIGH_LIGHT_TEXT);
-						else
-							color = skin->getColor(EGDC_BUTTON_TEXT);
-							
-						if (s.size()) {
-							font->draw(s.c_str(), text_rect, color,
-								false, true, &local_clip_rect, false);
-						}
-					}
-				} else {
-					// draw normal text
-					font->draw(txt_line_bidi, m_current_text_rect,
-						m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-						false, true, &local_clip_rect, false);
 				}
+
+				// draw normal text
+				font->draw(txt_line_bidi, m_current_text_rect,
+					m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
+					false, true, &local_clip_rect, false);
 			}
 
 			// Return the override color information to its previous settings.
@@ -289,7 +259,7 @@ void GUIEditBoxWithScrollBar::draw()
 
 			s = text_bidi.TextBidi.subString(0, rtl_cursor_pos);
 
-			charcursorpos = font->getDimension(s.c_str()).Width +
+			charcursorpos = font->getDimension(s.c_str(), false).Width +
 				font->getKerningWidth(L"_", rtl_cursor_pos > 0 ? &(text_bidi.TextBidi[rtl_cursor_pos-1]) : 0);
 
 			if (focus && (porting::getTimeMs() - m_blink_start_time) % 700 < 350) {

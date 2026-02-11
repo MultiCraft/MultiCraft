@@ -343,8 +343,8 @@ namespace gui
 			virtual core::dimension2d<u32> getCharDimension(const wchar_t ch) const;
 
 			//! Returns the dimension of a text string.
-			virtual core::dimension2d<u32> getDimension(const wchar_t* text) const;
-			virtual core::dimension2d<u32> getDimension(const core::ustring& text) const;
+			virtual core::dimension2d<u32> getDimension(const wchar_t* text, bool use_rtl = true) const;
+			virtual core::dimension2d<u32> getDimension(const core::ustring& text, bool use_rtl = true) const;
 
 			//! Returns the dimension of a text string with keep in mind that italic/bold text is slightly longer.
 			virtual core::dimension2d<u32> getTotalDimension(const wchar_t* text) const;
