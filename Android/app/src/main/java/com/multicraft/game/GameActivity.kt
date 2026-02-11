@@ -23,9 +23,7 @@ package com.multicraft.game
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.AnimationDrawable
-import android.os.Bundle
-import android.os.Vibrator;
-import android.os.VibrationEffect;
+import android.os.*
 import android.text.InputType
 import android.view.*
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -41,6 +39,7 @@ import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.net.toUri
 import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
+import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.set
@@ -344,34 +343,18 @@ class GameActivity : SDLActivity() {
 	fun needsExtractAssets() = isExtract
 
 	fun vibrationEffect(duration: Int, amplitude: Int) {
-		if (android.os.Build.VERSION.SDK_INT >= 31) {
-			val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? android.os.VibratorManager
+		val duration = duration.toLong()
+
+		if (isAndroid12()) {
+			val vibratorManager = getSystemService(VIBRATOR_MANAGER_SERVICE) as? VibratorManager
 			val vibrator = vibratorManager?.defaultVibrator
-
-			vibrator?.let {
-				val effect = VibrationEffect.createOneShot(duration.toLong(), amplitude)
-				it.vibrate(effect)
-			}
-		} else if (android.os.Build.VERSION.SDK_INT >= 26) {
-			@Suppress("DEPRECATION")
-			val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-
-			vibrator?.let {
-				if (it.hasVibrator()) {
-					val effect = VibrationEffect.createOneShot(duration.toLong(), amplitude)
-					it.vibrate(effect)
-				}
-			}
-		} else {
-			@Suppress("DEPRECATION")
-			val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-
-			vibrator?.let {
-				if (it.hasVibrator()) {
-					@Suppress("DEPRECATION")
-					it.vibrate(duration.toLong())
-				}
-			}
+			vibrator?.vibrate(VibrationEffect.createOneShot(duration, amplitude.coerceIn(1, 255)))
+		} else if (isOreo()) @Suppress("DEPRECATION") {
+			val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
+			vibrator?.vibrate(VibrationEffect.createOneShot(duration, amplitude.coerceIn(1, 255)))
+		} else @Suppress("DEPRECATION") {
+			val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
+			vibrator?.vibrate(duration)
 		}
 	}
 }
