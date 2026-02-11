@@ -1327,19 +1327,21 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
 
 core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 {
-	std::vector<ShapedRun> shaped_runs = shapeText(text);
+	core::ustring utext = applyBidiReorderingMultiline(text);
+
+	std::vector<ShapedRun> shaped_runs = shapeText(utext);
 
 	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
 
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
-	core::ustring::const_iterator iter(text);
+	core::ustring::const_iterator iter(utext);
 	u32 char_index = 0;
 
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
 			bool lineBreak = false;
-			if (glyph.cluster < text.size()) {
+			if (glyph.cluster < utext.size()) {
 				while (!iter.atEnd() && char_index < glyph.cluster) {
 					++iter;
 					++char_index;
