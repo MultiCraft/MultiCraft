@@ -648,8 +648,12 @@ void ServerEnvironment::saveMeta()
 		m_lbm_mgr.createIntroductionTimesString());
 	args.setU64("day_count", m_day_count);
 
-	if (m_has_world_spawnpoint)
-		args.setV3F("static_spawnpoint", m_world_spawnpoint);
+	if (m_world_spawnpoint.has_value())
+		args.setV3F("static_spawnpoint", m_world_spawnpoint.value());
+	if (m_world_spawnpoint_yaw.has_value())
+		args.setFloat("static_spawnpoint_yaw", m_world_spawnpoint_yaw.value());
+	if (m_world_spawnpoint_pitch.has_value())
+		args.setFloat("static_spawnpoint_pitch", m_world_spawnpoint_pitch.value());
 
 	args.writeLines(ss);
 
@@ -725,7 +729,15 @@ void ServerEnvironment::loadMeta()
 	m_day_count = args.exists("day_count") ?
 		args.getU64("day_count") : 0;
 
-	m_has_world_spawnpoint = args.getV3FNoEx("static_spawnpoint", m_world_spawnpoint);
+	try {
+		// static_spawnpoint must be read before yaw and pitch as yaw/pitch may
+		// not exist.
+		m_world_spawnpoint = args.getV3F("static_spawnpoint");
+		m_world_spawnpoint_yaw = args.getFloat("static_spawnpoint_yaw");
+		m_world_spawnpoint_pitch = args.getFloat("static_spawnpoint_pitch");
+	} catch (SettingNotFoundException &e) {
+		// The spawnpoint or yaw/pitch does not exist, this is expected
+	}
 }
 
 /**
@@ -1184,7 +1196,12 @@ void ServerEnvironment::clearObjects(ClearObjectsMode mode)
 
 		// If known by some client, don't delete immediately
 		if (obj->m_known_by_count > 0) {
-			obj->markForRemoval();
+			try {
+				obj->markForRemoval();
+			} catch (LuaError &e) {
+				m_server->setAsyncFatalError(
+						std::string("Lua error in clearObjects: ") + e.what());
+			}
 			return false;
 		}
 
@@ -2091,7 +2108,13 @@ void ServerEnvironment::deactivateFarObjects(bool _force_delete)
 
 		// Regardless of what happens to the object at this point, deactivate it first.
 		// This ensures that LuaEntity on_deactivate is always called.
-		obj->markForDeactivation();
+		try {
+			obj->markForDeactivation();
+		} catch (LuaError &e) {
+			m_server->setAsyncFatalError(
+					std::string("Lua error while deactivating object: ") + e.what());
+			return false;
+		}
 
 		/*
 			If known by some client, set pending deactivation.

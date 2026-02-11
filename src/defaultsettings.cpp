@@ -71,8 +71,6 @@ void set_default_settings()
 	settings->setDefault("max_out_chat_queue_size", "20");
 	settings->setDefault("pause_on_lost_focus", "true");
 	settings->setDefault("enable_register_confirmation", "true");
-	settings->setDefault("connect_timeout", "15");
-	settings->setDefault("reconnect_timeout", "15");
 
 	// Keymap
 	settings->setDefault("remote_port", "30000");
@@ -242,7 +240,6 @@ void set_default_settings()
 	settings->setDefault("gui_scaling_filter_txr2img", "true");
 	settings->setDefault("desynchronize_mapblock_texture_animation", "false");
 	settings->setDefault("hud_hotbar_max_width", "1.0");
-	settings->setDefault("hud_move_upwards", "0");
 	settings->setDefault("round_screen", "0");
 	settings->setDefault("enable_local_map_saving", "false");
 	settings->setDefault("show_entity_selectionbox", "false");
@@ -535,8 +532,6 @@ void set_default_settings()
 	settings->setDefault("gui_scaling_filter_txr2img", "false");
 	settings->setDefault("autosave_screensize", "false");
 	settings->setDefault("recent_chat_messages", "6");
-	settings->setDefault("connect_timeout", "10");
-	settings->setDefault("reconnect_timeout", "20");
 
 	if (isTablet) {
 		settings->setDefault("recent_chat_messages", "8");
@@ -626,10 +621,8 @@ void set_default_settings()
 	// Android Settings
 #ifdef __ANDROID__
 	// Switch to ogles1 without shaders on low-end Android devices
-	std::string arch = porting::getCpuArchitecture();
-	if (memoryMax < 4 && arch != "x86" && arch != "x86_64") {
+	if (memoryMax < 4 && !porting::isIntelDevice())
 		settings->setDefault("video_driver", "ogles1");
-	}
 
 	if (porting::isGooglePC())
 		settings->setDefault("mouse_sensitivity", "0.8");
@@ -728,20 +721,16 @@ void set_default_settings()
 		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE + 1));
 	}
 
-	// Settings for the Rounded Screen and Home Bar
-	int RoundScreen = RenderingEngine::getWindowSafeArea();
-	if (RoundScreen > 0) {
-		int upwards = 25, round = 40;
-		if (isDeviceiPhone12Series(model)) {
-			upwards = 20, round = 90;
-		} else if (isDevice8and3Inch(model)) {
-			upwards = 15, round = 20;
-		} else if (isDevice12and9Inch(model)) {
-			upwards = 20, round = 20;
-		}
-
-		settings->setDefault("hud_move_upwards", std::to_string(upwards));
-		settings->setDefault("round_screen", std::to_string(round));
+	// Settings for the Rounded Screen
+	if (RenderingEngine::getWindowSafeArea() > 0) {
+		if (isDeviceiPhone17Series(model))
+			settings->setDefault("round_screen", "100");
+		else if (isDeviceiPhone12Series(model))
+			settings->setDefault("round_screen", "90");
+		else if (isDevice8and3Inch(model) || isDevice12and9Inch(model))
+			settings->setDefault("round_screen", "20");
+		else
+			settings->setDefault("round_screen", "40");
 	}
 #endif // iOS
 #endif

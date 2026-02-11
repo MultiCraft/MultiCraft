@@ -1183,10 +1183,18 @@ core.register_chatcommand("spawn", {
 		if not player then
 			return false
 		end
-		local spawnpoint = core.setting_get_pos("static_spawnpoint") or
-			core.get_world_spawnpoint()
+		local spawnpoint = core.setting_get_pos("static_spawnpoint")
+		local yaw, pitch
+		if not spawnpoint then
+			spawnpoint, yaw, pitch = core.get_world_spawnpoint()
+		end
+
 		if spawnpoint then
 			player:set_pos(spawnpoint)
+			if yaw and pitch then
+				player:set_look_horizontal(yaw)
+				player:set_look_vertical(pitch)
+			end
 			return true, "Teleporting to spawn..."
 		else
 			return false, "The spawn point is not set!"
@@ -1214,7 +1222,10 @@ core.register_chatcommand("setspawn", {
 			core.settings:write()
 		end
 
-		core.set_world_spawnpoint(pos)
+		local yaw = math.round(player:get_look_horizontal() * 100) / 100
+		local pitch = math.round(player:get_look_vertical() * 100) / 100
+
+		core.set_world_spawnpoint(pos, yaw, pitch)
 
 		return true, "The spawn point has been set to " .. core.pos_to_string(pos)
 	end

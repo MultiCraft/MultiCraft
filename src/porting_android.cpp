@@ -359,24 +359,39 @@ bool upgrade(const std::string &item)
 	return res == JNI_TRUE;
 }
 
-std::string getCpuArchitecture()
+bool isIntelDevice()
 {
-	static std::string arch = [](){
-		jmethodID getArch = jnienv->GetMethodID(activityClass,
-				"getCpuArchitecture", "()Ljava/lang/String;");
+	if (jnienv == nullptr)
+		return false;
 
-		FATAL_ERROR_IF(getArch == nullptr,
-			"porting::getCpuArchitecture unable to find Java getCpuArchitecture method");
+	static const bool value = []() {
+		jclass buildClass = jnienv->FindClass("android/os/Build");
+		jfieldID abisField = jnienv->GetStaticFieldID(buildClass,
+				"SUPPORTED_ABIS", "[Ljava/lang/String;");
 
-		jstring javaString = (jstring) jnienv->CallObjectMethod(activityObj, getArch);
-		const char *str = jnienv->GetStringUTFChars(javaString, nullptr);
-		std::string cppStr(str);
-		jnienv->ReleaseStringUTFChars(javaString, str);
+		jobjectArray abisArray = (jobjectArray) jnienv->GetStaticObjectField(buildClass, abisField);
+		jsize abiCount = jnienv->GetArrayLength(abisArray);
+		bool isIntel = false;
 
-		return cppStr;
+		for (jsize index = 0; index < abiCount; ++index) {
+			jstring abiString = (jstring) jnienv->GetObjectArrayElement(abisArray, index);
+			const char *abiCString = jnienv->GetStringUTFChars(abiString, nullptr);
+			isIntel = (strcmp(abiCString, "x86") == 0 || strcmp(abiCString, "x86_64") == 0);
+
+			jnienv->ReleaseStringUTFChars(abiString, abiCString);
+			jnienv->DeleteLocalRef(abiString);
+
+			if (isIntel)
+				break;
+		}
+
+		jnienv->DeleteLocalRef(abisArray);
+		jnienv->DeleteLocalRef(buildClass);
+
+		return isIntel;
 	}();
 
-	return arch;
+	return value;
 }
 
 std::string getSecretKey(const std::string &key)

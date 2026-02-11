@@ -370,6 +370,9 @@ namespace gui
 				(const wchar_t* text, scene::ISceneManager* smgr, scene::ISceneNode* parent = 0,
 				 const video::SColor& color = video::SColor(255, 0, 0, 0), bool center = false );
 
+			virtual s32 getPrevClusterPos(const core::stringw& text, s32 pos);
+			virtual s32 getNextClusterPos(const core::stringw& text, s32 pos);
+
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
 			FT_Stroker getStroker() { return stroker; }

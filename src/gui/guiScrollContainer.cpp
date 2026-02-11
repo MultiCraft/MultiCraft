@@ -25,13 +25,15 @@ GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 		const std::string &orientation, f32 scrollfactor) :
 		gui::IGUIElement(gui::EGUIET_CUSTOM_SCROLLCONTAINER, env, parent, id,
 				rectangle),
-		m_scrollbar(nullptr), m_scrollfactor(scrollfactor)
+		m_scrollbar(nullptr), m_scroll_swipe(nullptr),
+		m_scrollfactor(scrollfactor)
 #else
 GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 		gui::IGUIElement *parent, s32 id, const core::rect<s32> &rectangle,
 		const std::string &orientation, f32 scrollfactor) :
 		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
-		m_scrollbar(nullptr), m_scrollfactor(scrollfactor)
+		m_scrollbar(nullptr), m_scroll_swipe(nullptr),
+		m_scrollfactor(scrollfactor)
 #endif
 {
 	if (orientation == "vertical")
@@ -41,9 +43,13 @@ GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 	else
 		m_orientation = UNDEFINED;
 
-	m_swipe_started = false;
-	m_swipe_start_px = -1;
-	m_swipe_pos = 0;
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	m_scroll_swipe = new ScrollSwipe(
+			env, this, (ScrollSwipe::OrientationEnum)m_orientation);
+	m_scroll_swipe->setScrollFactor(m_scrollfactor);
+#endif
+#endif
 }
 
 bool GUIScrollContainer::OnEvent(const SEvent &event)
@@ -66,60 +72,20 @@ bool GUIScrollContainer::OnEvent(const SEvent &event)
 		return retval;
 	}
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#ifdef HAVE_TOUCHSCREENGUI
-	if (event.EventType == EET_MOUSE_INPUT_EVENT && m_scrollbar) {
-		const int mouse_pos = m_orientation == HORIZONTAL ? event.MouseInput.X
-								  : event.MouseInput.Y;
-		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-			if (isPointInside(core::position2d<s32>(
-					    event.MouseInput.X, event.MouseInput.Y))) {
-				m_swipe_start_px = mouse_pos -
-						   m_scrollbar->getPos() * m_scrollfactor;
-			}
-		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
-			m_swipe_start_px = -1;
-			if (m_swipe_started) {
-				m_swipe_started = false;
-				return true;
-			}
-		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
-			double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
-
-			if (!m_swipe_started && m_orientation != UNDEFINED &&
-					m_swipe_start_px != -1 &&
-					std::abs(m_swipe_start_px - mouse_pos +
-							m_scrollbar->getPos() *
-									m_scrollfactor) >
-							0.1 * screen_dpi) {
-				m_swipe_started = true;
-				Environment->setFocus(this);
-			}
-
-			if (m_swipe_started) {
-				m_swipe_pos = (float)(mouse_pos - m_swipe_start_px) /
-					      m_scrollfactor;
-				m_scrollbar->setPos((int)m_swipe_pos);
-
-				SEvent e;
-				e.EventType = EET_GUI_EVENT;
-				e.GUIEvent.Caller = m_scrollbar;
-				e.GUIEvent.Element = nullptr;
-				e.GUIEvent.EventType = EGET_SCROLL_BAR_CHANGED;
-				OnEvent(e);
-
-				return true;
-			}
-		}
+	if (m_scroll_swipe) {
+		bool retval = m_scroll_swipe->onEvent(event);
+		if (retval)
+			return true;
 	}
-#endif
-#endif
 
 	return IGUIElement::OnEvent(event);
 }
 
 void GUIScrollContainer::draw()
 {
+	if (m_scroll_swipe)
+		m_scroll_swipe->updateScrollCoasting();
+
 	if (isVisible()) {
 		core::list<IGUIElement *>::Iterator it = Children.begin();
 		for (; it != Children.end(); ++it)

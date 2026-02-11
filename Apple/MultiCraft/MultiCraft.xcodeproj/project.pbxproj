@@ -282,6 +282,7 @@
 		84F20F4C25D52975009562A9 /* mapgen_fractal.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3A25D52975009562A9 /* mapgen_fractal.cpp */; };
 		84F20F4D25D52975009562A9 /* mapgen_v7.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3B25D52975009562A9 /* mapgen_v7.cpp */; };
 		84F20F4E25D52975009562A9 /* mapgen_v5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20F3C25D52975009562A9 /* mapgen_v5.cpp */; };
+		84FA0A162F19178E00394A7F /* scrollSwipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FA0A152F19178E00394A7F /* scrollSwipe.cpp */; };
 		84FD8E3126A0B01D00EF2BFA /* guiEditBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */; };
 		84FD8E3426A0B04900EF2BFA /* guiScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3326A0B04900EF2BFA /* guiScene.cpp */; };
 /* End PBXBuildFile section */
@@ -847,6 +848,8 @@
 		84F20F3B25D52975009562A9 /* mapgen_v7.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mapgen_v7.cpp; path = ../../../src/mapgen/mapgen_v7.cpp; sourceTree = "<group>"; };
 		84F20F3C25D52975009562A9 /* mapgen_v5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mapgen_v5.cpp; path = ../../../src/mapgen/mapgen_v5.cpp; sourceTree = "<group>"; };
 		84F20F3D25D52975009562A9 /* mapgen_v6.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mapgen_v6.h; path = ../../../src/mapgen/mapgen_v6.h; sourceTree = "<group>"; };
+		84FA0A142F19178E00394A7F /* scrollSwipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scrollSwipe.h; path = ../../../src/gui/scrollSwipe.h; sourceTree = "<group>"; };
+		84FA0A152F19178E00394A7F /* scrollSwipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scrollSwipe.cpp; path = ../../../src/gui/scrollSwipe.cpp; sourceTree = "<group>"; };
 		84FD8E2F26A0B01D00EF2BFA /* guiEditBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiEditBox.h; path = ../../../src/gui/guiEditBox.h; sourceTree = "<group>"; };
 		84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiEditBox.cpp; path = ../../../src/gui/guiEditBox.cpp; sourceTree = "<group>"; };
 		84FD8E3226A0B04900EF2BFA /* guiScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiScene.h; path = ../../../src/gui/guiScene.h; sourceTree = "<group>"; };
@@ -1018,6 +1021,8 @@
 				84F20EF825D52957009562A9 /* modalMenu.h */,
 				84F20ED225D52955009562A9 /* profilergraph.cpp */,
 				84F20EDF25D52956009562A9 /* profilergraph.h */,
+				84FA0A152F19178E00394A7F /* scrollSwipe.cpp */,
+				84FA0A142F19178E00394A7F /* scrollSwipe.h */,
 				84F20EED25D52957009562A9 /* StyleSpec.h */,
 			);
 			name = gui;
@@ -1691,6 +1696,9 @@
 			buildRules = (
 			);
 			name = MultiCraft;
+			packageProductDependencies = (
+				84D1BF552CD7EFF10077DD47 /* libzstd */,
+			);
 			productName = MultiCraft;
 			productReference = 845856A924B1322C0040BA4F /* MultiCraft.app */;
 			productType = "com.apple.product-type.application";
@@ -2001,6 +2009,7 @@
 				84135B9C25D5264C00CA4DCF /* mapsector.cpp in Sources */,
 				84135C0E25D526D700CA4DCF /* particles.cpp in Sources */,
 				84F20EA125D528C5009562A9 /* core.cpp in Sources */,
+				84FA0A162F19178E00394A7F /* scrollSwipe.cpp in Sources */,
 				84135B9B25D5264C00CA4DCF /* reflowscan.cpp in Sources */,
 				84F20E3A25D5282A009562A9 /* l_particles.cpp in Sources */,
 				84135B7A25D5264C00CA4DCF /* mapnode.cpp in Sources */,
@@ -2117,17 +2126,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				AUTOMATION_APPLE_EVENTS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 80;
+				CURRENT_PROJECT_VERSION = 90;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
 				ENABLE_RESOURCE_ACCESS_USB = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2168,9 +2177,11 @@
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
+				INFOPLIST_KEY_GCSupportsControllerUserInteraction = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "MultiCraft would like to remain connected to nearby bluetooth Game Controllers and Game Pads even when you’re not using the app.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 MultiCraft Studio OÜ. All rights reserved.";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 2.0.13;
 				OTHER_LDFLAGS = (
@@ -2202,17 +2213,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				AUTOMATION_APPLE_EVENTS = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 80;
+				CURRENT_PROJECT_VERSION = 90;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = YES;
 				ENABLE_RESOURCE_ACCESS_USB = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -2254,9 +2265,11 @@
 				);
 				INFOPLIST_FILE = MultiCraft/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MultiCraft;
+				INFOPLIST_KEY_GCSupportsControllerUserInteraction = YES;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.adventure-games";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2025 MultiCraft Studio OÜ. All rights reserved.";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "MultiCraft would like to remain connected to nearby bluetooth Game Controllers and Game Pads even when you’re not using the app.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 MultiCraft Studio OÜ. All rights reserved.";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 2.0.13;
 				OTHER_LDFLAGS = (

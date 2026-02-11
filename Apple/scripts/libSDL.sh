@@ -1,12 +1,14 @@
 #!/bin/bash -e
 
-SDL_VERSION=release-3.2.26
+SDL_VERSION=release-3.4.0
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
 
-[ ! -d libSDL-src ] && \
+if [ ! -d libSDL-src ]; then
 	git clone -b $SDL_VERSION --depth 1 https://github.com/libsdl-org/SDL.git libSDL-src
+	sed -i '' 's/^#pragma STDC FENV_ACCESS ON/\/\/&/' libSDL-src/src/audio/SDL_audiotypecvt.c
+fi
 
 rm -rf libSDL
 
@@ -20,7 +22,7 @@ do
 	mkdir -p build; cd build
 	cmake .. \
 		-DCMAKE_BUILD_TYPE=Release \
-		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH -ffp-model=precise" \
+		-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
 		-DCMAKE_OBJC_FLAGS_RELEASE="$OSX_FLAGS -arch $ARCH" \
 		-DCMAKE_INSTALL_PREFIX="." \
 		-DCMAKE_OSX_ARCHITECTURES=$ARCH \
@@ -34,6 +36,7 @@ do
 		-DSDL_POWER=OFF \
 		-DSDL_DIALOG=OFF \
 		-DSDL_TESTS=OFF \
+		-DSDL_VULKAN=OFF \
 		-DSDL_EXAMPLES=OFF
 
 	cmake --build . -j

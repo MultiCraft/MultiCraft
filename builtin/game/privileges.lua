@@ -90,10 +90,12 @@ core.register_privilege("noclip", {
 	description = "Can fly through solid nodes using noclip mode",
 	give_to_singleplayer = false,
 })
-core.register_privilege("rollback", {
-	description = "Can use the rollback functionality",
-	give_to_singleplayer = false,
-})
+if core.settings:get_bool("enable_rollback_recording") then
+	core.register_privilege("rollback", {
+		description = "Can use the rollback functionality",
+		give_to_singleplayer = false,
+	})
+end
 core.register_privilege("debug", {
 	description = "Allows enabling various debug options that may affect gameplay",
 	give_to_singleplayer = false,
