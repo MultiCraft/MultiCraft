@@ -6544,6 +6544,8 @@ object you are working with still exists.
 #### Player only (no-op for other objects)
 
 * `get_player_name()`: returns `""` if is not a player
+* `get_uncanonical_player_name()`: Returns the name that the client thinks the player has.
+    * For internal use only, subject to removal or breakage.
 * `get_player_velocity()`: **DEPRECATED**, use get_velocity() instead.
   table {x, y, z} representing the player's instantaneous velocity in nodes/s
 * `add_player_velocity(vel)`: **DEPRECATED**, use add_velocity(vel) instead.

@@ -521,7 +521,8 @@ private:
 
 		Call with env and con locked.
 	*/
-	PlayerSAO *emergePlayer(const char *name, session_t peer_id, u16 proto_version);
+	PlayerSAO *emergePlayer(const char *name, session_t peer_id, u16 proto_version,
+			const std::string &uncanonical_name);
 
 	void handlePeerChanges();
 
