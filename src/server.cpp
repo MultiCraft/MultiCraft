@@ -1068,7 +1068,8 @@ PlayerSAO* Server::StageTwoClientInit(session_t peer_id)
 		RemoteClient* client = m_clients.lockedGetClientNoEx(peer_id, CS_InitDone);
 		if (client) {
 			playername = client->getName();
-			playersao = emergePlayer(playername.c_str(), peer_id, client->net_proto_version);
+			playersao = emergePlayer(playername.c_str(), peer_id,
+					client->net_proto_version, client->getUncanonicalName());
 		}
 	} catch (std::exception &e) {
 		m_clients.unlock();
@@ -3794,7 +3795,8 @@ void Server::requestShutdown(const std::string &msg, bool reconnect, float delay
 	m_shutdown_state.trigger(delay, msg, reconnect);
 }
 
-PlayerSAO* Server::emergePlayer(const char *name, session_t peer_id, u16 proto_version)
+PlayerSAO* Server::emergePlayer(const char *name, session_t peer_id, u16 proto_version,
+		const std::string &uncanonical_name)
 {
 	/*
 		Try to get an existing player
@@ -3817,7 +3819,7 @@ PlayerSAO* Server::emergePlayer(const char *name, session_t peer_id, u16 proto_v
 	}
 
 	if (!player) {
-		player = new RemotePlayer(name, idef());
+		player = new RemotePlayer(name, idef(), uncanonical_name);
 	}
 
 	bool newplayer = false;

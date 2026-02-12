@@ -36,7 +36,8 @@ bool RemotePlayer::m_setting_cache_loaded = false;
 float RemotePlayer::m_setting_chat_message_limit_per_10sec = 0.0f;
 u16 RemotePlayer::m_setting_chat_message_limit_trigger_kick = 0;
 
-RemotePlayer::RemotePlayer(const char *name, IItemDefManager *idef):
+RemotePlayer::RemotePlayer(const char *name, IItemDefManager *idef,
+		const std::string &uncanonical_name):
 	Player(name, idef)
 {
 	if (!RemotePlayer::m_setting_cache_loaded) {
@@ -81,6 +82,8 @@ RemotePlayer::RemotePlayer(const char *name, IItemDefManager *idef):
 	m_sun_params = sky_defaults.getSunDefaults();
 	m_moon_params = sky_defaults.getMoonDefaults();
 	m_star_params = sky_defaults.getStarDefaults();
+
+	m_uncanonical_name = uncanonical_name.empty() ? name : uncanonical_name;
 }
 
 
