@@ -34,6 +34,7 @@
 #include <irrlicht.h>
 #include <ft2build.h>
 #include <vector>
+#include <map>
 #include "irrUString.h"
 #include "util/enriched_string.h"
 #include FT_FREETYPE_H
@@ -41,12 +42,41 @@
 #include FT_GLYPH_H
 #include FT_STROKER_H
 
+#include <harfbuzz/hb.h>
+#include <harfbuzz/hb-ft.h>
+
 namespace irr
 {
 namespace gui
 {
 	struct SGUITTFace;
 	class CGUITTFont;
+
+	struct ShapedGlyph
+	{
+		u32 glyph_index;
+		u32 cluster;
+		s32 x_offset;
+		s32 y_offset;
+		s32 x_advance;
+		s32 y_advance;
+		size_t face_index;
+	};
+
+	struct ShapedRun
+	{
+		std::vector<ShapedGlyph> glyphs;
+		size_t face_index;
+		u32 start_char;
+		u32 end_char;
+	};
+
+	struct TextRun
+	{
+		size_t face_index;
+		u32 start;
+		u32 length;
+	};
 
 	//! Class to assist in deleting glyphs.
 	class CGUITTAssistDelete
@@ -74,7 +104,7 @@ namespace gui
 		//! However, it simply defines the SGUITTGlyph's properties and will only create the page
 		//! textures if necessary.  The actual creation of the textures should only occur right
 		//! before the batch draw call.
-		void preload(uchar32_t c, u32 char_index, FT_Face face, video::IVideoDriver* driver,
+		void preload(u32 char_index, FT_Face face, video::IVideoDriver* driver,
 				u32 font_size, const FT_Int32 loadFlags, bool bold,
 				bool italic, u16 outline, u8 outline_type, s8 character_spacing);
 
@@ -104,9 +134,6 @@ namespace gui
 
 		//! The shadow offset of glyph
 		u32 shadow_offset;
-
-		//! Glyph advance information.
-		FT_Vector advance;
 
 		//! This is just the temporary image holder.  After this glyph is paged,
 		//! it will be dropped.
@@ -377,12 +404,10 @@ namespace gui
 
 			FT_Stroker getStroker() { return stroker; }
 
-			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
+			float getColorEmojiOffset() const { return color_emoji_offset; }
+			float getColorEmojiScale() const { return color_emoji_scale; }
 
-			bool testEmojiFont(const io::path& filename);
-			void calculateColorEmojiParams(FT_Face face);
-			float getColorEmojiScale() { return color_emoji_scale; }
-			float getColorEmojiOffset() { return color_emoji_offset; }
+			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false, const u32 shadow = false);
 
 		protected:
 			bool use_monochrome;
@@ -415,19 +440,20 @@ namespace gui
 				if (useMonochrome()) load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_TARGET_MONO;
 				else load_flags |= FT_LOAD_TARGET_NORMAL;
 			}
-			u32 getWidthFromCharacter(wchar_t c) const;
-			u32 getWidthFromCharacter(uchar32_t c) const;
-			u32 getHeightFromCharacter(wchar_t c) const;
-			u32 getHeightFromCharacter(uchar32_t c) const;
-			u32 getGlyphIndexByChar(wchar_t c) const;
-			u32 getGlyphIndexByChar(uchar32_t c) const;
 			s32 getFaceIndexByChar(uchar32_t c) const;
-			core::vector2di getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const;
-			core::vector2di getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const;
-			u32 getMaxFontHeight() const;
 			core::dimension2d<u32> getDimensionUntilEndOfLine(const wchar_t* p) const;
 
 			void createSharedPlane();
+
+			bool testEmojiFont(const io::path& filename);
+			void calculateColorEmojiParams(FT_Face face);
+			void calculateMaxFontHeight();
+
+			std::vector<ShapedRun> shapeText(const core::ustring& text) const;
+			std::vector<TextRun> splitIntoFontRuns(const std::vector<uint32_t>& text) const;
+			ShapedRun shapeRun(const TextRun& run, const std::vector<uint32_t>& text, u32 cluster_offset) const;
+			void loadGlyphsForShapedText(const std::vector<ShapedRun>& runs);
+			u64 makeGlyphKey(u32 face_index, u32 glyph_index);
 
 			irr::IrrlichtDevice* Device;
 			gui::IGUIEnvironment* Environment;
@@ -439,7 +465,7 @@ namespace gui
 			FT_Int32 load_flags;
 
 			mutable core::array<CGUITTGlyphPage*> Glyph_Pages;
-			mutable core::array<SGUITTGlyph*> Glyphs;
+			std::map<u64, SGUITTGlyph*> Glyphs;
 
 			s32 GlobalKerningWidth;
 			s32 GlobalKerningHeight;
@@ -453,6 +479,7 @@ namespace gui
 			s8 character_spacing;
 			float color_emoji_scale = 1.0f;
 			u32 color_emoji_offset;
+			u32 max_font_height = 0;
 	};
 
 } // end namespace gui

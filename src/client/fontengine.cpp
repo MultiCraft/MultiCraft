@@ -355,7 +355,6 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	};
 
 	std::string emoji_font_path = g_settings->get("emoji_font_path");
-	std::string emoji_font_system_paths = g_settings->get("emoji_font_system_paths");
 
 #if USE_FREETYPE
 	for (const std::string &font_path : fallback_settings) {
@@ -364,7 +363,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				outline_type, character_spacing, font_shadow, font_shadow_alpha);
 
 		if (font) {
-			std::vector<std::string> emoji_paths = split(emoji_font_system_paths, ',');
+			std::vector<std::string> emoji_paths = split(emoji_font_path, ',');
 			bool success = false;
 
 			// Load first available system emoji font
@@ -375,16 +374,6 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 						break;
 				}
 			}
-
-			// Load fallback emoji font if system fonts are not available.
-			// For macOS always load fallback font because we can't load
-			// some emojis from apple font atm.
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-			font->loadAdditionalFont(emoji_font_path.c_str(), true);
-#else
-			if (!success)
-				font->loadAdditionalFont(emoji_font_path.c_str(), true);
-#endif
 
 			if (font_path != fallback_font_path)
 				font->loadAdditionalFont(fallback_font_path.c_str(), false);
