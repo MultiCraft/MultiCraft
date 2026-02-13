@@ -18,6 +18,11 @@ LOCAL_SRC_FILES := deps/freetype/lib/$(APP_ABI)/libfreetype.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := HarfBuzz
+LOCAL_SRC_FILES := deps/harfbuzz/lib/$(APP_ABI)/libharfbuzz.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := Irrlicht
 LOCAL_SRC_FILES := deps/irrlicht/lib/$(APP_ABI)/libIrrlicht.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -116,6 +121,7 @@ LOCAL_C_INCLUDES := \
 	../../lib/jsoncpp                              \
 	../../lib/chacha                               \
 	deps/freetype/include                          \
+	deps/harfbuzz/include                          \
 	deps/gettext/include                           \
 	deps/irrlicht/include                          \
 	deps/libpng/include                            \
@@ -286,7 +292,7 @@ LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
 
 LOCAL_STATIC_LIBRARIES += \
 	Curl libssl libcrypto libnghttp2 \
-	Freetype \
+	Freetype HarfBuzz \
 	OpenAL \
 	Gettext \
 	Irrlicht libpng libjpeg SDL \
