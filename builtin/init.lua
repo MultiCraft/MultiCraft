@@ -39,6 +39,8 @@ if core.global_exists("jit") and jit.status() then
 	core.log("action", "Applied JIT compiler optimizations")
 end
 
+BIDI_SUPPORTED = true -- ToDo: will be removed in future releases
+
 if INIT == "game" then
 	dofile(gamepath .. "init.lua")
 	assert(not core.get_http_api)
