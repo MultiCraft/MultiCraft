@@ -44,6 +44,7 @@
 
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
+#include <SheenBidi.h>
 
 namespace irr
 {
@@ -51,6 +52,14 @@ namespace gui
 {
 	struct SGUITTFace;
 	class CGUITTFont;
+
+	struct BidiRun
+	{
+		u32 start;
+		u32 length;
+		SBLevel level;
+		hb_direction_t direction;
+	};
 
 	struct ShapedGlyph
 	{
@@ -450,8 +459,13 @@ namespace gui
 			void calculateMaxFontHeight();
 
 			std::vector<ShapedRun> shapeText(const core::ustring& text) const;
-			std::vector<TextRun> splitIntoFontRuns(const std::vector<uint32_t>& text) const;
-			ShapedRun shapeRun(const TextRun& run, const std::vector<uint32_t>& text, u32 cluster_offset) const;
+			std::vector<BidiRun> getBidiRunsInVisualOrder(
+					const std::vector<uint32_t>& text) const;
+			std::vector<TextRun> splitIntoFontRuns(
+					const std::vector<uint32_t>& text) const;
+			ShapedRun shapeRun(const TextRun& run,
+					const std::vector<uint32_t>& text, u32 cluster_offset,
+					hb_direction_t direction = HB_DIRECTION_LTR) const;
 			void loadGlyphsForShapedText(const std::vector<ShapedRun>& runs);
 			u64 makeGlyphKey(u32 face_index, u32 glyph_index);
 

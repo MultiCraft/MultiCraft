@@ -34,7 +34,6 @@
 #include <iostream>
 #include "CGUITTFont.h"
 #include "porting.h"
-#include "bidi.h"
 
 
 namespace irr
@@ -857,12 +856,75 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text) const
 		++iter;
 	}
 
-	std::vector<TextRun> font_runs = splitIntoFontRuns(utf32_text);
+	std::vector<BidiRun> bidi_runs = getBidiRunsInVisualOrder(utf32_text);
 
-	for (const auto& run : font_runs) {
-		ShapedRun shaped = shapeRun(run, utf32_text, run.start);
-		runs.push_back(shaped);
+	for (const auto& bidi_run : bidi_runs) {
+		std::vector<uint32_t> run_text(
+				utf32_text.begin() + bidi_run.start,
+				utf32_text.begin() + bidi_run.start + bidi_run.length);
+
+		std::vector<TextRun> font_runs = splitIntoFontRuns(run_text);
+
+		for (auto& font_run : font_runs) {
+			font_run.start += bidi_run.start;
+			ShapedRun shaped = shapeRun(font_run, utf32_text, font_run.start,
+					bidi_run.direction);
+			runs.push_back(shaped);
+		}
 	}
+
+	return runs;
+}
+
+std::vector<BidiRun> CGUITTFont::getBidiRunsInVisualOrder(
+		const std::vector<uint32_t>& text) const
+{
+	std::vector<BidiRun> runs;
+
+	if (text.empty())
+		return runs;
+
+	SBCodepointSequence codepointSequence;
+	codepointSequence.stringEncoding = SBStringEncodingUTF32;
+	codepointSequence.stringBuffer = (void*)text.data();
+	codepointSequence.stringLength = text.size();
+
+	SBAlgorithmRef bidiAlgorithm = SBAlgorithmCreate(&codepointSequence);
+
+	if (!bidiAlgorithm)
+		return runs;
+
+	SBParagraphRef paragraph = SBAlgorithmCreateParagraph(
+			bidiAlgorithm, 0, text.size(), SBLevelDefaultLTR);
+
+	if (!paragraph) {
+		SBAlgorithmRelease(bidiAlgorithm);
+		return runs;
+	}
+
+	SBLineRef line = SBParagraphCreateLine(paragraph, 0, text.size());
+
+	if (!line) {
+		SBParagraphRelease(paragraph);
+		SBAlgorithmRelease(bidiAlgorithm);
+		return runs;
+	}
+
+	SBUInteger runCount = SBLineGetRunCount(line);
+	const SBRun* visualRuns = SBLineGetRunsPtr(line);
+
+	for (SBUInteger i = 0; i < runCount; i++) {
+		BidiRun run;
+		run.start = visualRuns[i].offset;
+		run.length = visualRuns[i].length;
+		run.level = visualRuns[i].level;
+		run.direction = (run.level % 2 == 0) ? HB_DIRECTION_LTR : HB_DIRECTION_RTL;
+		runs.push_back(run);
+	}
+
+	SBLineRelease(line);
+	SBParagraphRelease(paragraph);
+	SBAlgorithmRelease(bidiAlgorithm);
 
 	return runs;
 }
@@ -900,7 +962,8 @@ std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
 }
 
 ShapedRun CGUITTFont::shapeRun(const TextRun& run,
-		const std::vector<uint32_t>& text, u32 cluster_offset) const
+		const std::vector<uint32_t>& text, u32 cluster_offset,
+		hb_direction_t direction) const
 {
 	ShapedRun result;
 	result.face_index = run.face_index;
@@ -922,7 +985,8 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	hb_buffer_add_utf32(buf, text.data() + run.start, run.length, 0, run.length);
 
 	hb_buffer_guess_segment_properties(buf);
-	hb_buffer_set_direction(buf, HB_DIRECTION_LTR);
+
+	hb_buffer_set_direction(buf, direction);
 	//~ hb_buffer_set_script(buf, HB_SCRIPT_COMMON);
 	//~ hb_buffer_set_language(buf, hb_language_get_default());
 
@@ -1196,9 +1260,6 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 	// Convert to a unicode string.
 	core::ustring utext = text.getString();
 
-	if (use_rtl)
-		utext = applyBidiReorderingMultiline(utext);
-
 	// Shape the text with HarfBuzz
 	std::vector<ShapedRun> shaped_runs = shapeText(utext.c_str());
 	loadGlyphsForShapedText(shaped_runs);
@@ -1328,9 +1389,6 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text, bool use_rt
 core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text, bool use_rtl) const
 {
 	core::ustring utext = text;
-
-	if (use_rtl)
-		utext = applyBidiReorderingMultiline(text);
 
 	std::vector<ShapedRun> shaped_runs = shapeText(utext);
 
