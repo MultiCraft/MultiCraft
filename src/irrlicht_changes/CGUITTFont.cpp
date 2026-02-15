@@ -938,7 +938,18 @@ std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
 	size_t current_face = SIZE_MAX;
 
 	for (u32 i = 0; i < text.size(); i++) {
-		s32 face_for_char = getFaceIndexByChar(text[i]);
+		uint32_t ch = text[i];
+
+		// Check for zero width joiner or variation selector
+		bool is_zwj = (ch == 0x200D);
+		bool is_variation_selector = (ch >= 0xFE00 && ch <= 0xFE0F) ||
+				(ch >= 0xE0100 && ch <= 0xE01EF);
+		bool is_emoji_modifier = (ch >= 0x1F3FB && ch <= 0x1F3FF);
+
+		if (is_zwj || is_variation_selector || is_emoji_modifier)
+			continue;
+
+		s32 face_for_char = getFaceIndexByChar(ch);
 
 		if (face_for_char == -1)
 			face_for_char = 0;
@@ -987,8 +998,6 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	hb_buffer_guess_segment_properties(buf);
 
 	hb_buffer_set_direction(buf, direction);
-	//~ hb_buffer_set_script(buf, HB_SCRIPT_COMMON);
-	//~ hb_buffer_set_language(buf, hb_language_get_default());
 
 	float bold_offset = 0;
 	if (bold) {
