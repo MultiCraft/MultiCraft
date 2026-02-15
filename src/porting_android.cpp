@@ -499,4 +499,20 @@ void destroyAssetManager()
 		asset_manager = NULL;
 	}
 }
+
+void vibrationEffect(int duration, int amplitude)
+{
+	if (jnienv == nullptr || activityObj == nullptr)
+		return;
+
+	jmethodID vibrationEffectMethod = jnienv->GetMethodID(activityClass,
+			"vibrationEffect", "(II)V");
+
+	FATAL_ERROR_IF(vibrationEffectMethod == nullptr,
+			"porting::vibrate unable to find Java vibrationEffect method");
+
+	jnienv->CallVoidMethod(activityObj, vibrationEffectMethod,
+			duration, amplitude);
+}
+
 }
