@@ -30,7 +30,8 @@ android {
 					"versionMinor=$versionMinor",
 					"versionPatch=$versionPatch",
 					"versionExtra=$versionExtra",
-					"developmentBuild=$developmentBuild"
+					"developmentBuild=$developmentBuild",
+					"prebuilt=$(if $(strip $(wildcard $(prebuilt_path))),$(prebuilt_path),.)"
 				)
 			}
 		}
@@ -85,7 +86,7 @@ val downloadDeps = tasks.register("downloadDeps") {
 			println("Dependencies already downloaded")
 		}
 	}
-}
+}!!
 
 val getDeps = tasks.register<Copy>("getDeps") {
 	dependsOn(downloadDeps)
@@ -100,8 +101,4 @@ val getDeps = tasks.register<Copy>("getDeps") {
 
 tasks.named("preBuild") {
 	dependsOn(getDeps)
-}
-
-android.defaultConfig.externalNativeBuild.ndkBuild.apply {
-	arguments("prebuilt=$(if $(strip $(wildcard $(prebuilt_path))),$(prebuilt_path),.)")
 }
