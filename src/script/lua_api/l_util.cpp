@@ -577,6 +577,10 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	lua_pushnumber(L,RenderingEngine::getDisplayDensity());
 	lua_settable(L, top);
 
+	lua_pushstring(L,"high_dpi");
+	lua_pushnumber(L,RenderingEngine::isHighDpi());
+	lua_settable(L, top);
+
 	lua_pushstring(L,"display_width");
 	lua_pushnumber(L,RenderingEngine::getDisplaySize().X);
 	lua_settable(L, top);

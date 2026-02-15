@@ -234,6 +234,7 @@ core.show_path_select_dialog(formname, caption, is_file_select)
 core.get_screen_info()
 ^ returns {
     density         = <screen density 0.75,1.0,2.0,3.0 ... (dpi)>,
+	high_dpi		= <high screen dpi>,
     display_width   = <width of display>,
     display_height  = <height of display>,
     window_width    = <current window width>,
