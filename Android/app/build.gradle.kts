@@ -85,7 +85,6 @@ val prepareAssetsFiles by tasks.registering {
 		copy {
 			from("$projRoot/builtin")
 			into("$assetsFolder/builtin")
-			exclude("*.txt")
 		}
 		copy {
 			from("$projRoot/client/shaders")
@@ -98,7 +97,8 @@ val prepareAssetsFiles by tasks.registering {
 		copy {
 			from(
 				"$projRoot/fonts/DroidSansFallback.ttf",
-				"$projRoot/fonts/MultiCraftFont.ttf"
+				"$projRoot/fonts/MultiCraftFont.ttf",
+				"$projRoot/fonts/OpenMoji.ttf"
 			)
 			into("$assetsFolder/fonts")
 		}
