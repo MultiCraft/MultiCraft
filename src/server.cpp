@@ -1509,18 +1509,41 @@ void Server::SendInventory(PlayerSAO *sao, bool incremental)
 	sao->getInventory()->setModified(false);
 	player->setModified(true);
 
-	const std::string &s = os.str();
-	pkt.putRawString(s.c_str(), s.size());
+	if (m_clients.getMulticraftProtocolVersion(sao->getPeerID()) > 4 || m_simple_singleplayer_mode) {
+		std::ostringstream tmp_os2(std::ios::binary);
+		compressZstd(os.str(), tmp_os2);
+		const std::string &s = tmp_os2.str();
+		pkt.putRawString(s.c_str(), s.size());
+	} else {
+		const std::string &s = os.str();
+		pkt.putRawString(s.c_str(), s.size());
+	}
+
 	Send(&pkt);
 }
 
 void Server::SendChatMessage(session_t peer_id, const ChatMessage &message)
 {
+	bool use_compression = false;
+
+	if ((m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) &&
+			(message.sender.length() + message.message.length() > 64))
+		use_compression = true;
+
 	NetworkPacket pkt(TOCLIENT_CHAT_MESSAGE, 0, peer_id);
-	u8 version = 1;
+	u8 version = use_compression ? 101 : 1;
 	u8 type = message.type;
 	pkt << version << type << message.sender << message.message
 		<< static_cast<u64>(message.timestamp);
+
+	if (use_compression) {
+		std::string datastring(pkt.getString(1), pkt.getSize() - 1);
+		std::ostringstream tmp_os2(std::ios::binary);
+		compressZstd(datastring, tmp_os2);
+		pkt.clearData();
+		pkt << version;
+		pkt.putLongString(tmp_os2.str());
+	}
 
 	if (peer_id != PEER_ID_INEXISTENT) {
 		RemotePlayer *player = m_env->getPlayer(peer_id);
@@ -1942,7 +1965,14 @@ void Server::SendPlayerInventoryFormspec(session_t peer_id)
 		return;
 
 	NetworkPacket pkt(TOCLIENT_INVENTORY_FORMSPEC, 0, peer_id);
-	pkt.putLongString(player->inventory_formspec);
+
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
+		std::ostringstream tmp_os2(std::ios::binary);
+		compressZstd(player->inventory_formspec, tmp_os2);
+		pkt.putLongString(tmp_os2.str());
+	} else {
+		pkt.putLongString(player->inventory_formspec);
+	}
 
 	Send(&pkt);
 }
@@ -2050,7 +2080,16 @@ void Server::SendActiveObjectRemoveAdd(RemoteClient *client, PlayerSAO *playersa
 	}
 
 	NetworkPacket pkt(TOCLIENT_ACTIVE_OBJECT_REMOVE_ADD, data.size(), client->peer_id);
-	pkt.putRawString(data.c_str(), data.size());
+
+	if (m_clients.getMulticraftProtocolVersion(client->peer_id) > 4 || m_simple_singleplayer_mode) {
+		std::ostringstream tmp_os2(std::ios::binary);
+		compressZstd(data, tmp_os2);
+		const std::string &s = tmp_os2.str();
+		pkt.putLongString(s);
+	} else {
+		pkt.putRawString(data.c_str(), data.size());
+	}
+
 	Send(&pkt);
 
 	verbosestream << "Server::SendActiveObjectRemoveAdd: "
@@ -2064,7 +2103,14 @@ void Server::SendActiveObjectMessages(session_t peer_id, const std::string &data
 	NetworkPacket pkt(TOCLIENT_ACTIVE_OBJECT_MESSAGES,
 			datas.size(), peer_id);
 
-	pkt.putRawString(datas.c_str(), datas.size());
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
+		std::ostringstream tmp_os2(std::ios::binary);
+		compressZstd(datas, tmp_os2);
+		const std::string &s = tmp_os2.str();
+		pkt.putLongString(s);
+	} else {
+		pkt.putRawString(datas.c_str(), datas.size());
+	}
 
 	m_clients.send(pkt.getPeerId(),
 			reliable ? clientCommandFactoryTable[pkt.getCommand()].channel : 1,
@@ -2600,6 +2646,14 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 	pkt << g_settings->get("remote_media");
 	if (g_settings->getBool("disable_texture_packs"))
 		pkt << true;
+
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
+		std::string datastring(pkt.getString(0), pkt.getSize());
+		std::ostringstream tmp_os2(std::ios::binary);
+		compressZstd(datastring, tmp_os2);
+		pkt.clearData();
+		pkt.putLongString(tmp_os2.str());
+	}
 
 	Send(&pkt);
 
