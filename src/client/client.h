@@ -433,7 +433,6 @@ public:
 	const u16 getRoundScreen() { return m_round_screen; }
 	const f32 getHudScaling() { return m_hud_scaling; }
 	const bool getInvItemAnimEnabled() { return m_inv_item_anim_enabled; }
-	const bool getConvertTo16bitEnabled() { return m_convert_to_16bit; }
 private:
 	void loadMods();
 
@@ -600,5 +599,4 @@ private:
 	u16 m_round_screen;
 	f32 m_hud_scaling;
 	bool m_inv_item_anim_enabled;
-	bool m_convert_to_16bit;
 };
