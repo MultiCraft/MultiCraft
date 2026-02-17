@@ -17,5 +17,4 @@ then
 else
 	cp ../fonts/DroidSansFallback.ttf $DEST/fonts/
 	cp ../fonts/MultiCraftFont.ttf $DEST/fonts/
-	cp ../fonts/OpenMoji.ttf $DEST/fonts/
 fi

@@ -543,7 +543,10 @@ int ModApiUtil::l_upgrade(lua_State *L)
 	NO_MAP_LOCK_REQUIRED;
 #if defined(__ANDROID__) || defined(__APPLE__)
 	const std::string item_name = luaL_checkstring(L, 1);
-	const bool res = porting::upgrade(item_name);
+	std::string extra;
+	if (lua_gettop(L) >= 2 && lua_isstring(L, 2))
+		extra = lua_tostring(L, 2);
+	const bool res = porting::upgrade(item_name, extra);
 	lua_pushboolean(L, res);
 #else
 	// Not implemented on other platforms
@@ -575,6 +578,10 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	int top = lua_gettop(L);
 	lua_pushstring(L,"density");
 	lua_pushnumber(L,RenderingEngine::getDisplayDensity());
+	lua_settable(L, top);
+
+	lua_pushstring(L,"high_dpi");
+	lua_pushnumber(L,RenderingEngine::isHighDpi());
 	lua_settable(L, top);
 
 	lua_pushstring(L,"display_width");

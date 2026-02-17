@@ -316,14 +316,18 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold", "");
 	settings->setDefault("mono_font_path_bold_italic", "");
 
-	settings->setDefault("emoji_font_path", porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf"));
-#if defined(__ANDROID__)
-	settings->setDefault("emoji_font_system_paths", "/system/fonts/SamsungColorEmoji.ttf,/system/fonts/NotoColorEmojiLegacy.ttf,/system/fonts/NotoColorEmoji.ttf");
+	std::string emoji_fonts;
+#ifdef __ANDROID__
+	emoji_fonts = "/system/fonts/SamsungColorEmoji.ttf,"
+		"/system/fonts/NotoColorEmojiLegacy.ttf,"
+		"/system/fonts/NotoColorEmoji.ttf,";
+	emoji_fonts += porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	settings->setDefault("emoji_font_system_paths", "/System/Library/Fonts/Apple Color Emoji.ttc");
+	emoji_fonts = "/System/Library/Fonts/Apple Color Emoji.ttc";
 #else
-	settings->setDefault("emoji_font_system_paths", "");
+	emoji_fonts = porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
 #endif
+	settings->setDefault("emoji_font_path", emoji_fonts);
 
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallback.ttf"));
 

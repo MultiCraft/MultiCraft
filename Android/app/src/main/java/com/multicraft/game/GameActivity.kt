@@ -322,7 +322,8 @@ class GameActivity : SDLActivity() {
 		print(exc)
 	}
 
-	fun upgrade(item: String?): Boolean {
+	fun upgrade(item: String?, extra: String?): Boolean {
+		if (extra != "") return true
 		return item?.isEmpty() ?: false
 	}
 

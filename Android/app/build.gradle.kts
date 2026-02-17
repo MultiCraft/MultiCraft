@@ -1,10 +1,8 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
 	id("com.android.application")
-	kotlin("android")
 }
 
 android {
@@ -73,12 +71,6 @@ android {
 		targetCompatibility = JavaVersion.VERSION_17
 	}
 
-	kotlin {
-		compilerOptions {
-			jvmTarget.set(JvmTarget.JVM_17)
-		}
-	}
-
 	buildFeatures {
 		viewBinding = true
 		buildConfig = true
@@ -93,7 +85,6 @@ val prepareAssetsFiles by tasks.registering {
 		copy {
 			from("$projRoot/builtin")
 			into("$assetsFolder/builtin")
-			exclude("*.txt")
 		}
 		copy {
 			from("$projRoot/client/shaders")
