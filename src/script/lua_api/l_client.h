@@ -111,6 +111,9 @@ private:
 	// get_secret_key(string)
 	static int l_get_secret_key(lua_State *L);
 
+	// set_visible_controls(buttons)
+	static int l_set_visible_controls(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };

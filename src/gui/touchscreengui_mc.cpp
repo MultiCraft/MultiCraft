@@ -749,6 +749,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					!(m_current_state == STATE_HIDDEN && button->state == STATE_DEFAULT))
 				continue;
 
+			if (!m_visible_btns.empty() && m_visible_btns.count(buttons_data[button->id].name) == 0)
+				continue;
+
 			if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
 				m_events[id] = true;
 				button->pressed = true;
@@ -786,7 +789,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		}
 
 		if (m_current_state == STATE_DEFAULT || m_current_state == STATE_HIDDEN) {
-			if (m_joystick.button_off->isPointInside(core::position2d<s32>(x, y))) {
+			if (m_joystick.button_off->isPointInside(core::position2d<s32>(x, y)) &&
+					(m_visible_btns.empty() || m_visible_btns.count("joystick") > 0)) {
 				m_events[id] = true;
 				m_joystick.button_off->setVisible(false);
 				m_joystick.button_bg->setVisible(m_current_state == STATE_DEFAULT);
@@ -1480,13 +1484,17 @@ void TouchScreenGUI::setVisible(bool visible)
 		else if (m_current_state == STATE_HIDDEN)
 			is_visible = false;
 
+		if (is_visible && !m_visible_btns.empty())
+			is_visible = m_visible_btns.count(buttons_data[button->id].name) > 0;
+
 		if (button->guibutton)
 			button->guibutton->setVisible(m_visible && is_visible);
 		if (button->text)
 			button->text->setVisible(m_visible && is_visible);
 	}
 
-	bool is_visible = (m_current_state != STATE_OVERFLOW) && (m_current_state != STATE_HIDDEN);
+	bool is_visible = (m_current_state != STATE_OVERFLOW) && (m_current_state != STATE_HIDDEN) &&
+			(m_visible_btns.empty() || m_visible_btns.count("joystick") > 0);
 
 	if (m_joystick.button_off)
 		m_joystick.button_off->setVisible(m_visible && is_visible);
@@ -1502,6 +1510,12 @@ void TouchScreenGUI::setVisible(bool visible)
 
 	if (!visible)
 		reset();
+}
+
+void TouchScreenGUI::setVisibleBtns(const std::set<std::string> &visible_btns)
+{
+	m_visible_btns = visible_btns;
+	setVisible(m_visible);
 }
 
 void TouchScreenGUI::changeCurrentState(touch_gui_state state)
