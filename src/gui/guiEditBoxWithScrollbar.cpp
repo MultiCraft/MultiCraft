@@ -187,8 +187,6 @@ void GUIEditBoxWithScrollBar::draw()
 				// draw mark and marked text
 				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
 					s32 mbegin = 0, mend = 0;
-					s32 mark_start_pos = 0; 
-					s32 mark_end_pos = txt_line->size();
 
 					if (i == hline_start) {
 						// highlight start is on this line
@@ -199,14 +197,11 @@ void GUIEditBoxWithScrollBar::draw()
 						mbegin += font->getKerningWidth(
 							&((*txt_line)[m_real_mark_begin - start_pos]),
 							m_real_mark_begin - start_pos > 0 ? &((*txt_line)[m_real_mark_begin - start_pos - 1]) : 0);
-
-						mark_start_pos = m_real_mark_begin - start_pos;
 					}
 					if (i == hline_start + hline_count - 1) {
 						// highlight end is on this line
 						s2 = txt_line->subString(0, m_real_mark_end - start_pos);
 						mend = font->getDimension(s2.c_str()).Width;
-						mark_end_pos = (s32)s2.size();
 					} else {
 						mend = font->getDimension(txt_line->c_str()).Width;
 					}
@@ -237,9 +232,7 @@ void GUIEditBoxWithScrollBar::draw()
 				txt_line = &m_broken_text[cursor_line];
 				start_pos = m_broken_text_positions[cursor_line];
 			}
-			s = txt_line->subString(0, m_cursor_pos - start_pos);
-			charcursorpos = font->getDimension(s.c_str()).Width +
-				font->getKerningWidth(L"_", m_cursor_pos - start_pos > 0 ? &((*txt_line)[m_cursor_pos - start_pos - 1]) : 0);
+			charcursorpos = font->getCursorPosition(*txt_line, m_cursor_pos - start_pos);
 
 			if (focus && (porting::getTimeMs() - m_blink_start_time) % 700 < 350) {
 				setTextRect(cursor_line);

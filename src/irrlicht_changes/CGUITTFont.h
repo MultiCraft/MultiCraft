@@ -58,7 +58,7 @@ namespace gui
 		u32 start;
 		u32 length;
 		SBLevel level;
-		hb_direction_t direction;
+		bool is_rtl;
 	};
 
 	struct ShapedGlyph
@@ -71,15 +71,16 @@ namespace gui
 		s32 y_advance;
 		size_t face_index;
 	};
-
+	
 	struct ShapedRun
 	{
 		std::vector<ShapedGlyph> glyphs;
 		size_t face_index;
 		u32 start_char;
 		u32 end_char;
+		bool is_rtl;
 	};
-
+	
 	struct TextRun
 	{
 		size_t face_index;
@@ -359,10 +360,6 @@ namespace gui
 			virtual core::dimension2d<u32> getTotalDimension(const wchar_t* text) const;
 			virtual core::dimension2d<u32> getTotalDimension(const core::ustring& text) const;
 
-			//! Calculates the index of the character in the text which is on a specific position.
-			virtual s32 getCharacterFromPos(const wchar_t* text, s32 pixel_x) const;
-			virtual s32 getCharacterFromPos(const core::ustring& text, s32 pixel_x) const;
-
 			//! Sets global kerning width for the font.
 			virtual void setKerningWidth(s32 kerning);
 
@@ -408,7 +405,13 @@ namespace gui
 
 			virtual s32 getPrevClusterPos(const core::stringw& text, s32 pos);
 			virtual s32 getNextClusterPos(const core::stringw& text, s32 pos);
-
+			
+			//! Calculates the index of the character in the text which is on a specific position.
+			virtual s32 getCharacterFromPos(const wchar_t* text, s32 pixel_x) const;
+			virtual s32 getCharacterFromPos(const core::ustring& text, s32 pixel_x) const;
+			
+			virtual s32 getCursorPosition(const core::stringw& text, u32 logical_pos) const;
+					
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
 			FT_Stroker getStroker() { return stroker; }
@@ -458,17 +461,18 @@ namespace gui
 			void calculateColorEmojiParams(FT_Face face);
 			void calculateMaxFontHeight();
 
+
 			std::vector<ShapedRun> shapeText(const core::ustring& text) const;
-			std::vector<BidiRun> getBidiRunsInVisualOrder(
+			std::vector<BidiRun> getBidiRuns(
 					const std::vector<uint32_t>& text) const;
 			std::vector<TextRun> splitIntoFontRuns(
 					const std::vector<uint32_t>& text) const;
 			ShapedRun shapeRun(const TextRun& run,
 					const std::vector<uint32_t>& text, u32 cluster_offset,
-					hb_direction_t direction = HB_DIRECTION_LTR) const;
+					bool is_rtl) const;
 			void loadGlyphsForShapedText(const std::vector<ShapedRun>& runs);
 			u64 makeGlyphKey(u32 face_index, u32 glyph_index);
-
+		
 			irr::IrrlichtDevice* Device;
 			gui::IGUIEnvironment* Environment;
 			video::IVideoDriver* Driver;

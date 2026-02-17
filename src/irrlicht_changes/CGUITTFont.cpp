@@ -856,7 +856,7 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text) const
 		++iter;
 	}
 
-	std::vector<BidiRun> bidi_runs = getBidiRunsInVisualOrder(utf32_text);
+	std::vector<BidiRun> bidi_runs = getBidiRuns(utf32_text);
 
 	for (const auto& bidi_run : bidi_runs) {
 		std::vector<uint32_t> run_text(
@@ -868,7 +868,7 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text) const
 		for (auto& font_run : font_runs) {
 			font_run.start += bidi_run.start;
 			ShapedRun shaped = shapeRun(font_run, utf32_text, font_run.start,
-					bidi_run.direction);
+					bidi_run.is_rtl);
 			runs.push_back(shaped);
 		}
 	}
@@ -876,7 +876,7 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text) const
 	return runs;
 }
 
-std::vector<BidiRun> CGUITTFont::getBidiRunsInVisualOrder(
+std::vector<BidiRun> CGUITTFont::getBidiRuns(
 		const std::vector<uint32_t>& text) const
 {
 	std::vector<BidiRun> runs;
@@ -918,7 +918,7 @@ std::vector<BidiRun> CGUITTFont::getBidiRunsInVisualOrder(
 		run.start = visualRuns[i].offset;
 		run.length = visualRuns[i].length;
 		run.level = visualRuns[i].level;
-		run.direction = (run.level % 2 == 0) ? HB_DIRECTION_LTR : HB_DIRECTION_RTL;
+		run.is_rtl = (run.level % 2 != 0);
 		runs.push_back(run);
 	}
 
@@ -974,13 +974,14 @@ std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
 
 ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 		const std::vector<uint32_t>& text, u32 cluster_offset,
-		hb_direction_t direction) const
+		bool is_rtl) const
 {
 	ShapedRun result;
 	result.face_index = run.face_index;
 	result.start_char = run.start;
 	result.end_char = run.start + run.length;
-
+	result.is_rtl = is_rtl;
+	
 	FT_Face face = tt_faces[run.face_index];
 
 	FT_Set_Pixel_Sizes(face, 0, size);
@@ -997,7 +998,7 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 
 	hb_buffer_guess_segment_properties(buf);
 
-	hb_buffer_set_direction(buf, direction);
+	hb_buffer_set_direction(buf, is_rtl ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
 
 	float bold_offset = 0;
 	if (bold) {
@@ -1097,10 +1098,8 @@ s32 CGUITTFont::getPrevClusterPos(const core::stringw& text, s32 pos)
 
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
-			if ((s32)glyph.cluster >= pos) {
-				return prev_cluster;
-			}
-			prev_cluster = glyph.cluster;
+			if ((s32)glyph.cluster < pos && (s32)glyph.cluster > prev_cluster)
+				prev_cluster = (s32)glyph.cluster;
 		}
 	}
 
@@ -1110,15 +1109,63 @@ s32 CGUITTFont::getPrevClusterPos(const core::stringw& text, s32 pos)
 s32 CGUITTFont::getNextClusterPos(const core::stringw& text, s32 pos)
 {
 	std::vector<ShapedRun> shaped_runs = shapeText(text);
-	bool found_current = false;
+
+	s32 next_cluster = (s32)text.size();
 
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
-			if (found_current)
-				return glyph.cluster;
+			if ((s32)glyph.cluster > pos && (s32)glyph.cluster < next_cluster)
+				next_cluster = (s32)glyph.cluster;
+		}
+	}
 
-			if ((s32)glyph.cluster >= pos)
-				found_current = true;
+	return next_cluster;
+}
+
+s32 CGUITTFont::getCursorPosition(const core::stringw& text, u32 logical_pos) const
+{
+	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
+	//loadGlyphsForShapedText(shaped_runs);
+
+	bool is_rtl = false;
+	s32 pos_x = 0;
+
+	for (const auto& run : shaped_runs) {
+		for (const auto& shaped_glyph : run.glyphs) {
+			if (shaped_glyph.cluster == logical_pos)
+				return pos_x;
+
+			pos_x += shaped_glyph.x_advance;
+			
+			if (shaped_glyph.cluster == 0 && run.is_rtl)
+				is_rtl = true;
+		}
+	}
+
+	if (is_rtl)
+		return 0;
+		
+	return pos_x;
+}
+
+s32 CGUITTFont::getCharacterFromPos(const wchar_t* text, s32 pixel_x) const
+{
+	return getCharacterFromPos(core::ustring(text), pixel_x);
+}
+
+s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) const
+{
+	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
+	//loadGlyphsForShapedText(shaped_runs);
+
+	s32 pos_x = 0;
+
+	for (const auto& run : shaped_runs) {
+		for (const auto& shaped_glyph : run.glyphs) {
+			pos_x += shaped_glyph.x_advance;
+
+			if (pos_x > pixel_x)
+				return shaped_glyph.cluster;
 		}
 	}
 
@@ -1480,31 +1527,6 @@ s32 CGUITTFont::getFaceIndexByChar(uchar32_t c) const
 
 		if (glyph != 0)
 			return i;
-	}
-
-	return -1;
-}
-
-s32 CGUITTFont::getCharacterFromPos(const wchar_t* text, s32 pixel_x) const
-{
-	return getCharacterFromPos(core::ustring(text), pixel_x);
-}
-
-s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) const
-{
-	if (text.size() == 0)
-		return -1;
-
-	std::vector<ShapedRun> shaped_runs = shapeText(text);
-	s32 x = 0;
-
-	for (const auto& run : shaped_runs) {
-		for (const auto& glyph : run.glyphs) {
-			x += glyph.x_advance;
-
-			if (x >= pixel_x)
-				return glyph.cluster;
-		}
 	}
 
 	return -1;
