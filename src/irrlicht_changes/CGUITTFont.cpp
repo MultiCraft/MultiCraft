@@ -981,7 +981,7 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	result.start_char = run.start;
 	result.end_char = run.start + run.length;
 	result.is_rtl = is_rtl;
-	
+
 	FT_Face face = tt_faces[run.face_index];
 
 	FT_Set_Pixel_Sizes(face, 0, size);
@@ -1136,7 +1136,7 @@ s32 CGUITTFont::getCursorPosition(const core::stringw& text, u32 logical_pos) co
 				return pos_x;
 
 			pos_x += shaped_glyph.x_advance;
-			
+
 			if (shaped_glyph.cluster == 0 && run.is_rtl)
 				is_rtl = true;
 		}
@@ -1144,7 +1144,7 @@ s32 CGUITTFont::getCursorPosition(const core::stringw& text, u32 logical_pos) co
 
 	if (is_rtl)
 		return 0;
-		
+
 	return pos_x;
 }
 
@@ -1170,6 +1170,61 @@ s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) cons
 	}
 
 	return text.size();
+}
+
+std::vector<core::recti> CGUITTFont::getSelectionRects(
+		const core::stringw& text, u32 start_pos, u32 end_pos) const
+{
+	std::vector<core::recti> result;
+
+	if (text.empty() || start_pos == end_pos)
+		return result;
+
+	if (start_pos > end_pos)
+		std::swap(start_pos, end_pos);
+
+	std::vector<ShapedRun> shaped_runs = shapeText(text);
+	//const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
+
+	s32 current_x = 0;
+	s32 selection_start_x = -1;
+	bool is_selection = false;
+
+	for (const auto& run : shaped_runs) {
+		for (const auto& glyph : run.glyphs) {
+			u32 cluster = glyph.cluster;
+
+			if (!is_selection && cluster >= start_pos && cluster < end_pos) {
+				selection_start_x = current_x;
+				is_selection = true;
+			}
+
+			if (is_selection && (cluster >= end_pos || cluster < start_pos)) {
+				core::recti rect;
+				rect.UpperLeftCorner.X = selection_start_x;
+				rect.UpperLeftCorner.Y = 0;
+				rect.LowerRightCorner.X = current_x;
+				rect.LowerRightCorner.Y = max_font_height;
+				result.push_back(rect);
+
+				is_selection = false;
+				selection_start_x = -1;
+			}
+
+			current_x += glyph.x_advance;
+		}
+	}
+
+	if (is_selection && selection_start_x >= 0) {
+		core::recti rect;
+		rect.UpperLeftCorner.X = selection_start_x;
+		rect.UpperLeftCorner.Y = 0;
+		rect.LowerRightCorner.X = current_x;
+		rect.LowerRightCorner.Y = max_font_height;
+		result.push_back(rect);
+	}
+
+	return result;
 }
 
 void CGUITTFont::reset_images()

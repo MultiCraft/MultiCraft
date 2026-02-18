@@ -186,34 +186,18 @@ void GUIEditBoxWithScrollBar::draw()
 
 				// draw mark and marked text
 				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
-					s32 mbegin = 0, mend = 0;
+					std::vector<core::recti> mark_rects = font->getSelectionRects(*txt_line,
+							m_real_mark_begin - start_pos, m_real_mark_end - start_pos);
 
-					if (i == hline_start) {
-						// highlight start is on this line
-						s = txt_line->subString(0, m_real_mark_begin - start_pos);
-						mbegin = font->getDimension(s.c_str()).Width;
+					for (auto& mark_rect : mark_rects) {
+						core::rect<s32> current_rect = m_current_text_rect;
+						current_rect.UpperLeftCorner.X += mark_rect.UpperLeftCorner.X;
+						current_rect.LowerRightCorner.X = current_rect.UpperLeftCorner.X + mark_rect.getWidth();
 
-						// deal with kerning
-						mbegin += font->getKerningWidth(
-							&((*txt_line)[m_real_mark_begin - start_pos]),
-							m_real_mark_begin - start_pos > 0 ? &((*txt_line)[m_real_mark_begin - start_pos - 1]) : 0);
+						skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), current_rect, &local_clip_rect);
 					}
-					if (i == hline_start + hline_count - 1) {
-						// highlight end is on this line
-						s2 = txt_line->subString(0, m_real_mark_end - start_pos);
-						mend = font->getDimension(s2.c_str()).Width;
-					} else {
-						mend = font->getDimension(txt_line->c_str()).Width;
-					}
-
-					core::rect<s32> mark_rect = m_current_text_rect;
-					mark_rect.UpperLeftCorner.X += mbegin;
-					mark_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X + mend - mbegin;
-
-					// draw mark
-					skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), mark_rect, &local_clip_rect);
 				}
-				
+
 				// draw normal text
 				font->draw(txt_line->c_str(), m_current_text_rect,
 					m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),

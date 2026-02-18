@@ -71,7 +71,7 @@ namespace gui
 		s32 y_advance;
 		size_t face_index;
 	};
-	
+
 	struct ShapedRun
 	{
 		std::vector<ShapedGlyph> glyphs;
@@ -80,7 +80,7 @@ namespace gui
 		u32 end_char;
 		bool is_rtl;
 	};
-	
+
 	struct TextRun
 	{
 		size_t face_index;
@@ -405,13 +405,16 @@ namespace gui
 
 			virtual s32 getPrevClusterPos(const core::stringw& text, s32 pos);
 			virtual s32 getNextClusterPos(const core::stringw& text, s32 pos);
-			
+
 			//! Calculates the index of the character in the text which is on a specific position.
 			virtual s32 getCharacterFromPos(const wchar_t* text, s32 pixel_x) const;
 			virtual s32 getCharacterFromPos(const core::ustring& text, s32 pixel_x) const;
-			
+
 			virtual s32 getCursorPosition(const core::stringw& text, u32 logical_pos) const;
-					
+
+			virtual std::vector<core::recti> getSelectionRects(const core::stringw& text,
+					u32 start_pos, u32 end_pos) const;
+
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
 			FT_Stroker getStroker() { return stroker; }
@@ -472,7 +475,7 @@ namespace gui
 					bool is_rtl) const;
 			void loadGlyphsForShapedText(const std::vector<ShapedRun>& runs);
 			u64 makeGlyphKey(u32 face_index, u32 glyph_index);
-		
+
 			irr::IrrlichtDevice* Device;
 			gui::IGUIEnvironment* Environment;
 			video::IVideoDriver* Driver;
