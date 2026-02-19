@@ -346,9 +346,13 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 	u32 text_height = g_fontengine->getTextHeight();
 	irr::gui::IGUIFont* font = g_fontengine->getFont();
 
+	bool show_touch_only = false;
 #if HAVE_TOUCHSCREENGUI
-	if (g_touchscreengui)
+	if (g_touchscreengui) {
 		g_touchscreengui->clearCSMButtons();
+		show_touch_only = g_touchscreengui->isVisible() &&
+				g_touchscreengui->getCurrentState() == STATE_DEFAULT;
+	}
 #endif
 
 	// Reorder elements by z_index
@@ -362,6 +366,9 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 
 		// Skip showing HUDs that aren't unhideable
 		if (!show_hud && !e->unhideable)
+			continue;
+
+		if (!show_touch_only && e->touch_only)
 			continue;
 
 		auto it = elems.begin();

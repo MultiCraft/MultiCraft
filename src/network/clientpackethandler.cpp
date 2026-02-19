@@ -1094,6 +1094,7 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	std::string text2;
 	u32 style = 0; // Used in later MT versions, here for compatibility
 	bool unhideable = false;
+	bool touch_only = false;
 
 	*pkt >> server_id >> type >> pos >> name >> scale >> text >> number >> item
 		>> dir >> align >> offset;
@@ -1104,6 +1105,7 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 		*pkt >> text2;
 		*pkt >> style;
 		*pkt >> unhideable;
+		*pkt >> touch_only;
 	} catch(PacketError &e) {};
 
 	ClientEvent *event = new ClientEvent();
@@ -1124,6 +1126,7 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	event->hudadd.z_index   = z_index;
 	event->hudadd.text2     = new std::string(text2);
 	event->hudadd.unhideable = unhideable;
+	event->hudadd.touch_only = touch_only;
 	m_client_event_queue.push(event);
 }
 

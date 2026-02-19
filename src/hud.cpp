@@ -52,6 +52,7 @@ const struct EnumString es_HudElementStat[] =
 	{HUD_STAT_Z_INDEX, "z_index"},
 	{HUD_STAT_TEXT2,   "text2"},
 	{HUD_STAT_UNHIDEABLE, "unhideable"},
+	{HUD_STAT_TOUCH_ONLY, "touch_only"},
 	{0, NULL},
 };
 
