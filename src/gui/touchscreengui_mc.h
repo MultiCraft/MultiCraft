@@ -278,6 +278,7 @@ public:
 	void show();
 	void reset();
 	void close() { m_close = true; }
+	bool isVisible() { return m_visible; };
 
 	touch_gui_state getCurrentState() { return m_current_state; }
 	void changeCurrentState(touch_gui_state state);

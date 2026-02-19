@@ -8453,6 +8453,9 @@ Used by `Player:hud_add`. Returned by `Player:hud_get`.
 
         unhideable = false,
         -- If true, this HUD will still be visible if the player hides HUDs.
+
+        touch_only = false,
+        -- If true, the HUD will only be shown when touchscreen controls are visible.
     }
 
 Particle definition
