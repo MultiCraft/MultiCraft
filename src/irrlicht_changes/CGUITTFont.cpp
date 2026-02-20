@@ -841,7 +841,8 @@ void CGUITTFont::calculateMaxFontHeight()
 	max_font_height = max_height + 1;
 }
 
-std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text) const
+std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text,
+		bool use_rtl) const
 {
 	std::vector<ShapedRun> runs;
 
@@ -856,19 +857,28 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text) const
 		++iter;
 	}
 
-	std::vector<BidiRun> bidi_runs = getBidiRuns(utf32_text);
-
-	for (const auto& bidi_run : bidi_runs) {
-		std::vector<uint32_t> run_text(
-				utf32_text.begin() + bidi_run.start,
-				utf32_text.begin() + bidi_run.start + bidi_run.length);
-
-		std::vector<TextRun> font_runs = splitIntoFontRuns(run_text);
+	if (use_rtl) {
+		std::vector<BidiRun> bidi_runs = getBidiRuns(utf32_text);
+	
+		for (const auto& bidi_run : bidi_runs) {
+			std::vector<uint32_t> run_text(
+					utf32_text.begin() + bidi_run.start,
+					utf32_text.begin() + bidi_run.start + bidi_run.length);
+	
+			std::vector<TextRun> font_runs = splitIntoFontRuns(run_text);
+	
+			for (auto& font_run : font_runs) {
+				font_run.start += bidi_run.start;
+				ShapedRun shaped = shapeRun(font_run, utf32_text, font_run.start,
+						bidi_run.is_rtl);
+				runs.push_back(shaped);
+			}
+		}
+	} else {
+		std::vector<TextRun> font_runs = splitIntoFontRuns(utf32_text);
 
 		for (auto& font_run : font_runs) {
-			font_run.start += bidi_run.start;
-			ShapedRun shaped = shapeRun(font_run, utf32_text, font_run.start,
-					bidi_run.is_rtl);
+			ShapedRun shaped = shapeRun(font_run, utf32_text, 0, false);
 			runs.push_back(shaped);
 		}
 	}
@@ -1372,7 +1382,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 	core::ustring utext = text.getString();
 
 	// Shape the text with HarfBuzz
-	std::vector<ShapedRun> shaped_runs = shapeText(utext.c_str());
+	std::vector<ShapedRun> shaped_runs = shapeText(utext.c_str(), use_rtl);
 	loadGlyphsForShapedText(shaped_runs);
 
 	// Set up our render map.
@@ -1501,7 +1511,7 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text, bool 
 {
 	core::ustring utext = text;
 
-	std::vector<ShapedRun> shaped_runs = shapeText(utext);
+	std::vector<ShapedRun> shaped_runs = shapeText(utext, use_rtl);
 
 	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
 

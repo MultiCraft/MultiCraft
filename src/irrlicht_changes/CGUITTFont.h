@@ -465,7 +465,8 @@ namespace gui
 			void calculateMaxFontHeight();
 
 
-			std::vector<ShapedRun> shapeText(const core::ustring& text) const;
+			std::vector<ShapedRun> shapeText(const core::ustring& text,
+				bool use_rtl = true) const;
 			std::vector<BidiRun> getBidiRuns(
 					const std::vector<uint32_t>& text) const;
 			std::vector<TextRun> splitIntoFontRuns(
