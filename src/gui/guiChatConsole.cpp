@@ -360,7 +360,7 @@ void GUIChatConsole::drawText()
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	for (u32 row = 0; row < buf.getRows(); ++row)
 	{
-		const ChatFormattedLine& line = buf.getFormattedLine(row);
+		const ChatFormattedLine &line = buf.getFormattedLine(row);
 		if (line.fragments.empty())
 			continue;
 
@@ -370,6 +370,8 @@ void GUIChatConsole::drawText()
 			continue;
 
 		s32 scroll_pos = buf.getScrollPos();
+		s32 start_pos_x = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
+
 		ChatSelection real_mark_begin = m_mark_end > m_mark_begin ? m_mark_begin : m_mark_end;
 		ChatSelection real_mark_end = m_mark_end > m_mark_begin ? m_mark_end : m_mark_begin;
 
@@ -379,80 +381,83 @@ void GUIChatConsole::drawText()
 				(s32)row + scroll_pos >= real_mark_begin.row + real_mark_begin.scroll &&
 				(s32)row + scroll_pos <= real_mark_end.row + real_mark_end.scroll) {
 
-			unsigned int fragment_first_id = 0;
-			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll &&
-					real_mark_begin.fragment < line.fragments.size()) {
-				fragment_first_id = real_mark_begin.fragment;
+			irr::core::stringw line_text;
+			std::vector<u32> fragment_char_start;
+			fragment_char_start.reserve(line.fragments.size());
+
+			for (const ChatFormattedFragment &frag : line.fragments) {
+				fragment_char_start.push_back(line_text.size());
+				line_text += frag.text.c_str();
 			}
 
-			unsigned int fragment_last_id = line.fragments.size() - 1;
-			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
-					real_mark_end.fragment < line.fragments.size()) {
-				fragment_last_id = real_mark_end.fragment;
-			}
-
-			ChatFormattedFragment fragment_first = line.fragments[fragment_first_id];
-			ChatFormattedFragment fragment_last = line.fragments[fragment_last_id];
-
-			s32 x_begin = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
-			for (unsigned int i = 0; i < fragment_first_id; i++) {
-				x_begin += m_font->getDimension(line.fragments[i].text.c_str()).Width;
-			}
-
-			s32 x_end = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
-			for (unsigned int i = 0; i <= fragment_last_id; i++) {
-				x_end += m_font->getDimension(line.fragments[i].text.c_str()).Width;
-			}
-
+			u32 selection_start = 0;
 			if ((s32)row + scroll_pos == real_mark_begin.row + real_mark_begin.scroll) {
-				irr::core::stringw text = fragment_first.text.c_str();
-				text = text.subString(0, real_mark_begin.character);
-				s32 text_size = m_font->getDimension(text.c_str()).Width;
-				x_begin += text_size;
+				u32 index = real_mark_begin.fragment < line.fragments.size() ?
+						real_mark_begin.fragment : (u32)line.fragments.size() - 1;
+				selection_start = fragment_char_start[index] + real_mark_begin.character;
 			}
 
-			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll &&
-					(real_mark_end.character < fragment_last.text.size())) {
-				irr::core::stringw text = fragment_last.text.c_str();
-				s32 text_size = m_font->getDimension(text.c_str()).Width;
-				text = text.subString(0, real_mark_end.character);
-				text_size -= m_font->getDimension(text.c_str()).Width;
-				x_end -= text_size;
+			u32 selection_end = line_text.size();
+			if ((s32)row + scroll_pos == real_mark_end.row + real_mark_end.scroll) {
+				u32 index = real_mark_end.fragment < line.fragments.size() ?
+						real_mark_end.fragment : (u32)line.fragments.size() - 1;
+				selection_end = fragment_char_start[index] + real_mark_end.character;
 			}
 
-			core::rect<s32> destrect(x_begin, y, x_end, y + m_fontsize.Y);
-			video::IVideoDriver* driver = Environment->getVideoDriver();
-			IGUISkin* skin = Environment->getSkin();
-			driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT), destrect, &AbsoluteClippingRect);
+			if (selection_start < selection_end) {
+				video::IVideoDriver* driver = Environment->getVideoDriver();
+				IGUISkin* skin = Environment->getSkin();
+				s32 fragment_x = start_pos_x;
+			
+				for (u32 i = 0; i < line.fragments.size(); i++) {
+					const ChatFormattedFragment& frag = line.fragments[i];
+					irr::core::stringw frag_text = frag.text.c_str();
+					u32 frag_start = fragment_char_start[i];
+					u32 frag_end = frag_start + frag_text.size();
+			
+					if (selection_end <= frag_start || selection_start >= frag_end) {
+						fragment_x += m_font->getDimension(frag_text.c_str()).Width;
+						continue;
+					}
+			
+					u32 real_selection_start = selection_start > frag_start ?
+							selection_start - frag_start : 0;
+					u32 real_selection_end = std::min(selection_end, frag_end) - frag_start;
+			
+					std::vector<core::recti> selection_rects = m_font->getSelectionRects(
+							frag_text, real_selection_start, real_selection_end);
+			
+					for (const core::recti& selection_rect : selection_rects) {
+						core::rect<s32> destrect(
+								fragment_x + selection_rect.UpperLeftCorner.X, y,
+								fragment_x + selection_rect.LowerRightCorner.X,
+								y + m_fontsize.Y);
+						driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT),
+								destrect, &AbsoluteClippingRect);
+					}
+			
+					fragment_x += m_font->getDimension(frag_text.c_str()).Width;
+				}
+			}
 		}
 
-		s32 x = (line.fragments[0].column + 1) * m_fontsize.X + m_round_screen_offset;
+		s32 x = start_pos_x;
 		for (const ChatFormattedFragment &fragment : line.fragments) {
 			s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
 			core::rect<s32> destrect(x, y, x + text_size, y + m_fontsize.Y);
 			x += text_size;
-
 #if USE_FREETYPE
 			if (m_font->getType() == irr::gui::EGFT_CUSTOM) {
 				// Draw colored text if FreeType is enabled
-				irr::gui::CGUITTFont *tmp = dynamic_cast<irr::gui::CGUITTFont *>(m_font);
-				tmp->draw(
-					fragment.text,
-					destrect,
-					false,
-					false,
-					&AbsoluteClippingRect);
+				irr::gui::CGUITTFont* tmp = dynamic_cast<irr::gui::CGUITTFont*>(m_font);
+				tmp->draw(fragment.text, destrect, false, false, &AbsoluteClippingRect);
 			} else
 #endif
 			{
 				// Otherwise use standard text
-				m_font->draw(
-					fragment.text.c_str(),
-					destrect,
-					video::SColor(255, 255, 255, 255),
-					false,
-					false,
-					&AbsoluteClippingRect);
+				m_font->draw(fragment.text.c_str(), destrect,
+						video::SColor(255, 255, 255, 255), false, false,
+						&AbsoluteClippingRect);
 			}
 		}
 	}
