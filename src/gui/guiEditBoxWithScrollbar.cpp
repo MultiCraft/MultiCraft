@@ -185,16 +185,25 @@ void GUIEditBoxWithScrollBar::draw()
 				}
 
 				// draw mark and marked text
-				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
-					std::vector<core::recti> mark_rects = font->getSelectionRects(*txt_line,
-							m_real_mark_begin - start_pos, m_real_mark_end - start_pos);
+				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end &&
+						i >= hline_start && i < hline_start + hline_count) {
+					s32 local_start = core::clamp(m_real_mark_begin - start_pos,
+							0, (s32)txt_line->size());
+					s32 local_end = core::clamp(m_real_mark_end - start_pos,
+							0, (s32)txt_line->size());
+				
+					if (local_start < local_end) {
+						std::vector<core::recti> mark_rects = font->getSelectionRects(
+								*txt_line, (u32)local_start, (u32)local_end);
 
-					for (auto& mark_rect : mark_rects) {
-						core::rect<s32> current_rect = m_current_text_rect;
-						current_rect.UpperLeftCorner.X += mark_rect.UpperLeftCorner.X;
-						current_rect.LowerRightCorner.X = current_rect.UpperLeftCorner.X + mark_rect.getWidth();
-
-						skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), current_rect, &local_clip_rect);
+						for (auto& mark_rect : mark_rects) {
+							core::rect<s32> current_rect = m_current_text_rect;
+							current_rect.UpperLeftCorner.X += mark_rect.UpperLeftCorner.X;
+							current_rect.LowerRightCorner.X = current_rect.UpperLeftCorner.X +
+									mark_rect.getWidth();
+							skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT),
+									current_rect, &local_clip_rect);
+						}
 					}
 				}
 
