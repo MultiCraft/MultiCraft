@@ -1923,6 +1923,7 @@ void read_hud_element(lua_State *L, HudElement *elem)
 	elem->text2   = getstringfield_default(L, 2, "text2", "");
 
 	elem->unhideable = getboolfield_default(L, 2, "unhideable", false);
+	elem->touch_only = getboolfield_default(L, 2, "touch_only", false);
 
 	// Deprecated, only for compatibility's sake
 	if (elem->dir == 0)
@@ -1997,6 +1998,9 @@ void push_hud_element(lua_State *L, HudElement *elem)
 
 	lua_pushboolean(L, elem->unhideable);
 	lua_setfield(L, -2, "unhideable");
+
+	lua_pushboolean(L, elem->touch_only);
+	lua_setfield(L, -2, "touch_only");
 }
 
 HudElementStat read_hud_change(lua_State *L, HudElement *elem, void **value)
@@ -2070,6 +2074,10 @@ HudElementStat read_hud_change(lua_State *L, HudElement *elem, void **value)
 		case HUD_STAT_UNHIDEABLE:
 			elem->unhideable = lua_toboolean(L, 4);
 			*value = &elem->unhideable;
+			break;
+		case HUD_STAT_TOUCH_ONLY:
+			elem->touch_only = lua_toboolean(L, 4);
+			*value = &elem->touch_only;
 			break;
 	}
 	return stat;

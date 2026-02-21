@@ -278,6 +278,7 @@ public:
 	void show();
 	void reset();
 	void close() { m_close = true; }
+	bool isVisible() { return m_visible; };
 
 	touch_gui_state getCurrentState() { return m_current_state; }
 	void changeCurrentState(touch_gui_state state);
@@ -286,6 +287,10 @@ public:
 	void registerHudItem(s32 index, const rect<s32> &button_rect);
 	void clearCSMButtons() { m_csm_buttons.clear(); };
 	void registerCSMButton(const std::string &name, const rect<s32> &button_rect);
+
+	// Sets a list of button names that will be shown
+	// If empty, all buttons will be shown
+	void setVisibleBtns(const std::set<std::string> &visible_btns);
 
 	void openEditor();
 
@@ -331,6 +336,7 @@ private:
 	bool m_overflow_close_schedule = false;
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
+	std::set<std::string> m_visible_btns;
 
 	Settings *m_settings = nullptr;
 	std::string m_settings_path;
