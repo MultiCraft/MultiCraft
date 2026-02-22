@@ -571,7 +571,6 @@
 		84EEE5E62782728E00F61929 /* libintl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libintl.a; path = ../deps/gettext/libintl.a; sourceTree = "<group>"; };
 		84F0B4D82B44CAEE000D8546 /* encryption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = encryption.h; path = ../../../src/util/encryption.h; sourceTree = "<group>"; };
 		84F0B4D92B44CAEE000D8546 /* encryption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = encryption.cpp; path = ../../../src/util/encryption.cpp; sourceTree = "<group>"; };
-		84F20D5425D52790009562A9 /* irrUString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = irrUString.h; path = ../../../src/irrlicht_changes/irrUString.h; sourceTree = "<group>"; };
 		84F20D5525D52790009562A9 /* static_text.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = static_text.cpp; path = ../../../src/irrlicht_changes/static_text.cpp; sourceTree = "<group>"; };
 		84F20D5625D52790009562A9 /* static_text.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = static_text.h; path = ../../../src/irrlicht_changes/static_text.h; sourceTree = "<group>"; };
 		84F20D5725D52790009562A9 /* CGUITTFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CGUITTFont.cpp; path = ../../../src/irrlicht_changes/CGUITTFont.cpp; sourceTree = "<group>"; };
@@ -1348,7 +1347,6 @@
 			children = (
 				84F20D5725D52790009562A9 /* CGUITTFont.cpp */,
 				84F20D5825D52790009562A9 /* CGUITTFont.h */,
-				84F20D5425D52790009562A9 /* irrUString.h */,
 				84F20D5525D52790009562A9 /* static_text.cpp */,
 				84F20D5625D52790009562A9 /* static_text.h */,
 			);
