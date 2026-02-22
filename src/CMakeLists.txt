@@ -576,6 +576,7 @@ include_directories(
 	${SQLITE3_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
 	${CHACHA_INCLUDE_DIR}
+	${SHEENBIDI_INCLUDE_DIR}
 	${GMP_INCLUDE_DIR}
 	${JSON_INCLUDE_DIR}
 	${X11_INCLUDE_DIR}
@@ -620,6 +621,7 @@ if(BUILD_CLIENT)
 		luautf8
 		luachacha
 		chacha
+		sheenbidi
 	)
 	if(NOT USE_LUAJIT)
 		set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -804,10 +806,8 @@ endif(BUILD_SERVER)
 # Blacklisted locales that don't work.
 # see issue #4638
 set(GETTEXT_BLACKLISTED_LOCALES
-	ar
 	he
 	ky
-	ms_Arab
 	th
 )
 

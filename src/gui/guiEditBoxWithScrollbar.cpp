@@ -185,72 +185,32 @@ void GUIEditBoxWithScrollBar::draw()
 				}
 
 				// draw mark and marked text
-				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end && i >= hline_start && i < hline_start + hline_count) {
-					s32 mbegin = 0, mend = 0;
-					s32 mark_start_pos = 0; 
-					s32 mark_end_pos = txt_line->size();
+				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end &&
+						i >= hline_start && i < hline_start + hline_count) {
+					s32 local_start = core::clamp(m_real_mark_begin - start_pos,
+							0, (s32)txt_line->size());
+					s32 local_end = core::clamp(m_real_mark_end - start_pos,
+							0, (s32)txt_line->size());
+				
+					if (local_start < local_end) {
+						std::vector<core::recti> mark_rects = font->getSelectionRects(
+								*txt_line, (u32)local_start, (u32)local_end);
 
-					if (i == hline_start) {
-						// highlight start is on this line
-						s = txt_line->subString(0, m_real_mark_begin - start_pos);
-						mbegin = font->getDimension(s.c_str()).Width;
-
-						// deal with kerning
-						mbegin += font->getKerningWidth(
-							&((*txt_line)[m_real_mark_begin - start_pos]),
-							m_real_mark_begin - start_pos > 0 ? &((*txt_line)[m_real_mark_begin - start_pos - 1]) : 0);
-
-						mark_start_pos = m_real_mark_begin - start_pos;
+						for (auto& mark_rect : mark_rects) {
+							core::rect<s32> current_rect = m_current_text_rect;
+							current_rect.UpperLeftCorner.X += mark_rect.UpperLeftCorner.X;
+							current_rect.LowerRightCorner.X = current_rect.UpperLeftCorner.X +
+									mark_rect.getWidth();
+							skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT),
+									current_rect, &local_clip_rect);
+						}
 					}
-					if (i == hline_start + hline_count - 1) {
-						// highlight end is on this line
-						s2 = txt_line->subString(0, m_real_mark_end - start_pos);
-						mend = font->getDimension(s2.c_str()).Width;
-						mark_end_pos = (s32)s2.size();
-					} else {
-						mend = font->getDimension(txt_line->c_str()).Width;
-					}
-
-					core::rect<s32> mark_rect = m_current_text_rect;
-					mark_rect.UpperLeftCorner.X += mbegin;
-					mark_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X + mend - mbegin;
-
-					// draw mark
-					skin->draw2DRectangle(this, skin->getColor(EGDC_HIGH_LIGHT), mark_rect, &local_clip_rect);
-
-					// draw text before marked
-					core::rect<s32> before_rect = m_current_text_rect;
-					before_rect.LowerRightCorner.X = mark_rect.UpperLeftCorner.X;
-					s = txt_line->subString(0, mark_start_pos);
-
-					if (s.size())
-						font->draw(s.c_str(), before_rect,
-							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-							false, true, &local_clip_rect);
-
-					// draw marked text
-					s = txt_line->subString(mark_start_pos, mark_end_pos - mark_start_pos);
-
-					if (s.size())
-						font->draw(s.c_str(), mark_rect,
-							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_HIGH_LIGHT_TEXT),
-							false, true, &local_clip_rect);
-
-					// draw text after marked
-					core::rect<s32> after_rect = m_current_text_rect;
-					after_rect.UpperLeftCorner.X = mark_rect.LowerRightCorner.X;
-					s = txt_line->subString(mark_end_pos, txt_line->size() - mark_end_pos);
-
-					if (s.size())
-						font->draw(s.c_str(), after_rect,
-							m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-							false, true, &local_clip_rect);
-				} else {
-					// draw normal text
-					font->draw(txt_line->c_str(), m_current_text_rect,
-						m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
-						false, true, &local_clip_rect);
 				}
+
+				// draw normal text
+				font->draw(txt_line->c_str(), m_current_text_rect,
+					m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
+					false, true, &local_clip_rect);
 			}
 
 			// Return the override color information to its previous settings.
@@ -265,9 +225,7 @@ void GUIEditBoxWithScrollBar::draw()
 				txt_line = &m_broken_text[cursor_line];
 				start_pos = m_broken_text_positions[cursor_line];
 			}
-			s = txt_line->subString(0, m_cursor_pos - start_pos);
-			charcursorpos = font->getDimension(s.c_str()).Width +
-				font->getKerningWidth(L"_", m_cursor_pos - start_pos > 0 ? &((*txt_line)[m_cursor_pos - start_pos - 1]) : 0);
+			charcursorpos = font->getCursorPosition(*txt_line, m_cursor_pos - start_pos);
 
 			if (focus && (porting::getTimeMs() - m_blink_start_time) % 700 < 350) {
 				setTextRect(cursor_line);
