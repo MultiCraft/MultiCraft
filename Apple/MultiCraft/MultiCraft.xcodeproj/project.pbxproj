@@ -2084,6 +2084,7 @@
 					"-Wno-inconsistent-missing-override",
 					"-D__FILE__=__FILE_NAME__",
 					"-Wno-builtin-macro-redefined",
+					"-DSB_CONFIG_UNITY",
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
@@ -2125,6 +2126,7 @@
 					"-Wno-inconsistent-missing-override",
 					"-D__FILE__=__FILE_NAME__",
 					"-Wno-builtin-macro-redefined",
+					"-DSB_CONFIG_UNITY",
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
@@ -2200,10 +2202,6 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 MultiCraft Studio OÜ. All rights reserved.";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 2.0.13;
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-DSB_CONFIG_UNITY",
-				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
@@ -2295,10 +2293,6 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 MultiCraft Studio OÜ. All rights reserved.";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MARKETING_VERSION = 2.0.13;
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-DSB_CONFIG_UNITY",
-				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-L${SRCROOT}/../deps/freetype",
