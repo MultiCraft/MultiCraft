@@ -472,8 +472,7 @@ namespace gui
 			std::vector<TextRun> splitIntoFontRuns(
 					const std::vector<uint32_t>& text) const;
 			ShapedRun shapeRun(const TextRun& run,
-					const std::vector<uint32_t>& text, u32 cluster_offset,
-					bool is_rtl) const;
+					const std::vector<uint32_t>& text, bool is_rtl) const;
 			void loadGlyphsForShapedText(const std::vector<ShapedRun>& runs);
 			u64 makeGlyphKey(u32 face_index, u32 glyph_index);
 

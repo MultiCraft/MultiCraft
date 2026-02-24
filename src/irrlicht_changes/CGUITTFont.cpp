@@ -859,26 +859,33 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text,
 
 	if (use_rtl) {
 		std::vector<BidiRun> bidi_runs = getBidiRuns(utf32_text);
-	
+
 		for (const auto& bidi_run : bidi_runs) {
 			std::vector<uint32_t> run_text(
 					utf32_text.begin() + bidi_run.start,
 					utf32_text.begin() + bidi_run.start + bidi_run.length);
-	
+
 			std::vector<TextRun> font_runs = splitIntoFontRuns(run_text);
-	
+
+			std::vector<ShapedRun> bidi_shaped_runs;
 			for (auto& font_run : font_runs) {
 				font_run.start += bidi_run.start;
-				ShapedRun shaped = shapeRun(font_run, utf32_text, font_run.start,
-						bidi_run.is_rtl);
-				runs.push_back(shaped);
+				ShapedRun shaped = shapeRun(font_run, utf32_text, bidi_run.is_rtl);
+
+				if (bidi_run.is_rtl) {
+					bidi_shaped_runs.insert(bidi_shaped_runs.begin(), shaped);
+				} else {
+					bidi_shaped_runs.push_back(shaped);
+				}
 			}
+
+			runs.insert(runs.end(), bidi_shaped_runs.begin(), bidi_shaped_runs.end());
 		}
 	} else {
 		std::vector<TextRun> font_runs = splitIntoFontRuns(utf32_text);
 
 		for (auto& font_run : font_runs) {
-			ShapedRun shaped = shapeRun(font_run, utf32_text, 0, false);
+			ShapedRun shaped = shapeRun(font_run, utf32_text, false);
 			runs.push_back(shaped);
 		}
 	}
@@ -983,8 +990,7 @@ std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
 }
 
 ShapedRun CGUITTFont::shapeRun(const TextRun& run,
-		const std::vector<uint32_t>& text, u32 cluster_offset,
-		bool is_rtl) const
+		const std::vector<uint32_t>& text, bool is_rtl) const
 {
 	ShapedRun result;
 	result.face_index = run.face_index;
@@ -1004,7 +1010,7 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
 	hb_buffer_t* buf = hb_buffer_create();
 
-	hb_buffer_add_utf32(buf, text.data() + run.start, run.length, 0, run.length);
+	hb_buffer_add_utf32(buf, text.data(), text.size(), run.start, run.length);
 
 	hb_buffer_guess_segment_properties(buf);
 
@@ -1035,7 +1041,7 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 
 		ShapedGlyph glyph;
 		glyph.glyph_index = glyph_info[i].codepoint;
-		glyph.cluster = glyph_info[i].cluster + cluster_offset;
+		glyph.cluster = glyph_info[i].cluster;
 		glyph.x_offset = glyph_pos[i].x_offset >> 6;
 		glyph.y_offset = glyph_pos[i].y_offset >> 6;
 		glyph.x_advance = x_advance + spacing_offset;
