@@ -491,7 +491,7 @@ void GUIEditBoxWithScrollBar::calculateScrollPos()
 		irr::u32 cursor_width = font->getDimension(L"_").Width;
 		core::stringw *txt_line = has_broken_text ? &m_broken_text[curs_line] : &Text;
 		s32 cpos = has_broken_text ? m_cursor_pos - m_broken_text_positions[curs_line] : m_cursor_pos;	// column
-		s32 cstart = font->getDimension(txt_line->subString(0, cpos).c_str()).Width;		// pixels from text-start
+		s32 cstart = font->getCursorPosition(*txt_line, cpos);
 		s32 cend = cstart + cursor_width;
 		s32 txt_width = font->getDimension(txt_line->c_str()).Width;
 

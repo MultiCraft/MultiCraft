@@ -1243,6 +1243,17 @@ std::vector<core::recti> CGUITTFont::getSelectionRects(
 	return result;
 }
 
+bool CGUITTFont::isRTL(const core::stringw& text) const
+{
+	std::vector<ShapedRun> runs = shapeText(text.c_str());
+
+	for (const auto& run : runs)
+		if (!run.glyphs.empty())
+			return run.is_rtl;
+
+	return false;
+}
+
 void CGUITTFont::reset_images()
 {
 	// Delete the glyphs.
