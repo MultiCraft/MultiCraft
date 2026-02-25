@@ -515,6 +515,13 @@ void GUIEditBoxWithScrollBar::calculateScrollPos()
 			m_hscroll_pos += (m_current_text_rect.UpperLeftCorner.X + cend) - m_frame_rect.LowerRightCorner.X;
 			setTextRect(curs_line);
 		}
+
+		if (font->isRTL(*txt_line))
+		{
+			s32 rtl_offset = core::min_((int)font->getDimension(L"X").Width * 10, m_frame_rect.getWidth() / 4);
+			if (cstart > m_frame_rect.LowerRightCorner.X - m_current_text_rect.UpperLeftCorner.X - rtl_offset)
+				m_hscroll_pos = cstart - m_frame_rect.getWidth() + rtl_offset;
+		}
 	}
 
 	// calculate vertical scrolling

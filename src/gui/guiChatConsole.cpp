@@ -535,6 +535,13 @@ void GUIChatConsole::calculatePromptScrollPos()
 	} else if (text_rect.UpperLeftCorner.X + cend > frame_rect.LowerRightCorner.X)	{
 		m_hscroll_pos += (text_rect.UpperLeftCorner.X + cend) - frame_rect.LowerRightCorner.X;
 	}
+
+	if (m_font->isRTL(text.c_str()))
+	{
+		s32 rtl_offset = core::min_((int)m_font->getDimension(L"X").Width * 10, frame_rect.getWidth() / 4);
+		if (cstart > frame_rect.LowerRightCorner.X - text_rect.UpperLeftCorner.X - rtl_offset)
+			m_hscroll_pos = cstart - frame_rect.getWidth() + rtl_offset;
+	}
 }
 
 void GUIChatConsole::drawPrompt()
