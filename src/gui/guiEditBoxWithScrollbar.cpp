@@ -191,7 +191,7 @@ void GUIEditBoxWithScrollBar::draw()
 							0, (s32)txt_line->size());
 					s32 local_end = core::clamp(m_real_mark_end - start_pos,
 							0, (s32)txt_line->size());
-				
+
 					if (local_start < local_end) {
 						std::vector<core::recti> mark_rects = font->getSelectionRects(
 								*txt_line, (u32)local_start, (u32)local_end);

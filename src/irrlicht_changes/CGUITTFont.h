@@ -414,7 +414,7 @@ namespace gui
 
 			virtual std::vector<core::recti> getSelectionRects(const core::stringw& text,
 					u32 start_pos, u32 end_pos) const;
-					
+
 			virtual bool isRTL(const core::stringw& text) const;
 
 			inline s32 getAscender() const { return font_metrics.ascender; }
