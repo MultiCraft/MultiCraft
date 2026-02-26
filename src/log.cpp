@@ -175,11 +175,13 @@ void Logger::addOutput(ILogOutput *out)
 
 void Logger::addOutput(ILogOutput *out, LogLevel lev)
 {
+	MutexAutoLock lock(m_mutex);
 	m_outputs[lev].push_back(out);
 }
 
 void Logger::addOutputMasked(ILogOutput *out, LogLevelMask mask)
 {
+	MutexAutoLock lock(m_mutex);
 	for (size_t i = 0; i < LL_MAX; i++) {
 		if (mask & LOGLEVEL_TO_MASKLEVEL(i))
 			m_outputs[i].push_back(out);
@@ -188,6 +190,7 @@ void Logger::addOutputMasked(ILogOutput *out, LogLevelMask mask)
 
 void Logger::addOutputMaxLevel(ILogOutput *out, LogLevel lev)
 {
+	MutexAutoLock lock(m_mutex);
 	assert(lev < LL_MAX);
 	for (size_t i = 0; i <= lev; i++)
 		m_outputs[i].push_back(out);
@@ -195,6 +198,7 @@ void Logger::addOutputMaxLevel(ILogOutput *out, LogLevel lev)
 
 LogLevelMask Logger::removeOutput(ILogOutput *out)
 {
+	MutexAutoLock lock(m_mutex);
 	LogLevelMask ret_mask = 0;
 	for (size_t i = 0; i < LL_MAX; i++) {
 		std::vector<ILogOutput *>::iterator it;
