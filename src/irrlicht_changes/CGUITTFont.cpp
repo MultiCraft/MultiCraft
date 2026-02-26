@@ -1024,7 +1024,12 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 
 	s32 spacing_offset = character_spacing + bold_offset;
 
-	hb_shape(hb_font, buf, nullptr, 0);
+	hb_feature_t features[] = {
+		{ HB_TAG('l','i','g','a'), 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END },
+		{ HB_TAG('c','l','i','g'), 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END },
+	};
+
+	hb_shape(hb_font, buf, features, 2);
 
 	unsigned int glyph_count;
 	hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(buf, &glyph_count);
