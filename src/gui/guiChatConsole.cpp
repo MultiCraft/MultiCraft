@@ -408,25 +408,25 @@ void GUIChatConsole::drawText()
 				video::IVideoDriver* driver = Environment->getVideoDriver();
 				IGUISkin* skin = Environment->getSkin();
 				s32 fragment_x = start_pos_x;
-			
+
 				for (u32 i = 0; i < line.fragments.size(); i++) {
 					const ChatFormattedFragment& frag = line.fragments[i];
 					irr::core::stringw frag_text = frag.text.c_str();
 					u32 frag_start = fragment_char_start[i];
 					u32 frag_end = frag_start + frag_text.size();
-			
+
 					if (selection_end <= frag_start || selection_start >= frag_end) {
 						fragment_x += m_font->getDimension(frag_text.c_str()).Width;
 						continue;
 					}
-			
+
 					u32 real_selection_start = selection_start > frag_start ?
 							selection_start - frag_start : 0;
 					u32 real_selection_end = std::min(selection_end, frag_end) - frag_start;
-			
+
 					std::vector<core::recti> selection_rects = m_font->getSelectionRects(
 							frag_text, real_selection_start, real_selection_end);
-			
+
 					for (const core::recti& selection_rect : selection_rects) {
 						core::rect<s32> destrect(
 								fragment_x + selection_rect.UpperLeftCorner.X, y,
@@ -435,7 +435,7 @@ void GUIChatConsole::drawText()
 						driver->draw2DRectangle(skin->getColor(EGDC_HIGH_LIGHT),
 								destrect, &AbsoluteClippingRect);
 					}
-			
+
 					fragment_x += m_font->getDimension(frag_text.c_str()).Width;
 				}
 			}
@@ -736,7 +736,7 @@ ChatSelection GUIChatConsole::getCurrentPromptCursorPos()
 
 	selection.selection_type = ChatSelection::SELECTION_PROMPT;
 	selection.scroll = prompt.getViewPosition();
-	selection.character = prompt.getVisibleCursorPosition();
+	selection.character = prompt.getVisibleCursorPosition() - 1;
 
 	return selection;
 }
