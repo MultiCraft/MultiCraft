@@ -1153,13 +1153,16 @@ s32 CGUITTFont::getCursorPosition(const core::stringw& text, u32 logical_pos) co
 
 	for (const auto& run : shaped_runs) {
 		for (const auto& shaped_glyph : run.glyphs) {
-			if (shaped_glyph.cluster == logical_pos)
-				return pos_x;
-
-			pos_x += shaped_glyph.x_advance;
-
 			if (shaped_glyph.cluster == 0 && run.is_rtl)
 				is_rtl = true;
+
+			if (shaped_glyph.cluster == logical_pos)
+				if (run.is_rtl)
+					return pos_x + shaped_glyph.x_advance;
+				else
+					return pos_x;
+
+			pos_x += shaped_glyph.x_advance;
 		}
 	}
 
@@ -1179,16 +1182,39 @@ s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) cons
 	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
 	//loadGlyphsForShapedText(shaped_runs);
 
+	bool is_rtl = false;
 	s32 pos_x = 0;
 
 	for (const auto& run : shaped_runs) {
 		for (const auto& shaped_glyph : run.glyphs) {
-			pos_x += shaped_glyph.x_advance;
+			s32 glyph_start = pos_x;
+			s32 glyph_end = pos_x + shaped_glyph.x_advance;
 
-			if (pos_x > pixel_x)
-				return shaped_glyph.cluster;
+			if (shaped_glyph.cluster == 0 && run.is_rtl)
+				is_rtl = true;
+
+			if (pixel_x < glyph_end) {
+				bool clicked_left_half = pixel_x < (glyph_start + shaped_glyph.x_advance / 2);
+
+				if (!run.is_rtl) {
+					if (clicked_left_half)
+						return shaped_glyph.cluster;
+					else
+						return shaped_glyph.cluster + 1;
+				} else {
+					if (clicked_left_half)
+						return shaped_glyph.cluster + 1;
+					else
+						return shaped_glyph.cluster;
+				}
+			}
+
+			pos_x = glyph_end;
 		}
 	}
+
+	if (is_rtl)
+		return 0;
 
 	return text.size();
 }

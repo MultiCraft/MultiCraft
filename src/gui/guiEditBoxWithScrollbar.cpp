@@ -229,9 +229,11 @@ void GUIEditBoxWithScrollBar::draw()
 
 			if (focus && (porting::getTimeMs() - m_blink_start_time) % 700 < 350) {
 				setTextRect(cursor_line);
-				m_current_text_rect.UpperLeftCorner.X += charcursorpos;
+				core::stringw cursor_char = L"|";
+				m_current_text_rect.UpperLeftCorner.X += charcursorpos -
+						font->getDimension(cursor_char.c_str()).Width / 2;
 
-				font->draw(L"_", m_current_text_rect,
+				font->draw(cursor_char, m_current_text_rect,
 					m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
 					false, true, &local_clip_rect);
 			}
@@ -251,7 +253,6 @@ s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 
 	core::stringw *txt_line = 0;
 	s32 start_pos = 0;
-	x += 3;
 
 	for (u32 i = 0; i < line_count; ++i) {
 		setTextRect(i);
