@@ -911,36 +911,43 @@ std::vector<BidiRun> CGUITTFont::getBidiRuns(
 	if (!bidiAlgorithm)
 		return runs;
 
-	SBParagraphRef paragraph = SBAlgorithmCreateParagraph(
-			bidiAlgorithm, 0, text.size(), SBLevelDefaultLTR);
+	SBUInteger paragraph_offset = 0;
 
-	if (!paragraph) {
-		SBAlgorithmRelease(bidiAlgorithm);
-		return runs;
-	}
+	while (paragraph_offset < text.size()) {
+		SBParagraphRef paragraph = SBAlgorithmCreateParagraph(
+				bidiAlgorithm, paragraph_offset, INT32_MAX, SBLevelDefaultLTR);
 
-	SBLineRef line = SBParagraphCreateLine(paragraph, 0, text.size());
+		if (!paragraph)
+			break;
 
-	if (!line) {
+		SBUInteger paragraph_length = SBParagraphGetLength(paragraph);
+
+		SBLineRef line = SBParagraphCreateLine(
+				paragraph, paragraph_offset, paragraph_length);
+
+		if (!line) {
+			SBParagraphRelease(paragraph);
+			break;
+		}
+
+		SBUInteger runCount = SBLineGetRunCount(line);
+		const SBRun *visualRuns = SBLineGetRunsPtr(line);
+
+		for (SBUInteger i = 0; i < runCount; i++) {
+			BidiRun run;
+			run.start = visualRuns[i].offset;
+			run.length = visualRuns[i].length;
+			run.level = visualRuns[i].level;
+			run.is_rtl = (run.level % 2 != 0);
+			runs.push_back(run);
+		}
+
+		SBLineRelease(line);
 		SBParagraphRelease(paragraph);
-		SBAlgorithmRelease(bidiAlgorithm);
-		return runs;
+
+		paragraph_offset += paragraph_length;
 	}
 
-	SBUInteger runCount = SBLineGetRunCount(line);
-	const SBRun* visualRuns = SBLineGetRunsPtr(line);
-
-	for (SBUInteger i = 0; i < runCount; i++) {
-		BidiRun run;
-		run.start = visualRuns[i].offset;
-		run.length = visualRuns[i].length;
-		run.level = visualRuns[i].level;
-		run.is_rtl = (run.level % 2 != 0);
-		runs.push_back(run);
-	}
-
-	SBLineRelease(line);
-	SBParagraphRelease(paragraph);
 	SBAlgorithmRelease(bidiAlgorithm);
 
 	return runs;
@@ -1429,6 +1436,13 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 	// Convert to a unicode string.
 	core::ustring utext = text.getString();
 
+	std::vector<uint32_t> utf32_text;
+	core::ustring::const_iterator it(utext);
+	while (!it.atEnd()) {
+		utf32_text.push_back(*it);
+		++it;
+	}
+
 	// Shape the text with HarfBuzz
 	std::vector<ShapedRun> shaped_runs = shapeText(utext.c_str(), use_rtl);
 	loadGlyphsForShapedText(shaped_runs);
@@ -1436,42 +1450,26 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 	// Set up our render map.
 	core::map<u32, CGUITTGlyphPage*> Render_Map;
 
-	u32 current_char_index = 0;
-
 	for (const auto& run : shaped_runs)
 	{
 		for (const auto& shaped_glyph : run.glyphs)
 		{
 			uchar32_t currentChar = 0;
-			if (shaped_glyph.cluster < utext.size()) {
-				currentChar = utext[shaped_glyph.cluster];
-			}
+			if (shaped_glyph.cluster < utf32_text.size())
+				currentChar = utf32_text[shaped_glyph.cluster];
 
 			bool visible = (Invisible.findFirst(currentChar) == -1);
-			bool lineBreak = false;
 
-			if (currentChar == L'\r') // Mac or Windows breaks
-			{
-				lineBreak = true;
-				if (shaped_glyph.cluster + 1 < utext.size() &&
-					utext[shaped_glyph.cluster + 1] == (uchar32_t)'\n') {
-					current_char_index++;
-				}
-			}
-			else if (currentChar == (uchar32_t)'\n') // Unix breaks
-			{
-				lineBreak = true;
-			}
+			bool lineBreak = (currentChar == L'\n' || currentChar == L'\r');
 
 			if (lineBreak)
 			{
-				offset.Y += font_metrics.height / 64;
+				offset.Y += max_font_height;
 				offset.X = position.UpperLeftCorner.X;
 
 				if (hcenter)
 					offset.X += (position.getWidth() - textDimension.Width) >> 1;
 
-				current_char_index++;
 				continue;
 			}
 
@@ -1481,8 +1479,8 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 				SGUITTGlyph* glyph = Glyphs[key];
 
 				// Calculate the glyph offset.
-				s32 offx = Glyphs[key]->offset.X + shaped_glyph.x_offset;
-				s32 offy = (font_metrics.ascender / 64) - Glyphs[key]->offset.Y + shaped_glyph.y_offset;
+				s32 offx = glyph->offset.X + shaped_glyph.x_offset;
+				s32 offy = (font_metrics.ascender / 64) - glyph->offset.Y + shaped_glyph.y_offset;
 
 				// Determine rendering information.
 				CGUITTGlyphPage* const page = Glyph_Pages[glyph->glyph_page];
@@ -1524,6 +1522,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 		if (!page->shadow_positions.empty()) {
 			Driver->draw2DImageBatch(page->texture, page->shadow_positions, page->shadow_source_rects, clip, video::SColor(shadow_alpha,0,0,0), true);
 		}
+
 		// render runs of matching color in batch
 		size_t ibegin;
 		video::SColor colprev;
@@ -1558,46 +1557,36 @@ core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text, bool use_rt
 core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text, bool use_rtl) const
 {
 	core::ustring utext = text;
-
 	std::vector<ShapedRun> shaped_runs = shapeText(utext, use_rtl);
-
 	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
+
+	std::vector<uint32_t> utf32_text;
+	core::ustring::const_iterator iter(text);
+	while (!iter.atEnd()) {
+		utf32_text.push_back(*iter);
+		++iter;
+	}
 
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
-	core::ustring::const_iterator iter(utext);
-	u32 char_index = 0;
 
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
-			bool lineBreak = false;
-			if (glyph.cluster < utext.size()) {
-				while (!iter.atEnd() && char_index < glyph.cluster) {
-					++iter;
-					++char_index;
+			if (glyph.cluster < utf32_text.size()) {
+				uchar32_t c = utf32_text[glyph.cluster];
+				if (c == L'\n' || c == L'\r') {
+					text_dimension.Height += line.Height;
+					if (text_dimension.Width < line.Width)
+						text_dimension.Width = line.Width;
+					line.Width = 0;
+					line.Height = max_font_height;
+					continue;
 				}
-
-				if (!iter.atEnd()) {
-					uchar32_t c = *iter;
-					if (c == L'\n' || c == L'\r') {
-						lineBreak = true;
-					}
-				}
-			}
-
-			// Check for linebreak.
-			if (lineBreak)
-			{
-				text_dimension.Height += line.Height;
-				if (text_dimension.Width < line.Width)
-					text_dimension.Width = line.Width;
-				line.Width = 0;
-				line.Height = max_font_height;
-				continue;
 			}
 			line.Width += glyph.x_advance;
 		}
 	}
+
 	if (text_dimension.Width < line.Width)
 		text_dimension.Width = line.Width;
 
