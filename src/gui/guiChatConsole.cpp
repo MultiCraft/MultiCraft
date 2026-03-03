@@ -559,6 +559,8 @@ void GUIChatConsole::drawPrompt()
 	std::replace_if(text.begin(), text.end(),
 			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
 
+	IGUISkin* skin = Environment->getSkin();
+
 	if (text.size()) {
 		core::rect<s32> text_rect = getPromptTextRect();
 
@@ -580,8 +582,6 @@ void GUIChatConsole::drawPrompt()
 
 				std::vector<core::recti> mark_rects = m_font->getSelectionRects(text.c_str(),
 						logical_start, logical_end);
-
-				IGUISkin* skin = Environment->getSkin();
 
 				for (auto& mark_rect : mark_rects) {
 					core::rect<s32> current_rect = text_rect;
@@ -605,13 +605,19 @@ void GUIChatConsole::drawPrompt()
 		s32 charcursorpos = m_font->getCursorPosition(text.c_str(), logical_cpos);
 
 		core::rect<s32> text_rect = getPromptTextRect();
-		core::stringw cursor_char = L"|";
-		text_rect.UpperLeftCorner.X += charcursorpos -
-				m_font->getDimension(cursor_char.c_str()).Width / 2;
+		text_rect.UpperLeftCorner.X += charcursorpos;
 
-		m_font->draw(cursor_char, text_rect,
-				video::SColor(255, 255, 255, 255),
-				false, true, &local_clip_rect);
+		const s32 cursor_width = 1;
+		const s32 cursor_height = m_font->getDimension(L"|").Height;
+		const s32 center_y = text_rect.getCenter().Y;
+
+		core::rect<s32> cursor_rect(
+				text_rect.UpperLeftCorner.X,
+				center_y - cursor_height / 2,
+				text_rect.UpperLeftCorner.X + cursor_width,
+				center_y + cursor_height / 2);
+		
+		skin->draw2DRectangle(this, video::SColor(255, 255, 255, 255), cursor_rect, &local_clip_rect);
 	}
 }
 
