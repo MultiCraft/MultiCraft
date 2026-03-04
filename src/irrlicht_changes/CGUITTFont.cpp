@@ -1163,11 +1163,12 @@ s32 CGUITTFont::getCursorPosition(const core::stringw& text, u32 logical_pos) co
 			if (shaped_glyph.cluster == 0 && run.is_rtl)
 				is_rtl = true;
 
-			if (shaped_glyph.cluster == logical_pos)
+			if (shaped_glyph.cluster == logical_pos) {
 				if (run.is_rtl)
 					return pos_x + shaped_glyph.x_advance;
 				else
 					return pos_x;
+			}
 
 			pos_x += shaped_glyph.x_advance;
 		}
