@@ -303,3 +303,5 @@ end
 if not core.global_exists("utf8") or not utf8.lower then
 	utf8 = string
 end
+
+sscsm.BIDI_SUPPORTED = true -- ToDo: will be removed in future releases

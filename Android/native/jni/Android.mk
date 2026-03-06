@@ -87,6 +87,7 @@ LOCAL_MODULE := MultiCraft
 
 LOCAL_CFLAGS += \
 	-DJSONCPP_NO_LOCALE_SUPPORT                    \
+	-DSB_CONFIG_UNITY                              \
 	-DHAVE_TOUCHSCREENGUI                          \
 	-DENABLE_GLES=1                                \
 	-DUSE_CURL=1                                   \
@@ -120,6 +121,7 @@ LOCAL_C_INCLUDES := \
 	../../lib/gmp                                  \
 	../../lib/jsoncpp                              \
 	../../lib/chacha                               \
+	../../lib/sheenbidi/Headers                    \
 	deps/freetype/include                          \
 	deps/harfbuzz/include                          \
 	deps/gettext/include                           \
@@ -289,6 +291,9 @@ LOCAL_SRC_FILES += ../../lib/luautf8/lutf8lib.c
 
 # Lua ChaCha Lib
 LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
+
+# Sheenbidi
+LOCAL_SRC_FILES += ../../lib/sheenbidi/Source/SheenBidi.c
 
 LOCAL_STATIC_LIBRARIES += \
 	Curl libssl libcrypto libnghttp2 \
