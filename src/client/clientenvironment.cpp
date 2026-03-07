@@ -276,6 +276,14 @@ void ClientEnvironment::step(float dtime)
 				damageLocalPlayer(damage, true);
 				m_client->getEventManager()->put(
 					new SimpleTriggerEvent(MtEvent::PLAYER_FALLING_DAMAGE));
+
+#if defined(__ANDROID__)
+				if (g_settings->getBool("enable_vibrations"))
+					porting::vibrationEffect(100, 128);
+#elif defined(__IOS__)
+				if (g_settings->getBool("enable_vibrations"))
+					porting::vibrationEffect(3);
+#endif
 			}
 		}
 	}
