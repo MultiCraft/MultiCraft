@@ -368,6 +368,7 @@ private:
 	void setVisible(bool visible);
 	void wakeUpInputhandler();
 	void playSound();
+	bool isValidKeymap(std::string settingname, std::string keysym);
 };
 
 extern TouchScreenGUI *g_touchscreengui;

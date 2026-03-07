@@ -1327,11 +1327,16 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 			continue;
 
 		std::string button_name = buttons_data[button->id].name;
+		std::string settings_name = "keymap_" + button_name;
 
-		if (!g_settings->exists("keymap_" + button_name))
+		if (!g_settings->exists(settings_name))
 			continue;
 
-		std::string keyname = g_settings->get("keymap_" + button_name);
+		std::string keyname = g_settings->get(settings_name);
+
+		if (!isValidKeymap(settings_name, keyname))
+			continue;
+
 		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
 
 		if (button_keycode == keycode)
@@ -1408,6 +1413,16 @@ bool TouchScreenGUI::immediateRelease(irr::EKEY_CODE keycode)
 	}
 
 	return false;
+}
+
+bool TouchScreenGUI::isValidKeymap(std::string settingname, std::string keysym)
+{
+	if (settingname != "keymap_dig" && keysym == "KEY_LBUTTON")
+		return false;
+	else if (settingname != "keymap_place" && keysym == "KEY_RBUTTON")
+		return false;
+
+	return true;
 }
 
 void TouchScreenGUI::step(float dtime)
