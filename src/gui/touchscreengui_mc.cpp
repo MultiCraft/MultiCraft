@@ -511,12 +511,12 @@ void TouchScreenGUI::initSettings(bool init)
 			m_settings->updateConfigFile(m_settings_path.c_str());
 		} else {
 			s32 old_button_size = m_settings->getS32("button_size");
-	
+
 			if (m_button_size != old_button_size) {
 				for (auto name : m_settings->getNames()) {
 					m_settings->remove(name);
 				}
-	
+
 				m_settings->setS32("button_size", m_button_size);
 				m_settings->updateConfigFile(m_settings_path.c_str());
 			}
@@ -1036,7 +1036,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					}
 				}
 			}
-			
+
 			IGUIButton *joystick_btn = m_joystick.button_off;
 			if (joystick_btn && m_editor.guibutton != joystick_btn) {
 				rect<s32> btn_rect = joystick_btn->getRelativePosition();
