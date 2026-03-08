@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/string.h"
 
 #include "leveldb/db.h"
-
+#include "leveldb/cache.h"
 
 #define ENSURE_STATUS_OK(s) \
 	if (!(s).ok()) { \
