@@ -1018,30 +1018,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_rect -= v2s32(0, new_rect.LowerRightCorner.Y - m_screensize.Y);
 			}
 
-			for (auto button : m_buttons) {
-				if (button->state != STATE_DEFAULT)
-					continue;
-
-				if (button->id == m_editor.button_id)
-					continue;
-
-				IGUIButton *guibutton = button->guibutton;
-
-				if (guibutton) {
-					rect<s32> btn_rect = guibutton->getRelativePosition();
-
-					if (new_rect.isRectCollided(btn_rect)) {
-						new_rect = m_editor.old_rect;
-						break;
-					}
-				}
-			}
-
-			IGUIButton *joystick_btn = m_joystick.button_off;
-			if (joystick_btn && m_editor.guibutton != joystick_btn) {
-				rect<s32> btn_rect = joystick_btn->getRelativePosition();
-				if (new_rect.isRectCollided(btn_rect))
-					new_rect = m_editor.old_rect;
+			if (isButtonCollided(m_editor.button_id, new_rect)) {
+				new_rect = m_editor.old_rect;
 			}
 
 			setValues(m_editor.button_id,
@@ -1203,6 +1181,36 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 	}
 
 	return result;
+}
+
+bool TouchScreenGUI::isButtonCollided(touch_gui_button_id id, rect<s32> button_rect)
+{
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		if (button->id == id)
+			continue;
+
+		IGUIButton *guibutton = button->guibutton;
+
+		if (guibutton) {
+			rect<s32> button_rect2 = guibutton->getRelativePosition();
+
+			if (button_rect.isRectCollided(button_rect2))
+				return true;
+		}
+	}
+
+	IGUIButton *joystick_btn = m_joystick.button_off;
+	if (joystick_btn && m_editor.guibutton != joystick_btn) {
+		rect<s32> button_rect2 = joystick_btn->getRelativePosition();
+
+		if (button_rect.isRectCollided(button_rect2))
+			return true;
+	}
+
+	return false;
 }
 
 bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
@@ -1421,6 +1429,29 @@ void TouchScreenGUI::step(float dtime)
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera_additional.dig = true;
 			wakeUpInputhandler();
+		}
+	}
+}
+
+void TouchScreenGUI::draw()
+{
+	IGUISkin* skin = m_guienv->getSkin();
+	if (!skin)
+		return;
+
+	if (m_current_state == STATE_EDITOR) {
+		IGUIButton *guibutton = m_editor.guibutton;
+
+		if (guibutton) {
+			rect<s32> outline_rect = guibutton->getRelativePosition();
+			bool collided = isButtonCollided(m_editor.button_id, outline_rect);
+
+			video::SColor outline_color = collided ?
+					video::SColor(255, 255, 0, 0) :
+					video::SColor(255, 0, 255, 0);
+
+			m_device->getVideoDriver()->draw2DRectangleOutline(outline_rect,
+					outline_color);
 		}
 	}
 }

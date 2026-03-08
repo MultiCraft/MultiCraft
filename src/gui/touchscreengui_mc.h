@@ -274,6 +274,7 @@ public:
 	}
 
 	void step(float dtime);
+	void draw();
 	void hide();
 	void show();
 	void reset();
@@ -363,6 +364,7 @@ private:
 	void updateEditorButtonsState();
 	void rebuildOverflowMenu();
 
+	bool isButtonCollided(touch_gui_button_id id, rect<s32> button_rect);
 	bool moveJoystick(s32 x, s32 y);
 	void updateCamera(camera_info &camera, s32 x, s32 y);
 	void setVisible(bool visible);
