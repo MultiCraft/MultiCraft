@@ -571,6 +571,7 @@ end
 
 local checkboxes = {} -- handle checkboxes events
 
+local style_exists = core.global_exists("btn_style")
 local function create_change_setting_formspec(dialogdata)
 	local setting = settings[selected_setting]
 	-- Final formspec will be created at the end of this function
@@ -622,7 +623,6 @@ local function create_change_setting_formspec(dialogdata)
 		end
 		formspec = "field[0.28," .. height + 0.15 .. ";8,1;te_setting_value;;"
 				.. core.formspec_escape(current_value) .. "]"
-				.. btn_style("btn_browser_" .. setting.type)
 				.. "button[8," .. height - 0.2 .. ";2,1;btn_browser_"
 				.. setting.type .. ";" .. fgettext("Browse") .. "]"
 		height = height + 1.15
@@ -828,14 +828,13 @@ local function create_change_setting_formspec(dialogdata)
 
 	return (
 		"size[" .. width .. "," .. height + 0.25 .. "]" ..
-		"bgcolor[#0000]" ..
-		"background9[0,0;0,0;" .. defaulttexturedir_esc .. "bg_common.png;true;40]" ..
+		(style_exists and "bgcolor[#0000]" or "") ..
+		(style_exists and "background9[0,0;0,0;" ..
+			core.formspec_escape(defaulttexturedir) .. "bg_common.png;true;40]" or "") ..
 		create_textfield(description_box, setting_name, comment_text) ..
 		formspec ..
-		btn_style("btn_done") ..
 		"button[" .. width / 2 - 2.5 .. "," .. height - 0.4 .. ";2.5,1;btn_done;" ..
 			fgettext("Save") .. "]" ..
-		btn_style("btn_cancel") ..
 		"button[" .. width / 2 .. "," .. height - 0.4 .. ";2.5,1;btn_cancel;" ..
 			fgettext("Cancel") .. "]"
 	)
@@ -1020,14 +1019,15 @@ end
 
 local function create_settings_formspec(tabview, _, tabdata)
 	local formspec =
+			(not style_exists and "size[12,5.4;true]" or "") ..
 			"tablecolumns[color;tree;text,width=28;text]" ..
 			"tableoptions[background=#00000000;border=false]" ..
 			"formspec_version[3]" ..
-			"image[-0.04,-0.13;14.9,0.8;" .. defaulttexturedir_esc .. "field_bg.png;32]" ..
-			"style[Dsearch_string;border=false;bgcolor=transparent]" ..
+			(style_exists and "image[-0.04,-0.13;14.9,0.8;" ..
+				core.formspec_escape(defaulttexturedir) .. "field_bg.png;32]" or "") ..
+			(style_exists and "style[Dsearch_string;border=false;bgcolor=transparent]" or "") ..
 			"field[0.3,0.15;12.0,0.9;Dsearch_string;;" .. core.formspec_escape(search_string) .. "]" ..
 			"field_close_on_enter[Dsearch_string;false]" ..
-			scrollbar_style("list_settings") ..
 			"table[0,0.8;11.8,3.5;list_settings;"
 
 	local current_level = 0
@@ -1074,11 +1074,8 @@ local function create_settings_formspec(tabview, _, tabdata)
 		formspec = formspec:sub(1, -2) -- remove trailing comma
 	end
 	formspec = formspec .. ";" .. selected_setting .. "]" ..
-			btn_style("btn_back") ..
 			"button[0,4.9;4,1;btn_back;".. fgettext("< Back to Settings page") .. "]" ..
-			btn_style("btn_restore") ..
 			"button[5.5,4.9;4,1;btn_restore;" .. fgettext("Restore Default") .. "]" ..
-			btn_style("btn_edit") ..
 			"button[9.5,4.9;2.5,1;btn_edit;" .. fgettext("Edit") .. "]" ..
 			"checkbox[0,4.3;cb_tech_settings;" .. fgettext("Show technical names") .. ";"
 					.. dump(core.settings:get_bool("main_menu_technical_settings")) .. "]"

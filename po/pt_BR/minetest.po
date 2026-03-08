@@ -1474,6 +1474,14 @@ msgid "HUD shown"
 msgstr "Interface mostrada"
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr ""
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr ""
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr "Analisador ocultado"
 
@@ -1904,6 +1912,18 @@ msgstr "Especial"
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle HUD"
 msgstr "Ativar interface"
+
+#: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr ""
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr ""
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr ""
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
@@ -4862,6 +4882,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -5618,6 +5645,10 @@ msgid ""
 msgstr ""
 "Nome do servidor, a ser exibido quando os jogadores abrem a lista de "
 "servidores."
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

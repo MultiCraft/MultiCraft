@@ -38,6 +38,8 @@ public:
 	bool deleteBlock(const v3s16 &pos);
 	void listAllLoadableBlocks(std::vector<v3s16> &dst);
 
+	void compact();
+
 	void beginSave() {}
 	void endSave() {}
 

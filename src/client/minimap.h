@@ -63,7 +63,8 @@ struct MinimapPixel {
 };
 
 struct MinimapMapblock {
-	void getMinimapNodes(VoxelManipulator *vmanip, const v3s16 &pos);
+	void getMinimapNodes(VoxelManipulator *vmanip, const v3s16 &pos,
+			const NodeDefManager *ndef);
 
 	MinimapPixel data[MAP_BLOCKSIZE * MAP_BLOCKSIZE];
 };
@@ -134,6 +135,7 @@ public:
 			std::string texture = "", u16 scale = 1);
 
 	void setModeIndex(size_t index);
+	void setOrUseSavedModeIndex(size_t index);
 	size_t getModeIndex() const { return m_current_mode_index; };
 	size_t getMaxModeIndex() const { return m_modes.size() - 1; };
 	void nextMode();

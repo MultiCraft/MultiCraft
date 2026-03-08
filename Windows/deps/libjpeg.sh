@@ -1,13 +1,10 @@
 #!/bin/bash -e
 
 . ./sdk.sh
-JPEG_VERSION=3.0.0
+JPEG_VERSION=3.1.3
 
 if [ ! -d libjpeg-src ]; then
-	wget https://download.sourceforge.net/libjpeg-turbo/libjpeg-turbo-$JPEG_VERSION.tar.gz
-	tar -xzf libjpeg-turbo-$JPEG_VERSION.tar.gz
-	mv libjpeg-turbo-$JPEG_VERSION libjpeg-src
-	rm libjpeg-turbo-$JPEG_VERSION.tar.gz
+	git clone -b $JPEG_VERSION --depth 1 https://github.com/libjpeg-turbo/libjpeg-turbo libjpeg-src
 	mkdir libjpeg-src/build
 fi
 
@@ -23,7 +20,7 @@ cmake --build . -j${NPROC}
 # update `include` folder
 rm -rf ../../libjpeg/include
 mkdir -p ../../libjpeg/include
-cp -a ../*.h ../../libjpeg/include
+cp -a ../src/*.h ../../libjpeg/include
 cp -a *.h ../../libjpeg/include
 # update lib
 rm -rf ../../libjpeg/lib

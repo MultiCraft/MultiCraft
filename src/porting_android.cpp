@@ -1,8 +1,8 @@
 /*
 Minetest
 Copyright (C) 2014 celeron55, Perttu Ahola <celeron55@gmail.com>
-Copyright (C) 2014-2023 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
-Copyright (C) 2023 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2026 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me>
+Copyright (C) 2023-2026 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -45,14 +45,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "prof.h"
 #endif
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 
 extern int real_main(int argc, char *argv[]);
 extern "C" void external_pause_game();
+extern "C" void external_update(const char* key, const char* value);
 
 static std::atomic<bool> ran = {false};
 
-extern "C" int SDL_main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	if (ran.exchange(true)) {
 		errorstream << "Caught second android_main execution in a process" << std::endl;
@@ -76,6 +78,17 @@ extern "C" int SDL_main(int argc, char *argv[])
 	_Exit(0);
 }
 
+static std::string readJavaString(JNIEnv *env, jstring j_str)
+{
+	// Get string as a UTF-8 C string
+	const char *c_str = env->GetStringUTFChars(j_str, nullptr);
+	// Save it
+	std::string str(c_str);
+	// And free the C string
+	env->ReleaseStringUTFChars(j_str, c_str);
+	return str;
+}
+
 extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
 			JNIEnv *env, jclass clazz)
@@ -88,6 +101,13 @@ extern "C" {
 	{
 		device_has_keyboard = hasKeyboard;
 	}
+	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_update(
+		JNIEnv *env, jclass clazz, jstring key, jstring value)
+	{
+		const std::string key_str = readJavaString(env, key);
+		const std::string value_str = readJavaString(env, value);
+		external_update(key_str.c_str(), value_str.c_str());
+	}
 }
 
 namespace porting {
@@ -95,47 +115,15 @@ JNIEnv      *jnienv;
 jclass       activityClass;
 jobject      activityObj;
 std::string  input_dialog_owner;
-
-jclass findClass(const std::string &classname)
-{
-	if (jnienv == nullptr)
-		return nullptr;
-
-	jclass activity = jnienv->FindClass("android/app/Activity");
-
-	if (jnienv->ExceptionCheck()) {
-		jnienv->ExceptionClear();
-		return nullptr;
-	}
-
-	jmethodID getClassLoader = jnienv->GetMethodID(
-			activity, "getClassLoader", "()Ljava/lang/ClassLoader;");
-	jobject cls = jnienv->CallObjectMethod(activityObj, getClassLoader);
-	jclass classLoader = jnienv->FindClass("java/lang/ClassLoader");
-	jmethodID findClassMethod = jnienv->GetMethodID(classLoader, "loadClass",
-					"(Ljava/lang/String;)Ljava/lang/Class;");
-	jstring strClassName = jnienv->NewStringUTF(classname.c_str());
-	jclass result = (jclass) jnienv->CallObjectMethod(cls, findClassMethod, strClassName);
-
-	if (jnienv->ExceptionCheck()) {
-		jnienv->ExceptionClear();
-		return nullptr;
-	}
-
-	jnienv->DeleteLocalRef(activity);
-	jnienv->DeleteLocalRef(cls);
-	jnienv->DeleteLocalRef(classLoader);
-	jnienv->DeleteLocalRef(strClassName);
-
-	return result;
-}
+AAssetManager *asset_manager = NULL;
+jobject java_asset_manager_ref = 0;
 
 void initAndroid()
 {
-	porting::jnienv = (JNIEnv*)SDL_AndroidGetJNIEnv();
-	activityObj = (jobject)SDL_AndroidGetActivity();
+	porting::jnienv = (JNIEnv*)SDL_GetAndroidJNIEnv();
+	activityObj = (jobject)SDL_GetAndroidActivity();
 
-	activityClass = findClass("com/multicraft/game/GameActivity");
+	activityClass = jnienv->GetObjectClass(activityObj);
 	if (activityClass == nullptr)
 		errorstream <<
 			"porting::initAndroid unable to find Java game activity class" <<
@@ -158,41 +146,16 @@ void cleanupAndroid()
 #endif
 }
 
-static std::string readJavaString(jstring j_str)
-{
-	// Get string as a UTF-8 C string
-	const char *c_str = jnienv->GetStringUTFChars(j_str, nullptr);
-	// Save it
-	std::string str(c_str);
-	// And free the C string
-	jnienv->ReleaseStringUTFChars(j_str, c_str);
-	return str;
-}
-
-std::string getCacheDir()
-{
-	jmethodID getCacheDirMethod = jnienv->GetMethodID(activityClass, "getCacheDir", "()Ljava/io/File;");
-	jobject fileObject = jnienv->CallObjectMethod(activityObj, getCacheDirMethod);
-	jclass fileClass = jnienv->FindClass("java/io/File");
-	jmethodID getAbsolutePathMethod = jnienv->GetMethodID(fileClass, "getAbsolutePath", "()Ljava/lang/String;");
-	jstring pathString = (jstring) jnienv->CallObjectMethod(fileObject, getAbsolutePathMethod);
-
-	const char *pathChars = jnienv->GetStringUTFChars(pathString, nullptr);
-	std::string path(pathChars);
-	jnienv->ReleaseStringUTFChars(pathString, pathChars);
-
-	return path;
-}
-
 void initializePaths()
 {
-	std::string path_storage = SDL_AndroidGetExternalStoragePath();
-	std::string path_data = SDL_AndroidGetInternalStoragePath();
+	const char *path_storage = SDL_GetAndroidExternalStoragePath();
+	const char *path_data = SDL_GetAndroidInternalStoragePath();
+	const char *path_acache = SDL_GetAndroidCachePath(); // not a typo
 
 	path_user = path_storage;
 	path_share = path_data;
-	path_locale = path_data + DIR_DELIM + "locale";
-	path_cache = getCacheDir();
+	path_locale = path_share + DIR_DELIM + "locale";
+	path_cache = path_acache;
 }
 
 void showInputDialog(const std::string &hint, const std::string &current, int editType, std::string owner)
@@ -214,17 +177,28 @@ void showInputDialog(const std::string &hint, const std::string &current, int ed
 	jnienv->DeleteLocalRef(jcurrent);
 }
 
-void openURIAndroid(const std::string &url)
+bool openURIAndroid(const std::string &url, bool untrusted)
 {
-	jmethodID url_open = jnienv->GetMethodID(activityClass, "openURI",
-		"(Ljava/lang/String;)V");
+	JNIEnv *env = (JNIEnv*) SDL_GetAndroidJNIEnv();
+	jobject activity = (jobject) SDL_GetAndroidActivity();
+	if (!env || !activity)
+		return false; // something really bad happened
+
+	jclass clazz(env->GetObjectClass(activity));
+	jmethodID url_open = env->GetMethodID(clazz, "openURI",
+		"(Ljava/lang/String;Z)Z");
 
 	FATAL_ERROR_IF(url_open == nullptr,
 		"porting::openURIAndroid unable to find Java openURI method");
 
-	jstring jurl = jnienv->NewStringUTF(url.c_str());
-	jnienv->CallVoidMethod(activityObj, url_open, jurl);
-	jnienv->DeleteLocalRef(jurl);
+	jstring jurl = env->NewStringUTF(url.c_str());
+	jboolean result = env->CallBooleanMethod(activity, url_open, jurl, (jboolean) untrusted);
+
+	env->DeleteLocalRef(jurl);
+	env->DeleteLocalRef(clazz);
+	env->DeleteLocalRef(activity);
+
+	return result == JNI_TRUE;
 }
 
 std::string getInputDialogOwner()
@@ -254,7 +228,7 @@ std::string getInputDialogValue()
 		"porting::getInputDialogValue unable to find Java getDialogValue method");
 
 	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, dialogvalue);
-	std::string returnValue = readJavaString(result);
+	std::string returnValue = readJavaString(jnienv, result);
 	jnienv->DeleteLocalRef(result);
 
 	return returnValue;
@@ -262,7 +236,7 @@ std::string getInputDialogValue()
 
 bool hasRealKeyboard()
 {
-	return device_has_keyboard;
+	return isGooglePC() || device_has_keyboard;
 }
 
 void handleError(const std::string &errType, const std::string &err)
@@ -304,6 +278,15 @@ void notifyExitGame()
 
 	if (jnienv->ExceptionOccurred())
 		jnienv->ExceptionClear();
+}
+
+void showToast(const std::string &msg)
+{
+	const int ver = SDL_GetAndroidSDKVersion();
+	if (ver >= 33 && msg == "Copied to clipboard")
+		return;
+
+	SDL_ShowAndroidToast(msg.c_str(), 1, -1, 0, 0);
 }
 
 float getScreenScale()
@@ -350,84 +333,198 @@ jstring getJniString(const std::string &message)
 	jbyteArray bytes = jnienv->NewByteArray(byteCount);
 	jnienv->SetByteArrayRegion(bytes, 0, byteCount, pNativeMessage);
 
-	jclass charsetClass = findClass("java/nio/charset/Charset");
+	jclass charsetClass = jnienv->FindClass("java/nio/charset/Charset");
 	jmethodID forName = jnienv->GetStaticMethodID(
 			charsetClass, "forName", "(Ljava/lang/String;)Ljava/nio/charset/Charset;");
 	jstring utf8 = jnienv->NewStringUTF("UTF-8");
 	jobject charset = jnienv->CallStaticObjectMethod(charsetClass, forName, utf8);
 
-	jclass stringClass = findClass("java/lang/String");
+	jclass stringClass = jnienv->FindClass("java/lang/String");
 	jmethodID ctor = jnienv->GetMethodID(
 			stringClass, "<init>", "([BLjava/nio/charset/Charset;)V");
 
 	jstring jMessage = (jstring) jnienv->NewObject(stringClass, ctor, bytes, charset);
 
+	jnienv->DeleteLocalRef(bytes);
+	jnienv->DeleteLocalRef(utf8);
+	jnienv->DeleteLocalRef(charsetClass);
+	jnienv->DeleteLocalRef(stringClass);
+
 	return jMessage;
 }
 
-void upgrade(const std::string &item)
+bool upgrade(const std::string &item, const std::string &extra)
 {
-	jmethodID upgradeGame = jnienv->GetMethodID(activityClass,
-			"upgrade", "(Ljava/lang/String;)V");
+	JNIEnv *env = (JNIEnv*) SDL_GetAndroidJNIEnv();
+	jobject activity = (jobject) SDL_GetAndroidActivity();
+	if (!env || !activity)
+		return false; // something really bad happened
+
+	jclass clazz(env->GetObjectClass(activity));
+	jmethodID upgradeGame = env->GetMethodID(clazz,
+			"upgrade", "(Ljava/lang/String;Ljava/lang/String;)Z");
 
 	FATAL_ERROR_IF(upgradeGame == nullptr,
 		"porting::upgrade unable to find Java upgrade method");
 
-	jstring jitem = jnienv->NewStringUTF(item.c_str());
-	jnienv->CallVoidMethod(activityObj, upgradeGame, jitem);
-	jnienv->DeleteLocalRef(jitem);
+	jstring jitem = env->NewStringUTF(item.c_str());
+	jstring jextra = env->NewStringUTF(extra.c_str());
+	jboolean res = env->CallBooleanMethod(activity, upgradeGame, jitem, jextra);
+
+	env->DeleteLocalRef(jitem);
+	env->DeleteLocalRef(jextra);
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
+
+	return res == JNI_TRUE;
 }
 
-int getRoundScreen()
+bool isIntelDevice()
 {
-	static const int radius = [](){
-		jmethodID getRadius = jnienv->GetMethodID(activityClass,
-				"getRoundScreen", "()I");
+	if (jnienv == nullptr)
+		return false;
 
-		FATAL_ERROR_IF(getRadius == nullptr,
-			"porting::getRoundScreen unable to find Java getRoundScreen method");
+	static const bool value = []() {
+		jclass buildClass = jnienv->FindClass("android/os/Build");
+		jfieldID abisField = jnienv->GetStaticFieldID(buildClass,
+				"SUPPORTED_ABIS", "[Ljava/lang/String;");
 
-		return jnienv->CallIntMethod(activityObj, getRadius);
+		jobjectArray abisArray = (jobjectArray) jnienv->GetStaticObjectField(buildClass, abisField);
+		jsize abiCount = jnienv->GetArrayLength(abisArray);
+		bool isIntel = false;
+
+		for (jsize index = 0; index < abiCount; ++index) {
+			jstring abiString = (jstring) jnienv->GetObjectArrayElement(abisArray, index);
+			const char *abiCString = jnienv->GetStringUTFChars(abiString, nullptr);
+			isIntel = (strcmp(abiCString, "x86") == 0 || strcmp(abiCString, "x86_64") == 0);
+
+			jnienv->ReleaseStringUTFChars(abiString, abiCString);
+			jnienv->DeleteLocalRef(abiString);
+
+			if (isIntel)
+				break;
+		}
+
+		jnienv->DeleteLocalRef(abisArray);
+		jnienv->DeleteLocalRef(buildClass);
+
+		return isIntel;
 	}();
 
-	return radius;
-}
-
-std::string getCpuArchitecture()
-{
-	static std::string arch = [](){
-		jmethodID getArch = jnienv->GetMethodID(activityClass,
-				"getCpuArchitecture", "()Ljava/lang/String;");
-
-		FATAL_ERROR_IF(getArch == nullptr,
-			"porting::getCpuArchitecture unable to find Java getCpuArchitecture method");
-
-		jstring javaString = (jstring) jnienv->CallObjectMethod(activityObj, getArch);
-		const char *str = jnienv->GetStringUTFChars(javaString, nullptr);
-		std::string cppStr(str);
-		jnienv->ReleaseStringUTFChars(javaString, str);
-
-		return cppStr;
-	}();
-
-	return arch;
+	return value;
 }
 
 std::string getSecretKey(const std::string &key)
 {
-	jmethodID getKey = jnienv->GetMethodID(activityClass,
+	JNIEnv *env = (JNIEnv*) SDL_GetAndroidJNIEnv();
+	jobject activity = (jobject) SDL_GetAndroidActivity();
+	if (!env || !activity)
+		return ""; // something really bad happened
+
+	jclass clazz(env->GetObjectClass(activity));
+	jmethodID getKey = env->GetMethodID(clazz,
 			"getSecretKey", "(Ljava/lang/String;)Ljava/lang/String;");
 
 	FATAL_ERROR_IF(getKey == nullptr,
 		"porting::getSecretKey unable to find Java getSecretKey method");
 
-	jstring jkey = jnienv->NewStringUTF(key.c_str());
-	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, getKey, jkey);
-	std::string returnValue = readJavaString(result);
+	jstring jkey = env->NewStringUTF(key.c_str());
+	jstring result = (jstring) env->CallObjectMethod(activity, getKey, jkey);
+	std::string returnValue = readJavaString(env, result);
 
-	jnienv->DeleteLocalRef(jkey);
-	jnienv->DeleteLocalRef(result);
+	env->DeleteLocalRef(jkey);
+	env->DeleteLocalRef(result);
+	env->DeleteLocalRef(activity);
+	env->DeleteLocalRef(clazz);
 
 	return returnValue;
+}
+
+bool isGooglePC()
+{
+	if (jnienv == nullptr || activityObj == nullptr)
+		return false;
+
+	static const bool value = [](){
+		jmethodID packageManager = jnienv->GetMethodID(activityClass,
+				"getPackageManager", "()Landroid/content/pm/PackageManager;");
+
+		if (packageManager == nullptr) {
+			errorstream << "porting::isGooglePC unable to find Java getPackageManager method" << std::endl;
+			return false;
+		}
+
+		jobject pm = jnienv->CallObjectMethod(activityObj, packageManager);
+		jclass pmCls = jnienv->GetObjectClass(pm);
+		jmethodID hasFeat = jnienv->GetMethodID(pmCls, "hasSystemFeature", "(Ljava/lang/String;)Z");
+		jstring feat = jnienv->NewStringUTF("com.google.android.play.feature.HPE_EXPERIENCE");
+		jboolean result = jnienv->CallBooleanMethod(pm, hasFeat, feat);
+
+		jnienv->DeleteLocalRef(feat);
+		jnienv->DeleteLocalRef(pmCls);
+		jnienv->DeleteLocalRef(pm);
+
+		return result == JNI_TRUE;
+	}();
+
+	return value;
+}
+
+void hideSplashScreen()
+{
+	if (jnienv == nullptr || activityObj == nullptr)
+		return;
+
+	jmethodID hideSplash = jnienv->GetMethodID(activityClass,
+			"hideSplashScreen", "()V");
+
+	FATAL_ERROR_IF(hideSplash == nullptr,
+		"porting::hideSplashScreen unable to find Java hideSplashScreen method");
+
+	jnienv->CallVoidMethod(activityObj, hideSplash);
+}
+
+bool needsExtractAssets()
+{
+	if (jnienv == nullptr || activityObj == nullptr)
+		return false;
+
+	jmethodID needsExtract = jnienv->GetMethodID(activityClass,
+			"needsExtractAssets", "()Z");
+
+	FATAL_ERROR_IF(needsExtract == nullptr,
+		"porting::needsExtractAssets unable to find Java needsExtractAssets method");
+
+	return jnienv->CallBooleanMethod(activityObj, needsExtract);
+}
+
+bool createAssetManager()
+{
+	jmethodID midGetContext = jnienv->GetStaticMethodID(activityClass,
+			"getContext", "()Landroid/content/Context;");
+
+	jobject context = jnienv->CallStaticObjectMethod(activityClass, midGetContext);
+
+	jmethodID mid = jnienv->GetMethodID(jnienv->GetObjectClass(context),
+			"getAssets", "()Landroid/content/res/AssetManager;");
+	jobject javaAssetManager = jnienv->CallObjectMethod(context, mid);
+
+	java_asset_manager_ref = jnienv->NewGlobalRef(javaAssetManager);
+	asset_manager = AAssetManager_fromJava(jnienv, java_asset_manager_ref);
+
+	if (!asset_manager) {
+		jnienv->DeleteGlobalRef(java_asset_manager_ref);
+		return false;
+	}
+
+	return true;
+}
+
+void destroyAssetManager()
+{
+	if (asset_manager) {
+		jnienv->DeleteGlobalRef(java_asset_manager_ref);
+		asset_manager = NULL;
+	}
 }
 }

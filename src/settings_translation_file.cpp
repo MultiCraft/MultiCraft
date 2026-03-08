@@ -182,6 +182,8 @@ fake_function() {
 	gettext("Key for selecting the 32nd hotbar slot.\nSee http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3");
 	gettext("HUD toggle key");
 	gettext("Key for toggling the display of the HUD.\nSee http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3");
+	gettext("Nametags toggle key");
+	gettext("Key for toggling the display of nametags.\nSee http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3");
 	gettext("Chat toggle key");
 	gettext("Key for toggling the display of chat.\nSee http://irrlicht.sourceforge.net/docu/namespaceirr.html#a54da2a0e231901735e3da1b0edf72eb3");
 	gettext("Large chat console key");

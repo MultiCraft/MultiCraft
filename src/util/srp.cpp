@@ -52,7 +52,11 @@
 	#include <mini-gmp.h>
 #endif
 
-#include <util/sha2.h>
+#if defined(__APPLE__)
+#include "util/sha2_apple.h"
+#else
+#include "util/sha2.h"
+#endif
 
 #include "srp.h"
 //#define CSRP_USE_SHA1

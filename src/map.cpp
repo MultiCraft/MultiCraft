@@ -58,6 +58,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if USE_POSTGRESQL
 #include "database/database-postgresql.h"
 #endif
+#include <zstd.h>
 
 
 /*
@@ -1257,7 +1258,8 @@ ServerMap::ServerMap(const std::string &savedir, IGameDef *gamedef,
 
 	m_save_time_counter = mb->addCounter("minetest_core_map_save_time", "Map save time (in nanoseconds)");
 
-	m_map_compression_level = rangelim(g_settings->getS16("map_compression_level_disk"), -1, 9);
+	m_map_compression_level = rangelim(g_settings->getS16("map_compression_level_disk"),
+			ZSTD_minCLevel(), ZSTD_maxCLevel());
 
 	try {
 		// If directory exists, check contents and load if possible

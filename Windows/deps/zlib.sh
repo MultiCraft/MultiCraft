@@ -1,14 +1,14 @@
 #!/bin/bash -e
 
-ZLIB_VERSION=1.2.13
+ZLIB_VERSION=2.3.2
 
 . ./sdk.sh
 
 if [ ! -d zlib-src ]; then
-	wget https://github.com/madler/zlib/archive/v$ZLIB_VERSION.tar.gz
-	tar -xzf v$ZLIB_VERSION.tar.gz
-	mv zlib-$ZLIB_VERSION zlib-src
-	rm v$ZLIB_VERSION.tar.gz
+	wget https://github.com/zlib-ng/zlib-ng/archive/$ZLIB_VERSION.tar.gz
+	tar -xzf $ZLIB_VERSION.tar.gz
+	mv zlib-ng-$ZLIB_VERSION zlib-src
+	rm $ZLIB_VERSION.tar.gz
 fi
 
 cd zlib-src
@@ -17,6 +17,7 @@ mkdir -p build; cd build
 
 cmake .. \
     -DCMAKE_BUILD_TYPE=Release \
+    -DZLIB_COMPAT=1 \
     -DCMAKE_C_FLAGS="$CFLAGS"
 
 cmake --build . -j${NPROC}
@@ -29,6 +30,6 @@ cp -a *.h ../../zlib/include
 # update lib
 rm -rf ../../zlib/lib
 mkdir -p ../../zlib/lib
-cp libzlibstatic.a ../../zlib/lib
+cp libz.a ../../zlib/lib
 
 echo "zlib build successful"

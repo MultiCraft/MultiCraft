@@ -21,10 +21,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "config.h" // for USE_FREETYPE
 #include "StyleSpec.h"
+#include "scrollSwipe.h"
 
 using namespace irr;
 
 class ISimpleTextureSource;
+class ISoundManager;
 class Client;
 
 #if USE_FREETYPE
@@ -95,7 +97,7 @@ public:
 
 		FloatType floating = FLOAT_NONE;
 
-		ValignType valign;
+		ValignType valign = VALIGN_TOP;
 
 		gui::IGUIFont *font;
 
@@ -178,7 +180,7 @@ public:
 	void draw(const core::rect<s32> &clip_rect,
 			const core::position2d<s32> &dest_offset);
 	ParsedText::Element *getElementAt(core::position2d<s32> pos);
-	ParsedText::Tag *m_hovertag;
+	ParsedText::Tag *m_hovertag = nullptr;
 
 protected:
 	struct RectWithMargin
@@ -188,8 +190,9 @@ protected:
 	};
 
 	ParsedText m_text;
-	Client *m_client;
-	gui::IGUIEnvironment *m_environment;
+	Client *m_client; ///< null in the mainmenu
+	ISimpleTextureSource *m_tsrc;
+	gui::IGUIEnvironment *m_guienv;
 	s32 m_height;
 	s32 m_voffset;
 	std::vector<RectWithMargin> m_floating;
@@ -202,7 +205,8 @@ public:
 	GUIHyperText(const wchar_t *text, gui::IGUIEnvironment *environment,
 			gui::IGUIElement *parent, s32 id,
 			const core::rect<s32> &rectangle, Client *client,
-			ISimpleTextureSource *tsrc, const StyleSpec &style);
+			ISimpleTextureSource *tsrc, const StyleSpec &style,
+			ISoundManager *sound_manager);
 
 	//! destructor
 	virtual ~GUIHyperText();
@@ -216,8 +220,9 @@ public:
 
 protected:
 	// GUI members
-	Client *m_client;
+	ISimpleTextureSource *m_tsrc;
 	GUIScrollBar *m_vscrollbar;
+	ScrollSwipe *m_scroll_swipe;
 	TextDrawer m_drawer;
 
 	// Positioning
@@ -228,7 +233,5 @@ protected:
 	ParsedText::Element *getElementAt(s32 X, s32 Y);
 	void checkHover(s32 X, s32 Y);
 
-	bool m_swipe_started;
-	int m_swipe_start_y;
-	float m_swipe_pos;
+	ParsedText::Element *m_pressed_element = nullptr;
 };

@@ -640,7 +640,6 @@ local playerstep_iter
 local playerstep_funcs = {}
 local playerstep_funcs_forced = {}
 local playernames = {}
-local playernames_forced = {}
 
 core.register_playerstep = function(func, force)
 	local funcs = force and playerstep_funcs_forced or playerstep_funcs
@@ -682,7 +681,9 @@ local function get_playerstep_func()
 				player_iter = nil
 				break
 			end
-			playernames[#playernames + 1] = name
+			if core.get_player_by_name(name) then
+				playernames[#playernames + 1] = name
+			end
 		end
 	end
 	local func = playerstep_iter()
@@ -695,7 +696,7 @@ end
 core.register_globalstep(function(dtime)
 	-- Run forced callbacks
 	if #playerstep_funcs_forced ~= 0 then
-		playernames_forced = {}
+		local playernames_forced = {}
 		for _ = 1, players_per_step do
 			if player_iter_forced == nil then
 				player_iter_forced = core.get_player_iter()
@@ -705,7 +706,9 @@ core.register_globalstep(function(dtime)
 				player_iter_forced = nil
 				break
 			end
-			playernames_forced[#playernames_forced + 1] = name
+			if core.get_player_by_name(name) then
+				playernames_forced[#playernames_forced + 1] = name
+			end
 		end
 		for func in table_iter(playerstep_funcs_forced) do
 			if type(func) == "function" then

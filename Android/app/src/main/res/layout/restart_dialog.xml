@@ -17,16 +17,29 @@
 		android:padding="16dp"
 		tools:ignore="UselessParent">
 
-		<androidx.appcompat.widget.AppCompatTextView
-			style="?android:attr/textAppearanceLarge"
+		<LinearLayout
+			android:id="@+id/headerContainer"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="center"
-			android:drawableStart="@mipmap/ic_dialog"
-			android:drawablePadding="8dp"
 			android:gravity="center"
-			android:text="@string/sorry"
-			android:textColor="@color/grey_900" />
+			android:orientation="horizontal">
+
+			<com.google.android.material.imageview.ShapeableImageView
+				android:id="@+id/headerIcon"
+				android:layout_width="wrap_content"
+				android:layout_height="60dp"
+				android:src="@mipmap/ic_launcher" />
+
+			<androidx.appcompat.widget.AppCompatTextView
+				android:id="@+id/headerTitle"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:text="@string/sorry"
+				android:textColor="@color/grey_900"
+				android:textSize="20sp" />
+		</LinearLayout>
 
 		<LinearLayout
 			android:layout_width="wrap_content"

@@ -50,6 +50,7 @@ public:
 	void on_damage_taken(int32_t damage_amount);
 	void on_hp_modification(int32_t newhp);
 	void on_death();
+	void on_tab();
 	void environment_step(float dtime);
 	void on_formspec_input(const std::string &formname, const StringMap &fields);
 
@@ -59,6 +60,8 @@ public:
 	bool on_item_use(const ItemStack &item, const PointedThing &pointed);
 
 	bool on_inventory_open(Inventory *inventory);
+	void on_hud_button_press(const std::string &btn);
+	void on_update(const std::string &key, const std::string &value);
 
 	void setEnv(ClientEnvironment *env);
 };

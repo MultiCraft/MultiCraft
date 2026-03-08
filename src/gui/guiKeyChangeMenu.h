@@ -29,6 +29,7 @@
 #include <vector>
 
 class ISimpleTextureSource;
+class ISoundManager;
 
 struct key_setting
 {
@@ -44,7 +45,7 @@ class GUIKeyChangeMenu : public GUIModalMenu
 public:
 	GUIKeyChangeMenu(gui::IGUIEnvironment *env, gui::IGUIElement *parent, s32 id,
 			IMenuManager *menumgr, ISimpleTextureSource *tsrc,
-			bool main_menu = false);
+			ISoundManager *sound_manager, bool main_menu = false);
 	~GUIKeyChangeMenu();
 
 	void removeChildren();
@@ -68,6 +69,8 @@ protected:
 private:
 	void init_keys();
 
+	void resetKeys();
+
 	bool resetMenu();
 
 	void add_key(int id, const wchar_t *button_name, const std::string &setting_name);
@@ -78,7 +81,9 @@ private:
 	gui::IGUIStaticText *key_used_text = nullptr;
 	std::vector<key_setting *> key_settings;
 	ISimpleTextureSource *m_tsrc;
+	ISoundManager *m_sound_manager;
 	bool m_main_menu = false;
+	float m_pixel_scale = 1.0f;
 
 	video::SColor m_fullscreen_bgcolor;
 };

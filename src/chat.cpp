@@ -574,7 +574,8 @@ s32 ChatPrompt::getVisibleCursorPosition() const
 	return m_cursor - m_view + m_prompt.size();
 }
 
-void ChatPrompt::cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope scope)
+void ChatPrompt::cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope scope,
+		s32 cluster_size)
 {
 	s32 old_cursor = m_cursor;
 	s32 new_cursor = m_cursor;
@@ -584,7 +585,7 @@ void ChatPrompt::cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope sco
 
 	switch (scope) {
 	case CURSOROP_SCOPE_CHARACTER:
-		new_cursor += increment;
+		new_cursor += increment * cluster_size;
 		break;
 	case CURSOROP_SCOPE_WORD:
 		if (dir == CURSOROP_DIR_RIGHT) {

@@ -30,11 +30,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 
 #ifdef HAVE_TOUCHSCREENGUI
-#include "touchscreengui.h"
+#include "touchscreengui_mc.h"
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 // clang-format off
@@ -62,15 +62,18 @@ GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 
 	m_doubleclickdetect[0].pos = v2s32(0, 0);
 	m_doubleclickdetect[1].pos = v2s32(0, 0);
+
+	m_pointer = v2s32(0, 0);
+	m_old_pointer = v2s32(0, 0);
+	m_zero_pointer = v2s32(0, 0);
+
+	m_pointer_is_zero = true;
 }
 // clang-format on
 
 GUIModalMenu::~GUIModalMenu()
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-		SDL_StopTextInput();
-#endif
+	RenderingEngine::stopTextInput();
 	m_menumgr->deletingMenu(this);
 }
 
@@ -315,16 +318,14 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 	// Enable text input events when edit box is focused
 	if (event.EventType == EET_GUI_EVENT) {
 		if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUSED &&
-			event.GUIEvent.Caller &&
-			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
-			if (porting::hasRealKeyboard())
-				SDL_StartTextInput();
+				event.GUIEvent.Caller &&
+				event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
+			RenderingEngine::startTextInput();
 		}
 		else if (event.GUIEvent.EventType == irr::gui::EGET_ELEMENT_FOCUS_LOST &&
-			event.GUIEvent.Caller &&
-			event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
-			if (porting::hasRealKeyboard() && SDL_IsTextInputActive())
-				SDL_StopTextInput();
+				event.GUIEvent.Caller &&
+				event.GUIEvent.Caller->getType() == irr::gui::EGUIET_EDIT_BOX) {
+			RenderingEngine::stopTextInput();
 		}
 	}
 #endif
@@ -377,8 +378,10 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 
 		switch ((int)event.TouchInput.touchedCount) {
 		case 1: {
-			if (event.TouchInput.Event == ETIE_PRESSED_DOWN || event.TouchInput.Event == ETIE_MOVED)
+			if (event.TouchInput.Event == ETIE_PRESSED_DOWN || event.TouchInput.Event == ETIE_MOVED) {
 				m_pointer = v2s32(event.TouchInput.X, event.TouchInput.Y);
+				m_pointer_is_zero = false;
+			}
 			if (event.TouchInput.Event == ETIE_PRESSED_DOWN)
 				m_old_pointer = m_pointer;
 			gui::IGUIElement *hovered = Environment->getRootGUIElement()->getElementFromPoint(core::position2d<s32>(m_pointer));
@@ -406,6 +409,7 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 				ret = m_hovered->OnEvent(mouse_event);
 			if (event.TouchInput.Event == ETIE_LEFT_UP) {
 				m_pointer = AbsoluteClippingRect.UpperLeftCorner;
+				m_pointer_is_zero = true;
 				leave();
 			}
 			return ret;
@@ -413,19 +417,31 @@ bool GUIModalMenu::preprocessEvent(const SEvent &event)
 		case 2: {
 			if (event.TouchInput.Event != ETIE_PRESSED_DOWN)
 				return true; // ignore
+
 			auto focused = Environment->getFocus();
 			if (!focused)
 				return true;
+
 			SEvent rclick_event{};
 			rclick_event.EventType = EET_MOUSE_INPUT_EVENT;
 			rclick_event.MouseInput.Event = EMIE_RMOUSE_PRESSED_DOWN;
 			rclick_event.MouseInput.ButtonStates = EMBSM_LEFT | EMBSM_RIGHT;
 			rclick_event.MouseInput.X = m_pointer.X;
 			rclick_event.MouseInput.Y = m_pointer.Y;
-			focused->OnEvent(rclick_event);
+
+			bool ret = preprocessEvent(rclick_event);
+
+			if (!ret && focused)
+				focused->OnEvent(rclick_event);
+				
 			rclick_event.MouseInput.Event = EMIE_RMOUSE_LEFT_UP;
 			rclick_event.MouseInput.ButtonStates = EMBSM_LEFT;
-			focused->OnEvent(rclick_event);
+
+			ret = preprocessEvent(rclick_event);
+
+			if (!ret && focused)
+				focused->OnEvent(rclick_event);
+
 			return true;
 		}
 		default: // ignored

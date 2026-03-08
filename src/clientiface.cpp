@@ -873,7 +873,7 @@ u16 ClientInterface::getProtocolVersion(session_t peer_id)
 }
 
 void ClientInterface::setClientVersion(session_t peer_id, u8 major, u8 minor, u8 patch,
-		const std::string &full)
+		const std::string &full, u32 ram)
 {
 	RecursiveMutexAutoLock conlock(m_clients_mutex);
 
@@ -885,4 +885,5 @@ void ClientInterface::setClientVersion(session_t peer_id, u8 major, u8 minor, u8
 		return;
 
 	n->second->setVersionInfo(major, minor, patch, full);
+	n->second->setSystemRAM(ram);
 }

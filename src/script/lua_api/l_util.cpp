@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cpp_api/s_async.h"
 #include "serialization.h"
 #include <json/json.h>
+#include <zstd.h>
 #include "cpp_api/s_security.h"
 #include "porting.h"
 #include "convert_json.h"
@@ -38,8 +39,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #include "version.h"
 #include "util/hex.h"
-#include "util/sha1.h"
+#include "util/hashing.h"
 #include <algorithm>
+#include "translation.h"
+#include "content/mods.h"
+#include "cpp_api/s_base.h"
 
 #ifndef SERVER
 #include "client/renderingengine.h"
@@ -85,7 +89,7 @@ int ModApiUtil::l_get_us_time(lua_State *L)
 	return 1;
 }
 
-// parse_json(str[, nullvalue])
+// parse_json(str[, nullvalue, return_error])
 int ModApiUtil::l_parse_json(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
@@ -99,40 +103,41 @@ int ModApiUtil::l_parse_json(lua_State *L)
 		nullindex = lua_gettop(L);
 	}
 
-	Json::Value root;
+	bool return_error = lua_toboolean(L, 3);
+	const auto handle_error = [&](const char *errmsg) {
+		if (return_error) {
+			lua_pushnil(L);
+			lua_pushstring(L, errmsg);
+			return 2;
+		}
+		errorstream << "Failed to parse json data: " << errmsg << std::endl;
+		errorstream << "data: \"";
+		if (strlen(jsonstr) <= 100) {
+			errorstream << jsonstr << "\"";
+		} else {
+			std::string s = jsonstr;
+			errorstream << s.substr(0, 100) << "\"... (truncated)";
+		}
+		errorstream << std::endl;
+		lua_pushnil(L);
+		return 1;
+	};
 
+	Json::Value root;
 	{
 		std::istringstream stream(jsonstr);
 
 		Json::CharReaderBuilder builder;
 		builder.settings_["collectComments"] = false;
-		std::string errs;
-
-		if (!Json::parseFromStream(builder, stream, &root, &errs)) {
-			errorstream << "Failed to parse json data " << errs << std::endl;
-			size_t jlen = strlen(jsonstr);
-			if (jlen > 100) {
-				errorstream << "Data (" << jlen
-#ifdef NDEBUG
-					<< " bytes) not printed." << std::endl;
-#else
-					<< " bytes) printed to warningstream." << std::endl;
-				warningstream << "data: \"" << jsonstr << "\"" << std::endl;
-#endif
-			} else {
-				errorstream << "data: \"" << jsonstr << "\"" << std::endl;
-			}
-			lua_pushnil(L);
-			return 1;
-		}
+		const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+		std::string errmsg;
+		if (!Json::parseFromStream(builder, stream, &root, &errmsg))
+			return handle_error(errmsg.c_str());
 	}
 
-	if (!push_json_value(L, root, nullindex)) {
-		errorstream << "Failed to parse json data, "
-			<< "depth exceeds lua stack limit" << std::endl;
-		errorstream << "data: \"" << jsonstr << "\"" << std::endl;
-		lua_pushnil(L);
-	}
+	if (!push_json_value(L, root, nullindex))
+		return handle_error("depth exceeds lua stack limit");
+
 	return 1;
 }
 
@@ -269,6 +274,34 @@ int ModApiUtil::l_get_user_path(lua_State *L)
 	return 1;
 }
 
+enum LuaCompressMethod
+{
+	LUA_COMPRESS_METHOD_DEFLATE,
+	LUA_COMPRESS_METHOD_ZSTD,
+};
+
+static const struct EnumString es_LuaCompressMethod[] =
+{
+	{LUA_COMPRESS_METHOD_DEFLATE, "deflate"},
+	{LUA_COMPRESS_METHOD_ZSTD, "zstd"},
+	{0, nullptr},
+};
+
+static LuaCompressMethod get_compress_method(lua_State *L, int index)
+{
+	if (lua_isnoneornil(L, index))
+		return LUA_COMPRESS_METHOD_DEFLATE;
+	const char *name = luaL_checkstring(L, index);
+	int value;
+	if (!string_to_enum(es_LuaCompressMethod, value, name)) {
+		// Pretend it's deflate if we don't know, for compatibility reasons.
+		log_deprecated(L, "Unknown compression method \"" + std::string(name)
+			+ "\", defaulting to \"deflate\". You should pass a valid value.");
+		return LUA_COMPRESS_METHOD_DEFLATE;
+	}
+	return (LuaCompressMethod) value;
+}
+
 // compress(data, method, level)
 int ModApiUtil::l_compress(lua_State *L)
 {
@@ -277,12 +310,23 @@ int ModApiUtil::l_compress(lua_State *L)
 	size_t size;
 	const char *data = luaL_checklstring(L, 1, &size);
 
-	int level = -1;
-	if (!lua_isnone(L, 3) && !lua_isnil(L, 3))
-		level = readParam<float>(L, 3);
+	LuaCompressMethod method = get_compress_method(L, 2);
 
-	std::ostringstream os;
-	compressZlib(std::string(data, size), os, level);
+	std::ostringstream os(std::ios_base::binary);
+
+	if (method == LUA_COMPRESS_METHOD_DEFLATE) {
+		int level = -1;
+		if (!lua_isnoneornil(L, 3))
+			level = readParam<int>(L, 3);
+
+		compressZlib(reinterpret_cast<const u8 *>(data), size, os, level);
+	} else if (method == LUA_COMPRESS_METHOD_ZSTD) {
+		int level = ZSTD_CLEVEL_DEFAULT;
+		if (!lua_isnoneornil(L, 3))
+			level = readParam<int>(L, 3);
+
+		compressZstd(reinterpret_cast<const u8 *>(data), size, os, level);
+	}
 
 	std::string out = os.str();
 
@@ -298,9 +342,16 @@ int ModApiUtil::l_decompress(lua_State *L)
 	size_t size;
 	const char *data = luaL_checklstring(L, 1, &size);
 
-	std::istringstream is(std::string(data, size));
-	std::ostringstream os;
-	decompressZlib(is, os);
+	LuaCompressMethod method = get_compress_method(L, 2);
+
+	std::istringstream is(std::string(data, size), std::ios_base::binary);
+	std::ostringstream os(std::ios_base::binary);
+
+	if (method == LUA_COMPRESS_METHOD_DEFLATE) {
+		decompressZlib(is, os);
+	} else if (method == LUA_COMPRESS_METHOD_ZSTD) {
+		decompressZstd(is, os);
+	}
 
 	std::string out = os.str();
 
@@ -423,17 +474,21 @@ int ModApiUtil::l_request_insecure_environment(lua_State *L)
 		return 0;
 	}
 
-	// Check secure.trusted_mods
 	std::string mod_name = readParam<std::string>(L, -1);
-	std::string trusted_mods = g_settings->get("secure.trusted_mods");
-	trusted_mods.erase(std::remove_if(trusted_mods.begin(),
-			trusted_mods.end(), static_cast<int(*)(int)>(&std::isspace)),
-			trusted_mods.end());
-	std::vector<std::string> mod_list = str_split(trusted_mods, ',');
-	mod_list.emplace_back("dummy");
-	if (std::find(mod_list.begin(), mod_list.end(), mod_name) ==
-			mod_list.end()) {
-		return 0;
+
+	const IGameDef *gamedef = getScriptApiBase(L)->getGameDef();
+	const ModSpec *mod = gamedef ? gamedef->getModSpec(mod_name) : nullptr;
+	if (mod == nullptr || !mod->isTrusted()) {
+		// Check secure.trusted_mods
+		std::string trusted_mods = g_settings->get("secure.trusted_mods");
+		trusted_mods.erase(std::remove_if(trusted_mods.begin(),
+				trusted_mods.end(), static_cast<int(*)(int)>(&std::isspace)),
+				trusted_mods.end());
+		std::vector<std::string> mod_list = str_split(trusted_mods, ',');
+		if (std::find(mod_list.begin(), mod_list.end(), mod_name) ==
+				mod_list.end()) {
+			return 0;
+		}
 	}
 
 	// Push insecure environment
@@ -471,14 +526,7 @@ int ModApiUtil::l_sha1(lua_State *L)
 	bool hex = !lua_isboolean(L, 2) || !readParam<bool>(L, 2);
 
 	// Compute actual checksum of data
-	std::string data_sha1;
-	{
-		SHA1 ctx;
-		ctx.addBytes(data, size);
-		unsigned char *data_tmpdigest = ctx.getDigest();
-		data_sha1.assign((char*) data_tmpdigest, 20);
-		free(data_tmpdigest);
-	}
+	std::string data_sha1 = hashing::sha1(data);
 
 	if (hex) {
 		std::string sha1_hex = hex_encode(data_sha1);
@@ -494,10 +542,13 @@ int ModApiUtil::l_sha1(lua_State *L)
 int ModApiUtil::l_upgrade(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
-#if defined(__ANDROID__) || defined(__IOS__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 	const std::string item_name = luaL_checkstring(L, 1);
-	porting::upgrade(item_name);
-	lua_pushboolean(L, true);
+	std::string extra;
+	if (lua_gettop(L) >= 2 && lua_isstring(L, 2))
+		extra = lua_tostring(L, 2);
+	const bool res = porting::upgrade(item_name, extra);
+	lua_pushboolean(L, res);
 #else
 	// Not implemented on other platforms
 	lua_pushnil(L);
@@ -530,6 +581,10 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	lua_pushnumber(L,RenderingEngine::getDisplayDensity());
 	lua_settable(L, top);
 
+	lua_pushstring(L,"high_dpi");
+	lua_pushnumber(L,RenderingEngine::isHighDpi());
+	lua_settable(L, top);
+
 	lua_pushstring(L,"display_width");
 	lua_pushnumber(L,RenderingEngine::getDisplaySize().X);
 	lua_settable(L, top);
@@ -546,6 +601,35 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	lua_pushstring(L,"window_height");
 	lua_pushnumber(L, window_size.Y);
 	lua_settable(L, top);
+	return 1;
+}
+
+int ModApiUtil::l_get_system_ram(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+	const int res = porting::getTotalSystemMemory();
+	lua_pushinteger(L, res);
+
+	return 1;
+}
+
+int ModApiUtil::l_copy_to_clipboard(lua_State *L)
+{
+	IOSOperator *op = RenderingEngine::get_raw_device()->getOSOperator();
+	const char *text = luaL_checkstring(L, 1);
+	op->copyToClipboard(text);
+#if defined(__ANDROID__) || defined(__IOS__)
+	porting::showToast("Copied to clipboard");
+#endif
+	return 0;
+}
+
+// Note: This is the main menu & CSM get_translated_string, the server-side one
+int ModApiUtil::l_get_translated_string(lua_State * L)
+{
+	std::string string = luaL_checkstring(L, 1);
+	string = wide_to_utf8(translate_string(utf8_to_wide(string), g_client_translations));
+	lua_pushstring(L, string.c_str());
 	return 1;
 }
 #endif
@@ -585,6 +669,12 @@ void ModApiUtil::Initialize(lua_State *L, int top)
 	API_FCT(get_version);
 	API_FCT(sha1);
 
+#ifndef SERVER
+	API_FCT(upgrade);
+	API_FCT(get_secret_key);
+	API_FCT(get_system_ram);
+#endif
+
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
 }
@@ -611,6 +701,9 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(sha1);
 
 	API_FCT(get_screen_info);
+	API_FCT(get_system_ram);
+	API_FCT(copy_to_clipboard);
+	API_FCT(get_translated_string);
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
@@ -655,6 +748,9 @@ void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	API_FCT(upgrade);
 	API_FCT(get_secret_key);
 	API_FCT(get_screen_info);
+	API_FCT(get_system_ram);
+	API_FCT(copy_to_clipboard);
+	API_FCT(get_translated_string);
 #else
 	FATAL_ERROR("InitializeMainMenu called from server");
 #endif

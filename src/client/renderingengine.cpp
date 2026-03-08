@@ -24,10 +24,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "fontengine.h"
 #include "client.h"
 #include "clouds.h"
+#include "daynightratio.h"
 #include "util/numeric.h"
 #include "guiscalingfilter.h"
 #include "localplayer.h"
 #include "client/hud.h"
+#include "client/sky.h"
+#include "gui/guiEngine.h"
 #include "camera.h"
 #include "minimap.h"
 #include "clientmap.h"
@@ -39,7 +42,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "../gui/guiSkin.h"
 
 #if !defined(_WIN32) && !defined(__APPLE__) && !defined(__ANDROID__) && \
-		!defined(SERVER) && !defined(__HAIKU__) && !defined(__IOS__)
+		!defined(SERVER) && !defined(__HAIKU__)
 #define XORG_USED
 #endif
 #ifdef XORG_USED
@@ -49,8 +52,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
-#include <SDL_syswm.h>
+#include <SDL3/SDL.h>
 #endif
 
 #ifdef _WIN32
@@ -91,15 +93,22 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 {
 	sanity_check(!s_singleton);
 
+	const u16 screen_min_w = 640;
+	const u16 screen_min_h = 480;
+
 	// Resolution selection
 	bool fullscreen = g_settings->getBool("fullscreen");
-#if defined(__ANDROID__) || defined(__IOS__)
-	u16 screen_w = 0;
-	u16 screen_h = 0;
- #else
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	u16 screen_w = g_settings->getU16("screen_w");
 	u16 screen_h = g_settings->getU16("screen_h");
- #endif
+#elif defined(__ANDROID__) || defined(__IOS__)
+	fullscreen = true;
+	u16 screen_w = 0;
+	u16 screen_h = 0;
+#else
+	u16 screen_w = std::max(g_settings->getU16("screen_w"), screen_min_w);
+	u16 screen_h = std::max(g_settings->getU16("screen_h"), screen_min_h);
+#endif
 
 	// bpp, fsaa, vsync
 	bool vsync = g_settings->getBool("vsync");
@@ -162,6 +171,12 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 #endif
 	driver = m_device->getVideoDriver();
 
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+	SDL_Window *window = exposedData.OpenGLSDL.Window;
+	SDL_SetWindowMinimumSize(window, screen_min_w, screen_min_h);
+#endif
+
 	s_singleton = this;
 
 	auto skin = createSkin(m_device->getGUIEnvironment(),
@@ -174,12 +189,15 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	// We can get real screen size only after device initialization finished
 	set_default_settings();
 #endif
+
+	m_last_time = porting::getTimeMs();
 }
 
 RenderingEngine::~RenderingEngine()
 {
 	core.reset();
 	m_device->closeDevice();
+	m_device->drop();
 	s_singleton = nullptr;
 }
 
@@ -275,15 +293,13 @@ void RenderingEngine::setupTopLevelXorgWindow(const std::string &name)
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11)
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0)
 		return;
 
-	Display *x11_dpl = info.info.x11.display;
-	Window x11_win = info.info.x11.window;
+	Display *x11_dpl = (Display *)SDL_GetPointerProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+	Window x11_win = (Window)SDL_GetNumberProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
 #else
 	Display *x11_dpl = reinterpret_cast<Display *>(exposedData.OpenGLLinux.X11Display);
 	Window x11_win = reinterpret_cast<Window>(exposedData.OpenGLLinux.X11Window);
@@ -480,17 +496,15 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11) {
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0) {
 		delete[] icon_buffer;
 		return false;
 	}
 
-	Display *x11_dpl = info.info.x11.display;
-	Window x11_win = info.info.x11.window;
+	Display *x11_dpl = (Display *)SDL_GetPointerProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+	Window x11_win = (Window)SDL_GetNumberProperty(
+			SDL_GetWindowProperties(window), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
 #else
 	Display *x11_dpl = (Display *)exposedData.OpenGLLinux.X11Display;
 	Window x11_win = (Window)exposedData.OpenGLLinux.X11Window;
@@ -521,7 +535,7 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 */
 void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		gui::IGUIEnvironment *guienv, ITextureSource *tsrc, float dtime,
-		int percent, bool clouds)
+		int percent)
 {
 #ifdef __IOS__
 		if (m_device->isWindowMinimized())
@@ -530,6 +544,18 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		if (!m_device->isWindowFocused())
 			return;
 #endif
+
+	float fps_max = std::min(g_settings->getFloat("fps_max"), 30.0f);
+	u64 cur_time = porting::getTimeMs();
+	m_load_screen_dtime += dtime;
+
+	if (cur_time - m_last_time < 1000.0f / fps_max && percent == m_percent)
+		return;
+
+	dtime = m_load_screen_dtime;
+	m_load_screen_dtime = 0;
+	m_last_time = cur_time;
+	m_percent = percent;
 
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
 
@@ -541,22 +567,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 			guienv->addStaticText(text.c_str(), textrect, false, false);
 	guitext->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_UPPERLEFT);
 
-	bool cloud_menu_background = clouds && g_settings->getBool("menu_clouds");
-	if (cloud_menu_background) {
-		g_menuclouds->step(dtime * 3);
-		g_menuclouds->render();
-		get_video_driver()->beginScene(
-				true, true, video::SColor(255, 140, 186, 250));
-		g_menucloudsmgr->drawAll();
-	} else {
-		get_video_driver()->beginScene(true, true, video::SColor(255, 0, 0, 0));
-		video::ITexture *background_image = tsrc->getTexture("bg.png");
-
-		v2u32 screensize = driver->getScreenSize();
-		get_video_driver()->draw2DImage(background_image,
-			irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
-			irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
-	}
+	_draw_load_bg(guienv, tsrc, dtime);
 
 	// draw progress bar
 	if ((percent >= 0) && (percent <= 100)) {
@@ -574,18 +585,25 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 					progress_img_bg->getSize();
 #if !defined(__ANDROID__) && !defined(__IOS__)
 			float density = RenderingEngine::getDisplayDensity();
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+			u32 imgW = rangelim(img_size.Width, 256, 1024) * density;
+			u32 imgH = rangelim(img_size.Height, 32, 128) * density;
+#else
 			float gui_scaling = g_settings->getFloat("gui_scaling");
 			float scale = density * gui_scaling;
 			u32 imgW = rangelim(img_size.Width, 256, 1024) * scale;
 			u32 imgH = rangelim(img_size.Height, 32, 128) * scale;
+#endif
 #else
 			float imgRatio = (float) img_size.Height / img_size.Width;
 			u32 imgW = screensize.X / 2;
+#if ENABLE_GLES && !defined(__APPLE__)
 			if (!hasNPotSupport()) {
 				imgW = npot2(imgW);
 				if (imgW > (screensize.X * 0.7) && imgW >= 1024)
 					imgW /= 2;
 			}
+#endif
 			u32 imgH = imgW * imgRatio;
 #endif
 			v2s32 img_pos((screensize.X - imgW) / 2,
@@ -631,27 +649,93 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 	Draws the menu scene including (optional) cloud background.
 */
 void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
-		ITextureSource *tsrc, float dtime, bool clouds)
+		ITextureSource *tsrc, float dtime)
 {
-	bool cloud_menu_background = clouds && g_settings->getBool("menu_clouds");
-	if (cloud_menu_background) {
-		g_menuclouds->step(dtime * 3);
-		g_menuclouds->render();
-		get_video_driver()->beginScene(
-				true, true, video::SColor(255, 140, 186, 250));
-		g_menucloudsmgr->drawAll();
-	} else {
-		get_video_driver()->beginScene(true, true, video::SColor(255, 0, 0, 0));
-		video::ITexture *background_image = tsrc->getTexture("bg.png");
-
-		v2u32 screensize = driver->getScreenSize();
-		get_video_driver()->draw2DImage(background_image,
-			irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
-			irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
-	}
-
+	_draw_load_bg(guienv, tsrc, dtime);
 	guienv->drawAll();
 	get_video_driver()->endScene();
+}
+
+/*
+	Draws the cloud background used by draw_load_screen and draw_menu_scene
+*/
+
+void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
+									ITextureSource *tsrc, float dtime)
+{
+	driver->beginScene(true, true, m_sky_color);
+
+	const v2u32 screensize = driver->getScreenSize();
+
+	const bool cloud_menu_background = m_load_bg_clouds && g_settings->getBool("menu_clouds");
+	if (cloud_menu_background) {
+		scene::ICameraSceneNode *camera = g_menucloudsmgr->getActiveCamera();
+		camera->setAspectRatio((float)(screensize.X) / screensize.Y);
+
+		video::SColor fog_color;
+		video::E_FOG_TYPE fog_type = video::EFT_FOG_LINEAR;
+		f32 fog_start = 0;
+		f32 fog_end = 0;
+		f32 fog_density = 0;
+		bool fog_pixelfog = false;
+		bool fog_rangefog = false;
+		driver->getFog(fog_color, fog_type, fog_start, fog_end, fog_density,
+				fog_pixelfog, fog_rangefog);
+
+		const video::SColor sky_color = g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245);
+		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
+				fog_pixelfog, fog_rangefog);
+
+		if (g_menusky) {
+			u32 daynight_ratio = time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);
+			float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
+			g_menusky->update(GUIEngine::g_timeofday, time_brightness, time_brightness, true, CAMERA_MODE_FIRST, 3, 0);
+			g_menusky->render();
+			g_menuclouds->update(v3f(0, 0, 0), g_menusky->getCloudColor());
+		}
+		g_menuclouds->step(dtime * 3);
+		g_menuclouds->render();
+		g_menucloudsmgr->drawAll();
+	}
+
+	video::ITexture *texture = m_load_bg_texture.empty() ? nullptr : driver->getTexture(m_load_bg_texture.c_str());
+	if (texture == nullptr) {
+		if (!cloud_menu_background) {
+			video::ITexture *background_image = tsrc->getTexture("bg.png");
+
+			driver->draw2DImage(background_image,
+				irr::core::rect<s32>(0, 0, screensize.X * 4, screensize.Y * 4),
+				irr::core::rect<s32>(0, 0, screensize.X, screensize.Y), 0, 0, false);
+		}
+		return;
+	}
+
+	const v2u32 sourcesize = texture->getOriginalSize();
+
+	/* Draw background texture */
+	float aspectRatioScreen = (float) screensize.X / screensize.Y;
+	float aspectRatioSource = (float) sourcesize.X / sourcesize.Y;
+
+	int sourceX = aspectRatioSource > aspectRatioScreen ? (sourcesize.X - sourcesize.Y * aspectRatioScreen) / 2 : 0;
+	int sourceY = aspectRatioSource < aspectRatioScreen ? (sourcesize.Y - sourcesize.X / aspectRatioScreen) / 2 : 0;
+
+	draw2DImageFilterScaled(driver, texture,
+			core::rect<s32>(0, 0, screensize.X, screensize.Y),
+			core::rect<s32>(sourceX, sourceY, sourcesize.X - sourceX, sourcesize.Y - sourceY),
+			NULL, NULL, true);
+}
+
+void RenderingEngine::_draw_load_cleanup()
+{
+	if (!m_load_bg_texture.empty()) {
+		video::ITexture *texture = driver->getTexture(m_load_bg_texture.c_str());
+
+		if (texture)
+			driver->removeTexture(texture);
+	}
+
+	m_load_screen_dtime = 0;
+	m_percent = 0;
 }
 
 std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
@@ -697,10 +781,26 @@ void RenderingEngine::_finalize()
 	core.reset();
 }
 
-void RenderingEngine::_draw_scene(video::SColor skycolor, bool show_hud,
-		bool show_minimap, bool draw_wield_tool, bool draw_crosshair)
+void RenderingEngine::_clear_irrlicht_texture_cache()
 {
-	core->draw(skycolor, show_hud, show_minimap, draw_wield_tool, draw_crosshair);
+	for (u32 i = 0; i < driver->getTextureCount(); i++) {
+		irr::video::ITexture *texture = driver->getTextureByIndex(i);
+
+		if (texture) {
+			std::string filename = texture->getName().getPath().c_str();
+
+			if ((filename.find("TTFontGlyphPage") == 0) || (filename == "#DefaultFont"))
+				continue;
+
+			driver->removeTexture(texture);
+		}
+	}
+}
+
+void RenderingEngine::_draw_scene(video::SColor skycolor, bool show_hud,
+		bool show_minimap, bool draw_wield_tool, bool draw_crosshair, bool draw_nametags)
+{
+	core->draw(skycolor, show_hud, show_minimap, draw_wield_tool, draw_crosshair, draw_nametags);
 }
 
 const char *RenderingEngine::getVideoDriverName(irr::video::E_DRIVER_TYPE type)
@@ -745,11 +845,7 @@ static float calcDisplayDensity(irr::video::IVideoDriver *driver)
 
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
 
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWindowWMInfo(window, &info);
-
-	if (info.subsystem != SDL_SYSWM_X11)
+	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") != 0)
 		return g_settings->getFloat("screen_dpi") / 96.0;
 #endif
 
@@ -816,7 +912,11 @@ float RenderingEngine::getDisplayDensity()
 
 float RenderingEngine::getDisplayDensity()
 {
+#ifdef __APPLE__
+	return (g_settings->getFloat("screen_dpi") / 72.0) * g_settings->getFloat("display_density_factor");
+#else
 	return (g_settings->getFloat("screen_dpi") / 96.0) * g_settings->getFloat("display_density_factor");
+#endif
 }
 
 #endif
@@ -846,8 +946,37 @@ v2u32 RenderingEngine::getDisplaySize()
 		return v2u32(0, 0);
 	return engine->getWindowSize();
 }
+
+int RenderingEngine::getWindowSafeArea()
+{
+#ifdef __IOS__
+	// don't make it static
+	return MultiCraft::getScreenRound();
+#elif defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	if (engine) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			SDL_Rect safe;
+			if (window && SDL_GetWindowSafeArea(window, &safe))
+				return (safe.x > safe.y) ? safe.x : safe.y;
+		}
+	}
+
+	return 0;
+#else
+	return 0;
+#endif
+}
+
 #endif // __ANDROID__/__IOS__
 
+#ifdef HAVE_TOUCHSCREENGUI
 bool RenderingEngine::isTablet()
 {
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
@@ -857,15 +986,55 @@ bool RenderingEngine::isTablet()
 	return false;
 #endif
 }
+#endif
 
 bool RenderingEngine::isHighDpi()
 {
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	return g_settings->getFloat("screen_dpi") / 72.0f >= 2;
-#elif defined(__IOS__)
 	float density = RenderingEngine::getDisplayDensity();
-	return isTablet() ? (density >= 2) : (density >= 3);
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	return density >= 2.0f;
+#elif defined(__IOS__)
+	return isTablet() ? (density >= 2.0f) : (density >= 3.0f);
 #else
-	return RenderingEngine::getDisplayDensity() >= 3;
+	return density >= 3.0f;
+#endif
+}
+
+void RenderingEngine::startTextInput()
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, porting::hasRealKeyboard() ? "0" : "1");
+
+	if (engine && porting::hasRealKeyboard()) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			if (window)
+				SDL_StartTextInput(window);
+		}
+	}
+#endif
+}
+
+void RenderingEngine::stopTextInput()
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	RenderingEngine *engine = RenderingEngine::get_instance();
+
+	if (engine && porting::hasRealKeyboard()) {
+		video::IVideoDriver* driver = engine->getVideoDriver();
+
+		if (driver) {
+			const video::SExposedVideoData exposedData = driver->getExposedVideoData();
+			SDL_Window *window = exposedData.OpenGLSDL.Window;
+
+			if (window && SDL_TextInputActive(window))
+				SDL_StopTextInput(window);
+		}
+	}
 #endif
 }

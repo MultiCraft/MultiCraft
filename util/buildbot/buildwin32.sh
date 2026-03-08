@@ -39,9 +39,10 @@ sqlite3_version=3.41.2
 luajit_version=20230221
 leveldb_version=1.23
 zlib_version=1.2.13
-sdl_version=2.28.5
+sdl_version=3.2.20
 jpeg_version=3.0.1
 png_version=1.6.42
+zstd_version=1.4.9
 
 mkdir -p $packagedir
 mkdir -p $libdir
@@ -53,6 +54,8 @@ cd $builddir
 #	-c -O $packagedir/irrlicht-$irrlicht_version.zip
 [ -e $packagedir/zlib-$zlib_version.zip ] || wget http://minetest.kitsunemimi.pw/zlib-$zlib_version-win32.zip \
 	-c -O $packagedir/zlib-$zlib_version.zip
+[ -e $packagedir/zstd-$zstd_version.zip ] || wget http://minetest.kitsunemimi.pw/zstd-$zstd_version-win32.zip \
+	-c -O $packagedir/zstd-$zstd_version.zip
 [ -e $packagedir/libogg-$ogg_version.zip ] || wget http://minetest.kitsunemimi.pw/libogg-$ogg_version-win32.zip \
 	-c -O $packagedir/libogg-$ogg_version.zip
 [ -e $packagedir/libvorbis-$vorbis_version.zip ] || wget http://minetest.kitsunemimi.pw/libvorbis-$vorbis_version-win32.zip \
@@ -71,13 +74,14 @@ cd $builddir
 	-c -O $packagedir/libleveldb-$leveldb_version.zip
 [ -e $packagedir/openal_stripped.zip ] || wget http://minetest.kitsunemimi.pw/openal_stripped.zip \
 	-c -O $packagedir/openal_stripped.zip
-[ -e $packagedir/SDL2-devel-$sdl_version-mingw.zip ] || wget https://github.com/libsdl-org/SDL/releases/download/release-$sdl_version/SDL2-devel-$sdl_version-mingw.zip \
-	-c -O $packagedir/SDL2-devel-$sdl_version-mingw.zip
+[ -e $packagedir/SDL3-devel-$sdl_version-mingw.zip ] || wget https://github.com/libsdl-org/SDL/releases/download/release-$sdl_version/SDL3-devel-$sdl_version-mingw.zip \
+	-c -O $packagedir/SDL3-devel-$sdl_version-mingw.zip
 
 # Extract stuff
 cd $libdir
 # [ -d irrlicht ] || unzip -o $packagedir/irrlicht-$irrlicht_version.zip -d irrlicht
 [ -d zlib ] || unzip -o $packagedir/zlib-$zlib_version.zip -d zlib
+[ -d zstd ] || unzip -o $packagedir/zstd-$zstd_version.zip -d zstd
 [ -d libogg ] || unzip -o $packagedir/libogg-$ogg_version.zip -d libogg
 [ -d libvorbis ] || unzip -o $packagedir/libvorbis-$vorbis_version.zip -d libvorbis
 [ -d libcurl ] || unzip -o $packagedir/curl-$curl_version.zip -d libcurl
@@ -87,7 +91,7 @@ cd $libdir
 [ -d openal_stripped ] || unzip -o $packagedir/openal_stripped.zip
 [ -d luajit ] || unzip -o $packagedir/luajit-$luajit_version.zip -d luajit
 [ -d leveldb ] || unzip -o $packagedir/libleveldb-$leveldb_version.zip -d leveldb
-[ -d SDL2 ] || (unzip -o $packagedir/SDL2-devel-$sdl_version-mingw.zip SDL2-$sdl_version/i686-w64-mingw32/* -d SDL2 && mv SDL2/SDL2-$sdl_version/i686-w64-mingw32/* SDL2)
+[ -d libSDL ] || (unzip -o $packagedir/SDL3-devel-$sdl_version-mingw.zip SDL3-$sdl_version/i686-w64-mingw32/* -d libSDL && mv libSDL/SDL3-$sdl_version/i686-w64-mingw32/* libSDL && mv libSDL/lib/libSDL3.a libSDL/lib/libSDL.a)
 
 # Get libjpeg
 if [ ! -d libjpeg ]; then
@@ -138,7 +142,7 @@ fi
 
 # Get irrlicht
 if [ ! -d irrlicht ]; then
-	git clone --depth 1 -b SDL2 https://github.com/MoNTE48/Irrlicht irrlicht
+	git clone --depth 1 -b SDL https://github.com/MoNTE48/Irrlicht irrlicht
 
 	cd irrlicht/source/Irrlicht
 
@@ -150,7 +154,7 @@ if [ ! -d irrlicht ]; then
 		-DNO_IRR_COMPILE_WITH_OGLES2_ \
 		-DNO_IRR_COMPILE_WITH_DIRECT3D_9_ \
 		-I/usr/i686-w64-mingw32/include \
-		-I$libdir/SDL2/include/SDL2 \
+		-I$libdir/libSDL/include \
 		-I$libdir/zlib/include \
 		-I$libdir/libjpeg \
 		-I$libdir/libjpeg/build \
@@ -197,8 +201,8 @@ cmake .. \
 	\
 	-DUSE_STATIC_BUILD=1 \
 	-DUSE_SDL=1 \
-	-DSDL2_LIBRARIES="$libdir/SDL2/lib/libSDL2.a" \
-	-DSDL2_INCLUDE_DIRS="$libdir/SDL2/include/SDL2" \
+	-DSDL_LIBRARIES="$libdir/libSDL/lib/libSDL.a" \
+	-DSDL_INCLUDE_DIRS="$libdir/libSDL/include" \
 	\
 	-DCMAKE_C_FLAGS=" \
 		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
@@ -221,6 +225,10 @@ cmake .. \
 	\
 	-DJPEG_INCLUDE_DIR="$libdir/libjpeg/include" \
 	-DJPEG_LIBRARIES="$libdir/libjpeg/build/libjpeg.a" \
+	\
+	-DZSTD_INCLUDE_DIR=$libdir/zstd/include \
+	-DZSTD_LIBRARY=$libdir/zstd/lib/libzstd.dll.a \
+	-DZSTD_DLL=$libdir/zstd/bin/libzstd.dll \
 	\
 	-DLUA_INCLUDE_DIR=$libdir/luajit/include \
 	-DLUA_LIBRARY=$libdir/luajit/libluajit.a \

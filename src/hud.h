@@ -66,7 +66,9 @@ enum HudElementType {
 	HUD_ELEM_WAYPOINT  = 4,
 	HUD_ELEM_IMAGE_WAYPOINT = 5,
 	HUD_ELEM_COMPASS   = 6,
-	HUD_ELEM_MINIMAP   = 7
+	HUD_ELEM_MINIMAP   = 7,
+	// (some space so as to not conflict with Luanti)
+	HUD_ELEM_CSM_BUTTON = 100,
 };
 
 enum HudElementStat {
@@ -83,6 +85,10 @@ enum HudElementStat {
 	HUD_STAT_SIZE,
 	HUD_STAT_Z_INDEX,
 	HUD_STAT_TEXT2,
+	HUD_STAT_STYLE,
+	HUD_STAT_UNHIDEABLE,
+	// (some space so as to not conflict with Luanti)
+	HUD_STAT_TOUCH_ONLY = 100,
 };
 
 enum HudCompassDir {
@@ -107,6 +113,8 @@ struct HudElement {
 	v2s32 size;
 	s16 z_index = 0;
 	std::string text2;
+	bool unhideable = false;
+	bool touch_only = false;
 };
 
 extern const EnumString es_HudElementType[];

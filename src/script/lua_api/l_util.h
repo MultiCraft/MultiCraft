@@ -102,13 +102,22 @@ private:
 	static int l_sha1(lua_State *L);
 
 #ifndef SERVER
-	// upgrade(string)
+	// upgrade(string, string)
 	static int l_upgrade(lua_State *L);
 
 	// get_secret_key(string)
 	static int l_get_secret_key(lua_State *L);
 
 	static int l_get_screen_info(lua_State *L);
+
+	// get_system_ram()
+	static int l_get_system_ram(lua_State *L);
+
+	// copy_to_clipboard(text)
+	static int l_copy_to_clipboard(lua_State *L);
+
+	// get_translated_string(text) (client & main menu, not server)
+	static int l_get_translated_string(lua_State *L);
 #endif
 
 public:

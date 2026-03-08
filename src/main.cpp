@@ -38,6 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "player.h"
 #include "porting.h"
 #include "network/socket.h"
+#include "mapblock.h"
 #if USE_CURSES
 	#include "terminal_chat_console.h"
 #endif
@@ -49,7 +50,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "translation.h"
 #endif
 #ifdef HAVE_TOUCHSCREENGUI
-	#include "gui/touchscreengui.h"
+	#include "gui/touchscreengui_mc.h"
+#endif
+
+#ifdef __APPLE__
+	#include <MultiCraft-Swift.h>
+#endif
+
+#ifdef __IOS__
+	#include <SDL3/SDL_main.h>
 #endif
 
 // for version information only
@@ -111,6 +120,7 @@ static bool determine_subgame(GameParams *game_params);
 
 static bool run_dedicated_server(const GameParams &game_params, const Settings &cmd_args);
 static bool migrate_map_database(const GameParams &game_params, const Settings &cmd_args);
+static bool recompress_map_database(const GameParams &game_params, const Settings &cmd_args, const Address &addr);
 
 /**********************************************************************/
 
@@ -119,7 +129,7 @@ FileLogOutput file_log_output;
 
 static OptionList allowed_options;
 
-#if defined(__ANDROID__) || defined(__IOS__)
+#ifdef __ANDROID__
 int real_main(int argc, char *argv[])
 #else
 int main(int argc, char *argv[])
@@ -160,6 +170,8 @@ int main(int argc, char *argv[])
 
 #ifdef __ANDROID__
 	porting::initAndroid();
+#elif __APPLE__
+	MultiCraft::initApple();
 #endif
 	porting::initializePaths();
 
@@ -317,6 +329,8 @@ static void set_allowed_options(OptionList *allowed_options)
 		_("Migrate from current auth backend to another (Only works when using minetestserver or with --server)"))));
 	allowed_options->insert(std::make_pair("terminal", ValueSpec(VALUETYPE_FLAG,
 			_("Feature an interactive terminal (Only works when using minetestserver or with --server)"))));
+	allowed_options->insert(std::make_pair("recompress", ValueSpec(VALUETYPE_FLAG,
+			_("Recompress the blocks of the given map database."))));
 #ifndef SERVER
 	allowed_options->insert(std::make_pair("videomodes", ValueSpec(VALUETYPE_FLAG,
 			_("Show available video modes"))));
@@ -483,8 +497,7 @@ static bool create_userdata_path()
 {
 	bool success;
 #if defined(__ANDROID__) || defined(__IOS__)
-	if (fs::PathExists(porting::path_user))
-		success = true;
+	success = fs::PathExists(porting::path_user);
 #else
 	// Create user data directory
 	success = fs::CreateDir(porting::path_user);
@@ -822,9 +835,11 @@ static bool determine_subgame(GameParams *game_params)
 			gamespec = findSubgame(g_settings->get("default_game"));
 			infostream << "Using default gameid [" << gamespec.id << "]" << std::endl;
 			if (!gamespec.isValid()) {
+#ifdef SERVER
 				warningstream << "Game specified in default_game ["
 				            << g_settings->get("default_game")
 				            << "] is invalid." << std::endl;
+#endif
 				return false;
 			}
 		}
@@ -884,11 +899,11 @@ static bool run_dedicated_server(const GameParams &game_params, const Settings &
 	if (bind_addr.isIPv6() && !g_settings->getBool("enable_ipv6")) {
 		errorstream << "Unable to listen on "
 		            << bind_addr.serializeString()
-		            << L" because IPv6 is disabled" << std::endl;
+		            << " because IPv6 is disabled" << std::endl;
 		return false;
 	}
 
-	// Database migration
+	// Database migration/compression
 	if (cmd_args.exists("migrate"))
 		return migrate_map_database(game_params, cmd_args);
 
@@ -897,6 +912,9 @@ static bool run_dedicated_server(const GameParams &game_params, const Settings &
 
 	if (cmd_args.exists("migrate-auth"))
 		return ServerEnvironment::migrateAuthDatabase(game_params, cmd_args);
+
+	if (cmd_args.getFlag("recompress"))
+		return recompress_map_database(game_params, cmd_args, bind_addr);
 
 	if (cmd_args.exists("terminal")) {
 #if USE_CURSES
@@ -1045,5 +1063,71 @@ static bool migrate_map_database(const GameParams &game_params, const Settings &
 	else
 		actionstream << "world.mt updated" << std::endl;
 
+	return true;
+}
+
+static bool recompress_map_database(const GameParams &game_params, const Settings &cmd_args, const Address &addr)
+{
+	Settings world_mt;
+	const std::string world_mt_path = game_params.world_path + DIR_DELIM + "world.mt";
+
+	if (!world_mt.readConfigFile(world_mt_path.c_str())) {
+		errorstream << "Cannot read world.mt at " << world_mt_path << std::endl;
+		return false;
+	}
+	const std::string &backend = world_mt.get("backend");
+	Server server(game_params.world_path, game_params.game_spec, false, addr, false);
+	MapDatabase *db = ServerMap::createDatabase(backend, game_params.world_path, world_mt);
+
+	u32 count = 0;
+	u64 last_update_time = 0;
+	bool &kill = *porting::signal_handler_killstatus();
+	const u8 serialize_as_ver = SER_FMT_VER_HIGHEST_WRITE;
+	const s16 map_compression_level = rangelim(g_settings->getS16("map_compression_level_disk"), -1, 9);
+
+	// This is ok because the server doesn't actually run
+	std::vector<v3s16> blocks;
+	db->listAllLoadableBlocks(blocks);
+	db->beginSave();
+	std::istringstream iss(std::ios_base::binary);
+	std::ostringstream oss(std::ios_base::binary);
+	for (auto it = blocks.begin(); it != blocks.end(); ++it) {
+		if (kill) return false;
+
+		std::string data;
+		db->loadBlock(*it, &data);
+		if (data.empty()) {
+			errorstream << "Failed to load block " << PP(*it) << std::endl;
+			return false;
+		}
+
+		iss.str(data);
+		iss.clear();
+
+		MapBlock mb(nullptr, v3s16(0,0,0), &server);
+		u8 ver = readU8(iss);
+		mb.deSerialize(iss, ver, true);
+
+		oss.str("");
+		oss.clear();
+		writeU8(oss, serialize_as_ver);
+		mb.serialize(oss, serialize_as_ver, true, map_compression_level);
+
+		db->saveBlock(*it, oss.str());
+
+		count++;
+		if (count % 0xFF == 0 && porting::getTimeS() - last_update_time >= 1) {
+			std::cerr << " Recompressed " << count << " blocks, "
+				<< (100.0f * count / blocks.size()) << "% completed.\r";
+			db->endSave();
+			db->beginSave();
+			last_update_time = porting::getTimeS();
+		}
+	}
+	std::cerr << std::endl;
+	db->endSave();
+	db->compact();
+
+	actionstream << "Done, " << count << " blocks were recompressed." << std::endl;
 	return true;
 }

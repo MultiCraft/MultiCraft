@@ -14,6 +14,15 @@ function vector.new(a, b, c)
 	return {x=0, y=0, z=0}
 end
 
+function vector.zero()
+	return {x=0, y=0, z=0}
+end
+
+function vector.copy(v)
+	assert(v.x and v.y and v.z, "Invalid vector passed to vector.copy()")
+	return vector.new(v)
+end
+
 function vector.equals(a, b)
 	return a.x == b.x and
 	       a.y == b.y and

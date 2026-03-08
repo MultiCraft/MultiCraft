@@ -319,7 +319,7 @@ void read_object_properties(lua_State *L, int index,
 			if (read_color(L, -1, &color))
 				prop->nametag_bgcolor = color;
 		} else {
-			prop->nametag_bgcolor = nullopt;
+			prop->nametag_bgcolor = std::nullopt;
 		}
 	}
 	lua_pop(L, 1);
@@ -1922,6 +1922,9 @@ void read_hud_element(lua_State *L, HudElement *elem)
 			getintfield_default(L, 2, "z_index", 0)));
 	elem->text2   = getstringfield_default(L, 2, "text2", "");
 
+	elem->unhideable = getboolfield_default(L, 2, "unhideable", false);
+	elem->touch_only = getboolfield_default(L, 2, "touch_only", false);
+
 	// Deprecated, only for compatibility's sake
 	if (elem->dir == 0)
 		elem->dir = getintfield_default(L, 2, "dir", 0);
@@ -1992,6 +1995,12 @@ void push_hud_element(lua_State *L, HudElement *elem)
 
 	lua_pushstring(L, elem->text2.c_str());
 	lua_setfield(L, -2, "text2");
+
+	lua_pushboolean(L, elem->unhideable);
+	lua_setfield(L, -2, "unhideable");
+
+	lua_pushboolean(L, elem->touch_only);
+	lua_setfield(L, -2, "touch_only");
 }
 
 HudElementStat read_hud_change(lua_State *L, HudElement *elem, void **value)
@@ -2059,6 +2068,16 @@ HudElementStat read_hud_change(lua_State *L, HudElement *elem, void **value)
 		case HUD_STAT_TEXT2:
 			elem->text2 = luaL_checkstring(L, 4);
 			*value = &elem->text2;
+			break;
+		case HUD_STAT_STYLE:
+			break;
+		case HUD_STAT_UNHIDEABLE:
+			elem->unhideable = lua_toboolean(L, 4);
+			*value = &elem->unhideable;
+			break;
+		case HUD_STAT_TOUCH_ONLY:
+			elem->touch_only = lua_toboolean(L, 4);
+			*value = &elem->touch_only;
 			break;
 	}
 	return stat;

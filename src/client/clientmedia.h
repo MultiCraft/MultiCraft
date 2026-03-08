@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "irrlichttypes.h"
 #include "filecache.h"
-#include <ostream>
 #include <map>
 #include <set>
 #include <vector>
@@ -34,9 +33,14 @@ struct HTTPFetchResult;
 #define MTHASHSET_FILE_NAME "index.mth"
 
 // Store file into media cache (unless it exists already)
-// Validating the hash is responsibility of the caller
+// Caller should check the hash.
+// return true if something was updated
 bool clientMediaUpdateCache(const std::string &raw_hash,
 	const std::string &filedata);
+
+// Copy file on disk(!) into media cache (unless it exists already)
+bool clientMediaUpdateCacheCopy(const std::string &raw_hash,
+	const std::string &path);
 
 class ClientMediaDownloader
 {
@@ -97,6 +101,7 @@ private:
 	struct RemoteServerStatus {
 		std::string baseurl;
 		s32 active_count;
+		bool supports_bulk_download;
 	};
 
 	void initialStep(Client *client);
@@ -112,7 +117,7 @@ private:
 			Client *client);
 
 	std::string serializeRequiredHashSet();
-	static void deSerializeHashSet(const std::string &data,
+	static bool deSerializeHashSet(const std::string &data,
 			std::set<std::string> &result);
 
 	// Maps filename to file status
@@ -141,7 +146,7 @@ private:
 	s32 m_httpfetch_active = 0;
 	s32 m_httpfetch_active_limit = 0;
 	s32 m_outstanding_hash_sets = 0;
-	std::unordered_map<unsigned long, std::string> m_remote_file_transfers;
+	std::unordered_map<unsigned long, std::vector<std::string>> m_remote_file_transfers;
 
 	// All files up to this name have either been received from a
 	// remote server or failed on all remote servers, so those files

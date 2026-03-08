@@ -39,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/minimap.h"
 
 #ifdef HAVE_TOUCHSCREENGUI
-#include "gui/touchscreengui.h"
+#include "gui/touchscreengui_mc.h"
 #endif
 
 #define OBJECT_CROSSHAIR_LINE_SIZE 16
@@ -60,7 +60,17 @@ Hud::Hud(gui::IGUIEnvironment *guienv, Client *client, LocalPlayer *player,
 		RenderingEngine::getDisplayDensity() + 0.5f);
 	m_hotbar_imagesize *= m_hud_scaling;
 	m_padding = m_hotbar_imagesize / 12;
-	m_hud_move_upwards = g_settings->getU16("hud_move_upwards");
+#ifdef __IOS__
+	if (RenderingEngine::getWindowSafeArea() > 0) {
+		const char *model = MultiCraft::getDeviceModel();
+		if (isDevice8and3Inch(model))
+			m_hud_move_upwards = 15;
+		else if (isDevice12and9Inch(model) || isDeviceiPhone12Series(model))
+			m_hud_move_upwards = 20;
+		else
+			m_hud_move_upwards = 25;
+	}
+#endif
 
 	for (auto &hbar_color : hbar_colors)
 		hbar_color = video::SColor(255, 255, 255, 255);
@@ -331,10 +341,19 @@ bool Hud::calculateScreenPos(const v3s16 &camera_offset, HudElement *e, v2s32 *p
 	return true;
 }
 
-void Hud::drawLuaElements(const v3s16 &camera_offset)
+void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 {
 	u32 text_height = g_fontengine->getTextHeight();
 	irr::gui::IGUIFont* font = g_fontengine->getFont();
+
+	bool show_touch_only = false;
+#if HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui) {
+		g_touchscreengui->clearCSMButtons();
+		show_touch_only = g_touchscreengui->isVisible() &&
+				g_touchscreengui->getCurrentState() == STATE_DEFAULT;
+	}
+#endif
 
 	// Reorder elements by z_index
 	std::vector<HudElement*> elems;
@@ -345,6 +364,13 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 		if (!e)
 			continue;
 
+		// Skip showing HUDs that aren't unhideable
+		if (!show_hud && !e->unhideable)
+			continue;
+
+		if (!show_touch_only && e->touch_only)
+			continue;
+
 		auto it = elems.begin();
 		while (it != elems.end() && (*it)->z_index <= e->z_index)
 			++it;
@@ -352,7 +378,16 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 		elems.insert(it, e);
 	}
 
+	// Note when rebasing: This can just be removed when the Lua HUD hotbar is
+	// added.
+	bool hotbar_added = !show_hud;
+
 	for (HudElement *e : elems) {
+		if (!hotbar_added && e->z_index >= 0) {
+			// Add the hotbar at z_index = 0
+			hotbar_added = true;
+			drawHotbar();
+		}
 
 		v2s32 pos(floor(e->pos.X * (float) m_screensize.X + 0.5),
 				floor(e->pos.Y * (float) m_screensize.Y + 0.5));
@@ -438,26 +473,32 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				if (!calculateScreenPos(camera_offset, e, &pos))
 					break;
 			}
-			case HUD_ELEM_IMAGE: {
+			case HUD_ELEM_IMAGE:
+			case HUD_ELEM_CSM_BUTTON: {
 				video::ITexture *texture = tsrc->getTexture(e->text);
+#if HAVE_TOUCHSCREENGUI
+				if (e->type == HUD_ELEM_CSM_BUTTON && g_touchscreengui &&
+						g_touchscreengui->getPressingCSMButton() == e->name &&
+						!e->text2.empty())
+					texture = tsrc->getTexture(e->text2);
+#endif
 				if (!texture)
 					continue;
 
 				const video::SColor color(255, 255, 255, 255);
 				const video::SColor colors[] = {color, color, color, color};
 				core::dimension2di imgsize(texture->getOriginalSize());
-				v2s32 dstsize(imgsize.Width * e->scale.X,
-				              imgsize.Height * e->scale.Y);
+				v2s32 dstsize(imgsize.Width * e->scale.X * m_scale_factor,
+				              imgsize.Height * e->scale.Y * m_scale_factor);
 				if (e->scale.X < 0)
 					dstsize.X = m_screensize.X * (e->scale.X * -0.01);
 				if (e->scale.Y < 0)
 					dstsize.Y = m_screensize.Y * (e->scale.Y * -0.01);
-				dstsize.X *= m_scale_factor;
-				dstsize.Y *= m_scale_factor;
 				v2s32 offset((e->align.X - 1.0) * dstsize.X / 2,
 				             (e->align.Y - 1.0) * dstsize.Y / 2);
 
-				if ((dstsize.Y + pos.Y + offset.Y + e->offset.Y * m_scale_factor) > m_displaycenter.Y)
+				if ((dstsize.Y + pos.Y + offset.Y + e->offset.Y * m_scale_factor) > m_displaycenter.Y &&
+						e->scale.X >= 0 && e->scale.Y >= 0)
 					offset.Y -= m_hud_move_upwards;
 				core::rect<s32> rect(0, 0, dstsize.X, dstsize.Y);
 				rect += pos + offset + v2s32(e->offset.X * m_scale_factor,
@@ -465,6 +506,12 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 				draw2DImageFilterScaled(driver, texture, rect,
 					core::rect<s32>(core::position2d<s32>(0,0), imgsize),
 					NULL, colors, true);
+
+#if HAVE_TOUCHSCREENGUI
+				if (e->type == HUD_ELEM_CSM_BUTTON && g_touchscreengui)
+					g_touchscreengui->registerCSMButton(e->name, rect);
+#endif
+
 				break; }
 			case HUD_ELEM_COMPASS: {
 				video::ITexture *texture = tsrc->getTexture(e->text);
@@ -534,6 +581,9 @@ void Hud::drawLuaElements(const v3s16 &camera_offset)
 					<< " due to unrecognized type" << std::endl;
 		}
 	}
+
+	if (!hotbar_added)
+		drawHotbar();
 }
 
 void Hud::drawCompassTranslate(HudElement *e, video::ITexture *texture,
@@ -744,7 +794,7 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 }
 
 
-void Hud::drawHotbar(u16 playeritem) {
+void Hud::drawHotbar() {
 
 	v2s32 centerlowerpos(m_displaycenter.X, m_screensize.Y);
 
@@ -754,6 +804,7 @@ void Hud::drawHotbar(u16 playeritem) {
 		return;
 	}
 
+	u16 playeritem = player->getWieldIndex();
 	s32 hotbar_itemcount = player->hud_hotbar_itemcount;
 	s32 width = hotbar_itemcount * (m_hotbar_imagesize + m_padding * 2);
 	v2s32 pos = centerlowerpos - v2s32(width / 2, m_hotbar_imagesize + m_padding * 2.4);
@@ -967,6 +1018,8 @@ void drawItemStack(
 
 	const ItemDefinition &def = item.getDefinition(client->idef());
 
+	bool draw_overlay = false;
+
 	// Render as mesh if animated or no inventory image
 	if ((enable_animations && rotation_kind < IT_ROT_NONE) || def.inventory_image.empty()) {
 		ItemMesh *imesh = client->idef()->getWieldMesh(def.name, client);
@@ -1059,6 +1112,8 @@ void drawItemStack(
 		driver->setTransform(video::ETS_VIEW, oldViewMat);
 		driver->setTransform(video::ETS_PROJECTION, oldProjMat);
 		driver->setViewPort(oldViewPort);
+
+		draw_overlay = def.type == ITEM_NODE && def.inventory_image.empty();
 	} else { // Otherwise just draw as 2D
 		video::ITexture *texture = client->idef()->getInventoryTexture(def.name, client);
 		if (!texture)
@@ -1070,11 +1125,12 @@ void drawItemStack(
 		draw2DImageFilterScaled(driver, texture, rect,
 			core::rect<s32>({0, 0}, core::dimension2di(texture->getOriginalSize())),
 			clip, colors, true);
+
+		draw_overlay = true;
 	}
 
 	// draw the inventory_overlay
-	if (def.type == ITEM_NODE && def.inventory_image.empty() &&
-			!def.inventory_overlay.empty()) {
+	if (!def.inventory_overlay.empty() && draw_overlay) {
 		ITextureSource *tsrc = client->getTextureSource();
 		video::ITexture *overlay_texture = tsrc->getTexture(def.inventory_overlay);
 		core::dimension2d<u32> dimens = overlay_texture->getOriginalSize();

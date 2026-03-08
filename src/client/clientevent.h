@@ -110,6 +110,8 @@ struct ClientEvent
 			v2s32 *size;
 			s16 z_index;
 			std::string *text2;
+			bool unhideable;
+			bool touch_only;
 		} hudadd;
 		struct
 		{

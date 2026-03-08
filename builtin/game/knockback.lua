@@ -23,7 +23,7 @@ local function vector_absmax(v)
 	return max(max(abs(v.x), abs(v.y)), abs(v.z))
 end
 
-local vdivide, vlength, vsubtract = vector.divide, vector.length, vector.subtract
+local vadd, vdivide, vlength, vsubtract = vector.add, vector.divide, vector.length, vector.subtract
 core.register_on_punchplayer(function(player, hitter, time_from_last_punch, tool_capabilities, unused_dir, damage)
 	if player:get_hp() == 0 then
 		return -- RIP
@@ -31,7 +31,8 @@ core.register_on_punchplayer(function(player, hitter, time_from_last_punch, tool
 
 	-- Server::handleCommand_Interact() adds eye offset to one but not the other
 	-- so the direction is slightly off, calculate it ourselves
-	local dir = vsubtract(player:get_pos(), hitter:get_pos())
+	local player_pos = player:get_pos()
+	local dir = vsubtract(player_pos, hitter:get_pos())
 	local d = vlength(dir)
 	if d ~= 0.0 then
 		dir = vdivide(dir, d)
@@ -44,5 +45,7 @@ core.register_on_punchplayer(function(player, hitter, time_from_last_punch, tool
 		return -- barely noticeable, so don't even send
 	end
 
-	player:add_velocity(kdir)
+	if core.is_valid_pos(vadd(player_pos, kdir)) then
+		player:add_velocity(kdir)
+	end
 end)

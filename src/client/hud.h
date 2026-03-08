@@ -59,7 +59,6 @@ public:
 			Inventory *inventory);
 	~Hud();
 
-	void drawHotbar(u16 playeritem);
 	void resizeHotbar();
 	void drawCrosshair();
 	void drawSelectionMesh();
@@ -83,7 +82,7 @@ public:
 
 	bool hasElementOfType(HudElementType type);
 
-	void drawLuaElements(const v3s16 &camera_offset);
+	void drawLuaElements(const v3s16 &camera_offset, bool show_hud);
 
 private:
 	bool calculateScreenPos(const v3s16 &camera_offset, HudElement *e, v2s32 *pos);
@@ -103,6 +102,8 @@ private:
 	void drawCompassRotate(HudElement *e, video::ITexture *texture,
 			const core::rect<s32> &rect, int way);
 
+	void drawHotbar();
+
 	float m_hud_scaling; // cached minetest setting
 	float m_scale_factor;
 	v3s16 m_camera_offset;
@@ -110,7 +111,7 @@ private:
 	v2s32 m_displaycenter;
 	s32 m_hotbar_imagesize; // Takes hud_scaling into account, updated by resizeHotbar()
 	s32 m_padding; // Takes hud_scaling into account, updated by resizeHotbar()
-	s32 m_hud_move_upwards;
+	s32 m_hud_move_upwards = 0;
 	video::SColor hbar_colors[4];
 
 	std::vector<aabb3f> m_selection_boxes;

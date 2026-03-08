@@ -40,10 +40,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "script/scripting_client.h"
 #include "util/serialize.h"
 #include "util/srp.h"
-#include "util/sha1.h"
+#include "util/hashing.h"
 #include "tileanimation.h"
 #include "gettext.h"
 #include "skyparams.h"
+#include "client/renderingengine.h"
 
 void Client::handleCommand_Deprecated(NetworkPacket* pkt)
 {
@@ -83,6 +84,7 @@ void Client::handleCommand_Hello(NetworkPacket* pkt)
 
 	m_server_ser_ver = serialization_ver;
 	m_proto_ver = proto_ver;
+	m_compression_mode = compression_mode;
 
 	//TODO verify that username_legacy matches sent username, only
 	// differs in casing (make both uppercase and compare)
@@ -262,7 +264,10 @@ void Client::handleCommand_NodemetaChanged(NetworkPacket *pkt)
 
 	std::istringstream is(pkt->readLongString(), std::ios::binary);
 	std::stringstream sstr;
-	decompressZlib(is, sstr);
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
+		decompressZstd(is, sstr);
+	else
+		decompressZlib(is, sstr);
 
 	NodeMetadataList meta_updates_list(false);
 	meta_updates_list.deSerialize(sstr, m_itemdef, true);
@@ -395,6 +400,22 @@ void Client::handleCommand_TimeOfDay(NetworkPacket* pkt)
 	//infostream << "Client: time_of_day=" << time_of_day
 	//		<< " time_speed=" << time_speed
 	//		<< " dr=" << dr << std::endl;
+}
+
+void Client::handleCommand_CopyToClipboard(NetworkPacket *pkt)
+{
+	/*
+	 *	std::string text
+	 */
+
+	std::string text;
+	*pkt >> text;
+
+	IOSOperator *op = RenderingEngine::get_raw_device()->getOSOperator();
+	op->copyToClipboard(text.c_str());
+#if defined(__ANDROID__) || defined(__IOS__)
+	porting::showToast("Copied to clipboard");
+#endif
 }
 
 void Client::handleCommand_ChatMessage(NetworkPacket *pkt)
@@ -762,7 +783,10 @@ void Client::handleCommand_NodeDef(NetworkPacket* pkt)
 	// Decompress node definitions
 	std::istringstream tmp_is(pkt->readLongString(), std::ios::binary);
 	std::ostringstream tmp_os;
-	decompressZlib(tmp_is, tmp_os);
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
+		decompressZstd(tmp_is, tmp_os);
+	else
+		decompressZlib(tmp_is, tmp_os);
 
 	// Deserialize node definitions
 	std::istringstream tmp_is2(tmp_os.str());
@@ -782,7 +806,10 @@ void Client::handleCommand_ItemDef(NetworkPacket* pkt)
 	// Decompress item definitions
 	std::istringstream tmp_is(pkt->readLongString(), std::ios::binary);
 	std::ostringstream tmp_os;
-	decompressZlib(tmp_is, tmp_os);
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
+		decompressZstd(tmp_is, tmp_os);
+	else
+		decompressZlib(tmp_is, tmp_os);
 
 	// Deserialize node definitions
 	std::istringstream tmp_is2(tmp_os.str());
@@ -1065,6 +1092,9 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	v2s32 size;
 	s16 z_index = 0;
 	std::string text2;
+	u32 style = 0; // Used in later MT versions, here for compatibility
+	bool unhideable = false;
+	bool touch_only = false;
 
 	*pkt >> server_id >> type >> pos >> name >> scale >> text >> number >> item
 		>> dir >> align >> offset;
@@ -1073,6 +1103,9 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 		*pkt >> size;
 		*pkt >> z_index;
 		*pkt >> text2;
+		*pkt >> style;
+		*pkt >> unhideable;
+		*pkt >> touch_only;
 	} catch(PacketError &e) {};
 
 	ClientEvent *event = new ClientEvent();
@@ -1092,6 +1125,8 @@ void Client::handleCommand_HudAdd(NetworkPacket* pkt)
 	event->hudadd.size      = new v2s32(size);
 	event->hudadd.z_index   = z_index;
 	event->hudadd.text2     = new std::string(text2);
+	event->hudadd.unhideable = unhideable;
+	event->hudadd.touch_only = touch_only;
 	m_client_event_queue.push(event);
 }
 
@@ -1506,14 +1541,7 @@ void Client::handleCommand_MediaPush(NetworkPacket *pkt)
 	}
 
 	// Compute and check checksum of data
-	std::string computed_hash;
-	{
-		SHA1 ctx;
-		ctx.addBytes(filedata.c_str(), filedata.size());
-		unsigned char *buf = ctx.getDigest();
-		computed_hash.assign((char*) buf, 20);
-		free(buf);
-	}
+	std::string computed_hash = hashing::sha1(filedata);
 	if (raw_hash != computed_hash) {
 		verbosestream << "Hash of file data mismatches, ignoring." << std::endl;
 		return;
@@ -1643,6 +1671,12 @@ void Client::handleCommand_MinimapModes(NetworkPacket *pkt)
 			m_minimap->addMode(MinimapType(type), size, label, texture, scale);
 	}
 
-	if (m_minimap)
-		m_minimap->setModeIndex(mode);
+	if (m_minimap) {
+		m_minimap->setOrUseSavedModeIndex(mode);
+
+		// Update the separate (for some reason) show minimap value
+		const u32 hud_flags = m_env.getLocalPlayer()->hud_flags;
+		if (hud_flags & HUD_FLAG_MINIMAP_VISIBLE)
+			showMinimap(m_minimap->getModeDef().type != MINIMAP_TYPE_OFF);
+	}
 }

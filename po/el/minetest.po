@@ -1432,6 +1432,14 @@ msgid "HUD shown"
 msgstr ""
 
 #: src/client/gameui.cpp
+msgid "Nametags hidden"
+msgstr "Κρυφές ετικέτες ονομάτων"
+
+#: src/client/gameui.cpp
+msgid "Nametags shown"
+msgstr "Εμφανίζονται ετικέτες ονομάτων"
+
+#: src/client/gameui.cpp
 msgid "Profiler hidden"
 msgstr ""
 
@@ -1854,6 +1862,18 @@ msgstr ""
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle HUD"
 msgstr ""
+
+#: src/gui/guiKeyChangeMenu.cpp
+msgid "Toggle nametags"
+msgstr "Εναλλαγή ετικετών ονομάτων"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Hide interface"
+msgstr "Απόκρυψη διεπαφής"
+
+#: src/gui/touchscrengui_mc.cpp
+msgid "Use double-tap to show interface"
+msgstr "Χρησιμοποιήστε διπλό πάτημα για να εμφανίσετε τη διασύνδεση"
 
 #: src/gui/guiKeyChangeMenu.cpp
 msgid "Toggle chat log"
@@ -4315,6 +4335,13 @@ msgstr ""
 
 #: src/settings_translation_file.cpp
 msgid ""
+"Key for toggling the display of nametags.\n"
+"See http://irrlicht.sourceforge.net/docu/namespaceirr."
+"html#a54da2a0e231901735e3da1b0edf72eb3"
+msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid ""
 "Key for toggling the display of the HUD.\n"
 "See http://irrlicht.sourceforge.net/docu/namespaceirr."
 "html#a54da2a0e231901735e3da1b0edf72eb3"
@@ -4962,6 +4989,10 @@ msgstr ""
 msgid ""
 "Name of the server, to be displayed when players join and in the serverlist."
 msgstr ""
+
+#: src/settings_translation_file.cpp
+msgid "Nametags toggle key"
+msgstr "Πλήκτρο εναλλαγής ετικετών ονομάτων"
 
 #: src/settings_translation_file.cpp
 msgid "Near plane"

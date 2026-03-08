@@ -41,7 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gettime.h"
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 #ifdef _MSC_VER
@@ -114,6 +114,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #if defined(__APPLE__)
 	#include <mach-o/dyld.h>
 	#include <CoreFoundation/CoreFoundation.h>
+	#include <MultiCraft-Swift.h>
 #endif
 
 #ifndef _WIN32 // Posix
@@ -124,10 +125,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 		#include <mach/clock.h>
 		#include <mach/mach.h>
 	#endif
-#endif
-
-#if defined(__APPLE__)
-	#include "wrapper.h"
 #endif
 
 namespace porting
@@ -347,7 +344,7 @@ int mt_snprintf(char *buf, const size_t buf_size, const char *fmt, ...);
  * @param url The URL
  * @return true on success, false on failure
  */
-bool open_url(const std::string &url);
+bool open_url(const std::string &url, bool untrusted = false);
 
 /**
  * Opens a directory in the default file manager
@@ -359,16 +356,20 @@ bool open_url(const std::string &url);
  */
 
 #if defined(__APPLE__)
+bool upgrade(const std::string &item, const std::string &extra = "");
+
 std::string getSecretKey(const std::string &key);
 
 float getScreenScale();
+
+NORETURN void finishGame(const std::string &exc);
 #endif
 
 /**
  * Get total device memory
  */
 
-float getTotalSystemMemory();
+int getTotalSystemMemory();
 
 bool open_directory(const std::string &path);
 

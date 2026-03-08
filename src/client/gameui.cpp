@@ -73,7 +73,7 @@ void GameUI::init(Client *client)
 
 	// At the middle of the screen
 	// Object infos are shown in this
-	u32 chat_font_height = m_guitext_chat->getActiveFont()->getDimension(L"Ay").Height;
+	//u32 chat_font_height = m_guitext_chat->getActiveFont()->getDimension(L"Ay").Height;
 	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
 	s32 text_height = g_fontengine->getTextHeight() * 6;
 	s32 top_y = (screensize.Y - text_height) / 2;
@@ -180,12 +180,10 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 	setStaticText(m_guitext_info, m_infotext.c_str());
 	m_guitext_info->setVisible(m_flags.show_hud && g_menumgr.menuCount() == 0);
 
-	static const float statustext_time_max = 1.5f;
-
 	if (!m_statustext.empty()) {
 		m_statustext_time += dtime;
 
-		if (m_statustext_time >= statustext_time_max) {
+		if (m_statustext_time >= m_statustext_time_max) {
 			clearStatusText();
 			m_statustext_time = 0.0f;
 		}
@@ -210,7 +208,7 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		video::SColor final_color = m_statustext_initial_color;
 		final_color.setAlpha(0);
 		video::SColor fade_color = m_statustext_initial_color.getInterpolated_quadratic(
-			m_statustext_initial_color, final_color, m_statustext_time / statustext_time_max);
+			m_statustext_initial_color, final_color, m_statustext_time / m_statustext_time_max);
 		m_guitext_status->setOverrideColor(fade_color);
 		m_guitext_status->enableOverrideColor(true);
 	}
@@ -255,10 +253,10 @@ void GameUI::showMinimap(bool show)
 	m_flags.show_minimap = show;
 }
 
-void GameUI::showTranslatedStatusText(const char *str)
+void GameUI::showTranslatedStatusText(const char *str, float time)
 {
 	const wchar_t *wmsg = wgettext(str);
-	showStatusText(wmsg);
+	showStatusText(wmsg, time);
 	delete[] wmsg;
 }
 
@@ -339,6 +337,15 @@ void GameUI::toggleHud()
 	else
 		showTranslatedStatusText("HUD hidden");
 	m_chat_text_needs_update = true;
+}
+
+void GameUI::toggleNametags()
+{
+	m_flags.show_nametags = !m_flags.show_nametags;
+	if (m_flags.show_nametags)
+		showTranslatedStatusText("Nametags shown");
+	else
+		showTranslatedStatusText("Nametags hidden");
 }
 
 void GameUI::toggleProfiler()

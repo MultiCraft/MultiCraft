@@ -73,6 +73,11 @@ public:
 		video::ITexture* slotbg_h_texture,
 		video::ITexture* slotbg_p_texture,
 		const core::rect<s32> &slotbg_middle,
+		const bool fgimg_when_full,
+		video::ITexture* slotfg_n_texture,
+		video::ITexture* slotfg_h_texture,
+		video::ITexture* slotfg_p_texture,
+		const core::rect<s32> &slotfg_middle,
 		GUIFormSpecMenu *fs_menu,
 		const Options &options,
 		gui::IGUIFont *font);
@@ -107,6 +112,10 @@ public:
 	s32 getItemIndexAtPos(v2s32 p) const;
 
 private:
+	void drawSlotBg(const core::rect<s32> rect, const bool hovering,
+		video::ITexture* normal, video::ITexture* hovered,
+		video::ITexture* pressed, const core::rect<s32> middle);
+
 	InventoryManager *m_invmgr;
 	const InventoryLocation m_inventoryloc;
 	const std::string m_listname;
@@ -126,6 +135,12 @@ private:
 	video::ITexture* m_slotbg_h_texture;
 	video::ITexture* m_slotbg_p_texture;
 	core::rect<s32> m_slotbg_middle;
+
+	video::ITexture* m_slotfg_n_texture;
+	video::ITexture* m_slotfg_h_texture;
+	video::ITexture* m_slotfg_p_texture;
+	core::rect<s32> m_slotfg_middle;
+	bool m_fgimg_when_full;
 
 	// the GUIFormSpecMenu can have an item selected and co.
 	GUIFormSpecMenu *m_fs_menu;

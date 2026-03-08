@@ -428,8 +428,8 @@ u32 ShaderSource::getShaderIdDirect(const std::string &name,
 	// Check if already have such instance
 	for(u32 i=0; i<m_shaderinfo_cache.size(); i++){
 		ShaderInfo *info = &m_shaderinfo_cache[i];
-		if(info->name == name && info->material_type == material_type &&
-			info->drawtype == drawtype)
+		if(info->name == name && info->material_type == material_type /*&&
+			info->drawtype == drawtype*/)
 			return i;
 	}
 
@@ -603,15 +603,12 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 			)";
 	}
 
-	bool use_discard = use_gles;
-#if defined(__unix__) && !defined(__APPLE__)
-	// For renderers that should use discard instead of GL_ALPHA_TEST
-	const char* gl_renderer = (const char*)glGetString(GL_RENDERER);
-	if (strstr(gl_renderer, "GC7000"))
-		use_discard = true;
-#endif
-	if (use_discard && shaderinfo.base_material != video::EMT_SOLID)
-		shaders_header << "#define USE_DISCARD 1\n";
+	if (use_gles) {
+		if (shaderinfo.base_material == video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF)
+			shaders_header << "#define USE_ALPHA_TEST_DISCARD 1\n";
+		else if (shaderinfo.base_material != video::EMT_SOLID)
+			shaders_header << "#define USE_DISCARD 1\n";
+	}
 
 #define PROVIDE(constant) shaders_header << "#define " #constant " " << (int)constant << "\n"
 
@@ -649,7 +646,7 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 #undef PROVIDE
 
 	shaders_header << "#define MATERIAL_TYPE " << (int)material_type << "\n";
-	shaders_header << "#define DRAW_TYPE " << (int)drawtype << "\n";
+	//shaders_header << "#define DRAW_TYPE " << (int)drawtype << "\n";
 
 	bool enable_waving_water = g_settings->getBool("enable_waving_water");
 	shaders_header << "#define ENABLE_WAVING_WATER " << enable_waving_water << "\n";

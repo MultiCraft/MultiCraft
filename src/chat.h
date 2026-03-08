@@ -215,6 +215,8 @@ public:
 	// Get length of cursor selection
 	s32 getCursorLength() const { return m_cursor_len; }
 
+	int getCursorPos() { return m_cursor; }
+
 	// Cursor operations
 	enum CursorOp {
 		CURSOROP_MOVE,
@@ -245,7 +247,8 @@ public:
 	//     moves the cursor to the end of the line.
 	//   cursorOperation(CURSOROP_DELETE, CURSOROP_DIR_LEFT, CURSOROP_SCOPE_WORD)
 	//     deletes the word to the left of the cursor.
-	void cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope scope);
+	void cursorOperation(CursorOp op, CursorOpDir dir, CursorOpScope scope,
+			s32 cluster_size = 1);
 
 	void setCursorPos(int cursor_pos);
 	void setViewPosition(int view);

@@ -201,6 +201,8 @@ namespace gui
 
 		void setText(const EnrichedString &text);
 
+		void setCenterEachLine(const bool centerEachLine);
+
 	private:
 
 		//! Breaks the single text line.
@@ -212,6 +214,7 @@ namespace gui
 		bool Background;
 		bool RestrainTextInside;
 		bool RightToLeft;
+		bool CenterEachLine;
 
 		gui::IGUIFont* OverrideFont;
 		gui::IGUIFont* LastBreakFont; // stored because: if skin changes, line break must be recalculated.

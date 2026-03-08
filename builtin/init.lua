@@ -34,11 +34,23 @@ dofile(commonpath .. "strict.lua")
 dofile(commonpath .. "serialize.lua")
 dofile(commonpath .. "misc_helpers.lua")
 
+if core.global_exists("jit") and jit.status() then
+	jit.opt.start("maxtrace=4000", "maxrecord=8000", "minstitch=2", "maxmcode=8192")
+	core.log("action", "Applied JIT compiler optimizations")
+end
+
+BIDI_SUPPORTED = true -- ToDo: will be removed in future releases
+
 if INIT == "game" then
 	dofile(gamepath .. "init.lua")
 	assert(not core.get_http_api)
 elseif INIT == "mainmenu" then
+	local mainmenudir = core.get_mainmenu_path() .. DIR_DELIM
+	dofile(mainmenudir .. "register.lua")
 	local mm_script = core.settings:get("main_menu_script")
+	if not mm_script or mm_script == "" then
+		mm_script = scriptdir .. ".." .. DIR_DELIM .. "menu" .. DIR_DELIM .. "init.lua"
+	end
 	local custom_loaded = false
 	if mm_script and mm_script ~= "" then
 		local testfile = io.open(mm_script, "r")
@@ -48,12 +60,12 @@ elseif INIT == "mainmenu" then
 			custom_loaded = true
 			core.log("info", "Loaded custom main menu script: "..mm_script)
 		else
-			core.log("error", "Failed to load custom main menu script: "..mm_script)
+			core.log("info", "Failed to load custom main menu script: "..mm_script)
 			core.log("info", "Falling back to default main menu script")
 		end
 	end
 	if not custom_loaded then
-		dofile(core.get_mainmenu_path() .. DIR_DELIM .. "init.lua")
+		dofile(mainmenudir .. "init.lua")
 	end
 elseif INIT == "async" then
 	dofile(asyncpath .. "init.lua")

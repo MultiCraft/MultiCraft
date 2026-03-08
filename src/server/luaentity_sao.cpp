@@ -109,6 +109,9 @@ void LuaEntitySAO::addedToEnvironment(u32 dtime_s)
 			luaentity_Activate(m_id, m_init_state, dtime_s);
 	} else {
 		m_prop.infotext = m_init_name;
+#ifdef NDEBUG
+		markForRemoval(); // remove unknown entities
+#endif
 	}
 }
 

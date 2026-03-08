@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "gui/mainmenumanager.h"
 #include "clouds.h"
+#include "daynightratio.h"
 #include "server.h"
 #include "filesys.h"
 #include "gui/guiMainMenu.h"
@@ -70,6 +71,11 @@ static void dump_start_data(const GameStartData &data)
 
 ClientLauncher::~ClientLauncher()
 {
+	RenderingEngine *rendering_engine = RenderingEngine::get_instance();
+
+	if (rendering_engine && rendering_engine->get_raw_device())
+		rendering_engine->get_raw_device()->setEventReceiver(nullptr);
+
 	delete receiver;
 
 	delete input;
@@ -77,7 +83,7 @@ ClientLauncher::~ClientLauncher()
 	delete g_fontengine;
 	delete g_gamecallback;
 
-	delete RenderingEngine::get_instance();
+	delete rendering_engine;
 
 #if USE_SOUND
 	deleteSoundManagerSingleton(g_sound_manager_singleton);
@@ -106,6 +112,13 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		if (!g_sound_manager_singleton)
 			g_sound_manager_singleton = createSoundManagerSingleton();
 	}
+#endif
+
+#ifdef __ANDROID__
+    if (!init_assets()) {
+        errorstream << "Could not extract assets." << std::endl;
+        return false;
+    }
 #endif
 
 	if (!init_engine()) {
@@ -184,8 +197,30 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		g_menucloudsmgr = RenderingEngine::get_scene_manager()->createNewSceneManager();
 	if (!g_menuclouds)
 		g_menuclouds = new Clouds(g_menucloudsmgr, -1, rand());
-	g_menuclouds->setHeight(100.0f);
-	g_menuclouds->update(v3f(0, 0, 0), video::SColor(255, 240, 240, 255));
+//	g_menuclouds->setHeight(100.0f); // 120 is default value
+//	g_menuclouds->update(v3f(0, 0, 0), video::SColor(255, 240, 240, 255));
+
+	m_shader_src = createShaderSource();
+
+	if (m_shader_src) {
+		set_light_table(g_settings->getFloat("display_gamma"));
+
+		static bool disable_fog = false;
+		static f32 fog_range = 0;
+		auto *scsf = new GameGlobalShaderConstantSetterFactory(
+				&disable_fog, &fog_range, nullptr);
+		m_shader_src->addShaderConstantSetterFactory(scsf);
+
+		if (!g_menusky) {
+			g_menusky = new Sky(-1, nullptr, m_shader_src, g_menucloudsmgr, true);
+		}
+
+		u32 daynight_ratio = time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);
+		float time_brightness = decode_light_f((float)daynight_ratio / 1000.0);
+		scsf->setSky(g_menusky);
+		g_menusky->update(GUIEngine::g_timeofday, time_brightness, time_brightness, true, CAMERA_MODE_FIRST, 3, 0);
+	}
+
 	scene::ICameraSceneNode* camera;
 	camera = g_menucloudsmgr->addCameraSceneNode(NULL, v3f(0, 0, 0), v3f(0, 60, 100));
 	camera->setFarValue(10000);
@@ -215,7 +250,9 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		const wchar_t *text = wgettext("Main Menu");
 		RenderingEngine::get_raw_device()->
 			setWindowCaption((utf8_to_wide(PROJECT_NAME_C) +
+#ifndef NDEBUG
 			L" " + utf8_to_wide(g_version_hash) +
+#endif
 			L" [" + text + L"]").c_str());
 		delete[] text;
 
@@ -257,11 +294,13 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 				break;
 			}
 
+			RenderingEngine::clear_irrlicht_texture_cache();
+
 			RenderingEngine::get_video_driver()->setTextureCreationFlag(
 					video::ETCF_CREATE_MIP_MAPS, g_settings->getBool("mip_map"));
 
 #ifdef HAVE_TOUCHSCREENGUI
-			receiver->m_touchscreengui = new TouchScreenGUI(RenderingEngine::get_raw_device(), receiver);
+			receiver->m_touchscreengui = new TouchScreenGUI(RenderingEngine::get_raw_device());
 			g_touchscreengui = receiver->m_touchscreengui;
 #endif
 
@@ -312,8 +351,11 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 		}
 	} // Menu-game loop
 
+	g_menusky->drop();
 	g_menuclouds->drop();
 	g_menucloudsmgr->drop();
+
+	delete m_shader_src;
 
 	return retval;
 }
@@ -342,6 +384,47 @@ void ClientLauncher::init_args(GameStartData &start_data, const Settings &cmd_ar
 	random_input = g_settings->getBool("random_input")
 			|| cmd_args.getFlag("random-input");
 }
+
+#ifdef __ANDROID__
+bool ClientLauncher::init_assets()
+{
+	if (!porting::needsExtractAssets())
+		return true;
+
+	IrrlichtDevice *nulldevice = createDevice(video::EDT_NULL);
+
+	if (!nulldevice) {
+		porting::hideSplashScreen();
+		return false;
+	}
+
+	io::IFileSystem *irrfs = nulldevice->getFileSystem();
+	std::string error_msg;
+
+	// Removing old assets will be done in Java activity
+	/*std::string dirs[] = {
+			"builtin", "client/shaders",
+			"fonts", "textures/base"
+	};
+
+	for (std::string dir : dirs) {
+		fs::RecursiveDelete(porting::path_share + "/" + dir);
+	}*/
+
+	if (!fs::extractZipFileFromAssets(irrfs, porting::path_share, "",
+				&error_msg)) {
+		errorstream << "Could not extract assets: " << error_msg << std::endl;
+		nulldevice->drop();
+		porting::hideSplashScreen();
+		return false;
+	}
+
+	nulldevice->drop();
+	porting::hideSplashScreen();
+
+	return true;
+}
+#endif
 
 bool ClientLauncher::init_engine()
 {

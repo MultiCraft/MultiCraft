@@ -4,12 +4,8 @@ local builtin_shared = ...
 
 local abs, atan2, cos, floor, max, sin, random =
 	math.abs, math.atan2, math.cos, math.floor, math.max, math.sin, math.random
-local vadd, vnew, vmultiply, vnormalize, vsubtract =
-	vector.add, vector.new, vector.multiply, vector.normalize, vector.subtract
+local vnew = vector.new
 local tcopy = table.copy
-
-local creative_mode = core.settings:get_bool("creative_mode")
-local node_drop = core.settings:get_bool("node_drop")
 
 local function copy_pointed_thing(pointed_thing)
 	return {
@@ -420,9 +416,9 @@ function core.item_place(itemstack, placer, pointed_thing, param2)
 	if pointed_thing.type == "node" and placer and
 			not placer:get_player_control().sneak then
 		local n = core.get_node(pointed_thing.under)
-		local nn = n.name
-		if core.registered_nodes[nn] and core.registered_nodes[nn].on_rightclick then
-			return core.registered_nodes[nn].on_rightclick(pointed_thing.under, n,
+		local ndef = core.registered_nodes[n.name]
+		if ndef and ndef.on_rightclick then
+			return ndef.on_rightclick(pointed_thing.under, n,
 					placer, itemstack, pointed_thing) or itemstack, nil
 		end
 	end
@@ -436,96 +432,6 @@ end
 
 function core.item_secondary_use(itemstack, placer)
 	return itemstack
-end
-
-local function item_throw_step(entity, dtime)
-	entity.throw_timer = entity.throw_timer + dtime
-	if entity.throw_timer > 20 then
-		entity.object:remove()
-		return
-	end
-	if not entity.thrower then
-		return
-	end
-	local pos = entity.object:get_pos()
-	if not core.is_valid_pos(pos) then
-		entity.object:remove()
-		return
-	end
-	local hit_object
-	local dir = vnormalize(entity.object:get_velocity())
-	local pos2 = vadd(pos, vmultiply(dir, 3))
-	local _, node_pos = core.line_of_sight(pos, pos2)
-	if node_pos then
-		local def = core.get_node(node_pos)
-		if def then
-			pos = vsubtract(node_pos, vmultiply(dir, 1.5))
-			entity.object:move_to(pos)
-		else
-			node_pos = nil
-		end
-	end
-	local objs = core.get_objects_inside_radius(pos, 1.5)
-	for _, obj in pairs(objs) do
-		if obj:is_player() then
-			local name = obj:get_player_name()
-			if name ~= entity.thrower then
-				hit_object = obj
-				break
-			end
-		elseif obj:get_luaentity() ~= nil and
-				obj:get_luaentity().name ~= "__builtin:throwing_item" and
-				obj:get_luaentity().name ~= "__builtin:item" then
-			hit_object = obj
-			break
-		end
-	end
-	if hit_object or node_pos then
-		local player = core.get_player_by_name(entity.thrower)
-		entity.on_impact(player, pos, entity.throw_direction, hit_object)
-		entity.object:remove()
-	end
-end
-
-function core.item_throw(name, thrower, speed, accel, on_impact)
-	if not thrower or not thrower:is_player() then
-		return
-	end
-	local pos = thrower:get_pos()
-	if not core.is_valid_pos(pos) then
-		return
-	end
-	pos.y = pos.y + 1.5
-	local obj
-	local properties = {is_visible=true}
-	if core.registered_entities[name] then
-		obj = core.add_entity(pos, name)
-	elseif core.registered_items[name] then
-		obj = core.add_entity(pos, "__builtin:throwing_item")
-		properties.textures = {name}
-	else
-		return
-	end
-	if obj then
-		local ent = obj:get_luaentity()
-		if ent then
-			local s = speed or 19 -- default speed
-			local a = accel or -3 -- default acceleration
-			local dir = thrower:get_look_dir()
-			local gravity = tonumber(core.settings:get("movement_gravity")) or 9.81
-			ent.thrower = thrower:get_player_name()
-			ent.throw_timer = 0
-			ent.throw_direction = dir
-			ent.on_step = item_throw_step
-			ent.on_impact = on_impact and on_impact or function() end
-			obj:set_properties(properties)
-			obj:set_velocity({x=dir.x * s, y=dir.y * s, z=dir.z * s})
-			obj:set_acceleration({x=dir.x * a, y=-gravity, z=dir.z * a})
-			return obj
-		else
-			obj:remove()
-		end
-	end
 end
 
 function core.item_drop(itemstack, dropper, pos)
@@ -563,8 +469,7 @@ function core.item_drop(itemstack, dropper, pos)
 	-- environment failed
 end
 
-local enable_hunger = core.settings:get_bool("enable_damage") and core.settings:get_bool("enable_hunger")
-function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
+function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
 	for _, callback in pairs(core.registered_on_item_eats) do
 		local result = callback(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		if result then
@@ -573,48 +478,14 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 	end
 	local def = itemstack:get_definition()
 	if itemstack:take_item() ~= nil then
-		if enable_hunger then
-			hunger.item_eat(hp_change, user, poison)
-		else
-			user:set_hp(user:get_hp() + hp_change)
-		end
-
-		local pos = user:get_pos()
-		if not core.is_valid_pos(pos) then
-			return itemstack
-		end
+		user:set_hp(user:get_hp() + hp_change)
 
 		if def and def.sound and def.sound.eat then
 			core.sound_play(def.sound.eat, {
-				pos = pos,
+				pos = user:get_pos(),
 				max_hear_distance = 16
 			}, true)
-		else
-			core.sound_play("player_eat", {
-				pos = pos,
-				max_hear_distance = 16,
-				gain = 0.3
-			}, true)
 		end
-
-		local dir = user:get_look_dir()
-		local ppos = {x = pos.x, y = pos.y + 1.3, z = pos.z}
-		core.add_particlespawner({
-			amount = 20,
-			time = 0.1,
-			minpos = ppos,
-			maxpos = ppos,
-			minvel = {x = dir.x - 1, y = 2, z = dir.z - 1},
-			maxvel = {x = dir.x + 1, y = 2, z = dir.z + 1},
-			minacc = {x = 0, y = -5, z = 0},
-			maxacc = {x = 0, y = -9, z = 0},
-			minexptime = 1,
-			maxexptime = 1,
-			minsize = 1,
-			maxsize = 1,
-			vertical = false,
-			texture = def.inventory_image
-		})
 
 		if replace_with_item then
 			if itemstack:is_empty() then
@@ -625,7 +496,8 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 				if inv and inv:room_for_item("main", {name=replace_with_item}) then
 					inv:add_item("main", replace_with_item)
 				else
-					pos.y = pos.y + 0.5
+					local pos = user:get_pos()
+					pos.y = floor(pos.y + 0.5)
 					core.add_item(pos, replace_with_item)
 				end
 			end
@@ -634,7 +506,7 @@ function core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed
 	return itemstack
 end
 
-function core.item_eat(hp_change, replace_with_item, poison)
+function core.item_eat(hp_change, replace_with_item)
 	return function(itemstack, user, pointed_thing)  -- closure
 		if user then
 			if user:is_player() and pointed_thing.type == "object" then
@@ -642,7 +514,7 @@ function core.item_eat(hp_change, replace_with_item, poison)
 				return user:get_wielded_item()
 			end
 
-			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing, poison)
+			return core.do_item_eat(hp_change, replace_with_item, itemstack, user, pointed_thing)
 		end
 	end
 end
@@ -662,7 +534,7 @@ function core.handle_node_drops(pos, drops, digger)
 	-- Add dropped items to object's inventory
 	local inv = digger and digger:get_inventory()
 	local give_item
-	if (not node_drop or creative_mode) and inv then
+	if inv then
 		give_item = function(item)
 			return inv:add_item("main", item)
 		end

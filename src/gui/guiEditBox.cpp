@@ -24,11 +24,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "IGUIFont.h"
 
 #include "porting.h"
-#include "touchscreengui.h"
+#ifdef HAVE_TOUCHSCREENGUI
+#include "touchscreengui_mc.h"
+#endif
 #include "util/string.h"
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 GUIEditBox::~GUIEditBox()
@@ -222,11 +224,13 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 		case EET_SDL_TEXT_EVENT:
 			if (event.SDLTextEvent.Type == irr::ESDLET_TEXTINPUT) {
-				core::stringw text =
-						utf8_to_stringw(event.SDLTextEvent.Text);
+				if (event.SDLTextEvent.Text) {
+					core::stringw text = utf8_to_stringw(
+							event.SDLTextEvent.Text);
 
-				for (size_t i = 0; i < text.size(); i++)
-					inputChar(text[i]);
+					for (size_t i = 0; i < text.size(); i++)
+						inputChar(text[i]);
+				}
 
 				return true;
 			}
@@ -266,16 +270,8 @@ bool GUIEditBox::OnEvent(const SEvent &event)
 			if (event.TouchInput.Event == irr::ETIE_PRESSED_LONG) {
 				if (!m_mouse_marking) {
 					m_long_press = true;
-					bool success = onKeyControlC(event);
-#ifdef __ANDROID__
-					if (success)
-						SDL_AndroidShowToast(
-								"Copied to clipboard", 2,
-								-1, 0, 0);
-#elif __IOS__
-					if (success)
+					if (onKeyControlC(event))
 						porting::showToast("Copied to clipboard");
-#endif
 				}
 				return true;
 			}
@@ -305,7 +301,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 	bool altPressed = false;
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	SDL_Keymod keymod = SDL_GetModState();
-	altPressed = keymod & KMOD_ALT;
+	altPressed = keymod & SDL_KMOD_ALT;
 #endif
 
 	// control shortcut handling
@@ -418,13 +414,16 @@ bool GUIEditBox::processKey(const SEvent &event)
 				return true;
 			}
 			break;
-		case KEY_LEFT:
+		case KEY_LEFT: {
+			IGUIFont *font = getActiveFont();
+			s32 prev_pos = font->getPrevClusterPos(Text, m_cursor_pos);
+
 			if (event.KeyInput.Shift) {
 				if (m_cursor_pos > 0) {
 					if (m_mark_begin == m_mark_end)
 						new_mark_begin = m_cursor_pos;
 
-					new_mark_end = m_cursor_pos - 1;
+					new_mark_end = prev_pos;
 				}
 			} else {
 				new_mark_begin = 0;
@@ -432,16 +431,19 @@ bool GUIEditBox::processKey(const SEvent &event)
 			}
 
 			if (m_cursor_pos > 0)
-				m_cursor_pos--;
+				m_cursor_pos = prev_pos;
 			m_blink_start_time = porting::getTimeMs();
-			break;
-		case KEY_RIGHT:
+		} break;
+		case KEY_RIGHT: {
+			IGUIFont *font = getActiveFont();
+			s32 next_pos = font->getPrevClusterPos(Text, m_cursor_pos);
+
 			if (event.KeyInput.Shift) {
 				if (Text.size() > (u32)m_cursor_pos) {
 					if (m_mark_begin == m_mark_end)
 						new_mark_begin = m_cursor_pos;
 
-					new_mark_end = m_cursor_pos + 1;
+					new_mark_end = next_pos;
 				}
 			} else {
 				new_mark_begin = 0;
@@ -449,9 +451,9 @@ bool GUIEditBox::processKey(const SEvent &event)
 			}
 
 			if (Text.size() > (u32)m_cursor_pos)
-				m_cursor_pos++;
+				m_cursor_pos = next_pos;
 			m_blink_start_time = porting::getTimeMs();
-			break;
+		} break;
 		case KEY_UP:
 			if (!onKeyUp(event, new_mark_begin, new_mark_end)) {
 				return false;
@@ -683,18 +685,22 @@ bool GUIEditBox::onKeyBack(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 
 		m_cursor_pos = m_real_mark_begin;
 	} else {
+		IGUIFont *font = getActiveFont();
+		s32 prev_pos = font->getPrevClusterPos(Text, m_cursor_pos);
+
 		// delete text behind cursor
-		if (m_cursor_pos > 0)
-			s = Text.subString(0, m_cursor_pos - 1);
-		else
-			s = L"";
-		s.append(Text.subString(m_cursor_pos, Text.size() - m_cursor_pos));
-		Text = s;
-		--m_cursor_pos;
+		if (m_cursor_pos > 0) {
+			s = Text.subString(0, prev_pos);
+			s.append(Text.subString(
+					m_cursor_pos, Text.size() - m_cursor_pos));
+			m_cursor_pos = prev_pos;
+			Text = s;
+		}
 	}
 
 	if (m_cursor_pos < 0)
 		m_cursor_pos = 0;
+
 	m_blink_start_time = porting::getTimeMs(); // os::Timer::getTime();
 	mark_begin = 0;
 	mark_end = 0;
@@ -716,10 +722,14 @@ bool GUIEditBox::onKeyDelete(const SEvent &event, s32 &mark_begin, s32 &mark_end
 
 		m_cursor_pos = m_real_mark_begin;
 	} else {
+		IGUIFont *font = getActiveFont();
+		s32 next_pos = font->getNextClusterPos(Text, m_cursor_pos);
+		s32 chars_to_delete = next_pos - m_cursor_pos;
+
 		// delete text before cursor
 		s = Text.subString(0, m_cursor_pos);
-		s.append(Text.subString(
-				m_cursor_pos + 1, Text.size() - m_cursor_pos - 1));
+		s.append(Text.subString(m_cursor_pos + chars_to_delete,
+				Text.size() - m_cursor_pos - chars_to_delete));
 		Text = s;
 	}
 

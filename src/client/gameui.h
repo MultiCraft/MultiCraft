@@ -61,6 +61,7 @@ public:
 		bool show_minimal_debug = false;
 		bool show_basic_debug = false;
 		bool show_profiler_graph = false;
+		bool show_nametags = true;
 	};
 
 	void init(Client *client);
@@ -76,12 +77,13 @@ public:
 	inline void setInfoText(const std::wstring &str) { m_infotext = str; }
 	inline void clearInfoText() { m_infotext.clear(); }
 
-	inline void showStatusText(const std::wstring &str)
+	inline void showStatusText(const std::wstring &str, float time = 1.5f)
 	{
 		m_statustext = str;
 		m_statustext_time = 0.0f;
+		m_statustext_time_max = time;
 	}
-	void showTranslatedStatusText(const char *str);
+	void showTranslatedStatusText(const char *str, float time = 1.5f);
 	inline void clearStatusText() { m_statustext.clear(); }
 
 	const bool isChatVisible()
@@ -95,6 +97,7 @@ public:
 
 	void toggleChat();
 	void toggleHud();
+	void toggleNametags();
 	void toggleProfiler();
 
 	GUIFormSpecMenu *&updateFormspec(const std::string &formname)
@@ -119,6 +122,7 @@ private:
 	gui::IGUIStaticText *m_guitext_status = nullptr;
 	std::wstring m_statustext;
 	float m_statustext_time = 0.0f;
+	float m_statustext_time_max = 1.5f;
 	video::SColor m_statustext_initial_color;
 
 	gui::IGUIStaticText *m_guitext_chat = nullptr; // Chat text

@@ -44,6 +44,12 @@ files["builtin/common/misc_helpers.lua"] = {
 	},
 }
 
+files["builtin/common/strict.lua"] = {
+	globals = {
+		string = {fields={"buffer"}},
+	}
+}
+
 files["builtin/common/vector.lua"] = {
 	globals = { "vector" },
 }
@@ -70,6 +76,7 @@ files["builtin/mainmenu"] = {
 
 	read_globals = {
 		"PLATFORM",
+		"btn_style",
 	},
 }
 

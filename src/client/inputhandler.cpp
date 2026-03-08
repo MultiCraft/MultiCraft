@@ -31,7 +31,7 @@ extern "C" void external_pause_game();
 #endif
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 void KeyCache::populate_nonchanging()
@@ -72,6 +72,7 @@ void KeyCache::populate()
 	key[KeyType::CINEMATIC] = getKeySetting("keymap_cinematic");
 	key[KeyType::SCREENSHOT] = getKeySetting("keymap_screenshot");
 	key[KeyType::TOGGLE_HUD] = getKeySetting("keymap_toggle_hud");
+	key[KeyType::TOGGLE_NAMETAGS] = getKeySetting("keymap_toggle_nametags");
 	key[KeyType::TOGGLE_CHAT] = getKeySetting("keymap_toggle_chat");
 	key[KeyType::TOGGLE_FOG] = getKeySetting("keymap_toggle_fog");
 	key[KeyType::TOGGLE_UPDATE_CAMERA] = getKeySetting("keymap_toggle_update_camera");
@@ -89,6 +90,8 @@ void KeyCache::populate()
 	key[KeyType::QUICKTUNE_PREV] = getKeySetting("keymap_quicktune_prev");
 	key[KeyType::QUICKTUNE_INC] = getKeySetting("keymap_quicktune_inc");
 	key[KeyType::QUICKTUNE_DEC] = getKeySetting("keymap_quicktune_dec");
+
+	key[KeyType::TABB] = getKeySetting("keymap_tabb");
 
 	for (int i = 0; i < HUD_HOTBAR_ITEMCOUNT_MAX; i++) {
 		std::string slot_key_name = "keymap_slot" + std::to_string(i + 1);
@@ -108,10 +111,12 @@ void KeyCache::populate()
 
 bool MyEventReceiver::OnEvent(const SEvent &event)
 {
+	setLastInputDevice(event);
+
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT ||
 			event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
-		if (g_settings->getBool("enable_joysticks") && sdl_game_controller) {
+		if (joystick_enabled && sdl_game_controller) {
 			sdl_game_controller->translateEvent(event);
 			input->setCursorVisible(sdl_game_controller->isCursorVisible());
 		}
@@ -135,8 +140,35 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 			event.MouseInput.Event == irr::EMIE_MOUSE_MOVED) ||
 			(sdl_game_controller && sdl_game_controller->isActive())) {
 		TouchScreenGUI::setActive(false);
-		if (m_touchscreengui && !isMenuActive())
+		if (m_touchscreengui && m_touchscreengui->getCurrentState() != STATE_EDITOR && !isMenuActive())
 			m_touchscreengui->hide();
+	}
+#endif
+
+#ifdef HAVE_TOUCHSCREENGUI
+	// Always send touch events to the touchscreen gui, so it has up-to-date information
+	if (m_touchscreengui) {
+		bool result = m_touchscreengui->preprocessEvent(event);
+
+		if (result) {
+			for (auto key : keysListenedFor) {
+				irr::EKEY_CODE key_code = key.getKeyCode();
+				bool pressed = m_touchscreengui->isButtonPressed(key_code);
+				if (pressed) {
+					if (!IsKeyDown(key)) {
+						keyWasPressed.set(key);
+						keyIsDown.set(key);
+						keyWasDown.set(key);
+					}
+				}
+				if (!pressed || m_touchscreengui->immediateRelease(key_code)) {
+					if (IsKeyDown(key))
+						keyWasReleased.set(key);
+
+					keyIsDown.unset(key);
+				}
+			}
+		}
 	}
 #endif
 
@@ -183,22 +215,6 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 
 			return true;
 		}
-
-#ifdef HAVE_TOUCHSCREENGUI
-	} else if (m_touchscreengui && event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
-		// In case of touchscreengui, we have to handle different events
-		m_touchscreengui->translateEvent(event);
-		return true;
-#endif
-
-#ifdef __IOS__
-	} else if (event.EventType == irr::EET_APPLICATION_EVENT) {
-		int AppEvent = event.ApplicationEvent.EventType;
-		if (AppEvent == irr::EAET_WILL_PAUSE)
-			external_pause_game();
-		return true;
-#endif
-
 	} else if (event.EventType == irr::EET_JOYSTICK_INPUT_EVENT) {
 		/* TODO add a check like:
 		if (event.JoystickEvent != joystick_we_listen_for)
@@ -251,6 +267,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		default: break;
 		}
 	} else if (event.EventType == irr::EET_LOG_TEXT_EVENT) {
+#ifndef NDEBUG
 		static const LogLevel irr_loglev_conv[] = {
 				LL_VERBOSE, // ELL_DEBUG
 				LL_INFO,    // ELL_INFORMATION
@@ -259,7 +276,6 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 				LL_NONE,    // ELL_NONE
 		};
 		assert(event.LogEvent.Level < ARRLEN(irr_loglev_conv));
-#ifndef NDEBUG
 		g_logger.log(irr_loglev_conv[event.LogEvent.Level],
 				std::string("Irrlicht: ") + event.LogEvent.Text);
 #endif
@@ -268,6 +284,94 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 	/* always return false in order to continue processing events */
 	return false;
 }
+
+void MyEventReceiver::setLastInputDevice(const SEvent &event)
+{
+	if (!input)
+		return;
+
+	InputDeviceType input_device = IDT_NONE;
+
+	if (joystick_enabled) {
+		if (event.EventType == irr::EET_SDL_CONTROLLER_BUTTON_EVENT) {
+			input_device = IDT_GAMEPAD;
+		} else if (event.EventType == irr::EET_SDL_CONTROLLER_AXIS_EVENT) {
+			const s16* value = event.SDLControllerAxisEvent.Value;
+			int deadzone = g_settings->getU16("joystick_deadzone");
+
+			if (value[SDL_GAMEPAD_AXIS_LEFT_TRIGGER] > deadzone ||
+					value[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER] > deadzone ||
+					std::abs(value[SDL_GAMEPAD_AXIS_LEFTX]) > deadzone ||
+					std::abs(value[SDL_GAMEPAD_AXIS_LEFTY]) > deadzone ||
+					std::abs(value[SDL_GAMEPAD_AXIS_RIGHTX]) > deadzone ||
+					std::abs(value[SDL_GAMEPAD_AXIS_RIGHTY]) > deadzone)
+				input_device = IDT_GAMEPAD;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+		} else if (sdl_game_controller && sdl_game_controller->isFakeEvent()) {
+			input_device = IDT_GAMEPAD;
+#endif
+		}
+	}
+
+	if (input_device == IDT_NONE) {
+		if (event.EventType == irr::EET_KEY_INPUT_EVENT)
+			input_device = IDT_KEYBOARD;
+		else if (event.EventType == irr::EET_MOUSE_INPUT_EVENT)
+			input_device = IDT_MOUSE;
+		else if (event.EventType == irr::EET_TOUCH_INPUT_EVENT)
+			input_device = IDT_TOUCH;
+	}
+
+	if (input_device != IDT_NONE)
+		input->last_input_device = input_device;
+}
+
+void RealInputHandler::settingsCallback(const std::string &name, void *userdata)
+{
+	if (name == "enable_joysticks") {
+		RealInputHandler *input = (RealInputHandler *)userdata;
+		input->m_receiver->joystick_enabled = g_settings->getBool("enable_joysticks");
+	}
+}
+
+RealInputHandler::RealInputHandler(MyEventReceiver *receiver) : m_receiver(receiver)
+{
+	m_receiver->joystick = &joystick;
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	m_receiver->sdl_game_controller = &sdl_game_controller;
+	m_receiver->input = this;
+
+#ifdef __IOS__
+	SDL_AddEventWatch(SdlEventWatcher, nullptr);
+#endif
+#endif
+
+	m_receiver->joystick_enabled = g_settings->getBool("enable_joysticks");
+	g_settings->registerChangedCallback("enable_joysticks", settingsCallback, this);
+}
+
+RealInputHandler::~RealInputHandler()
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+#ifdef __IOS__
+	SDL_RemoveEventWatch(SdlEventWatcher, nullptr);
+#endif
+#endif
+
+	g_settings->deregisterChangedCallback("enable_joysticks", settingsCallback, this);
+}
+
+#ifdef __IOS__
+bool RealInputHandler::SdlEventWatcher(void *userdata, SDL_Event *event)
+{
+	if (event->type == SDL_EVENT_WILL_ENTER_BACKGROUND) {
+		external_pause_game();
+		return true;
+	}
+
+	return false;
+}
+#endif
 
 /*
  * RandomInputHandler

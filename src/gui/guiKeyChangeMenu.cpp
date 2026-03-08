@@ -38,6 +38,7 @@
 
 #include "mainmenumanager.h"  // for g_gamecallback
 #include "client/renderingengine.h"
+#include "client/sound.h"
 
 #define KMaxButtonPerColumns 12
 
@@ -45,8 +46,10 @@ extern MainGameCallback *g_gamecallback;
 
 enum
 {
-	GUI_ID_BACK_BUTTON = 101, GUI_ID_ABORT_BUTTON, GUI_ID_SCROLL_BAR,
+	GUI_ID_BACK_BUTTON = 101, GUI_ID_ABORT_BUTTON, GUI_ID_RESET_BUTTON,
+	GUI_ID_SCROLL_BAR,
 	GUI_ID_BACKGROUND_IMG,
+	GUI_ID_ICON,
 	// buttons
 	GUI_ID_KEY_FORWARD_BUTTON,
 	GUI_ID_KEY_BACKWARD_BUTTON,
@@ -77,21 +80,23 @@ enum
 	GUI_ID_KEY_SCREENSHOT_BUTTON,
 	GUI_ID_KEY_CHATLOG_BUTTON,
 	GUI_ID_KEY_HUD_BUTTON,
+	GUI_ID_KEY_NAMETAGS_BUTTON,
 	GUI_ID_KEY_FOG_BUTTON,
 	GUI_ID_KEY_DEC_RANGE_BUTTON,
 	GUI_ID_KEY_INC_RANGE_BUTTON,
 	GUI_ID_KEY_AUTOFWD_BUTTON,
 	// other
 	GUI_ID_CB_AUX1_DESCENDS,
-	GUI_ID_CB_DOUBLETAP_JUMP,
+	//GUI_ID_CB_DOUBLETAP_JUMP,
 	GUI_ID_CB_AUTOJUMP,
 };
 
 GUIKeyChangeMenu::GUIKeyChangeMenu(gui::IGUIEnvironment* env,
 		gui::IGUIElement* parent, s32 id, IMenuManager *menumgr,
-		ISimpleTextureSource *tsrc, bool main_menu) :
+		ISimpleTextureSource *tsrc, ISoundManager *sound_manager,
+		bool main_menu) :
 		GUIModalMenu(env, parent, id, menumgr),
-		m_tsrc(tsrc),
+		m_tsrc(tsrc), m_sound_manager(sound_manager),
 		m_main_menu(main_menu)
 {
 	init_keys();
@@ -137,10 +142,21 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 
 	float s = MYMIN(screensize.X / 835.f, screensize.Y / 430.f);
 #if HAVE_TOUCHSCREENGUI
+#ifdef __IOS__
+	const char *model = MultiCraft::getDeviceModel();
+	if (!isDevice11Inch(model) && !isDevice12and9Inch(model))
+		s *= 0.9f;
+	else
+		s *= 0.8f;
+#else
 	s *= RenderingEngine::isTablet() ? 0.8f : 0.9f;
+#endif
 #else
 	s *= 0.75f;
 #endif
+
+	// Save for Key already in use message
+	m_pixel_scale = s;
 
 	// Make sure the GUI will fit on the screen
 	// The change keys GUI is 835x430 pixels (with a scaling of 1)
@@ -174,19 +190,24 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 				texture, middle, m_tsrc, true);
 	}
 
+	// Icon
 	{
-		core::rect<s32> rect(0, 0, 795 * s, 50 * s);
-		rect += topleft + v2s32(25 * s, 10 * s);
-		//gui::IGUIStaticText *t =
-#if !defined(__ANDROID__) && !defined(__IOS__)
-		const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
-#else
+		const std::string texture = texture_path + "gui" DIR_DELIM "change_keys.png";
+		const core::rect<s32> rect(15 * s, 15 * s, 50 * s, 50 * s);
+		const core::rect<s32> middle(0, 0, 0, 0);
+		new GUIBackgroundImage(Environment, this, GUI_ID_ICON, rect,
+							   texture, middle, m_tsrc, false);
+	}
+
+	{
+		core::rect<s32> rect(0, 0, 795 * s, 35 * s);
+		rect += topleft + v2s32(60 * s, 15 * s);
+		//const wchar_t *text = wgettext("Keybindings. (If this menu screws up, remove stuff from multicraft.conf)");
 		const wchar_t *text = wgettext("Change Keys");
-#endif
-		Environment->addStaticText(text,
+		gui::IGUIStaticText *t = Environment->addStaticText(text,
 								   rect, false, true, this, -1);
 		delete[] text;
-		//t->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_UPPERLEFT);
+		t->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
 	}
 
 	// Build buttons
@@ -232,7 +253,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		offset += v2s32(0, 25 * s);
 	}
 
-	{
+	/*{
 		s32 option_x = offset.X;
 		s32 option_y = offset.Y + 5 * s;
 		u32 option_w = 300 * s;
@@ -245,7 +266,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 			delete[] text;
 		}
 		offset += v2s32(0, 25 * s);
-	}
+	}*/
 
 	{
 		s32 option_x = offset.X;
@@ -262,15 +283,12 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		offset += v2s32(0, 25);
 	}
 
-	const std::array<StyleSpec, StyleSpec::NUM_STATES> styles =
-			StyleSpec::getButtonStyle(texture_path);
-
 	{
 		core::rect<s32> rect(0, 0, 150 * s, 35 * s);
 		rect += topleft + v2s32(size.X / 2 - 165 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Save");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_BACK_BUTTON, text);
-		e->setStyles(styles);
+		e->setStyles(StyleSpec::getButtonStyle(texture_path, "green"));
 		delete[] text;
 	}
 	{
@@ -278,7 +296,15 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 		rect += topleft + v2s32(size.X / 2 + 15 * s, size.Y - 50 * s);
 		const wchar_t *text = wgettext("Cancel");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_ABORT_BUTTON, text);
-		e->setStyles(styles);
+		e->setStyles(StyleSpec::getButtonStyle(texture_path, "red"));
+		delete[] text;
+	}
+	{
+		core::rect<s32> rect(0, 0, 200 * s, 35 * s);
+		rect += topleft + v2s32(size.X - 215 * s, size.Y - 50 * s);
+		const wchar_t *text = wgettext("Restore Default");
+		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this, GUI_ID_RESET_BUTTON, text);
+		e->setStyles(StyleSpec::getButtonStyle(texture_path));
 		delete[] text;
 	}
 }
@@ -316,11 +342,11 @@ bool GUIKeyChangeMenu::acceptInput()
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
 			g_settings->setBool("aux1_descends", ((gui::IGUICheckBox*)e)->isChecked());
 	}
-	{
+	/*{
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_DOUBLETAP_JUMP);
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
 			g_settings->setBool("doubletap_jump", ((gui::IGUICheckBox*)e)->isChecked());
-	}
+	}*/
 	{
 		gui::IGUIElement *e = getElementFromId(GUI_ID_CB_AUTOJUMP);
 		if(e && e->getType() == gui::EGUIET_CHECK_BOX)
@@ -335,6 +361,25 @@ bool GUIKeyChangeMenu::acceptInput()
 		g_settings->updateConfigFile(g_settings_path.c_str());
 
 	return true;
+}
+
+void GUIKeyChangeMenu::resetKeys()
+{
+	// Use getNames instead of key_settings so that keys not displayed in this
+	// menu get reset too.
+	for (const auto &name : g_settings->getNames()) {
+		if (str_starts_with(name, "keymap_"))
+			g_settings->remove(name);
+	}
+	g_settings->remove("aux1_descends");
+	g_settings->remove("doubletap_jump");
+	g_settings->remove("autojump");
+
+	// Save settings
+	clearKeyCache();
+	g_gamecallback->signalKeyConfigChange();
+	if (!g_settings_path.empty())
+		g_settings->updateConfigFile(g_settings_path.c_str());
 }
 
 bool GUIKeyChangeMenu::resetMenu()
@@ -380,12 +425,15 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 		}
 
 		if (key_in_use && !this->key_used_text) {
-			core::rect<s32> rect(0, 0, 600, 40);
-			rect += v2s32(0, 0) + v2s32(25, 30);
+			v2s32 size = DesiredRect.getSize();
+			core::rect<s32> rect(0, 0, 600, 35 * m_pixel_scale);
+			rect += v2s32(0, 0) + v2s32(15 * m_pixel_scale, size.Y - 50 * m_pixel_scale);
 			const wchar_t *text = wgettext("Key already in use");
 			this->key_used_text = Environment->addStaticText(text,
 					rect, false, true, this, -1);
 			delete[] text;
+			this->key_used_text->setOverrideColor(video::SColor(255, 255, 0, 0));
+			this->key_used_text->setTextAlignment(gui::EGUIA_UPPERLEFT, gui::EGUIA_CENTER);
 		} else if (!key_in_use && this->key_used_text) {
 			this->key_used_text->remove();
 			this->key_used_text = nullptr;
@@ -431,6 +479,13 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 				return true;
 			}
 		}
+		if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED ||
+				event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED)
+		{
+			const std::string sound = g_settings->get("btn_press_sound");
+			if (!sound.empty())
+				m_sound_manager->playSound(sound, false, 1.0f);
+		}
 		if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED)
 		{
 			switch (event.GUIEvent.Caller->getID())
@@ -441,6 +496,18 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 					return true;
 				case GUI_ID_ABORT_BUTTON: //abort
 					quitMenu();
+					return true;
+				case GUI_ID_RESET_BUTTON:
+					resetKeys();
+					for (key_setting *ks : key_settings) {
+						ks->key = getKeySetting(ks->setting_name.c_str());
+						const wchar_t *text = wgettext(ks->key.name());
+						ks->button->setText(text);
+						delete[] text;
+					}
+					if (this->key_used_text)
+						this->key_used_text->remove();
+						this->key_used_text = nullptr;
 					return true;
 				default:
 					resetMenu();
@@ -508,6 +575,7 @@ void GUIKeyChangeMenu::init_keys()
 	this->add_key(GUI_ID_KEY_CMD_BUTTON,       wgettext("Command"),          "keymap_cmd");
 	this->add_key(GUI_ID_KEY_CMD_LOCAL_BUTTON, wgettext("Local command"),    "keymap_cmd_local");
 	this->add_key(GUI_ID_KEY_HUD_BUTTON,       wgettext("Toggle HUD"),       "keymap_toggle_hud");
+	this->add_key(GUI_ID_KEY_NAMETAGS_BUTTON,  wgettext("Toggle nametags"),  "keymap_toggle_nametags");
 	this->add_key(GUI_ID_KEY_CHATLOG_BUTTON,   wgettext("Toggle chat log"),  "keymap_toggle_chat");
 	this->add_key(GUI_ID_KEY_FOG_BUTTON,       wgettext("Toggle fog"),       "keymap_toggle_fog");
 }

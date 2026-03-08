@@ -134,7 +134,7 @@ void AsyncEngine::step(lua_State *L)
 {
 	int error_handler = PUSH_ERROR_HANDLER(L);
 	lua_getglobal(L, "core");
-	resultQueueMutex.lock();
+	MutexAutoLock autolock(resultQueueMutex);
 	while (!resultQueue.empty()) {
 		LuaJobInfo jobDone = resultQueue.front();
 		resultQueue.pop_front();
@@ -153,7 +153,6 @@ void AsyncEngine::step(lua_State *L)
 
 		PCALL_RESL(L, lua_pcall(L, 2, 0, error_handler));
 	}
-	resultQueueMutex.unlock();
 	lua_pop(L, 2); // Pop core and error handler
 }
 

@@ -31,20 +31,19 @@ if(NOT (BUILD_CLIENT OR BUILD_SERVER))
 	set(BUILD_SERVER TRUE)
 endif()
 
-option(USE_SDL "Use SDL2 for window management" FALSE)
+option(USE_SDL "Use SDL for window management" FALSE)
 option(USE_STATIC_BUILD "Link additional libraries needed for static build" FALSE)
 
 if(USE_SDL)
 	if(NOT USE_STATIC_BUILD)
-		find_package(SDL2)
-	else()
-		set(SDL2_FOUND TRUE)
+		find_library(SDL_LIBRARIES NAMES SDL3 libSDL3)
+		find_path(SDL_INCLUDE_DIRS NAMES SDL.h PATH_SUFFIXES SDL3 include/SDL3 include PATHS)
 	endif()
-	if (SDL2_FOUND)
-		message(STATUS "SDL2 found.")
-		include_directories(${SDL2_INCLUDE_DIRS})
+	if (SDL_LIBRARIES AND SDL_INCLUDE_DIRS)
+		message(STATUS "SDL found.")
+		include_directories(${SDL_INCLUDE_DIRS})
 	else()
-		message(FATAL_ERROR "SDL2 not found.")
+		message(FATAL_ERROR "SDL not found.")
 	endif()
 endif()
 
@@ -52,7 +51,7 @@ option(ENABLE_CURL "Enable cURL support for fetching media" TRUE)
 set(USE_CURL FALSE)
 
 if(ENABLE_CURL)
-	find_package(CURL)
+	find_package(CURL 7.28.0)
 	if (CURL_FOUND)
 		message(STATUS "cURL support enabled.")
 		set(USE_CURL TRUE)
@@ -148,6 +147,13 @@ if(ENABLE_FREETYPE)
 	if(FREETYPE_FOUND)
 		message(STATUS "Freetype enabled.")
 		set(USE_FREETYPE TRUE)
+	endif()
+
+	find_library(HARFBUZZ_LIBRARY NAMES harfbuzz libharfbuzz)
+	find_path(HARFBUZZ_INCLUDE_DIR NAMES harfbuzz/hb.h hb.h PATHS)
+	if (HARFBUZZ_LIBRARY AND HARFBUZZ_INCLUDE_DIR)
+		message(STATUS "HarfBuzz found.")
+		include_directories(${HARFBUZZ_INCLUDE_DIR})
 	endif()
 endif(ENABLE_FREETYPE)
 
@@ -253,6 +259,28 @@ if(ENABLE_SPATIAL)
 	endif(SPATIAL_LIBRARY AND SPATIAL_INCLUDE_DIR)
 endif(ENABLE_SPATIAL)
 
+option(ENABLE_OPENSSL "Use OpenSSL's libcrypto for faster SHA implementations" TRUE)
+set(USE_OPENSSL FALSE)
+
+if(ENABLE_OPENSSL)
+	if(NOT USE_STATIC_BUILD)
+		find_package(OpenSSL 3.0)
+		if(OPENSSL_FOUND)
+			set(OPENSSL_LIBRARY OpenSSL::Crypto)
+		endif()
+	else()
+		set(OPENSSL_FOUND TRUE)
+		include_directories(${OPENSSL_INCLUDE_DIR})
+	endif()
+	if(OPENSSL_FOUND)
+		set(USE_OPENSSL TRUE)
+		add_definitions(-DUSE_OPENSSL=1)
+		message(STATUS "OpenSSL's libcrypto SHA enabled.")
+	else()
+		message(STATUS "OpenSSL not found!")
+	endif()
+endif(ENABLE_OPENSSL)
+
 
 if(NOT MSVC)
 	set(USE_GPROF FALSE CACHE BOOL "Use -pg flag for g++")
@@ -292,9 +320,13 @@ if(WIN32)
 	find_path(ZLIB_INCLUDE_DIR "zlib.h" DOC "Zlib include directory")
 	find_library(ZLIB_LIBRARIES "zlib" DOC "Path to zlib library")
 
+	find_path(ZSTD_INCLUDE_DIR "zstd.h" DOC "Zstd include directory")
+	find_library(ZSTD_LIBRARY "zstd" DOC "Path to zstd library")
+
 	# Dll's are automatically copied to the output directory by vcpkg when VCPKG_APPLOCAL_DEPS=ON
 	if(NOT VCPKG_APPLOCAL_DEPS)
 		find_file(ZLIB_DLL NAMES "zlib.dll" "zlib1.dll" DOC "Path to zlib.dll for installation (optional)")
+		find_file(ZSTD_DLL NAMES "zstd.dll" DOC "Path to zstd.dll for installation (optional)")
 		if(ENABLE_SOUND)
 			set(OPENAL_DLL "" CACHE FILEPATH "Path to OpenAL32.dll for installation (optional)")
 			set(OGG_DLL "" CACHE FILEPATH "Path to libogg.dll for installation (optional)")
@@ -342,6 +374,7 @@ else()
 	endif(BUILD_CLIENT)
 
 	find_package(ZLIB REQUIRED)
+	find_package(Zstd REQUIRED)
 	set(PLATFORM_LIBS -lpthread ${CMAKE_DL_LIBS})
 	if(APPLE)
 		set(PLATFORM_LIBS "-framework CoreFoundation" ${PLATFORM_LIBS})
@@ -400,7 +433,6 @@ set(common_SRCS
 	${mapgen_SRCS}
 	${server_SRCS}
 	${content_SRCS}
-	ban.cpp
 	chat.cpp
 	clientiface.cpp
 	collision.cpp
@@ -473,6 +505,11 @@ if(BUILD_UNITTESTS)
 	set(common_SRCS ${common_SRCS} ${UNITTEST_SRCS})
 endif()
 
+option(ENABLE_BANMANAGER "Enable builtin BanManager" TRUE)
+if(ENABLE_BANMANAGER)
+	add_definitions(-DBAN_MANAGER=1)
+	set(common_SRCS ${common_SRCS} ban.cpp)
+endif()
 
 # This gives us the icon and file version information
 if(WIN32)
@@ -533,11 +570,13 @@ include_directories(
 	${PROJECT_SOURCE_DIR}
 	${IRRLICHT_INCLUDE_DIR}
 	${ZLIB_INCLUDE_DIR}
+	${ZSTD_INCLUDE_DIR}
 	${PNG_INCLUDE_DIR}
 	${SOUND_INCLUDE_DIRS}
 	${SQLITE3_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
 	${CHACHA_INCLUDE_DIR}
+	${SHEENBIDI_INCLUDE_DIR}
 	${GMP_INCLUDE_DIR}
 	${JSON_INCLUDE_DIR}
 	${X11_INCLUDE_DIR}
@@ -566,6 +605,7 @@ if(BUILD_CLIENT)
 	target_link_libraries(
 		${PROJECT_NAME}
 		${ZLIB_LIBRARIES}
+		${ZSTD_LIBRARY}
 		${IRRLICHT_LIBRARY}
 		${JPEG_LIBRARIES}
 		${BZIP2_LIBRARIES}
@@ -581,6 +621,7 @@ if(BUILD_CLIENT)
 		luautf8
 		luachacha
 		chacha
+		sheenbidi
 	)
 	if(NOT USE_LUAJIT)
 		set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -589,11 +630,18 @@ if(BUILD_CLIENT)
 			ENABLE_EXPORTS 1
 		)
 	endif()
-
+	if(USE_SOUND)
+		if(USE_STATIC_BUILD AND WIN32)
+			target_link_libraries(
+				${PROJECT_NAME}
+				avrt
+			)
+		endif()
+	endif()
 	if(USE_SDL)
 		target_link_libraries(
 			${PROJECT_NAME}
-			${SDL2_LIBRARIES}
+			${SDL_LIBRARIES}
 		)
 		if(USE_STATIC_BUILD AND WIN32)
 			target_link_libraries(
@@ -629,6 +677,14 @@ if(BUILD_CLIENT)
 			)
 		endif()
 	endif()
+	if (USE_OPENSSL)
+		target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARY})
+		if(USE_STATIC_BUILD)
+			if(WIN32)
+				target_link_libraries(${PROJECT_NAME} bcrypt crypt32 ws2_32)
+			endif()
+		endif()
+	endif()
 	if(USE_CURL)
 		target_link_libraries(
 			${PROJECT_NAME}
@@ -650,6 +706,7 @@ if(BUILD_CLIENT)
 		target_link_libraries(
 			${PROJECT_NAME}
 			${FREETYPE_LIBRARY}
+			${HARFBUZZ_LIBRARY}
 		)
 	endif()
 	if (USE_CURSES)
@@ -679,6 +736,7 @@ if(BUILD_SERVER)
 	target_link_libraries(
 		${PROJECT_NAME}server
 		${ZLIB_LIBRARIES}
+		${ZSTD_LIBRARY}
 		${SQLITE3_LIBRARY}
 		${JSON_LIBRARY}
 		${LUA_LIBRARY}
@@ -701,7 +759,7 @@ if(BUILD_SERVER)
 	if(USE_SDL)
 		target_link_libraries(
 			${PROJECT_NAME}server
-			${SDL2_LIBRARIES}
+			${SDL_LIBRARIES}
 		)
 		if(USE_STATIC_BUILD AND WIN32)
 			target_link_libraries(
@@ -734,6 +792,9 @@ if(BUILD_SERVER)
 	if (USE_SPATIAL)
 		target_link_libraries(${PROJECT_NAME}server ${SPATIAL_LIBRARY})
 	endif()
+	if (USE_OPENSSL)
+		target_link_libraries(${PROJECT_NAME}server ${OPENSSL_LIBRARY})
+	endif()
 	if(USE_CURL)
 		target_link_libraries(
 			${PROJECT_NAME}server
@@ -745,10 +806,8 @@ endif(BUILD_SERVER)
 # Blacklisted locales that don't work.
 # see issue #4638
 set(GETTEXT_BLACKLISTED_LOCALES
-	ar
 	he
 	ky
-	ms_Arab
 	th
 )
 
@@ -901,6 +960,9 @@ if(WIN32)
 		endif()
 		if(ZLIB_DLL)
 			install(FILES ${ZLIB_DLL} DESTINATION ${BINDIR})
+		endif()
+		if(ZSTD_DLL)
+			install(FILES ${ZSTD_DLL} DESTINATION ${BINDIR})
 		endif()
 		if(FREETYPE_DLL)
 			install(FILES ${FREETYPE_DLL} DESTINATION ${BINDIR})

@@ -74,8 +74,10 @@ protected:
 
 	v2s32 m_pointer;
 	v2s32 m_old_pointer;  // Mouse position after previous mouse event
+	v2s32 m_zero_pointer;
 	v2u32 m_screensize_old;
 	float m_gui_scale;
+	bool m_pointer_is_zero;
 #if defined(__ANDROID__) || defined(__IOS__)
 	std::string m_jni_field_name;
 #endif

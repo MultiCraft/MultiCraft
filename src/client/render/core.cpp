@@ -53,7 +53,7 @@ void RenderingCore::updateScreenSize()
 }
 
 void RenderingCore::draw(video::SColor _skycolor, bool _show_hud, bool _show_minimap,
-		bool _draw_wield_tool, bool _draw_crosshair)
+		bool _draw_wield_tool, bool _draw_crosshair, bool _draw_nametags)
 {
 	v2u32 ss = driver->getScreenSize();
 	if (screensize != ss) {
@@ -65,6 +65,7 @@ void RenderingCore::draw(video::SColor _skycolor, bool _show_hud, bool _show_min
 	show_minimap = _show_minimap;
 	draw_wield_tool = _draw_wield_tool;
 	draw_crosshair = _draw_crosshair;
+	draw_nametags = _draw_nametags;
 
 	beforeDraw();
 	drawAll();
@@ -83,13 +84,14 @@ void RenderingCore::draw3D()
 
 void RenderingCore::drawHUD()
 {
-	if (show_hud) {
-		if (draw_crosshair)
-			hud->drawCrosshair();
+	if (show_hud && draw_crosshair)
+		hud->drawCrosshair();
 	
-		hud->drawHotbar(client->getEnv().getLocalPlayer()->getWieldIndex());
-		hud->drawLuaElements(camera->getOffset());
-		camera->drawNametags();
+	hud->drawLuaElements(camera->getOffset(), show_hud);
+
+	if (show_hud) {
+		if (draw_nametags)
+			camera->drawNametags();
 		if (mapper && show_minimap)
 			mapper->drawMinimap();
 	}

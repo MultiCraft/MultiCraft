@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h"
 #include "util/basic_macros.h"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 class Semaphore
 {
@@ -42,7 +42,7 @@ public:
 	bool wait(unsigned int time_ms);
 
 private:
-	SDL_sem *semaphore;
+	SDL_Semaphore *semaphore;
 };
 
 #endif

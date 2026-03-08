@@ -15,7 +15,8 @@ cmake .. \
 	-DOGG_LIBRARY="../../libogg/libogg.a" \
 	-DOGG_INCLUDE_DIR="../../libogg/include" \
 	-DCMAKE_C_FLAGS_RELEASE="$CFLAGS" \
-	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC"
+	-DCMAKE_CXX_FLAGS="$CXXFLAGS -fPIC" \
+	-DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 cmake --build . -j${NPROC}
 

@@ -22,6 +22,7 @@ cmake ../ \
 	-DENABLE_PROMETHEUS=0 \
 	-DENABLE_CURSES=0 \
 	-DENABLE_SYSTEM_GMP=0 \
+	-DENABLE_OPENSSL=1 \
 	-DUSE_SDL=1 \
 	-DUSE_STATIC_BUILD=1 \
 	-DCMAKE_C_FLAGS="-static \
@@ -31,7 +32,8 @@ cmake ../ \
 		-DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ \
 		-D_IRR_STATIC_LIB_ \
 		-DAL_LIBTYPE_STATIC \
-		-DCURL_STATICLIB" \
+		-DCURL_STATICLIB \
+		-D_WIN32_WINNT=0x0600" \
 	-DCMAKE_CXX_FLAGS="-static \
 		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
 		-DNO_IRR_COMPILE_WITH_OGLES2_ \
@@ -39,16 +41,17 @@ cmake ../ \
 		-DNO_IRR_COMPILE_WITH_DIRECTINPUT_JOYSTICK_ \
 		-D_IRR_STATIC_LIB_ \
 		-DAL_LIBTYPE_STATIC \
-		-DCURL_STATICLIB" \
+		-DCURL_STATICLIB \
+		-D_WIN32_WINNT=0x0600" \
 	-DIRRLICHT_LIBRARY="$DEPS_ROOT/irrlicht/lib/libIrrlicht.a" \
 	-DIRRLICHT_INCLUDE_DIR="$DEPS_ROOT/irrlicht/include" \
-	-DSDL2_LIBRARIES="$DEPS_ROOT/sdl2/lib/libSDL2.a" \
-	-DSDL2_INCLUDE_DIRS="$DEPS_ROOT/sdl2/include" \
+	-DSDL_LIBRARIES="$DEPS_ROOT/libSDL/lib/libSDL.a" \
+	-DSDL_INCLUDE_DIRS="$DEPS_ROOT/libSDL/include" \
 	-DCURL_LIBRARY="$DEPS_ROOT/libcurl/lib/libcurl.a" \
 	-DCURL_INCLUDE_DIR="$DEPS_ROOT/libcurl/include" \
 	-DLUA_LIBRARY="$DEPS_ROOT/luajit/lib/libluajit.a" \
 	-DLUA_INCLUDE_DIR="$DEPS_ROOT/luajit/include" \
-	-DZLIB_LIBRARIES="$DEPS_ROOT/zlib/lib/libzlibstatic.a" \
+	-DZLIB_LIBRARIES="$DEPS_ROOT/zlib/lib/libz.a" \
 	-DZLIB_INCLUDE_DIR="$DEPS_ROOT/zlib/include" \
 	-DPNG_LIBRARIES="$DEPS_ROOT/libpng/lib/libpng16.a" \
 	-DPNG_INCLUDE_DIR="$DEPS_ROOT/libpng/include" \
@@ -56,6 +59,8 @@ cmake ../ \
 	-DJPEG_INCLUDE_DIR="$DEPS_ROOT/libjpeg/include" \
 	-DFREETYPE_LIBRARY="$DEPS_ROOT/freetype/lib/libfreetype.a" \
 	-DFREETYPE_INCLUDE_DIRS="$DEPS_ROOT/freetype/include" \
+	-DHARFBUZZ_LIBRARY="$DEPS_ROOT/harfbuzz/lib/libharfbuzz.a" \
+	-DHARFBUZZ_INCLUDE_DIR="$DEPS_ROOT/harfbuzz/include" \
 	-DSQLITE3_LIBRARY="$DEPS_ROOT/sqlite/lib/libsqlite3.a" \
 	-DSQLITE3_INCLUDE_DIR="$DEPS_ROOT/sqlite/include" \
 	-DOGG_LIBRARY="$DEPS_ROOT/libogg/lib/libogg.a" \
@@ -67,7 +72,11 @@ cmake ../ \
 	-DGETTEXT_ICONV_LIBRARY="/mingw64/lib/libiconv.a" \
 	-DGETTEXT_INCLUDE_DIR="$DEPS_ROOT/gettext/include" \
 	-DOPENAL_LIBRARY="$DEPS_ROOT/openal/lib/libOpenAL32.a" \
-	-DOPENAL_INCLUDE_DIR="$DEPS_ROOT/openal/include/AL"
+	-DOPENAL_INCLUDE_DIR="$DEPS_ROOT/openal/include/AL" \
+	-DOPENSSL_LIBRARY="$DEPS_ROOT/openssl/lib/libcrypto.a" \
+	-DOPENSSL_INCLUDE_DIR="$DEPS_ROOT/openssl/include" \
+	-DZSTD_LIBRARY="$DEPS_ROOT/zstd/lib/libzstd.a" \
+	-DZSTD_INCLUDE_DIR="$DEPS_ROOT/zstd/include"
 
 echo
 echo "Build with 'cmake --build . -j'"

@@ -28,8 +28,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include "guiScrollBar.h"
 #include "StyleSpec.h"
+#include "scrollSwipe.h"
 
 class ISimpleTextureSource;
+class ISoundManager;
 
 /*
 	A table GUI element for GUIFormSpecMenu.
@@ -92,7 +94,8 @@ public:
 	GUITable(gui::IGUIEnvironment *env,
 			gui::IGUIElement *parent, s32 id,
 			core::rect<s32> rectangle,
-			ISimpleTextureSource *tsrc);
+			ISimpleTextureSource *tsrc,
+			ISoundManager *sound_manager);
 
 	virtual ~GUITable();
 
@@ -273,7 +276,5 @@ protected:
 			s32 align);
 
 private:
-	static bool m_swipe_started;
-	static int m_swipe_start_y;
-	static float m_swipe_pos;
+	ScrollSwipe *m_scroll_swipe = nullptr;
 };

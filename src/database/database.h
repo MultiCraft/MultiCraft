@@ -47,6 +47,8 @@ public:
 	static v3s16 getIntegerAsBlock(s64 i);
 
 	virtual void listAllLoadableBlocks(std::vector<v3s16> &dst) = 0;
+
+	virtual void compact(){};
 };
 
 class PlayerSAO;

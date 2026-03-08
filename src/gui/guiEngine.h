@@ -22,11 +22,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /******************************************************************************/
 /* Includes                                                                   */
 /******************************************************************************/
+#include <atomic>
 #include "irrlichttypes.h"
 #include "guiFormSpecMenu.h"
 #include "client/sound.h"
 #include "client/tile.h"
 #include "util/enriched_string.h"
+#include "client/sky.h"
+#include "httpfetch.h"
 
 /******************************************************************************/
 /* Structs and macros                                                         */
@@ -83,35 +86,6 @@ public:
 private:
 	/** target to transmit data to */
 	GUIEngine *m_engine = nullptr;
-};
-
-/** GUIEngine specific implementation of ISimpleTextureSource */
-class MenuTextureSource : public ISimpleTextureSource
-{
-public:
-	/**
-	 * default constructor
-	 * @param driver the video driver to load textures from
-	 */
-	MenuTextureSource(video::IVideoDriver *driver) : m_driver(driver) {};
-
-	/**
-	 * destructor, removes all loaded textures
-	 */
-	virtual ~MenuTextureSource();
-
-	/**
-	 * get a texture, loading it if required
-	 * @param name path to the texture
-	 * @param id receives the texture ID, always 0 in this implementation
-	 */
-	video::ITexture *getTexture(const std::string &name, u32 *id = NULL);
-
-private:
-	/** driver to get textures from */
-	video::IVideoDriver *m_driver = nullptr;
-	/** set of texture names to delete */
-	std::set<std::string> m_to_delete;
 };
 
 /** GUIEngine specific implementation of OnDemandSoundFetcher */
@@ -179,6 +153,14 @@ public:
 	unsigned int queueAsync(const std::string &serialized_fct,
 			const std::string &serialized_params);
 
+	ITextureSource *getTextureSource() { return m_texture_source; }
+
+	static float g_timeofday;
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+	static bool readUpdate(std::string *key_to, std::string *value_to);
+#endif
+
 private:
 
 	/** find and run the main menu script */
@@ -199,7 +181,7 @@ private:
 	/** pointer to data beeing transfered back to main game handling */
 	MainMenuData            *m_data = nullptr;
 	/** pointer to texture source */
-	ISimpleTextureSource    *m_texture_source = nullptr;
+	ITextureSource          *m_texture_source = nullptr;
 	/** pointer to soundmanager*/
 	ISoundManager           *m_sound_manager = nullptr;
 
@@ -253,12 +235,20 @@ private:
 	bool setTexture(texture_layer layer, const std::string &texturepath,
 			bool tile_image, unsigned int minsize);
 
+	/** used to check the validity of download_file requests */
+	static std::atomic<unsigned int> s_download_file_reset_counter;
+
 	/**
 	 * download a file using curl
-	 * @param url url to download
+	 * @param fetch_request the request to download
 	 * @param target file to store to
 	 */
-	static bool downloadFile(const std::string &url, const std::string &target);
+	static bool downloadFile(HTTPFetchRequest fetch_request, const std::string &target);
+
+	static void cancelAllDownloadFiles()
+	{
+		s_download_file_reset_counter++;
+	}
 
 	/** array containing pointers to current specified texture layers */
 	image_definition m_textures[TEX_LAYER_MAX];

@@ -1048,7 +1048,7 @@ bool UDPPeer::processReliableSendCommand(
 	}
 
 	if (have_sequence_number) {
-		volatile u16 pcount = 0;
+		//volatile u16 pcount = 0;
 		while (!toadd.empty()) {
 			BufferedPacket p = std::move(toadd.front());
 			toadd.pop();
@@ -1058,7 +1058,7 @@ bool UDPPeer::processReliableSendCommand(
 //					<< " seqnum: " << readU16(&p.data[BASE_HEADER_SIZE+1])
 //					<< std::endl)
 			chan.queued_reliables.push(std::move(p));
-			pcount++;
+			//pcount++;
 		}
 		sanity_check(chan.queued_reliables.size() < 0xFFFF);
 		return true;

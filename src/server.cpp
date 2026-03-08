@@ -59,7 +59,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "defaultsettings.h"
 #include "server/mods.h"
 #include "util/base64.h"
-#include "util/sha1.h"
+#include "util/hashing.h"
 #include "util/hex.h"
 #include "database/database.h"
 #include "chatmessage.h"
@@ -68,6 +68,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "server/player_sao.h"
 #include "server/serverinventorymgr.h"
 #include "translation.h"
+#include <zstd.h>
+#if defined(__ANDROID__) || defined(__APPLE__)
+#include "util/encryption.h"
+#endif
 
 class ClientNotFoundException : public BaseException
 {
@@ -121,6 +125,12 @@ void *ServerThread::run()
 		} catch (LuaError &e) {
 			m_server->setAsyncFatalError(
 					"ServerThread::run Lua: " + std::string(e.what()));
+		} catch (SerializationError &e) {
+			m_server->setAsyncFatalError(
+					"ServerThread::run: " + std::string(e.what()));
+		} catch (DatabaseException &e) {
+			m_server->setAsyncFatalError(
+					"ServerThread::run: " + std::string(e.what()));
 		}
 	}
 
@@ -287,7 +297,9 @@ Server::~Server()
 		MutexAutoLock envlock(m_env_mutex);
 
 		infostream << "Server: Saving players" << std::endl;
-		m_env->saveLoadedPlayers();
+		try {
+			m_env->saveLoadedPlayers();
+		} catch (DatabaseException &e) {}
 
 		infostream << "Server: Kicking players" << std::endl;
 		std::string kick_msg;
@@ -299,7 +311,9 @@ Server::~Server()
 		if (kick_msg.empty()) {
 			kick_msg = g_settings->get("kick_msg_shutdown");
 		}
-		m_env->saveLoadedPlayers(true);
+		try {
+			m_env->saveLoadedPlayers(true);
+		} catch (DatabaseException &e) {}
 		m_env->kickAllPlayers(SERVER_ACCESSDENIED_SHUTDOWN,
 			kick_msg, reconnect);
 	}
@@ -332,7 +346,17 @@ Server::~Server()
 		}
 
 		infostream << "Server: Saving environment metadata" << std::endl;
-		m_env->saveMeta();
+		try {
+			m_env->saveMeta();
+		} catch (SerializationError &e) {
+			if (m_on_shutdown_errmsg) {
+				if (m_on_shutdown_errmsg->empty()) {
+					*m_on_shutdown_errmsg = std::string("ServerEnvironment: ") + e.what();
+				} else {
+					*m_on_shutdown_errmsg += std::string("\nServerEnvironment: ") + e.what();
+				}
+			}
+		}
 	}
 
 	// Stop threads
@@ -347,7 +371,9 @@ Server::~Server()
 #if USE_SQLITE
 	delete m_rollback;
 #endif
+#if BAN_MANAGER
 	delete m_banmanager;
+#endif
 	delete m_itemdef;
 	delete m_nodedef;
 	delete m_craftdef;
@@ -388,9 +414,11 @@ void Server::init()
 	// Create emerge manager
 	m_emerge = new EmergeManager(this);
 
+#if BAN_MANAGER
 	// Create ban manager
 	std::string ban_path = m_path_world + DIR_DELIM "ipban.txt";
 	m_banmanager = new BanManager(ban_path);
+#endif
 
 	m_modmgr = std::unique_ptr<ServerModManager>(new ServerModManager(m_path_world));
 	std::vector<ModSpec> unsatisfied_mods = m_modmgr->getUnsatisfiedMods();
@@ -967,10 +995,12 @@ void Server::AsyncRunStep(bool initial_step)
 
 			ScopeProfiler sp(g_profiler, "Server: map saving (sum)");
 
+#if BAN_MANAGER
 			// Save ban file
 			if (m_banmanager->isModified()) {
 				m_banmanager->save();
 			}
+#endif
 
 			// Save changed parts of map
 			m_env->getMap().save(MOD_STATE_WRITE_NEEDED);
@@ -1119,6 +1149,7 @@ void Server::ProcessData(NetworkPacket *pkt)
 	ScopeProfiler sp(g_profiler, "Server: Process network packet (sum)");
 	u32 peer_id = pkt->getPeerId();
 
+#if BAN_MANAGER
 	try {
 		Address address = getPeerAddress(peer_id);
 		std::string addr_s = address.serializeString();
@@ -1143,6 +1174,7 @@ void Server::ProcessData(NetworkPacket *pkt)
 				<< peer_id << " not found" << std::endl;
 		return;
 	}
+#endif
 
 	try {
 		ToServerCommand command = (ToServerCommand) pkt->getCommand();
@@ -1266,6 +1298,8 @@ bool Server::getClientInfo(session_t peer_id, ClientInfo &ret)
 	ret.vers_string = client->getFullVer();
 	ret.platform = client->getPlatform();
 	ret.sysinfo = client->getSysInfo();
+
+	ret.system_ram = client->getSystemRAM();
 
 	ret.lang_code = client->getLangCode();
 
@@ -1411,7 +1445,10 @@ void Server::SendItemDef(session_t peer_id,
 	std::ostringstream tmp_os(std::ios::binary);
 	itemdef->serialize(tmp_os, protocol_version);
 	std::ostringstream tmp_os2(std::ios::binary);
-	compressZlib(tmp_os.str(), tmp_os2);
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 3 || m_simple_singleplayer_mode)
+		compressZstd(tmp_os.str(), tmp_os2);
+	else
+		compressZlib(tmp_os.str(), tmp_os2);
 	pkt.putLongString(tmp_os2.str());
 
 	// Make data buffer
@@ -1434,7 +1471,10 @@ void Server::SendNodeDef(session_t peer_id,
 	std::ostringstream tmp_os(std::ios::binary);
 	nodedef->serialize(tmp_os, protocol_version);
 	std::ostringstream tmp_os2(std::ios::binary);
-	compressZlib(tmp_os.str(), tmp_os2);
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 3 || m_simple_singleplayer_mode)
+		compressZstd(tmp_os.str(), tmp_os2);
+	else
+		compressZlib(tmp_os.str(), tmp_os2);
 
 	pkt.putLongString(tmp_os2.str());
 
@@ -1634,6 +1674,13 @@ void Server::SendHUDAdd(session_t peer_id, u32 id, HudElement *form)
 			<< form->align << form->offset << form->world_pos << form->size
 			<< form->z_index << form->text2;
 
+	// Only send unhideable if it is specified for maximum compatibility
+	if (form->unhideable || form->touch_only) {
+		pkt << (u32)0 // Style (used by recent MT versions, remove when rebasing)
+			<< (u8)form->unhideable
+			<< (u8)form->touch_only;
+	}
+
 	Send(&pkt);
 }
 
@@ -1666,6 +1713,13 @@ void Server::SendHUDChange(session_t peer_id, u32 id, HudElementStat stat, void 
 			break;
 		case HUD_STAT_SIZE:
 			pkt << *(v2s32 *) value;
+			break;
+		case HUD_STAT_UNHIDEABLE:
+		case HUD_STAT_TOUCH_ONLY:
+			{
+				bool b = *(bool *)value;
+				pkt << (u32) b;
+			}
 			break;
 		case HUD_STAT_NUMBER:
 		case HUD_STAT_ITEM:
@@ -2309,7 +2363,10 @@ void Server::sendMetadataChanged(const std::list<v3s16> &meta_updates, float far
 		std::ostringstream os(std::ios::binary);
 		meta_updates_list.serialize(os, client->net_proto_version, false, true);
 		std::ostringstream oss(std::ios::binary);
-		compressZlib(os.str(), oss);
+		if (m_clients.getMulticraftProtocolVersion(i) > 3 || m_simple_singleplayer_mode)
+			compressZstd(os.str(), oss);
+		else
+			compressZlib(os.str(), oss);
 
 		NetworkPacket pkt(TOCLIENT_NODEMETA_CHANGED, 0);
 		pkt.putLongString(oss.str());
@@ -2327,7 +2384,8 @@ void Server::SendBlockNoLock(session_t peer_id, MapBlock *block, u8 ver,
 	/*
 		Create a packet with the block in the right format
 	*/
-	thread_local const int net_compression_level = rangelim(g_settings->getS16("map_compression_level_net"), -1, 9);
+	thread_local const int net_compression_level = m_simple_singleplayer_mode ? -1 :
+			rangelim(g_settings->getS16("map_compression_level_net"), ZSTD_minCLevel(), ZSTD_maxCLevel());
 	std::ostringstream os(std::ios_base::binary);
 	block->serialize(os, ver, false, net_compression_level);
 	block->serializeNetworkSpecific(os);
@@ -2376,8 +2434,10 @@ void Server::SendBlocks(float dtime)
 
 	// Maximal total count calculation
 	// The per-client block sends is halved with the maximal online users
-	u32 max_blocks_to_send = (m_env->getPlayerCount() + g_settings->getU32("max_users")) *
-		g_settings->getU32("max_simultaneous_block_sends_per_client") / 4 + 1;
+//	u32 max_blocks_to_send = (m_env->getPlayerCount() + g_settings->getU32("max_users")) *
+//		g_settings->getU32("max_simultaneous_block_sends_per_client") / 4 + 1;
+	u32 max_blocks_to_send = m_env->getPlayerCount() *
+		g_settings->getU32("max_simultaneous_block_sends_per_client") + 1;
 
 	ScopeProfiler sp(g_profiler, "Server::SendBlocks(): Send to clients");
 	Map &map = m_env->getMap();
@@ -2436,9 +2496,8 @@ bool Server::addMediaFile(const std::string &filename,
 	// If name is not in a supported format, ignore it
 	const char *supported_ext[] = {
 		".png", ".jpg", ".bmp", ".tga",
-		".pcx", ".ppm", ".psd", ".wal", ".rgb",
 		".ogg",
-		".x", ".b3d", ".md2", ".obj",
+		".x", ".b3d", ".obj",
 		// Custom translation file format
 		".tr",
 		".e",
@@ -2465,14 +2524,12 @@ bool Server::addMediaFile(const std::string &filename,
 		return false;
 	}
 
-	SHA1 sha1;
-	sha1.addBytes(filedata.c_str(), filedata.length());
-
-	unsigned char *digest = sha1.getDigest();
-	std::string sha1_base64 = base64_encode(digest, 20);
+	std::string sha1 = hashing::sha1(filedata);
+	std::string sha1_base64 = base64_encode(
+			reinterpret_cast<const unsigned char*>(sha1.data()), sha1.size());
+	std::string sha1_hex = hex_encode(sha1);
 	if (digest_to)
-		*digest_to = std::string((char*) digest, 20);
-	free(digest);
+		*digest_to = sha1;
 
 	// Put in list
 	m_media[filename] = MediaInfo(filepath, sha1_base64);
@@ -3179,17 +3236,25 @@ void Server::reportFormspecPrependModified(const std::string &name)
 
 void Server::setIpBanned(const std::string &ip, const std::string &name)
 {
+#if BAN_MANAGER
 	m_banmanager->add(ip, name);
+#endif
 }
 
 void Server::unsetIpBanned(const std::string &ip_or_name)
 {
+#if BAN_MANAGER
 	m_banmanager->remove(ip_or_name);
+#endif
 }
 
 std::string Server::getBanDescription(const std::string &ip_or_name)
 {
+#if BAN_MANAGER
 	return m_banmanager->getBanDescription(ip_or_name);
+#else
+	return "";
+#endif
 }
 
 void Server::notifyPlayer(const char *name, const std::wstring &msg)
@@ -3226,6 +3291,13 @@ bool Server::showFormspec(const char *playername, const std::string &formspec,
 
 	SendShowFormspecMessage(player->getPeerId(), formspec, formname);
 	return true;
+}
+
+void Server::copyToClipboard(RemotePlayer *player, const std::string &text)
+{
+	NetworkPacket pkt(TOCLIENT_COPY_TO_CLIPBOARD, 0, player->getPeerId());
+	pkt << text;
+	Send(&pkt);
 }
 
 u32 Server::hudAdd(RemotePlayer *player, HudElement *form)
@@ -3841,9 +3913,9 @@ bool Server::leaveModChannel(const std::string &channel)
 	return m_modchannel_mgr->leaveChannel(channel, PEER_ID_SERVER);
 }
 
-bool Server::sendModChannelMessage(const std::string &channel, const std::string &message)
+bool Server::sendModChannelMessage(const std::string &channel, const std::string &message, bool force)
 {
-	if (!m_modchannel_mgr->canWriteOnChannel(channel))
+	if (!force && !m_modchannel_mgr->canWriteOnChannel(channel))
 		return false;
 
 	broadcastModChannelMessage(channel, message, PEER_ID_SERVER);
@@ -3910,7 +3982,29 @@ Translations *Server::getTranslationLanguage(const std::string &lang_code)
 				translations->loadTranslation(data);
 			}
 		}
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+		else if (str_ends_with(i.first, suffix + ".e")) {
+			std::string data;
+			if (fs::ReadFile(i.second.path, data)) {
+				std::string decrypted_data;
+				if (Encryption::decryptSimple(data, decrypted_data))
+					translations->loadTranslation(decrypted_data);
+			}
+		}
+#endif
 	}
 
 	return translations;
+}
+
+std::unordered_map<std::string, std::string> Server::getMediaList()
+{
+	MutexAutoLock env_lock(m_env_mutex);
+
+	std::unordered_map<std::string, std::string> ret;
+	for (auto &it : m_media) {
+		ret.emplace(base64_decode(it.second.sha1_digest), it.second.path);
+	}
+	return ret;
 }

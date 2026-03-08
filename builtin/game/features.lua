@@ -20,6 +20,9 @@ core.features = {
 	direct_velocity_on_players = true,
 	use_texture_alpha_string_modes = true,
 	abm_min_max_y = true,
+	compress_zstd = true,
+	item_meta_range = true,
+	bidi_text_supported = true,
 }
 
 function core.has_feature(arg)

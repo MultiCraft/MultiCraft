@@ -222,8 +222,8 @@ void MapgenV7P::makeChunk(BlockMakeData *data)
 
 	blockseed = getBlockSeed2(full_node_min, seed);
 
-	if (node_max.Y <= bedrock_level) {
-		// Only generate bedrock
+	if (node_max.Y <= bedrock_level && c_bedrock != CONTENT_IGNORE) {
+		// Only generate bedrock (if enabled)
 		generateBedrock();
 	} else {
 		// Generate base and mountain terrain
@@ -380,8 +380,8 @@ int MapgenV7P::generateTerrain()
 		for (s16 y = node_min.Y - 1; y <= node_max.Y + 1; y++) {
 			if (vm->m_data[vi].getContent() == CONTENT_IGNORE) {
 				if (y <= surface_y) {
-					if (y <= bedrock_level)
-						vm->m_data[vi] = n_bedrock; // Bedrock
+					if (y <= bedrock_level && c_bedrock != CONTENT_IGNORE)
+						vm->m_data[vi] = n_bedrock; // Bedrock (if enabled)
 					else
 						vm->m_data[vi] = n_stone; // Base and mountain terrain
 				} else if (y <= water_level) {

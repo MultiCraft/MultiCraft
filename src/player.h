@@ -57,6 +57,7 @@ struct PlayerControl
 		bool a_aux1,
 		bool a_sneak,
 		bool a_zoom,
+		bool a_tabb,
 		bool a_dig,
 		bool a_place,
 		float a_pitch,
@@ -73,6 +74,7 @@ struct PlayerControl
 		aux1 = a_aux1;
 		sneak = a_sneak;
 		zoom = a_zoom;
+		tabb = a_tabb;
 		dig = a_dig;
 		place = a_place;
 		pitch = a_pitch;
@@ -88,6 +90,7 @@ struct PlayerControl
 	bool aux1 = false;
 	bool sneak = false;
 	bool zoom = false;
+	bool tabb = false;
 	bool dig = false;
 	bool place = false;
 	float pitch = 0.0f;

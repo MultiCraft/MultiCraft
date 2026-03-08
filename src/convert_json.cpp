@@ -40,9 +40,9 @@ Json::Value fetchJsonValue(const std::string &url,
 	if (extra_headers != NULL)
 		fetch_request.extra_headers = *extra_headers;
 
-	httpfetch_sync(fetch_request, fetch_result);
+	bool completed = httpfetch_sync_interruptible(fetch_request, fetch_result);
 
-	if (!fetch_result.succeeded) {
+	if (!completed || !fetch_result.succeeded) {
 		return Json::Value();
 	}
 	Json::Value root;

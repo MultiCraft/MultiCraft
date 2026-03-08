@@ -18,6 +18,11 @@ LOCAL_SRC_FILES := deps/freetype/lib/$(APP_ABI)/libfreetype.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := HarfBuzz
+LOCAL_SRC_FILES := deps/harfbuzz/lib/$(APP_ABI)/libharfbuzz.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := Irrlicht
 LOCAL_SRC_FILES := deps/irrlicht/lib/$(APP_ABI)/libIrrlicht.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -33,8 +38,8 @@ LOCAL_SRC_FILES := deps/libjpeg/lib/$(APP_ABI)/libjpeg.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := SDL2
-LOCAL_SRC_FILES := deps/sdl2/lib/$(APP_ABI)/libSDL2.a
+LOCAL_MODULE := SDL
+LOCAL_SRC_FILES := deps/libSDL/lib/$(APP_ABI)/libSDL.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -48,18 +53,18 @@ LOCAL_SRC_FILES := deps/luajit/lib/$(APP_ABI)/libluajit.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := mbedTLS
-LOCAL_SRC_FILES := deps/mbedtls/lib/$(APP_ABI)/libmbedtls.a
+LOCAL_MODULE := libssl
+LOCAL_SRC_FILES := deps/openssl/lib/$(APP_ABI)/libssl.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := mbedx509
-LOCAL_SRC_FILES := deps/mbedtls/lib/$(APP_ABI)/libmbedx509.a
+LOCAL_MODULE := libcrypto
+LOCAL_SRC_FILES := deps/openssl/lib/$(APP_ABI)/libcrypto.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := mbedcrypto
-LOCAL_SRC_FILES := deps/mbedtls/lib/$(APP_ABI)/libmbedcrypto.a
+LOCAL_MODULE := nghttp2
+LOCAL_SRC_FILES := deps/nghttp2/lib/$(APP_ABI)/libnghttp2.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -73,10 +78,16 @@ LOCAL_SRC_FILES := deps/vorbis/lib/$(APP_ABI)/libvorbis.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := zstd
+LOCAL_SRC_FILES := deps/zstd/lib/$(APP_ABI)/libzstd.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := MultiCraft
 
 LOCAL_CFLAGS += \
 	-DJSONCPP_NO_LOCALE_SUPPORT                    \
+	-DSB_CONFIG_UNITY                              \
 	-DHAVE_TOUCHSCREENGUI                          \
 	-DENABLE_GLES=1                                \
 	-DUSE_CURL=1                                   \
@@ -86,6 +97,7 @@ LOCAL_CFLAGS += \
 	-DUSE_SQLITE=0                                 \
 	-DUSE_LUAJIT=1                                 \
 	-DUSE_GETTEXT=1                                \
+	-DUSE_OPENSSL=1                                \
 	-DVERSION_MAJOR=${versionMajor}                \
 	-DVERSION_MINOR=${versionMinor}                \
 	-DVERSION_PATCH=${versionPatch}                \
@@ -109,17 +121,21 @@ LOCAL_C_INCLUDES := \
 	../../lib/gmp                                  \
 	../../lib/jsoncpp                              \
 	../../lib/chacha                               \
+	../../lib/sheenbidi/Headers                    \
 	deps/freetype/include                          \
+	deps/harfbuzz/include                          \
 	deps/gettext/include                           \
 	deps/irrlicht/include                          \
 	deps/libpng/include                            \
 	deps/libjpeg/include                           \
-	deps/sdl2/include                              \
+	deps/libSDL/include                            \
 	deps/leveldb/include                           \
 	deps/libcurl/include                           \
 	deps/luajit/include                            \
 	deps/openal/include                            \
-	deps/vorbis/include
+	deps/openssl/include                           \
+	deps/vorbis/include                            \
+	deps/zstd/include
 
 LOCAL_SRC_FILES := \
 	$(wildcard ../../src/client/*.cpp)             \
@@ -132,7 +148,33 @@ LOCAL_SRC_FILES := \
 	../../src/database/database-dummy.cpp          \
 	../../src/database/database-files.cpp          \
 	../../src/database/database-leveldb.cpp        \
-	$(wildcard ../../src/gui/*.cpp)                \
+	../../src/gui/guiAnimatedImage.cpp             \
+	../../src/gui/guiBackgroundImage.cpp           \
+	../../src/gui/guiBox.cpp                       \
+	../../src/gui/guiButton.cpp                    \
+	../../src/gui/guiButtonImage.cpp               \
+	../../src/gui/guiButtonItemImage.cpp           \
+	../../src/gui/guiChatConsole.cpp               \
+	../../src/gui/guiConfirmRegistration.cpp       \
+	../../src/gui/guiEditBox.cpp                   \
+	../../src/gui/guiEditBoxWithScrollbar.cpp      \
+	../../src/gui/guiEngine.cpp                    \
+	../../src/gui/guiFormSpecMenu.cpp              \
+	../../src/gui/guiInventoryList.cpp             \
+	../../src/gui/guiItemImage.cpp                 \
+	../../src/gui/guiKeyChangeMenu.cpp             \
+	../../src/gui/guiPathSelectMenu.cpp            \
+	../../src/gui/guiScene.cpp                     \
+	../../src/gui/guiScrollBar.cpp                 \
+	../../src/gui/guiScrollContainer.cpp           \
+	../../src/gui/guiSkin.cpp                      \
+	../../src/gui/guiTable.cpp                     \
+	../../src/gui/guiHyperText.cpp                 \
+	../../src/gui/guiVolumeChange.cpp              \
+	../../src/gui/modalMenu.cpp                    \
+	../../src/gui/profilergraph.cpp                \
+	../../src/gui/scrollSwipe.cpp                  \
+	../../src/gui/touchscreengui_mc.cpp            \
 	$(wildcard ../../src/irrlicht_changes/*.cpp)   \
 	$(wildcard ../../src/mapgen/*.cpp)             \
 	$(wildcard ../../src/network/*.cpp)            \
@@ -173,9 +215,7 @@ LOCAL_SRC_FILES := \
 	../../src/threading/event.cpp                  \
 	../../src/threading/sdl_semaphore.cpp          \
 	../../src/threading/sdl_thread.cpp             \
-	$(wildcard ../../src/util/*.c)                 \
 	$(wildcard ../../src/util/*.cpp)               \
-	../../src/ban.cpp                              \
 	../../src/chat.cpp                             \
 	../../src/clientiface.cpp                      \
 	../../src/collision.cpp                        \
@@ -252,15 +292,19 @@ LOCAL_SRC_FILES += ../../lib/luautf8/lutf8lib.c
 # Lua ChaCha Lib
 LOCAL_SRC_FILES += $(wildcard ../../lib/luachacha/*.c)
 
+# Sheenbidi
+LOCAL_SRC_FILES += ../../lib/sheenbidi/Source/SheenBidi.c
+
 LOCAL_STATIC_LIBRARIES += \
-	Curl mbedTLS mbedx509 mbedcrypto \
-	Freetype \
+	Curl libssl libcrypto libnghttp2 \
+	Freetype HarfBuzz \
 	OpenAL \
 	Gettext \
-	Irrlicht libpng libjpeg SDL2 \
+	Irrlicht libpng libjpeg SDL \
 	LevelDB \
 	Vorbis \
-	LuaJIT
+	LuaJIT \
+	zstd
 
 LOCAL_STATIC_LIBRARIES += $(PROFILER_LIBS)
 

@@ -50,8 +50,13 @@ public:
 	static const char *getVideoDriverFriendlyName(irr::video::E_DRIVER_TYPE type);
 	static float getDisplayDensity();
 	static v2u32 getDisplaySize();
+	static int getWindowSafeArea();
+#ifdef HAVE_TOUCHSCREENGUI
 	static bool isTablet();
+#endif
 	static bool isHighDpi();
+	static void startTextInput();
+	static void stopTextInput();
 
 	bool setupTopLevelWindow(const std::string &name);
 	void setupTopLevelXorgWindow(const std::string &name);
@@ -106,24 +111,29 @@ public:
 
 	inline static void draw_load_screen(const std::wstring &text,
 			gui::IGUIEnvironment *guienv, ITextureSource *tsrc,
-			float dtime = 0, int percent = 0, bool clouds = false)
+			float dtime = 0, int percent = 0)
 	{
 		s_singleton->_draw_load_screen(
-				text, guienv, tsrc, dtime, percent, clouds);
+				text, guienv, tsrc, dtime, percent);
+	}
+
+	inline static void draw_load_cleanup()
+	{
+		s_singleton->_draw_load_cleanup();
 	}
 
 	inline static void draw_menu_scene(
 			gui::IGUIEnvironment *guienv, ITextureSource *tsrc,
-			float dtime, bool clouds = false)
+			float dtime)
 	{
-		s_singleton->_draw_menu_scene(guienv, tsrc, dtime, clouds);
+		s_singleton->_draw_menu_scene(guienv, tsrc, dtime);
 	}
 
 	inline static void draw_scene(video::SColor skycolor, bool show_hud,
-			bool show_minimap, bool draw_wield_tool, bool draw_crosshair)
+			bool show_minimap, bool draw_wield_tool, bool draw_crosshair, bool draw_nametags)
 	{
 		s_singleton->_draw_scene(skycolor, show_hud, show_minimap,
-				draw_wield_tool, draw_crosshair);
+				draw_wield_tool, draw_crosshair, draw_nametags);
 	}
 
 	inline static void initialize(Client *client, Hud *hud)
@@ -132,6 +142,8 @@ public:
 	}
 
 	inline static void finalize() { s_singleton->_finalize(); }
+
+	inline static void clear_irrlicht_texture_cache() { s_singleton->_clear_irrlicht_texture_cache(); }
 
 	static bool run()
 	{
@@ -142,24 +154,46 @@ public:
 	static std::vector<core::vector3d<u32>> getSupportedVideoModes();
 	static std::vector<irr::video::E_DRIVER_TYPE> getSupportedVideoDrivers();
 
+	static void setLoadScreenBackground(const bool clouds, const std::string texture,
+			const video::SColor sky_color)
+	{
+		if (s_singleton) {
+			s_singleton->m_load_bg_clouds = clouds;
+			s_singleton->m_load_bg_texture = texture;
+			s_singleton->m_sky_color = sky_color;
+		}
+	}
+
 private:
 	void _draw_load_screen(const std::wstring &text, gui::IGUIEnvironment *guienv,
-			ITextureSource *tsrc, float dtime = 0, int percent = 0,
-			bool clouds = false);
+			ITextureSource *tsrc, float dtime = 0, int percent = 0);
 
 	void _draw_menu_scene(gui::IGUIEnvironment *guienv,
-			ITextureSource *tsrc, float dtime = 0,
-			bool clouds = false);
+			ITextureSource *tsrc, float dtime = 0);
+
+	void _draw_load_bg(gui::IGUIEnvironment *guienv,
+			ITextureSource *tsrc, float dtime = 0);
 
 	void _draw_scene(video::SColor skycolor, bool show_hud, bool show_minimap,
-			bool draw_wield_tool, bool draw_crosshair);
+			bool draw_wield_tool, bool draw_crosshair, bool draw_nametags);
+
+	void _draw_load_cleanup();
 
 	void _initialize(Client *client, Hud *hud);
 
 	void _finalize();
 
+	void _clear_irrlicht_texture_cache();
+
 	std::unique_ptr<RenderingCore> core;
 	irr::IrrlichtDevice *m_device = nullptr;
 	irr::video::IVideoDriver *driver;
 	static RenderingEngine *s_singleton;
+
+	bool m_load_bg_clouds = false;
+	std::string m_load_bg_texture = "";
+	video::SColor m_sky_color;
+	u64 m_last_time = 0;
+	float m_load_screen_dtime = 0;
+	int m_percent = 0;
 };

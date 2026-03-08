@@ -17,7 +17,7 @@ if core.settings:get_bool("profiler.load") then
 end
 
 dofile(commonpath .. "after.lua")
-dofile(gamepath .. "item_entity.lua")
+assert(loadfile(gamepath .. "item_entity.lua"))(builtin_shared)
 dofile(gamepath .. "deprecated.lua")
 dofile(gamepath .. "misc.lua")
 dofile(gamepath .. "privileges.lua")
@@ -33,7 +33,7 @@ dofile(gamepath .. "voxelarea.lua")
 dofile(gamepath .. "forceloading.lua")
 dofile(gamepath .. "statbars.lua")
 dofile(gamepath .. "knockback.lua")
-dofile(gamepath .. "hunger.lua")
 dofile(gamepath .. "sscsm" .. DIR_DELIM .. "init.lua")
 
 profiler = nil
+string.dump = nil -- luacheck: ignore

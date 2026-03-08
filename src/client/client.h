@@ -179,6 +179,7 @@ public:
 	void handleCommand_BlockData(NetworkPacket* pkt);
 	void handleCommand_Inventory(NetworkPacket* pkt);
 	void handleCommand_TimeOfDay(NetworkPacket* pkt);
+	void handleCommand_CopyToClipboard(NetworkPacket *pkt);
 	void handleCommand_ChatMessage(NetworkPacket *pkt);
 	void handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt);
 	void handleCommand_ActiveObjectMessages(NetworkPacket* pkt);
@@ -341,10 +342,12 @@ public:
 	void confirmRegistration();
 	bool m_is_registration_confirmation_state = false;
 	bool m_simple_singleplayer_mode;
+	bool *m_connect_aborted = nullptr;
 
 	float mediaReceiveProgress();
 
-	void afterContentReceived();
+	bool drawLoadScreen(const std::wstring &text, float dtime, int percent);
+	bool afterContentReceived();
 
 	float getRTT();
 	float getCurRate();
@@ -419,7 +422,7 @@ public:
 	bool joinModChannel(const std::string &channel) override;
 	bool leaveModChannel(const std::string &channel) override;
 	bool sendModChannelMessage(const std::string &channel,
-			const std::string &message) override;
+			const std::string &message, bool force = false) override;
 	ModChannel *getModChannel(const std::string &channel) override;
 
 	const std::string &getFormspecPrepend() const
@@ -430,6 +433,7 @@ public:
 	const u16 getRoundScreen() { return m_round_screen; }
 	const f32 getHudScaling() { return m_hud_scaling; }
 	const bool getInvItemAnimEnabled() { return m_inv_item_anim_enabled; }
+	const bool getConvertTo16bitEnabled() { return m_convert_to_16bit; }
 private:
 	void loadMods();
 
@@ -494,6 +498,8 @@ private:
 	// the server didn't send the version back then.
 	// If 0, server init hasn't been received yet.
 	u16 m_proto_ver = 0;
+
+	u16 m_compression_mode = NETPROTO_COMPRESSION_NONE;
 
 	bool m_update_wielded_item = false;
 	Inventory *m_inventory_from_server = nullptr;
@@ -594,4 +600,5 @@ private:
 	u16 m_round_screen;
 	f32 m_hud_scaling;
 	bool m_inv_item_anim_enabled;
+	bool m_convert_to_16bit;
 };

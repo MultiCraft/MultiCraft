@@ -30,9 +30,11 @@ OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #include <IGUIFont.h>
 #include "settings.h"
 #include "StyleSpec.h"
+#include "porting.h"
 
 #include "gettext.h"
 #include "client/renderingengine.h"
+#include "client/sound.h"
 
 const int ID_backgroundImage = 262;
 const int ID_soundText = 263;
@@ -42,10 +44,11 @@ const int ID_soundMuteButton = 266;
 
 GUIVolumeChange::GUIVolumeChange(gui::IGUIEnvironment* env,
 		gui::IGUIElement* parent, s32 id,
-		IMenuManager *menumgr, ISimpleTextureSource *tsrc
+		IMenuManager *menumgr, ISimpleTextureSource *tsrc,
+		ISoundManager *sound_manager
 ):
 	GUIModalMenu(env, parent, id, menumgr),
-	m_tsrc(tsrc)
+	m_tsrc(tsrc), m_sound_manager(sound_manager)
 {
 	v3f formspec_bgcolor = g_settings->getV3F("formspec_fullscreen_bg_color");
 	m_fullscreen_bgcolor = video::SColor(
@@ -90,7 +93,15 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 	*/
 	float s = MYMIN(screensize.X / 380.f, screensize.Y / 180.f);
 #if HAVE_TOUCHSCREENGUI
+#ifdef __IOS__
+	const char *model = MultiCraft::getDeviceModel();
+	if (!isDevice11Inch(model) && !isDevice12and9Inch(model))
+		s *= 0.5f;
+	else
+		s *= 0.4f;
+#else
 	s *= RenderingEngine::isTablet() ? 0.4f : 0.5f;
+#endif
 #else
 	s *= 0.35f;
 #endif
@@ -122,16 +133,16 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 
 		const wchar_t *text = wgettext("Sound Volume: ");
 		core::stringw volume_text = text;
-		delete [] text;
+		delete[] text;
 
 		volume_text += core::stringw(volume) + core::stringw("%");
 		Environment->addStaticText(volume_text.c_str(), rect, false,
 				true, this, ID_soundText);
 	}
 	{
-		core::rect<s32> rect(0, 0, 80 * s, 35 * s);
-		rect = rect + v2s32(size.X / 2 - 40 * s, size.Y / 2 + 35 * s); // 45
-		const wchar_t *text = wgettext("Exit");
+		core::rect<s32> rect(0, 0, 100 * s, 35 * s);
+		rect = rect + v2s32(size.X / 2 - 50 * s, size.Y / 2 + 35 * s); // 45
+		const wchar_t *text = wgettext("Save");
 		GUIButton *e = GUIButton::addButton(Environment, rect, m_tsrc, this,
 				ID_soundExitButton, text);
 		delete[] text;
@@ -142,16 +153,18 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 		core::rect<s32> rect(0, 0, 320 * s, 30 * s);
 		rect = rect + v2s32(size.X / 2 - 160 * s, size.Y / 2 - 12 * s); // 30
 		GUIScrollBar *e = new GUIScrollBar(Environment, this,
-			ID_soundSlider, rect, true, false);
+			ID_soundSlider, rect, true, false, m_sound_manager);
 		e->setMax(100);
 		e->setPos(volume);
 		e->setArrowsVisible(GUIScrollBar::ArrowVisibility::SHOW);
-		e->setTextures({
-			m_tsrc->getTexture("gui/scrollbar_horiz_bg.png"),
-			m_tsrc->getTexture("gui/scrollbar_slider.png"),
-			m_tsrc->getTexture("gui/scrollbar_minus.png"),
-			m_tsrc->getTexture("gui/scrollbar_plus.png"),
-		});
+
+		StyleSpec spec;
+		spec.set(StyleSpec::SOUND, g_settings->get("btn_press_sound"));
+		spec.set(StyleSpec::SCROLLBAR_BGIMG, "gui/scrollbar_horiz_bg.png");
+		spec.set(StyleSpec::SCROLLBAR_THUMB_IMG, "gui/scrollbar_slider.png");
+		spec.set(StyleSpec::SCROLLBAR_UP_IMG, "gui/scrollbar_minus.png");
+		spec.set(StyleSpec::SCROLLBAR_DOWN_IMG, "gui/scrollbar_plus.png");
+		e->setStyle(spec, m_tsrc);
 	}
 	/*{
 		core::rect<s32> rect(0, 0, 150 * s, 25 * s);
@@ -209,6 +222,9 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 
 		if (event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
 			if (event.GUIEvent.Caller->getID() == ID_soundExitButton) {
+				const std::string sound = g_settings->get("btn_press_sound");
+				if (!sound.empty())
+					m_sound_manager->playSound(sound, false, 1.0f);
 				saveSettingsAndQuit();
 				return true;
 			}
@@ -236,7 +252,7 @@ bool GUIVolumeChange::OnEvent(const SEvent& event)
 				gui::IGUIElement *e = getElementFromId(ID_soundText);
 				const wchar_t *text = wgettext("Sound Volume: ");
 				core::stringw volume_text = text;
-				delete [] text;
+				delete[] text;
 
 				volume_text += core::stringw(pos) + core::stringw("%");
 				e->setText(volume_text.c_str());

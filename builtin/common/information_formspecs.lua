@@ -2,14 +2,8 @@ local COLOR_BLUE = "#7AF"
 local COLOR_GREEN = "#7F7"
 local COLOR_GRAY = "#BBB"
 
--- Only use bg_common.png with MultiCraft clients
-local function get_background(name)
-	local info = minetest.get_player_information(name)
-	return info.major == 2 and "background9[0,0;14,8;bg_common.png;true;40]" or ""
-end
-
 local LIST_FORMSPEC = [[
-		size[13,6.5]%s
+		size[13,6.5]
 		label[0,-0.1;%s]
 		tablecolumns[color;tree;text;text]
 		table[0,0.5;12.8,5.5;list;%s;0]
@@ -17,7 +11,7 @@ local LIST_FORMSPEC = [[
 	]]
 
 local LIST_FORMSPEC_DESCRIPTION = [[
-		size[13,7.5]%s
+		size[13,7.5]
 		label[0,-0.1;%s]
 		tablecolumns[color;tree;text;text]
 		table[0,0.5;12.8,4.8;list;%s;%i]
@@ -89,7 +83,6 @@ local function build_chatcommands_formspec(name, sel, copy)
 	end
 
 	return LIST_FORMSPEC_DESCRIPTION:format(
-			get_background(name),
 			"Available commands: (see also: /help <cmd>)",
 			table.concat(rows, ","), sel or 0,
 			description, "Close"
@@ -117,7 +110,6 @@ local function build_privs_formspec(name)
 	end
 
 	return LIST_FORMSPEC:format(
-			get_background(name),
 			"Available privileges:",
 			table.concat(rows, ","),
 			"Close"

@@ -112,7 +112,11 @@ core.builtin_auth_handler = {
 	record_login = function(name)
 		assert(type(name) == "string")
 		local auth_entry = core_auth.read(name)
-		assert(auth_entry)
+		if not auth_entry then
+			core.log('warning',
+				"Built-in authentication handler skipped record_login: no auth entry for '"..name.."'")
+			return
+		end
 		auth_entry.last_login = os.time()
 		core_auth.save(auth_entry)
 	end,

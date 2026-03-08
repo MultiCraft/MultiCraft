@@ -37,22 +37,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h" // for dpi
 #include "client/guiscalingfilter.h"
 
+#if USE_FREETYPE
+	#include "irrlicht_changes/CGUITTFont.h"
+#endif
+
 /*
 	GUITable
 */
 
-bool GUITable::m_swipe_started = false;
-int GUITable::m_swipe_start_y = -1;
-float GUITable::m_swipe_pos = 0;
-
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
-		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
+		core::rect<s32> rectangle, ISimpleTextureSource *tsrc,
+		ISoundManager *sound_manager) :
 		gui::IGUIElement(gui::EGUIET_CUSTOM_GUITABLE, env, parent, id, rectangle),
 		m_tsrc(tsrc)
 #else
 GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
-		core::rect<s32> rectangle, ISimpleTextureSource *tsrc) :
+		core::rect<s32> rectangle, ISimpleTextureSource *tsrc,
+		ISoundManager *sound_manager) :
 		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, id, rectangle),
 		m_tsrc(tsrc)
 #endif
@@ -74,7 +76,7 @@ GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
 					0,
 					RelativeRect.getWidth(),
 					RelativeRect.getHeight()),
-			false, true);
+			false, true, sound_manager);
 	m_scrollbar->setSubElement(true);
 	m_scrollbar->setTabStop(false);
 	m_scrollbar->setAlignment(gui::EGUIA_LOWERRIGHT, gui::EGUIA_LOWERRIGHT,
@@ -95,6 +97,20 @@ GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
 			relative_rect.LowerRightCorner.X-width,relative_rect.UpperLeftCorner.Y,
 			relative_rect.LowerRightCorner.X,relative_rect.LowerRightCorner.Y
 			));
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	ScrollSwipe::OrientationEnum orientation;
+	if (m_scrollbar->isHorizontal())
+		orientation = ScrollSwipe::OrientationEnum::HORIZONTAL;
+	else
+		orientation = ScrollSwipe::OrientationEnum::VERTICAL;
+
+	m_scroll_swipe = new ScrollSwipe(env, this, orientation);
+	m_scroll_swipe->setScrollBar(m_scrollbar);
+	m_scroll_swipe->setScrollFactor(-1.0f / scale);
+#endif
+#endif
 }
 
 GUITable::~GUITable()
@@ -355,7 +371,7 @@ void GUITable::setTable(const TableOptions &options,
 				row->content_index = allocString(content[i * colcount + j]);
 				const core::stringw &text = m_strings[row->content_index];
 				row->content_width = m_font ?
-					m_font->getDimension(text.c_str()).Width : 0;
+					((CGUITTFont *)m_font)->getTotalDimension(text.c_str()).Width : 0;
 				row->content_width = MYMAX(row->content_width, width);
 				s32 row_xmax = row->x + padding + row->content_width;
 				xmax = MYMAX(xmax, row_xmax);
@@ -661,6 +677,9 @@ void GUITable::draw()
 	if (!IsVisible)
 		return;
 
+	if (m_scroll_swipe)
+		m_scroll_swipe->updateScrollCoasting();
+
 	gui::IGUISkin *skin = Environment->getSkin();
 
 	// draw background
@@ -922,45 +941,26 @@ bool GUITable::OnEvent(const SEvent &event)
 				return false;
 		}
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#ifdef HAVE_TOUCHSCREENGUI
-		// Handle swipe gesture
-		if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
+		if (m_scroll_swipe) {
 			s32 totalheight = m_rowheight * m_visible_rows.size();
 			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
 					(m_scrollbar->getMax() - m_scrollbar->getMin());
-			m_swipe_start_y = event.MouseInput.Y + m_scrollbar->getPos() / scale;
-		} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
-			m_swipe_start_y = -1;
-			if (m_swipe_started) {
-				m_swipe_started = false;
+			m_scroll_swipe->setScrollFactor(-1.0f / scale);
+
+			bool retval = m_scroll_swipe->onEvent(event);
+			if (retval)
 				return true;
-			}
-		} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
-			double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
-			s32 totalheight = m_rowheight * m_visible_rows.size();
-			float scale = (float)(totalheight - AbsoluteRect.getHeight()) /
-					(m_scrollbar->getMax() - m_scrollbar->getMin());
-
-			if (!m_swipe_started && m_swipe_start_y != -1 &&
-					std::abs(m_swipe_start_y - event.MouseInput.Y - m_scrollbar->getPos() / scale) > 0.1 * screen_dpi) {
-				m_swipe_started = true;
-				Environment->setFocus(this);
-			}
-
-			if (m_swipe_started) {
-				m_swipe_pos = (float)(m_swipe_start_y - event.MouseInput.Y) * scale;
-				m_scrollbar->setPos((int)m_swipe_pos);
-
-				return true;
-			}
 		}
-#endif
-#endif
 
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+		if (isPointInside(p) && (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP ||
+				event.MouseInput.Event == EMIE_LMOUSE_DOUBLE_CLICK ||
+				event.MouseInput.Event == EMIE_LMOUSE_TRIPLE_CLICK)) {
+#else
 		if (event.MouseInput.isLeftPressed() &&
 				(isPointInside(p) ||
 				 event.MouseInput.Event == EMIE_MOUSE_MOVED)) {
+#endif
 			s32 sel_column = 0;
 			bool sel_doubleclick = (event.MouseInput.Event
 					== EMIE_LMOUSE_DOUBLE_CLICK);
@@ -969,7 +969,11 @@ bool GUITable::OnEvent(const SEvent &event)
 			// For certain events (left click), report column
 			// Also open/close subtrees when the +/- is clicked
 			if (cell && (
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+					event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP ||
+#else
 					event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN ||
+#endif
 					event.MouseInput.Event == EMIE_LMOUSE_DOUBLE_CLICK ||
 					event.MouseInput.Event == EMIE_LMOUSE_TRIPLE_CLICK)) {
 				sel_column = cell->reported_column;
@@ -978,7 +982,11 @@ bool GUITable::OnEvent(const SEvent &event)
 			}
 
 			if (plusminus_clicked) {
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_) && defined(HAVE_TOUCHSCREENGUI)
+				if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
+#else
 				if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
+#endif
 					toggleVisibleTree(row_i, 0, false);
 				}
 			}

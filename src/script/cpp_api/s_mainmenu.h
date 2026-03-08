@@ -42,4 +42,6 @@ public:
 	 * @param fields data in field format
 	 */
 	void handleMainMenuButtons(const StringMap &fields);
+
+	void handleUpdate(const std::string &key, const std::string &value);
 };

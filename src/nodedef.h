@@ -530,7 +530,7 @@ public:
 	 */
 	inline const ContentFeatures& get(content_t c) const {
 		return
-			c < m_content_features.size() ?
+			(c < m_content_features.size() && !m_content_features[c].name.empty()) ?
 				m_content_features[c] : m_content_features[CONTENT_UNKNOWN];
 	}
 
@@ -661,7 +661,7 @@ public:
 	 * total ContentFeatures.
 	 * @param progress_cbk_args passed to the callback function
 	 */
-	void updateTextures(IGameDef *gamedef,
+	bool updateTextures(IGameDef *gamedef,
 		void (*progress_cbk)(void *progress_args, u32 progress, u32 max_progress),
 		void *progress_cbk_args);
 
