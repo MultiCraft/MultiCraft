@@ -1018,50 +1018,30 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_rect -= v2s32(0, new_rect.LowerRightCorner.Y - m_screensize.Y);
 			}
 
-			if (m_editor.button_id == escape_id) {
-				for (auto button : m_buttons) {
-					if (button->state != STATE_DEFAULT)
-						continue;
+			for (auto button : m_buttons) {
+				if (button->state != STATE_DEFAULT)
+					continue;
 
-					if (button->id == m_editor.button_id)
-						continue;
+				if (button->id == m_editor.button_id)
+					continue;
 
-					IGUIButton *guibutton = button->guibutton;
+				IGUIButton *guibutton = button->guibutton;
 
-					if (guibutton) {
-						rect<s32> btn_rect = guibutton->getRelativePosition();
+				if (guibutton) {
+					rect<s32> btn_rect = guibutton->getRelativePosition();
 
-						if (new_rect.isRectCollided(btn_rect)) {
-							new_rect = m_editor.old_rect;
-							break;
-						}
+					if (new_rect.isRectCollided(btn_rect)) {
+						new_rect = m_editor.old_rect;
+						break;
 					}
 				}
-
-				IGUIButton *guibutton = m_joystick.button_off;
-				rect<s32> btn_rect = guibutton->getRelativePosition();
-
+			}
+			
+			IGUIButton *joystick_btn = m_joystick.button_off;
+			if (joystick_btn && m_editor.guibutton != joystick_btn) {
+				rect<s32> btn_rect = joystick_btn->getRelativePosition();
 				if (new_rect.isRectCollided(btn_rect))
 					new_rect = m_editor.old_rect;
-			} else {
-				for (auto button : m_buttons) {
-					if (button->state != STATE_DEFAULT)
-						continue;
-
-					if (button->id != escape_id)
-						continue;
-
-					IGUIButton *guibutton = button->guibutton;
-
-					if (guibutton) {
-						rect<s32> btn_rect = guibutton->getRelativePosition();
-
-						if (new_rect.isRectCollided(btn_rect)) {
-							new_rect = m_editor.old_rect;
-							break;
-						}
-					}
-				}
 			}
 
 			setValues(m_editor.button_id,
