@@ -350,6 +350,7 @@ private:
 	rect<s32> getDefaultButtonRect(touch_gui_button_id id);
 	void resetAllValues();
 	void restoreAllValues();
+	bool checkInvalidSettings();
 
 	void loadButtonTexture(button_info *button, IGUIButton *guibutton,
 			std::string image, std::string image_pressed,

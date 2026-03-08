@@ -182,6 +182,9 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manag
 			getButtonRect(editor_redo_id), STATE_EDITOR);
 	m_editor.button_redo->guibutton->setIsPushButton();
 
+	if (checkInvalidSettings())
+		resetAllValues();
+
 	updateButtons();
 
 	m_buttons_initialized = true;
@@ -706,6 +709,24 @@ void TouchScreenGUI::restoreAllValues()
 	m_settings->updateConfigFile(m_settings_path.c_str());
 
 	initSettings();
+}
+
+bool TouchScreenGUI::checkInvalidSettings()
+{
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		rect<s32> button_rect = getButtonRect(button->id);
+
+		if (button_rect == getDefaultButtonRect(button->id))
+			continue;
+
+		if (isButtonCollided(button->id, button_rect))
+			return true;
+	}
+
+	return false;
 }
 
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
