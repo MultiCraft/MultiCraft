@@ -24,6 +24,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/clientmap.h"
 #include "client/hud.h"
 #include "client/minimap.h"
+#ifdef HAVE_TOUCHSCREENGUI
+#include "gui/touchscreengui_mc.h"
+#endif
 
 RenderingCore::RenderingCore(IrrlichtDevice *_device, Client *_client, Hud *_hud)
 	: device(_device), driver(device->getVideoDriver()), smgr(device->getSceneManager()),
@@ -96,6 +99,12 @@ void RenderingCore::drawHUD()
 			mapper->drawMinimap();
 	}
 	guienv->drawAll();
+	
+#ifdef HAVE_TOUCHSCREENGUI
+	if (g_touchscreengui) {
+		g_touchscreengui->draw();
+	}
+#endif
 }
 
 void RenderingCore::drawPostFx()

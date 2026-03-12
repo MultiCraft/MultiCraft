@@ -1675,9 +1675,10 @@ void Server::SendHUDAdd(session_t peer_id, u32 id, HudElement *form)
 			<< form->z_index << form->text2;
 
 	// Only send unhideable if it is specified for maximum compatibility
-	if (form->unhideable) {
+	if (form->unhideable || form->touch_only) {
 		pkt << (u32)0 // Style (used by recent MT versions, remove when rebasing)
-			<< (u8)1;
+			<< (u8)form->unhideable
+			<< (u8)form->touch_only;
 	}
 
 	Send(&pkt);
@@ -1714,6 +1715,7 @@ void Server::SendHUDChange(session_t peer_id, u32 id, HudElementStat stat, void 
 			pkt << *(v2s32 *) value;
 			break;
 		case HUD_STAT_UNHIDEABLE:
+		case HUD_STAT_TOUCH_ONLY:
 			{
 				bool b = *(bool *)value;
 				pkt << (u32) b;

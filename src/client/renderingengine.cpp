@@ -990,13 +990,13 @@ bool RenderingEngine::isTablet()
 
 bool RenderingEngine::isHighDpi()
 {
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-	return RenderingEngine::getDisplayDensity() >= 2;
-#elif defined(__IOS__)
 	float density = RenderingEngine::getDisplayDensity();
-	return isTablet() ? (density >= 2) : (density >= 3);
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	return density >= 2.0f;
+#elif defined(__IOS__)
+	return isTablet() ? (density >= 2.0f) : (density >= 3.0f);
 #else
-	return RenderingEngine::getDisplayDensity() >= 3;
+	return density >= 3.0f;
 #endif
 }
 

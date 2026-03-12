@@ -35,6 +35,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/string.h"
 #include "nodedef.h"
 
+#ifdef HAVE_TOUCHSCREENGUI
+#include "gui/touchscreengui_mc.h"
+#endif
+
 #define checkCSMRestrictionFlag(flag) \
 	( getClient(L)->checkCSMRestrictionFlag(CSMRestrictionFlags::flag) )
 
@@ -419,8 +423,13 @@ int ModApiClient::l_upgrade(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
 #if defined(__ANDROID__) || defined(__APPLE__)
-	const std::string item_name = std::string("CSM/") + luaL_checkstring(L, 1);
-	const bool res = porting::upgrade(item_name);
+	std::string item_name = luaL_checkstring(L, 1);
+	if (!getClient(L)->m_simple_singleplayer_mode)
+		item_name = "CSM/" + item_name;
+	std::string extra;
+	if (lua_gettop(L) >= 2 && lua_isstring(L, 2))
+		extra = lua_tostring(L, 2);
+	const bool res = porting::upgrade(item_name, extra);
 	lua_pushboolean(L, res);
 #else
 	// Not implemented on other platforms
@@ -434,7 +443,9 @@ int ModApiClient::l_get_secret_key(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
 #if defined(__ANDROID__) || defined(__APPLE__)
-	const std::string secret_name = std::string("CSM/") + luaL_checkstring(L, 1);
+	std::string secret_name = luaL_checkstring(L, 1);
+	if (!getClient(L)->m_simple_singleplayer_mode)
+		secret_name = "CSM/" + secret_name;
 	const std::string res = porting::getSecretKey(secret_name);
 	lua_pushlstring(L, res.c_str(), res.size());
 #else
@@ -443,6 +454,28 @@ int ModApiClient::l_get_secret_key(lua_State *L)
 #endif
 
 	return 1;
+}
+
+int ModApiClient::l_set_visible_controls(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+
+#ifdef HAVE_TOUCHSCREENGUI
+	std::set<std::string> visible_btns;
+	if (lua_istable(L, -1)) {
+		lua_pushnil(L);
+		while (lua_next(L, -2)) {
+			if (lua_toboolean(L, -1))
+				visible_btns.insert(lua_tostring(L, -2)); // the key, not the value
+			lua_pop(L, 1);
+		}
+	}
+
+	if (g_touchscreengui)
+		g_touchscreengui->setVisibleBtns(visible_btns);
+#endif
+
+	return 0;
 }
 
 void ModApiClient::Initialize(lua_State *L, int top)
@@ -474,4 +507,5 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(get_csm_restrictions);
 	API_FCT(upgrade);
 	API_FCT(get_secret_key);
+	API_FCT(set_visible_controls);
 }
