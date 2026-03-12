@@ -145,10 +145,8 @@ bool createAssetManager();
 void destroyAssetManager();
 
 /**
- * vibrate phone on Android
- * @param duration in miliseconds
- * @param amplitude 1-255
+ * vibrate phone
  */
-void vibrationEffect(int duration, int amplitude);
+void vibrationEffect(int intensity);
 
 }

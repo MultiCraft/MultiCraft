@@ -528,7 +528,7 @@ void destroyAssetManager()
 	}
 }
 
-void vibrationEffect(int duration, int amplitude)
+void vibrationEffect(int intensity)
 {
 	if (jnienv == nullptr || activityObj == nullptr)
 		return;
@@ -539,8 +539,7 @@ void vibrationEffect(int duration, int amplitude)
 	FATAL_ERROR_IF(vibrationEffectMethod == nullptr,
 			"porting::vibrate unable to find Java vibrationEffect method");
 
-	jnienv->CallVoidMethod(activityObj, vibrationEffectMethod,
-			duration, amplitude);
+	jnienv->CallVoidMethod(activityObj, vibrationEffectMethod, intensity);
 }
 
 }

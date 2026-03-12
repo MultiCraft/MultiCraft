@@ -2803,10 +2803,7 @@ void Game::handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation 
 	// Play damage sound
 	client->getEventManager()->put(new SimpleTriggerEvent(MtEvent::PLAYER_DAMAGE));
 
-#if defined(__ANDROID__)
-		if (m_enable_vibrations)
-			porting::vibrationEffect(100, 128);
-#elif defined(__IOS__)
+#if defined(__ANDROID__) || defined(__IOS__)
 		if (m_enable_vibrations)
 			porting::vibrationEffect(3);
 #endif
@@ -3773,10 +3770,7 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 			// A node is predicted, also play a sound
 			soundmaker->m_player_rightpunch_sound = selected_def.sound_place;
 
-#if defined(__ANDROID__)
-			if (m_enable_vibrations)
-				porting::vibrationEffect(100, 128);
-#elif defined(__IOS__)
+#if defined(__ANDROID__) || defined(__IOS__)
 			if (m_enable_vibrations)
 				porting::vibrationEffect(1);
 #endif
@@ -3843,10 +3837,7 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 			runData.punching = true;
 		}
 
-#if defined(__ANDROID__)
-		if (m_enable_vibrations)
-			porting::vibrationEffect(100, 128);
-#elif defined(__IOS__)
+#if defined(__ANDROID__) || defined(__IOS__)
 		if (m_enable_vibrations)
 			porting::vibrationEffect(2);
 #endif
@@ -3998,10 +3989,7 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 		// Send event to trigger sound
 		client->getEventManager()->put(new NodeDugEvent(nodepos, wasnode));
 
-#if defined(__ANDROID__)
-		if (m_enable_vibrations)
-			porting::vibrationEffect(100, 128);
-#elif defined(__IOS__)
+#if defined(__ANDROID__) || defined(__IOS__)
 		if (m_enable_vibrations)
 			porting::vibrationEffect(1);
 #endif

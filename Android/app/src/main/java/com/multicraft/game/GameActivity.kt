@@ -343,19 +343,21 @@ class GameActivity : SDLActivity() {
 
 	fun needsExtractAssets() = isExtract
 
-	fun vibrationEffect(duration: Int, amplitude: Int) {
-		val duration = duration.toLong()
+	fun vibrationEffect(intensity: Int) {
+		val intensity: Long = (intensity * 100).toLong()
 
 		if (isAndroid12()) {
 			val vibratorManager = getSystemService(VIBRATOR_MANAGER_SERVICE) as? VibratorManager
 			val vibrator = vibratorManager?.defaultVibrator
-			vibrator?.vibrate(VibrationEffect.createOneShot(duration, amplitude.coerceIn(1, 255)))
-		} else if (isOreo()) @Suppress("DEPRECATION") {
+			vibrator?.vibrate(VibrationEffect.createOneShot(intensity, 128))
+		}
+		// it's difficult to predict the type of vibration.
+		/*else if (isOreo()) @Suppress("DEPRECATION") {
 			val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
-			vibrator?.vibrate(VibrationEffect.createOneShot(duration, amplitude.coerceIn(1, 255)))
+			vibrator?.vibrate(VibrationEffect.createOneShot(intensity, 128))
 		} else @Suppress("DEPRECATION") {
 			val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
-			vibrator?.vibrate(duration)
-		}
+			vibrator?.vibrate(intensity)
+		}*/
 	}
 }
