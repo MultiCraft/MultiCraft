@@ -182,6 +182,9 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manag
 			getButtonRect(editor_redo_id), STATE_EDITOR);
 	m_editor.button_redo->guibutton->setIsPushButton();
 
+	if (checkInvalidSettings())
+		resetAllValues();
+
 	updateButtons();
 
 	m_buttons_initialized = true;
@@ -511,12 +514,12 @@ void TouchScreenGUI::initSettings(bool init)
 			m_settings->updateConfigFile(m_settings_path.c_str());
 		} else {
 			s32 old_button_size = m_settings->getS32("button_size");
-	
+
 			if (m_button_size != old_button_size) {
 				for (auto name : m_settings->getNames()) {
 					m_settings->remove(name);
 				}
-	
+
 				m_settings->setS32("button_size", m_button_size);
 				m_settings->updateConfigFile(m_settings_path.c_str());
 			}
@@ -706,6 +709,24 @@ void TouchScreenGUI::restoreAllValues()
 	m_settings->updateConfigFile(m_settings_path.c_str());
 
 	initSettings();
+}
+
+bool TouchScreenGUI::checkInvalidSettings()
+{
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		rect<s32> button_rect = getButtonRect(button->id);
+
+		if (button_rect == getDefaultButtonRect(button->id))
+			continue;
+
+		if (isButtonCollided(button->id, button_rect))
+			return true;
+	}
+
+	return false;
 }
 
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
@@ -1018,50 +1039,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_rect -= v2s32(0, new_rect.LowerRightCorner.Y - m_screensize.Y);
 			}
 
-			if (m_editor.button_id == escape_id) {
-				for (auto button : m_buttons) {
-					if (button->state != STATE_DEFAULT)
-						continue;
-
-					if (button->id == m_editor.button_id)
-						continue;
-
-					IGUIButton *guibutton = button->guibutton;
-
-					if (guibutton) {
-						rect<s32> btn_rect = guibutton->getRelativePosition();
-
-						if (new_rect.isRectCollided(btn_rect)) {
-							new_rect = m_editor.old_rect;
-							break;
-						}
-					}
-				}
-
-				IGUIButton *guibutton = m_joystick.button_off;
-				rect<s32> btn_rect = guibutton->getRelativePosition();
-
-				if (new_rect.isRectCollided(btn_rect))
-					new_rect = m_editor.old_rect;
-			} else {
-				for (auto button : m_buttons) {
-					if (button->state != STATE_DEFAULT)
-						continue;
-
-					if (button->id != escape_id)
-						continue;
-
-					IGUIButton *guibutton = button->guibutton;
-
-					if (guibutton) {
-						rect<s32> btn_rect = guibutton->getRelativePosition();
-
-						if (new_rect.isRectCollided(btn_rect)) {
-							new_rect = m_editor.old_rect;
-							break;
-						}
-					}
-				}
+			if (isButtonCollided(m_editor.button_id, new_rect)) {
+				new_rect = m_editor.old_rect;
 			}
 
 			setValues(m_editor.button_id,
@@ -1223,6 +1202,36 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 	}
 
 	return result;
+}
+
+bool TouchScreenGUI::isButtonCollided(touch_gui_button_id id, rect<s32> button_rect)
+{
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		if (button->id == id)
+			continue;
+
+		IGUIButton *guibutton = button->guibutton;
+
+		if (guibutton) {
+			rect<s32> button_rect2 = guibutton->getRelativePosition();
+
+			if (button_rect.isRectCollided(button_rect2))
+				return true;
+		}
+	}
+
+	IGUIButton *joystick_btn = m_joystick.button_off;
+	if (joystick_btn && m_editor.guibutton != joystick_btn) {
+		rect<s32> button_rect2 = joystick_btn->getRelativePosition();
+
+		if (button_rect.isRectCollided(button_rect2))
+			return true;
+	}
+
+	return false;
 }
 
 bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
@@ -1456,6 +1465,29 @@ void TouchScreenGUI::step(float dtime)
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera_additional.dig = true;
 			wakeUpInputhandler();
+		}
+	}
+}
+
+void TouchScreenGUI::draw()
+{
+	IGUISkin* skin = m_guienv->getSkin();
+	if (!skin)
+		return;
+
+	if (m_current_state == STATE_EDITOR) {
+		IGUIButton *guibutton = m_editor.guibutton;
+
+		if (guibutton) {
+			rect<s32> outline_rect = guibutton->getRelativePosition();
+			bool collided = isButtonCollided(m_editor.button_id, outline_rect);
+
+			video::SColor outline_color = collided ?
+					video::SColor(255, 255, 0, 0) :
+					video::SColor(255, 0, 255, 0);
+
+			m_device->getVideoDriver()->draw2DRectangleOutline(outline_rect,
+					outline_color);
 		}
 	}
 }
