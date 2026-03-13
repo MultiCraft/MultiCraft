@@ -39,6 +39,7 @@ import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.net.toUri
 import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
+import com.multicraft.game.helpers.ApiLevelHelper.isAndroid10
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
@@ -344,20 +345,32 @@ class GameActivity : SDLActivity() {
 	fun needsExtractAssets() = isExtract
 
 	fun vibrationEffect(intensity: Int) {
-		val intensity: Long = (intensity * 100).toLong()
-
-		if (isAndroid12()) {
-			val vibratorManager = getSystemService(VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-			val vibrator = vibratorManager?.defaultVibrator
-			vibrator?.vibrate(VibrationEffect.createOneShot(intensity, 128))
+		val effect: Int = if (isAndroid10()) {
+			when (intensity) {
+				1 -> VibrationEffect.EFFECT_TICK
+				2 -> VibrationEffect.EFFECT_CLICK
+				3 -> VibrationEffect.EFFECT_HEAVY_CLICK
+				else -> return
+			}
+		} else {
+			when (intensity) {
+				1 -> 60
+				2 -> 120
+				3 -> 240
+				else -> return
+			}
 		}
-		// it's difficult to predict the type of vibration.
-		/*else if (isOreo()) @Suppress("DEPRECATION") {
+		if (isAndroid12()) {
+			val vibrator = getSystemService(VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+			vibrator?.defaultVibrator?.vibrate(VibrationEffect.createPredefined(effect))
+		} else if (isAndroid10()) @Suppress("DEPRECATION") {
 			val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
-			vibrator?.vibrate(VibrationEffect.createOneShot(intensity, 128))
-		} else @Suppress("DEPRECATION") {
+			vibrator?.vibrate(VibrationEffect.createPredefined(effect))
+		} else if (isOreo()) @Suppress("DEPRECATION") {
 			val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
-			vibrator?.vibrate(intensity)
-		}*/
+			vibrator?.vibrate(VibrationEffect.createOneShot(20L, effect))
+		}
+		// Vibration is not available in earlier versions,
+		// as it is difficult to predict the type of vibration.
 	}
 }

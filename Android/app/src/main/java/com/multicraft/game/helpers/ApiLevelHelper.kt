@@ -22,12 +22,15 @@ package com.multicraft.game.helpers
 
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.O
+import android.os.Build.VERSION_CODES.Q
 import android.os.Build.VERSION_CODES.S
 
 object ApiLevelHelper {
 	private fun isGreaterOrEqual(versionCode: Int) = SDK_INT >= versionCode
 
 	fun isOreo() = isGreaterOrEqual(O)
+
+	fun isAndroid10() = isGreaterOrEqual(Q)
 
 	fun isAndroid12() = isGreaterOrEqual(S)
 }
