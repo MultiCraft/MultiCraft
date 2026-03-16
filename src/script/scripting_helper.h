@@ -23,9 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cpp_api/s_mainmenu.h"
 #include "cpp_api/s_async.h"
 
-class HelperScripting
-		: virtual public ScriptApiBase,
-		  public ScriptApiMainMenu
+class HelperScripting : virtual public ScriptApiBase, public ScriptApiMainMenu
 {
 public:
 	HelperScripting();
@@ -36,6 +34,7 @@ public:
 	// Pass async events from engine to async threads
 	unsigned int queueAsync(const std::string &serialized_func,
 			const std::string &serialized_params);
+
 private:
 	void initializeModApi(lua_State *L, int top);
 	static void registerLuaClasses(lua_State *L, int top);

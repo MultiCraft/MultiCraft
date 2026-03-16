@@ -255,7 +255,9 @@ int main(int argc, char *argv[])
 
 	print_modified_quicktune_values();
 
+#ifndef SERVER
 	delete g_helper_script;
+#endif
 
 	// Stop httpfetch thread (if started)
 	httpfetch_cleanup();
@@ -530,7 +532,9 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 	// Initialize g_settings
 	Settings::createLayer(SL_GLOBAL);
 
+#ifndef SERVER
 	g_helper_script = new HelperScripting();
+#endif
 
 	if (!read_config_file(cmd_args))
 		return false;
