@@ -36,7 +36,6 @@ extern "C" {
 // Set in main.cpp
 HelperScripting *g_helper_script = nullptr;
 
-
 HelperScripting::HelperScripting() : ScriptApiBase(ScriptingType::Helper)
 {
 	SCRIPTAPI_PRECHECKHEADER
@@ -95,4 +94,3 @@ unsigned int HelperScripting::queueAsync(
 {
 	return asyncEngine.queueAsyncJob(serialized_func, serialized_param);
 }
-
