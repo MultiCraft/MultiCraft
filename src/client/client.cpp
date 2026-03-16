@@ -57,6 +57,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "serialization.h"
 #include "guiscalingfilter.h"
 #include "script/scripting_client.h"
+#include "script/scripting_helper.h"
 #include "game.h"
 #include "chatmessage.h"
 #include "translation.h"
@@ -373,6 +374,8 @@ void Client::step(float dtime)
 			m_packetcounter.clear();
 		}
 	}
+
+	g_helper_script->step();
 
 	// UGLY hack to fix 2 second startup delay caused by non existent
 	// server client startup synchronization in local server or singleplayer mode

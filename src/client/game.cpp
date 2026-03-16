@@ -72,6 +72,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irr_ptr.h"
 #include "version.h"
 #include "script/scripting_client.h"
+#include "script/scripting_helper.h"
 #include "hud.h"
 
 #if USE_SOUND
@@ -1247,6 +1248,7 @@ void Game::shutdown()
 			assert(shader_src != NULL);
 			texture_src->processQueue();
 			shader_src->processQueue();
+			g_helper_script->step();
 			sleep_ms(100);
 		}
 	}

@@ -62,7 +62,8 @@ enum class ScriptingType: u8 {
 	Async,
 	Client,
 	MainMenu,
-	Server
+	Server,
+	Helper,
 };
 
 class Server;

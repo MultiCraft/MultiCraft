@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <ICameraSceneNode.h>
 #include "client/renderingengine.h"
 #include "scripting_mainmenu.h"
+#include "scripting_helper.h"
 #include "util/numeric.h"
 #include "config.h"
 #include "version.h"
@@ -326,6 +327,7 @@ void GUIEngine::run()
 			sleep_ms(frametime_min);
 
 		m_script->step();
+		g_helper_script->step();
 
 #if defined(__ANDROID__) || defined(__APPLE__)
 		std::string key, value;

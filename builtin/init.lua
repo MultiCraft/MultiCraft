@@ -71,6 +71,8 @@ elseif INIT == "async" then
 	dofile(asyncpath .. "init.lua")
 elseif INIT == "client" then
 	dofile(clientpath .. "init.lua")
+elseif INIT == "helper" then
+	print("Helper script loaded!")
 else
 	error(("Unrecognized builtin initialization type %s!"):format(tostring(INIT)))
 end

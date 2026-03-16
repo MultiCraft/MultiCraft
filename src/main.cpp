@@ -47,6 +47,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/clientlauncher.h"
 #include "gui/guiEngine.h"
 #include "gui/mainmenumanager.h"
+#include "script/scripting_helper.h"
 #include "translation.h"
 #endif
 #ifdef HAVE_TOUCHSCREENGUI
@@ -253,6 +254,8 @@ int main(int argc, char *argv[])
 		g_settings->updateConfigFile(g_settings_path.c_str());
 
 	print_modified_quicktune_values();
+
+	delete g_helper_script;
 
 	// Stop httpfetch thread (if started)
 	httpfetch_cleanup();
@@ -526,6 +529,8 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 
 	// Initialize g_settings
 	Settings::createLayer(SL_GLOBAL);
+
+	g_helper_script = new HelperScripting();
 
 	if (!read_config_file(cmd_args))
 		return false;
