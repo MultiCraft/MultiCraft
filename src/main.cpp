@@ -532,10 +532,6 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 	// Initialize g_settings
 	Settings::createLayer(SL_GLOBAL);
 
-#ifndef SERVER
-	g_helper_script = new HelperScripting();
-#endif
-
 	if (!read_config_file(cmd_args))
 		return false;
 
@@ -552,6 +548,10 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 		g_settings->get("language"), argc, argv);
 #if !defined(_MSC_VER) && !defined(SERVER)
 	g_settings->registerChangedCallback("language", language_setting_changed, nullptr);
+#endif
+
+#ifndef SERVER
+	g_helper_script = new HelperScripting();
 #endif
 
 	return true;
