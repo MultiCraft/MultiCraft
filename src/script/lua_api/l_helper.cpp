@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "lua_api/l_internal.h"
 #include "common/c_converter.h"
 
-
 int ModApiHelper::l_do_async_callback(lua_State *L)
 {
 	HelperScripting *script = getScriptApi<HelperScripting>(L);

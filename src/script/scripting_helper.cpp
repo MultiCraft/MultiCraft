@@ -72,9 +72,6 @@ void HelperScripting::initializeModApi(lua_State *L, int top)
 	asyncEngine.registerStateInitializer(ModApiMainMenu::InitializeAsync);
 	asyncEngine.registerStateInitializer(ModApiUtil::InitializeAsync);
 	asyncEngine.registerStateInitializer(ModApiHttp::InitializeAsync);
-
-	// Initialize async environment
-	asyncEngine.initialize(HELPER_NUM_ASYNC_THREADS);
 }
 
 /******************************************************************************/
@@ -94,5 +91,9 @@ void HelperScripting::step()
 unsigned int HelperScripting::queueAsync(
 		const std::string &serialized_func, const std::string &serialized_param)
 {
+	// Lazily initialize async environment if/when it is needed
+	if (!asyncEngine.isInitialized())
+		asyncEngine.initialize(HELPER_NUM_ASYNC_THREADS);
+
 	return asyncEngine.queueAsyncJob(serialized_func, serialized_param);
 }

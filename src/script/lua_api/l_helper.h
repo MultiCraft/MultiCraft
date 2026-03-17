@@ -21,19 +21,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "lua_api/l_base.h"
 
-class ModApiHelper: public ModApiBase
+class ModApiHelper : public ModApiBase
 {
 
 private:
 	static int l_do_async_callback(lua_State *L);
 
 public:
-
 	/**
 	 * initialize this API module
 	 * @param L lua stack to initialize
 	 * @param top index (in lua stack) of global API table
 	 */
 	static void Initialize(lua_State *L, int top);
-
 };

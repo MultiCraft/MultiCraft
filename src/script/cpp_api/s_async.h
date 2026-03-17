@@ -91,6 +91,11 @@ public:
 	void initialize(unsigned int numEngines);
 
 	/**
+	 * Returns true if initialize() has been called.
+	 */
+	bool isInitialized() { return initDone; };
+
+	/**
 	 * Queue an async job
 	 * @param func Serialized lua function
 	 * @param params Serialized parameters
