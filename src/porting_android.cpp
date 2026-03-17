@@ -534,7 +534,7 @@ void vibrationEffect(int intensity)
 		return;
 
 	jmethodID vibrationEffectMethod = jnienv->GetMethodID(activityClass,
-			"vibrationEffect", "(II)V");
+			"vibrationEffect", "(I)V");
 
 	FATAL_ERROR_IF(vibrationEffectMethod == nullptr,
 			"porting::vibrate unable to find Java vibrationEffect method");
