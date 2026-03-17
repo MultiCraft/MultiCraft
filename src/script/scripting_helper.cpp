@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "scripting_helper.h"
 #include "cpp_api/s_internal.h"
 #include "lua_api/l_base.h"
+#include "lua_api/l_helper.h"
 #include "lua_api/l_http.h"
 #include "lua_api/l_mainmenu.h"
 #include "lua_api/l_noise.h"
@@ -65,6 +66,7 @@ void HelperScripting::initializeModApi(lua_State *L, int top)
 	ModApiMainMenu::InitializeAsync(L, top);
 	ModApiUtil::InitializeMainMenu(L, top);
 	ModApiHttp::Initialize(L, top);
+	ModApiHelper::Initialize(L, top);
 
 	asyncEngine.registerStateInitializer(registerLuaClasses);
 	asyncEngine.registerStateInitializer(ModApiMainMenu::InitializeAsync);
