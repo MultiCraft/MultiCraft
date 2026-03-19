@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "cpp_api/s_base.h"
 #include "cpp_api/s_client.h"
+#include "cpp_api/s_helper.h"
 #include "cpp_api/s_modchannels.h"
 #include "cpp_api/s_security.h"
 
@@ -34,6 +35,7 @@ class ClientScripting:
 	virtual public ScriptApiBase,
 	public ScriptApiSecurity,
 	public ScriptApiClient,
+	public ScriptApiHelper,
 	public ScriptApiModChannels
 {
 public:

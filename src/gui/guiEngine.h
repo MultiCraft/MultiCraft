@@ -157,7 +157,7 @@ public:
 
 	static float g_timeofday;
 
-#if defined(__ANDROID__) || defined(__APPLE__)
+#if 1
 	static bool readUpdate(std::string *key_to, std::string *value_to);
 #endif
 

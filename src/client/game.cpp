@@ -1156,14 +1156,6 @@ void Game::run()
 		if (!handleCallbacks())
 			break;
 
-#if defined(__ANDROID__) || defined(__APPLE__)
-		if (client->modsLoaded() && !g_menumgr.pausesGame()) {
-			std::string key, value;
-			if (GUIEngine::readUpdate(&key, &value))
-				client->getScript()->on_update(key, value);
-		}
-#endif
-
 		processQueues();
 
 		m_game_ui->clearInfoText();

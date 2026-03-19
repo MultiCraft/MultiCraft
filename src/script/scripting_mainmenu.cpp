@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "content/mods.h"
 #include "cpp_api/s_internal.h"
 #include "lua_api/l_base.h"
+#include "lua_api/l_helper.h"
 #include "lua_api/l_http.h"
 #include "lua_api/l_mainmenu.h"
 #include "lua_api/l_noise.h"
@@ -69,6 +70,7 @@ void MainMenuScripting::initializeModApi(lua_State *L, int top)
 	ModApiUtil::InitializeMainMenu(L, top);
 	ModApiSound::Initialize(L, top);
 	ModApiHttp::Initialize(L, top);
+	ModApiHelper::InitializeClient(L, top);
 
 	asyncEngine.registerStateInitializer(registerLuaClasses);
 	asyncEngine.registerStateInitializer(ModApiMainMenu::InitializeAsync);
@@ -91,6 +93,7 @@ void MainMenuScripting::registerLuaClasses(lua_State *L, int top)
 void MainMenuScripting::step()
 {
 	asyncEngine.step(getStack());
+	process_update_notifications();
 }
 
 /******************************************************************************/

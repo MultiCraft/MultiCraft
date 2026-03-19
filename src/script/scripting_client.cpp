@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cpp_api/s_internal.h"
 #include "lua_api/l_client.h"
 #include "lua_api/l_env.h"
+#include "lua_api/l_helper.h"
 #include "lua_api/l_item.h"
 #include "lua_api/l_itemstackmeta.h"
 #include "lua_api/l_minimap.h"
@@ -82,6 +83,7 @@ void ClientScripting::InitializeModApi(lua_State *L, int top)
 	ModApiEnvMod::InitializeClient(L, top);
 	ModApiChannels::Initialize(L, top);
 	ModApiParticlesLocal::Initialize(L, top);
+	ModApiHelper::InitializeClient(L, top);
 }
 
 void ClientScripting::on_client_ready(LocalPlayer *localplayer)

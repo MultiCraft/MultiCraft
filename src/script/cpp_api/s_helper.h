@@ -1,6 +1,7 @@
 /*
 Minetest
 Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
+Copyright (C) 2017 nerzhul, Loic Blot <loic.blot@unix-experience.fr>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -20,34 +21,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include "cpp_api/s_base.h"
-#include "cpp_api/s_mainmenu.h"
-#include "cpp_api/s_async.h"
-#include "cpp_api/s_helper.h"
+#include "util/string.h"
 
-struct UpdateNotification
-{
-	ScriptingType source = ScriptingType::Invalid;
-	std::string channel;
-	std::string msg;
-};
-
-class HelperScripting : virtual public ScriptApiBase, public ScriptApiHelper, public ScriptApiMainMenu
+class ScriptApiHelper : virtual public ScriptApiBase
 {
 public:
-	HelperScripting();
-
-	// Global step handler to pass back async events
-	void step();
-
-	// Pass async events from engine to async threads
-	unsigned int queueAsync(const std::string &serialized_func,
-			const std::string &serialized_params);
-
-private:
-	void initializeModApi(lua_State *L, int top);
-	static void registerLuaClasses(lua_State *L, int top);
-
-	AsyncEngine asyncEngine;
+	void process_update_notifications();
 };
-
-extern HelperScripting *g_helper_script;

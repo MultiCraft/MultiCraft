@@ -21,6 +21,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "lua_api/l_helper.h"
 #include "lua_api/l_internal.h"
 #include "common/c_converter.h"
+#include "util/container.h"
+
+MutexedQueue<UpdateNotification> g_helper_to_game;
+MutexedQueue<UpdateNotification> g_game_to_helper;
 
 int ModApiHelper::l_do_async_callback(lua_State *L)
 {
@@ -34,7 +38,28 @@ int ModApiHelper::l_do_async_callback(lua_State *L)
 	return 1;
 }
 
+int ModApiHelper::l_notify_game(lua_State *L)
+{
+	UpdateNotification n;
+	n.source = getScriptApiBase(L)->getType();
+	n.channel = readParam<std::string>(L, 1);
+	n.msg = readParam<std::string>(L, 2);
+
+	if (n.source == ScriptingType::Helper)
+		g_helper_to_game.push_back(n);
+	else
+		g_game_to_helper.push_back(n);
+
+	return 0;
+}
+
 void ModApiHelper::Initialize(lua_State *L, int top)
 {
 	API_FCT(do_async_callback);
+	API_FCT(notify_game);
+}
+
+void ModApiHelper::InitializeClient(lua_State *L, int top)
+{
+	registerFunction(L, "notify_helper", l_notify_game, top);
 }

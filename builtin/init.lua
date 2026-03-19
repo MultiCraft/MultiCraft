@@ -72,7 +72,16 @@ elseif INIT == "async" then
 elseif INIT == "client" then
 	dofile(clientpath .. "init.lua")
 elseif INIT == "helper" then
-	print("Helper script loaded!")
+	dofile(core.get_builtin_path() .. "/mainmenu/async_event.lua")
+	dofile(core.get_builtin_path() .. "/mainmenu/register.lua")
+
+	core.register_on_update(function(k, v, src)
+		if src == "helper" then
+			core.notify_game(k, v)
+		elseif src == "main_menu" and k == "exec" then
+			assert(loadstring(v))()
+		end
+	end)
 else
 	error(("Unrecognized builtin initialization type %s!"):format(tostring(INIT)))
 end

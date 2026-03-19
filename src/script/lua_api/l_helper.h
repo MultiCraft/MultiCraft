@@ -27,6 +27,8 @@ class ModApiHelper : public ModApiBase
 private:
 	static int l_do_async_callback(lua_State *L);
 
+	static int l_notify_game(lua_State *L);
+
 public:
 	/**
 	 * initialize this API module
@@ -34,4 +36,6 @@ public:
 	 * @param top index (in lua stack) of global API table
 	 */
 	static void Initialize(lua_State *L, int top);
+
+	static void InitializeClient(lua_State *L, int top);
 };

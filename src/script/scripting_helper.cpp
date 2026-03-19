@@ -85,6 +85,8 @@ void HelperScripting::registerLuaClasses(lua_State *L, int top)
 void HelperScripting::step()
 {
 	asyncEngine.step(getStack());
+
+	process_update_notifications();
 }
 
 /******************************************************************************/

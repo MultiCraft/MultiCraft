@@ -280,8 +280,10 @@ void ClientEnvironment::step(float dtime)
 		}
 	}
 
-	if (m_client->modsLoaded())
+	if (m_client->modsLoaded()) {
 		m_script->environment_step(dtime);
+		m_script->process_update_notifications();
+	}
 
 	// Update lighting on local player (used for wield item)
 	u32 day_night_ratio = getDayNightRatio();
