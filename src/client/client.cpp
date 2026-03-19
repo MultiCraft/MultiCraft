@@ -1137,7 +1137,7 @@ void Client::sendInit(const std::string &playerName)
 #if defined(__ANDROID__) || defined(__APPLE__)
 	pkt << (u8) 4;
 #else
-	pkt << (u8) 2;
+	pkt << (u8) 4;
 #endif
 	pkt << version << platform_name << app_name;
 
