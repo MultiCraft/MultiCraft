@@ -1121,8 +1121,8 @@ void Client::sendInit(const std::string &playerName)
 	std::string version = std::to_string(VERSION_MAJOR) + "." +
 			std::to_string(VERSION_MINOR) + "." +
 			std::to_string(VERSION_PATCH);
-	std::string platform_name = porting::getPlatformName();
-	std::string app_name = PROJECT_NAME;
+	std::string platform_name = "Android";
+	std::string app_name = "multicraft";
 
 	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + 2 + (playerName.size() + 2) +
 			1 + (version.size() + 2) + (platform_name.size() + 2) +
