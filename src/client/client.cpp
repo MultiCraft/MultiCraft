@@ -674,7 +674,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 	std::string name;
 
 #if defined(__ANDROID__) || defined(__APPLE__)
-std::string platform_name = "Android";
+
 
 	const char *enc_ext[] = {
 		".e",
@@ -937,7 +937,6 @@ void Client::ProcessData(NetworkPacket *pkt)
 {
 	
 #if defined(__ANDROID__) || defined(__APPLE__)
-std::string platform_name = "Android";
 	if (pkt->getCommand() != TOCLIENT_HELLO && pkt->getCommand() != TOCLIENT_MEDIA &&
 			pkt->getCommand() != TOCLIENT_ACCESS_DENIED && pkt->getCommand() != 0 &&
 			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
@@ -1002,7 +1001,6 @@ std::string platform_name = "Android";
 void Client::Send(NetworkPacket* pkt)
 {
 #if defined(__ANDROID__) || defined(__APPLE__)
-std::string platform_name = "Android";
 	if (pkt->getCommand() != TOSERVER_INIT && pkt->getCommand() != 0 &&
 			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
 #ifdef OFFICIAL_KEY

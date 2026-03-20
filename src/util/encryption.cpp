@@ -150,7 +150,7 @@ void Encryption::setKey(std::string new_key)
 }
 
 #if defined(__ANDROID__) || defined(__APPLE__)
-std::string platform_name = "Android";
+
 bool Encryption::decryptSimple(const std::string &data, std::string &decrypted_data,
 		std::string *filename_to)
 {
