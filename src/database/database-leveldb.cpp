@@ -46,7 +46,7 @@ Database_LevelDB::Database_LevelDB(const std::string &savedir)
 	leveldb::Options options;
 	options.create_if_missing = true;
 #ifdef SERVER
-	options.block_cache = leveldb::NewLRUCache(128 * 1024 * 1024); // 8MB by default
+	options.block_cache = leveldb::NewLRUCache(32 * 1024 * 1024); // x4 from default
 	options.block_size = 16 * 1024; // x4 from default
 	options.write_buffer_size = 16 * 1024 * 1024; // x4 from default
 	options.max_file_size = 8 * 1024 * 1024; // x4 from default
