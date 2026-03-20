@@ -1059,6 +1059,7 @@ void Client::ProcessData(NetworkPacket *pkt)
 void Client::Send(NetworkPacket* pkt)
 {
 	if (m_compression_mode == NETPROTO_COMPRESSION_ENC &&
+			m_state != LC_Created &&
 			shouldEncryptOutgoingPacket(pkt->getCommand()))
 		pkt->encrypt(getOfficialPacketKey());
 
