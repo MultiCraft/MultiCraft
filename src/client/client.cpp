@@ -109,6 +109,12 @@ bool shouldEncryptOutgoingPacket(u16 command)
 	return command != TOSERVER_INIT && command != 0;
 }
 
+bool packetPayloadLooksEncrypted(NetworkPacket *pkt)
+{
+	return pkt->getSize() >= 4 &&
+		std::string(pkt->getString(0), 4) == "ENC1";
+}
+
 bool decryptOfficialPayload(const std::string &data, std::string &decrypted_data)
 {
 	Encryption::setKey(getOfficialPacketKey());
@@ -990,9 +996,10 @@ inline void Client::handleCommand(NetworkPacket* pkt)
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
-	// Official mobile clients encrypt all packets after HELLO once ENC is negotiated.
+	// Official servers can mix ENC-wrapped and plain packets after HELLO.
 	if (m_compression_mode == NETPROTO_COMPRESSION_ENC &&
 			shouldDecryptIncomingPacket(pkt->getCommand()) &&
+			packetPayloadLooksEncrypted(pkt) &&
 			!pkt->decrypt(getOfficialPacketKey())) {
 		errorstream << "Client::ProcessData(): Failed to decrypt command "
 			<< pkt->getCommand() << std::endl;
