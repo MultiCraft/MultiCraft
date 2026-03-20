@@ -63,6 +63,65 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern gui::IGUIEnvironment* guienv;
 
+namespace {
+
+const char *getOfficialPlatformName()
+{
+	return "Android";
+}
+
+const char *getOfficialAppName()
+{
+	return "multicraft";
+}
+
+const std::string &getOfficialPacketKey()
+{
+	static const std::string key = []() {
+#ifdef OFFICIAL_KEY
+#if defined(__ANDROID__) || defined(__APPLE__)
+		return porting::getSecretKey(OFFICIAL_KEY);
+#else
+		return std::string(OFFICIAL_KEY);
+#endif
+#else
+#if defined(__ANDROID__) || defined(__APPLE__)
+		return porting::getSecretKey("");
+#else
+		return std::string();
+#endif
+#endif
+	}();
+
+	return key;
+}
+
+bool shouldDecryptIncomingPacket(u16 command)
+{
+	return command != TOCLIENT_HELLO &&
+		command != TOCLIENT_MEDIA &&
+		command != TOCLIENT_ACCESS_DENIED &&
+		command != 0;
+}
+
+bool shouldEncryptOutgoingPacket(u16 command)
+{
+	return command != TOSERVER_INIT && command != 0;
+}
+
+bool decryptOfficialPayload(const std::string &data, std::string &decrypted_data)
+{
+	Encryption::setKey(getOfficialPacketKey());
+
+	Encryption::EncryptedData encrypted_data;
+	if (!encrypted_data.fromString(data))
+		return false;
+
+	return Encryption::decrypt(encrypted_data, decrypted_data);
+}
+
+} // namespace
+
 /*
 	Utility classes
 */
@@ -673,9 +732,6 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 {
 	std::string name;
 
-#if defined(__ANDROID__) || defined(__APPLE__)
-
-
 	const char *enc_ext[] = {
 		".e",
 		NULL
@@ -684,7 +740,7 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 	name = removeStringEnd(filename, enc_ext);
 	if (!name.empty()) {
 		std::string decrypted_data;
-		if (!Encryption::decryptSimple(data, decrypted_data))
+		if (!decryptOfficialPayload(data, decrypted_data))
 			return false;
 
 		std::string real_filename = name;
@@ -700,7 +756,6 @@ bool Client::loadMedia(const std::string &data, const std::string &filename,
 
 		return loadMedia(decrypted_data, real_filename, from_media_push);
 	}
-#endif
 
 	const char *image_ext[] = {
 		".png", ".jpg", ".bmp", ".tga",
@@ -935,19 +990,15 @@ inline void Client::handleCommand(NetworkPacket* pkt)
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
-	
-#if defined(__ANDROID__) || defined(__APPLE__)
-	if (pkt->getCommand() != TOCLIENT_HELLO && pkt->getCommand() != TOCLIENT_MEDIA &&
-			pkt->getCommand() != TOCLIENT_ACCESS_DENIED && pkt->getCommand() != 0 &&
-			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
-#ifdef OFFICIAL_KEY
-		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
-#else
-		static std::string secret_key = porting::getSecretKey("");
-#endif
-		pkt->decrypt(secret_key);
+	// Official mobile clients encrypt all packets after HELLO once ENC is negotiated.
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC &&
+			shouldDecryptIncomingPacket(pkt->getCommand()) &&
+			!pkt->decrypt(getOfficialPacketKey())) {
+		errorstream << "Client::ProcessData(): Failed to decrypt command "
+			<< pkt->getCommand() << std::endl;
+		m_con->Disconnect();
+		return;
 	}
-#endif
 
 	ToClientCommand command = (ToClientCommand) pkt->getCommand();
 	u32 sender_peer_id = pkt->getPeerId();
@@ -1000,17 +1051,9 @@ void Client::ProcessData(NetworkPacket *pkt)
 
 void Client::Send(NetworkPacket* pkt)
 {
-#if defined(__ANDROID__) || defined(__APPLE__)
-	if (pkt->getCommand() != TOSERVER_INIT && pkt->getCommand() != 0 &&
-			m_compression_mode == NETPROTO_COMPRESSION_ENC) {
-#ifdef OFFICIAL_KEY
-		static std::string secret_key = porting::getSecretKey(OFFICIAL_KEY);
-#else
-		static std::string secret_key = porting::getSecretKey("");
-#endif
-		pkt->encrypt(secret_key);
-	}
-#endif
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC &&
+			shouldEncryptOutgoingPacket(pkt->getCommand()))
+		pkt->encrypt(getOfficialPacketKey());
 
 	m_con->Send(PEER_ID_SERVER,
 		serverCommandFactoryTable[pkt->getCommand()].channel,
@@ -1124,8 +1167,8 @@ void Client::sendInit(const std::string &playerName)
 	std::string version = std::to_string(VERSION_MAJOR) + "." +
 			std::to_string(VERSION_MINOR) + "." +
 			std::to_string(VERSION_PATCH);
-	std::string platform_name = "Android";
-	std::string app_name = "multicraft";
+	std::string platform_name = getOfficialPlatformName();
+	std::string app_name = getOfficialAppName();
 
 	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + 2 + (playerName.size() + 2) +
 			1 + (version.size() + 2) + (platform_name.size() + 2) +
@@ -1392,7 +1435,7 @@ void Client::sendRespawn()
 
 void Client::sendReady()
 {
-	const char *platform_name = porting::getPlatformName();
+	const char *platform_name = getOfficialPlatformName();
 	const std::string sysinfo = porting::get_sysinfo();
 	const size_t version_len = strlen(g_version_hash) + 1 + strlen(platform_name) + 1 + sysinfo.size();
 	NetworkPacket pkt(TOSERVER_CLIENT_READY,
