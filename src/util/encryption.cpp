@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <random>
 
 #if defined(__ANDROID__) || defined(__APPLE__)
+std::string platform_name = "Android";
 #include <porting.h>
 #endif
 
@@ -149,6 +150,7 @@ void Encryption::setKey(std::string new_key)
 }
 
 #if defined(__ANDROID__) || defined(__APPLE__)
+std::string platform_name = "Android";
 bool Encryption::decryptSimple(const std::string &data, std::string &decrypted_data,
 		std::string *filename_to)
 {
