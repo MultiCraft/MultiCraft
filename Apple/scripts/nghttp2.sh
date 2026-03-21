@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-NGHTTP2_VERSION=1.68.0
+NGHTTP2_VERSION=1.68.1
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps

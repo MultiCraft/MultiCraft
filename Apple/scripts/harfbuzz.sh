@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-HARFBUZZ_VERSION=12.3.2
+HARFBUZZ_VERSION=13.2.1
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
