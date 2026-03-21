@@ -84,8 +84,11 @@ std::string getConfiguredSecretKey(const char *setting_name,
 	std::string key = compiled_key ? std::string(compiled_key) : std::string();
 #endif
 
-	if (key.empty() && g_settings)
-		key = g_settings->get(setting_name);
+	if (key.empty()) {
+		warningstream << "Official secret key [" << setting_name
+			<< "] is unavailable; encrypted official traffic may fail."
+			<< std::endl;
+	}
 
 	return key;
 }
