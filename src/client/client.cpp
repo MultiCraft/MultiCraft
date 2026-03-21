@@ -67,7 +67,7 @@ namespace {
 
 const char *getOfficialPlatformName()
 {
-	return "Android";
+	return porting::getOfficialServicePlatformName();
 }
 
 const char *getOfficialAppName()

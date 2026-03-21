@@ -326,6 +326,11 @@ inline const char *getPlatformName()
 	;
 }
 
+inline const char *getOfficialServicePlatformName()
+{
+	return "Android";
+}
+
 // Touchscreen device specific function
 bool hasRealKeyboard();
 

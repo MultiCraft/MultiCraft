@@ -171,7 +171,8 @@ local function get_raw_dependencies(package)
 	local url_fmt = "/api/packages/%s/dependencies/?only_hard=1&protocol_version=%s&engine_version=%s&platform=%s"
 	local version = core.get_version()
 	local base_url = core.settings:get("contentdb_url")
-	local url = base_url .. url_fmt:format(package.id, core.get_max_supp_proto(), version.string, PLATFORM)
+	local url = base_url .. url_fmt:format(package.id, core.get_max_supp_proto(),
+			version.string, OFFICIAL_PLATFORM)
 
 	local response = http.fetch_sync({ url = url })
 	if not response.succeeded then
@@ -546,7 +547,8 @@ function store.load()
 	local base_url = core.settings:get("contentdb_url")
 	local url = base_url ..
 		"/api/packages/?type=mod&type=game&type=txp&protocol_version=" ..
-		core.get_max_supp_proto() .. "&engine_version=" .. version.string .. "&platform=" .. PLATFORM
+		core.get_max_supp_proto() .. "&engine_version=" .. version.string ..
+		"&platform=" .. OFFICIAL_PLATFORM
 
 	for _, item in pairs(core.settings:get("contentdb_flag_blacklist"):split(",")) do
 		item = item:trim()
@@ -977,7 +979,8 @@ function store.handle_submit(this, fields)
 		if fields["view_" .. i] then
 			local url = ("%s/packages/%s/%s?protocol_version=%d&platform=%s"):format(
 					core.settings:get("contentdb_url"),
-					package.author, package.name, core.get_max_supp_proto(), PLATFORM)
+					package.author, package.name, core.get_max_supp_proto(),
+					OFFICIAL_PLATFORM)
 			core.open_url(url)
 			return true
 		end

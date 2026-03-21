@@ -68,7 +68,7 @@ function serverlistmgr.sync()
 				core.settings:get("serverlist_url"),
 				core.get_min_supp_proto(),
 				core.get_max_supp_proto(),
-				PLATFORM)
+				OFFICIAL_PLATFORM)
 
 			local response = http.fetch_sync({ url = url })
 			if not response.succeeded then

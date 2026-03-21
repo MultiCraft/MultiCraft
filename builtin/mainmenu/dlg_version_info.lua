@@ -179,7 +179,7 @@ function check_new_version()
 
 	core.settings:set("update_last_checked", tostring(time_now))
 
-	url = ("%s?lang=%s&platform=%s"):format(url, LANG, PLATFORM)
+	url = ("%s?lang=%s&platform=%s"):format(url, LANG, OFFICIAL_PLATFORM)
 
 	core.handle_async(function(params)
 		local http = core.get_http_api()
