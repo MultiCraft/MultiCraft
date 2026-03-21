@@ -182,8 +182,8 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manag
 			getButtonRect(editor_redo_id), STATE_EDITOR);
 	m_editor.button_redo->guibutton->setIsPushButton();
 
-	if (checkInvalidSettings())
-		resetAllValues();
+	/*if (checkInvalidSettings())
+		resetAllValues();*/
 
 	updateButtons();
 
@@ -711,7 +711,7 @@ void TouchScreenGUI::restoreAllValues()
 	initSettings();
 }
 
-bool TouchScreenGUI::checkInvalidSettings()
+/*bool TouchScreenGUI::checkInvalidSettings()
 {
 	for (auto button : m_buttons) {
 		if (button->state != STATE_DEFAULT)
@@ -727,7 +727,7 @@ bool TouchScreenGUI::checkInvalidSettings()
 	}
 
 	return false;
-}
+}*/
 
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
@@ -1039,7 +1039,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_rect -= v2s32(0, new_rect.LowerRightCorner.Y - m_screensize.Y);
 			}
 
-			if (isButtonCollided(m_editor.button_id, new_rect)) {
+			if (m_editor.button_id == escape_id && isButtonCollided(m_editor.button_id, new_rect)) {
 				new_rect = m_editor.old_rect;
 			}
 
