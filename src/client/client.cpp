@@ -75,21 +75,28 @@ const char *getOfficialAppName()
 	return "multicraft";
 }
 
+std::string getConfiguredSecretKey(const char *setting_name,
+		const char *compiled_key)
+{
+#if defined(__ANDROID__) || defined(__APPLE__)
+	std::string key = porting::getSecretKey(compiled_key ? compiled_key : "");
+#else
+	std::string key = compiled_key ? std::string(compiled_key) : std::string();
+#endif
+
+	if (key.empty() && g_settings)
+		key = g_settings->get(setting_name);
+
+	return key;
+}
+
 const std::string &getOfficialPacketKey()
 {
 	static const std::string key = []() {
 #ifdef OFFICIAL_KEY
-	#if defined(__ANDROID__) || defined(__APPLE__)
-		return porting::getSecretKey(OFFICIAL_KEY);
-	#else
-		return std::string(OFFICIAL_KEY);
-	#endif
+		return getConfiguredSecretKey("official_key", OFFICIAL_KEY);
 #else
-	#if defined(__ANDROID__) || defined(__APPLE__)
-		return porting::getSecretKey("");
-	#else
-		return std::string();
-	#endif
+		return getConfiguredSecretKey("official_key", "");
 #endif
 	}();
 
@@ -100,17 +107,9 @@ const std::string &getOfficialMediaKey()
 {
 	static const std::string key = []() {
 #ifdef SIGN_KEY
-	#if defined(__ANDROID__) || defined(__APPLE__)
-		return porting::getSecretKey(SIGN_KEY);
-	#else
-		return std::string(SIGN_KEY);
-	#endif
+		return getConfiguredSecretKey("sign_key", SIGN_KEY);
 #else
-	#if defined(__ANDROID__) || defined(__APPLE__)
-		return porting::getSecretKey("");
-	#else
-		return std::string();
-	#endif
+		return getConfiguredSecretKey("sign_key", "");
 #endif
 	}();
 
@@ -122,6 +121,7 @@ bool shouldDecryptIncomingPacket(u16 command)
 	return command != TOCLIENT_HELLO &&
 		command != TOCLIENT_MEDIA &&
 		command != TOCLIENT_ACCESS_DENIED &&
+		command != TOCLIENT_ACCESS_DENIED_LEGACY &&
 		command != 0;
 }
 
@@ -1047,7 +1047,7 @@ inline void Client::handleCommand(NetworkPacket* pkt)
 
 void Client::flushPendingConnectedPackets()
 {
-	if (m_state == LC_Created || m_pending_connected_packets.empty())
+	if (m_pending_connected_packets.empty())
 		return;
 
 	auto pending_packets = std::move(m_pending_connected_packets);
@@ -1082,6 +1082,13 @@ void Client::ProcessData(NetworkPacket *pkt)
 	// Ignore unknown commands
 	if (command >= TOCLIENT_NUM_MSG_TYPES) {
 		infostream << "Client: Ignoring unknown command " << command << std::endl;
+		return;
+	}
+
+	// Before HELLO we don't know the server serialization or compression mode yet,
+	// so every connected-state packet must wait.
+	if (isConnectedStatePacket(command) && m_server_ser_ver == SER_FMT_VER_INVALID) {
+		m_pending_connected_packets.push_back(*pkt);
 		return;
 	}
 
@@ -1123,6 +1130,10 @@ void Client::ProcessData(NetworkPacket *pkt)
 	 */
 	if (toClientCommandTable[command].state == TOCLIENT_STATE_NOT_CONNECTED) {
 		handleCommand(pkt);
+
+		if (command == TOCLIENT_HELLO)
+			flushPendingConnectedPackets();
+
 		return;
 	}
 
