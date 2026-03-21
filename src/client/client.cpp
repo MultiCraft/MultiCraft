@@ -1050,76 +1050,83 @@ void Client::flushPendingConnectedPackets()
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
-	ToClientCommand command = (ToClientCommand) pkt->getCommand();
-	u32 sender_peer_id = pkt->getPeerId();
+    ToClientCommand command = (ToClientCommand) pkt->getCommand();
+    u32 sender_peer_id = pkt->getPeerId();
 
-	//infostream<<"Client: received command="<<command<<std::endl;
-	m_packetcounter.add((u16)command);
-	g_profiler->graphAdd("client_received_packets", 1);
+    m_packetcounter.add((u16)command);
+    g_profiler->graphAdd("client_received_packets", 1);
 
-	/*
-		If this check is removed, be sure to change the queue
-		system to know the ids
-	*/
-	if(sender_peer_id != PEER_ID_SERVER) {
-		infostream << "Client::ProcessData(): Discarding data not "
-			"coming from server: peer_id=" << sender_peer_id
-			<< std::endl;
-		return;
-	}
+    // Only accept packets from the server
+    if(sender_peer_id != PEER_ID_SERVER) {
+        infostream << "Client::ProcessData(): Discarding data not "
+                   << "coming from server: peer_id=" << sender_peer_id
+                   << std::endl;
+        return;
+    }
 
-	// Command must be handled into ToClientCommandHandler
-	if (command >= TOCLIENT_NUM_MSG_TYPES) {
-		infostream << "Client: Ignoring unknown command "
-			<< command << std::endl;
-		return;
-	}
+    // Ignore unknown commands
+    if(command >= TOCLIENT_NUM_MSG_TYPES) {
+        infostream << "Client: Ignoring unknown command " << command << std::endl;
+        return;
+    }
 
-	if (isConnectedStatePacket(command) && m_state == LC_Created) {
-		// Official servers can race channel 0 packets ahead of auth/init on channel 1.
-		m_pending_connected_packets.push_back(*pkt);
-		return;
-	}
+    // Queue packets that arrive before client is initialized
+    if(isConnectedStatePacket(command) && m_state == LC_Created) {
+        m_pending_connected_packets.push_back(*pkt);
+        return;
+    }
 
-	// Official servers can mix ENC-wrapped and plain packets after HELLO.
-	if (m_compression_mode == NETPROTO_COMPRESSION_ENC &&
-			shouldDecryptIncomingPacket(command) &&
-			packetPayloadLooksEncrypted(pkt) &&
-			!pkt->decrypt(getOfficialPacketKey())) {
-		if (isConnectedStatePacket(command)) {
-			warningstream << "Client::ProcessData(): Failed to decrypt connected "
-				"command " << command << ", dropping packet." << std::endl;
-			return;
-		}
+    // Decrypt packets if necessary
+    if(m_compression_mode == NETPROTO_COMPRESSION_ENC &&
+       shouldDecryptIncomingPacket(command) &&
+       packetPayloadLooksEncrypted(pkt)) {
 
-		errorstream << "Client::ProcessData(): Failed to decrypt command "
-			<< command << std::endl;
-		m_con->Disconnect();
-		return;
-	}
+        std::string decrypted_data;
+        if(!Encryption::decryptSimple(pkt->getRawData(), decrypted_data)) {
+            if(isConnectedStatePacket(command)) {
+                warningstream << "Client::ProcessData(): Failed to decrypt connected "
+                              << "command " << command << ", dropping packet." << std::endl;
+                return;
+            }
 
-	/*
-	 * Those packets are handled before m_server_ser_ver is set, it's normal
-	 * But we must use the new ToClientConnectionState in the future,
-	 * as a byte mask
-	 */
-	if(toClientCommandTable[command].state == TOCLIENT_STATE_NOT_CONNECTED) {
-		handleCommand(pkt);
-		return;
-	}
+            errorstream << "Client::ProcessData(): Failed to decrypt command "
+                        << command << std::endl;
+            m_con->Disconnect();
+            return;
+        }
 
-	if(m_server_ser_ver == SER_FMT_VER_INVALID) {
-		infostream << "Client: Server serialization"
-				" format invalid or not initialized."
-				" Skipping incoming command=" << command << std::endl;
-		return;
-	}
+        // Overwrite packet payload with decrypted data
+        pkt->setData(decrypted_data);
+    }
 
-	/*
-	  Handle runtime commands
-	*/
+    // Special handling for HELLO
+    if(command == TOCLIENT_HELLO) {
+        handleCommand(pkt); // process HELLO normally
+        m_state = LC_Init;
 
-	handleCommand(pkt);
+        // Process queued packets that arrived before HELLO
+        for(auto &queued_pkt : m_pending_connected_packets) {
+            ProcessData(&queued_pkt);
+        }
+        m_pending_connected_packets.clear();
+        return;
+    }
+
+    // Handle commands that don’t require a connected state
+    if(toClientCommandTable[command].state == TOCLIENT_STATE_NOT_CONNECTED) {
+        handleCommand(pkt);
+        return;
+    }
+
+    // Skip if server serialization version isn’t set
+    if(m_server_ser_ver == SER_FMT_VER_INVALID) {
+        infostream << "Client: Server serialization format invalid or not initialized. "
+                   << "Skipping incoming command=" << command << std::endl;
+        return;
+    }
+
+    // Handle runtime commands
+    handleCommand(pkt);
 }
 
 void Client::Send(NetworkPacket* pkt)
