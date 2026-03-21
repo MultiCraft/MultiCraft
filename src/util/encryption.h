@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #pragma once
-#define __ANDROID__
 #if defined(__APPLE__)
 #include "util/sha2_apple.h"
 #else

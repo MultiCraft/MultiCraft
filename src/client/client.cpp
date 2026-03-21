@@ -136,6 +136,21 @@ bool isConnectedStatePacket(ToClientCommand command)
 		toClientCommandTable[command].state == TOCLIENT_STATE_CONNECTED;
 }
 
+bool shouldProcessDuringOfficialBootstrap(ToClientCommand command)
+{
+	switch (command) {
+	case TOCLIENT_ANNOUNCE_MEDIA:
+	case TOCLIENT_MEDIA:
+	case TOCLIENT_MEDIA_PUSH:
+	case TOCLIENT_NODEDEF:
+	case TOCLIENT_ITEMDEF:
+	case TOCLIENT_CSM_RESTRICTION_FLAGS:
+		return true;
+	default:
+		return false;
+	}
+}
+
 bool packetPayloadLooksEncrypted(NetworkPacket *pkt)
 {
 	return pkt->getSize() >= 4 &&
@@ -1050,80 +1065,78 @@ void Client::flushPendingConnectedPackets()
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
-    ToClientCommand command = (ToClientCommand)pkt->getCommand();
-    u32 sender_peer_id = pkt->getPeerId();
+	ToClientCommand command = (ToClientCommand)pkt->getCommand();
+	u32 sender_peer_id = pkt->getPeerId();
 
-    m_packetcounter.add((u16)command);
-    g_profiler->graphAdd("client_received_packets", 1);
+	m_packetcounter.add((u16)command);
+	g_profiler->graphAdd("client_received_packets", 1);
 
-    // Only accept packets from the server
-    if(sender_peer_id != PEER_ID_SERVER) {
-        infostream << "Client::ProcessData(): Discarding data not "
-                   << "coming from server: peer_id=" << sender_peer_id
-                   << std::endl;
-        return;
-    }
+	// Only accept packets from the server
+	if (sender_peer_id != PEER_ID_SERVER) {
+		infostream << "Client::ProcessData(): Discarding data not "
+			<< "coming from server: peer_id=" << sender_peer_id
+			<< std::endl;
+		return;
+	}
 
-    // Ignore unknown commands
-    if(command >= TOCLIENT_NUM_MSG_TYPES) {
-        infostream << "Client: Ignoring unknown command " << command << std::endl;
-        return;
-    }
+	// Ignore unknown commands
+	if (command >= TOCLIENT_NUM_MSG_TYPES) {
+		infostream << "Client: Ignoring unknown command " << command << std::endl;
+		return;
+	}
 
-    // Queue packets that arrive before client is initialized
-    if(isConnectedStatePacket(command) && m_state == LC_Created) {
-        m_pending_connected_packets.push_back(*pkt);
-        return;
-    }
+	// Official servers can stream some startup content before auth is fully done.
+	// Process the content/bootstrap packets immediately, but keep all other
+	// connected-state packets queued until the client reaches init/ready.
+	if (isConnectedStatePacket(command) && m_state == LC_Created &&
+			!shouldProcessDuringOfficialBootstrap(command)) {
+		m_pending_connected_packets.push_back(*pkt);
+		return;
+	}
 
-    // Decrypt packets if necessary
-    if(m_compression_mode == NETPROTO_COMPRESSION_ENC &&
-       shouldDecryptIncomingPacket(command) &&
-       packetPayloadLooksEncrypted(pkt)) {
+	// Decrypt packets if necessary
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC &&
+			shouldDecryptIncomingPacket(command) &&
+			packetPayloadLooksEncrypted(pkt)) {
+		if (!pkt->decrypt(getOfficialPacketKey())) {
+			if (isConnectedStatePacket(command)) {
+				warningstream << "Client::ProcessData(): Failed to decrypt connected "
+					<< "command " << command
+					<< " while state=" << m_state
+					<< ", size=" << pkt->getSize()
+					<< "; dropping packet." << std::endl;
+				return;
+			}
 
-        // Use NetworkPacket's internal decrypt function
-        if(!pkt->decrypt(getOfficialPacketKey())) {
-            if(isConnectedStatePacket(command)) {
-                warningstream << "Client::ProcessData(): Failed to decrypt connected "
-                              << "command " << command << ", dropping packet." << std::endl;
-                return;
-            }
+			errorstream << "Client::ProcessData(): Failed to decrypt command "
+				<< command << " while state=" << m_state
+				<< ", size=" << pkt->getSize() << std::endl;
+			m_con->Disconnect();
+			return;
+		}
+	}
 
-            errorstream << "Client::ProcessData(): Failed to decrypt command "
-                        << command << std::endl;
-            m_con->Disconnect();
-            return;
-        }
-    }
+	/*
+	 * Those packets are handled before m_server_ser_ver is set, it's normal
+	 * But we must use the new ToClientConnectionState in the future,
+	 * as a byte mask
+	 */
+	if (toClientCommandTable[command].state == TOCLIENT_STATE_NOT_CONNECTED) {
+		handleCommand(pkt);
+		return;
+	}
 
-    // Special handling for HELLO
-    if(command == TOCLIENT_HELLO) {
-        handleCommand(pkt); // process HELLO normally
-        m_state = LC_Init;
+	if (m_server_ser_ver == SER_FMT_VER_INVALID) {
+		infostream << "Client: Server serialization"
+			<< " format invalid or not initialized."
+			<< " Skipping incoming command=" << command << std::endl;
+		return;
+	}
 
-        // Process queued packets that arrived before HELLO
-        for(auto &queued_pkt : m_pending_connected_packets) {
-            ProcessData(&queued_pkt);
-        }
-        m_pending_connected_packets.clear();
-        return;
-    }
-
-    // Handle commands that don’t require a connected state
-    if(toClientCommandTable[command].state == TOCLIENT_STATE_NOT_CONNECTED) {
-        handleCommand(pkt);
-        return;
-    }
-
-    // Skip if server serialization version isn’t set
-    if(m_server_ser_ver == SER_FMT_VER_INVALID) {
-        infostream << "Client: Server serialization format invalid or not initialized. "
-                   << "Skipping incoming command=" << command << std::endl;
-        return;
-    }
-
-    // Handle runtime commands
-    handleCommand(pkt);
+	/*
+	  Handle runtime commands
+	*/
+	handleCommand(pkt);
 }
 
 void Client::Send(NetworkPacket* pkt)
@@ -2063,6 +2076,7 @@ bool Client::afterContentReceived()
 
 	m_state = LC_Ready;
 	sendReady();
+	flushPendingConnectedPackets();
 
 	if (m_mods_loaded)
 		m_script->on_client_ready(m_env.getLocalPlayer());
