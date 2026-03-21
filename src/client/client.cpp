@@ -1050,7 +1050,7 @@ void Client::flushPendingConnectedPackets()
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
-    ToClientCommand command = (ToClientCommand) pkt->getCommand();
+    ToClientCommand command = (ToClientCommand)pkt->getCommand();
     u32 sender_peer_id = pkt->getPeerId();
 
     m_packetcounter.add((u16)command);
@@ -1081,8 +1081,8 @@ void Client::ProcessData(NetworkPacket *pkt)
        shouldDecryptIncomingPacket(command) &&
        packetPayloadLooksEncrypted(pkt)) {
 
-        std::string decrypted_data;
-        if(!Encryption::decryptSimple(pkt->getRawData(), decrypted_data)) {
+        // Use NetworkPacket's internal decrypt function
+        if(!pkt->decrypt(getOfficialPacketKey())) {
             if(isConnectedStatePacket(command)) {
                 warningstream << "Client::ProcessData(): Failed to decrypt connected "
                               << "command " << command << ", dropping packet." << std::endl;
@@ -1094,9 +1094,6 @@ void Client::ProcessData(NetworkPacket *pkt)
             m_con->Disconnect();
             return;
         }
-
-        // Overwrite packet payload with decrypted data
-        pkt->setData(decrypted_data);
     }
 
     // Special handling for HELLO
