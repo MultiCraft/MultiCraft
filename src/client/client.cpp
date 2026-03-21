@@ -75,28 +75,21 @@ const char *getOfficialAppName()
 	return "multicraft";
 }
 
-std::string getConfiguredSecretKey(const char *setting_name,
-		const char *compiled_key)
-{
-#if defined(__ANDROID__) || defined(__APPLE__)
-	std::string key = porting::getSecretKey(compiled_key ? compiled_key : "");
-#else
-	std::string key = compiled_key ? std::string(compiled_key) : std::string();
-#endif
-
-	if (key.empty() && g_settings)
-		key = g_settings->get(setting_name);
-
-	return key;
-}
-
 const std::string &getOfficialPacketKey()
 {
 	static const std::string key = []() {
 #ifdef OFFICIAL_KEY
-		return getConfiguredSecretKey("official_key", OFFICIAL_KEY);
+	#if defined(__ANDROID__) || defined(__APPLE__)
+		return porting::getSecretKey(OFFICIAL_KEY);
+	#else
+		return std::string(OFFICIAL_KEY);
+	#endif
 #else
-		return getConfiguredSecretKey("official_key", "");
+	#if defined(__ANDROID__) || defined(__APPLE__)
+		return porting::getSecretKey("");
+	#else
+		return std::string();
+	#endif
 #endif
 	}();
 
@@ -107,9 +100,17 @@ const std::string &getOfficialMediaKey()
 {
 	static const std::string key = []() {
 #ifdef SIGN_KEY
-		return getConfiguredSecretKey("sign_key", SIGN_KEY);
+	#if defined(__ANDROID__) || defined(__APPLE__)
+		return porting::getSecretKey(SIGN_KEY);
+	#else
+		return std::string(SIGN_KEY);
+	#endif
 #else
-		return getConfiguredSecretKey("sign_key", "");
+	#if defined(__ANDROID__) || defined(__APPLE__)
+		return porting::getSecretKey("");
+	#else
+		return std::string();
+	#endif
 #endif
 	}();
 
@@ -1034,10 +1035,7 @@ void Client::ProcessData(NetworkPacket *pkt)
 			packetPayloadLooksEncrypted(pkt) &&
 			!pkt->decrypt(getOfficialPacketKey())) {
 		errorstream << "Client::ProcessData(): Failed to decrypt command "
-			<< pkt->getCommand();
-		if (getOfficialPacketKey().empty())
-			errorstream << " (official_key is empty)";
-		errorstream << std::endl;
+			<< pkt->getCommand() << std::endl;
 		m_con->Disconnect();
 		return;
 	}
