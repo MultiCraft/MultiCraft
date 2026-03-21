@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "encryption.h"
 #include "ecrypt-sync.h"
-#define __ANDROID__
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
