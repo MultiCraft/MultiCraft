@@ -130,6 +130,12 @@ bool shouldEncryptOutgoingPacket(u16 command)
 	return command != TOSERVER_INIT && command != 0;
 }
 
+bool isConnectedStatePacket(ToClientCommand command)
+{
+	return command < TOCLIENT_NUM_MSG_TYPES &&
+		toClientCommandTable[command].state == TOCLIENT_STATE_CONNECTED;
+}
+
 bool packetPayloadLooksEncrypted(NetworkPacket *pkt)
 {
 	return pkt->getSize() >= 4 &&
@@ -1024,22 +1030,26 @@ inline void Client::handleCommand(NetworkPacket* pkt)
 	(this->*opHandle.handler)(pkt);
 }
 
+void Client::flushPendingConnectedPackets()
+{
+	if (m_state == LC_Created || m_pending_connected_packets.empty())
+		return;
+
+	auto pending_packets = std::move(m_pending_connected_packets);
+	m_pending_connected_packets.clear();
+
+	while (!pending_packets.empty()) {
+		NetworkPacket pkt = std::move(pending_packets.front());
+		pending_packets.pop_front();
+		ProcessData(&pkt);
+	}
+}
+
 /*
 	sender_peer_id given to this shall be quaranteed to be a valid peer
 */
 void Client::ProcessData(NetworkPacket *pkt)
 {
-	// Official servers can mix ENC-wrapped and plain packets after HELLO.
-	if (m_compression_mode == NETPROTO_COMPRESSION_ENC &&
-			shouldDecryptIncomingPacket(pkt->getCommand()) &&
-			packetPayloadLooksEncrypted(pkt) &&
-			!pkt->decrypt(getOfficialPacketKey())) {
-		errorstream << "Client::ProcessData(): Failed to decrypt command "
-			<< pkt->getCommand() << std::endl;
-		m_con->Disconnect();
-		return;
-	}
-
 	ToClientCommand command = (ToClientCommand) pkt->getCommand();
 	u32 sender_peer_id = pkt->getPeerId();
 
@@ -1062,6 +1072,29 @@ void Client::ProcessData(NetworkPacket *pkt)
 	if (command >= TOCLIENT_NUM_MSG_TYPES) {
 		infostream << "Client: Ignoring unknown command "
 			<< command << std::endl;
+		return;
+	}
+
+	if (isConnectedStatePacket(command) && m_state == LC_Created) {
+		// Official servers can race channel 0 packets ahead of auth/init on channel 1.
+		m_pending_connected_packets.push_back(*pkt);
+		return;
+	}
+
+	// Official servers can mix ENC-wrapped and plain packets after HELLO.
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC &&
+			shouldDecryptIncomingPacket(command) &&
+			packetPayloadLooksEncrypted(pkt) &&
+			!pkt->decrypt(getOfficialPacketKey())) {
+		if (isConnectedStatePacket(command)) {
+			warningstream << "Client::ProcessData(): Failed to decrypt connected "
+				"command " << command << ", dropping packet." << std::endl;
+			return;
+		}
+
+		errorstream << "Client::ProcessData(): Failed to decrypt command "
+			<< command << std::endl;
+		m_con->Disconnect();
 		return;
 	}
 
@@ -1211,6 +1244,8 @@ void Client::sendInit(const std::string &playerName)
 	std::string platform_name = getOfficialPlatformName();
 	std::string app_name = getOfficialAppName();
 
+	m_pending_connected_packets.clear();
+
 	NetworkPacket pkt(TOSERVER_INIT, 1 + 2 + 2 + 2 + (playerName.size() + 2) +
 			1 + (version.size() + 2) + (platform_name.size() + 2) +
 			(app_name.size() + 2));
@@ -1246,6 +1281,7 @@ void Client::confirmRegistration()
 void Client::startAuth(AuthMechanism chosen_auth_mechanism)
 {
 	m_chosen_auth_mech = chosen_auth_mechanism;
+	m_pending_connected_packets.clear();
 
 	switch (chosen_auth_mechanism) {
 		case AUTH_MECHANISM_FIRST_SRP: {

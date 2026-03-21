@@ -152,6 +152,7 @@ void Client::handleCommand_AuthAccept(NetworkPacket* pkt)
 	Send(&resp_pkt);
 
 	m_state = LC_Init;
+	flushPendingConnectedPackets();
 }
 void Client::handleCommand_AcceptSudoMode(NetworkPacket* pkt)
 {

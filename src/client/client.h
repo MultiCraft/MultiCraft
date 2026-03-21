@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "clientenvironment.h"
 #include "irrlichttypes_extrabloated.h"
+#include <deque>
 #include <ostream>
 #include <map>
 #include <set>
@@ -36,6 +37,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "tileanimation.h"
 #include "mesh_generator_thread.h"
 #include "network/address.h"
+#include "network/networkpacket.h"
 #include "network/peerhandler.h"
 #include <fstream>
 
@@ -60,7 +62,6 @@ class MapDatabase;
 class Minimap;
 struct MinimapMapblock;
 class Camera;
-class NetworkPacket;
 namespace con {
 class Connection;
 }
@@ -452,6 +453,7 @@ private:
 	void deleteAuthData();
 	// helper method shared with clientpackethandler
 	static AuthMechanism choseAuthMech(const u32 mechs);
+	void flushPendingConnectedPackets();
 
 	void sendInit(const std::string &playerName);
 	void promptConfirmRegistration(AuthMechanism chosen_auth_mechanism);
@@ -500,6 +502,7 @@ private:
 	u16 m_proto_ver = 0;
 
 	u16 m_compression_mode = NETPROTO_COMPRESSION_NONE;
+	std::deque<NetworkPacket> m_pending_connected_packets;
 
 	bool m_update_wielded_item = false;
 	Inventory *m_inventory_from_server = nullptr;
