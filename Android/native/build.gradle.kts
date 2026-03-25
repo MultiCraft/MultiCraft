@@ -86,7 +86,7 @@ val downloadDeps = tasks.register("downloadDeps") {
 			println("Dependencies already downloaded")
 		}
 	}
-}!!
+}
 
 val getDeps = tasks.register<Copy>("getDeps") {
 	dependsOn(downloadDeps)
