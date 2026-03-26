@@ -115,7 +115,7 @@ HTTP Requests
     * Return response data for given asynchronous HTTP request
 * `HTTPApiTable.get_download_stats()`
     * Returns `bytes_downloaded, total_bytes`
-    * This is the sum of all running HTTP requests, including core.download_file.
+    * This is the sum of all HTTP requests, including core.download_file.
     * `bytes_downloaded` should never decrease, however `total_bytes` may
       decrease if a request fails (so that when no requests are running,
       bytes_downloaded == total_bytes).
