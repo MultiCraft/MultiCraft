@@ -49,7 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <SDL3/SDL_main.h>
 
 extern int real_main(int argc, char *argv[]);
-extern "C" void external_pause_game();
+extern "C" void external_pause_game(bool unpause = true);
 extern "C" void external_update(const char* key, const char* value);
 
 static std::atomic<bool> ran = {false};
@@ -93,7 +93,7 @@ extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
 			JNIEnv *env, jclass clazz)
 	{
-		external_pause_game();
+		external_pause_game(false);
 	}
 	bool device_has_keyboard = false;
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_keyboardEvent(
