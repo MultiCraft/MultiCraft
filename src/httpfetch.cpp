@@ -218,6 +218,14 @@ public:
 	const HTTPFetchRequest &getRequest()    const { return request; };
 	const CURL             *getEasyHandle() const { return curl; };
 
+	size_t getDownloadedBytes() { return oss.tellp(); }
+	void getContentLength(curl_off_t *content_length) {
+		CURLcode error = curl_easy_getinfo(curl,
+				CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, content_length);
+		if (error != CURLE_OK)
+			*content_length = -1;
+	}
+
 private:
 	CurlHandlePool *pool;
 	CURL *curl = nullptr;
@@ -472,6 +480,16 @@ protected:
 	std::vector<HTTPFetchOngoing*> m_all_ongoing;
 	std::list<HTTPFetchRequest> m_queued_fetches;
 
+	// The number of bytes downloaded by completed requests
+	// We track this separately so that the value we report is just a
+	// monotinic counter, which will make it easier to track
+	// This is added to the byte counts in m_download_stats.
+	u64 m_completed_download_bytes = 0;
+
+	// Count of the received bytes & total bytes
+	std::atomic<u64> m_total_bytes = {0};
+	std::atomic<u64> m_received_bytes = {0};
+
 public:
 	CurlFetchThread(int parallel_limit) :
 		Thread("CurlFetch")
@@ -506,6 +524,12 @@ public:
 		req.type = RT_WAKEUP;
 		req.event = NULL;
 		m_requests.push_back(req);
+	}
+
+	std::tuple<u64, u64> getDownloadStats()
+	{
+		u64 total_bytes = m_total_bytes;
+		return {m_received_bytes.load(), total_bytes};
 	}
 
 protected:
@@ -573,6 +597,7 @@ protected:
 				m_all_ongoing.push_back(ongoing);
 			}
 			else {
+				m_completed_download_bytes += ongoing->getDownloadedBytes();
 				httpfetch_deliver_result(*ongoing->complete(res));
 				delete ongoing;
 			}
@@ -594,6 +619,7 @@ protected:
 		if (msg->msg == CURLMSG_DONE && found) {
 			// m_all_ongoing[i] succeeded or failed.
 			HTTPFetchOngoing *ongoing = m_all_ongoing[i];
+			m_completed_download_bytes += ongoing->getDownloadedBytes();
 			httpfetch_deliver_result(*ongoing->complete(msg->data.result));
 			delete ongoing;
 			m_all_ongoing.erase(m_all_ongoing.begin() + i);
@@ -712,6 +738,22 @@ protected:
 			else
 				waitForIO(100);
 
+			u64 downloaded_bytes = m_completed_download_bytes;
+			u64 total_bytes = m_completed_download_bytes;
+			for (HTTPFetchOngoing *ongoing : m_all_ongoing) {
+				downloaded_bytes += ongoing->getDownloadedBytes();
+				curl_off_t content_length;
+				ongoing->getContentLength(&content_length);
+				if (content_length > 0)
+					total_bytes += content_length;
+				else
+					total_bytes += ongoing->getDownloadedBytes();
+			}
+			// m_total_bytes is set first to try and avoid a situation where
+			// m_received_bytes > m_total_bytes
+			m_total_bytes = total_bytes;
+			m_received_bytes = downloaded_bytes;
+
 			END_DEBUG_EXCEPTION_HANDLER
 		}
 
@@ -805,39 +847,28 @@ static void httpfetch_request_clear(unsigned long caller)
 	}
 }
 
-static void httpfetch_sync(const HTTPFetchRequest &fetch_request,
-		HTTPFetchResult &fetch_result)
-{
-	// Create ongoing fetch data and make a cURL handle
-	// Set cURL options based on HTTPFetchRequest
-	CurlHandlePool pool;
-	HTTPFetchOngoing ongoing(fetch_request, &pool);
-	// Do the fetch (curl_easy_perform)
-	CURLcode res = ongoing.start(NULL);
-	// Update fetch result
-	fetch_result = *ongoing.complete(res);
-}
-
 bool httpfetch_sync_interruptible(const HTTPFetchRequest &fetch_request,
 		HTTPFetchResult &fetch_result, long interval, std::function<bool()> is_cancelled)
 {
-	if (Thread *thread = Thread::getCurrentThread()) {
-		HTTPFetchRequest req = fetch_request;
-		req.caller = httpfetch_caller_alloc_secure();
-		httpfetch_async(req);
-		do {
-			if (thread->stopRequested() || (is_cancelled && is_cancelled())) {
-				httpfetch_caller_free(req.caller);
-				fetch_result = HTTPFetchResult(fetch_request);
-				return false;
-			}
-			sleep_ms(interval);
-		} while (!httpfetch_async_get(req.caller, fetch_result));
-		httpfetch_caller_free(req.caller);
-	} else {
-		httpfetch_sync(fetch_request, fetch_result);
-	}
+	Thread *thread = Thread::getCurrentThread();
+	HTTPFetchRequest req = fetch_request;
+	req.caller = httpfetch_caller_alloc_secure();
+	httpfetch_async(req);
+	do {
+		if ((thread && thread->stopRequested()) || (is_cancelled && is_cancelled())) {
+			httpfetch_caller_free(req.caller);
+			fetch_result = HTTPFetchResult(fetch_request);
+			return false;
+		}
+		sleep_ms(interval);
+	} while (!httpfetch_async_get(req.caller, fetch_result));
+	httpfetch_caller_free(req.caller);
 	return true;
+}
+
+std::tuple<u64, u64> httpfetch_get_download_stats()
+{
+	return g_httpfetch_thread->getDownloadStats();
 }
 
 #else  // USE_CURL
@@ -877,6 +908,11 @@ bool httpfetch_sync_interruptible(const HTTPFetchRequest &fetch_request,
 
 	fetch_result = HTTPFetchResult(fetch_request); // sets succeeded = false etc.
 	return false;
+}
+
+std::tuple<u64, u64> httpfetch_get_download_stats()
+{
+	return std::make_tuple(0, 0);
 }
 
 #endif  // USE_CURL

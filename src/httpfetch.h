@@ -129,3 +129,5 @@ void httpfetch_caller_free(unsigned long caller);
 bool httpfetch_sync_interruptible(const HTTPFetchRequest &fetch_request,
 		HTTPFetchResult &fetch_result, long interval = 25,
 		std::function<bool()> is_cancelled = {});
+
+std::tuple<u64, u64> httpfetch_get_download_stats();
