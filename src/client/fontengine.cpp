@@ -325,10 +325,11 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 			setting_suffix.append("_italic");
 	}
 
-	u32 size = std::max(std::floor(RenderingEngine::getDisplayDensity() *
-			g_settings->getFloat("gui_scaling") * spec.size), 1.0f);
+	f32 size_factor = RenderingEngine::getDisplayDensity() *
+			g_settings->getFloat("gui_scaling");
+	u32 size = std::max(std::floor(size_factor * spec.size), 1.0f);
 
-	u16 outline = spec.outline;
+	u16 outline = spec.outline * size_factor;
 	u8 outline_type = spec.outline_type;
 	s8 character_spacing = spec.character_spacing;
 
