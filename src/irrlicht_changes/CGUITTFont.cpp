@@ -445,6 +445,7 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 	font->character_spacing = font_settings.character_spacing;
 	font->shadow_offset = font_settings.shadow_offset;
 	font->shadow_alpha = font_settings.shadow_alpha;
+	font->density = font_settings.density;
 
 	bool ret = font->load(filename, size);
 	if (!ret)

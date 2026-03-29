@@ -273,8 +273,9 @@ namespace gui
 				s8 character_spacing = 0;
 				u32 shadow_offset = 0;
 				u32 shadow_alpha = 255;
+				f32 density = 1.0f;
 			};
-			
+
 			//! Creates a new TrueType font and returns a pointer to it.  The pointer must be drop()'ed when finished.
 			//! \param env The IGUIEnvironment the font loads out of.
 			//! \param filename The filename of the font.
@@ -404,6 +405,8 @@ namespace gui
 
 			virtual bool isRTL(const core::stringw& text) const;
 
+			virtual f32 getDisplayDensity() const { return density; }
+
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
 			FT_Stroker getStroker() { return stroker; }
@@ -490,6 +493,7 @@ namespace gui
 			float color_emoji_scale = 1.0f;
 			u32 color_emoji_offset = 0;
 			u32 max_font_height = 0;
+			f32 density = 1.0f;
 	};
 
 } // end namespace gui

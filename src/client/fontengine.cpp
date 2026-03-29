@@ -367,7 +367,8 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	font_settings.character_spacing = character_spacing;
 	font_settings.shadow_offset = font_shadow;
 	font_settings.shadow_alpha = font_shadow_alpha;
-			
+	font_settings.density = RenderingEngine::getDisplayDensity();
+
 	for (const std::string &font_path : fallback_settings) {
 		irr::gui::CGUITTFont *font = gui::CGUITTFont::createTTFont(m_env,
 				font_path.c_str(), size, font_settings);
