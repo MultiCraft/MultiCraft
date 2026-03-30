@@ -113,13 +113,14 @@ public:
 		v3s16 rotation{0, 0, 0};
 
 		s32 margin = 10;
+		bool is_split = false;
 
 		void setStyle(StyleList &style);
 	};
 
 	struct Paragraph
 	{
-		std::vector<Element> elements;
+		std::list<Element> elements;
 		HalignType halign;
 		s32 margin = 10;
 
