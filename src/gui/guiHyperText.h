@@ -224,6 +224,7 @@ protected:
 	GUIScrollBar *m_vscrollbar;
 	ScrollSwipe *m_scroll_swipe;
 	TextDrawer m_drawer;
+	bool m_placed = false;
 
 	// Positioning
 	u32 m_scrollbar_width;
