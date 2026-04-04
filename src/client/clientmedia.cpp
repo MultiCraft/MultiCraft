@@ -200,10 +200,6 @@ void ClientMediaDownloader::initialStep(Client *client)
 	m_uncached_count = m_files.size();
 	m_cached_count = 0;
 	for (auto &file_it : m_files) {
-		int receive = getProgress() * 100;
-		std::wstring progress_text = std::wstring(loading_text);
-		if (receive > 0)
-			progress_text += L" " + std::to_wstring(receive) + L"%";
 		std::string name = file_it.first;
 		FileStatus *filestatus = file_it.second;
 		const std::string &sha1 = filestatus->sha1;
@@ -228,6 +224,10 @@ void ClientMediaDownloader::initialStep(Client *client)
 		u64 cur_time = porting::getTimeMs();
 		u64 dtime = porting::getDeltaMs(last_time, cur_time);
 		if (dtime >= chunk_time_ms) {
+			int receive = getProgress() * 100;
+			std::wstring progress_text = std::wstring(loading_text);
+			if (receive > 0)
+				progress_text += L" " + std::to_wstring(receive) + L"%";
 			int progress = 30 + getProgress() * 35 + 0.5;
 			bool result = client->drawLoadScreen(progress_text, dtime / 1000.0f, progress);
 
