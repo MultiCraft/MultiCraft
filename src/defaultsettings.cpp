@@ -318,17 +318,20 @@ void set_default_settings()
 	settings->setDefault("mono_font_path_bold_italic", "");
 
 	std::string emoji_fonts;
+	std::string emoji_flags_font;
 #ifdef __ANDROID__
 	emoji_fonts = "/system/fonts/SamsungColorEmoji.ttf,"
 		"/system/fonts/NotoColorEmojiLegacy.ttf,"
 		"/system/fonts/NotoColorEmoji.ttf,";
 	emoji_fonts += porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
+	emoji_flags_font = "/system/fonts/NotoColorEmojiFlags.ttf"
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	emoji_fonts = "/System/Library/Fonts/Apple Color Emoji.ttc";
 #else
 	emoji_fonts = porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
 #endif
 	settings->setDefault("emoji_font_path", emoji_fonts);
+	settings->setDefault("emoji_flags_font_path", emoji_flags_font);
 
 	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallback.ttf"));
 

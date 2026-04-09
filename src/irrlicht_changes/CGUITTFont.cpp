@@ -763,8 +763,15 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (!face)
 		return false;
 
-	uchar32_t smile = 0x1F600;
-	u32 char_index = FT_Get_Char_Index(face, smile);
+	uchar32_t emojis_to_test[] = { 0x1F600, 0x1F1FA, 0x1F3F4 };
+
+	u32 char_index = 0;
+	for (uchar32_t emoji : emojis_to_test) {
+		char_index = FT_Get_Char_Index(face, emoji);
+
+		if (char_index != 0)
+			break;
+	}
 
 	if (char_index == 0)
 		return false;
