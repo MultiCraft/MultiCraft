@@ -45,6 +45,8 @@
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
 #include <SheenBidi.h>
+#include <cairo/cairo.h>
+#include <cairo/cairo-ft.h>
 
 namespace irr
 {

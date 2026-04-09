@@ -155,6 +155,13 @@ if(ENABLE_FREETYPE)
 		message(STATUS "HarfBuzz found.")
 		include_directories(${HARFBUZZ_INCLUDE_DIR})
 	endif()
+	
+	find_library(CAIRO_LIBRARY NAMES cairo libcairo)
+	find_path(CAIRO_INCLUDE_DIR NAMES cairo/cairo.h cairo.h PATHS)
+	if (CAIRO_LIBRARY AND CAIRO_INCLUDE_DIR)
+		message(STATUS "Cairo found.")
+		include_directories(${CAIRO_INCLUDE_DIR})
+	endif()
 endif(ENABLE_FREETYPE)
 
 option(ENABLE_CURSES "Enable ncurses console" TRUE)
@@ -707,6 +714,7 @@ if(BUILD_CLIENT)
 			${PROJECT_NAME}
 			${FREETYPE_LIBRARY}
 			${HARFBUZZ_LIBRARY}
+			${CAIRO_LIBRARY}
 		)
 	endif()
 	if (USE_CURSES)
