@@ -161,6 +161,7 @@ if(ENABLE_FREETYPE)
 	if (CAIRO_LIBRARY AND CAIRO_INCLUDE_DIR)
 		message(STATUS "Cairo found.")
 		include_directories(${CAIRO_INCLUDE_DIR})
+		add_definitions(-DUSE_CAIRO=1)
 	endif()
 endif(ENABLE_FREETYPE)
 

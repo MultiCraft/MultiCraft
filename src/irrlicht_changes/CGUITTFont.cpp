@@ -304,7 +304,8 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
 		FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
 		bits = bitmap_glyph->bitmap;
-		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
+		offset = core::vector2di(glyph_slot->bitmap_left * scale,
+				glyph_slot->bitmap_top * scale);
 
 	} else if (face->num_fixed_sizes > 0) {
 		bits = glyph_slot->bitmap;
@@ -312,6 +313,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		offset = core::vector2di(glyph_slot->bitmap_left * scale, bitmap_top);
 
 	} else {
+#ifdef USE_CAIRO
 		cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
 				font_size * 1.5f, font_size * 1.5f);
 
@@ -346,6 +348,13 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		bits.buffer = data;
 
 		offset = core::vector2di(0, (int)(font_size));
+
+#else
+		FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
+		bits = glyph_slot->bitmap;
+ 		offset = core::vector2di(glyph_slot->bitmap_left * scale,
+		 		glyph_slot->bitmap_top * scale);
+#endif
 	}
 
 	// Try to get the last page with available slots.
