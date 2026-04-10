@@ -422,10 +422,8 @@ void SGUITTGlyph::unload()
 //////////////////////
 
 CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
-		const io::path& filename, const u32 size, const bool antialias,
-		const bool transparency, const bool bold, const bool italic,
-		const u16 outline, const u8 outline_type, const s8 character_spacing,
-		const u32 shadow, const u32 shadow_alpha)
+		const io::path& filename, const u32 size,
+		const FontSettings& font_settings)
 {
 	if (!c_libraryLoaded)
 	{
@@ -438,14 +436,18 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 
 	CGUITTFont* font = new CGUITTFont(env);
 
-	font->shadow_alpha = shadow_alpha;
-	font->bold = bold;
-	font->italic = italic;
-	font->outline = outline;
-	font->outline_type = outline_type;
-	font->character_spacing = character_spacing;
+	font->use_monochrome = font_settings.use_monochrome;
+	font->use_transparency = font_settings.use_transparency;
+	font->bold = font_settings.bold;
+	font->italic = font_settings.italic;
+	font->outline = font_settings.outline;
+	font->outline_type = font_settings.outline_type;
+	font->character_spacing = font_settings.character_spacing;
+	font->shadow_offset = font_settings.shadow_offset;
+	font->shadow_alpha = font_settings.shadow_alpha;
+	font->density = font_settings.density;
 
-	bool ret = font->load(filename, size, antialias, transparency, shadow);
+	bool ret = font->load(filename, size);
 	if (!ret)
 	{
 		font->drop();
@@ -453,67 +455,12 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 	}
 
 	return font;
-}
-
-CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
-		const io::path& filename, const u32 size, const bool antialias,
-		const bool transparency, const bool bold, const bool italic,
-		const u16 outline, const u8 outline_type, const s8 character_spacing)
-{
-	if (!c_libraryLoaded)
-	{
-		if (FT_Init_FreeType(&c_library))
-			return 0;
-		c_libraryLoaded = true;
-	}
-
-	FT_Stroker_New(c_library, &stroker);
-
-	CGUITTFont* font = new CGUITTFont(device->getGUIEnvironment());
-
-	font->bold = bold;
-	font->italic = italic;
-	font->outline = outline;
-	font->outline_type = outline_type;
-	font->character_spacing = character_spacing;
-	font->Device = device;
-
-	bool ret = font->load(filename, size, antialias, transparency, false);
-	if (!ret)
-	{
-		font->drop();
-		return 0;
-	}
-
-	return font;
-}
-
-CGUITTFont* CGUITTFont::create(IGUIEnvironment *env, const io::path& filename,
-		const u32 size, const bool antialias, const bool transparency,
-		const bool bold, const bool italic, const u16 outline,
-		const u8 outline_type, const s8 character_spacing)
-{
-	return CGUITTFont::createTTFont(env, filename, size, antialias,
-			transparency, bold, italic, outline, outline_type,
-			character_spacing);
-}
-
-CGUITTFont* CGUITTFont::create(IrrlichtDevice *device, const io::path& filename,
-		const u32 size, const bool antialias, const bool transparency,
-		const bool bold, const bool italic, const u16 outline,
-		const u8 outline_type, const s8 character_spacing)
-{
-	return CGUITTFont::createTTFont(device, filename, size, antialias,
-			transparency, bold, italic, outline, outline_type,
-			character_spacing);
 }
 
 //////////////////////
 
 //! Constructor.
-CGUITTFont::CGUITTFont(IGUIEnvironment *env)
-: use_monochrome(false), use_transparency(true), use_hinting(true), use_auto_hinting(true),
-batch_load_size(1), Device(0), Environment(env), Driver(0), GlobalKerningWidth(0), GlobalKerningHeight(0)
+CGUITTFont::CGUITTFont(IGUIEnvironment *env) : Environment(env)
 {
 	#ifdef _DEBUG
 	setDebugName("CGUITTFont");
@@ -568,7 +515,7 @@ CGUITTFont::~CGUITTFont()
 		Driver->drop();
 }
 
-bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antialias, const bool transparency, const u32 shadow)
+bool CGUITTFont::load(const io::path& filename, const u32 size)
 {
 	// Some sanity checks.
 	if (Environment == 0 || Driver == 0) return false;
@@ -580,14 +527,11 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	this->size = size;
 	this->filenames.push_back(filename);
 
-	// Update the font loading flags when the font is first loaded.
-	this->use_monochrome = !antialias;
-	this->use_transparency = transparency;
 	update_load_flags();
 
 	// Log.
 	if (logger)
-		logger->log(L"CGUITTFont", core::stringw(core::stringw(L"Creating new font: ") + core::ustring(filename).toWCHAR_s() + L" " + core::stringc(size) + L"pt " + (antialias ? L"+antialias " : L"-antialias ") + (transparency ? L"+transparency" : L"-transparency")).c_str(), irr::ELL_INFORMATION);
+		logger->log(L"CGUITTFont", core::stringw(core::stringw(L"Creating new font: ") + core::ustring(filename).toWCHAR_s() + L" " + core::stringc(size) + L"pt " + (!use_monochrome ? L"+antialias " : L"-antialias ") + (use_transparency ? L"+transparency" : L"-transparency")).c_str(), irr::ELL_INFORMATION);
 
 	// Grab the face.
 	SGUITTFace* face = 0;
@@ -661,7 +605,6 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 
 	// Store our face.
 	tt_faces.push_back(face->face);
-	shadow_offsets.push_back(shadow);
 
 	if (tt_faces.size() == 1) {
 		// Store font metrics.
@@ -674,9 +617,9 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	return true;
 }
 
-bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font, const u32 shadow)
+bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font)
 {
-	bool success = load(filename, size, !use_monochrome, use_transparency, shadow);
+	bool success = load(filename, size);
 
 	if (!success || !is_emoji_font)
 		return success;
@@ -686,7 +629,6 @@ bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font
 	if (!success) {
 		filenames.pop_back();
 		tt_faces.pop_back();
-		shadow_offsets.pop_back();
 
 		core::map<io::path, SGUITTFace*>::Node *node = c_faces.find(filename);
 		if (node) {
@@ -1090,7 +1032,6 @@ void CGUITTFont::loadGlyphsForShapedText(const std::vector<ShapedRun>& runs)
 				glyph->glyph_page = 0;
 				glyph->source_rect = core::recti();
 				glyph->offset = core::vector2di();
-				glyph->shadow_offset = 0;
 				glyph->surface = 0;
 				glyph->parent = this;
 				Glyphs[key] = glyph;
@@ -1103,7 +1044,6 @@ void CGUITTFont::loadGlyphsForShapedText(const std::vector<ShapedRun>& runs)
 
 				glyph->preload(glyph_idx, face, Driver, size, flags,
 						bold, italic, outline, outline_type, character_spacing);
-				glyph->shadow_offset = shadow_offsets[run.face_index];
 				Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
 			}
 		}
@@ -1488,10 +1428,10 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 				page->render_positions.push_back(core::position2di(offset.X + offx, offset.Y + offy));
 				page->render_source_rects.push_back(glyph->source_rect);
 
-				if (glyph->shadow_offset) {
+				if (shadow_offset && !glyph->isColor) {
 					page->shadow_positions.push_back(core::position2di(
-							offset.X + offx + glyph->shadow_offset,
-							offset.Y + offy + glyph->shadow_offset));
+							offset.X + offx + shadow_offset,
+							offset.Y + offy + shadow_offset));
 					page->shadow_source_rects.push_back(glyph->source_rect);
 				}
 
