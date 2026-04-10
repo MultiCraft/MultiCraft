@@ -1,12 +1,12 @@
-local function make_registration()
+local function make_registration_reverse()
     local t = {}
     local registerfunc = function(func)
-        t[#t + 1] = func
+        table.insert(t, 1, func)
     end
     return t, registerfunc
 end
 
-core.registered_on_update, core.register_on_update = make_registration()
+core.registered_on_update, core.register_on_update = make_registration_reverse()
 
 function core.run_callbacks(callbacks, mode, ...)
 	assert(type(callbacks) == "table")

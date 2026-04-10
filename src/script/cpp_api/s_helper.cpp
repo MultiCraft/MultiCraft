@@ -66,7 +66,7 @@ void ScriptApiHelper::process_update_notifications()
 					break;
 			}
 			lua_pushlstring(L, source.c_str(), source.size());
-			runCallbacks(3, RUN_CALLBACKS_MODE_FIRST);
+			runCallbacks(3, RUN_CALLBACKS_MODE_OR_SC);
 		} else {
 			runCallbacks(2, RUN_CALLBACKS_MODE_FIRST);
 		}
