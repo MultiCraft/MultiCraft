@@ -32,7 +32,8 @@ void ScriptApiHelper::process_update_notifications()
 	SCRIPTAPI_PRECHECKHEADER
 
 	const bool is_helper = getType() == ScriptingType::Helper;
-	MutexedQueue<UpdateNotification> *queue = is_helper ? &g_game_to_helper : &g_helper_to_game;
+	MutexedQueue<UpdateNotification> *queue =
+			is_helper ? &g_game_to_helper : &g_helper_to_game;
 
 	if (is_helper) {
 		UpdateNotification n;
@@ -56,15 +57,15 @@ void ScriptApiHelper::process_update_notifications()
 			if (is_helper) {
 				std::string source;
 				switch (n.source) {
-					case ScriptingType::Helper:
-						source = "helper";
-						break;
-					case ScriptingType::MainMenu:
-						source = "main_menu";
-						break;
-					case ScriptingType::Client:
-						source = "client";
-						break;
+				case ScriptingType::Helper:
+					source = "helper";
+					break;
+				case ScriptingType::MainMenu:
+					source = "main_menu";
+					break;
+				case ScriptingType::Client:
+					source = "client";
+					break;
 				}
 				lua_pushlstring(L, source.c_str(), source.size());
 				runCallbacks(3, RUN_CALLBACKS_MODE_OR_SC);
@@ -73,7 +74,8 @@ void ScriptApiHelper::process_update_notifications()
 			}
 		} catch (LuaError &e) {
 			if (is_helper && n.source == ScriptingType::Helper)
-				// If there's a Lua error, just pass the message onto the game
+				// If there's a Lua error, just pass the message onto the
+				// game
 				g_helper_to_game.push_back(n);
 			throw;
 		}

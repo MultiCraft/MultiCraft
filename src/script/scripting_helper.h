@@ -31,7 +31,9 @@ struct UpdateNotification
 	std::string msg;
 };
 
-class HelperScripting : virtual public ScriptApiBase, public ScriptApiHelper, public ScriptApiMainMenu
+class HelperScripting : virtual public ScriptApiBase,
+			public ScriptApiHelper,
+			public ScriptApiMainMenu
 {
 public:
 	HelperScripting();
