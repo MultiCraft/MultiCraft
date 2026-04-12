@@ -47,28 +47,35 @@ void ScriptApiHelper::process_update_notifications()
 		if (n.source == ScriptingType::Invalid)
 			break;
 
-		lua_getglobal(L, "core");
-		lua_getfield(L, -1, "registered_on_update");
-		lua_pushlstring(L, n.channel.c_str(), n.channel.size());
-		lua_pushlstring(L, n.msg.c_str(), n.msg.size());
+		try {
+			lua_getglobal(L, "core");
+			lua_getfield(L, -1, "registered_on_update");
+			lua_pushlstring(L, n.channel.c_str(), n.channel.size());
+			lua_pushlstring(L, n.msg.c_str(), n.msg.size());
 
-		if (is_helper) {
-			std::string source;
-			switch (n.source) {
-				case ScriptingType::Helper:
-					source = "helper";
-					break;
-				case ScriptingType::MainMenu:
-					source = "main_menu";
-					break;
-				case ScriptingType::Client:
-					source = "client";
-					break;
+			if (is_helper) {
+				std::string source;
+				switch (n.source) {
+					case ScriptingType::Helper:
+						source = "helper";
+						break;
+					case ScriptingType::MainMenu:
+						source = "main_menu";
+						break;
+					case ScriptingType::Client:
+						source = "client";
+						break;
+				}
+				lua_pushlstring(L, source.c_str(), source.size());
+				runCallbacks(3, RUN_CALLBACKS_MODE_OR_SC);
+			} else {
+				runCallbacks(2, RUN_CALLBACKS_MODE_FIRST);
 			}
-			lua_pushlstring(L, source.c_str(), source.size());
-			runCallbacks(3, RUN_CALLBACKS_MODE_OR_SC);
-		} else {
-			runCallbacks(2, RUN_CALLBACKS_MODE_FIRST);
+		} catch (LuaError &e) {
+			if (is_helper && n.source == ScriptingType::Helper)
+				// If there's a Lua error, just pass the message onto the game
+				g_helper_to_game.push_back(n);
+			throw;
 		}
 	}
 }
