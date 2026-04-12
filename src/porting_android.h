@@ -143,4 +143,10 @@ bool createAssetManager();
  * destroy asset manager
  */
 void destroyAssetManager();
+
+/**
+ * vibrate phone
+ */
+void vibrationEffect(int intensity);
+
 }

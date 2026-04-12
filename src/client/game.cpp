@@ -660,6 +660,7 @@ using PausedNodesList = std::vector<std::pair<irr_ptr<scene::IAnimatedMeshSceneN
 
 #if defined(__ANDROID__) || defined(__IOS__)
 static std::atomic<bool> g_pause_menu_schedule(false);
+static std::atomic<bool> g_pause_menu_unpause(true);
 #endif
 
 /* This is not intended to be a public class. If a public class becomes
@@ -932,6 +933,8 @@ private:
 
 	bool m_does_lost_focus_pause_game = false;
 
+	bool m_enable_vibrations = false;
+
 	int m_reset_HW_buffer_counter = 0;
 
 #ifdef HAVE_TOUCHSCREENGUI
@@ -1098,6 +1101,14 @@ void Game::run()
 
 	irr::core::dimension2d<u32> previous_screen_size(g_settings->getU16("screen_w"),
 		g_settings->getU16("screen_h"));
+
+#if defined(__ANDROID__) || defined(__IOS__)
+	// Resume if the app is no longer minimized
+	if (g_pause_menu_unpause && device->isWindowMinimized()) {
+		g_pause_menu_schedule = false;
+		g_pause_menu_unpause = false;
+	}
+#endif
 
 	while (RenderingEngine::run()
 			&& !(*kill || g_gamecallback->shutdown_requested
@@ -2794,6 +2805,11 @@ void Game::handleClientEvent_PlayerDamage(ClientEvent *event, CameraOrientation 
 
 	// Play damage sound
 	client->getEventManager()->put(new SimpleTriggerEvent(MtEvent::PLAYER_DAMAGE));
+
+#if defined(__ANDROID__) || defined(__IOS__)
+		if (m_enable_vibrations)
+			porting::vibrationEffect(3);
+#endif
 }
 
 void Game::handleClientEvent_PlayerForceMove(ClientEvent *event, CameraOrientation *cam)
@@ -3756,6 +3772,12 @@ bool Game::nodePlacement(const ItemDefinition &selected_def,
 			client->interact(INTERACT_PLACE, pointed);
 			// A node is predicted, also play a sound
 			soundmaker->m_player_rightpunch_sound = selected_def.sound_place;
+
+#if defined(__ANDROID__) || defined(__IOS__)
+			if (m_enable_vibrations)
+				porting::vibrationEffect(1);
+#endif
+
 			return true;
 		} else {
 			soundmaker->m_player_rightpunch_sound = selected_def.sound_place_failed;
@@ -3817,6 +3839,11 @@ void Game::handlePointingAtObject(const PointedThing &pointed,
 			infostream << "Punched object" << std::endl;
 			runData.punching = true;
 		}
+
+#if defined(__ANDROID__) || defined(__IOS__)
+		if (m_enable_vibrations)
+			porting::vibrationEffect(2);
+#endif
 
 		if (do_punch_damage) {
 			// Report direct punch
@@ -3964,6 +3991,11 @@ void Game::handleDigging(const PointedThing &pointed, const v3s16 &nodepos,
 
 		// Send event to trigger sound
 		client->getEventManager()->put(new NodeDugEvent(nodepos, wasnode));
+
+#if defined(__ANDROID__) || defined(__IOS__)
+		if (m_enable_vibrations)
+			porting::vibrationEffect(1);
+#endif
 	}
 
 	if (runData.dig_time_complete < 100000.0) {
@@ -4399,6 +4431,8 @@ void Game::readSettings()
 	m_cache_mouse_sensitivity = rangelim(m_cache_mouse_sensitivity, 0.001, 100.0);
 
 	m_does_lost_focus_pause_game = g_settings->getBool("pause_on_lost_focus");
+
+	m_enable_vibrations = g_settings->getBool("enable_vibrations");
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
@@ -4710,6 +4744,7 @@ void the_game(bool *kill,
 	Game game;
 #if defined(__ANDROID__) || defined(__IOS__)
 	g_pause_menu_schedule = false;
+	g_pause_menu_unpause = true;
 #endif
 
 	/* Make a copy of the server address because if a local singleplayer server
@@ -4758,8 +4793,11 @@ void the_game(bool *kill,
 }
 
 #if defined(__ANDROID__) || defined(__IOS__)
-extern "C" void external_pause_game()
+extern "C" void external_pause_game(bool unpause = true)
 {
 	g_pause_menu_schedule = true;
+	// If any one external_pause_game call has unpause=false, remove the flag
+	if (!unpause)
+		g_pause_menu_unpause = false;
 }
 #endif

@@ -14,10 +14,10 @@ fi
 
 rm -rf libcurl
 
-cd libcurl-src
+INCLUDE_DIRS="-I$(pwd)/nghttp2/include"
+LIBRARY_DIRS="-L$(pwd)/nghttp2"
 
-INCLUDE_DIRS="-I$(pwd)/../nghttp2/include"
-LIBRARY_DIRS="-L$(pwd)/../nghttp2"
+cd libcurl-src
 
 CFLAGS="$INCLUDE_DIRS $LIBRARY_DIRS $CFLAGS $OSX_FLAGS $OSX_ARCH" \
 ./configure --host=arm-apple-darwin --prefix=/ --disable-shared --enable-static \
