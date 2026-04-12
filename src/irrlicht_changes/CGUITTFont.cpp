@@ -232,9 +232,11 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	FT_Glyph glyph = nullptr;
 	FT_Bitmap bits;
+#ifdef USE_CAIRO
 	cairo_surface_t *cairo_surface = nullptr;
 	cairo_t *cairo = nullptr;
 	cairo_font_face_t *cairo_font_face = nullptr;
+#endif
 
 	FT_GlyphSlot glyph_slot = face->glyph;
 	if (!FT_HAS_COLOR(face)) {
@@ -396,11 +398,13 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
 	surface = createGlyphImage(face, bits, driver, color);
 
+#ifdef USE_CAIRO
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
 		cairo_font_face_destroy(cairo_font_face);
 		cairo_destroy(cairo);
 		cairo_surface_destroy(cairo_surface);
 	}
+#endif
 
 	if (glyph)
 		FT_Done_Glyph(glyph);
@@ -801,6 +805,7 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (FT_Load_Glyph(face, char_index, flags) != FT_Err_Ok)
 		return false;
 
+#ifdef USE_CAIRO
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
 		cairo_surface_t* cairo_surface = cairo_image_surface_create(
 				CAIRO_FORMAT_ARGB32, size * 1.5f, size * 1.5f);
@@ -840,6 +845,7 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 			return false;
 
 	} else {
+#endif
 		FT_GlyphSlot glyph = face->glyph;
 		FT_Bitmap bits = glyph->bitmap;
 
@@ -852,7 +858,9 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 		if (!FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_MONO &&
 				bits.pixel_mode != FT_PIXEL_MODE_GRAY)
 			return false;
+#ifdef USE_CAIRO
 	}
+#endif
 
 	return true;
 }

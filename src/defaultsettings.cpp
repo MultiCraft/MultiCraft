@@ -324,7 +324,7 @@ void set_default_settings()
 		"/system/fonts/NotoColorEmojiLegacy.ttf,"
 		"/system/fonts/NotoColorEmoji.ttf,";
 	emoji_fonts += porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
-	emoji_flags_font = "/system/fonts/NotoColorEmojiFlags.ttf"
+	emoji_flags_font = "/system/fonts/NotoColorEmojiFlags.ttf";
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	emoji_fonts = "/System/Library/Fonts/Apple Color Emoji.ttc";
 #else
