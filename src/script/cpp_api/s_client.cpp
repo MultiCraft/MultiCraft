@@ -136,7 +136,7 @@ void ScriptApiClient::environment_step(float dtime)
 	}
 }
 
-void ScriptApiClient::on_formspec_input(const std::string &formname,
+bool ScriptApiClient::on_formspec_input(const std::string &formname,
 	const StringMap &fields)
 {
 	SCRIPTAPI_PRECHECKHEADER
@@ -158,6 +158,7 @@ void ScriptApiClient::on_formspec_input(const std::string &formname,
 		lua_settable(L, -3);
 	}
 	runCallbacks(2, RUN_CALLBACKS_MODE_OR_SC);
+	return readParam<bool>(L, -1);
 }
 
 bool ScriptApiClient::on_dignode(v3s16 p, MapNode node)
@@ -250,6 +251,16 @@ bool ScriptApiClient::on_inventory_open(Inventory *inventory)
 	}
 
 	runCallbacks(1, RUN_CALLBACKS_MODE_OR);
+	return readParam<bool>(L, -1);
+}
+
+bool ScriptApiClient::on_pause_menu_open()
+{
+	SCRIPTAPI_PRECHECKHEADER
+
+	lua_getglobal(L, "core");
+	lua_getfield(L, -1, "registered_on_pause_menu_open");
+	runCallbacks(0, RUN_CALLBACKS_MODE_OR);
 	return readParam<bool>(L, -1);
 }
 

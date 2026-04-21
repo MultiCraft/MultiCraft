@@ -145,26 +145,8 @@ struct LocalFormspecHandler : public TextDest
 	void gotText(const StringMap &fields)
 	{
 		if (m_formname == "MT_PAUSE_MENU") {
-			if (fields.find("btn_sound") != fields.end()) {
-				g_gamecallback->changeVolume();
-				return;
-			}
-
-			if (fields.find("btn_key_config") != fields.end()) {
-				g_gamecallback->keyConfig();
-				return;
-			}
-
-			if (fields.find("btn_key_touchscreen_edit") != fields.end()) {
-#ifdef HAVE_TOUCHSCREENGUI
-				if (g_touchscreengui) {
-					g_touchscreengui->openEditor();
-					g_touchscreengui->show();
-				}
-#endif
-				return;
-			}
-
+			// The exit buttons bypass CSMs in case a broken CSM always returns
+			// true on any kind of formspec input
 			if (fields.find("btn_exit_menu") != fields.end()) {
 				g_gamecallback->disconnect();
 				return;
@@ -177,13 +159,6 @@ struct LocalFormspecHandler : public TextDest
 #endif
 				return;
 			}
-
-			if (fields.find("btn_change_password") != fields.end()) {
-				g_gamecallback->changePassword();
-				return;
-			}
-
-			return;
 		}
 
 		if (m_formname == "MT_CHANGE_PW") {
@@ -209,7 +184,8 @@ struct LocalFormspecHandler : public TextDest
 
 		if (m_client->modsLoaded()) {
 			try {
-				m_client->getScript()->on_formspec_input(m_formname, fields);
+				if (m_client->getScript()->on_formspec_input(m_formname, fields))
+					return;
 			} catch (LuaError &e) {
 				const std::string error_message = std::string("LuaError: ") + e.what() +
 						strgettext("\nCheck debug.txt for details.");
@@ -217,6 +193,34 @@ struct LocalFormspecHandler : public TextDest
 #ifdef __ANDROID__
 				porting::handleError("LuaError (on_formspec_input)", error_message);
 #endif
+			}
+		}
+
+		// Pause menu buttons that can be intercepted by CSMs
+		if (m_formname == "MT_PAUSE_MENU") {
+			if (fields.find("btn_sound") != fields.end()) {
+				g_gamecallback->changeVolume();
+				return;
+			}
+
+			if (fields.find("btn_key_config") != fields.end()) {
+				g_gamecallback->keyConfig();
+				return;
+			}
+
+			if (fields.find("btn_key_touchscreen_edit") != fields.end()) {
+#ifdef HAVE_TOUCHSCREENGUI
+				if (g_touchscreengui) {
+					g_touchscreengui->openEditor();
+					g_touchscreengui->show();
+				}
+#endif
+				return;
+			}
+
+			if (fields.find("btn_change_password") != fields.end()) {
+				g_gamecallback->changePassword();
+				return;
 			}
 		}
 	}
@@ -2865,11 +2869,21 @@ void Game::handleClientEvent_ShowFormSpec(ClientEvent *event, CameraOrientation 
 
 void Game::handleClientEvent_ShowLocalFormSpec(ClientEvent *event, CameraOrientation *cam)
 {
-	FormspecFormSource *fs_src = new FormspecFormSource(*event->show_formspec.formspec);
-	LocalFormspecHandler *txt_dst =
-		new LocalFormspecHandler(*event->show_formspec.formname, client);
-	GUIFormSpecMenu::create(m_game_ui->getFormspecGUI(), client, &input->joystick,
-			fs_src, txt_dst, client->getFormspecPrepend(), sound);
+	if (event->show_formspec.formspec->empty()) {
+		auto formspec = m_game_ui->getFormspecGUI();
+		if (formspec && (event->show_formspec.formname->empty()
+				|| *(event->show_formspec.formname) == m_game_ui->getFormspecName())) {
+			formspec->quitMenu();
+		}
+	} else {
+		FormspecFormSource *fs_src = new FormspecFormSource(*event->show_formspec.formspec);
+		LocalFormspecHandler *txt_dst =
+			new LocalFormspecHandler(*event->show_formspec.formname, client);
+
+		auto *&formspec = m_game_ui->updateFormspec(*(event->show_formspec.formname));
+		GUIFormSpecMenu::create(formspec, client, &input->joystick,
+				fs_src, txt_dst, client->getFormspecPrepend(), sound);
+	}
 
 	delete event->show_formspec.formspec;
 	delete event->show_formspec.formname;
@@ -4687,14 +4701,18 @@ void Game::showPauseMenu()
 	/* Create menu */
 	/* Note: FormspecFormSource and LocalFormspecHandler  *
 	 * are deleted by guiFormSpecMenu                     */
-	FormspecFormSource *fs_src = new FormspecFormSource(os.str());
-	LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU");
 
 	auto *&formspec = m_game_ui->getFormspecGUI();
-	GUIFormSpecMenu::create(formspec, client, &input->joystick,
-			fs_src, txt_dst, client->getFormspecPrepend(), sound);
-	formspec->setFocus("btn_continue");
-	formspec->doPause = true;
+	if (!client->modsLoaded() || !client->getScript()->on_pause_menu_open()) {
+		FormspecFormSource *fs_src = new FormspecFormSource(os.str());
+		LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU");
+
+		GUIFormSpecMenu::create(formspec, client, &input->joystick,
+				fs_src, txt_dst, client->getFormspecPrepend(), sound);
+		formspec->setFocus("btn_continue");
+	}
+	if (formspec != nullptr)
+		formspec->doPause = true;
 
 	if (simple_singleplayer_mode)
 		pauseAnimation();
