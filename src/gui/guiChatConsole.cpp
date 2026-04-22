@@ -607,7 +607,7 @@ void GUIChatConsole::drawPrompt()
 		core::rect<s32> text_rect = getPromptTextRect();
 		text_rect.UpperLeftCorner.X += charcursorpos;
 
-		const s32 cursor_width = 1;
+		const s32 cursor_width = 1 * m_font->getDisplayDensity();
 		const s32 cursor_height = m_font->getDimension(L"|").Height;
 		const s32 center_y = text_rect.getCenter().Y;
 
@@ -616,7 +616,7 @@ void GUIChatConsole::drawPrompt()
 				center_y - cursor_height / 2,
 				text_rect.UpperLeftCorner.X + cursor_width,
 				center_y + cursor_height / 2);
-		
+
 		skin->draw2DRectangle(this, video::SColor(255, 255, 255, 255), cursor_rect, &local_clip_rect);
 	}
 }
