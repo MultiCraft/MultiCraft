@@ -813,6 +813,10 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 		cairo_font_face_t* cairo_face =
 				cairo_ft_font_face_create_for_ft_face(face, 0);
 
+		cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cairo);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+
 		cairo_set_font_face(cairo, cairo_face);
 		cairo_set_font_size(cairo, size);
 
