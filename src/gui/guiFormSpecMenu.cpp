@@ -2896,6 +2896,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 			data->current_parent, rect, spec.fid);
 
 	auto meshnode = e->setMesh(mesh);
+	mesh->drop();
 
 	for (u32 i = 0; i < textures.size() && i < meshnode->getMaterialCount(); ++i)
 		e->setTexture(i, m_tsrc->getTexture(unescape_string(textures[i])));
