@@ -62,7 +62,7 @@ struct SGUITTFace : public virtual irr::IReferenceCounted
 
 // Static variables.
 FT_Library CGUITTFont::c_library;
-FT_Stroker CGUITTFont::stroker;
+FT_Stroker CGUITTFont::stroker = nullptr;
 core::map<io::path, SGUITTFace*> CGUITTFont::c_faces;
 bool CGUITTFont::c_libraryLoaded = false;
 scene::IMesh* CGUITTFont::shared_plane_ptr_ = 0;
@@ -295,7 +295,7 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 						2 << 16);
 			}
 
-			FT_Glyph_Stroke(&glyph, stroker, 0);
+			FT_Glyph_Stroke(&glyph, stroker, 1);
 		}
 
 		FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
@@ -432,7 +432,8 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 		c_libraryLoaded = true;
 	}
 
-	FT_Stroker_New(c_library, &stroker);
+	if (!stroker)
+		FT_Stroker_New(c_library, &stroker);
 
 	CGUITTFont* font = new CGUITTFont(env);
 
@@ -503,6 +504,7 @@ CGUITTFont::~CGUITTFont()
 			if (c_faces.size() == 0)
 			{
 				FT_Stroker_Done(stroker);
+				stroker = nullptr;
 
 				FT_Done_FreeType(c_library);
 				c_libraryLoaded = false;
