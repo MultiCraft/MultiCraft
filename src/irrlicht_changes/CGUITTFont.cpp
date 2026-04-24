@@ -851,6 +851,11 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	} else {
 #endif
 		FT_GlyphSlot glyph = face->glyph;
+
+		if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
+			FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
+		}
+
 		FT_Bitmap bits = glyph->bitmap;
 
 		if (bits.rows < 1 || bits.width < 1)
