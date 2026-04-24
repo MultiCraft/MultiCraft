@@ -37,8 +37,6 @@ public:
 	ScrollSwipe(gui::IGUIEnvironment *env, gui::IGUIElement *parent,
 			OrientationEnum orientation);
 
-	~ScrollSwipe();
-
 	void calculateCoastingVelocity();
 	void updateScrollCoasting();
 	bool onEvent(const SEvent &event);

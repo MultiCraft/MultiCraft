@@ -115,6 +115,12 @@ GUITable::GUITable(gui::IGUIEnvironment *env, gui::IGUIElement* parent, s32 id,
 
 GUITable::~GUITable()
 {
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	delete m_scroll_swipe;
+#endif
+#endif
+
 	for (GUITable::Row &row : m_rows)
 		delete[] row.cells;
 
