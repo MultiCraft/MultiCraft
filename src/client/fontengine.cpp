@@ -325,10 +325,11 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 			setting_suffix.append("_italic");
 	}
 
-	u32 size = std::max(std::floor(RenderingEngine::getDisplayDensity() *
-			g_settings->getFloat("gui_scaling") * spec.size), 1.0f);
+	f32 size_factor = RenderingEngine::getDisplayDensity() *
+			g_settings->getFloat("gui_scaling");
+	u32 size = std::max(std::floor(size_factor * spec.size), 1.0f);
 
-	u16 outline = spec.outline;
+	u16 outline = spec.outline * size_factor;
 	u8 outline_type = spec.outline_type;
 	s8 character_spacing = spec.character_spacing;
 
@@ -358,10 +359,21 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	std::string emoji_flags_font_path = g_settings->get("emoji_flags_font_path");
 
 #if USE_FREETYPE
+	gui::CGUITTFont::FontSettings font_settings;
+	font_settings.use_monochrome = false;
+	font_settings.use_transparency = true;
+	font_settings.bold = bold;
+	font_settings.italic = italic;
+	font_settings.outline = outline;
+	font_settings.outline_type = outline_type;
+	font_settings.character_spacing = character_spacing;
+	font_settings.shadow_offset = font_shadow;
+	font_settings.shadow_alpha = font_shadow_alpha;
+	font_settings.density = RenderingEngine::getDisplayDensity();
+
 	for (const std::string &font_path : fallback_settings) {
 		irr::gui::CGUITTFont *font = gui::CGUITTFont::createTTFont(m_env,
-				font_path.c_str(), size, true, true, bold, italic, outline,
-				outline_type, character_spacing, font_shadow, font_shadow_alpha);
+				font_path.c_str(), size, font_settings);
 
 		if (font) {
 			std::vector<std::string> emoji_paths = split(emoji_font_path, ',');

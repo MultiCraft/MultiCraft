@@ -1213,30 +1213,34 @@ void GUIHyperText::draw()
 
 	// Text
 	m_display_text_rect = AbsoluteRect;
-	m_drawer.place(m_display_text_rect);
+	if (!m_placed) {
+		m_placed = true;
+		m_drawer.place(m_display_text_rect);
 
-	// Show a scrollbar if the text overflows vertically
-	if (m_drawer.getHeight() > m_display_text_rect.getHeight()) {
-		// Showing a scrollbar will reduce the width of the viewport, causing
-		// more text to be wrapped and thus increasing the height of the text.
-		// Therefore, we have to re-layout the text *before* setting the height
-		// of the scrollbar.
-		core::rect<s32> smaller_rect = m_display_text_rect;
-		smaller_rect.LowerRightCorner.X -= m_scrollbar_width;
-		m_drawer.place(smaller_rect);
+		// Show a scrollbar if the text overflows vertically
+		if (m_drawer.getHeight() > m_display_text_rect.getHeight()) {
+			// Showing a scrollbar will reduce the width of the viewport, causing
+			// more text to be wrapped and thus increasing the height of the text.
+			// Therefore, we have to re-layout the text *before* setting the height
+			// of the scrollbar.
+			core::rect<s32> smaller_rect = m_display_text_rect;
+			smaller_rect.LowerRightCorner.X -= m_scrollbar_width;
+			m_drawer.place(smaller_rect);
 
-		m_vscrollbar->setSmallStep(m_display_text_rect.getHeight() * 0.1f);
-		m_vscrollbar->setLargeStep(m_display_text_rect.getHeight() * 0.5f);
-		m_vscrollbar->setMax(m_drawer.getHeight() - m_display_text_rect.getHeight());
+			m_vscrollbar->setSmallStep(m_display_text_rect.getHeight() * 0.1f);
+			m_vscrollbar->setLargeStep(m_display_text_rect.getHeight() * 0.5f);
+			m_vscrollbar->setMax(m_drawer.getHeight() - m_display_text_rect.getHeight());
 
-		m_vscrollbar->setVisible(true);
+			m_vscrollbar->setVisible(true);
 
-		m_vscrollbar->setPageSize(s32(m_drawer.getHeight()));
-	} else {
-		m_vscrollbar->setMax(0);
-		m_vscrollbar->setPos(0);
-		m_vscrollbar->setVisible(false);
+			m_vscrollbar->setPageSize(s32(m_drawer.getHeight()));
+		} else {
+			m_vscrollbar->setMax(0);
+			m_vscrollbar->setPos(0);
+			m_vscrollbar->setVisible(false);
+		}
 	}
+
 	m_drawer.draw(AbsoluteClippingRect,
 			m_display_text_rect.UpperLeftCorner + m_text_scrollpos);
 

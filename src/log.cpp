@@ -108,7 +108,6 @@ std::ostream verbosestream(&verbose_buf);
 
 // Android
 #ifdef __ANDROID__
-
 static unsigned int g_level_to_android[] = {
 	ANDROID_LOG_INFO,     // LL_NONE
 	//ANDROID_LOG_FATAL,
@@ -122,14 +121,8 @@ static unsigned int g_level_to_android[] = {
 
 class AndroidSystemLogOutput : public ICombinedLogOutput {
 	public:
-		AndroidSystemLogOutput()
-		{
-			g_logger.addOutput(this);
-		}
-		~AndroidSystemLogOutput()
-		{
-			g_logger.removeOutput(this);
-		}
+		AndroidSystemLogOutput() = default;
+		~AndroidSystemLogOutput() = default;
 		void logRaw(LogLevel lev, const std::string &line)
 		{
 			STATIC_ASSERT(ARRLEN(g_level_to_android) == LL_MAX,
@@ -139,8 +132,23 @@ class AndroidSystemLogOutput : public ICombinedLogOutput {
 		}
 };
 
-AndroidSystemLogOutput g_android_log_output;
+static AndroidSystemLogOutput g_android_log_output;
 
+struct AndroidLogInit {
+	AndroidLogInit() {
+		g_logger.removeOutput(&g_android_log_output);
+
+#ifdef NDEBUG
+		g_logger.addOutputMaxLevel(&g_android_log_output, LL_ACTION);
+		g_logger.setLevelSilenced(LL_INFO, true);
+		g_logger.setLevelSilenced(LL_VERBOSE, true);
+#else
+		g_logger.addOutputMaxLevel(&g_android_log_output, LL_INFO);
+#endif
+	}
+};
+
+static AndroidLogInit g_android_log_init;
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////

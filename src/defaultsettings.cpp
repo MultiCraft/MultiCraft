@@ -319,21 +319,25 @@ void set_default_settings()
 
 	std::string emoji_fonts;
 	std::string emoji_flags_font;
+	std::string fallback_font;
 #ifdef __ANDROID__
 	emoji_fonts = "/system/fonts/SamsungColorEmoji.ttf,"
 		"/system/fonts/NotoColorEmojiLegacy.ttf,"
 		"/system/fonts/NotoColorEmoji.ttf,";
 	emoji_fonts += porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
 	emoji_flags_font = "/system/fonts/NotoColorEmojiFlags.ttf";
+	fallback_font = porting::getDataPath("fonts" DIR_DELIM "DroidSansFallback.ttf");
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
 	emoji_fonts = "/System/Library/Fonts/Apple Color Emoji.ttc";
+	fallback_font = "/System/Library/Fonts/Helvetica.ttc";
 #else
 	emoji_fonts = porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
+	fallback_font = porting::getDataPath("fonts" DIR_DELIM "DroidSansFallback.ttf");
 #endif
 	settings->setDefault("emoji_font_path", emoji_fonts);
 	settings->setDefault("emoji_flags_font_path", emoji_flags_font);
 
-	settings->setDefault("fallback_font_path", porting::getDataPath("fonts" DIR_DELIM "DroidSansFallback.ttf"));
+	settings->setDefault("fallback_font_path", fallback_font);
 
 	settings->setDefault("fallback_font_shadow", "1");
 	settings->setDefault("fallback_font_shadow_alpha", "128");

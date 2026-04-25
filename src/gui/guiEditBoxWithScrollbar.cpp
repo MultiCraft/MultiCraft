@@ -231,7 +231,7 @@ void GUIEditBoxWithScrollBar::draw()
 				setTextRect(cursor_line);
 				m_current_text_rect.UpperLeftCorner.X += charcursorpos;
 
-				const s32 cursor_width = 1;
+				const s32 cursor_width = 1 * font->getDisplayDensity();
 				const s32 cursor_height = font->getDimension(L"|").Height;
 				const s32 center_y = m_current_text_rect.getCenter().Y;
 
@@ -240,7 +240,7 @@ void GUIEditBoxWithScrollBar::draw()
 						center_y - cursor_height / 2,
 						m_current_text_rect.UpperLeftCorner.X + cursor_width,
 						center_y + cursor_height / 2);
-				
+
 				video::SColor cursor_color = m_override_color_enabled ?
 						m_override_color : skin->getColor(EGDC_BUTTON_TEXT);
 				skin->draw2DRectangle(this, cursor_color, cursor_rect, &local_clip_rect);
