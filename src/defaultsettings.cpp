@@ -323,8 +323,7 @@ void set_default_settings()
 #ifdef __ANDROID__
 	emoji_fonts = "/system/fonts/SamsungColorEmoji.ttf,"
 		"/system/fonts/NotoColorEmojiLegacy.ttf,"
-		"/system/fonts/NotoColorEmoji.ttf,";
-	emoji_fonts += porting::getDataPath("fonts" DIR_DELIM "OpenMoji.ttf");
+		"/system/fonts/NotoColorEmoji.ttf";
 	emoji_flags_font = "/system/fonts/NotoColorEmojiFlags.ttf";
 	fallback_font = porting::getDataPath("fonts" DIR_DELIM "DroidSansFallback.ttf");
 #elif defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
