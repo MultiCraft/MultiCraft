@@ -67,6 +67,8 @@ void ScriptApiHelper::process_update_notifications()
 				case ScriptingType::Client:
 					source = "client";
 					break;
+				default:
+					break;
 				}
 				lua_pushlstring(L, source.c_str(), source.size());
 				runCallbacks(3, RUN_CALLBACKS_MODE_OR_SC);
