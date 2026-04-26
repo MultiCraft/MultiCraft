@@ -4432,6 +4432,7 @@ void Game::readSettings()
 	else
 		m_cache_cam_smoothing = 1 - g_settings->getFloat("camera_smoothing");
 
+	m_repeat_place_time = rangelim(m_repeat_place_time, 0.01f, 0.25f);
 	m_cache_fog_start = rangelim(m_cache_fog_start, 0.0f, 0.99f);
 	m_cache_cam_smoothing = rangelim(m_cache_cam_smoothing, 0.01f, 1.0f);
 	m_cache_mouse_sensitivity = rangelim(m_cache_mouse_sensitivity, 0.001, 100.0);
