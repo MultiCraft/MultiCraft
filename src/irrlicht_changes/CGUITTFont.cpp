@@ -232,6 +232,11 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	FT_Glyph glyph = nullptr;
 	FT_Bitmap bits;
+#ifdef USE_CAIRO
+	cairo_surface_t *cairo_surface = nullptr;
+	cairo_t *cairo = nullptr;
+	cairo_font_face_t *cairo_font_face = nullptr;
+#endif
 
 	FT_GlyphSlot glyph_slot = face->glyph;
 	if (!FT_HAS_COLOR(face)) {
@@ -301,21 +306,56 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
 		FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
 		bits = bitmap_glyph->bitmap;
-		offset = core::vector2di(bitmap_glyph->left * scale, bitmap_glyph->top * scale);
-	} else {
-		if (face->num_fixed_sizes == 0)
-			FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
+		offset = core::vector2di(glyph_slot->bitmap_left * scale,
+				glyph_slot->bitmap_top * scale);
 
+	} else if (face->num_fixed_sizes > 0) {
 		bits = glyph_slot->bitmap;
-		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
-	}
-
-	// Setup the glyph information here:
-	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		int bitmap_top = parent->getColorEmojiOffset();
 		offset = core::vector2di(glyph_slot->bitmap_left * scale, bitmap_top);
+
 	} else {
-		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
+#ifdef USE_CAIRO
+		cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+				font_size * 1.5f, font_size * 1.5f);
+
+		cairo = cairo_create(cairo_surface);
+
+		cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cairo);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+
+		cairo_font_face = cairo_ft_font_face_create_for_ft_face(face, 0);
+
+		cairo_set_font_face(cairo, cairo_font_face);
+		cairo_set_font_size(cairo, font_size);
+
+		cairo_glyph_t cairo_glyph;
+		cairo_glyph.index = char_index;
+		cairo_glyph.x = 0;
+		cairo_glyph.y = font_size;
+
+		cairo_show_glyphs(cairo, &cairo_glyph, 1);
+		cairo_surface_flush(cairo_surface);
+
+		unsigned char* data = cairo_image_surface_get_data(cairo_surface);
+		int stride = cairo_image_surface_get_stride(cairo_surface);
+		int w = cairo_image_surface_get_width(cairo_surface);
+		int h = cairo_image_surface_get_height(cairo_surface);
+
+		bits.width = w;
+		bits.rows = h;
+		bits.pitch = stride;
+		bits.pixel_mode = FT_PIXEL_MODE_BGRA;
+		bits.buffer = data;
+
+		offset = core::vector2di(0, (int)(font_size));
+#else
+		FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
+		bits = glyph_slot->bitmap;
+ 		offset = core::vector2di(glyph_slot->bitmap_left * scale,
+		 		glyph_slot->bitmap_top * scale);
+#endif
 	}
 
 	// Try to get the last page with available slots.
@@ -356,6 +396,14 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
 	surface = createGlyphImage(face, bits, driver, color);
+
+#ifdef USE_CAIRO
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
+		cairo_font_face_destroy(cairo_font_face);
+		cairo_destroy(cairo);
+		cairo_surface_destroy(cairo_surface);
+	}
+#endif
 
 	if (glyph)
 		FT_Done_Glyph(glyph);
@@ -669,8 +717,15 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (!face)
 		return false;
 
-	uchar32_t smile = 0x1F600;
-	u32 char_index = FT_Get_Char_Index(face, smile);
+	uchar32_t emojis_to_test[] = { 0x1F600, 0x1F1FA, 0x1F3F4 };
+
+	u32 char_index = 0;
+	for (uchar32_t emoji : emojis_to_test) {
+		char_index = FT_Get_Char_Index(face, emoji);
+
+		if (char_index != 0)
+			break;
+	}
 
 	if (char_index == 0)
 		return false;
@@ -691,23 +746,70 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (FT_Load_Glyph(face, char_index, flags) != FT_Err_Ok)
 		return false;
 
-	FT_GlyphSlot glyph = face->glyph;
-
+#ifdef USE_CAIRO
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
-		FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
+		cairo_surface_t* cairo_surface = cairo_image_surface_create(
+				CAIRO_FORMAT_ARGB32, size * 1.5f, size * 1.5f);
+		cairo_t* cairo = cairo_create(cairo_surface);
+		cairo_font_face_t* cairo_face =
+				cairo_ft_font_face_create_for_ft_face(face, 0);
+
+		cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cairo);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+
+		cairo_set_font_face(cairo, cairo_face);
+		cairo_set_font_size(cairo, size);
+
+		cairo_glyph_t cairo_glyph;
+		cairo_glyph.index = char_index;
+		cairo_glyph.x = 0;
+		cairo_glyph.y = size;
+
+		cairo_show_glyphs(cairo, &cairo_glyph, 1);
+		cairo_surface_flush(cairo_surface);
+
+		unsigned char *data = cairo_image_surface_get_data(cairo_surface);
+		int stride = cairo_image_surface_get_stride(cairo_surface);
+		bool has_pixels = false;
+
+		u32* pixels = (u32*)data;
+		int buffer_size = stride/4 * size;
+		for (int i = 0; i < buffer_size; i++) {
+			if ((pixels[i] >> 24) > 0) {
+				has_pixels = true;
+				break;
+			}
+		}
+
+		cairo_font_face_destroy(cairo_face);
+		cairo_destroy(cairo);
+		cairo_surface_destroy(cairo_surface);
+
+		if (!has_pixels)
+			return false;
+
+	} else {
+#endif
+		FT_GlyphSlot glyph = face->glyph;
+
+		if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0)
+			FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
+
+		FT_Bitmap bits = glyph->bitmap;
+
+		if (bits.rows < 1 || bits.width < 1)
+			return false;
+
+		if (FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_BGRA)
+			return false;
+
+		if (!FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_MONO &&
+				bits.pixel_mode != FT_PIXEL_MODE_GRAY)
+			return false;
+#ifdef USE_CAIRO
 	}
-
-	FT_Bitmap bits = glyph->bitmap;
-
-	if (bits.rows < 1 || bits.width < 1)
-		return false;
-
-	if (FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_BGRA)
-		return false;
-
-	if (!FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_MONO &&
-			bits.pixel_mode != FT_PIXEL_MODE_GRAY)
-		return false;
+#endif
 
 	return true;
 }

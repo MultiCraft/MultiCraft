@@ -356,6 +356,7 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	};
 
 	std::string emoji_font_path = g_settings->get("emoji_font_path");
+	std::string emoji_flags_font_path = g_settings->get("emoji_flags_font_path");
 
 #if USE_FREETYPE
 	gui::CGUITTFont::FontSettings font_settings;
@@ -386,6 +387,9 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 						break;
 				}
 			}
+
+			if (!emoji_flags_font_path.empty() && fs::PathExists(emoji_flags_font_path))
+				font->loadAdditionalFont(emoji_flags_font_path.c_str(), true);
 
 			if (font_path != fallback_font_path)
 				font->loadAdditionalFont(fallback_font_path.c_str(), false);
