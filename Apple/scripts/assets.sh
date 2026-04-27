@@ -15,6 +15,5 @@ if $ALL_FONTS
 then
 	cp ../fonts/*.ttf $DEST/fonts/
 else
-	cp ../fonts/DroidSansFallback.ttf $DEST/fonts/
 	cp ../fonts/MultiCraftFont.ttf $DEST/fonts/
 fi

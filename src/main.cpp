@@ -142,6 +142,8 @@ int main(int argc, char *argv[])
 	g_logger.registerThread("Main");
 #ifdef NDEBUG
 	g_logger.addOutputMaxLevel(&stderr_output, LL_ACTION);
+	g_logger.setLevelSilenced(LL_INFO, true);
+	g_logger.setLevelSilenced(LL_VERBOSE, true);
 #else
 	g_logger.addOutputMaxLevel(&stderr_output, LL_INFO);
 #endif
