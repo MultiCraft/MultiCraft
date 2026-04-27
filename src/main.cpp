@@ -47,7 +47,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/clientlauncher.h"
 #include "gui/guiEngine.h"
 #include "gui/mainmenumanager.h"
-#include "script/scripting_helper.h"
 #include "translation.h"
 #endif
 #ifdef HAVE_TOUCHSCREENGUI
@@ -256,10 +255,6 @@ int main(int argc, char *argv[])
 		g_settings->updateConfigFile(g_settings_path.c_str());
 
 	print_modified_quicktune_values();
-
-#ifndef SERVER
-	delete g_helper_script;
-#endif
 
 	// Stop httpfetch thread (if started)
 	httpfetch_cleanup();
@@ -550,10 +545,6 @@ static bool init_common(const Settings &cmd_args, int argc, char *argv[])
 		g_settings->get("language"), argc, argv);
 #if !defined(_MSC_VER) && !defined(SERVER)
 	g_settings->registerChangedCallback("language", language_setting_changed, nullptr);
-#endif
-
-#ifndef SERVER
-	g_helper_script = new HelperScripting();
 #endif
 
 	return true;
