@@ -6,6 +6,7 @@ local function make_registration()
     return t, registerfunc
 end
 
+core.registered_globalsteps, core.register_globalstep = make_registration()
 core.registered_on_update, core.register_on_update = make_registration()
 
 function core.update_handler(...)
@@ -13,3 +14,45 @@ function core.update_handler(...)
         func(...)
     end
 end
+
+function core.run_callbacks(callbacks, mode, ...)
+	assert(type(callbacks) == "table")
+	local cb_len = #callbacks
+	if cb_len == 0 then
+		if mode == 2 or mode == 3 then
+			return true
+		elseif mode == 4 or mode == 5 then
+			return false
+		end
+	end
+	local ret = nil
+	for i = 1, cb_len do
+		local cb_ret = callbacks[i](...)
+
+		if mode == 0 and i == 1 then
+			ret = cb_ret
+		elseif mode == 1 and i == cb_len then
+			ret = cb_ret
+		elseif mode == 2 then
+			if not cb_ret or i == 1 then
+				ret = cb_ret
+			end
+		elseif mode == 3 then
+			if cb_ret then
+				return cb_ret
+			end
+			ret = cb_ret
+		elseif mode == 4 then
+			if (cb_ret and not ret) or i == 1 then
+				ret = cb_ret
+			end
+		elseif mode == 5 and cb_ret then
+			return cb_ret
+		end
+	end
+	return ret
+end
+
+-- These are for after.lua since they make no sense for the main menu code
+function core.get_last_run_mod() end
+function core.set_last_run_mod() end
