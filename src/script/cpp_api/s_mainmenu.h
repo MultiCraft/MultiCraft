@@ -44,4 +44,5 @@ public:
 	void handleMainMenuButtons(const StringMap &fields);
 
 	void handleUpdate(const std::string &key, const std::string &value);
+	void environment_step(float dtime);
 };
