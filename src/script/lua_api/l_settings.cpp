@@ -46,7 +46,8 @@ static inline int checkSettingSecurity(lua_State* L, const std::string &name)
 
 	bool is_mainmenu = false;
 #ifndef SERVER
-	is_mainmenu = ModApiBase::getGuiEngine(L) != nullptr;
+	auto context = ModApiBase::getScriptApiBase(L)->getType();
+	is_mainmenu = context == ScriptingType::MainMenu || context == ScriptingType::Helper;
 #endif
 	if (!is_mainmenu && (name == "mg_name" || name == "mg_flags")) {
 		errorstream << "Tried to set global setting " << name << ", ignoring. "
@@ -58,6 +59,7 @@ static inline int checkSettingSecurity(lua_State* L, const std::string &name)
 	const char *disallowed[] = {
 		"main_menu_script", "shader_path", "texture_path", "screenshot_path",
 		"serverlist_file", "serverlist_url", "map-dir", "contentdb_url",
+		"csm_script",
 	};
 	if (!is_mainmenu) {
 		for (const char *name2 : disallowed) {

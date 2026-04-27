@@ -188,6 +188,7 @@ LOCAL_SRC_FILES := \
 	../../src/script/lua_api/l_craft.cpp           \
 	../../src/script/lua_api/l_client.cpp          \
 	../../src/script/lua_api/l_env.cpp             \
+	../../src/script/lua_api/l_helper.cpp          \
 	../../src/script/lua_api/l_http.cpp            \
 	../../src/script/lua_api/l_inventory.cpp       \
 	../../src/script/lua_api/l_item.cpp            \

@@ -59,10 +59,12 @@ extern "C" {
 	setOriginFromTableRaw(index, __FUNCTION__)
 
 enum class ScriptingType: u8 {
+	Invalid,
 	Async,
 	Client,
 	MainMenu,
-	Server
+	Server,
+	Helper,
 };
 
 class Server;

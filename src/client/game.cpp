@@ -72,6 +72,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irr_ptr.h"
 #include "version.h"
 #include "script/scripting_client.h"
+#include "script/scripting_helper.h"
 #include "hud.h"
 
 #if USE_SOUND
@@ -1166,14 +1167,6 @@ void Game::run()
 		if (!handleCallbacks())
 			break;
 
-#if defined(__ANDROID__) || defined(__APPLE__)
-		if (client->modsLoaded() && !g_menumgr.pausesGame()) {
-			std::string key, value;
-			if (GUIEngine::readUpdate(&key, &value))
-				client->getScript()->on_update(key, value);
-		}
-#endif
-
 		processQueues();
 
 		m_game_ui->clearInfoText();
@@ -1258,6 +1251,7 @@ void Game::shutdown()
 			assert(shader_src != NULL);
 			texture_src->processQueue();
 			shader_src->processQueue();
+			g_helper_script->step();
 			sleep_ms(100);
 		}
 	}

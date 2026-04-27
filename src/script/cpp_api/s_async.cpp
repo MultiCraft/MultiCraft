@@ -74,6 +74,7 @@ void AsyncEngine::registerStateInitializer(StateInitializer func)
 /******************************************************************************/
 void AsyncEngine::initialize(unsigned int numEngines)
 {
+	sanity_check(!initDone);
 	initDone = true;
 
 	for (unsigned int i = 0; i < numEngines; i++) {

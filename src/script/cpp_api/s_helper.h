@@ -1,7 +1,8 @@
 /*
-Minetest
+MultiCraft
 Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
 Copyright (C) 2017 nerzhul, Loic Blot <loic.blot@unix-experience.fr>
+Copyright (C) 2026 MultiCraft Development Team
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -21,29 +22,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #pragma once
 
 #include "cpp_api/s_base.h"
-#include "cpp_api/s_client.h"
-#include "cpp_api/s_helper.h"
-#include "cpp_api/s_modchannels.h"
-#include "cpp_api/s_security.h"
+#include "util/string.h"
 
-class Client;
-class LocalPlayer;
-class Camera;
-class Minimap;
-
-class ClientScripting:
-	virtual public ScriptApiBase,
-	public ScriptApiSecurity,
-	public ScriptApiClient,
-	public ScriptApiHelper,
-	public ScriptApiModChannels
+class ScriptApiHelper : virtual public ScriptApiBase
 {
 public:
-	ClientScripting(Client *client);
-	void on_client_ready(LocalPlayer *localplayer);
-	void on_camera_ready(Camera *camera);
-	void on_minimap_ready(Minimap *minimap);
-
-private:
-	virtual void InitializeModApi(lua_State *L, int top);
+	void process_update_notifications();
 };

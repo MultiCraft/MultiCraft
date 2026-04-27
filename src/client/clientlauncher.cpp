@@ -35,6 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "version.h"
 #include "renderingengine.h"
 #include "network/networkexceptions.h"
+#include "script/scripting_helper.h"
 
 #if USE_SOUND
 	#include "sound_openal.h"
@@ -191,6 +192,8 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 	skin->setColor(gui::EGDC_EDITABLE, video::SColor(255, 128, 128, 128));
 	skin->setColor(gui::EGDC_FOCUSED_EDITABLE, video::SColor(255, 96, 134, 49));
 #endif
+
+	g_helper_script = new HelperScripting();
 
 	// Create the menu clouds
 	if (!g_menucloudsmgr)
@@ -356,6 +359,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 	g_menucloudsmgr->drop();
 
 	delete m_shader_src;
+	delete g_helper_script;
 
 	return retval;
 }

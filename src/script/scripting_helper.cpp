@@ -1,6 +1,7 @@
 /*
-Minetest
+MultiCraft
 Copyright (C) 2013 celeron55, Perttu Ahola <celeron55@gmail.com>
+Copyright (C) 2026 MultiCraft Development Team
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -17,89 +18,85 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "scripting_mainmenu.h"
-#include "content/mods.h"
+#include "scripting_helper.h"
 #include "cpp_api/s_internal.h"
 #include "lua_api/l_base.h"
 #include "lua_api/l_helper.h"
 #include "lua_api/l_http.h"
 #include "lua_api/l_mainmenu.h"
 #include "lua_api/l_noise.h"
-#include "lua_api/l_sound.h"
 #include "lua_api/l_util.h"
 #include "lua_api/l_settings.h"
 #include "log.h"
+#include "filesys.h"
 
 extern "C" {
 #include "lualib.h"
 }
-#define MAINMENU_NUM_ASYNC_THREADS 4
+#define HELPER_NUM_ASYNC_THREADS 4
 
+// Set in main.cpp
+HelperScripting *g_helper_script = nullptr;
 
-MainMenuScripting::MainMenuScripting(GUIEngine* guiengine):
-		ScriptApiBase(ScriptingType::MainMenu)
+HelperScripting::HelperScripting() : ScriptApiBase(ScriptingType::Helper)
 {
-	setGuiEngine(guiengine);
-
 	SCRIPTAPI_PRECHECKHEADER
 
 	lua_getglobal(L, "core");
 	int top = lua_gettop(L);
-
-	lua_newtable(L);
-	lua_setglobal(L, "gamedata");
 
 	// Initialize our lua_api modules
 	initializeModApi(L, top);
 	lua_pop(L, 1);
 
 	// Push builtin initialization type
-	lua_pushstring(L, "mainmenu");
+	lua_pushstring(L, "helper");
 	lua_setglobal(L, "INIT");
 
-	infostream << "SCRIPTAPI: Initialized main menu modules" << std::endl;
+	loadScript(porting::path_share + DIR_DELIM "builtin" DIR_DELIM "init.lua");
+
+	infostream << "SCRIPTAPI: Initialized helper modules" << std::endl;
 }
 
 /******************************************************************************/
-void MainMenuScripting::initializeModApi(lua_State *L, int top)
+void HelperScripting::initializeModApi(lua_State *L, int top)
 {
 	registerLuaClasses(L, top);
 
 	// Initialize mod API modules
-	ModApiMainMenu::Initialize(L, top);
+	ModApiMainMenu::InitializeAsync(L, top);
 	ModApiUtil::InitializeMainMenu(L, top);
-	ModApiSound::Initialize(L, top);
 	ModApiHttp::Initialize(L, top);
-	ModApiHelper::InitializeClient(L, top);
+	ModApiHelper::Initialize(L, top);
 
 	asyncEngine.registerStateInitializer(registerLuaClasses);
 	asyncEngine.registerStateInitializer(ModApiMainMenu::InitializeAsync);
 	asyncEngine.registerStateInitializer(ModApiUtil::InitializeAsync);
 	asyncEngine.registerStateInitializer(ModApiHttp::InitializeAsync);
-
-	// Initialize async environment
-	//TODO possibly make number of async threads configurable
-	asyncEngine.initialize(MAINMENU_NUM_ASYNC_THREADS);
 }
 
 /******************************************************************************/
-void MainMenuScripting::registerLuaClasses(lua_State *L, int top)
+void HelperScripting::registerLuaClasses(lua_State *L, int top)
 {
 	LuaSecureRandom::Register(L);
 	LuaSettings::Register(L);
 }
 
 /******************************************************************************/
-void MainMenuScripting::step()
+void HelperScripting::step()
 {
 	asyncEngine.step(getStack());
+
 	process_update_notifications();
 }
 
 /******************************************************************************/
-unsigned int MainMenuScripting::queueAsync(const std::string &serialized_func,
-		const std::string &serialized_param)
+unsigned int HelperScripting::queueAsync(
+		const std::string &serialized_func, const std::string &serialized_param)
 {
+	// Lazily initialize async environment if/when it is needed
+	if (!asyncEngine.isInitialized())
+		asyncEngine.initialize(HELPER_NUM_ASYNC_THREADS);
+
 	return asyncEngine.queueAsyncJob(serialized_func, serialized_param);
 }
-

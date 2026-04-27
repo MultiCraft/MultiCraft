@@ -23,6 +23,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <ICameraSceneNode.h>
 #include "client/renderingengine.h"
 #include "scripting_mainmenu.h"
+#include "scripting_helper.h"
+#include "util/container.h"
 #include "util/numeric.h"
 #include "config.h"
 #include "version.h"
@@ -326,12 +328,7 @@ void GUIEngine::run()
 			sleep_ms(frametime_min);
 
 		m_script->step();
-
-#if defined(__ANDROID__) || defined(__APPLE__)
-		std::string key, value;
-		if (readUpdate(&key, &value))
-			m_script->handleUpdate(key, value);
-#endif
+		g_helper_script->step();
 
 		// Update sound volume
 		// Note when rebasing onto MT 5.9.0+: This code can be removed since
@@ -679,28 +676,17 @@ unsigned int GUIEngine::queueAsync(const std::string &serialized_func,
 
 
 /******************************************************************************/
-#if defined(__ANDROID__) || defined(__APPLE__)
-static std::mutex g_update_mutex;
-static std::string g_update_key;
-static std::string g_update_value;
+#if 1
+static MutexedQueue<std::tuple<std::string, std::string>> g_update_queue;
 
 extern "C" void external_update(const char *key, const char *value)
 {
-	MutexAutoLock lock(g_update_mutex);
-	g_update_key = key;
-	g_update_value = value;
+	g_update_queue.push_back({key, value});
 }
 
 bool GUIEngine::readUpdate(std::string *key_to, std::string *value_to)
 {
-	MutexAutoLock lock(g_update_mutex);
-	if (g_update_key.empty())
-		return false;
-
-	*key_to = g_update_key;
-	*value_to = g_update_value;
-	g_update_key.clear();
-	g_update_value.clear();
-	return true;
+	std::tie(*key_to, *value_to) = g_update_queue.pop_frontNoEx(0);
+	return !key_to->empty();
 }
 #endif
