@@ -350,7 +350,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		bits.buffer = data;
 
 		offset = core::vector2di(0, (int)(font_size));
-
 #else
 		FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
 		bits = glyph_slot->bitmap;
@@ -794,9 +793,8 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 #endif
 		FT_GlyphSlot glyph = face->glyph;
 
-		if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
+		if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0)
 			FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
-		}
 
 		FT_Bitmap bits = glyph->bitmap;
 

@@ -388,10 +388,8 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				}
 			}
 
-			if (!emoji_flags_font_path.empty() &&
-					fs::PathExists(emoji_flags_font_path)) {
+			if (!emoji_flags_font_path.empty() && fs::PathExists(emoji_flags_font_path))
 				font->loadAdditionalFont(emoji_flags_font_path.c_str(), true);
-			}
 
 			if (font_path != fallback_font_path)
 				font->loadAdditionalFont(fallback_font_path.c_str(), false);
