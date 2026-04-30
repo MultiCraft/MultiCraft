@@ -11,9 +11,22 @@ MultiCraft is based on the Minetest project, which is developed by a [number of 
 
 Copyright © 2014-2023 Maksim Gamarnik [MoNTE48] <Maksym48@pm.me> & MultiCraft Development Team.
 
-[![License](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg)](https://jb.gg/OpenSourceSupport)
+<table>
+  <tr>
+	<td align="left">
+	  <a href="https://jb.gg/OpenSourceSupport">
+		<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" height="160" width="160">
+	  </a>
+	</td>
+	<td align="right">
+	  <a href="https://talsec.app/">
+		<img src="https://cdn.prod.website-files.com/5f6c9afa297e5fa91a7201da/66f14dc0fe151b7e46ffefc2_Talsec_logo.svg" height="180" width="180">
+	  </a>
+	</td>
+  </tr>
+</table>
 
-Special thanks to JetBrains for their support of our community!
+Special thanks to JetBrains and Talsec for their support of our community!
 
 Table of Contents
 ------------------
