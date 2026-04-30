@@ -215,33 +215,39 @@ void RenderingEngine::setResizable(bool resize)
 
 bool RenderingEngine::print_video_modes()
 {
-	IrrlichtDevice *nulldevice;
+	IrrlichtDevice *device = RenderingEngine::get_raw_device();
+	MyEventReceiver *receiver = nullptr;
+	bool is_null_device = false;
 
-	bool vsync = g_settings->getBool("vsync");
-	u16 fsaa = g_settings->getU16("fsaa");
-	MyEventReceiver *receiver = new MyEventReceiver();
+	if (!device) {
+		is_null_device = true;
 
-	SIrrlichtCreationParameters params = SIrrlichtCreationParameters();
-	params.DriverType = video::EDT_NULL;
-	params.WindowSize = core::dimension2d<u32>(640, 480);
-	params.Bits = 24;
-	params.AntiAlias = fsaa;
-	params.Fullscreen = false;
-	params.Stencilbuffer = false;
-	params.Vsync = vsync;
-	params.EventReceiver = receiver;
-	params.HighPrecisionFPU = g_settings->getBool("high_precision_fpu");
+		bool vsync = g_settings->getBool("vsync");
+		u16 fsaa = g_settings->getU16("fsaa");
+		receiver = new MyEventReceiver();
 
-	nulldevice = createDeviceEx(params);
+		SIrrlichtCreationParameters params = SIrrlichtCreationParameters();
+		params.DriverType = video::EDT_NULL;
+		params.WindowSize = core::dimension2d<u32>(640, 480);
+		params.Bits = 24;
+		params.AntiAlias = fsaa;
+		params.Fullscreen = false;
+		params.Stencilbuffer = false;
+		params.Vsync = vsync;
+		params.EventReceiver = receiver;
+		params.HighPrecisionFPU = g_settings->getBool("high_precision_fpu");
 
-	if (!nulldevice) {
+		device = createDeviceEx(params);
+	}
+
+	if (!device) {
 		delete receiver;
 		return false;
 	}
 
 	std::cout << _("Available video modes (WxHxD):") << std::endl;
 
-	video::IVideoModeList *videomode_list = nulldevice->getVideoModeList();
+	video::IVideoModeList *videomode_list = device->getVideoModeList();
 
 	if (videomode_list != NULL) {
 		s32 videomode_count = videomode_list->getVideoModeCount();
@@ -261,8 +267,10 @@ bool RenderingEngine::print_video_modes()
 			  << videomode_depth << std::endl;
 	}
 
-	nulldevice->drop();
-	delete receiver;
+	if (is_null_device) {
+		device->drop();
+		delete receiver;
+	}
 
 	return videomode_list != NULL;
 }
@@ -740,11 +748,21 @@ void RenderingEngine::_draw_load_cleanup()
 
 std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
 {
-	IrrlichtDevice *nulldevice = createDevice(video::EDT_NULL);
-	sanity_check(nulldevice);
+	IrrlichtDevice *device = RenderingEngine::get_raw_device();
+	bool is_null_device = false;
+	sanity_check(device);
+
+	if (!device) {
+		device = createDevice(video::EDT_NULL);
+		is_null_device = true;
+	}
 
 	std::vector<core::vector3d<u32>> mlist;
-	video::IVideoModeList *modelist = nulldevice->getVideoModeList();
+
+	if (!device)
+		return mlist;
+
+	video::IVideoModeList *modelist = device->getVideoModeList();
 
 	s32 num_modes = modelist->getVideoModeCount();
 	for (s32 i = 0; i != num_modes; i++) {
@@ -753,7 +771,9 @@ std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
 		mlist.emplace_back(mode_res.Width, mode_res.Height, mode_depth);
 	}
 
-	nulldevice->drop();
+	if (is_null_device)
+		device->drop();
+
 	return mlist;
 }
 
@@ -923,11 +943,22 @@ float RenderingEngine::getDisplayDensity()
 
 v2u32 RenderingEngine::getDisplaySize()
 {
-	IrrlichtDevice *nulldevice = createDevice(video::EDT_NULL);
+	IrrlichtDevice *device = RenderingEngine::get_raw_device();
+	bool is_null_device = false;
+
+	if (!device) {
+		device = createDevice(video::EDT_NULL);
+		is_null_device = true;
+	}
+
+	if (!device)
+		return core::dimension2d<u32>(0, 0);
 
 	core::dimension2d<u32> deskres =
-			nulldevice->getVideoModeList()->getDesktopResolution();
-	nulldevice->drop();
+			device->getVideoModeList()->getDesktopResolution();
+
+	if (is_null_device)
+		device->drop();
 
 	return deskres;
 }
