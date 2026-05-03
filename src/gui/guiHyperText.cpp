@@ -1077,6 +1077,12 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 //! destructor
 GUIHyperText::~GUIHyperText()
 {
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	delete m_scroll_swipe;
+#endif
+#endif
+
 	m_vscrollbar->remove();
 	m_vscrollbar->drop();
 }

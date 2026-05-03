@@ -21,11 +21,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "guiButton.h"
 #include "IGUIButton.h"
+#include "guiItemImage.h"
+#include "irr_ptr.h"
 
 using namespace irr;
 
 class Client;
-class GUIItemImage;
 
 class GUIButtonItemImage : public GUIButton
 {
@@ -43,5 +44,5 @@ public:
 
 private:
 	Client *m_client;
-	GUIItemImage *m_image;
+	irr_ptr<GUIItemImage> m_image;
 };
