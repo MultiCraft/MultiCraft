@@ -65,6 +65,9 @@ class GameActivity : SDLActivity() {
 
 		@JvmStatic
 		external fun update(key: String, value: String)
+
+		@JvmStatic
+		external fun setInputDialogActive(value: Boolean)
 	}
 
 	private var splashView: View? = null
@@ -140,6 +143,7 @@ class GameActivity : SDLActivity() {
 
 	fun showDialog(hint: String?, current: String?, editType: Int) {
 		isInputActive = true
+		//setInputDialogActive(isInputActive)
 		messageReturnValue = ""
 		if (editType == 1)
 			runOnUiThread { showMultiLineDialog(hint, current) }
@@ -177,6 +181,7 @@ class GameActivity : SDLActivity() {
 				messageReturnValue = editText.text.toString()
 				alertDialog.dismiss()
 				isInputActive = false
+				setInputDialogActive(isInputActive)
 				return@setOnEditorActionListener true
 			}
 			return@setOnEditorActionListener false
@@ -188,6 +193,7 @@ class GameActivity : SDLActivity() {
 					messageReturnValue = editText.text.toString()
 					alertDialog.dismiss()
 					isInputActive = false
+					setInputDialogActive(isInputActive)
 					return@setOnKeyListener true
 				}
 				return@setOnKeyListener false
@@ -198,12 +204,14 @@ class GameActivity : SDLActivity() {
 			messageReturnValue = editText.text.toString()
 			alertDialog.dismiss()
 			isInputActive = false
+			setInputDialogActive(isInputActive)
 		}
 		binding.rl.setOnClickListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			alertDialog.dismiss()
 			isInputActive = false
+			setInputDialogActive(isInputActive)
 		}
 		val alertWindow = alertDialog.window!!
 		// should be above `show()`
@@ -215,6 +223,7 @@ class GameActivity : SDLActivity() {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			isInputActive = false
+			setInputDialogActive(isInputActive)
 		}
 	}
 
@@ -241,6 +250,7 @@ class GameActivity : SDLActivity() {
 				messageReturnValue = editText.text.toString()
 				alertDialog.dismiss()
 				isInputActive = false
+				setInputDialogActive(isInputActive)
 				return@setOnEditorActionListener true
 			}
 			return@setOnEditorActionListener false
@@ -252,6 +262,7 @@ class GameActivity : SDLActivity() {
 					messageReturnValue = editText.text.toString()
 					alertDialog.dismiss()
 					isInputActive = false
+					setInputDialogActive(isInputActive)
 					return@setOnKeyListener true
 				}
 				return@setOnKeyListener false
@@ -262,12 +273,14 @@ class GameActivity : SDLActivity() {
 			messageReturnValue = editText.text.toString()
 			alertDialog.dismiss()
 			isInputActive = false
+			setInputDialogActive(isInputActive)
 		}
 		binding.multiRl.setOnClickListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			alertDialog.dismiss()
 			isInputActive = false
+			setInputDialogActive(isInputActive)
 		}
 		// should be above `show()`
 		val alertWindow = alertDialog.window!!
@@ -279,10 +292,9 @@ class GameActivity : SDLActivity() {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			isInputActive = false
+			setInputDialogActive(isInputActive)
 		}
 	}
-
-	fun isDialogActive() = isInputActive
 
 	fun getDialogValue(): String {
 		val value = messageReturnValue
