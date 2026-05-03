@@ -348,6 +348,7 @@ jstring getJniString(const std::string &message)
 
 	jnienv->DeleteLocalRef(bytes);
 	jnienv->DeleteLocalRef(utf8);
+	jnienv->DeleteLocalRef(charset);
 	jnienv->DeleteLocalRef(charsetClass);
 	jnienv->DeleteLocalRef(stringClass);
 
