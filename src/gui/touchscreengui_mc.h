@@ -249,7 +249,7 @@ public:
 
 	line3d<f32> getShootline()
 	{
-		if (m_camera_additional.event_id != -1 ||
+		if (m_camera_additional.event_id != 0 ||
 				m_camera_additional.place_shootline) {
 			m_camera_additional.place_shootline = false;
 			return m_camera_additional.shootline;
