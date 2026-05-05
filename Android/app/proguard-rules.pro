@@ -23,7 +23,6 @@
 	public <methods>;
 	#noinspection ShrinkerUnresolvedReference
 	void showDialog(java.lang.String, java.lang.String, int);
-	boolean isDialogActive();
 	java.lang.String getDialogValue();
 	float getDensity();
 	void notifyServerConnect(boolean);
