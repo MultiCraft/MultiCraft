@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2014 sapier
-Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
-Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2026 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023-2026 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -102,14 +102,14 @@ struct button_info
 	bool pressed = false;
 	bool floating = false;
 	bool inactive = false;
-	s32 event_id = -1;
+	u64 event_id = 0;
 	std::string image;
 	float aspect_ratio = -1;
 
 	void reset()
 	{
 		pressed = false;
-		event_id = -1;
+		event_id = 0;
 	}
 };
 
@@ -122,7 +122,7 @@ struct joystick_info
 	s16 move_forward = 0;
 	bool pressed = false;
 	bool released = false;
-	s32 event_id = -1;
+	u64 event_id = 0;
 
 	void reset(bool visible)
 	{
@@ -135,7 +135,7 @@ struct joystick_info
 		move_sideward = 0;
 		move_forward = 0;
 		pressed = false;
-		event_id = -1;
+		event_id = 0;
 	}
 };
 
@@ -165,7 +165,7 @@ struct camera_info
 	bool place_shootline = false;
 	s32 x = 0;
 	s32 y = 0;
-	s32 event_id = -1;
+	u64 event_id = 0;
 
 	void reset()
 	{
@@ -176,7 +176,7 @@ struct camera_info
 		place_shootline = false;
 		x = 0;
 		y = 0;
-		event_id = -1;
+		event_id = 0;
 	}
 };
 
@@ -200,7 +200,7 @@ struct editor_info
 	button_info *button = nullptr;
 	IGUIButton *guibutton = nullptr;
 	touch_gui_button_id button_id = unknown_id;
-	s32 event_id = -1;
+	u64 event_id = 0;
 	s32 x = 0;
 	s32 y = 0;
 	bool change_size = false;
@@ -213,7 +213,7 @@ struct editor_info
 		button = nullptr;
 		guibutton = nullptr;
 		button_id = unknown_id;
-		event_id = -1;
+		event_id = 0;
 		x = 0;
 		y = 0;
 	}
@@ -249,7 +249,7 @@ public:
 
 	line3d<f32> getShootline()
 	{
-		if (m_camera_additional.event_id != -1 ||
+		if (m_camera_additional.event_id != 0 ||
 				m_camera_additional.place_shootline) {
 			m_camera_additional.place_shootline = false;
 			return m_camera_additional.shootline;

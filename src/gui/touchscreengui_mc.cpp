@@ -2,8 +2,8 @@
 Copyright (C) 2014 sapier
 Copyright (C) 2018 srifqi, Muhammad Rifqi Priyo Susanto
 		<muhammadrifqipriyosusanto@gmail.com>
-Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
-Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2026 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023-2026 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -757,7 +757,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		return false;
 
 	bool result = false;
-	s32 id = (unsigned int)event.TouchInput.ID;
+	u64 id = event.TouchInput.ID;
 	s32 x = event.TouchInput.X;
 	s32 y = event.TouchInput.Y;
 
@@ -841,7 +841,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 
 			if (!m_events[id]) {
-				if (m_camera.event_id == -1) {
+				if (m_camera.event_id == 0) {
 					m_events[id] = true;
 					m_camera.downtime = porting::getTimeMs();
 					m_camera.x = x;
@@ -861,7 +861,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 							new_state = STATE_DEFAULT;
 						}
 					}
-				} else if (m_camera_additional.event_id == -1) {
+				} else if (m_camera_additional.event_id == 0) {
 					m_events[id] = true;
 					m_camera_additional.downtime = porting::getTimeMs();
 					m_camera_additional.x = x;
@@ -873,7 +873,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 		}
 
-		if (m_current_state == STATE_EDITOR && !m_events[id] && m_editor.event_id == -1) {
+		if (m_current_state == STATE_EDITOR && !m_events[id] && m_editor.event_id == 0) {
 			for (auto button : m_buttons) {
 				if (button->state != STATE_DEFAULT)
 					continue;
@@ -994,7 +994,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if (m_joystick.event_id == id)
 			m_joystick.reset(m_visible && m_current_state == STATE_DEFAULT);
 
-		if (m_camera.event_id == id && m_camera_additional.event_id != -1) {
+		if (m_camera.event_id == id && m_camera_additional.event_id != 0) {
 			m_camera.reset();
 			m_camera.event_id = m_camera_additional.event_id;
 			m_camera.x = m_camera_additional.x;
@@ -1450,7 +1450,7 @@ void TouchScreenGUI::step(float dtime)
 	if (m_current_state == STATE_OVERFLOW && m_overflow_close_schedule)
 		changeCurrentState(m_previous_state);
 
-	if (m_camera.event_id != -1 && (!m_camera.has_really_moved) &&
+	if (m_camera.event_id != 0 && (!m_camera.has_really_moved) &&
 			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
@@ -1459,7 +1459,7 @@ void TouchScreenGUI::step(float dtime)
 		}
 	}
 
-	if (m_camera_additional.event_id != -1 && (!m_camera_additional.has_really_moved) &&
+	if (m_camera_additional.event_id != 0 && (!m_camera_additional.has_really_moved) &&
 			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
