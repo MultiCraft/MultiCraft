@@ -1973,7 +1973,7 @@ void Game::processUserInput(f32 dtime)
 	}
 
 #if defined(__ANDROID__) || defined(__IOS__)
-	if (porting::isInputDialogActive() && porting::getInputDialogOwner() == "chat") {
+	if (porting::getInputDialogOwner() == "chat" && porting::isInputDialogActive()) {
 		input->clear();
 		g_touchscreengui->hide();
 	}
