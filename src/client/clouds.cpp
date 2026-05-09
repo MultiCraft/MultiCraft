@@ -272,9 +272,17 @@ void Clouds::render()
 		}
 	}
 	int vertex_count = pv - buf;
+	const int max_quads = 16384; // 16 bit
 	int quad_count = vertex_count / 4;
-	driver->drawVertexPrimitiveList(buf, vertex_count, quad_indices.data(), 2 * quad_count,
-			video::EVT_STANDARD, scene::EPT_TRIANGLES, video::EIT_16BIT);
+	int quads_drawn = 0;
+
+	while (quads_drawn < quad_count) {
+		int count = std::min(quad_count - quads_drawn, max_quads);
+		driver->drawVertexPrimitiveList(buf + quads_drawn * 4, count * 4,
+				quad_indices.data(), count * 2, video::EVT_STANDARD,
+				scene::EPT_TRIANGLES, video::EIT_16BIT);
+		quads_drawn += count;
+	}
 	free(buf);
 
 	// Restore fog settings
