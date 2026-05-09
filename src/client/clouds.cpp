@@ -322,7 +322,7 @@ void Clouds::update(const v3f &camera_p, const video::SColorf &color_diffuse)
 
 void Clouds::readSettings()
 {
-	m_cloud_radius_i = g_settings->getU16("cloud_radius");
+	m_cloud_radius_i = std::min(g_settings->getU16("cloud_radius"), (u16)128);
 	m_enable_3d = g_settings->getBool("enable_3d_clouds");
 }
 
