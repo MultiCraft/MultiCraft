@@ -1250,10 +1250,6 @@ ServerMap::ServerMap(const std::string &savedir, IGameDef *gamedef,
 		std::string readonly_dir = savedir + DIR_DELIM + "readonly";
 		dbase_ro = createDatabase(conf.get("readonly_backend"), readonly_dir, conf);
 	}
-#ifdef SERVER
-	else
-		dbase->compact();
-#endif
 	if (!conf.updateConfigFile(conf_path.c_str()))
 		errorstream << "ServerMap::ServerMap(): Failed to update world.mt!" << std::endl;
 
