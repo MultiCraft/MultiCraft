@@ -53,7 +53,7 @@ Database_LevelDB::Database_LevelDB(const std::string &savedir)
 	options.block_size = 32 * 1024; // x8 from default
 	options.write_buffer_size = 32 * 1024 * 1024; // x8 from default
 	options.max_file_size = 8 * 1024 * 1024; // x4 from default
-	options.filter_policy = leveldb::NewBloomFilterPolicy(8);
+	options.filter_policy = leveldb::NewBloomFilterPolicy(10);
 #endif
 	leveldb::Status status = leveldb::DB::Open(options,
 		savedir + DIR_DELIM + "map.db", &m_database);
