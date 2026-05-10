@@ -39,32 +39,14 @@ GUIButtonImage::GUIButtonImage(gui::IGUIEnvironment *environment,
 	sendToBack(m_image.get());
 }
 
-void GUIButtonImage::setForegroundImage(irr_ptr<video::ITexture> image,
-		const core::rect<s32> &middle)
-{
-	if (image == m_foreground_image)
-		return;
-
-	m_foreground_image = std::move(image);
-	m_image->setTexture(m_foreground_image.get());
-	m_image->setMiddleRect(middle);
-}
-
 //! Set element properties from a StyleSpec
 void GUIButtonImage::setFromStyle(const StyleSpec &style)
 {
 	GUIButton::setFromStyle(style);
 
-	if (style.isNotDefault(StyleSpec::FGIMG)) {
-		const std::string texture_name = style.get(StyleSpec::FGIMG, "");
-
-		// Use setTextureName instead of setForegroundImage
-		m_foreground_image = nullptr;
-		m_image->setTextureName(texture_name);
-		m_image->setMiddleRect(style.getRect(StyleSpec::FGIMG_MIDDLE, m_image->getMiddleRect()));
-	} else {
-		setForegroundImage();
-	}
+	const std::string texture_name = style.get(StyleSpec::FGIMG, "");
+	m_image->setTextureName(texture_name);
+	m_image->setMiddleRect(style.getRect(StyleSpec::FGIMG_MIDDLE, m_image->getMiddleRect()));
 }
 
 GUIButtonImage *GUIButtonImage::addButton(IGUIEnvironment *environment,
