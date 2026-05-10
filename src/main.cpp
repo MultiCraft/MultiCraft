@@ -1082,7 +1082,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 	MapDatabase *db = ServerMap::createDatabase(backend, game_params.world_path, world_mt);
 
 	u32 count = 0;
-	u64 last_update_time = 0;
+	/*u64 last_update_time = 0;
 	bool &kill = *porting::signal_handler_killstatus();
 	const u8 serialize_as_ver = SER_FMT_VER_HIGHEST_WRITE;
 	const s16 map_compression_level = rangelim(g_settings->getS16("map_compression_level_disk"), -1, 9);
@@ -1126,7 +1126,7 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 			last_update_time = porting::getTimeS();
 		}
 	}
-	std::cerr << std::endl;
+	std::cerr << std::endl;*/
 	db->endSave();
 	db->compact();
 
