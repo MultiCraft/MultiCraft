@@ -47,6 +47,8 @@ if INIT == "game" then
 elseif INIT == "mainmenu" then
 	local mainmenudir = core.get_mainmenu_path() .. DIR_DELIM
 	dofile(mainmenudir .. "register.lua")
+	dofile(commonpath .. "after.lua")
+
 	local mm_script = core.settings:get("main_menu_script")
 	if not mm_script or mm_script == "" then
 		mm_script = scriptdir .. ".." .. DIR_DELIM .. "menu" .. DIR_DELIM .. "init.lua"

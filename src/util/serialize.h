@@ -22,7 +22,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_bloated.h"
 #include "exceptions.h" // for SerializationError
 #include "debug.h" // for assert
-#include "ieee_float.h"
 
 #include "config.h"
 #if HAVE_ENDIAN_H
@@ -60,8 +59,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // 64 MB ought to be enough for anybody - Billy G.
 #define LONG_STRING_MAX_LEN (64 * 1024 * 1024)
 
-
-extern FloatType g_serialize_f32_type;
 
 #if HAVE_ENDIAN_H
 // use machine native byte swapping routines
@@ -194,20 +191,9 @@ inline f32 readF1000(const u8 *data)
 inline f32 readF32(const u8 *data)
 {
 	u32 u = readU32(data);
-
-	switch (g_serialize_f32_type) {
-	case FLOATTYPE_SYSTEM: {
-			f32 f;
-			memcpy(&f, &u, 4);
-			return f;
-		}
-	case FLOATTYPE_SLOW:
-		return u32Tof32Slow(u);
-	case FLOATTYPE_UNKNOWN: // First initialization
-		g_serialize_f32_type = getFloatSerializationType();
-		return readF32(data);
-	}
-	throw SerializationError("readF32: Unreachable code");
+	f32 f;
+	memcpy(&f, &u, 4);
+	return f;
 }
 
 inline video::SColor readARGB8(const u8 *data)
@@ -311,19 +297,9 @@ inline void writeF1000(u8 *data, f32 i)
 
 inline void writeF32(u8 *data, f32 i)
 {
-	switch (g_serialize_f32_type) {
-	case FLOATTYPE_SYSTEM: {
-			u32 u;
-			memcpy(&u, &i, 4);
-			return writeU32(data, u);
-		}
-	case FLOATTYPE_SLOW:
-		return writeU32(data, f32Tou32Slow(i));
-	case FLOATTYPE_UNKNOWN: // First initialization
-		g_serialize_f32_type = getFloatSerializationType();
-		return writeF32(data, i);
-	}
-	throw SerializationError("writeF32: Unreachable code");
+	u32 u;
+	memcpy(&u, &i, 4);
+	return writeU32(data, u);
 }
 
 inline void writeARGB8(u8 *data, video::SColor p)

@@ -27,7 +27,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifdef __IOS__
 #include "porting.h"
-extern "C" void external_pause_game();
+extern "C" void external_pause_game(bool unpause = true);
 #endif
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)

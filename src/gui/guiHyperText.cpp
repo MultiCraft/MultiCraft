@@ -731,8 +731,25 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 
 		ymargin = p.margin;
 
+		// Re-join words that were broken in a previous call to place()
+		for (auto e = p.elements.begin(); e != p.elements.end(); ++e) {
+			if (!e->is_split)
+				continue;
+
+			while (e->is_split) {
+				auto next = std::next(e);
+				if (next == p.elements.end())
+					break;
+				e->text += next->text;
+				e->is_split = next->is_split;
+				p.elements.erase(next);
+			}
+
+			e->dim.Width = e->font->getDimension(e->text.c_str()).Width;
+		}
+
 		// Place non floating stuff
-		std::vector<ParsedText::Element>::iterator el = p.elements.begin();
+		std::list<ParsedText::Element>::iterator el = p.elements.begin();
 
 		while (el != p.elements.end()) {
 			// Determine line width and y pos
@@ -805,14 +822,44 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 				el++;
 			}
 
-			std::vector<ParsedText::Element>::iterator linestart = el;
-			std::vector<ParsedText::Element>::iterator lineend = p.elements.end();
+			std::list<ParsedText::Element>::iterator linestart = el;
+			std::list<ParsedText::Element>::iterator lineend = p.elements.end();
 
 			// First pass, find elements fitting into line
 			// (or at least one element)
 			while (el != p.elements.end() && (charswidth == 0 ||
 					charswidth + el->dim.Width <= linewidth)) {
+
 				if (el->floating == ParsedText::FLOAT_NONE) {
+					if (el->type == ParsedText::ELEMENT_TEXT && el->dim.Width > linewidth) {
+						core::dimension2d<u32> d = el->font->getDimension(el->text.c_str());
+
+						// Find the longest substring that we can fit on this line
+						// This is not efficient but hopefully means text shaping will work
+						u32 fit_chars = 1;
+						for (u32 i = 2; i <= el->text.size(); i++) {
+							const core::stringw s = el->text.subString(0, i);
+							core::dimension2d<u32> dim = el->font->getDimension(s.c_str());
+							if (dim.Width > linewidth) {
+								fit_chars = i - 1;
+								break;
+							}
+						}
+
+						// Break the element into two
+						ParsedText::Element split = *el;
+						el->text = el->text.subString(0, fit_chars);
+						el->is_split = true;
+						split.text = split.text.subString(fit_chars, split.text.size() - fit_chars);
+
+						// Re-calculate the width
+						el->dim.Width = el->font->getDimension(el->text.c_str()).Width;
+						split.dim.Width = split.font->getDimension(split.text.c_str()).Width;
+
+						// Add the split element after the current one
+						p.elements.insert(std::next(el), split);
+					}
+
 					if (el->type != ParsedText::ELEMENT_SEPARATOR) {
 						lineend = el;
 						wordcount++;
@@ -1077,6 +1124,12 @@ GUIHyperText::GUIHyperText(const wchar_t *text, IGUIEnvironment *environment,
 //! destructor
 GUIHyperText::~GUIHyperText()
 {
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	delete m_scroll_swipe;
+#endif
+#endif
+
 	m_vscrollbar->remove();
 	m_vscrollbar->drop();
 }
@@ -1213,30 +1266,34 @@ void GUIHyperText::draw()
 
 	// Text
 	m_display_text_rect = AbsoluteRect;
-	m_drawer.place(m_display_text_rect);
+	if (!m_placed) {
+		m_placed = true;
+		m_drawer.place(m_display_text_rect);
 
-	// Show a scrollbar if the text overflows vertically
-	if (m_drawer.getHeight() > m_display_text_rect.getHeight()) {
-		// Showing a scrollbar will reduce the width of the viewport, causing
-		// more text to be wrapped and thus increasing the height of the text.
-		// Therefore, we have to re-layout the text *before* setting the height
-		// of the scrollbar.
-		core::rect<s32> smaller_rect = m_display_text_rect;
-		smaller_rect.LowerRightCorner.X -= m_scrollbar_width;
-		m_drawer.place(smaller_rect);
+		// Show a scrollbar if the text overflows vertically
+		if (m_drawer.getHeight() > m_display_text_rect.getHeight()) {
+			// Showing a scrollbar will reduce the width of the viewport, causing
+			// more text to be wrapped and thus increasing the height of the text.
+			// Therefore, we have to re-layout the text *before* setting the height
+			// of the scrollbar.
+			core::rect<s32> smaller_rect = m_display_text_rect;
+			smaller_rect.LowerRightCorner.X -= m_scrollbar_width;
+			m_drawer.place(smaller_rect);
 
-		m_vscrollbar->setSmallStep(m_display_text_rect.getHeight() * 0.1f);
-		m_vscrollbar->setLargeStep(m_display_text_rect.getHeight() * 0.5f);
-		m_vscrollbar->setMax(m_drawer.getHeight() - m_display_text_rect.getHeight());
+			m_vscrollbar->setSmallStep(m_display_text_rect.getHeight() * 0.1f);
+			m_vscrollbar->setLargeStep(m_display_text_rect.getHeight() * 0.5f);
+			m_vscrollbar->setMax(m_drawer.getHeight() - m_display_text_rect.getHeight());
 
-		m_vscrollbar->setVisible(true);
+			m_vscrollbar->setVisible(true);
 
-		m_vscrollbar->setPageSize(s32(m_drawer.getHeight()));
-	} else {
-		m_vscrollbar->setMax(0);
-		m_vscrollbar->setPos(0);
-		m_vscrollbar->setVisible(false);
+			m_vscrollbar->setPageSize(s32(m_drawer.getHeight()));
+		} else {
+			m_vscrollbar->setMax(0);
+			m_vscrollbar->setPos(0);
+			m_vscrollbar->setVisible(false);
+		}
 	}
+
 	m_drawer.draw(AbsoluteClippingRect,
 			m_display_text_rect.UpperLeftCorner + m_text_scrollpos);
 

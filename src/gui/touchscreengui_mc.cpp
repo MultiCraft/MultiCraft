@@ -2,8 +2,8 @@
 Copyright (C) 2014 sapier
 Copyright (C) 2018 srifqi, Muhammad Rifqi Priyo Susanto
 		<muhammadrifqipriyosusanto@gmail.com>
-Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
-Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2026 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023-2026 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -181,6 +181,9 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manag
 	m_editor.button_redo = initButton(editor_redo_id,
 			getButtonRect(editor_redo_id), STATE_EDITOR);
 	m_editor.button_redo->guibutton->setIsPushButton();
+
+	/*if (checkInvalidSettings())
+		resetAllValues();*/
 
 	updateButtons();
 
@@ -511,12 +514,12 @@ void TouchScreenGUI::initSettings(bool init)
 			m_settings->updateConfigFile(m_settings_path.c_str());
 		} else {
 			s32 old_button_size = m_settings->getS32("button_size");
-	
+
 			if (m_button_size != old_button_size) {
 				for (auto name : m_settings->getNames()) {
 					m_settings->remove(name);
 				}
-	
+
 				m_settings->setS32("button_size", m_button_size);
 				m_settings->updateConfigFile(m_settings_path.c_str());
 			}
@@ -708,6 +711,24 @@ void TouchScreenGUI::restoreAllValues()
 	initSettings();
 }
 
+/*bool TouchScreenGUI::checkInvalidSettings()
+{
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		rect<s32> button_rect = getButtonRect(button->id);
+
+		if (button_rect == getDefaultButtonRect(button->id))
+			continue;
+
+		if (isButtonCollided(button->id, button_rect))
+			return true;
+	}
+
+	return false;
+}*/
+
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
 	if (!m_buttons_initialized || m_close)
@@ -736,7 +757,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		return false;
 
 	bool result = false;
-	s32 id = (unsigned int)event.TouchInput.ID;
+	u64 id = event.TouchInput.ID;
 	s32 x = event.TouchInput.X;
 	s32 y = event.TouchInput.Y;
 
@@ -820,7 +841,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 
 			if (!m_events[id]) {
-				if (m_camera.event_id == -1) {
+				if (m_camera.event_id == 0) {
 					m_events[id] = true;
 					m_camera.downtime = porting::getTimeMs();
 					m_camera.x = x;
@@ -840,7 +861,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 							new_state = STATE_DEFAULT;
 						}
 					}
-				} else if (m_camera_additional.event_id == -1) {
+				} else if (m_camera_additional.event_id == 0) {
 					m_events[id] = true;
 					m_camera_additional.downtime = porting::getTimeMs();
 					m_camera_additional.x = x;
@@ -852,7 +873,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 		}
 
-		if (m_current_state == STATE_EDITOR && !m_events[id] && m_editor.event_id == -1) {
+		if (m_current_state == STATE_EDITOR && !m_events[id] && m_editor.event_id == 0) {
 			for (auto button : m_buttons) {
 				if (button->state != STATE_DEFAULT)
 					continue;
@@ -973,7 +994,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if (m_joystick.event_id == id)
 			m_joystick.reset(m_visible && m_current_state == STATE_DEFAULT);
 
-		if (m_camera.event_id == id && m_camera_additional.event_id != -1) {
+		if (m_camera.event_id == id && m_camera_additional.event_id != 0) {
 			m_camera.reset();
 			m_camera.event_id = m_camera_additional.event_id;
 			m_camera.x = m_camera_additional.x;
@@ -1018,50 +1039,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_rect -= v2s32(0, new_rect.LowerRightCorner.Y - m_screensize.Y);
 			}
 
-			if (m_editor.button_id == escape_id) {
-				for (auto button : m_buttons) {
-					if (button->state != STATE_DEFAULT)
-						continue;
-
-					if (button->id == m_editor.button_id)
-						continue;
-
-					IGUIButton *guibutton = button->guibutton;
-
-					if (guibutton) {
-						rect<s32> btn_rect = guibutton->getRelativePosition();
-
-						if (new_rect.isRectCollided(btn_rect)) {
-							new_rect = m_editor.old_rect;
-							break;
-						}
-					}
-				}
-
-				IGUIButton *guibutton = m_joystick.button_off;
-				rect<s32> btn_rect = guibutton->getRelativePosition();
-
-				if (new_rect.isRectCollided(btn_rect))
-					new_rect = m_editor.old_rect;
-			} else {
-				for (auto button : m_buttons) {
-					if (button->state != STATE_DEFAULT)
-						continue;
-
-					if (button->id != escape_id)
-						continue;
-
-					IGUIButton *guibutton = button->guibutton;
-
-					if (guibutton) {
-						rect<s32> btn_rect = guibutton->getRelativePosition();
-
-						if (new_rect.isRectCollided(btn_rect)) {
-							new_rect = m_editor.old_rect;
-							break;
-						}
-					}
-				}
+			if (m_editor.button_id == escape_id && isButtonCollided(m_editor.button_id, new_rect)) {
+				new_rect = m_editor.old_rect;
 			}
 
 			setValues(m_editor.button_id,
@@ -1225,6 +1204,36 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 	return result;
 }
 
+bool TouchScreenGUI::isButtonCollided(touch_gui_button_id id, rect<s32> button_rect)
+{
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		if (button->id == id)
+			continue;
+
+		IGUIButton *guibutton = button->guibutton;
+
+		if (guibutton) {
+			rect<s32> button_rect2 = guibutton->getRelativePosition();
+
+			if (button_rect.isRectCollided(button_rect2))
+				return true;
+		}
+	}
+
+	IGUIButton *joystick_btn = m_joystick.button_off;
+	if (joystick_btn && m_editor.guibutton != joystick_btn) {
+		rect<s32> button_rect2 = joystick_btn->getRelativePosition();
+
+		if (button_rect.isRectCollided(button_rect2))
+			return true;
+	}
+
+	return false;
+}
+
 bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 {
 	rect<s32> joystick_rect = m_joystick.button_bg->getRelativePosition();
@@ -1327,11 +1336,16 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 			continue;
 
 		std::string button_name = buttons_data[button->id].name;
+		std::string settings_name = "keymap_" + button_name;
 
-		if (!g_settings->exists("keymap_" + button_name))
+		if (!g_settings->exists(settings_name))
 			continue;
 
-		std::string keyname = g_settings->get("keymap_" + button_name);
+		std::string keyname = g_settings->get(settings_name);
+
+		if (!isValidKeymap(settings_name, keyname))
+			continue;
+
 		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
 
 		if (button_keycode == keycode)
@@ -1410,6 +1424,16 @@ bool TouchScreenGUI::immediateRelease(irr::EKEY_CODE keycode)
 	return false;
 }
 
+bool TouchScreenGUI::isValidKeymap(std::string settingname, std::string keysym)
+{
+	if (settingname != "keymap_dig" && keysym == "KEY_LBUTTON")
+		return false;
+	else if (settingname != "keymap_place" && keysym == "KEY_RBUTTON")
+		return false;
+
+	return true;
+}
+
 void TouchScreenGUI::step(float dtime)
 {
 	if (!m_buttons_initialized || m_close)
@@ -1426,7 +1450,7 @@ void TouchScreenGUI::step(float dtime)
 	if (m_current_state == STATE_OVERFLOW && m_overflow_close_schedule)
 		changeCurrentState(m_previous_state);
 
-	if (m_camera.event_id != -1 && (!m_camera.has_really_moved) &&
+	if (m_camera.event_id != 0 && (!m_camera.has_really_moved) &&
 			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
@@ -1435,12 +1459,35 @@ void TouchScreenGUI::step(float dtime)
 		}
 	}
 
-	if (m_camera_additional.event_id != -1 && (!m_camera_additional.has_really_moved) &&
+	if (m_camera_additional.event_id != 0 && (!m_camera_additional.has_really_moved) &&
 			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera_additional.dig = true;
 			wakeUpInputhandler();
+		}
+	}
+}
+
+void TouchScreenGUI::draw()
+{
+	IGUISkin* skin = m_guienv->getSkin();
+	if (!skin)
+		return;
+
+	if (m_current_state == STATE_EDITOR) {
+		IGUIButton *guibutton = m_editor.guibutton;
+
+		if (guibutton) {
+			rect<s32> outline_rect = guibutton->getRelativePosition();
+			bool collided = isButtonCollided(m_editor.button_id, outline_rect);
+
+			video::SColor outline_color = collided ?
+					video::SColor(255, 255, 0, 0) :
+					video::SColor(255, 0, 255, 0);
+
+			m_device->getVideoDriver()->draw2DRectangleOutline(outline_rect,
+					outline_color);
 		}
 	}
 }

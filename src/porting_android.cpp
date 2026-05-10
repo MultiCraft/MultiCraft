@@ -49,7 +49,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <SDL3/SDL_main.h>
 
 extern int real_main(int argc, char *argv[]);
-extern "C" void external_pause_game();
+extern "C" void external_pause_game(bool unpause = true);
 extern "C" void external_update(const char* key, const char* value);
 
 static std::atomic<bool> ran = {false};
@@ -93,9 +93,9 @@ extern "C" {
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_pauseGame(
 			JNIEnv *env, jclass clazz)
 	{
-		external_pause_game();
+		external_pause_game(false);
 	}
-	bool device_has_keyboard = false;
+	std::atomic<bool> device_has_keyboard = false;
 	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_keyboardEvent(
 			JNIEnv *env, jclass clazz, jboolean hasKeyboard)
 	{
@@ -107,6 +107,12 @@ extern "C" {
 		const std::string key_str = readJavaString(env, key);
 		const std::string value_str = readJavaString(env, value);
 		external_update(key_str.c_str(), value_str.c_str());
+	}
+	std::atomic<bool> is_input_dialog_active = false;
+	JNIEXPORT void JNICALL Java_com_multicraft_game_GameActivity_setInputDialogActive(
+			JNIEnv *env, jclass clazz, jboolean value)
+	{
+		is_input_dialog_active = value;
 	}
 }
 
@@ -160,6 +166,7 @@ void initializePaths()
 
 void showInputDialog(const std::string &hint, const std::string &current, int editType, std::string owner)
 {
+	is_input_dialog_active = true;
 	input_dialog_owner = owner;
 
 	jmethodID showdialog = jnienv->GetMethodID(activityClass, "showDialog",
@@ -208,13 +215,7 @@ std::string getInputDialogOwner()
 
 bool isInputDialogActive()
 {
-	jmethodID dialog_active = jnienv->GetMethodID(activityClass,
-			"isDialogActive", "()Z");
-
-	FATAL_ERROR_IF(dialog_active == nullptr,
-		"porting::isInputDialogActive unable to find Java dialog state method");
-
-	return jnienv->CallBooleanMethod(activityObj, dialog_active);
+	return is_input_dialog_active;
 }
 
 std::string getInputDialogValue()
@@ -347,6 +348,7 @@ jstring getJniString(const std::string &message)
 
 	jnienv->DeleteLocalRef(bytes);
 	jnienv->DeleteLocalRef(utf8);
+	jnienv->DeleteLocalRef(charset);
 	jnienv->DeleteLocalRef(charsetClass);
 	jnienv->DeleteLocalRef(stringClass);
 
@@ -527,4 +529,19 @@ void destroyAssetManager()
 		asset_manager = NULL;
 	}
 }
+
+void vibrationEffect(int intensity)
+{
+	if (jnienv == nullptr || activityObj == nullptr)
+		return;
+
+	jmethodID vibrationEffectMethod = jnienv->GetMethodID(activityClass,
+			"vibrationEffect", "(I)V");
+
+	FATAL_ERROR_IF(vibrationEffectMethod == nullptr,
+			"porting::vibrate unable to find Java vibrationEffect method");
+
+	jnienv->CallVoidMethod(activityObj, vibrationEffectMethod, intensity);
+}
+
 }

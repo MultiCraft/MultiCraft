@@ -23,7 +23,6 @@
 	public <methods>;
 	#noinspection ShrinkerUnresolvedReference
 	void showDialog(java.lang.String, java.lang.String, int);
-	boolean isDialogActive();
 	java.lang.String getDialogValue();
 	float getDensity();
 	void notifyServerConnect(boolean);
@@ -35,6 +34,7 @@
 	java.lang.String getSecretKey(java.lang.String);
 	void hideSplashScreen();
 	boolean needsExtractAssets();
+	void vibrationEffect(int);
 }
 -keepclasseswithmembernames,includedescriptorclasses class * {
 	native <methods>;
