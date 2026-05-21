@@ -23,7 +23,35 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "sound.h"
 
-class SoundManagerSingleton;
+#define AL_ALEXT_PROTOTYPES
+#if defined(_WIN32)
+	#include <al.h>
+	#include <alc.h>
+	#include <alext.h>
+#else
+	#include <AL/al.h>
+	#include <AL/alc.h>
+	#include <AL/alext.h>
+#endif
+
+typedef std::unique_ptr<ALCdevice, void (*)(ALCdevice *p)> unique_ptr_alcdevice;
+typedef std::unique_ptr<ALCcontext, void(*)(ALCcontext *p)> unique_ptr_alccontext;
+
+class SoundManagerSingleton
+{
+private:
+	unique_ptr_alcdevice m_device;
+	unique_ptr_alccontext m_context;
+
+public:
+	SoundManagerSingleton();
+	~SoundManagerSingleton();
+
+	bool init();
+	void pauseDevice();
+	void resumeDevice();
+};
+
 extern SoundManagerSingleton* g_sound_manager_singleton;
 
 SoundManagerSingleton* createSoundManagerSingleton();
