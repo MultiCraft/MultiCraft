@@ -293,6 +293,7 @@ bool SoundManagerSingleton::init()
 	return true;
 }
 
+#ifdef __IOS__
 void SoundManagerSingleton::pauseDevice()
 {
 	alcDevicePauseSOFT(m_device.get());
@@ -302,6 +303,7 @@ void SoundManagerSingleton::resumeDevice()
 {
 	alcDeviceResumeSOFT(m_device.get());
 }
+#endif
 
 class OpenALSoundManager: public ISoundManager
 {
