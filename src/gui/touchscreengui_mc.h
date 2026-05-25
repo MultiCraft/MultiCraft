@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <map>
 #include <vector>
 
+#include "client/keys.h"
 #include "client/sound.h"
 #include "client/tile.h"
 #include "settings.h"
@@ -91,6 +92,7 @@ struct button_data
 	const char *name;
 	bool has_sound;
 	int group;
+	KeyType::T key_type;
 };
 
 struct button_info
@@ -227,8 +229,8 @@ public:
 
 	void init(ISimpleTextureSource *tsrc, ISoundManager *sound_manage);
 	bool preprocessEvent(const SEvent &event);
-	bool isButtonPressed(irr::EKEY_CODE keycode);
-	bool immediateRelease(irr::EKEY_CODE keycode);
+	bool isButtonPressed(KeyType::T key_type);
+	bool immediateRelease(KeyType::T key_type);
 
 	s16 getMoveSideward() { return m_joystick.move_sideward; }
 	s16 getMoveForward() { return m_joystick.move_forward; }
@@ -315,8 +317,6 @@ private:
 	bool m_close = false;
 	bool m_dig_and_move = false;
 	bool m_doubletap_initialized = false;
-	irr::EKEY_CODE m_keycode_dig;
-	irr::EKEY_CODE m_keycode_place;
 	std::string m_press_sound;
 	std::string m_ui_message;
 	u64 m_doubletap_time = 0;
@@ -371,7 +371,6 @@ private:
 	void setVisible(bool visible);
 	void wakeUpInputhandler();
 	void playSound();
-	bool isValidKeymap(std::string settingname, std::string keysym);
 };
 
 extern TouchScreenGUI *g_touchscreengui;
