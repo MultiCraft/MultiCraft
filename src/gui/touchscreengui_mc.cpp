@@ -1366,28 +1366,20 @@ bool TouchScreenGUI::isButtonPressed(KeyType::T key_type)
 			return true;
 	}
 
-	if (m_camera.dig) {
-		if (key_type == KeyType::DIG)
-			return true;
+	if (m_camera.dig && key_type == KeyType::DIG)
+		return true;
+
+	if (m_camera.place && key_type == KeyType::PLACE) {
+		m_camera.place = false;
+		return true;
 	}
 
-	if (m_camera.place) {
-		if (key_type == KeyType::PLACE) {
-			m_camera.place = false;
-			return true;
-		}
-	}
+	if (m_camera_additional.dig && key_type == KeyType::DIG)
+		return true;
 
-	if (m_camera_additional.dig) {
-		if (key_type == KeyType::DIG)
-			return true;
-	}
-
-	if (m_camera_additional.place) {
-		if (key_type == KeyType::PLACE) {
-			m_camera_additional.place = false;
-			return true;
-		}
+	if (m_camera_additional.place && key_type == KeyType::PLACE) {
+		m_camera_additional.place = false;
+		return true;
 	}
 
 	return false;
