@@ -370,9 +370,8 @@ bool RealInputHandler::SdlEventWatcher(void *userdata, SDL_Event *event)
 {
 	if (event->type == SDL_EVENT_WILL_ENTER_BACKGROUND) {
 #if USE_SOUND
-		if (g_sound_manager_singleton) {
+		if (g_sound_manager_singleton)
 			g_sound_manager_singleton->pauseDevice();
-		}
 #endif
 
 		external_pause_game();
@@ -380,9 +379,8 @@ bool RealInputHandler::SdlEventWatcher(void *userdata, SDL_Event *event)
 	}
 	if (event->type == SDL_EVENT_DID_ENTER_FOREGROUND) {
 #if USE_SOUND
-		if (g_sound_manager_singleton) {
+		if (g_sound_manager_singleton)
 			g_sound_manager_singleton->resumeDevice();
-		}
 #endif
 		return true;
 	}
