@@ -5,8 +5,8 @@ plugins {
 }
 
 android {
-	buildToolsVersion = "36.0.0"
-	compileSdk = 36
+	buildToolsVersion = "37.0.0"
+	compileSdk = 37
 	ndkVersion = "29.0.14206865"
 	namespace = "com.multicraft"
 
@@ -18,7 +18,7 @@ android {
 
 	defaultConfig {
 		minSdk = 23
-		lint.targetSdk = 36
+		lint.targetSdk = 37
 
 		@Suppress("UnstableApiUsage")
 		externalNativeBuild {

@@ -21,7 +21,6 @@
 #-renamesourcefileattribute SourceFile
 -keep class com.multicraft.game.GameActivity {
 	public <methods>;
-	#noinspection ShrinkerUnresolvedReference
 	void showDialog(java.lang.String, java.lang.String, int);
 	java.lang.String getDialogValue();
 	float getDensity();
@@ -39,6 +38,3 @@
 -keepclasseswithmembernames,includedescriptorclasses class * {
 	native <methods>;
 }
--keepclassmembers class androidx.lifecycle.ReportFragment$** { *; }
-# SDL
--keep public class org.libsdl.app.** { public *; }
