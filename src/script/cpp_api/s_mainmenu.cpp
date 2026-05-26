@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "cpp_api/s_mainmenu.h"
 #include "cpp_api/s_internal.h"
 #include "common/c_converter.h"
+#include "gui/guiEngine.h"
 
 void ScriptApiMainMenu::setMainMenuData(MainMenuDataForScript *data)
 {
@@ -113,4 +114,24 @@ void ScriptApiMainMenu::handleUpdate(const std::string &key, const std::string &
 	lua_pushstring(L, value.c_str());
 	PCALL_RES(lua_pcall(L, 2, 0, error_handler));
 	lua_pop(L, 1); // Pop error handler
+}
+
+void ScriptApiMainMenu::environment_step(float dtime)
+{
+	SCRIPTAPI_PRECHECKHEADER
+
+	// Get core.registered_globalsteps
+	lua_getglobal(L, "core");
+	lua_getfield(L, -1, "registered_globalsteps");
+	// Call callbacks
+	lua_pushnumber(L, dtime);
+	try {
+		runCallbacks(1, RUN_CALLBACKS_MODE_FIRST);
+	} catch (LuaError &e) {
+		std::string err = "Menu environment_step: ";
+		err.append(e.what());
+		err.append("\n");
+		err.append(script_get_backtrace(L));
+		getGuiEngine()->handleMainMenuLuaError(err.c_str());
+	}
 }

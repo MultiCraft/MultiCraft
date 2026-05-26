@@ -2868,6 +2868,8 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 				*data_rw, data_rw.getSize(), filename.c_str());
 			FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
 			mesh = smgr->getMesh(rfile);
+			if (mesh)
+				mesh->grab();
 			rfile->drop();
 		} else {
 			mesh = nullptr;
@@ -2875,6 +2877,8 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 #endif
 	} else {
 		mesh = smgr->getMesh(meshstr.c_str());
+		if (mesh)
+			mesh->grab();
 	}
 
 	if (!mesh) {
@@ -2896,6 +2900,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 			data->current_parent, rect, spec.fid);
 
 	auto meshnode = e->setMesh(mesh);
+	mesh->drop();
 
 	for (u32 i = 0; i < textures.size() && i < meshnode->getMaterialCount(); ++i)
 		e->setTexture(i, m_tsrc->getTexture(unescape_string(textures[i])));

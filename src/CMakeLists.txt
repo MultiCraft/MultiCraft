@@ -140,6 +140,7 @@ endif()
 
 
 option(ENABLE_FREETYPE "Enable FreeType2 (TrueType fonts and basic unicode support)" TRUE)
+option(USE_CAIRO "Enable Cairo for COLRv1 emoji" TRUE)
 set(USE_FREETYPE FALSE)
 
 if(ENABLE_FREETYPE)
@@ -154,6 +155,18 @@ if(ENABLE_FREETYPE)
 	if (HARFBUZZ_LIBRARY AND HARFBUZZ_INCLUDE_DIR)
 		message(STATUS "HarfBuzz found.")
 		include_directories(${HARFBUZZ_INCLUDE_DIR})
+	endif()
+	
+	if (USE_CAIRO)
+		find_library(CAIRO_LIBRARY NAMES cairo libcairo)
+		find_path(CAIRO_INCLUDE_DIR NAMES cairo/cairo.h cairo.h PATHS)
+		if (CAIRO_LIBRARY AND CAIRO_INCLUDE_DIR)
+			message(STATUS "Cairo found.")
+			include_directories(${CAIRO_INCLUDE_DIR})
+			add_definitions(-DUSE_CAIRO=1)
+		else()
+			message(STATUS "Cairo not found.")
+		endif()
 	endif()
 endif(ENABLE_FREETYPE)
 
@@ -707,6 +720,7 @@ if(BUILD_CLIENT)
 			${PROJECT_NAME}
 			${FREETYPE_LIBRARY}
 			${HARFBUZZ_LIBRARY}
+			${CAIRO_LIBRARY}
 		)
 	endif()
 	if (USE_CURSES)

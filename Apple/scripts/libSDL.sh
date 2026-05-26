@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-SDL_VERSION=release-3.4.2
+SDL_VERSION=release-3.4.8
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
@@ -36,6 +36,7 @@ do
 		-DSDL_POWER=OFF \
 		-DSDL_DIALOG=OFF \
 		-DSDL_TESTS=OFF \
+		-DSDL_TRAY=OFF \
 		-DSDL_VULKAN=OFF \
 		-DSDL_EXAMPLES=OFF
 

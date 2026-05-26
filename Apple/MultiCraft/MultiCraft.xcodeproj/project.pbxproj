@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 90;
+	objectVersion = 100;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -224,7 +224,6 @@
 		84F20E8425D52868009562A9 /* numeric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E5F25D52867009562A9 /* numeric.cpp */; };
 		84F20E8625D52868009562A9 /* serialize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6225D52867009562A9 /* serialize.cpp */; };
 		84F20E8725D52868009562A9 /* areastore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6525D52867009562A9 /* areastore.cpp */; };
-		84F20E8825D52868009562A9 /* ieee_float.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6625D52867009562A9 /* ieee_float.cpp */; };
 		84F20E8A25D52868009562A9 /* quicktune.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6C25D52867009562A9 /* quicktune.cpp */; };
 		84F20E8B25D52868009562A9 /* enriched_string.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E6E25D52867009562A9 /* enriched_string.cpp */; };
 		84F20E8C25D52868009562A9 /* timetaker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E7025D52868009562A9 /* timetaker.cpp */; };
@@ -720,7 +719,6 @@
 		84F20E6325D52867009562A9 /* pointedthing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pointedthing.h; path = ../../../src/util/pointedthing.h; sourceTree = "<group>"; };
 		84F20E6425D52867009562A9 /* metricsbackend.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = metricsbackend.h; path = ../../../src/util/metricsbackend.h; sourceTree = "<group>"; };
 		84F20E6525D52867009562A9 /* areastore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = areastore.cpp; path = ../../../src/util/areastore.cpp; sourceTree = "<group>"; };
-		84F20E6625D52867009562A9 /* ieee_float.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ieee_float.cpp; path = ../../../src/util/ieee_float.cpp; sourceTree = "<group>"; };
 		84F20E6825D52867009562A9 /* sha2_apple.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sha2_apple.h; path = ../../../src/util/sha2_apple.h; sourceTree = "<group>"; };
 		84F20E6A25D52867009562A9 /* directiontables.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = directiontables.h; path = ../../../src/util/directiontables.h; sourceTree = "<group>"; };
 		84F20E6B25D52867009562A9 /* timetaker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timetaker.h; path = ../../../src/util/timetaker.h; sourceTree = "<group>"; };
@@ -737,7 +735,6 @@
 		84F20E7625D52868009562A9 /* enriched_string.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = enriched_string.h; path = ../../../src/util/enriched_string.h; sourceTree = "<group>"; };
 		84F20E7725D52868009562A9 /* container.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = container.h; path = ../../../src/util/container.h; sourceTree = "<group>"; };
 		84F20E7825D52868009562A9 /* areastore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = areastore.h; path = ../../../src/util/areastore.h; sourceTree = "<group>"; };
-		84F20E7925D52868009562A9 /* ieee_float.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ieee_float.h; path = ../../../src/util/ieee_float.h; sourceTree = "<group>"; };
 		84F20E7A25D52868009562A9 /* base64.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = base64.cpp; path = ../../../src/util/base64.cpp; sourceTree = "<group>"; };
 		84F20E7B25D52868009562A9 /* pointedthing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pointedthing.cpp; path = ../../../src/util/pointedthing.cpp; sourceTree = "<group>"; };
 		84F20E7C25D52868009562A9 /* hex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hex.h; path = ../../../src/util/hex.h; sourceTree = "<group>"; };
@@ -1416,8 +1413,6 @@
 				84E97FC52D1393F800C85934 /* hashing.cpp */,
 				84E97FC62D1393F800C85934 /* hashing.h */,
 				84F20E7C25D52868009562A9 /* hex.h */,
-				84F20E6625D52867009562A9 /* ieee_float.cpp */,
-				84F20E7925D52868009562A9 /* ieee_float.h */,
 				84F20E5E25D52867009562A9 /* metricsbackend.cpp */,
 				84F20E6425D52867009562A9 /* metricsbackend.h */,
 				84F20E5F25D52867009562A9 /* numeric.cpp */,
@@ -1723,7 +1718,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2610;
+				LastUpgradeCheck = 2640;
 				ORGANIZATIONNAME = "MultiCraft Studio OÜ";
 				TargetAttributes = {
 					845856A824B1322C0040BA4F = {
@@ -1770,12 +1765,13 @@
 				"zh-Hans",
 				"zh-Hant",
 				ms,
+				hr,
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			packageReferences = (
 				84D1BF522CD7EC430077DD47 /* XCRemoteSwiftPackageReference "zstd" */,
 			);
-			preferredProjectObjectVersion = 90;
+			preferredProjectObjectVersion = 100;
 			productRefGroup = 845856AA24B1322C0040BA4F /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1917,7 +1913,6 @@
 				84135B7225D5264B00CA4DCF /* log.cpp in Sources */,
 				84135B7625D5264B00CA4DCF /* profiler.cpp in Sources */,
 				84F20DA825D527C5009562A9 /* connectionthreads.cpp in Sources */,
-				84F20E8825D52868009562A9 /* ieee_float.cpp in Sources */,
 				84F20DDE25D52812009562A9 /* s_modchannels.cpp in Sources */,
 				84F20F0225D52958009562A9 /* guiEditBoxWithScrollbar.cpp in Sources */,
 				84F20F4625D52975009562A9 /* mapgen_flat.cpp in Sources */,
@@ -2110,6 +2105,7 @@
 				ENABLE_INCREMENTAL_DISTILL = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_FAST_MATH = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2144,9 +2140,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 90;
+				CURRENT_PROJECT_VERSION = 100;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -2234,9 +2229,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 90;
+				CURRENT_PROJECT_VERSION = 100;
 				DEVELOPMENT_TEAM = R3RLJ9TW52;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;

@@ -167,6 +167,17 @@ int ModApiHttp::l_http_fetch_async_get(lua_State *L)
 	return 1;
 }
 
+int ModApiHttp::l_http_get_download_stats(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+
+	u64 received_bytes, total_bytes;
+	std::tie(received_bytes, total_bytes) = httpfetch_get_download_stats();
+	lua_pushnumber(L, received_bytes);
+	lua_pushnumber(L, total_bytes);
+	return 2;
+}
+
 int ModApiHttp::l_request_http_api(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
@@ -220,6 +231,7 @@ int ModApiHttp::l_request_http_api(lua_State *L)
 	lua_newtable(L);
 	HTTP_API(fetch_async);
 	HTTP_API(fetch_async_get);
+	HTTP_API(get_download_stats);
 
 	// Stack now looks like this:
 	// <core.http_add_fetch> <table with fetch_async, fetch_async_get>
@@ -237,6 +249,7 @@ int ModApiHttp::l_get_http_api(lua_State *L)
 	HTTP_API(fetch_async);
 	HTTP_API(fetch_async_get);
 	HTTP_API(fetch_sync);
+	HTTP_API(get_download_stats);
 
 	return 1;
 }
