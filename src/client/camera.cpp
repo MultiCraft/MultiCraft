@@ -76,7 +76,7 @@ Camera::Camera(MapDrawControl &draw_control, Client *client):
 	m_cache_view_bobbing_amount = g_settings->getFloat("view_bobbing_amount");
 	// 45 degrees is the lowest FOV that doesn't cause the server to treat this
 	// as a zoom FOV and load world beyond the set server limits.
-	m_cache_fov                 = std::fmax(g_settings->getFloat("fov"), 45.0f);
+	m_cache_fov                 = core::clamp(g_settings->getFloat("fov"), 45.0f, 120.0f);
 	m_arm_inertia               = g_settings->getBool("arm_inertia");
 	m_nametags.clear();
 	m_show_nametag_backgrounds  = g_settings->getBool("show_nametag_backgrounds");

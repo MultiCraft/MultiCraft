@@ -639,7 +639,7 @@ fullscreen_bpp (Full screen BPP) int 24
 vsync (VSync) bool true
 
 #    Field of view in degrees.
-fov (Field of view) int 72 45 160
+fov (Field of view) int 72 45 120
 
 #    Alters the light curve by applying 'gamma correction' to it.
 #    Higher values make middle and lower light levels brighter.
