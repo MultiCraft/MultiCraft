@@ -35,34 +35,34 @@ using namespace irr::core;
 
 const button_data buttons_data[] = {
 	// image, image_pressed, image_float, title, name, has_sound, group
-	{ "jump_btn.png", "", "", N_("Jump"), "jump", false, -1 },
-	{ "drop_btn.png", "", "drop_btn_float.png", N_("Drop"), "drop", false, -1 },
-	{ "sneak_btn.png", "", "sneak_btn_float.png", N_("Sneak"), "sneak", false, -1 },
-	{ "special1_btn.png", "", "", N_("Special"), "special1", false, -1 },
-	{ "inventory_btn.png", "", "inventory_btn_float.png", N_("Inventory"), "inventory", true, -1 },
-	{ "escape_btn.png", "", "escape_btn_float.png", N_("Exit"), "escape", true, 1 },
-	{ "minimap_btn.png", "", "minimap_btn_float.png", N_("Toggle minimap"), "minimap", true, 1 },
-	{ "camera_btn.png", "", "camera_btn_float.png", N_("Change camera"), "camera_mode", true, 1 },
-	{ "overflow_btn.png", "", "overflow_btn_float.png", N_("Overflow menu"), "overflow", true, 1 },
-	{ "chat_btn.png", "", "chat_btn_float.png", N_("Chat"), "chat", true, 2 },
-	{ "tab_btn.png", "", "tab_btn_float.png", N_("Tab"), "tabb", true, 2 },
-	{ "fly_btn.png", "", "", N_("Toggle fly"), "freemove", true, -1 },
-	{ "fast_btn.png", "", "", N_("Toggle fast"), "fastmove", true, -1 },
-	{ "noclip_btn.png", "", "", N_("Toggle noclip"), "noclip", true, -1 },
-	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true, -1 },
-	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true, -1 },
-	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true, -1 },
-	{ "hide_interface.png", "", "", N_("Hide interface"), "toggle_interface", true, -1 },
-	{ "joystick_off.png", "", "", "", "joystick", false, -1 },
-	{ "joystick_bg.png", "", "", "", "joystick", false, -1 },
-	{ "joystick_center.png", "", "", "", "joystick_center", false, -1 },
-	{ "", "", "", N_("Open editor"), "editor_open", true, -1 },
-	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", true, -1 },
-	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", true, -1 },
-	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", true, -1 },
-	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", true, -1 },
-	{ "edit_ui_undo.png", "edit_ui_undo_pressed.png", "", N_("Undo"), "editor_undo", true, -1 },
-	{ "edit_ui_redo.png", "edit_ui_redo_pressed.png", "", N_("Redo"), "editor_redo", true, -1 },
+	{ "jump_btn.png", "", "", N_("Jump"), "jump", false, -1, KeyType::JUMP },
+	{ "drop_btn.png", "", "drop_btn_float.png", N_("Drop"), "drop", false, -1, KeyType::DROP },
+	{ "sneak_btn.png", "", "sneak_btn_float.png", N_("Sneak"), "sneak", false, -1, KeyType::SNEAK },
+	{ "special1_btn.png", "", "", N_("Special"), "special1", false, -1, KeyType::SPECIAL1 },
+	{ "inventory_btn.png", "", "inventory_btn_float.png", N_("Inventory"), "inventory", true, -1, KeyType::INVENTORY },
+	{ "escape_btn.png", "", "escape_btn_float.png", N_("Exit"), "escape", true, 1, KeyType::ESC },
+	{ "minimap_btn.png", "", "minimap_btn_float.png", N_("Toggle minimap"), "minimap", true, 1, KeyType::MINIMAP },
+	{ "camera_btn.png", "", "camera_btn_float.png", N_("Change camera"), "camera_mode", true, 1, KeyType::CAMERA_MODE },
+	{ "overflow_btn.png", "", "overflow_btn_float.png", N_("Overflow menu"), "overflow", true, 1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "chat_btn.png", "", "chat_btn_float.png", N_("Chat"), "chat", true, 2, KeyType::CHAT },
+	{ "tab_btn.png", "", "tab_btn_float.png", N_("Tab"), "tabb", true, 2, KeyType::TABB },
+	{ "fly_btn.png", "", "", N_("Toggle fly"), "freemove", true, -1, KeyType::FREEMOVE },
+	{ "fast_btn.png", "", "", N_("Toggle fast"), "fastmove", true, -1, KeyType::FASTMOVE },
+	{ "noclip_btn.png", "", "", N_("Toggle noclip"), "noclip", true, -1, KeyType::NOCLIP },
+	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true, -1, KeyType::RANGESELECT },
+	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true, -1, KeyType::TOGGLE_CHAT },
+	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true, -1, KeyType::TOGGLE_NAMETAGS },
+	{ "hide_interface.png", "", "", N_("Hide interface"), "toggle_interface", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "joystick_off.png", "", "", "", "joystick", false, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "joystick_bg.png", "", "", "", "joystick", false, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "joystick_center.png", "", "", "", "joystick_center", false, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "", "", "", N_("Open editor"), "editor_open", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_undo.png", "edit_ui_undo_pressed.png", "", N_("Undo"), "editor_undo", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_redo.png", "edit_ui_redo_pressed.png", "", N_("Redo"), "editor_redo", true, -1, KeyType::INTERNAL_ENUM_COUNT },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -83,10 +83,6 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	m_button_size = RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("hud_scaling") * 64.0f;
 
-	std::string keyname_dig = g_settings->get("keymap_dig");
-	m_keycode_dig = keyname_to_keycode(keyname_dig.c_str());
-	std::string keyname_place = g_settings->get("keymap_place");
-	m_keycode_place = keyname_to_keycode(keyname_place.c_str());
 	m_dig_and_move = g_settings->getBool("dig_and_move");
 	m_press_sound = g_settings->get("btn_press_sound");
 }
@@ -1329,26 +1325,18 @@ void TouchScreenGUI::updateCamera(camera_info &camera, s32 x, s32 y)
 			->getRayFromScreenCoordinates(v2s32(x, y));
 }
 
-bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
+bool TouchScreenGUI::isButtonPressed(KeyType::T key_type)
 {
 	for (auto button : m_buttons) {
 		if (!button->pressed)
 			continue;
 
-		std::string button_name = buttons_data[button->id].name;
-		std::string settings_name = "keymap_" + button_name;
+		KeyType::T button_key_type = buttons_data[button->id].key_type;
 
-		if (!g_settings->exists(settings_name))
+		if (button_key_type == KeyType::INTERNAL_ENUM_COUNT)
 			continue;
 
-		std::string keyname = g_settings->get(settings_name);
-
-		if (!isValidKeymap(settings_name, keyname))
-			continue;
-
-		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
-
-		if (button_keycode == keycode)
+		if (key_type == button_key_type)
 			return true;
 	}
 
@@ -1356,82 +1344,60 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 		if (!hud_button.pressed)
 			continue;
 
-		irr::EKEY_CODE button_keycode = (irr::EKEY_CODE) (KEY_KEY_1 + hud_button.id);
+		KeyType::T button_key_type = (KeyType::T)((int)KeyType::SLOT_1 + hud_button.id);
 
-		if (button_keycode == keycode) {
+		if (key_type == button_key_type) {
 			hud_button.pressed = false;
 			return true;
 		}
 	}
 
 	if (m_joystick.move_sideward) {
-		std::string button_name = m_joystick.move_sideward < 0 ? "left" : "right";
-		std::string keyname = g_settings->get("keymap_" + button_name);
-		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
+		KeyType::T button_key_type = m_joystick.move_sideward < 0 ? KeyType::LEFT : KeyType::RIGHT;
 
-		if (button_keycode == keycode)
+		if (key_type == button_key_type)
 			return true;
 	}
 
 	if (m_joystick.move_forward) {
-		std::string button_name = m_joystick.move_forward < 0 ? "forward" : "backward";
-		std::string keyname = g_settings->get("keymap_" + button_name);
-		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
+		KeyType::T button_key_type = m_joystick.move_forward < 0 ? KeyType::FORWARD : KeyType::BACKWARD;
 
-		if (button_keycode == keycode)
+		if (key_type == button_key_type)
 			return true;
 	}
 
-	if (m_camera.dig) {
-		if (m_keycode_dig == keycode)
-			return true;
+	if (m_camera.dig && key_type == KeyType::DIG)
+		return true;
+
+	if (m_camera.place && key_type == KeyType::PLACE) {
+		m_camera.place = false;
+		return true;
 	}
 
-	if (m_camera.place) {
-		if (m_keycode_place == keycode) {
-			m_camera.place = false;
-			return true;
-		}
-	}
+	if (m_camera_additional.dig && key_type == KeyType::DIG)
+		return true;
 
-	if (m_camera_additional.dig) {
-		if (m_keycode_dig == keycode)
-			return true;
-	}
-
-	if (m_camera_additional.place) {
-		if (m_keycode_place == keycode) {
-			m_camera_additional.place = false;
-			return true;
-		}
+	if (m_camera_additional.place && key_type == KeyType::PLACE) {
+		m_camera_additional.place = false;
+		return true;
 	}
 
 	return false;
 }
 
-bool TouchScreenGUI::immediateRelease(irr::EKEY_CODE keycode)
+bool TouchScreenGUI::immediateRelease(KeyType::T key_type)
 {
-	if (m_keycode_place == keycode)
+	if (key_type == KeyType::PLACE)
 		return true;
 
 	for (auto &hud_button : m_hud_buttons) {
-		irr::EKEY_CODE button_keycode = (irr::EKEY_CODE) (KEY_KEY_1 + hud_button.id);
+		KeyType::T button_key_type = (KeyType::T)((int)KeyType::SLOT_1 + hud_button.id);
 
-		if (button_keycode == keycode)
+		if (key_type == button_key_type)
 			return true;
 	}
 
 	return false;
-}
-
-bool TouchScreenGUI::isValidKeymap(std::string settingname, std::string keysym)
-{
-	if (settingname != "keymap_dig" && keysym == "KEY_LBUTTON")
-		return false;
-	else if (settingname != "keymap_place" && keysym == "KEY_RBUTTON")
-		return false;
-
-	return true;
 }
 
 void TouchScreenGUI::step(float dtime)

@@ -151,9 +151,13 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		bool result = m_touchscreengui->preprocessEvent(event);
 
 		if (result) {
-			for (auto key : keysListenedFor) {
-				irr::EKEY_CODE key_code = key.getKeyCode();
-				bool pressed = m_touchscreengui->isButtonPressed(key_code);
+			for (int key_type = 0; key_type < KeyType::INTERNAL_ENUM_COUNT; key_type++) {
+				auto key = input->keycache.key[key_type];
+
+				if (!keysListenedFor[key])
+					continue;
+
+				bool pressed = m_touchscreengui->isButtonPressed((KeyType::T)key_type);
 				if (pressed) {
 					if (!IsKeyDown(key)) {
 						keyWasPressed.set(key);
@@ -161,7 +165,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 						keyWasDown.set(key);
 					}
 				}
-				if (!pressed || m_touchscreengui->immediateRelease(key_code)) {
+				if (!pressed || m_touchscreengui->immediateRelease((KeyType::T)key_type)) {
 					if (IsKeyDown(key))
 						keyWasReleased.set(key);
 
