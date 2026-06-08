@@ -60,7 +60,7 @@ public:
 	bool on_item_use(const ItemStack &item, const PointedThing &pointed);
 
 	bool on_inventory_open(Inventory *inventory);
-	bool on_pause_menu_open();
+	bool on_pause_menu_open(const std::string &fs);
 	void on_hud_button_press(const std::string &btn);
 	void on_update(const std::string &key, const std::string &value);
 

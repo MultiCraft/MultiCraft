@@ -4615,7 +4615,9 @@ void Game::showPauseMenu()
 	std::ostringstream os;
 	os << "formspec_version[1]" << "size[11,6]"
 		<< "no_prepend[]"
-		<< "bgcolor[#00000060;true]";
+		<< "bgcolor[#00000060;true]"
+		<< "pause_game[]"
+		<< "set_focus[btn_continue;true]";
 	getButtonStyle(os);
 
 	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
@@ -4697,17 +4699,14 @@ void Game::showPauseMenu()
 	/* Note: FormspecFormSource and LocalFormspecHandler  *
 	 * are deleted by guiFormSpecMenu                     */
 
-	auto *&formspec = m_game_ui->getFormspecGUI();
-	if (!client->modsLoaded() || !client->getScript()->on_pause_menu_open()) {
+	if (!client->modsLoaded() || !client->getScript()->on_pause_menu_open(os.str())) {
 		FormspecFormSource *fs_src = new FormspecFormSource(os.str());
 		LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU", client);
 
+		auto *&formspec = m_game_ui->getFormspecGUI();
 		GUIFormSpecMenu::create(formspec, client, &input->joystick,
 				fs_src, txt_dst, client->getFormspecPrepend(), sound);
-		formspec->setFocus("btn_continue");
 	}
-	if (formspec != nullptr)
-		formspec->doPause = true;
 
 	if (simple_singleplayer_mode)
 		pauseAnimation();

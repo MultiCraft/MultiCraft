@@ -254,13 +254,15 @@ bool ScriptApiClient::on_inventory_open(Inventory *inventory)
 	return readParam<bool>(L, -1);
 }
 
-bool ScriptApiClient::on_pause_menu_open()
+bool ScriptApiClient::on_pause_menu_open(const std::string &fs)
 {
 	SCRIPTAPI_PRECHECKHEADER
 
 	lua_getglobal(L, "core");
 	lua_getfield(L, -1, "registered_on_pause_menu_open");
-	runCallbacks(0, RUN_CALLBACKS_MODE_OR);
+	lua_pushlstring(L, fs.c_str(), fs.size());
+
+	runCallbacks(1, RUN_CALLBACKS_MODE_OR);
 	return readParam<bool>(L, -1);
 }
 
