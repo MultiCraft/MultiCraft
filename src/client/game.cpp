@@ -131,11 +131,6 @@ struct TextDestPlayerInventory : public TextDest
 
 struct LocalFormspecHandler : public TextDest
 {
-	LocalFormspecHandler(const std::string &formname)
-	{
-		m_formname = formname;
-	}
-
 	LocalFormspecHandler(const std::string &formname, Client *client):
 		m_client(client)
 	{
@@ -4705,7 +4700,7 @@ void Game::showPauseMenu()
 	auto *&formspec = m_game_ui->getFormspecGUI();
 	if (!client->modsLoaded() || !client->getScript()->on_pause_menu_open()) {
 		FormspecFormSource *fs_src = new FormspecFormSource(os.str());
-		LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU");
+		LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU", client);
 
 		GUIFormSpecMenu::create(formspec, client, &input->joystick,
 				fs_src, txt_dst, client->getFormspecPrepend(), sound);
