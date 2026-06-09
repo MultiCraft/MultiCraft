@@ -346,10 +346,19 @@ void Server::handleCommand_RequestMedia(NetworkPacket* pkt)
 {
 	std::vector<std::string> tosend;
 	u16 numfiles;
+	session_t peer_id = pkt->getPeerId();
+
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
+		std::istringstream is(pkt->readLongString(), std::ios::binary);
+		std::stringstream sstr;
+		decompressZstd(is, sstr);
+		pkt->clearData();
+		pkt->putRawString(sstr.str().c_str(), sstr.str().size());
+		pkt->setReadOffset(0);
+	}
 
 	*pkt >> numfiles;
 
-	session_t peer_id = pkt->getPeerId();
 	infostream << "Sending " << numfiles << " files to " <<
 		getPlayerName(peer_id) << std::endl;
 	verbosestream << "TOSERVER_REQUEST_MEDIA: " << std::endl;
@@ -765,9 +774,26 @@ void Server::handleCommand_InventoryAction(NetworkPacket* pkt)
 void Server::handleCommand_ChatMessage(NetworkPacket* pkt)
 {
 	std::wstring message;
-	*pkt >> message;
-
 	session_t peer_id = pkt->getPeerId();
+
+	if (m_clients.getMulticraftProtocolVersion(peer_id) > 4 || m_simple_singleplayer_mode) {
+		u8 version = 0;
+		*pkt >> version;
+
+		if (version > 100) {
+			std::istringstream is(pkt->readLongString(), std::ios::binary);
+			std::stringstream sstr;
+			decompressZstd(is, sstr);
+			std::string datastring = sstr.str();
+			message = std::wstring((const wchar_t*)(datastring.data()),
+			        datastring.size() / sizeof(wchar_t));
+		} else {
+			*pkt >> message;
+		}
+	} else {
+		*pkt >> message;
+	}
+
 	RemotePlayer *player = m_env->getPlayer(peer_id);
 	if (player == NULL) {
 		errorstream <<
