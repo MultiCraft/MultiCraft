@@ -36,10 +36,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "serverlist.h"
 #include "mapgen/mapgen.h"
 #include "settings.h"
-#include "translation.h"
-#if defined(__ANDROID__) || defined(__APPLE__)
-#include "util/encryption.h"
-#endif
 
 #include <IFileArchive.h>
 #include <IFileSystem.h>
@@ -1127,27 +1123,6 @@ int ModApiMainMenu::l_sleep_ms(lua_State *L)
 }
 
 /******************************************************************************/
-int ModApiMainMenu::l_load_translation(lua_State *L)
-{
-	size_t tr_data_length;
-	const char *tr_data_raw = luaL_checklstring(L, 1, &tr_data_length);
-	sanity_check(tr_data_raw != NULL);
-
-	std::string tr_data = std::string(tr_data_raw, tr_data_length);
-
-#if defined(__ANDROID__) || defined(__APPLE__)
-	std::string decrypted_data;
-	if (Encryption::decryptSimple(tr_data, decrypted_data)) {
-		g_client_translations->loadTranslation(decrypted_data);
-		return 0;
-	}
-#endif
-
-	g_client_translations->loadTranslation(tr_data);
-	return 0;
-}
-
-/******************************************************************************/
 void ModApiMainMenu::Initialize(lua_State *L, int top)
 {
 	API_FCT(update_formspec);
@@ -1200,7 +1175,6 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(open_url);
 	API_FCT(open_dir);
 	API_FCT(do_async_callback);
-	API_FCT(load_translation);
 }
 
 /******************************************************************************/

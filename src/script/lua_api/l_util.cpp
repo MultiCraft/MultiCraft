@@ -40,8 +40,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "version.h"
 #include "util/hex.h"
 #include "util/hashing.h"
+#include "util/string.h"
 #include <algorithm>
 #include "translation.h"
+#if defined(__ANDROID__) || defined(__APPLE__)
+#include "util/encryption.h"
+#endif
 #include "content/mods.h"
 #include "cpp_api/s_base.h"
 
@@ -632,6 +636,57 @@ int ModApiUtil::l_get_translated_string(lua_State * L)
 	lua_pushstring(L, string.c_str());
 	return 1;
 }
+
+void load_tr_data(const std::string &tr_data)
+{
+#if defined(__ANDROID__) || defined(__APPLE__)
+	std::string decrypted_data;
+	if (Encryption::decryptSimple(tr_data, decrypted_data)) {
+		g_client_translations->loadTranslation(decrypted_data);
+		return;
+	}
+#endif
+
+	g_client_translations->loadTranslation(tr_data);
+}
+
+int ModApiUtil::l_load_translation(lua_State *L)
+{
+	size_t tr_data_length;
+	const char *tr_data_raw = luaL_checklstring(L, 1, &tr_data_length);
+	sanity_check(tr_data_raw != NULL);
+
+	std::string tr_data = std::string(tr_data_raw, tr_data_length);
+	load_tr_data(tr_data);
+	return 0;
+}
+
+int ModApiUtil::l_load_translation_from_file(lua_State *L)
+{
+	// This is intended to be used from CSMs which are not ordinarily permitted
+	// to read files, so to avoid abuse it's locked down
+
+	std::string path = luaL_checkstring(L, 1);
+	// Restrict to loading from cache path
+	path = fs::AbsolutePath(path);
+	if (!fs::PathStartsWith(path, fs::AbsolutePath(porting::path_cache)))
+		return 0;
+
+	// Restrict to filenames ending with .tr
+	const char *translate_ext[] = {".tr", NULL};
+	if (removeStringEnd(path, translate_ext).empty())
+		return 0;
+
+	std::string tr_data;
+	if (!fs::ReadFile(path, tr_data)) {
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	load_tr_data(tr_data);
+	lua_pushboolean(L, true);
+	return 1;
+}
 #endif
 
 void ModApiUtil::Initialize(lua_State *L, int top)
@@ -704,6 +759,8 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(get_system_ram);
 	API_FCT(copy_to_clipboard);
 	API_FCT(get_translated_string);
+	API_FCT(load_translation);
+	API_FCT(load_translation_from_file);
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
@@ -751,6 +808,8 @@ void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	API_FCT(get_system_ram);
 	API_FCT(copy_to_clipboard);
 	API_FCT(get_translated_string);
+	API_FCT(load_translation);
+	API_FCT(load_translation_from_file);
 #else
 	FATAL_ERROR("InitializeMainMenu called from server");
 #endif

@@ -173,8 +173,6 @@ private:
 	static int l_do_async_callback(lua_State *L);
 
 	// MultiCraft
-	static int l_load_translation(lua_State *L);
-
 	static int l_sleep_ms(lua_State *L);
 
 public:

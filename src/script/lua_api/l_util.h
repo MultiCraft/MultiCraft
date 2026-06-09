@@ -118,6 +118,12 @@ private:
 
 	// get_translated_string(text) (client & main menu, not server)
 	static int l_get_translated_string(lua_State *L);
+
+	// load_translation(data)
+	static int l_load_translation(lua_State *L);
+
+	// load_translation_from_file(filepath)
+	static int l_load_translation_from_file(lua_State *L);
 #endif
 
 public:
