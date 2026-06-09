@@ -129,6 +129,24 @@ end
 -- Recalculate the CSM order once all other mods are loaded
 core.register_on_mods_loaded(recalc_csm_order)
 
+local player_rename_hack = sscsm.minify_code([[
+	local old_player = core.localplayer
+	core.localplayer = setmetatable({}, {__index = function(self, key)
+		local res = old_player[key]
+		if type(res) == "function" then
+			local f = res
+			res = function(_, ...)
+				return f(old_player, ...)
+			end
+			self[key] = res
+		end
+		return res
+	end})
+	function core.localplayer:get_name()
+		return n
+	end
+]])
+
 -- Handle players joining
 local has_sscsms = {}
 local sscsms_sent = {}
@@ -139,7 +157,7 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 	if not sender or sscsms_sent[sender] then return end
 
 	local v2_channel = v2_mod_channels[sender]
-	if channel_name ~= "sscsm:v2_" .. sender or not v2_channel then
+	if channel_name:sub(1, 9) ~= "sscsm:v2_" or not v2_channel then
 		return
 	end
 
@@ -157,10 +175,24 @@ core.register_on_modchannel_message(function(channel_name, sender, message)
 	-- New protocol (compressed)
 	local blob = {}
 
+	local player = core.get_player_by_name(sender)
 	for _, name in ipairs(csm_order) do
 		local def = sscsm.registered_csms[name]
 		if not def.is_enabled_for or def.is_enabled_for(sender) then
-			blob[#blob + 1] = name .. "\n" .. def.code
+			local code = def.code
+			if name == ":init" then
+				local uncanonical_name = player.get_uncanonical_player_name and
+					player:get_uncanonical_player_name()
+				if uncanonical_name and uncanonical_name ~= sender then
+					code = format(
+						"(function(n)\n%s\nend)(%q);\n%s",
+						player_rename_hack,
+						sender,
+						code
+					)
+				end
+			end
+			blob[#blob + 1] = name .. "\n" .. code
 		end
 	end
 
@@ -186,7 +218,9 @@ core.register_on_joinplayer(function(player)
 	-- Join player-specific mod channels to avoid relaying messages to players
 	-- that don't need them
 	local name = player:get_player_name()
-	v2_mod_channels[name] = core.mod_channel_join("sscsm:v2_" .. name)
+	local uncanonical_name = player.get_uncanonical_player_name and
+		player:get_uncanonical_player_name() or name
+	v2_mod_channels[name] = core.mod_channel_join("sscsm:v2_" .. uncanonical_name)
 end)
 
 core.register_on_leaveplayer(function(player)

@@ -49,6 +49,7 @@ public:
 		const std::string &password);
 	bool setPassword(const std::string &playername,
 		const std::string &password);
+	std::string getCanonicalPlayerName(const std::string &playername);
 
 	// Note that this calls collectgarbage() first.
 	size_t getMemoryUsageKB();
