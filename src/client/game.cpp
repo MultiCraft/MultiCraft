@@ -4522,8 +4522,8 @@ void Game::showDeathFormspec()
 	formspec->setFocus("btn_respawn");
 }
 
-void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple<const char*, std::string,
-		std::string, bool>> &buttons, float center_y, float btn_h, float gap)
+void createPauseMenuButtons(std::ostringstream &os, const std::vector<PauseMenuButton> &buttons,
+		float center_y, float btn_h, float gap)
 {
 	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
 	float y = center_y + gap * 0.5f - total_height * 0.5f;
@@ -4621,16 +4621,8 @@ void Game::showPauseMenu()
 	ypos += 0.5f;
 #endif
 
-	std::ostringstream os;
-	os << "formspec_version[1]" << "size[11,6]"
-		<< "no_prepend[]"
-		<< "bgcolor[#00000060;true]"
-		<< "pause_game[]"
-		<< "set_focus[btn_continue;true]";
-	getButtonStyle(os);
-
 	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
-	auto buttons = std::vector<std::tuple<const char*, std::string, std::string, bool>>{
+	auto buttons = std::vector<PauseMenuButton>{
 		{"btn_continue", strgettext("Continue"), sheet + "0,0", true}
 	};
 
@@ -4661,6 +4653,17 @@ void Game::showPauseMenu()
 #if !defined(__ANDROID__) && !defined(__IOS__)
 	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), sheet + "1,2", true);
 #endif
+
+	if (client->modsLoaded() && client->getScript()->on_pause_menu_open(buttons))
+		return;
+
+	std::ostringstream os;
+	os << "formspec_version[1]" << "size[11,6]"
+		<< "no_prepend[]"
+		<< "bgcolor[#00000060;true]"
+		<< "pause_game[]"
+		<< "set_focus[btn_continue;true]";
+	getButtonStyle(os);
 
 	createPauseMenuButtons(os, buttons, 3.0f, 0.95f, 0.2f);
 
@@ -4708,14 +4711,12 @@ void Game::showPauseMenu()
 	/* Note: FormspecFormSource and LocalFormspecHandler  *
 	 * are deleted by guiFormSpecMenu                     */
 
-	if (!client->modsLoaded() || !client->getScript()->on_pause_menu_open(os.str())) {
-		FormspecFormSource *fs_src = new FormspecFormSource(os.str());
-		LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU", client);
+	FormspecFormSource *fs_src = new FormspecFormSource(os.str());
+	LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU", client);
 
-		auto *&formspec = m_game_ui->getFormspecGUI();
-		GUIFormSpecMenu::create(formspec, client, &input->joystick,
-				fs_src, txt_dst, client->getFormspecPrepend(), sound);
-	}
+	auto *&formspec = m_game_ui->getFormspecGUI();
+	GUIFormSpecMenu::create(formspec, client, &input->joystick,
+			fs_src, txt_dst, client->getFormspecPrepend(), sound);
 }
 
 void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,

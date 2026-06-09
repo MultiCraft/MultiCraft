@@ -34,6 +34,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 class ClientEnvironment;
 
+using PauseMenuButton = std::tuple<const char*, std::string, std::string, bool>;
+
 class ScriptApiClient : virtual public ScriptApiBase
 {
 public:
@@ -60,7 +62,7 @@ public:
 	bool on_item_use(const ItemStack &item, const PointedThing &pointed);
 
 	bool on_inventory_open(Inventory *inventory);
-	bool on_pause_menu_open(const std::string &fs);
+	bool on_pause_menu_open(const std::vector<PauseMenuButton> &buttons);
 	void on_hud_button_press(const std::string &btn);
 	void on_update(const std::string &key, const std::string &value);
 

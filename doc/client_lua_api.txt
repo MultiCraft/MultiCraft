@@ -743,10 +743,9 @@ Call these functions only at load time!
     * If function returns `true`, remaining functions are not called
 * `minetest.register_on_tab(function())`
     * Called when tab key pressed
-* `minetest.register_on_pause_menu_open(function(formspec))`
+* `minetest.register_on_pause_menu_open(function(buttons))`
     * Called when the pause menu is opened
-    * The default formspec is passed in if it is going to be modified and shown
-      (use the `MT_PAUSE_MENU` formname to get builtin to handle fields)
+    * The list of enabled buttons is passed in.
     * If function returns `true`, the default pause menu is not shown
 ### Sounds
 * `minetest.sound_play(spec, parameters)`: returns a handle
