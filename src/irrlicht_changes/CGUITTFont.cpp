@@ -34,6 +34,7 @@
 #include <iostream>
 #include "CGUITTFont.h"
 #include "porting.h"
+#include "util/string.h"
 
 
 namespace irr
@@ -88,7 +89,7 @@ u32 getBestFixedSizeIndex(FT_Face face, u32 font_size)
 	u32 index = 0;
 	u32 last_font_size =0;
 
-	for (u32 i = 0; i < face->num_fixed_sizes; i++) {
+	for (u32 i = 0; i < (u32)(face->num_fixed_sizes); i++) {
 		u32 current_size = face->available_sizes[i].height;
 
 		if (current_size > last_font_size) {
@@ -581,7 +582,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 
 	// Log.
 	if (logger)
-		logger->log(L"CGUITTFont", core::stringw(core::stringw(L"Creating new font: ") + core::ustring(filename).toWCHAR_s() + L" " + core::stringc(size) + L"pt " + (!use_monochrome ? L"+antialias " : L"-antialias ") + (use_transparency ? L"+transparency" : L"-transparency")).c_str(), irr::ELL_INFORMATION);
+		logger->log(L"CGUITTFont", core::stringw(core::stringw(L"Creating new font: ") + core::stringw(filename) + L" " + core::stringc(size) + L"pt " + (!use_monochrome ? L"+antialias " : L"-antialias ") + (use_transparency ? L"+transparency" : L"-transparency")).c_str(), irr::ELL_INFORMATION);
 
 	// Grab the face.
 	SGUITTFace* face = 0;
@@ -611,7 +612,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 			int systemMemory = porting::getTotalSystemMemory();
 			int maxFontSize = 5 * 1024 * 1024;
 			size_t fileSize = file->getSize();
-			if (systemMemory < 3072 && fileSize > maxFontSize) {
+			if (systemMemory < 3072 && (int)fileSize > maxFontSize) {
 				use_memory_face = false;
 			} else {
 				face->face_buffer = new FT_Byte[fileSize];
@@ -634,8 +635,8 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 
 		if (!filesystem || !use_memory_face)
 		{
-			core::ustring converter(filename);
-			if (FT_New_Face(c_library, reinterpret_cast<const char*>(converter.toUTF8_s().c_str()), 0, &face->face))
+			std::string filename_utf8 = stringw_to_utf8(filename);
+			if (FT_New_Face(c_library, filename_utf8.c_str(), 0, &face->face))
 			{
 				if (logger) logger->log(L"CGUITTFont", L"FT_New_Face failed.", irr::ELL_INFORMATION);
 
@@ -719,10 +720,10 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (!face)
 		return false;
 
-	uchar32_t emojis_to_test[] = { 0x1F600, 0x1F1FA, 0x1F3F4 };
+	uint32_t emojis_to_test[] = { 0x1F600, 0x1F1FA, 0x1F3F4 };
 
 	u32 char_index = 0;
-	for (uchar32_t emoji : emojis_to_test) {
+	for (uint32_t emoji : emojis_to_test) {
 		char_index = FT_Get_Char_Index(face, emoji);
 
 		if (char_index != 0)
@@ -863,10 +864,10 @@ void CGUITTFont::calculateMaxFontHeight()
 	//     return font_metrics.height / 64;
 	// but for now keep it for compatibility
 
-	const uchar32_t test_chars[] = {'g', 'j', '_'};
+	core::stringw test_chars[] = {"g", "j", "_"};
 	u32 max_height = font_metrics.height / 64;
 
-	for (uchar32_t c : test_chars) {
+	for (core::stringw c : test_chars) {
 		std::vector<ShapedRun> shaped_runs = shapeText(c);
 		loadGlyphsForShapedText(shaped_runs);
 
@@ -887,7 +888,7 @@ void CGUITTFont::calculateMaxFontHeight()
 	max_font_height = max_height + 1;
 }
 
-std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text,
+std::vector<ShapedRun> CGUITTFont::shapeText(const core::stringw& text,
 		bool use_rtl) const
 {
 	std::vector<ShapedRun> runs;
@@ -895,28 +896,17 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text,
 	if (text.size() == 0)
 		return runs;
 
-	std::vector<uint32_t> utf32_text;
-	core::ustring::const_iterator iter(text);
-
-	while (!iter.atEnd()) {
-		utf32_text.push_back(*iter);
-		++iter;
-	}
-
 	if (use_rtl) {
-		std::vector<BidiRun> bidi_runs = getBidiRuns(utf32_text);
+		std::vector<BidiRun> bidi_runs = getBidiRuns(text);
 
 		for (const auto& bidi_run : bidi_runs) {
-			std::vector<uint32_t> run_text(
-					utf32_text.begin() + bidi_run.start,
-					utf32_text.begin() + bidi_run.start + bidi_run.length);
-
+			core::stringw run_text = text.subString(bidi_run.start, bidi_run.length);
 			std::vector<TextRun> font_runs = splitIntoFontRuns(run_text);
 
 			std::vector<ShapedRun> bidi_shaped_runs;
 			for (auto& font_run : font_runs) {
 				font_run.start += bidi_run.start;
-				ShapedRun shaped = shapeRun(font_run, utf32_text, bidi_run.is_rtl);
+				ShapedRun shaped = shapeRun(font_run, text, bidi_run.is_rtl);
 
 				if (bidi_run.is_rtl) {
 					bidi_shaped_runs.insert(bidi_shaped_runs.begin(), shaped);
@@ -928,10 +918,10 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text,
 			runs.insert(runs.end(), bidi_shaped_runs.begin(), bidi_shaped_runs.end());
 		}
 	} else {
-		std::vector<TextRun> font_runs = splitIntoFontRuns(utf32_text);
+		std::vector<TextRun> font_runs = splitIntoFontRuns(text);
 
 		for (auto& font_run : font_runs) {
-			ShapedRun shaped = shapeRun(font_run, utf32_text, false);
+			ShapedRun shaped = shapeRun(font_run, text, false);
 			runs.push_back(shaped);
 		}
 	}
@@ -940,7 +930,7 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::ustring& text,
 }
 
 std::vector<BidiRun> CGUITTFont::getBidiRuns(
-		const std::vector<uint32_t>& text) const
+		const core::stringw& text) const
 {
 	std::vector<BidiRun> runs;
 
@@ -948,8 +938,12 @@ std::vector<BidiRun> CGUITTFont::getBidiRuns(
 		return runs;
 
 	SBCodepointSequence codepointSequence;
+#if defined(_WIN32) || defined(_WIN64)
+	codepointSequence.stringEncoding = SBStringEncodingUTF16;
+#else
 	codepointSequence.stringEncoding = SBStringEncodingUTF32;
-	codepointSequence.stringBuffer = (void*)text.data();
+#endif
+	codepointSequence.stringBuffer = (void*)text.c_str();
 	codepointSequence.stringLength = text.size();
 
 	SBAlgorithmRef bidiAlgorithm = SBAlgorithmCreate(&codepointSequence);
@@ -1000,7 +994,7 @@ std::vector<BidiRun> CGUITTFont::getBidiRuns(
 }
 
 std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
-		const std::vector<uint32_t>& text) const
+		const core::stringw& text) const
 {
 	std::vector<TextRun> runs;
 
@@ -1008,27 +1002,32 @@ std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
 	size_t current_face = SIZE_MAX;
 
 	for (u32 i = 0; i < text.size(); i++) {
-		uint32_t ch = text[i];
+		wchar_t ch = text[i];
+		uint32_t codepoint = (uint32_t)ch;
+		
+#if defined(_WIN32) || defined(_WIN64)
+		if (i + 1 < text.size() && isSurrogatePair(ch, text[i + 1])) {
+			codepoint = 0x10000 + ((uint32_t)(ch - 0xD800) << 10) + (text[i + 1] - 0xDC00);
+		} else if (isLowSurrogate(ch)) {
+			continue;
+		}
+#endif
 
-		// Check for zero width joiner or variation selector
-		bool is_zwj = (ch == 0x200D);
-		bool is_variation_selector = (ch >= 0xFE00 && ch <= 0xFE0F) ||
-				(ch >= 0xE0100 && ch <= 0xE01EF);
-		bool is_emoji_modifier = (ch >= 0x1F3FB && ch <= 0x1F3FF);
+		bool is_zwj = (codepoint == 0x200D);
+		bool is_variation_selector = (codepoint >= 0xFE00 && codepoint <= 0xFE0F) ||
+				(codepoint >= 0xE0100 && codepoint <= 0xE01EF);
+		bool is_emoji_modifier = (codepoint >= 0x1F3FB && codepoint <= 0x1F3FF);
 
 		if (is_zwj || is_variation_selector || is_emoji_modifier)
 			continue;
 
-		s32 face_for_char = getFaceIndexByChar(ch);
-
+		s32 face_for_char = getFaceIndexByChar(codepoint);
 		if (face_for_char == -1)
 			face_for_char = 0;
 
 		if ((size_t)face_for_char != current_face) {
-			if (current_face != SIZE_MAX) {
+			if (current_face != SIZE_MAX)
 				runs.push_back({current_face, run_start, i - run_start});
-			}
-
 			run_start = i;
 			current_face = face_for_char;
 		}
@@ -1043,7 +1042,7 @@ std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
 }
 
 ShapedRun CGUITTFont::shapeRun(const TextRun& run,
-		const std::vector<uint32_t>& text, bool is_rtl) const
+		const core::stringw& text, bool is_rtl) const
 {
 	ShapedRun result;
 	result.face_index = run.face_index;
@@ -1063,7 +1062,11 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
 	hb_buffer_t* buf = hb_buffer_create();
 
-	hb_buffer_add_utf32(buf, text.data(), text.size(), run.start, run.length);
+#if defined(_WIN32) || defined(_WIN64)
+	hb_buffer_add_utf16(buf, (const uint16_t*)text.c_str(), text.size(), run.start, run.length);
+#else
+	hb_buffer_add_utf32(buf, (const uint32_t*)text.c_str(), text.size(), run.start, run.length);
+#endif
 
 	hb_buffer_guess_segment_properties(buf);
 
@@ -1226,10 +1229,10 @@ s32 CGUITTFont::getCursorPosition(const core::stringw& text, u32 logical_pos) co
 
 s32 CGUITTFont::getCharacterFromPos(const wchar_t* text, s32 pixel_x) const
 {
-	return getCharacterFromPos(core::ustring(text), pixel_x);
+	return getCharacterFromPos(core::stringw(text), pixel_x);
 }
 
-s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) const
+s32 CGUITTFont::getCharacterFromPos(const core::stringw& text, s32 pixel_x) const
 {
 	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
 	//loadGlyphsForShapedText(shaped_runs);
@@ -1247,15 +1250,16 @@ s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) cons
 
 			if (pixel_x < glyph_end) {
 				bool clicked_left_half = pixel_x < (glyph_start + shaped_glyph.x_advance / 2);
+				s32 next_cluster = const_cast<CGUITTFont*>(this)->getNextClusterPos(text, shaped_glyph.cluster);
 
 				if (!run.is_rtl) {
 					if (clicked_left_half)
 						return shaped_glyph.cluster;
 					else
-						return shaped_glyph.cluster + 1;
+						return next_cluster;
 				} else {
 					if (clicked_left_half)
-						return shaped_glyph.cluster + 1;
+						return next_cluster;
 					else
 						return shaped_glyph.cluster;
 				}
@@ -1478,18 +1482,8 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 			offset.Y = ((position.getHeight() - textDimension.Height) >> 1) + offset.Y;
 	}
 
-	// Convert to a unicode string.
-	core::ustring utext = text.getString();
-
-	std::vector<uint32_t> utf32_text;
-	core::ustring::const_iterator it(utext);
-	while (!it.atEnd()) {
-		utf32_text.push_back(*it);
-		++it;
-	}
-
 	// Shape the text with HarfBuzz
-	std::vector<ShapedRun> shaped_runs = shapeText(utext.c_str(), use_rtl);
+	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str(), use_rtl);
 	loadGlyphsForShapedText(shaped_runs);
 
 	// Set up our render map.
@@ -1499,9 +1493,9 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 	{
 		for (const auto& shaped_glyph : run.glyphs)
 		{
-			uchar32_t currentChar = 0;
-			if (shaped_glyph.cluster < utf32_text.size())
-				currentChar = utf32_text[shaped_glyph.cluster];
+			uint32_t currentChar = 0;
+			if (shaped_glyph.cluster < text.size())
+				currentChar = (text.c_str())[shaped_glyph.cluster];
 
 			bool visible = (Invisible.findFirst(currentChar) == -1);
 
@@ -1591,34 +1585,29 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 
 core::dimension2d<u32> CGUITTFont::getCharDimension(const wchar_t ch) const
 {
-	return getDimension(core::ustring(ch));
+	core::stringw str;
+	str.append(ch);
+
+	return getDimension(str);
 }
 
 core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text, bool use_rtl) const
 {
-	return getDimension(core::ustring(text), use_rtl);
+	return getDimension(core::stringw(text), use_rtl);
 }
 
-core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text, bool use_rtl) const
+core::dimension2d<u32> CGUITTFont::getDimension(const core::stringw& text, bool use_rtl) const
 {
-	core::ustring utext = text;
-	std::vector<ShapedRun> shaped_runs = shapeText(utext, use_rtl);
+	std::vector<ShapedRun> shaped_runs = shapeText(text, use_rtl);
 	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
-
-	std::vector<uint32_t> utf32_text;
-	core::ustring::const_iterator iter(text);
-	while (!iter.atEnd()) {
-		utf32_text.push_back(*iter);
-		++iter;
-	}
 
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
 
 	for (const auto& run : shaped_runs) {
 		for (const auto& glyph : run.glyphs) {
-			if (glyph.cluster < utf32_text.size()) {
-				uchar32_t c = utf32_text[glyph.cluster];
+			if (glyph.cluster < text.size()) {
+				uint32_t c = text[glyph.cluster];
 				if (c == L'\n' || c == L'\r') {
 					text_dimension.Height += line.Height;
 					if (text_dimension.Width < line.Width)
@@ -1646,10 +1635,10 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text, bool 
 
 core::dimension2d<u32> CGUITTFont::getTotalDimension(const wchar_t* text) const
 {
-	return getTotalDimension(core::ustring(text));
+	return getTotalDimension(core::stringw(text));
 }
 
-core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) const
+core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::stringw& text) const
 {
 	core::dimension2d<u32> text_dimension = getDimension(text);
 
@@ -1667,7 +1656,7 @@ core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) 
 	return text_dimension;
 }
 
-s32 CGUITTFont::getFaceIndexByChar(uchar32_t c) const
+s32 CGUITTFont::getFaceIndexByChar(uint32_t c) const
 {
 	for (size_t i = 0; i < tt_faces.size(); i++) {
 		u32 glyph = FT_Get_Char_Index(tt_faces[i], c);
@@ -1694,7 +1683,7 @@ s32 CGUITTFont::getKerningWidth(const wchar_t* thisLetter, const wchar_t* previo
 	return 0;
 }
 
-s32 CGUITTFont::getKerningWidth(const uchar32_t thisLetter, const uchar32_t previousLetter) const
+s32 CGUITTFont::getKerningWidth(const uint32_t thisLetter, const uint32_t previousLetter) const
 {
 	return 0;
 }
@@ -1706,18 +1695,19 @@ s32 CGUITTFont::getKerningHeight() const
 
 void CGUITTFont::setInvisibleCharacters(const wchar_t *s)
 {
-	core::ustring us(s);
+	core::stringw us;
+	us.append(s);
 	Invisible = us;
 }
 
-void CGUITTFont::setInvisibleCharacters(const core::ustring& s)
+void CGUITTFont::setInvisibleCharacters(const core::stringw& s)
 {
 	Invisible = s;
 }
 
-video::IImage* CGUITTFont::createTextureFromChar(const uchar32_t& ch)
+video::IImage* CGUITTFont::createTextureFromChar(const uint32_t& ch)
 {
-	core::ustring temp_text;
+	core::stringw temp_text;
 	temp_text.append(ch);
 
 	std::vector<ShapedRun> shaped = shapeText(temp_text);
@@ -1828,7 +1818,7 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 	if (!shared_plane_ptr_) //this points to a static mesh that contains the plane
 		createSharedPlane(); //if it's not initialized, we create one.
 
-	core::ustring utext(text);
+	core::stringw utext(text);
 	std::vector<ShapedRun> shaped_runs = shapeText(utext);
 	loadGlyphsForShapedText(shaped_runs);
 
@@ -1865,7 +1855,7 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 		for (const auto& shaped_glyph : run.glyphs)
 		{
 			// Check for line breaks
-			uchar32_t currentChar = 0;
+			uint32_t currentChar = 0;
 			if (shaped_glyph.cluster < utext.size()) {
 				currentChar = utext[shaped_glyph.cluster];
 			}
@@ -1875,7 +1865,7 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 			{
 				lineBreak = true;
 			}
-			else if (currentChar == (uchar32_t)'\n')
+			else if (currentChar == (uint32_t)'\n')
 			{
 				lineBreak = true;
 			}
