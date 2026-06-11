@@ -954,6 +954,8 @@ Call these functions only at load time!
     * If the `btns` table is empty or nil, all controls are visible.
     * Example: `{jump = true, joystick = true}`
     * No-op if there is no touchscreen
+* `minetest.texture_exists(texture_name)`
+    * Returns true if the specified texture exists.
 
 Setting-related
 ---------------
