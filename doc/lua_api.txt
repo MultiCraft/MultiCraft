@@ -4585,6 +4585,13 @@ Utilities
           abm_min_max_y = true,
           -- "zstd" method for compress/decompress (5.7.0)
           compress_zstd = true,
+
+          -- Whether bidirectional text is supported
+          bidi_text_supported = true,
+
+          -- Whether the "scrollbar_arrows" style is supported and themed
+          -- scrollbars can have their arrows hidden
+          themed_scrollbar_hide_arrows = true,
       }
 
 * `minetest.has_feature(arg)`: returns `boolean, missing_features`
