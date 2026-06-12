@@ -103,6 +103,16 @@ void GUIScene::draw()
 		m_cam->bindTargetAndRotation(true);
 	}
 
+	if (m_initial_rotation && m_mesh) {
+		m_cam->updateAbsolutePosition();
+		m_cam->updateMatrices();
+
+		rotateCamera(v3f(m_custom_rot.X, m_custom_rot.Y, 0.f));
+		calcOptimalDistance();
+
+		m_initial_rotation = false;
+	}
+
 	cameraLoop();
 
 	// Continuous rotation
@@ -110,13 +120,6 @@ void GUIScene::draw()
 		rotateCamera(v3f(0.f, -0.03f * (float)dtime_ms, 0.f));
 
 	m_smgr->drawAll();
-
-	if (m_initial_rotation && m_mesh) {
-		rotateCamera(v3f(m_custom_rot.X, m_custom_rot.Y, 0.f));
-		calcOptimalDistance();
-
-		m_initial_rotation = false;
-	}
 
 	m_driver->setViewPort(oldViewPort);
 }
