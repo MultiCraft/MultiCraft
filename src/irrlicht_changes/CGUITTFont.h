@@ -35,7 +35,6 @@
 #include <ft2build.h>
 #include <vector>
 #include <map>
-#include "irrUString.h"
 #include "util/enriched_string.h"
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
@@ -346,11 +345,11 @@ namespace gui
 
 			//! Returns the dimension of a text string.
 			virtual core::dimension2d<u32> getDimension(const wchar_t* text, bool use_rtl = true) const;
-			virtual core::dimension2d<u32> getDimension(const core::ustring& text, bool use_rtl = true) const;
+			virtual core::dimension2d<u32> getDimension(const core::stringw& text, bool use_rtl = true) const;
 
 			//! Returns the dimension of a text string with keep in mind that italic/bold text is slightly longer.
 			virtual core::dimension2d<u32> getTotalDimension(const wchar_t* text) const;
-			virtual core::dimension2d<u32> getTotalDimension(const core::ustring& text) const;
+			virtual core::dimension2d<u32> getTotalDimension(const core::stringw& text) const;
 
 			//! Sets global kerning width for the font.
 			virtual void setKerningWidth(s32 kerning);
@@ -360,14 +359,14 @@ namespace gui
 
 			//! Gets kerning values (distance between letters) for the font. If no parameters are provided,
 			virtual s32 getKerningWidth(const wchar_t* thisLetter=0, const wchar_t* previousLetter=0) const;
-			virtual s32 getKerningWidth(const uchar32_t thisLetter=0, const uchar32_t previousLetter=0) const;
+			virtual s32 getKerningWidth(const uint32_t thisLetter=0, const uint32_t previousLetter=0) const;
 
 			//! Returns the distance between letters
 			virtual s32 getKerningHeight() const;
 
 			//! Define which characters should not be drawn by the font.
 			virtual void setInvisibleCharacters(const wchar_t *s);
-			virtual void setInvisibleCharacters(const core::ustring& s);
+			virtual void setInvisibleCharacters(const core::stringw& s);
 
 			//! Get the last glyph page if there's still available slots.
 			//! If not, it will return zero.
@@ -384,7 +383,7 @@ namespace gui
 			//! Create corresponding character's software image copy from the font,
 			//! so you can use this data just like any ordinary video::IImage.
 			//! \param ch The character you need
-			virtual video::IImage* createTextureFromChar(const uchar32_t& ch);
+			virtual video::IImage* createTextureFromChar(const uint32_t& ch);
 
 			//! This function is for debugging mostly. If the page doesn't exist it returns zero.
 			//! \param page_index Simply return the texture handle of a given page index.
@@ -400,7 +399,7 @@ namespace gui
 
 			//! Calculates the index of the character in the text which is on a specific position.
 			virtual s32 getCharacterFromPos(const wchar_t* text, s32 pixel_x) const;
-			virtual s32 getCharacterFromPos(const core::ustring& text, s32 pixel_x) const;
+			virtual s32 getCharacterFromPos(const core::stringw& text, s32 pixel_x) const;
 
 			virtual s32 getCursorPosition(const core::stringw& text, u32 logical_pos) const;
 
@@ -451,7 +450,7 @@ namespace gui
 				if (useMonochrome()) load_flags |= FT_LOAD_MONOCHROME | FT_LOAD_TARGET_MONO;
 				else load_flags |= FT_LOAD_TARGET_NORMAL;
 			}
-			s32 getFaceIndexByChar(uchar32_t c) const;
+			s32 getFaceIndexByChar(uint32_t c) const;
 			core::dimension2d<u32> getDimensionUntilEndOfLine(const wchar_t* p) const;
 
 			void createSharedPlane();
@@ -461,14 +460,14 @@ namespace gui
 			void calculateMaxFontHeight();
 
 
-			std::vector<ShapedRun> shapeText(const core::ustring& text,
+			std::vector<ShapedRun> shapeText(const core::stringw& text,
 				bool use_rtl = true) const;
 			std::vector<BidiRun> getBidiRuns(
-					const std::vector<uint32_t>& text) const;
+					const core::stringw& text) const;
 			std::vector<TextRun> splitIntoFontRuns(
-					const std::vector<uint32_t>& text) const;
+					const core::stringw& text) const;
 			ShapedRun shapeRun(const TextRun& run,
-					const std::vector<uint32_t>& text, bool is_rtl) const;
+					const core::stringw& text, bool is_rtl) const;
 			void loadGlyphsForShapedText(const std::vector<ShapedRun>& runs);
 			u64 makeGlyphKey(u32 face_index, u32 glyph_index);
 
@@ -486,7 +485,7 @@ namespace gui
 
 			s32 GlobalKerningWidth = 0;
 			s32 GlobalKerningHeight = 0;
-			core::ustring Invisible;
+			core::stringw Invisible;
 			u32 shadow_offset = 0;
 			u32 shadow_alpha = 0;
 			bool bold = false;
