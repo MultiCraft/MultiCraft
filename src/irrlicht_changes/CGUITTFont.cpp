@@ -1004,7 +1004,7 @@ std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
 	for (u32 i = 0; i < text.size(); i++) {
 		wchar_t ch = text[i];
 		uint32_t codepoint = (uint32_t)ch;
-		
+
 #if defined(_WIN32) || defined(_WIN64)
 		if (i + 1 < text.size() && isSurrogatePair(ch, text[i + 1])) {
 			codepoint = 0x10000 + ((uint32_t)(ch - 0xD800) << 10) + (text[i + 1] - 0xDC00);
@@ -1444,17 +1444,34 @@ void CGUITTFont::setFontHinting(const bool enable, const bool enable_auto_hintin
 	reset_images();
 }
 
-void CGUITTFont::draw(const core::stringw& text, const core::rect<s32>& position, video::SColor color, bool hcenter, bool vcenter, const core::rect<s32>* clip, bool use_rtl)
+void CGUITTFont::draw(const core::stringw& text,
+		const core::rect<s32>& position, video::SColor color, bool hcenter,
+		bool vcenter, const core::rect<s32>* clip, bool use_rtl)
 {
-	draw(EnrichedString(std::wstring(text.c_str()), color), position, hcenter, vcenter, clip, use_rtl);
+	draw(EnrichedString(std::wstring(text.c_str()), color), position, hcenter,
+			vcenter, clip, use_rtl);
 }
 
-void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& position, bool hcenter, bool vcenter, const core::rect<s32>* clip, bool use_rtl)
+void CGUITTFont::draw(const EnrichedString &text,
+		const core::rect<s32>& position, bool hcenter, bool vcenter,
+		const core::rect<s32>* clip, bool use_rtl)
+{
+	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str(), use_rtl);
+	//loadGlyphsForShapedText(shaped_runs);
+
+	draw(shaped_runs, text, position, hcenter, vcenter, clip);
+}
+
+void CGUITTFont::draw(const std::vector<ShapedRun>& shaped_runs,
+		const EnrichedString &text, const core::rect<s32>& position,
+		bool hcenter, bool vcenter, const core::rect<s32>* clip)
 {
 	const std::vector<video::SColor> &colors = text.getColors();
 
 	if (!Driver)
 		return;
+
+	loadGlyphsForShapedText(shaped_runs);
 
 	// Clear the glyph pages of their render information.
 	for (u32 i = 0; i < Glyph_Pages.size(); ++i)
@@ -1473,7 +1490,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 	// Determine offset positions.
 	if (hcenter || vcenter)
 	{
-		textDimension = getDimension(text.c_str());
+		textDimension = getDimension(shaped_runs, text.c_str());
 
 		if (hcenter)
 			offset.X = ((position.getWidth() - textDimension.Width) >> 1) + offset.X;
@@ -1481,10 +1498,6 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 		if (vcenter)
 			offset.Y = ((position.getHeight() - textDimension.Height) >> 1) + offset.Y;
 	}
-
-	// Shape the text with HarfBuzz
-	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str(), use_rtl);
-	loadGlyphsForShapedText(shaped_runs);
 
 	// Set up our render map.
 	core::map<u32, CGUITTGlyphPage*> Render_Map;
@@ -1583,14 +1596,6 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 	}
 }
 
-core::dimension2d<u32> CGUITTFont::getCharDimension(const wchar_t ch) const
-{
-	core::stringw str;
-	str.append(ch);
-
-	return getDimension(str);
-}
-
 core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text, bool use_rtl) const
 {
 	return getDimension(core::stringw(text), use_rtl);
@@ -1601,6 +1606,12 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::stringw& text, bool 
 	std::vector<ShapedRun> shaped_runs = shapeText(text, use_rtl);
 	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
 
+	return getDimension(shaped_runs, text);
+}
+
+
+core::dimension2d<u32> CGUITTFont::getDimension(const std::vector<ShapedRun>& shaped_runs, const core::stringw& text) const
+{
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
 
@@ -1633,14 +1644,22 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::stringw& text, bool 
 	return text_dimension;
 }
 
-core::dimension2d<u32> CGUITTFont::getTotalDimension(const wchar_t* text) const
+core::dimension2d<u32> CGUITTFont::getTotalDimension(const wchar_t* text, bool use_rtl) const
 {
-	return getTotalDimension(core::stringw(text));
+	return getTotalDimension(core::stringw(text), use_rtl);
 }
 
-core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::stringw& text) const
+core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::stringw& text, bool use_rtl) const
 {
-	core::dimension2d<u32> text_dimension = getDimension(text);
+	std::vector<ShapedRun> shaped_runs = shapeText(text, use_rtl);
+	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
+
+	return getTotalDimension(shaped_runs, text);
+}
+
+core::dimension2d<u32> CGUITTFont::getTotalDimension(const std::vector<ShapedRun>& shaped_runs, const core::stringw& text) const
+{
+	core::dimension2d<u32> text_dimension = getDimension(shaped_runs, text);
 
 	if (italic) {
 		float slant = 0.2f;
@@ -1679,11 +1698,6 @@ void CGUITTFont::setKerningHeight(s32 kerning)
 }
 
 s32 CGUITTFont::getKerningWidth(const wchar_t* thisLetter, const wchar_t* previousLetter) const
-{
-	return 0;
-}
-
-s32 CGUITTFont::getKerningWidth(const uint32_t thisLetter, const uint32_t previousLetter) const
 {
 	return 0;
 }

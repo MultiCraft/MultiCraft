@@ -13,10 +13,6 @@
 #include <SColor.h>
 #include <iostream>
 
-#if USE_FREETYPE
-	#include "CGUITTFont.h"
-#endif
-
 #include "util/string.h"
 
 namespace irr
@@ -81,16 +77,18 @@ void StaticText::draw()
 	// draw the text
 	IGUIFont *font = getActiveFont();
 	if (font && BrokenText.size()) {
-		if (font != LastBreakFont)
+		if (font != LastBreakFont) {
 			updateText();
+			updateShapedRuns();
+		}
 
 		core::rect<s32> r = frameRect;
-		s32 height_line = font->getDimension(L"A").Height + font->getKerningHeight();
+		s32 height_line = ((CGUITTFont *)font)->getMaxFontHeight();
 		s32 height_total = height_line * BrokenText.size();
 		if (VAlign == EGUIA_CENTER && (WordWrap || CenterEachLine))
 		{
 			// Calculate the line height in the exact same way that it used to be
-			height_total = font->getDimension(ColoredText.c_str()).Height;
+			height_total = ((CGUITTFont *)font)->getDimension(ColoredShapedRuns, ColoredText.c_str()).Height;
 			height_line -= 1; // Remove the 1px offset added by getDimension
 			r.UpperLeftCorner.Y = r.getCenter().Y - (height_total / 2);
 		}
@@ -100,34 +98,23 @@ void StaticText::draw()
 		}
 		if (HAlign == EGUIA_LOWERRIGHT)
 		{
-			r.UpperLeftCorner.X = r.LowerRightCorner.X -
-				getTextWidth();
+			r.UpperLeftCorner.X = r.LowerRightCorner.X - getTextWidth();
 		}
 
 		irr::video::SColor previous_color(255, 255, 255, 255);
-		for (const EnrichedString &str : BrokenText) {
+		for (unsigned int i = 0; i < BrokenText.size(); i++) {
+			const EnrichedString &str = BrokenText[i];
+
 			if (HAlign == EGUIA_LOWERRIGHT)
 			{
 				r.UpperLeftCorner.X = frameRect.LowerRightCorner.X -
-					((CGUITTFont *)font)->getTotalDimension(str.c_str()).Width;
+					((CGUITTFont *)font)->getTotalDimension(BrokenShapedRuns[i], str.c_str()).Width;
 			}
 
-#if USE_FREETYPE
-			if (font->getType() == irr::gui::EGFT_CUSTOM) {
-				irr::gui::CGUITTFont *tmp = static_cast<irr::gui::CGUITTFont*>(font);
-				tmp->draw(str,
-					r, HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
-					(RestrainTextInside ? &AbsoluteClippingRect : NULL));
-			} else
-#endif
-			{
-				// Draw non-colored text
-				font->draw(str.c_str(),
-					r, str.getDefaultColor(), // TODO: Implement colorization
-					HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
-					(RestrainTextInside ? &AbsoluteClippingRect : NULL));
-			}
-
+			irr::gui::CGUITTFont *tmp = static_cast<irr::gui::CGUITTFont*>(font);
+			tmp->draw(BrokenShapedRuns[i], str,
+				r, HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
+				(RestrainTextInside ? &AbsoluteClippingRect : NULL));
 
 			r.LowerRightCorner.Y += height_line;
 			r.UpperLeftCorner.Y += height_line;
@@ -153,6 +140,7 @@ void StaticText::setOverrideFont(IGUIFont* font)
 		OverrideFont->grab();
 
 	updateText();
+	updateShapedRuns();
 }
 
 //! Gets the override font (if any)
@@ -177,6 +165,7 @@ void StaticText::setOverrideColor(video::SColor color)
 {
 	ColoredText.setDefaultColor(color);
 	updateText();
+	updateShapedRuns();
 }
 
 
@@ -285,6 +274,7 @@ void StaticText::setWordWrap(bool enable)
 {
 	WordWrap = enable;
 	updateText();
+	updateShapedRuns();
 }
 
 
@@ -300,6 +290,7 @@ void StaticText::setRightToLeft(bool rtl)
 	{
 		RightToLeft = rtl;
 		updateText();
+		updateShapedRuns();
 	}
 }
 
@@ -552,6 +543,18 @@ void StaticText::updateText()
 	}
 }
 
+void StaticText::updateShapedRuns()
+{
+	IGUIFont *font = getActiveFont();
+
+	ColoredShapedRuns = ((CGUITTFont *)font)->shapeText(ColoredText.c_str());
+
+	BrokenShapedRuns.clear();
+
+	for (const EnrichedString &str : BrokenText) {
+		BrokenShapedRuns.push_back(((CGUITTFont *)font)->shapeText(str.c_str()));
+	}
+}
 
 //! Sets the new caption of this element.
 void StaticText::setText(const wchar_t* text)
@@ -564,12 +567,14 @@ void StaticText::setText(const EnrichedString &text)
 	ColoredText = text;
 	IGUIElement::setText(ColoredText.c_str());
 	updateText();
+	updateShapedRuns();
 }
 
 void StaticText::updateAbsolutePosition()
 {
 	IGUIElement::updateAbsolutePosition();
 	updateText();
+	updateShapedRuns();
 }
 
 
@@ -581,11 +586,11 @@ s32 StaticText::getTextHeight() const
 		return 0;
 
 	if (WordWrap) {
-		s32 height = font->getDimension(L"A").Height + font->getKerningHeight();
+		s32 height = ((CGUITTFont *)font)->getMaxFontHeight();
 		return height * BrokenText.size();
 	}
 	// There may be intentional new lines without WordWrap
-	return font->getDimension(BrokenText[0].c_str()).Height;
+	return ((CGUITTFont *)font)->getDimension(BrokenShapedRuns[0], BrokenText[0].c_str()).Height;
 }
 
 
@@ -597,8 +602,10 @@ s32 StaticText::getTextWidth() const
 
 	s32 widest = 0;
 
-	for (const EnrichedString &line : BrokenText) {
-		s32 width = font->getDimension(line.c_str()).Width;
+	for (unsigned int i = 0; i < BrokenText.size(); i++) {
+		const EnrichedString &line = BrokenText[i];
+
+		s32 width = ((CGUITTFont *)font)->getDimension(BrokenShapedRuns[i], line.c_str()).Width;
 
 		if (width > widest)
 			widest = width;

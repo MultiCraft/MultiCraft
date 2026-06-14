@@ -340,16 +340,19 @@ namespace gui
 				bool hcenter=false, bool vcenter=false,
 				const core::rect<s32>* clip=0, bool use_rtl = true);
 
-			//! Returns the dimension of a character produced by this font.
-			virtual core::dimension2d<u32> getCharDimension(const wchar_t ch) const;
+			virtual void draw(const std::vector<ShapedRun>& shaped_runs,
+				const EnrichedString &text, const core::rect<s32>& position,
+				bool hcenter, bool vcenter, const core::rect<s32>* clip);
 
 			//! Returns the dimension of a text string.
 			virtual core::dimension2d<u32> getDimension(const wchar_t* text, bool use_rtl = true) const;
 			virtual core::dimension2d<u32> getDimension(const core::stringw& text, bool use_rtl = true) const;
+			virtual core::dimension2d<u32> getDimension(const std::vector<ShapedRun>& shaped_runs, const core::stringw& text) const;
 
 			//! Returns the dimension of a text string with keep in mind that italic/bold text is slightly longer.
-			virtual core::dimension2d<u32> getTotalDimension(const wchar_t* text) const;
-			virtual core::dimension2d<u32> getTotalDimension(const core::stringw& text) const;
+			virtual core::dimension2d<u32> getTotalDimension(const wchar_t* text, bool use_rtl = true) const;
+			virtual core::dimension2d<u32> getTotalDimension(const core::stringw& text, bool use_rtl = true) const;
+			virtual core::dimension2d<u32> getTotalDimension(const std::vector<ShapedRun>& shaped_runs, const core::stringw& text) const;
 
 			//! Sets global kerning width for the font.
 			virtual void setKerningWidth(s32 kerning);
@@ -359,7 +362,6 @@ namespace gui
 
 			//! Gets kerning values (distance between letters) for the font. If no parameters are provided,
 			virtual s32 getKerningWidth(const wchar_t* thisLetter=0, const wchar_t* previousLetter=0) const;
-			virtual s32 getKerningWidth(const uint32_t thisLetter=0, const uint32_t previousLetter=0) const;
 
 			//! Returns the distance between letters
 			virtual s32 getKerningHeight() const;
@@ -410,6 +412,9 @@ namespace gui
 
 			virtual f32 getDisplayDensity() const { return density; }
 
+			virtual std::vector<ShapedRun> shapeText(const core::stringw& text,
+					bool use_rtl = true) const;
+
 			inline s32 getAscender() const { return font_metrics.ascender; }
 
 			FT_Stroker getStroker() { return stroker; }
@@ -418,6 +423,8 @@ namespace gui
 			float getColorEmojiScale() const { return color_emoji_scale; }
 
 			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false);
+
+			u32 getMaxFontHeight() const { return max_font_height; }
 
 		protected:
 			bool use_monochrome = false;
@@ -459,9 +466,6 @@ namespace gui
 			void calculateColorEmojiParams(FT_Face face);
 			void calculateMaxFontHeight();
 
-
-			std::vector<ShapedRun> shapeText(const core::stringw& text,
-				bool use_rtl = true) const;
 			std::vector<BidiRun> getBidiRuns(
 					const core::stringw& text) const;
 			std::vector<TextRun> splitIntoFontRuns(
