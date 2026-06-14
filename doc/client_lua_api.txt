@@ -565,6 +565,9 @@ examples.
     * `color` column options:
         * `span=<value>`: number of following columns to affect (default: infinite)
 
+#### `pause_game[]`
+* Pauses the game in singleplayer mode.
+
 **Note**: do _not_ use a element name starting with `key_`; those names are reserved to
 pass key press events to formspec!
 
@@ -740,6 +743,10 @@ Call these functions only at load time!
     * If function returns `true`, remaining functions are not called
 * `minetest.register_on_tab(function())`
     * Called when tab key pressed
+* `minetest.register_on_pause_menu_open(function(buttons))`
+    * Called when the pause menu is opened
+    * The list of enabled buttons is passed in.
+    * If function returns `true`, the default pause menu is not shown
 ### Sounds
 * `minetest.sound_play(spec, parameters)`: returns a handle
     * `spec` is a `SimpleSoundSpec`
@@ -947,6 +954,8 @@ Call these functions only at load time!
     * If the `btns` table is empty or nil, all controls are visible.
     * Example: `{jump = true, joystick = true}`
     * No-op if there is no touchscreen
+* `minetest.texture_exists(texture_name)`
+    * Returns true if the specified texture exists.
 
 Setting-related
 ---------------
