@@ -23,20 +23,6 @@ with this program; ifnot, write to the Free Software Foundation, Inc.,
 
 #include "sound_openal.h"
 
-#if defined(_WIN32)
-	#include <al.h>
-	#include <alc.h>
-	//#include <alext.h>
-#elif defined(__APPLE__)
-	#define OPENAL_DEPRECATED
-	#include <OpenAL/al.h>
-	#include <OpenAL/alc.h>
-	//#include <OpenAL/alext.h>
-#else
-	#include <AL/al.h>
-	#include <AL/alc.h>
-	#include <AL/alext.h>
-#endif
 #include <cmath>
 #include <vorbis/vorbisfile.h>
 #include <cassert>
@@ -51,9 +37,6 @@ with this program; ifnot, write to the Free Software Foundation, Inc.,
 #define BUFFER_SIZE 30000
 
 SoundManagerSingleton* g_sound_manager_singleton = nullptr;
-
-typedef std::unique_ptr<ALCdevice, void (*)(ALCdevice *p)> unique_ptr_alcdevice;
-typedef std::unique_ptr<ALCcontext, void(*)(ALCcontext *p)> unique_ptr_alccontext;
 
 static void delete_alcdevice(ALCdevice *p)
 {
@@ -267,62 +250,65 @@ struct PlayingSound
 	bool loop;
 };
 
-class SoundManagerSingleton
-{
-public:
-	unique_ptr_alcdevice  m_device;
-	unique_ptr_alccontext m_context;
-public:
-	SoundManagerSingleton() :
+SoundManagerSingleton::SoundManagerSingleton() :
 		m_device(nullptr, delete_alcdevice),
 		m_context(nullptr, delete_alccontext)
-	{
+{
+}
+
+SoundManagerSingleton::~SoundManagerSingleton()
+{
+	infostream << "Audio: Global Deinitialized." << std::endl;
+}
+
+bool SoundManagerSingleton::init()
+{
+	if (!(m_device = unique_ptr_alcdevice(alcOpenDevice(nullptr), delete_alcdevice))) {
+		errorstream << "Audio: Global Initialization: Failed to open device" << std::endl;
+		return false;
 	}
 
-	bool init()
-	{
-		if (!(m_device = unique_ptr_alcdevice(alcOpenDevice(nullptr), delete_alcdevice))) {
-			errorstream << "Audio: Global Initialization: Failed to open device" << std::endl;
-			return false;
-		}
-
-		if (!(m_context = unique_ptr_alccontext(
-				alcCreateContext(m_device.get(), nullptr), delete_alccontext))) {
-			errorstream << "Audio: Global Initialization: Failed to create context" << std::endl;
-			return false;
-		}
-
-		if (!alcMakeContextCurrent(m_context.get())) {
-			errorstream << "Audio: Global Initialization: Failed to make current context" << std::endl;
-			return false;
-		}
-
-		alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-
-		if (alGetError() != AL_NO_ERROR) {
-			errorstream << "Audio: Global Initialization: OpenAL Error " << alGetError() << std::endl;
-			return false;
-		}
-
-		infostream << "Audio: Global Initialized: OpenAL " << alGetString(AL_VERSION)
-			<< ", using " << alcGetString(m_device.get(), ALC_DEVICE_SPECIFIER)
-			<< std::endl;
-
-		return true;
+	if (!(m_context = unique_ptr_alccontext(
+			alcCreateContext(m_device.get(), nullptr), delete_alccontext))) {
+		errorstream << "Audio: Global Initialization: Failed to create context" << std::endl;
+		return false;
 	}
 
-	~SoundManagerSingleton()
-	{
-		infostream << "Audio: Global Deinitialized." << std::endl;
+	if (!alcMakeContextCurrent(m_context.get())) {
+		errorstream << "Audio: Global Initialization: Failed to make current context" << std::endl;
+		return false;
 	}
-};
+
+	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+
+	if (alGetError() != AL_NO_ERROR) {
+		errorstream << "Audio: Global Initialization: OpenAL Error " << alGetError() << std::endl;
+		return false;
+	}
+
+	infostream << "Audio: Global Initialized: OpenAL " << alGetString(AL_VERSION)
+		<< ", using " << alcGetString(m_device.get(), ALC_DEVICE_SPECIFIER)
+		<< std::endl;
+
+	return true;
+}
+
+#ifdef __IOS__
+void SoundManagerSingleton::pauseDevice()
+{
+	alcDevicePauseSOFT(m_device.get());
+}
+
+void SoundManagerSingleton::resumeDevice()
+{
+	alcDeviceResumeSOFT(m_device.get());
+}
+#endif
 
 class OpenALSoundManager: public ISoundManager
 {
 private:
 	OnDemandSoundFetcher *m_fetcher;
-	ALCdevice *m_device;
-	ALCcontext *m_context;
 	int m_next_id;
 	std::unordered_map<std::string, std::vector<std::string>> m_sound_files;
 	std::unordered_map<std::string, std::vector<SoundBuffer*>> m_buffers;
@@ -343,8 +329,6 @@ private:
 public:
 	OpenALSoundManager(SoundManagerSingleton *smg, OnDemandSoundFetcher *fetcher):
 		m_fetcher(fetcher),
-		m_device(smg->m_device.get()),
-		m_context(smg->m_context.get()),
 		m_next_id(1)
 	{
 		infostream << "Audio: Initialized: OpenAL " << std::endl;

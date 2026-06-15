@@ -33,13 +33,12 @@ local asyncpath = scriptdir .. "async" .. DIR_DELIM
 dofile(commonpath .. "strict.lua")
 dofile(commonpath .. "serialize.lua")
 dofile(commonpath .. "misc_helpers.lua")
+dofile(commonpath .. "features.lua")
 
 if core.global_exists("jit") and jit.status() then
 	jit.opt.start("maxtrace=4000", "maxrecord=8000", "minstitch=2", "maxmcode=8192")
 	core.log("action", "Applied JIT compiler optimizations")
 end
-
-BIDI_SUPPORTED = true -- ToDo: will be removed in future releases
 
 if INIT == "game" then
 	dofile(gamepath .. "init.lua")

@@ -235,6 +235,7 @@ void PlayerSAO::step(float dtime, bool send_recommended)
 	if (m_attachment_parent_id && !isAttached()) {
 		// This is handled when objects are removed from the map
 		warningstream << "PlayerSAO::step() id=" << m_id <<
+			" (player \"" << m_player->getName() << "\")" <<
 			" is attached to nonexistent parent. This is a bug." << std::endl;
 		clearParentAttachment();
 		setBasePosition(m_last_good_position);

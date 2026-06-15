@@ -2985,7 +2985,8 @@ Some types may inherit styles from parent types.
     * scrollbar_thumb_bottom_img - The bottom half of the thumb image
     * scrollbar_up_img - The up arrow image to use for the scrollbar
     * scrollbar_down_img - The down arrow image to use for the scrollbar
-    * scrollbar_middle - The middle for all 9-sliced scrollbar textures
+    * scrollbar_arrows - Whether to show arrows in the scrollbar. Overrides `scrollbaroptions` when set.
+                         This can be either `hide`, `show`, or `default`.
     * sound - a sound to be played when the scrollbar arrow buttons are pressed
     * NOTE: Scrollbar textures will only be applied if all scrollbar image properties are specified.
 * tabheader
@@ -4585,6 +4586,13 @@ Utilities
           abm_min_max_y = true,
           -- "zstd" method for compress/decompress (5.7.0)
           compress_zstd = true,
+
+          -- Whether bidirectional text is supported
+          bidi_text_supported = true,
+
+          -- Whether the "scrollbar_arrows" style is supported and themed
+          -- scrollbars can have their arrows hidden
+          themed_scrollbar_hide_arrows = true,
       }
 
 * `minetest.has_feature(arg)`: returns `boolean, missing_features`
