@@ -24,6 +24,7 @@ core.features = {
 	item_meta_range = true,
 	bidi_text_supported = true,
 	themed_scrollbar_hide_arrows = true,
+	camera_runtime_settings = true,
 }
 
 function core.has_feature(arg)
