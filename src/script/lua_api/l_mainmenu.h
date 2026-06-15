@@ -146,6 +146,8 @@ private:
 
 	static int l_is_dir(lua_State *L);
 
+	static int l_file_exists(lua_State *L);
+
 	static int l_extract_zip(lua_State *L);
 
 	static int l_may_modify_path(lua_State *L);
