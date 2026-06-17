@@ -263,7 +263,7 @@ bool ScriptApiClient::on_pause_menu_open(const std::vector<PauseMenuButton> &but
 
 	lua_createtable(L, buttons.size(), 0);
 	int i = 0;
-	for (auto &[id, text, icon, is_exit] : buttons) {
+	for (auto &[id, text, is_exit] : buttons) {
 		lua_createtable(L, 0, 4);
 
 		lua_pushstring(L, id);
@@ -271,9 +271,6 @@ bool ScriptApiClient::on_pause_menu_open(const std::vector<PauseMenuButton> &but
 
 		lua_pushlstring(L, text.data(), text.size());
 		lua_setfield(L, -2, "text");
-
-		lua_pushlstring(L, icon.data(), icon.size());
-		lua_setfield(L, -2, "icon");
 
 		lua_pushboolean(L, is_exit);
 		lua_setfield(L, -2, "is_exit");

@@ -4532,14 +4532,13 @@ void createPauseMenuButtons(std::ostringstream &os, const std::vector<PauseMenuB
 	if (buttons.size() <= 4)
 		y = y - gap * 3;
 
-	for (auto &[id, text, icon, is_exit] : buttons) {
+	for (auto &[id, text, is_exit] : buttons) {
 		if (is_exit)
 			os << "image_button_exit[3," << y << ";5," << btn_h
 			<< ";;" << id << ";" << text << ";;false]";
 		else
 			os << "image_button[3," << y << ";5," << btn_h
 			<< ";;" << id << ";" << text << ";;false]";
-		os << "image[3.12," << (y + 0.1f) << ";" << icon_size << "," << icon_size << ";" << icon << "]";
 		y += btn_h + gap;
 	}
 }
@@ -4621,17 +4620,16 @@ void Game::showPauseMenu()
 	ypos += 0.5f;
 #endif
 
-	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
 	auto buttons = std::vector<PauseMenuButton>{
-		{"btn_continue", strgettext("Continue"), sheet + "0,0", true}
+		{"btn_continue", strgettext("Continue"), true}
 	};
 
 	if (!simple_singleplayer_mode)
-		buttons.emplace_back("btn_change_password", strgettext("Change Password"), sheet + "0,2", false);
+		buttons.emplace_back("btn_change_password", strgettext("Change Password"), false);
 
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound"))
-		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), sheet + "0,3", true);
+		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), true);
 #endif
 
 #ifdef HAVE_TOUCHSCREENGUI
@@ -4641,17 +4639,17 @@ void Game::showPauseMenu()
 	} else
 #endif
 	if ((input->last_input_device == IDT_KEYBOARD || input->last_input_device == IDT_MOUSE) && porting::hasRealKeyboard())
-		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
+		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), true);
 	else
-		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), sheet + "0,1", true);
+		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), true);
 #else
-	buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
+	buttons.emplace_back("btn_key_config", strgettext("Change Keys"), true);
 #endif
 
-	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), sheet + "1,0", true);
+	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), true);
 
 #if !defined(__ANDROID__) && !defined(__IOS__)
-	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), sheet + "1,2", true);
+	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), true);
 #endif
 
 	if (client->modsLoaded() && client->getScript()->on_pause_menu_open(buttons))

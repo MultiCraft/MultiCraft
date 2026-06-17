@@ -34,7 +34,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 class ClientEnvironment;
 
-using PauseMenuButton = std::tuple<const char *, std::string, std::string, bool>;
+using PauseMenuButton = std::tuple<const char *, std::string, bool>;
 
 class ScriptApiClient : virtual public ScriptApiBase
 {
