@@ -13,6 +13,8 @@
 #include "porting.h"
 #include "Keycodes.h"
 
+#include "irrlicht_changes/CGUITTFont.h"
+
 /*
 todo:
 optional scrollbars [done]
@@ -183,6 +185,10 @@ void GUIEditBoxWithScrollBar::draw()
 					txt_line = ml ? &m_broken_text[i] : &Text;
 					start_pos = ml ? m_broken_text_positions[i] : 0;
 				}
+				
+				CGUITTFont *tt_font = (CGUITTFont *)font;
+				std::vector<ShapedRun> shaped_runs = tt_font->shapeText(
+						(*txt_line).c_str());
 
 				// draw mark and marked text
 				if ((focus || scollbar_focus) && m_mark_begin != m_mark_end &&
@@ -193,8 +199,8 @@ void GUIEditBoxWithScrollBar::draw()
 							0, (s32)txt_line->size());
 
 					if (local_start < local_end) {
-						std::vector<core::recti> mark_rects = font->getSelectionRects(
-								*txt_line, (u32)local_start, (u32)local_end);
+						std::vector<core::recti> mark_rects = tt_font->getSelectionRects(
+								shaped_runs, *txt_line, (u32)local_start, (u32)local_end);
 
 						for (auto& mark_rect : mark_rects) {
 							core::rect<s32> current_rect = m_current_text_rect;
@@ -208,7 +214,7 @@ void GUIEditBoxWithScrollBar::draw()
 				}
 
 				// draw normal text
-				font->draw(txt_line->c_str(), m_current_text_rect,
+				tt_font->draw(shaped_runs, txt_line->c_str(), m_current_text_rect,
 					m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
 					false, true, &local_clip_rect);
 			}

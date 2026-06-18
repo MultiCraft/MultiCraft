@@ -1278,6 +1278,16 @@ s32 CGUITTFont::getCharacterFromPos(const core::stringw& text, s32 pixel_x) cons
 std::vector<core::recti> CGUITTFont::getSelectionRects(
 		const core::stringw& text, u32 start_pos, u32 end_pos) const
 {
+	std::vector<ShapedRun> shaped_runs = shapeText(text);
+	//const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
+
+	return getSelectionRects(shaped_runs, text, start_pos, end_pos);
+}
+
+std::vector<core::recti> CGUITTFont::getSelectionRects(
+		const std::vector<ShapedRun>& shaped_runs, const core::stringw& text,
+		u32 start_pos, u32 end_pos) const
+{
 	std::vector<core::recti> result;
 
 	if (text.empty() || start_pos == end_pos)
@@ -1285,9 +1295,6 @@ std::vector<core::recti> CGUITTFont::getSelectionRects(
 
 	if (start_pos > end_pos)
 		std::swap(start_pos, end_pos);
-
-	std::vector<ShapedRun> shaped_runs = shapeText(text);
-	//const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
 
 	s32 current_x = 0;
 	s32 selection_start_x = -1;
@@ -1450,6 +1457,15 @@ void CGUITTFont::draw(const core::stringw& text,
 {
 	draw(EnrichedString(std::wstring(text.c_str()), color), position, hcenter,
 			vcenter, clip, use_rtl);
+}
+
+void CGUITTFont::draw(const std::vector<ShapedRun>& shaped_runs,
+		const core::stringw& text, const core::rect<s32>& position,
+		video::SColor color, bool hcenter, bool vcenter,
+		const core::rect<s32>* clip)
+{
+	draw(shaped_runs, EnrichedString(std::wstring(text.c_str()), color),
+			position, hcenter, vcenter, clip);
 }
 
 void CGUITTFont::draw(const EnrichedString &text,

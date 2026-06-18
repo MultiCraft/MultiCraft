@@ -336,6 +336,11 @@ namespace gui
 				video::SColor color, bool hcenter=false, bool vcenter=false,
 				const core::rect<s32>* clip=0, bool use_rtl = true);
 
+			virtual void draw(const std::vector<ShapedRun>& shaped_runs,
+				const core::stringw& text, const core::rect<s32>& position,
+				video::SColor color, bool hcenter=false, bool vcenter=false,
+				const core::rect<s32>* clip=0);
+
 			virtual void draw(const EnrichedString& text, const core::rect<s32>& position,
 				bool hcenter=false, bool vcenter=false,
 				const core::rect<s32>* clip=0, bool use_rtl = true);
@@ -406,6 +411,9 @@ namespace gui
 			virtual s32 getCursorPosition(const core::stringw& text, u32 logical_pos) const;
 
 			virtual std::vector<core::recti> getSelectionRects(const core::stringw& text,
+					u32 start_pos, u32 end_pos) const;
+			virtual std::vector<core::recti> getSelectionRects(
+					const std::vector<ShapedRun>& shaped_runs, const core::stringw& text,
 					u32 start_pos, u32 end_pos) const;
 
 			virtual bool isRTL(const core::stringw& text) const;
