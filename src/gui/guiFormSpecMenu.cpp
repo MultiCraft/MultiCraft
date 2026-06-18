@@ -1542,8 +1542,10 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 			);
 
 		spec.send = true;
-		gui::IGUIEditBox *e = Environment->addEditBox(wpassword.c_str(), rect, true,
-				data->current_parent, spec.fid);
+
+		GUIEditBox *e = new GUIEditBoxWithScrollBar(wpassword.c_str(), true,
+				Environment, data->current_parent, spec.fid, rect, true, false,
+				m_sound_manager);
 
 		if (spec.fname == m_focused_element) {
 			Environment->setFocus(e);
@@ -1605,19 +1607,9 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 		spec.flabel.swap(spec.fdefault);
 	}
 
-	GUIEditBox *box = nullptr;
-	gui::IGUIEditBox *e = nullptr;
-
-	if (is_multiline) {
-		box = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true, Environment,
-				data->current_parent, spec.fid, rect, is_editable, !is_editable,
-				m_sound_manager);
-		e = box;
-	} else if (is_editable) {
-		e = Environment->addEditBox(spec.fdefault.c_str(), rect, true,
-				data->current_parent, spec.fid);
-		e->grab();
-	}
+	GUIEditBox *e = new GUIEditBoxWithScrollBar(spec.fdefault.c_str(), true,
+			Environment, data->current_parent, spec.fid, rect, is_editable,
+			is_multiline && !is_editable, m_sound_manager);
 
 	auto style = getDefaultStyleForElement(is_multiline ? "textarea" : "field", spec.fname);
 
@@ -1647,8 +1639,7 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 			e->setDrawBackground(false);
 		}
 		e->setOverrideFont(style.getFont());
-		if (box != nullptr)
-			box->setScrollbarStyle(style, m_tsrc);
+		e->setScrollbarStyle(style, m_tsrc);
 
 		e->drop();
 	}
@@ -2857,7 +2848,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 	scene::IAnimatedMesh *mesh;
 	if (m_client != nullptr) {
 		mesh = m_client->getMesh(meshstr);
-#if defined(__ANDROID__) || defined(__APPLE__)
+//#if defined(__ANDROID__) || defined(__APPLE__)
 	} else if (meshstr.compare(meshstr.size() - 2, 2, ".e") == 0) {
 		std::string data, decrypted_data, filename;
 		if (fs::ReadFile(meshstr, data) &&
@@ -2874,7 +2865,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 		} else {
 			mesh = nullptr;
 		}
-#endif
+//#endif
 	} else {
 		mesh = smgr->getMesh(meshstr.c_str());
 		if (mesh)
