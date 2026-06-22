@@ -59,6 +59,7 @@ void GUIEditBox::setOverrideFont(IGUIFont *font)
 		m_override_font->grab();
 
 	breakText();
+	updateShapedRuns();
 }
 
 //! Get the font which is used right now for drawing
@@ -95,6 +96,7 @@ void GUIEditBox::setWordWrap(bool enable)
 {
 	m_word_wrap = enable;
 	breakText();
+	updateShapedRuns();
 }
 
 //! Enables or disables newlines.
@@ -118,6 +120,7 @@ void GUIEditBox::setPasswordBox(bool password_box, wchar_t password_char)
 		setMultiLine(false);
 		setWordWrap(false);
 		m_broken_text.clear();
+		m_broken_shaped_runs.clear();
 	}
 }
 
@@ -136,6 +139,7 @@ void GUIEditBox::setText(const wchar_t *text)
 		m_cursor_pos = Text.size();
 	m_hscroll_pos = 0;
 	breakText();
+	updateShapedRuns();
 }
 
 //! Sets the maximum amount of characters which may be entered in the box.
@@ -415,8 +419,8 @@ bool GUIEditBox::processKey(const SEvent &event)
 			}
 			break;
 		case KEY_LEFT: {
-			IGUIFont *font = getActiveFont();
-			s32 prev_pos = font->getPrevClusterPos(Text, m_cursor_pos);
+			CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
+			s32 prev_pos = tt_font->getPrevClusterPos(m_text_shaped_runs, Text, m_cursor_pos);
 
 			if (event.KeyInput.Shift) {
 				if (m_cursor_pos > 0) {
@@ -435,8 +439,8 @@ bool GUIEditBox::processKey(const SEvent &event)
 			m_blink_start_time = porting::getTimeMs();
 		} break;
 		case KEY_RIGHT: {
-			IGUIFont *font = getActiveFont();
-			s32 next_pos = font->getPrevClusterPos(Text, m_cursor_pos);
+			CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
+			s32 next_pos = tt_font->getNextClusterPos(m_text_shaped_runs, Text, m_cursor_pos);
 
 			if (event.KeyInput.Shift) {
 				if (Text.size() > (u32)m_cursor_pos) {
@@ -520,6 +524,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 	// break the text if it has changed
 	if (text_changed) {
 		breakText();
+		updateShapedRuns();
 		sendGuiEvent(EGET_EDITBOX_CHANGED);
 	}
 
@@ -685,8 +690,8 @@ bool GUIEditBox::onKeyBack(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 
 		m_cursor_pos = m_real_mark_begin;
 	} else {
-		IGUIFont *font = getActiveFont();
-		s32 prev_pos = font->getPrevClusterPos(Text, m_cursor_pos);
+		CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
+		s32 prev_pos = tt_font->getPrevClusterPos(m_text_shaped_runs, Text, m_cursor_pos);
 
 		// delete text behind cursor
 		if (m_cursor_pos > 0) {
@@ -722,8 +727,8 @@ bool GUIEditBox::onKeyDelete(const SEvent &event, s32 &mark_begin, s32 &mark_end
 
 		m_cursor_pos = m_real_mark_begin;
 	} else {
-		IGUIFont *font = getActiveFont();
-		s32 next_pos = font->getNextClusterPos(Text, m_cursor_pos);
+		CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
+		s32 next_pos = tt_font->getNextClusterPos(m_text_shaped_runs, Text, m_cursor_pos);
 		s32 chars_to_delete = next_pos - m_cursor_pos;
 
 		// delete text before cursor
@@ -775,6 +780,7 @@ void GUIEditBox::inputChar(wchar_t c)
 		}
 	}
 	breakText();
+	updateShapedRuns();
 	sendGuiEvent(EGET_EDITBOX_CHANGED);
 	calculateScrollPos();
 }
@@ -956,6 +962,19 @@ void GUIEditBox::updateVScrollBar()
 			m_vscrollbar->setMax(1);
 			m_vscrollbar->setPageSize(s32(getTextDimension().Height));
 		}
+	}
+}
+
+void GUIEditBox::updateShapedRuns()
+{
+	CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
+
+	m_text_shaped_runs = tt_font->shapeText(Text.c_str());
+
+	m_broken_shaped_runs.clear();
+
+	for (const core::stringw &str : m_broken_text) {
+		m_broken_shaped_runs.push_back(tt_font->shapeText(str.c_str()));
 	}
 }
 

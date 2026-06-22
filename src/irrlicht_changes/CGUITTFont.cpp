@@ -1164,10 +1164,16 @@ u64 CGUITTFont::makeGlyphKey(u32 face_index, u32 glyph_index)
 
 s32 CGUITTFont::getPrevClusterPos(const core::stringw& text, s32 pos)
 {
+	std::vector<ShapedRun> shaped_runs = shapeText(text);
+
+	return getPrevClusterPos(shaped_runs, text, pos);
+}
+
+s32 CGUITTFont::getPrevClusterPos(const std::vector<ShapedRun>& shaped_runs,
+		const core::stringw& text, s32 pos)
+{
 	if (pos <= 0)
 		return 0;
-
-	std::vector<ShapedRun> shaped_runs = shapeText(text);
 
 	s32 prev_cluster = 0;
 
@@ -1185,6 +1191,12 @@ s32 CGUITTFont::getNextClusterPos(const core::stringw& text, s32 pos)
 {
 	std::vector<ShapedRun> shaped_runs = shapeText(text);
 
+	return getNextClusterPos(shaped_runs, text, pos);
+}
+
+s32 CGUITTFont::getNextClusterPos(const std::vector<ShapedRun>& shaped_runs,
+		const core::stringw& text, s32 pos)
+{
 	s32 next_cluster = (s32)text.size();
 
 	for (const auto& run : shaped_runs) {
@@ -1202,6 +1214,12 @@ s32 CGUITTFont::getCursorPosition(const core::stringw& text, u32 logical_pos) co
 	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
 	//loadGlyphsForShapedText(shaped_runs);
 
+	return getCursorPosition(shaped_runs, text, logical_pos);
+}
+
+s32 CGUITTFont::getCursorPosition(const std::vector<ShapedRun>& shaped_runs,
+		const core::stringw& text, u32 logical_pos) const
+{
 	bool is_rtl = false;
 	s32 pos_x = 0;
 
@@ -1237,6 +1255,12 @@ s32 CGUITTFont::getCharacterFromPos(const core::stringw& text, s32 pixel_x) cons
 	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
 	//loadGlyphsForShapedText(shaped_runs);
 
+	return getCharacterFromPos(shaped_runs, text, pixel_x);
+}
+
+s32 CGUITTFont::getCharacterFromPos(const std::vector<ShapedRun>& shaped_runs,
+		const core::stringw& text, s32 pixel_x) const
+{
 	bool is_rtl = false;
 	s32 pos_x = 0;
 
@@ -1250,7 +1274,7 @@ s32 CGUITTFont::getCharacterFromPos(const core::stringw& text, s32 pixel_x) cons
 
 			if (pixel_x < glyph_end) {
 				bool clicked_left_half = pixel_x < (glyph_start + shaped_glyph.x_advance / 2);
-				s32 next_cluster = const_cast<CGUITTFont*>(this)->getNextClusterPos(text, shaped_glyph.cluster);
+				s32 next_cluster = const_cast<CGUITTFont*>(this)->getNextClusterPos(shaped_runs, text, shaped_glyph.cluster);
 
 				if (!run.is_rtl) {
 					if (clicked_left_half)
@@ -1339,9 +1363,15 @@ std::vector<core::recti> CGUITTFont::getSelectionRects(
 
 bool CGUITTFont::isRTL(const core::stringw& text) const
 {
-	std::vector<ShapedRun> runs = shapeText(text.c_str());
+	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
 
-	for (const auto& run : runs)
+	return isRTL(shaped_runs, text);
+}
+
+bool CGUITTFont::isRTL(const std::vector<ShapedRun>& shaped_runs,
+		const core::stringw& text) const
+{
+	for (const auto& run : shaped_runs)
 		if (!run.glyphs.empty())
 			return run.is_rtl;
 

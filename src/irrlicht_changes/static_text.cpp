@@ -545,14 +545,14 @@ void StaticText::updateText()
 
 void StaticText::updateShapedRuns()
 {
-	IGUIFont *font = getActiveFont();
+	CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
 
-	ColoredShapedRuns = ((CGUITTFont *)font)->shapeText(ColoredText.c_str());
+	ColoredShapedRuns = tt_font->shapeText(ColoredText.c_str());
 
 	BrokenShapedRuns.clear();
 
 	for (const EnrichedString &str : BrokenText) {
-		BrokenShapedRuns.push_back(((CGUITTFont *)font)->shapeText(str.c_str()));
+		BrokenShapedRuns.push_back(tt_font->shapeText(str.c_str()));
 	}
 }
 

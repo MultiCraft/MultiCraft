@@ -402,13 +402,21 @@ namespace gui
 				 const video::SColor& color = video::SColor(255, 0, 0, 0), bool center = false );
 
 			virtual s32 getPrevClusterPos(const core::stringw& text, s32 pos);
+			virtual s32 getPrevClusterPos(const std::vector<ShapedRun>& shaped_runs,
+					const core::stringw& text, s32 pos);
 			virtual s32 getNextClusterPos(const core::stringw& text, s32 pos);
+			virtual s32 getNextClusterPos(const std::vector<ShapedRun>& shaped_runs,
+					const core::stringw& text, s32 pos);
 
 			//! Calculates the index of the character in the text which is on a specific position.
 			virtual s32 getCharacterFromPos(const wchar_t* text, s32 pixel_x) const;
 			virtual s32 getCharacterFromPos(const core::stringw& text, s32 pixel_x) const;
+			virtual s32 getCharacterFromPos(const std::vector<ShapedRun>& shaped_runs,
+					const core::stringw& text, s32 pixel_x) const;
 
 			virtual s32 getCursorPosition(const core::stringw& text, u32 logical_pos) const;
+			virtual s32 getCursorPosition(const std::vector<ShapedRun>& shaped_runs,
+					const core::stringw& text, u32 logical_pos) const;
 
 			virtual std::vector<core::recti> getSelectionRects(const core::stringw& text,
 					u32 start_pos, u32 end_pos) const;
@@ -417,6 +425,8 @@ namespace gui
 					u32 start_pos, u32 end_pos) const;
 
 			virtual bool isRTL(const core::stringw& text) const;
+			virtual bool isRTL(const std::vector<ShapedRun>& shaped_runs,
+					const core::stringw& text) const;
 
 			virtual f32 getDisplayDensity() const { return density; }
 
