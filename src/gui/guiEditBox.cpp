@@ -420,7 +420,8 @@ bool GUIEditBox::processKey(const SEvent &event)
 			break;
 		case KEY_LEFT: {
 			CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
-			s32 prev_pos = tt_font->getPrevClusterPos(m_text_shaped_runs, Text, m_cursor_pos);
+			s32 prev_pos = tt_font->getPrevClusterPos(
+					m_text_shaped_runs, Text, m_cursor_pos);
 
 			if (event.KeyInput.Shift) {
 				if (m_cursor_pos > 0) {
@@ -440,7 +441,8 @@ bool GUIEditBox::processKey(const SEvent &event)
 		} break;
 		case KEY_RIGHT: {
 			CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
-			s32 next_pos = tt_font->getNextClusterPos(m_text_shaped_runs, Text, m_cursor_pos);
+			s32 next_pos = tt_font->getNextClusterPos(
+					m_text_shaped_runs, Text, m_cursor_pos);
 
 			if (event.KeyInput.Shift) {
 				if (Text.size() > (u32)m_cursor_pos) {
@@ -691,7 +693,8 @@ bool GUIEditBox::onKeyBack(const SEvent &event, s32 &mark_begin, s32 &mark_end)
 		m_cursor_pos = m_real_mark_begin;
 	} else {
 		CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
-		s32 prev_pos = tt_font->getPrevClusterPos(m_text_shaped_runs, Text, m_cursor_pos);
+		s32 prev_pos = tt_font->getPrevClusterPos(
+				m_text_shaped_runs, Text, m_cursor_pos);
 
 		// delete text behind cursor
 		if (m_cursor_pos > 0) {
@@ -728,7 +731,8 @@ bool GUIEditBox::onKeyDelete(const SEvent &event, s32 &mark_begin, s32 &mark_end
 		m_cursor_pos = m_real_mark_begin;
 	} else {
 		CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
-		s32 next_pos = tt_font->getNextClusterPos(m_text_shaped_runs, Text, m_cursor_pos);
+		s32 next_pos = tt_font->getNextClusterPos(
+				m_text_shaped_runs, Text, m_cursor_pos);
 		s32 chars_to_delete = next_pos - m_cursor_pos;
 
 		// delete text before cursor

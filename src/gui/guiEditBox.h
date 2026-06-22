@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <vector>
 
 #if USE_FREETYPE
-	#include "irrlicht_changes/CGUITTFont.h"
+#include "irrlicht_changes/CGUITTFont.h"
 #endif
 
 using namespace irr;
