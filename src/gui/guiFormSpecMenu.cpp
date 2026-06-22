@@ -2848,7 +2848,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 	scene::IAnimatedMesh *mesh;
 	if (m_client != nullptr) {
 		mesh = m_client->getMesh(meshstr);
-//#if defined(__ANDROID__) || defined(__APPLE__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 	} else if (meshstr.compare(meshstr.size() - 2, 2, ".e") == 0) {
 		std::string data, decrypted_data, filename;
 		if (fs::ReadFile(meshstr, data) &&
@@ -2865,7 +2865,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 		} else {
 			mesh = nullptr;
 		}
-//#endif
+#endif
 	} else {
 		mesh = smgr->getMesh(meshstr.c_str());
 		if (mesh)
