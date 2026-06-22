@@ -24,6 +24,7 @@ cmake ../ \
 	-DENABLE_SYSTEM_GMP=0 \
 	-DENABLE_OPENSSL=1 \
 	-DUSE_SDL=1 \
+	-DUSE_CAIRO=0 \
 	-DUSE_STATIC_BUILD=1 \
 	-DCMAKE_C_FLAGS="-static \
 		-DNO_IRR_COMPILE_WITH_SDL_TEXTINPUT_ \
@@ -59,6 +60,8 @@ cmake ../ \
 	-DJPEG_INCLUDE_DIR="$DEPS_ROOT/libjpeg/include" \
 	-DFREETYPE_LIBRARY="$DEPS_ROOT/freetype/lib/libfreetype.a" \
 	-DFREETYPE_INCLUDE_DIRS="$DEPS_ROOT/freetype/include" \
+	-DHARFBUZZ_LIBRARY="$DEPS_ROOT/harfbuzz/lib/libharfbuzz.a" \
+	-DHARFBUZZ_INCLUDE_DIR="$DEPS_ROOT/harfbuzz/include" \
 	-DSQLITE3_LIBRARY="$DEPS_ROOT/sqlite/lib/libsqlite3.a" \
 	-DSQLITE3_INCLUDE_DIR="$DEPS_ROOT/sqlite/include" \
 	-DOGG_LIBRARY="$DEPS_ROOT/libogg/lib/libogg.a" \

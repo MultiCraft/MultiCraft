@@ -34,6 +34,8 @@
 #include <iostream>
 #include "CGUITTFont.h"
 #include "porting.h"
+#include "util/string.h"
+
 
 namespace irr
 {
@@ -61,7 +63,7 @@ struct SGUITTFace : public virtual irr::IReferenceCounted
 
 // Static variables.
 FT_Library CGUITTFont::c_library;
-FT_Stroker CGUITTFont::stroker;
+FT_Stroker CGUITTFont::stroker = nullptr;
 core::map<io::path, SGUITTFace*> CGUITTFont::c_faces;
 bool CGUITTFont::c_libraryLoaded = false;
 scene::IMesh* CGUITTFont::shared_plane_ptr_ = 0;
@@ -87,7 +89,7 @@ u32 getBestFixedSizeIndex(FT_Face face, u32 font_size)
 	u32 index = 0;
 	u32 last_font_size =0;
 
-	for (u32 i = 0; i < face->num_fixed_sizes; i++) {
+	for (u32 i = 0; i < (u32)(face->num_fixed_sizes); i++) {
 		u32 current_size = face->available_sizes[i].height;
 
 		if (current_size > last_font_size) {
@@ -206,7 +208,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 	return image;
 }
 
-void SGUITTGlyph::preload(uchar32_t c, u32 char_index, FT_Face face,
+void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags,
 		bool bold, bool italic, u16 outline, u8 outline_type, s8 character_spacing)
 {
@@ -231,6 +233,11 @@ void SGUITTGlyph::preload(uchar32_t c, u32 char_index, FT_Face face,
 
 	FT_Glyph glyph = nullptr;
 	FT_Bitmap bits;
+#ifdef USE_CAIRO
+	cairo_surface_t *cairo_surface = nullptr;
+	cairo_t *cairo = nullptr;
+	cairo_font_face_t *cairo_font_face = nullptr;
+#endif
 
 	FT_GlyphSlot glyph_slot = face->glyph;
 	if (!FT_HAS_COLOR(face)) {
@@ -294,35 +301,62 @@ void SGUITTGlyph::preload(uchar32_t c, u32 char_index, FT_Face face,
 						2 << 16);
 			}
 
-			FT_Glyph_Stroke(&glyph, stroker, 0);
+			FT_Glyph_Stroke(&glyph, stroker, 1);
 		}
 
 		FT_Glyph_To_Bitmap(&glyph, FT_RENDER_MODE_NORMAL, nullptr, 1);
 		FT_BitmapGlyph bitmap_glyph = (FT_BitmapGlyph)glyph;
 		bits = bitmap_glyph->bitmap;
-		offset = core::vector2di(bitmap_glyph->left * scale, bitmap_glyph->top * scale);
-	} else {
-		if (face->num_fixed_sizes == 0)
-			FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
+		offset = core::vector2di(glyph_slot->bitmap_left * scale,
+				glyph_slot->bitmap_top * scale);
 
+	} else if (face->num_fixed_sizes > 0) {
 		bits = glyph_slot->bitmap;
-		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
-	}
-
-	// Don't allow empty textures for emoji letters so the fallback glyphs are used
-	if ((c >= 0x1F1E6 && c <= 0x1F1FF) && (bits.width < 1 || bits.rows < 1))
-		return;
-
-	// Setup the glyph information here:
-	advance = glyph_slot->advance;
-	advance.x += bold_offset;
-	advance.x *= scale;
-	advance.y *= scale;
-	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		int bitmap_top = parent->getColorEmojiOffset();
 		offset = core::vector2di(glyph_slot->bitmap_left * scale, bitmap_top);
+
 	} else {
-		offset = core::vector2di(glyph_slot->bitmap_left * scale, glyph_slot->bitmap_top * scale);
+#ifdef USE_CAIRO
+		cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+				font_size * 1.5f, font_size * 1.5f);
+
+		cairo = cairo_create(cairo_surface);
+
+		cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cairo);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+
+		cairo_font_face = cairo_ft_font_face_create_for_ft_face(face, 0);
+
+		cairo_set_font_face(cairo, cairo_font_face);
+		cairo_set_font_size(cairo, font_size);
+
+		cairo_glyph_t cairo_glyph;
+		cairo_glyph.index = char_index;
+		cairo_glyph.x = 0;
+		cairo_glyph.y = font_size;
+
+		cairo_show_glyphs(cairo, &cairo_glyph, 1);
+		cairo_surface_flush(cairo_surface);
+
+		unsigned char* data = cairo_image_surface_get_data(cairo_surface);
+		int stride = cairo_image_surface_get_stride(cairo_surface);
+		int w = cairo_image_surface_get_width(cairo_surface);
+		int h = cairo_image_surface_get_height(cairo_surface);
+
+		bits.width = w;
+		bits.rows = h;
+		bits.pitch = stride;
+		bits.pixel_mode = FT_PIXEL_MODE_BGRA;
+		bits.buffer = data;
+
+		offset = core::vector2di(0, (int)(font_size));
+#else
+		FT_Render_Glyph(glyph_slot, FT_RENDER_MODE_NORMAL);
+		bits = glyph_slot->bitmap;
+ 		offset = core::vector2di(glyph_slot->bitmap_left * scale,
+		 		glyph_slot->bitmap_top * scale);
+#endif
 	}
 
 	// Try to get the last page with available slots.
@@ -363,6 +397,14 @@ void SGUITTGlyph::preload(uchar32_t c, u32 char_index, FT_Face face,
 
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
 	surface = createGlyphImage(face, bits, driver, color);
+
+#ifdef USE_CAIRO
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
+		cairo_font_face_destroy(cairo_font_face);
+		cairo_destroy(cairo);
+		cairo_surface_destroy(cairo_surface);
+	}
+#endif
 
 	if (glyph)
 		FT_Done_Glyph(glyph);
@@ -429,10 +471,8 @@ void SGUITTGlyph::unload()
 //////////////////////
 
 CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
-		const io::path& filename, const u32 size, const bool antialias,
-		const bool transparency, const bool bold, const bool italic,
-		const u16 outline, const u8 outline_type, const s8 character_spacing,
-		const u32 shadow, const u32 shadow_alpha)
+		const io::path& filename, const u32 size,
+		const FontSettings& font_settings)
 {
 	if (!c_libraryLoaded)
 	{
@@ -441,18 +481,23 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 		c_libraryLoaded = true;
 	}
 
-	FT_Stroker_New(c_library, &stroker);
+	if (!stroker)
+		FT_Stroker_New(c_library, &stroker);
 
 	CGUITTFont* font = new CGUITTFont(env);
 
-	font->shadow_alpha = shadow_alpha;
-	font->bold = bold;
-	font->italic = italic;
-	font->outline = outline;
-	font->outline_type = outline_type;
-	font->character_spacing = character_spacing;
+	font->use_monochrome = font_settings.use_monochrome;
+	font->use_transparency = font_settings.use_transparency;
+	font->bold = font_settings.bold;
+	font->italic = font_settings.italic;
+	font->outline = font_settings.outline;
+	font->outline_type = font_settings.outline_type;
+	font->character_spacing = font_settings.character_spacing;
+	font->shadow_offset = font_settings.shadow_offset;
+	font->shadow_alpha = font_settings.shadow_alpha;
+	font->density = font_settings.density;
 
-	bool ret = font->load(filename, size, antialias, transparency, shadow);
+	bool ret = font->load(filename, size);
 	if (!ret)
 	{
 		font->drop();
@@ -460,67 +505,12 @@ CGUITTFont* CGUITTFont::createTTFont(IGUIEnvironment *env,
 	}
 
 	return font;
-}
-
-CGUITTFont* CGUITTFont::createTTFont(IrrlichtDevice *device,
-		const io::path& filename, const u32 size, const bool antialias,
-		const bool transparency, const bool bold, const bool italic,
-		const u16 outline, const u8 outline_type, const s8 character_spacing)
-{
-	if (!c_libraryLoaded)
-	{
-		if (FT_Init_FreeType(&c_library))
-			return 0;
-		c_libraryLoaded = true;
-	}
-
-	FT_Stroker_New(c_library, &stroker);
-
-	CGUITTFont* font = new CGUITTFont(device->getGUIEnvironment());
-
-	font->bold = bold;
-	font->italic = italic;
-	font->outline = outline;
-	font->outline_type = outline_type;
-	font->character_spacing = character_spacing;
-	font->Device = device;
-
-	bool ret = font->load(filename, size, antialias, transparency, false);
-	if (!ret)
-	{
-		font->drop();
-		return 0;
-	}
-
-	return font;
-}
-
-CGUITTFont* CGUITTFont::create(IGUIEnvironment *env, const io::path& filename,
-		const u32 size, const bool antialias, const bool transparency,
-		const bool bold, const bool italic, const u16 outline,
-		const u8 outline_type, const s8 character_spacing)
-{
-	return CGUITTFont::createTTFont(env, filename, size, antialias,
-			transparency, bold, italic, outline, outline_type,
-			character_spacing);
-}
-
-CGUITTFont* CGUITTFont::create(IrrlichtDevice *device, const io::path& filename,
-		const u32 size, const bool antialias, const bool transparency,
-		const bool bold, const bool italic, const u16 outline,
-		const u8 outline_type, const s8 character_spacing)
-{
-	return CGUITTFont::createTTFont(device, filename, size, antialias,
-			transparency, bold, italic, outline, outline_type,
-			character_spacing);
 }
 
 //////////////////////
 
 //! Constructor.
-CGUITTFont::CGUITTFont(IGUIEnvironment *env)
-: use_monochrome(false), use_transparency(true), use_hinting(true), use_auto_hinting(true),
-batch_load_size(1), Device(0), Environment(env), Driver(0), GlobalKerningWidth(0), GlobalKerningHeight(0)
+CGUITTFont::CGUITTFont(IGUIEnvironment *env) : Environment(env)
 {
 	#ifdef _DEBUG
 	setDebugName("CGUITTFont");
@@ -536,12 +526,47 @@ batch_load_size(1), Device(0), Environment(env), Driver(0), GlobalKerningWidth(0
 		Driver->grab();
 
 	setInvisibleCharacters(L" ");
-
-	// Glyphs aren't reference counted, so don't try to delete them when we free the array.
-	Glyphs.set_free_when_destroyed(false);
 }
 
-bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antialias, const bool transparency, const u32 shadow)
+CGUITTFont::~CGUITTFont()
+{
+	// Delete the glyphs and glyph pages.
+	reset_images();
+
+	for (auto& pair : Glyphs) {
+		if (pair.second)
+			delete pair.second;
+	}
+
+	for (auto filename : filenames) {
+		// We aren't using this face anymore.
+		core::map<io::path, SGUITTFace*>::Node* n = c_faces.find(filename);
+		if (n)
+		{
+			SGUITTFace* f = n->getValue();
+
+			// Drop our face.  If this was the last face, the destructor will clean up.
+			if (f->drop())
+				c_faces.remove(filename);
+
+			// If there are no more faces referenced by FreeType, clean up.
+			if (c_faces.size() == 0)
+			{
+				FT_Stroker_Done(stroker);
+				stroker = nullptr;
+
+				FT_Done_FreeType(c_library);
+				c_libraryLoaded = false;
+			}
+		}
+	}
+
+	// Drop our driver now.
+	if (Driver)
+		Driver->drop();
+}
+
+bool CGUITTFont::load(const io::path& filename, const u32 size)
 {
 	// Some sanity checks.
 	if (Environment == 0 || Driver == 0) return false;
@@ -553,14 +578,11 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 	this->size = size;
 	this->filenames.push_back(filename);
 
-	// Update the font loading flags when the font is first loaded.
-	this->use_monochrome = !antialias;
-	this->use_transparency = transparency;
 	update_load_flags();
 
 	// Log.
 	if (logger)
-		logger->log(L"CGUITTFont", core::stringw(core::stringw(L"Creating new font: ") + core::ustring(filename).toWCHAR_s() + L" " + core::stringc(size) + L"pt " + (antialias ? L"+antialias " : L"-antialias ") + (transparency ? L"+transparency" : L"-transparency")).c_str(), irr::ELL_INFORMATION);
+		logger->log(L"CGUITTFont", core::stringw(core::stringw(L"Creating new font: ") + core::stringw(filename) + L" " + core::stringc(size) + L"pt " + (!use_monochrome ? L"+antialias " : L"-antialias ") + (use_transparency ? L"+transparency" : L"-transparency")).c_str(), irr::ELL_INFORMATION);
 
 	// Grab the face.
 	SGUITTFace* face = 0;
@@ -590,7 +612,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 			int systemMemory = porting::getTotalSystemMemory();
 			int maxFontSize = 5 * 1024 * 1024;
 			size_t fileSize = file->getSize();
-			if (systemMemory < 3072 && fileSize > maxFontSize) {
+			if (systemMemory < 3072 && (int)fileSize > maxFontSize) {
 				use_memory_face = false;
 			} else {
 				face->face_buffer = new FT_Byte[fileSize];
@@ -613,8 +635,8 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 
 		if (!filesystem || !use_memory_face)
 		{
-			core::ustring converter(filename);
-			if (FT_New_Face(c_library, reinterpret_cast<const char*>(converter.toUTF8_s().c_str()), 0, &face->face))
+			std::string filename_utf8 = stringw_to_utf8(filename);
+			if (FT_New_Face(c_library, filename_utf8.c_str(), 0, &face->face))
 			{
 				if (logger) logger->log(L"CGUITTFont", L"FT_New_Face failed.", irr::ELL_INFORMATION);
 
@@ -634,44 +656,21 @@ bool CGUITTFont::load(const io::path& filename, const u32 size, const bool antia
 
 	// Store our face.
 	tt_faces.push_back(face->face);
-	tt_offsets.push_back(Glyphs.size());
-	shadow_offsets.push_back(shadow);
-
-	// Allocate our glyphs.
-	for (FT_Long i = 0; i < face->face->num_glyphs; i++)
-	{
-		SGUITTGlyph* glyph = new SGUITTGlyph();
-		glyph->isLoaded = false;
-		glyph->isColor = false;
-		glyph->glyph_page = 0;
-		glyph->source_rect = core::recti();
-		glyph->offset = core::vector2di();
-		glyph->shadow_offset = 0;
-		glyph->advance = FT_Vector();
-		glyph->surface = 0;
-		glyph->parent = this;
-
-		Glyphs.push_back(glyph);
-	}
 
 	if (tt_faces.size() == 1) {
 		// Store font metrics.
 		FT_Set_Pixel_Sizes(face->face, size, 0);
 		font_metrics = face->face->size->metrics;
 
-		// Cache the first 127 ascii characters.
-		u32 old_size = batch_load_size;
-		batch_load_size = 127;
-		getGlyphIndexByChar((uchar32_t)0);
-		batch_load_size = old_size;
+		calculateMaxFontHeight();
 	}
 
 	return true;
 }
 
-bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font, const u32 shadow)
+bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font)
 {
-	bool success = load(filename, size, !use_monochrome, use_transparency, shadow);
+	bool success = load(filename, size);
 
 	if (!success || !is_emoji_font)
 		return success;
@@ -681,8 +680,6 @@ bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font
 	if (!success) {
 		filenames.pop_back();
 		tt_faces.pop_back();
-		tt_offsets.pop_back();
-		shadow_offsets.pop_back();
 
 		core::map<io::path, SGUITTFace*>::Node *node = c_faces.find(filename);
 		if (node) {
@@ -723,8 +720,15 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (!face)
 		return false;
 
-	uchar32_t smile = 0x1F600;
-	u32 char_index = FT_Get_Char_Index(face, smile);
+	uint32_t emojis_to_test[] = { 0x1F600, 0x1F1FA, 0x1F3F4 };
+
+	u32 char_index = 0;
+	for (uint32_t emoji : emojis_to_test) {
+		char_index = FT_Get_Char_Index(face, emoji);
+
+		if (char_index != 0)
+			break;
+	}
 
 	if (char_index == 0)
 		return false;
@@ -745,23 +749,70 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (FT_Load_Glyph(face, char_index, flags) != FT_Err_Ok)
 		return false;
 
-	FT_GlyphSlot glyph = face->glyph;
-
+#ifdef USE_CAIRO
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
-		FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
+		cairo_surface_t* cairo_surface = cairo_image_surface_create(
+				CAIRO_FORMAT_ARGB32, size * 1.5f, size * 1.5f);
+		cairo_t* cairo = cairo_create(cairo_surface);
+		cairo_font_face_t* cairo_face =
+				cairo_ft_font_face_create_for_ft_face(face, 0);
+
+		cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
+		cairo_paint(cairo);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+
+		cairo_set_font_face(cairo, cairo_face);
+		cairo_set_font_size(cairo, size);
+
+		cairo_glyph_t cairo_glyph;
+		cairo_glyph.index = char_index;
+		cairo_glyph.x = 0;
+		cairo_glyph.y = size;
+
+		cairo_show_glyphs(cairo, &cairo_glyph, 1);
+		cairo_surface_flush(cairo_surface);
+
+		unsigned char *data = cairo_image_surface_get_data(cairo_surface);
+		int stride = cairo_image_surface_get_stride(cairo_surface);
+		bool has_pixels = false;
+
+		u32* pixels = (u32*)data;
+		int buffer_size = stride/4 * size;
+		for (int i = 0; i < buffer_size; i++) {
+			if ((pixels[i] >> 24) > 0) {
+				has_pixels = true;
+				break;
+			}
+		}
+
+		cairo_font_face_destroy(cairo_face);
+		cairo_destroy(cairo);
+		cairo_surface_destroy(cairo_surface);
+
+		if (!has_pixels)
+			return false;
+
+	} else {
+#endif
+		FT_GlyphSlot glyph = face->glyph;
+
+		if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0)
+			FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
+
+		FT_Bitmap bits = glyph->bitmap;
+
+		if (bits.rows < 1 || bits.width < 1)
+			return false;
+
+		if (FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_BGRA)
+			return false;
+
+		if (!FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_MONO &&
+				bits.pixel_mode != FT_PIXEL_MODE_GRAY)
+			return false;
+#ifdef USE_CAIRO
 	}
-
-	FT_Bitmap bits = glyph->bitmap;
-
-	if (bits.rows < 1 || bits.width < 1)
-		return false;
-
-	if (FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_BGRA)
-		return false;
-
-	if (!FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_MONO &&
-			bits.pixel_mode != FT_PIXEL_MODE_GRAY)
-		return false;
+#endif
 
 	return true;
 }
@@ -771,7 +822,7 @@ void CGUITTFont::calculateColorEmojiParams(FT_Face face)
 	if (!FT_HAS_COLOR(face) || face->num_fixed_sizes == 0)
 		return;
 
-	u32 height = std::round((float)(getMaxFontHeight()) * 0.9f);
+	u32 height = std::round((float)(max_font_height) * 0.9f);
 	float scale = 1.0f;
 	u32 bitmap_top = height;
 
@@ -807,60 +858,497 @@ void CGUITTFont::calculateColorEmojiParams(FT_Face face)
 	color_emoji_offset = bitmap_top;
 }
 
-CGUITTFont::~CGUITTFont()
+void CGUITTFont::calculateMaxFontHeight()
 {
-	// Delete the glyphs and glyph pages.
-	reset_images();
+	// Probably better just
+	//     return font_metrics.height / 64;
+	// but for now keep it for compatibility
 
-	for (u32 i = 0; i < Glyphs.size(); i++) {
-		delete Glyphs[i];
-	}
+	core::stringw test_chars[] = {"g", "j", "_"};
+	u32 max_height = font_metrics.height / 64;
 
-	CGUITTAssistDelete::Delete(Glyphs);
-	//Glyphs.clear();
+	for (core::stringw c : test_chars) {
+		std::vector<ShapedRun> shaped_runs = shapeText(c);
+		loadGlyphsForShapedText(shaped_runs);
 
-	for (auto filename : filenames) {
-		// We aren't using this face anymore.
-		core::map<io::path, SGUITTFace*>::Node* n = c_faces.find(filename);
-		if (n)
-		{
-			SGUITTFace* f = n->getValue();
+		if (!shaped_runs.empty() && !shaped_runs[0].glyphs.empty()) {
+			const ShapedGlyph& shaped_glyph = shaped_runs[0].glyphs[0];
+			u64 key = makeGlyphKey(
+					shaped_glyph.face_index, shaped_glyph.glyph_index);
+			SGUITTGlyph* glyph = Glyphs[key];
 
-			// Drop our face.  If this was the last face, the destructor will clean up.
-			if (f->drop())
-				c_faces.remove(filename);
-
-			// If there are no more faces referenced by FreeType, clean up.
-			if (c_faces.size() == 0)
-			{
-				FT_Stroker_Done(stroker);
-
-				FT_Done_FreeType(c_library);
-				c_libraryLoaded = false;
+			if (glyph && glyph->isLoaded) {
+				s32 height = (font_metrics.ascender / 64) - glyph->offset.Y +
+						glyph->source_rect.getHeight();
+				max_height = core::max_(max_height, (u32)height);
 			}
 		}
 	}
 
-	// Drop our driver now.
-	if (Driver)
-		Driver->drop();
+	max_font_height = max_height + 1;
+}
+
+std::vector<ShapedRun> CGUITTFont::shapeText(const core::stringw& text,
+		bool use_rtl) const
+{
+	std::vector<ShapedRun> runs;
+
+	if (text.size() == 0)
+		return runs;
+
+	if (use_rtl) {
+		std::vector<BidiRun> bidi_runs = getBidiRuns(text);
+
+		for (const auto& bidi_run : bidi_runs) {
+			core::stringw run_text = text.subString(bidi_run.start, bidi_run.length);
+			std::vector<TextRun> font_runs = splitIntoFontRuns(run_text);
+
+			std::vector<ShapedRun> bidi_shaped_runs;
+			for (auto& font_run : font_runs) {
+				font_run.start += bidi_run.start;
+				ShapedRun shaped = shapeRun(font_run, text, bidi_run.is_rtl);
+
+				if (bidi_run.is_rtl) {
+					bidi_shaped_runs.insert(bidi_shaped_runs.begin(), shaped);
+				} else {
+					bidi_shaped_runs.push_back(shaped);
+				}
+			}
+
+			runs.insert(runs.end(), bidi_shaped_runs.begin(), bidi_shaped_runs.end());
+		}
+	} else {
+		std::vector<TextRun> font_runs = splitIntoFontRuns(text);
+
+		for (auto& font_run : font_runs) {
+			ShapedRun shaped = shapeRun(font_run, text, false);
+			runs.push_back(shaped);
+		}
+	}
+
+	return runs;
+}
+
+std::vector<BidiRun> CGUITTFont::getBidiRuns(
+		const core::stringw& text) const
+{
+	std::vector<BidiRun> runs;
+
+	if (text.empty())
+		return runs;
+
+	SBCodepointSequence codepointSequence;
+#if defined(_WIN32) || defined(_WIN64)
+	codepointSequence.stringEncoding = SBStringEncodingUTF16;
+#else
+	codepointSequence.stringEncoding = SBStringEncodingUTF32;
+#endif
+	codepointSequence.stringBuffer = (void*)text.c_str();
+	codepointSequence.stringLength = text.size();
+
+	SBAlgorithmRef bidiAlgorithm = SBAlgorithmCreate(&codepointSequence);
+
+	if (!bidiAlgorithm)
+		return runs;
+
+	SBUInteger paragraph_offset = 0;
+
+	while (paragraph_offset < text.size()) {
+		SBParagraphRef paragraph = SBAlgorithmCreateParagraph(
+				bidiAlgorithm, paragraph_offset, INT32_MAX, SBLevelDefaultLTR);
+
+		if (!paragraph)
+			break;
+
+		SBUInteger paragraph_length = SBParagraphGetLength(paragraph);
+
+		SBLineRef line = SBParagraphCreateLine(
+				paragraph, paragraph_offset, paragraph_length);
+
+		if (!line) {
+			SBParagraphRelease(paragraph);
+			break;
+		}
+
+		SBUInteger runCount = SBLineGetRunCount(line);
+		const SBRun *visualRuns = SBLineGetRunsPtr(line);
+
+		for (SBUInteger i = 0; i < runCount; i++) {
+			BidiRun run;
+			run.start = visualRuns[i].offset;
+			run.length = visualRuns[i].length;
+			run.level = visualRuns[i].level;
+			run.is_rtl = (run.level % 2 != 0);
+			runs.push_back(run);
+		}
+
+		SBLineRelease(line);
+		SBParagraphRelease(paragraph);
+
+		paragraph_offset += paragraph_length;
+	}
+
+	SBAlgorithmRelease(bidiAlgorithm);
+
+	return runs;
+}
+
+std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
+		const core::stringw& text) const
+{
+	std::vector<TextRun> runs;
+
+	u32 run_start = 0;
+	size_t current_face = SIZE_MAX;
+
+	for (u32 i = 0; i < text.size(); i++) {
+		wchar_t ch = text[i];
+		uint32_t codepoint = (uint32_t)ch;
+		
+#if defined(_WIN32) || defined(_WIN64)
+		if (i + 1 < text.size() && isSurrogatePair(ch, text[i + 1])) {
+			codepoint = 0x10000 + ((uint32_t)(ch - 0xD800) << 10) + (text[i + 1] - 0xDC00);
+		} else if (isLowSurrogate(ch)) {
+			continue;
+		}
+#endif
+
+		bool is_zwj = (codepoint == 0x200D);
+		bool is_variation_selector = (codepoint >= 0xFE00 && codepoint <= 0xFE0F) ||
+				(codepoint >= 0xE0100 && codepoint <= 0xE01EF);
+		bool is_emoji_modifier = (codepoint >= 0x1F3FB && codepoint <= 0x1F3FF);
+
+		if (is_zwj || is_variation_selector || is_emoji_modifier)
+			continue;
+
+		s32 face_for_char = getFaceIndexByChar(codepoint);
+		if (face_for_char == -1)
+			face_for_char = 0;
+
+		if ((size_t)face_for_char != current_face) {
+			if (current_face != SIZE_MAX)
+				runs.push_back({current_face, run_start, i - run_start});
+			run_start = i;
+			current_face = face_for_char;
+		}
+	}
+
+	if (current_face != SIZE_MAX) {
+		runs.push_back({current_face, run_start,
+					   (u32)text.size() - run_start});
+	}
+
+	return runs;
+}
+
+ShapedRun CGUITTFont::shapeRun(const TextRun& run,
+		const core::stringw& text, bool is_rtl) const
+{
+	ShapedRun result;
+	result.face_index = run.face_index;
+	result.start_char = run.start;
+	result.end_char = run.start + run.length;
+	result.is_rtl = is_rtl;
+
+	FT_Face face = tt_faces[run.face_index];
+
+	FT_Set_Pixel_Sizes(face, 0, size);
+
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+		u32 best_index = getBestFixedSizeIndex(face, size);
+		FT_Select_Size(face, best_index);
+	}
+
+	hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
+	hb_buffer_t* buf = hb_buffer_create();
+
+#if defined(_WIN32) || defined(_WIN64)
+	hb_buffer_add_utf16(buf, (const uint16_t*)text.c_str(), text.size(), run.start, run.length);
+#else
+	hb_buffer_add_utf32(buf, (const uint32_t*)text.c_str(), text.size(), run.start, run.length);
+#endif
+
+	hb_buffer_guess_segment_properties(buf);
+
+	hb_buffer_set_direction(buf, is_rtl ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
+
+	float bold_offset = 0;
+	if (bold) {
+		float embolden_amount = (float)size * 2.0f;
+		bold_offset = (embolden_amount * 2.0f) / 64.0f;
+	}
+
+	s32 spacing_offset = character_spacing + bold_offset;
+
+	hb_feature_t features[] = {
+		{ HB_TAG('l','i','g','a'), 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END },
+		{ HB_TAG('c','l','i','g'), 0, HB_FEATURE_GLOBAL_START, HB_FEATURE_GLOBAL_END },
+	};
+
+	hb_shape(hb_font, buf, features, 2);
+
+	unsigned int glyph_count;
+	hb_glyph_info_t* glyph_info = hb_buffer_get_glyph_infos(buf, &glyph_count);
+	hb_glyph_position_t* glyph_pos = hb_buffer_get_glyph_positions(buf, &glyph_count);
+
+	for (unsigned int i = 0; i < glyph_count; i++) {
+		s32 x_advance = glyph_pos[i].x_advance >> 6;
+		s32 y_advance = glyph_pos[i].y_advance >> 6;
+
+		if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
+			x_advance *= color_emoji_scale;
+			y_advance *= color_emoji_scale;
+		}
+
+		ShapedGlyph glyph;
+		glyph.glyph_index = glyph_info[i].codepoint;
+		glyph.cluster = glyph_info[i].cluster;
+		glyph.x_offset = glyph_pos[i].x_offset >> 6;
+		glyph.y_offset = glyph_pos[i].y_offset >> 6;
+		glyph.x_advance = x_advance + spacing_offset;
+		glyph.y_advance = y_advance;
+		glyph.face_index = run.face_index;
+
+		result.glyphs.push_back(glyph);
+	}
+
+	hb_buffer_destroy(buf);
+	hb_font_destroy(hb_font);
+
+	return result;
+}
+
+void CGUITTFont::loadGlyphsForShapedText(const std::vector<ShapedRun>& runs)
+{
+	for (const auto& run : runs) {
+		FT_Face face = tt_faces[run.face_index];
+
+		for (const auto& shaped_glyph : run.glyphs) {
+			u32 glyph_idx = shaped_glyph.glyph_index;
+
+			if (glyph_idx < 1)
+				continue;
+
+			u64 key = makeGlyphKey(shaped_glyph.face_index, shaped_glyph.glyph_index);
+			SGUITTGlyph* glyph = Glyphs[key];
+
+			if (!glyph) {
+				glyph = new SGUITTGlyph();
+				glyph->isLoaded = false;
+				glyph->isColor = false;
+				glyph->glyph_page = 0;
+				glyph->source_rect = core::recti();
+				glyph->offset = core::vector2di();
+				glyph->surface = 0;
+				glyph->parent = this;
+				Glyphs[key] = glyph;
+			}
+
+			if (!glyph->isLoaded) {
+				FT_Int32 flags = load_flags;
+				if (FT_HAS_COLOR(face))
+					flags |= FT_LOAD_COLOR;
+
+				glyph->preload(glyph_idx, face, Driver, size, flags,
+						bold, italic, outline, outline_type, character_spacing);
+				Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
+			}
+		}
+	}
+}
+
+u64 CGUITTFont::makeGlyphKey(u32 face_index, u32 glyph_index)
+{
+	return ((u64)face_index << 32) | glyph_index;
 }
 
 s32 CGUITTFont::getPrevClusterPos(const core::stringw& text, s32 pos)
 {
-	return pos - 1;
+	if (pos <= 0)
+		return 0;
+
+	std::vector<ShapedRun> shaped_runs = shapeText(text);
+
+	s32 prev_cluster = 0;
+
+	for (const auto& run : shaped_runs) {
+		for (const auto& glyph : run.glyphs) {
+			if ((s32)glyph.cluster < pos && (s32)glyph.cluster > prev_cluster)
+				prev_cluster = (s32)glyph.cluster;
+		}
+	}
+
+	return prev_cluster;
 }
 
 s32 CGUITTFont::getNextClusterPos(const core::stringw& text, s32 pos)
 {
-	return pos + 1;
+	std::vector<ShapedRun> shaped_runs = shapeText(text);
+
+	s32 next_cluster = (s32)text.size();
+
+	for (const auto& run : shaped_runs) {
+		for (const auto& glyph : run.glyphs) {
+			if ((s32)glyph.cluster > pos && (s32)glyph.cluster < next_cluster)
+				next_cluster = (s32)glyph.cluster;
+		}
+	}
+
+	return next_cluster;
+}
+
+s32 CGUITTFont::getCursorPosition(const core::stringw& text, u32 logical_pos) const
+{
+	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
+	//loadGlyphsForShapedText(shaped_runs);
+
+	bool is_rtl = false;
+	s32 pos_x = 0;
+
+	for (const auto& run : shaped_runs) {
+		for (const auto& shaped_glyph : run.glyphs) {
+			if (shaped_glyph.cluster == 0 && run.is_rtl)
+				is_rtl = true;
+
+			if (shaped_glyph.cluster == logical_pos) {
+				if (run.is_rtl)
+					return pos_x + shaped_glyph.x_advance;
+				else
+					return pos_x;
+			}
+
+			pos_x += shaped_glyph.x_advance;
+		}
+	}
+
+	if (is_rtl)
+		return 0;
+
+	return pos_x;
+}
+
+s32 CGUITTFont::getCharacterFromPos(const wchar_t* text, s32 pixel_x) const
+{
+	return getCharacterFromPos(core::stringw(text), pixel_x);
+}
+
+s32 CGUITTFont::getCharacterFromPos(const core::stringw& text, s32 pixel_x) const
+{
+	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str());
+	//loadGlyphsForShapedText(shaped_runs);
+
+	bool is_rtl = false;
+	s32 pos_x = 0;
+
+	for (const auto& run : shaped_runs) {
+		for (const auto& shaped_glyph : run.glyphs) {
+			s32 glyph_start = pos_x;
+			s32 glyph_end = pos_x + shaped_glyph.x_advance;
+
+			if (shaped_glyph.cluster == 0 && run.is_rtl)
+				is_rtl = true;
+
+			if (pixel_x < glyph_end) {
+				bool clicked_left_half = pixel_x < (glyph_start + shaped_glyph.x_advance / 2);
+				s32 next_cluster = const_cast<CGUITTFont*>(this)->getNextClusterPos(text, shaped_glyph.cluster);
+
+				if (!run.is_rtl) {
+					if (clicked_left_half)
+						return shaped_glyph.cluster;
+					else
+						return next_cluster;
+				} else {
+					if (clicked_left_half)
+						return next_cluster;
+					else
+						return shaped_glyph.cluster;
+				}
+			}
+
+			pos_x = glyph_end;
+		}
+	}
+
+	if (is_rtl)
+		return 0;
+
+	return text.size();
+}
+
+std::vector<core::recti> CGUITTFont::getSelectionRects(
+		const core::stringw& text, u32 start_pos, u32 end_pos) const
+{
+	std::vector<core::recti> result;
+
+	if (text.empty() || start_pos == end_pos)
+		return result;
+
+	if (start_pos > end_pos)
+		std::swap(start_pos, end_pos);
+
+	std::vector<ShapedRun> shaped_runs = shapeText(text);
+	//const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
+
+	s32 current_x = 0;
+	s32 selection_start_x = -1;
+	bool is_selection = false;
+
+	for (const auto& run : shaped_runs) {
+		for (const auto& glyph : run.glyphs) {
+			u32 cluster = glyph.cluster;
+
+			if (!is_selection && cluster >= start_pos && cluster < end_pos) {
+				selection_start_x = current_x;
+				is_selection = true;
+			}
+
+			if (is_selection && (cluster >= end_pos || cluster < start_pos)) {
+				core::recti rect;
+				rect.UpperLeftCorner.X = selection_start_x;
+				rect.UpperLeftCorner.Y = 0;
+				rect.LowerRightCorner.X = current_x;
+				rect.LowerRightCorner.Y = max_font_height;
+				result.push_back(rect);
+
+				is_selection = false;
+				selection_start_x = -1;
+			}
+
+			current_x += glyph.x_advance;
+		}
+	}
+
+	if (is_selection && selection_start_x >= 0) {
+		core::recti rect;
+		rect.UpperLeftCorner.X = selection_start_x;
+		rect.UpperLeftCorner.Y = 0;
+		rect.LowerRightCorner.X = current_x;
+		rect.LowerRightCorner.Y = max_font_height;
+		result.push_back(rect);
+	}
+
+	return result;
+}
+
+bool CGUITTFont::isRTL(const core::stringw& text) const
+{
+	std::vector<ShapedRun> runs = shapeText(text.c_str());
+
+	for (const auto& run : runs)
+		if (!run.glyphs.empty())
+			return run.is_rtl;
+
+	return false;
 }
 
 void CGUITTFont::reset_images()
 {
 	// Delete the glyphs.
-	for (u32 i = 0; i != Glyphs.size(); ++i)
-		Glyphs[i]->unload();
+	for (auto& pair : Glyphs) {
+		if (pair.second) {
+			pair.second->unload();
+		}
+	}
 
 	// Unload the glyph pages from video memory.
 	for (u32 i = 0; i != Glyph_Pages.size(); ++i)
@@ -956,12 +1444,12 @@ void CGUITTFont::setFontHinting(const bool enable, const bool enable_auto_hintin
 	reset_images();
 }
 
-void CGUITTFont::draw(const core::stringw& text, const core::rect<s32>& position, video::SColor color, bool hcenter, bool vcenter, const core::rect<s32>* clip)
+void CGUITTFont::draw(const core::stringw& text, const core::rect<s32>& position, video::SColor color, bool hcenter, bool vcenter, const core::rect<s32>* clip, bool use_rtl)
 {
-	draw(EnrichedString(std::wstring(text.c_str()), color), position, hcenter, vcenter, clip);
+	draw(EnrichedString(std::wstring(text.c_str()), color), position, hcenter, vcenter, clip, use_rtl);
 }
 
-void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& position, bool hcenter, bool vcenter, const core::rect<s32>* clip)
+void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& position, bool hcenter, bool vcenter, const core::rect<s32>* clip, bool use_rtl)
 {
 	const std::vector<video::SColor> &colors = text.getColors();
 
@@ -994,87 +1482,69 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 			offset.Y = ((position.getHeight() - textDimension.Height) >> 1) + offset.Y;
 	}
 
-	// Convert to a unicode string.
-	core::ustring utext = text.getString();
+	// Shape the text with HarfBuzz
+	std::vector<ShapedRun> shaped_runs = shapeText(text.c_str(), use_rtl);
+	loadGlyphsForShapedText(shaped_runs);
 
 	// Set up our render map.
 	core::map<u32, CGUITTGlyphPage*> Render_Map;
 
-	// Start parsing characters.
-	u32 n;
-	uchar32_t previousChar = 0;
-	core::ustring::const_iterator iter(utext);
-	u32 charPos = 0; // Position in Unicode characters (not UTF-16)
-	while (!iter.atEnd())
+	for (const auto& run : shaped_runs)
 	{
-		uchar32_t currentChar = *iter;
-		n = getGlyphIndexByChar(currentChar);
-		bool visible = (Invisible.findFirst(currentChar) == -1);
-		bool lineBreak=false;
-		if (currentChar == L'\r') // Mac or Windows breaks
+		for (const auto& shaped_glyph : run.glyphs)
 		{
-			lineBreak = true;
-			if (*(iter + 1) == (uchar32_t)'\n') { 	// Windows line breaks.
-				currentChar = *(++iter);
-				++charPos;
-			}
-		}
-		else if (currentChar == (uchar32_t)'\n') // Unix breaks
-		{
-			lineBreak = true;
-		}
+			uint32_t currentChar = 0;
+			if (shaped_glyph.cluster < text.size())
+				currentChar = (text.c_str())[shaped_glyph.cluster];
 
-		if (lineBreak)
-		{
-			previousChar = 0;
-			offset.Y += font_metrics.height / 64;
-			offset.X = position.UpperLeftCorner.X;
+			bool visible = (Invisible.findFirst(currentChar) == -1);
 
-			if (hcenter)
-				offset.X += (position.getWidth() - textDimension.Width) >> 1;
-			++iter;
-			++charPos;
-			continue;
-		}
+			bool lineBreak = (currentChar == L'\n' || currentChar == L'\r');
 
-		if (n > 0 && visible)
-		{
-			// Calculate the glyph offset.
-			s32 offx = Glyphs[n-1]->offset.X;
-			s32 offy = (font_metrics.ascender / 64) - Glyphs[n-1]->offset.Y;
+			if (lineBreak)
+			{
+				offset.Y += max_font_height;
+				offset.X = position.UpperLeftCorner.X;
 
-			// Apply kerning.
-			core::vector2di k = getKerning(currentChar, previousChar);
-			offset.X += k.X;
-			offset.Y += k.Y;
+				if (hcenter)
+					offset.X += (position.getWidth() - textDimension.Width) >> 1;
 
-			// Determine rendering information.
-			SGUITTGlyph* glyph = Glyphs[n-1];
-			CGUITTGlyphPage* const page = Glyph_Pages[glyph->glyph_page];
-			page->render_positions.push_back(core::position2di(offset.X + offx, offset.Y + offy));
-			page->render_source_rects.push_back(glyph->source_rect);
-
-			if (glyph->shadow_offset) {
-				page->shadow_positions.push_back(core::position2di(
-						offset.X + offx + glyph->shadow_offset,
-						offset.Y + offy + glyph->shadow_offset));
-				page->shadow_source_rects.push_back(glyph->source_rect);
+				continue;
 			}
 
-			// If wchar_t is 32-bit then use charPos instead
-			u32 iterPos = sizeof(wchar_t) == 4 ? charPos : iter.getPos();
+			if (shaped_glyph.glyph_index > 0 && visible)
+			{
+				u64 key = makeGlyphKey(shaped_glyph.face_index, shaped_glyph.glyph_index);
+				SGUITTGlyph* glyph = Glyphs[key];
 
-			if (!glyph->isColor && iterPos < colors.size())
-				page->render_colors.push_back(colors[iterPos]);
-			else
-				page->render_colors.push_back(video::SColor(255,255,255,255));
-			Render_Map.set(glyph->glyph_page, page);
+				// Calculate the glyph offset.
+				s32 offx = glyph->offset.X + shaped_glyph.x_offset;
+				s32 offy = (font_metrics.ascender / 64) - glyph->offset.Y + shaped_glyph.y_offset;
+
+				// Determine rendering information.
+				CGUITTGlyphPage* const page = Glyph_Pages[glyph->glyph_page];
+				page->render_positions.push_back(core::position2di(offset.X + offx, offset.Y + offy));
+				page->render_source_rects.push_back(glyph->source_rect);
+
+				if (shadow_offset && !glyph->isColor) {
+					page->shadow_positions.push_back(core::position2di(
+							offset.X + offx + shadow_offset,
+							offset.Y + offy + shadow_offset));
+					page->shadow_source_rects.push_back(glyph->source_rect);
+				}
+
+				u32 color_index = shaped_glyph.cluster;
+				if (!glyph->isColor && color_index < colors.size())
+					page->render_colors.push_back(colors[color_index]);
+				else
+					page->render_colors.push_back(video::SColor(255,255,255,255));
+
+				Render_Map.set(glyph->glyph_page, page);
+			}
+
+			offset.X += shaped_glyph.x_advance;
+			offset.Y += shaped_glyph.y_advance;
 		}
-		offset.X += getWidthFromCharacter(currentChar);
-
-		previousChar = currentChar;
-		++iter;
-		++charPos;
 	}
 
 	// Draw now.
@@ -1091,6 +1561,7 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 		if (!page->shadow_positions.empty()) {
 			Driver->draw2DImageBatch(page->texture, page->shadow_positions, page->shadow_source_rects, clip, video::SColor(shadow_alpha,0,0,0), true);
 		}
+
 		// render runs of matching color in batch
 		size_t ibegin;
 		video::SColor colprev;
@@ -1114,76 +1585,42 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 
 core::dimension2d<u32> CGUITTFont::getCharDimension(const wchar_t ch) const
 {
-	return core::dimension2d<u32>(getWidthFromCharacter(ch), getHeightFromCharacter(ch));
+	core::stringw str;
+	str.append(ch);
+
+	return getDimension(str);
 }
 
-core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text) const
+core::dimension2d<u32> CGUITTFont::getDimension(const wchar_t* text, bool use_rtl) const
 {
-	return getDimension(core::ustring(text));
+	return getDimension(core::stringw(text), use_rtl);
 }
 
-u32 CGUITTFont::getMaxFontHeight() const
+core::dimension2d<u32> CGUITTFont::getDimension(const core::stringw& text, bool use_rtl) const
 {
-	// Get the maximum font height.  Unfortunately, we have to do this hack as
-	// Irrlicht will draw things wrong.  In FreeType, the font size is the
-	// maximum size for a single glyph, but that glyph may hang "under" the
-	// draw line, increasing the total font height to beyond the set size.
-	// Irrlicht does not understand this concept when drawing fonts.  Also, I
-	// add +1 to give it a 1 pixel blank border.  This makes things like
-	// tooltips look nicer.
-	u32 test1 = getHeightFromCharacter((uchar32_t)'g') + 1;
-	u32 test2 = getHeightFromCharacter((uchar32_t)'j') + 1;
-	u32 test3 = getHeightFromCharacter((uchar32_t)'_') + 1;
-	u32 max_font_height = core::max_(test1, core::max_(test2, test3));
-
-	return max_font_height;
-}
-
-core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
-{
-	s32 max_font_height = getMaxFontHeight();
+	std::vector<ShapedRun> shaped_runs = shapeText(text, use_rtl);
+	const_cast<CGUITTFont*>(this)->loadGlyphsForShapedText(shaped_runs);
 
 	core::dimension2d<u32> text_dimension(0, max_font_height);
 	core::dimension2d<u32> line(0, max_font_height);
 
-	uchar32_t previousChar = 0;
-	core::ustring::const_iterator iter = text.begin();
-	for (; !iter.atEnd(); ++iter)
-	{
-		uchar32_t p = *iter;
-		bool lineBreak = false;
-		if (p == '\r')	// Mac or Windows line breaks.
-		{
-			lineBreak = true;
-			if (*(iter + 1) == '\n')
-			{
-				++iter;
-				p = *iter;
+	for (const auto& run : shaped_runs) {
+		for (const auto& glyph : run.glyphs) {
+			if (glyph.cluster < text.size()) {
+				uint32_t c = text[glyph.cluster];
+				if (c == L'\n' || c == L'\r') {
+					text_dimension.Height += line.Height;
+					if (text_dimension.Width < line.Width)
+						text_dimension.Width = line.Width;
+					line.Width = 0;
+					line.Height = max_font_height;
+					continue;
+				}
 			}
+			line.Width += glyph.x_advance;
 		}
-		else if (p == '\n')	// Unix line breaks.
-		{
-			lineBreak = true;
-		}
-
-		// Kerning.
-		core::vector2di k = getKerning(p, previousChar);
-		line.Width += k.X;
-		previousChar = p;
-
-		// Check for linebreak.
-		if (lineBreak)
-		{
-			previousChar = 0;
-			text_dimension.Height += line.Height;
-			if (text_dimension.Width < line.Width)
-				text_dimension.Width = line.Width;
-			line.Width = 0;
-			line.Height = max_font_height;
-			continue;
-		}
-		line.Width += getWidthFromCharacter(p);
 	}
+
 	if (text_dimension.Width < line.Width)
 		text_dimension.Width = line.Width;
 
@@ -1198,13 +1635,12 @@ core::dimension2d<u32> CGUITTFont::getDimension(const core::ustring& text) const
 
 core::dimension2d<u32> CGUITTFont::getTotalDimension(const wchar_t* text) const
 {
-	return getTotalDimension(core::ustring(text));
+	return getTotalDimension(core::stringw(text));
 }
 
-core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) const
+core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::stringw& text) const
 {
 	core::dimension2d<u32> text_dimension = getDimension(text);
-	u32 max_font_height = getMaxFontHeight();
 
 	if (italic) {
 		float slant = 0.2f;
@@ -1220,180 +1656,13 @@ core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::ustring& text) 
 	return text_dimension;
 }
 
-inline u32 CGUITTFont::getWidthFromCharacter(wchar_t c) const
-{
-	return getWidthFromCharacter((uchar32_t)c);
-}
-
-inline u32 CGUITTFont::getWidthFromCharacter(uchar32_t c) const
-{
-	// Set the size of the face.
-	// This is because we cache faces and the face may have been set to a different size.
-	//FT_Set_Pixel_Sizes(tt_face, 0, size);
-
-	u32 n = getGlyphIndexByChar(c);
-	if (n > 0)
-	{
-		int w = Glyphs[n-1]->advance.x / 64;
-		return w;
-	}
-	if (c >= 0xFE00 && c <= 0xFE0F) // variation selectors
-		return 0;
-	else if (c >= 0x2000)
-		return (font_metrics.ascender / 64);
-	else return (font_metrics.ascender / 64) / 2;
-}
-
-inline u32 CGUITTFont::getHeightFromCharacter(wchar_t c) const
-{
-	return getHeightFromCharacter((uchar32_t)c);
-}
-
-inline u32 CGUITTFont::getHeightFromCharacter(uchar32_t c) const
-{
-	// Set the size of the face.
-	// This is because we cache faces and the face may have been set to a different size.
-	//FT_Set_Pixel_Sizes(tt_face, 0, size);
-
-	u32 n = getGlyphIndexByChar(c);
-	if (n > 0)
-	{
-		// Grab the true height of the character, taking into account underhanging glyphs.
-		s32 height = (font_metrics.ascender / 64) - Glyphs[n-1]->offset.Y + Glyphs[n-1]->source_rect.getHeight();
-		return height;
-	}
-	if (c >= 0xFE00 && c <= 0xFE0F) // variation selectors
-		return 0;
-	else if (c >= 0x2000)
-		return (font_metrics.ascender / 64);
-	else return (font_metrics.ascender / 64) / 2;
-}
-
-u32 CGUITTFont::getGlyphIndexByChar(wchar_t c) const
-{
-	return getGlyphIndexByChar((uchar32_t)c);
-}
-
-u32 CGUITTFont::getGlyphIndexByChar(uchar32_t c) const
-{
-	// If our glyph is already loaded, don't bother doing any batch loading code.
-	for (size_t i = 0; i < tt_faces.size(); i++) {
-		u32 glyph = FT_Get_Char_Index(tt_faces[i], c);
-		int tt_offset = tt_offsets[i];
-
-		if (glyph != 0 && Glyphs[tt_offset + glyph - 1]->isLoaded) {
-			return glyph + tt_offset;
-		}
-	}
-
-	size_t current_face = 0;
-
-begin:
-
-	// Get the glyph.
-	FT_Face tt_face = tt_faces[0];
-	u32 glyph = 0;
-	int tt_offset = 0;
-	u32 shadow_offset = shadow_offsets[0];
-	for (size_t i = current_face; i < tt_faces.size(); i++) {
-		glyph = FT_Get_Char_Index(tt_faces[i], c);
-
-		if (glyph != 0) {
-			tt_face = tt_faces[i];
-			tt_offset = tt_offsets[i];
-			shadow_offset = shadow_offsets[i];
-			current_face = i;
-			break;
-		}
-	}
-
-	// Check for a valid glyph.  If it is invalid, attempt to use the replacement character.
-	if (glyph == 0)
-		glyph = FT_Get_Char_Index(tt_face, core::unicode::UTF_REPLACEMENT_CHARACTER);
-
-	// Determine our batch loading positions.
-	u32 half_size = (batch_load_size / 2);
-	u32 start_pos = 0;
-	if (c > half_size) start_pos = c - half_size;
-	u32 end_pos = start_pos + batch_load_size;
-
-	// Load all our characters.
-	do
-	{
-		// Get the character we are going to load.
-		u32 char_index = FT_Get_Char_Index(tt_face, start_pos);
-
-		// If the glyph hasn't been loaded yet, do it now.
-		if (char_index)
-		{
-			SGUITTGlyph* glyph = Glyphs[tt_offset + char_index - 1];
-			if (!glyph->isLoaded)
-			{
-				FT_Int32 flags = load_flags;
-				if (FT_HAS_COLOR(tt_face))
-					flags |= FT_LOAD_COLOR;
-				else
-					flags |= FT_LOAD_DEFAULT;
-
-				glyph->preload(c, char_index, tt_face, Driver, size, flags,
-						bold, italic, outline, outline_type, character_spacing);
-
-				if (!glyph->isLoaded && current_face < tt_faces.size()) {
-					current_face++;
-					goto begin;
-				}
-
-				glyph->shadow_offset = shadow_offset;
-				Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
-			}
-		}
-	}
-	while (++start_pos < end_pos);
-
-	// Return our original character.
-	return glyph + tt_offset;
-}
-
-s32 CGUITTFont::getFaceIndexByChar(uchar32_t c) const
+s32 CGUITTFont::getFaceIndexByChar(uint32_t c) const
 {
 	for (size_t i = 0; i < tt_faces.size(); i++) {
 		u32 glyph = FT_Get_Char_Index(tt_faces[i], c);
 
 		if (glyph != 0)
 			return i;
-	}
-
-	return -1;
-}
-
-s32 CGUITTFont::getCharacterFromPos(const wchar_t* text, s32 pixel_x) const
-{
-	return getCharacterFromPos(core::ustring(text), pixel_x);
-}
-
-s32 CGUITTFont::getCharacterFromPos(const core::ustring& text, s32 pixel_x) const
-{
-	s32 x = 0;
-	//s32 idx = 0;
-
-	u32 character = 0;
-	uchar32_t previousChar = 0;
-	core::ustring::const_iterator iter = text.begin();
-	while (!iter.atEnd())
-	{
-		uchar32_t c = *iter;
-		x += getWidthFromCharacter(c);
-
-		// Kerning.
-		core::vector2di k = getKerning(c, previousChar);
-		x += k.X;
-
-		if (x >= pixel_x)
-			return character;
-
-		previousChar = c;
-		++iter;
-		++character;
 	}
 
 	return -1;
@@ -1411,97 +1680,53 @@ void CGUITTFont::setKerningHeight(s32 kerning)
 
 s32 CGUITTFont::getKerningWidth(const wchar_t* thisLetter, const wchar_t* previousLetter) const
 {
-	if (tt_faces[0] == 0)
-		return GlobalKerningWidth;
-	if (thisLetter == 0 || previousLetter == 0)
-		return 0;
-
-	return getKerningWidth((uchar32_t)*thisLetter, (uchar32_t)*previousLetter);
+	return 0;
 }
 
-s32 CGUITTFont::getKerningWidth(const uchar32_t thisLetter, const uchar32_t previousLetter) const
+s32 CGUITTFont::getKerningWidth(const uint32_t thisLetter, const uint32_t previousLetter) const
 {
-	// Return only the kerning width.
-	return getKerning(thisLetter, previousLetter).X;
+	return 0;
 }
 
 s32 CGUITTFont::getKerningHeight() const
 {
-	// FreeType 2 currently doesn't return any height kerning information.
-	return GlobalKerningHeight;
-}
-
-core::vector2di CGUITTFont::getKerning(const wchar_t thisLetter, const wchar_t previousLetter) const
-{
-	return getKerning((uchar32_t)thisLetter, (uchar32_t)previousLetter);
-}
-
-core::vector2di CGUITTFont::getKerning(const uchar32_t thisLetter, const uchar32_t previousLetter) const
-{
-	if (tt_faces[0] == 0 || thisLetter == 0 || previousLetter == 0)
-		return core::vector2di();
-
-	// Set the size of the face.
-	// This is because we cache faces and the face may have been set to a different size.
-	for (auto tt_face : tt_faces) {
-		FT_Set_Pixel_Sizes(tt_face, 0, size);
-	}
-
-	core::vector2di ret(GlobalKerningWidth, GlobalKerningHeight);
-
-	// Use global kerning if chars come from two different faces
-	s32 first_face_index = getFaceIndexByChar(previousLetter);
-	s32 second_face_index = getFaceIndexByChar(thisLetter);
-	if (first_face_index != -1 && second_face_index != -1 &&
-			first_face_index != second_face_index) {
-		return ret;
-	}
-
-	u32 face_index = 0;
-	if (first_face_index != -1)
-		face_index = first_face_index;
-	else if (second_face_index != -1)
-		face_index = second_face_index;
-
-	// If we don't have kerning, no point in continuing.
-	if (!FT_HAS_KERNING(tt_faces[face_index]))
-		return ret;
-
-	// Get the kerning information.
-	FT_Vector v;
-	FT_Get_Kerning(tt_faces[face_index], getGlyphIndexByChar(previousLetter), getGlyphIndexByChar(thisLetter), FT_KERNING_DEFAULT, &v);
-
-	// If we have a scalable font, the return value will be in font points.
-	if (FT_IS_SCALABLE(tt_faces[face_index]))
-	{
-		// Font points, so divide by 64.
-		ret.X += (v.x / 64);
-		ret.Y += (v.y / 64);
-	}
-	else
-	{
-		// Pixel units.
-		ret.X += v.x;
-		ret.Y += v.y;
-	}
-	return ret;
+	return 0;
 }
 
 void CGUITTFont::setInvisibleCharacters(const wchar_t *s)
 {
-	core::ustring us(s);
+	core::stringw us;
+	us.append(s);
 	Invisible = us;
 }
 
-void CGUITTFont::setInvisibleCharacters(const core::ustring& s)
+void CGUITTFont::setInvisibleCharacters(const core::stringw& s)
 {
 	Invisible = s;
 }
 
-video::IImage* CGUITTFont::createTextureFromChar(const uchar32_t& ch)
+video::IImage* CGUITTFont::createTextureFromChar(const uint32_t& ch)
 {
-	u32 n = getGlyphIndexByChar(ch);
-	const SGUITTGlyph* glyph = Glyphs[n-1];
+	core::stringw temp_text;
+	temp_text.append(ch);
+
+	std::vector<ShapedRun> shaped = shapeText(temp_text);
+
+	if (shaped.empty() || shaped[0].glyphs.empty()) {
+		return nullptr;
+	}
+
+	loadGlyphsForShapedText(shaped);
+
+	const ShapedGlyph& shaped_glyph = shaped[0].glyphs[0];
+	u64 key = makeGlyphKey(shaped_glyph.face_index, shaped_glyph.glyph_index);
+
+	SGUITTGlyph* glyph = Glyphs[key];
+
+	if (!glyph || !glyph->isLoaded) {
+		return nullptr; // Glyph not loaded
+	}
+
 	CGUITTGlyphPage* page = Glyph_Pages[glyph->glyph_page];
 
 	if (page->dirty)
@@ -1526,6 +1751,7 @@ video::IImage* CGUITTFont::createTextureFromChar(const uchar32_t& ch)
 	pageholder->copyTo(image, core::position2di(0, 0), glyph->source_rect);
 
 	tex->unlock();
+
 	return image;
 }
 
@@ -1592,7 +1818,11 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 	if (!shared_plane_ptr_) //this points to a static mesh that contains the plane
 		createSharedPlane(); //if it's not initialized, we create one.
 
-	dimension2d<s32> text_size(getDimension(text)); //convert from unsigned to signed.
+	core::stringw utext(text);
+	std::vector<ShapedRun> shaped_runs = shapeText(utext);
+	loadGlyphsForShapedText(shaped_runs);
+
+	dimension2d<s32> text_size(getDimension(text));
 	vector3df start_point(0, 0, 0), offset;
 
 	/** NOTICE:
@@ -1603,7 +1833,7 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 	if (center)
 	{
 		offset.X = start_point.X = -text_size.Width / 2.f;
-		offset.Y = start_point.Y = +text_size.Height/ 2.f;
+		offset.Y = start_point.Y = +text_size.Height / 2.f;
 		offset.X += (text_size.Width - getDimensionUntilEndOfLine(text).Width) >> 1;
 	}
 
@@ -1617,53 +1847,55 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 	mat.MaterialTypeParam = 0.01f;
 	mat.DiffuseColor = color;
 
-	wchar_t current_char = 0, previous_char = 0;
-	u32 n = 0;
+	array<u64> glyph_keys;
 
-	array<u32> glyph_indices;
-
-	while (*text)
+	// Process shaped runs
+	for (const auto& run : shaped_runs)
 	{
-		current_char = *text;
-		bool line_break=false;
-		if (current_char == L'\r') // Mac or Windows breaks
+		for (const auto& shaped_glyph : run.glyphs)
 		{
-			line_break = true;
-			if (*(text + 1) == L'\n') // Windows line breaks.
-				current_char = *(++text);
-		}
-		else if (current_char == L'\n') // Unix breaks
-		{
-			line_break = true;
-		}
+			// Check for line breaks
+			uint32_t currentChar = 0;
+			if (shaped_glyph.cluster < utext.size()) {
+				currentChar = utext[shaped_glyph.cluster];
+			}
 
-		if (line_break)
-		{
-			previous_char = 0;
-			offset.Y -= tt_faces[0]->size->metrics.ascender / 64;
-			offset.X = start_point.X;
-			if (center)
-				offset.X += (text_size.Width - getDimensionUntilEndOfLine(text+1).Width) >> 1;
-			++text;
-		}
-		else
-		{
-			n = getGlyphIndexByChar(current_char);
-			if (n > 0)
+			bool lineBreak = false;
+			if (currentChar == L'\r')
 			{
-				glyph_indices.push_back( n );
+				lineBreak = true;
+			}
+			else if (currentChar == (uint32_t)'\n')
+			{
+				lineBreak = true;
+			}
+
+			if (lineBreak)
+			{
+				offset.Y -= font_metrics.ascender / 64;
+				offset.X = start_point.X;
+				if (center)
+					offset.X += (text_size.Width - getDimensionUntilEndOfLine(text + shaped_glyph.cluster + 1).Width) >> 1;
+				continue;
+			}
+
+			if (shaped_glyph.glyph_index > 0)
+			{
+				u64 key = makeGlyphKey(shaped_glyph.face_index, shaped_glyph.glyph_index);
+				SGUITTGlyph* glyph = Glyphs[key];
+
+				if (!glyph || !glyph->isLoaded) {
+					offset.X += shaped_glyph.x_advance;
+					continue;
+				}
+
+				glyph_keys.push_back(key);
 
 				// Store glyph size and offset informations.
-				SGUITTGlyph* glyph = Glyphs[n-1];
 				u32 texw = glyph->source_rect.getWidth();
 				u32 texh = glyph->source_rect.getHeight();
-				s32 offx = glyph->offset.X;
-				s32 offy = (font_metrics.ascender / 64) - glyph->offset.Y;
-
-				// Apply kerning.
-				vector2di k = getKerning(current_char, previous_char);
-				offset.X += k.X;
-				offset.Y += k.Y;
+				s32 offx = glyph->offset.X + shaped_glyph.x_offset;
+				s32 offy = (font_metrics.ascender / 64) - glyph->offset.Y + shaped_glyph.y_offset;
 
 				vector3df current_pos(offset.X + offx, offset.Y - offy, 0);
 				dimension2d<u32> letter_size = dimension2d<u32>(texw, texh);
@@ -1687,19 +1919,23 @@ core::array<scene::ISceneNode*> CGUITTFont::addTextSceneNode(const wchar_t* text
 
 				container.push_back(current_node);
 			}
-			offset.X += getWidthFromCharacter(current_char);
-			previous_char = current_char;
-			++text;
+
+			offset.X += shaped_glyph.x_advance;
+			offset.Y += shaped_glyph.y_advance;
 		}
 	}
 
 	update_glyph_pages();
 	//only after we update the textures can we use the glyph page textures.
 
-	for (u32 i = 0; i < glyph_indices.size(); ++i)
+	for (u32 i = 0; i < glyph_keys.size(); ++i)
 	{
-		u32 n = glyph_indices[i];
-		SGUITTGlyph* glyph = Glyphs[n-1];
+		u64 key = glyph_keys[i];
+		SGUITTGlyph* glyph = Glyphs[key];
+
+		if (!glyph)
+			continue;
+
 		ITexture* current_tex = Glyph_Pages[glyph->glyph_page]->texture;
 		f32 page_texture_size = (f32)current_tex->getSize().Width;
 		//Now we calculate the UV position according to the texture size and the source rect.

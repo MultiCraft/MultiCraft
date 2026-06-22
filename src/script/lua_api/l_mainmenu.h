@@ -146,6 +146,8 @@ private:
 
 	static int l_is_dir(lua_State *L);
 
+	static int l_file_exists(lua_State *L);
+
 	static int l_extract_zip(lua_State *L);
 
 	static int l_may_modify_path(lua_State *L);
@@ -173,8 +175,6 @@ private:
 	static int l_do_async_callback(lua_State *L);
 
 	// MultiCraft
-	static int l_load_translation(lua_State *L);
-
 	static int l_sleep_ms(lua_State *L);
 
 public:

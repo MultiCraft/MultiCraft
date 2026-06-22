@@ -1,7 +1,7 @@
 /*
 Copyright (C) 2014 sapier
-Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
-Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2026 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023-2026 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <map>
 #include <vector>
 
+#include "client/keys.h"
 #include "client/sound.h"
 #include "client/tile.h"
 #include "settings.h"
@@ -91,6 +92,7 @@ struct button_data
 	const char *name;
 	bool has_sound;
 	int group;
+	KeyType::T key_type;
 };
 
 struct button_info
@@ -102,14 +104,14 @@ struct button_info
 	bool pressed = false;
 	bool floating = false;
 	bool inactive = false;
-	s32 event_id = -1;
+	u64 event_id = 0;
 	std::string image;
 	float aspect_ratio = -1;
 
 	void reset()
 	{
 		pressed = false;
-		event_id = -1;
+		event_id = 0;
 	}
 };
 
@@ -122,7 +124,7 @@ struct joystick_info
 	s16 move_forward = 0;
 	bool pressed = false;
 	bool released = false;
-	s32 event_id = -1;
+	u64 event_id = 0;
 
 	void reset(bool visible)
 	{
@@ -135,7 +137,7 @@ struct joystick_info
 		move_sideward = 0;
 		move_forward = 0;
 		pressed = false;
-		event_id = -1;
+		event_id = 0;
 	}
 };
 
@@ -165,7 +167,7 @@ struct camera_info
 	bool place_shootline = false;
 	s32 x = 0;
 	s32 y = 0;
-	s32 event_id = -1;
+	u64 event_id = 0;
 
 	void reset()
 	{
@@ -176,7 +178,7 @@ struct camera_info
 		place_shootline = false;
 		x = 0;
 		y = 0;
-		event_id = -1;
+		event_id = 0;
 	}
 };
 
@@ -200,7 +202,7 @@ struct editor_info
 	button_info *button = nullptr;
 	IGUIButton *guibutton = nullptr;
 	touch_gui_button_id button_id = unknown_id;
-	s32 event_id = -1;
+	u64 event_id = 0;
 	s32 x = 0;
 	s32 y = 0;
 	bool change_size = false;
@@ -213,7 +215,7 @@ struct editor_info
 		button = nullptr;
 		guibutton = nullptr;
 		button_id = unknown_id;
-		event_id = -1;
+		event_id = 0;
 		x = 0;
 		y = 0;
 	}
@@ -227,8 +229,8 @@ public:
 
 	void init(ISimpleTextureSource *tsrc, ISoundManager *sound_manage);
 	bool preprocessEvent(const SEvent &event);
-	bool isButtonPressed(irr::EKEY_CODE keycode);
-	bool immediateRelease(irr::EKEY_CODE keycode);
+	bool isButtonPressed(KeyType::T key_type);
+	bool immediateRelease(KeyType::T key_type);
 
 	s16 getMoveSideward() { return m_joystick.move_sideward; }
 	s16 getMoveForward() { return m_joystick.move_forward; }
@@ -249,7 +251,7 @@ public:
 
 	line3d<f32> getShootline()
 	{
-		if (m_camera_additional.event_id != -1 ||
+		if (m_camera_additional.event_id != 0 ||
 				m_camera_additional.place_shootline) {
 			m_camera_additional.place_shootline = false;
 			return m_camera_additional.shootline;
@@ -274,10 +276,12 @@ public:
 	}
 
 	void step(float dtime);
+	void draw();
 	void hide();
 	void show();
 	void reset();
 	void close() { m_close = true; }
+	bool isVisible() { return m_visible; };
 
 	touch_gui_state getCurrentState() { return m_current_state; }
 	void changeCurrentState(touch_gui_state state);
@@ -286,6 +290,10 @@ public:
 	void registerHudItem(s32 index, const rect<s32> &button_rect);
 	void clearCSMButtons() { m_csm_buttons.clear(); };
 	void registerCSMButton(const std::string &name, const rect<s32> &button_rect);
+
+	// Sets a list of button names that will be shown
+	// If empty, all buttons will be shown
+	void setVisibleBtns(const std::set<std::string> &visible_btns);
 
 	void openEditor();
 
@@ -309,8 +317,6 @@ private:
 	bool m_close = false;
 	bool m_dig_and_move = false;
 	bool m_doubletap_initialized = false;
-	irr::EKEY_CODE m_keycode_dig;
-	irr::EKEY_CODE m_keycode_place;
 	std::string m_press_sound;
 	std::string m_ui_message;
 	u64 m_doubletap_time = 0;
@@ -331,6 +337,7 @@ private:
 	bool m_overflow_close_schedule = false;
 	IGUIStaticText *m_overflow_bg = nullptr;
 	std::vector<IGUIStaticText *> m_overflow_button_titles;
+	std::set<std::string> m_visible_btns;
 
 	Settings *m_settings = nullptr;
 	std::string m_settings_path;
@@ -343,6 +350,7 @@ private:
 	rect<s32> getDefaultButtonRect(touch_gui_button_id id);
 	void resetAllValues();
 	void restoreAllValues();
+	// bool checkInvalidSettings();
 
 	void loadButtonTexture(button_info *button, IGUIButton *guibutton,
 			std::string image, std::string image_pressed,
@@ -357,6 +365,7 @@ private:
 	void updateEditorButtonsState();
 	void rebuildOverflowMenu();
 
+	bool isButtonCollided(touch_gui_button_id id, rect<s32> button_rect);
 	bool moveJoystick(s32 x, s32 y);
 	void updateCamera(camera_info &camera, s32 x, s32 y);
 	void setVisible(bool visible);

@@ -3,7 +3,6 @@
 LUAJIT_VERSION=2.1
 
 . scripts/sdk.sh
-export MACOSX_DEPLOYMENT_TARGET=11.0
 mkdir -p deps; cd deps
 
 [ ! -d luajit-src ] && \

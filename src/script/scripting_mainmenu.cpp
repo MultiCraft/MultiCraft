@@ -32,7 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern "C" {
 #include "lualib.h"
 }
-#define MAINMENU_NUM_ASYNC_THREADS 4
+#define MAINMENU_NUM_ASYNC_THREADS 6
 
 
 MainMenuScripting::MainMenuScripting(GUIEngine* guiengine):
@@ -88,9 +88,10 @@ void MainMenuScripting::registerLuaClasses(lua_State *L, int top)
 }
 
 /******************************************************************************/
-void MainMenuScripting::step()
+void MainMenuScripting::step(float dtime)
 {
 	asyncEngine.step(getStack());
+	environment_step(dtime);
 }
 
 /******************************************************************************/

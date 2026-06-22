@@ -23,7 +23,7 @@ package com.multicraft.game
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.AnimationDrawable
-import android.os.Bundle
+import android.os.*
 import android.text.InputType
 import android.view.*
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -39,6 +39,8 @@ import androidx.browser.customtabs.CustomTabsIntent.SHARE_STATE_OFF
 import androidx.core.net.toUri
 import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
+import com.multicraft.game.helpers.ApiLevelHelper.isAndroid10
+import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.set
@@ -63,6 +65,9 @@ class GameActivity : SDLActivity() {
 
 		@JvmStatic
 		external fun update(key: String, value: String)
+
+		@JvmStatic
+		external fun setInputDialogActive(value: Boolean)
 	}
 
 	private var splashView: View? = null
@@ -175,6 +180,7 @@ class GameActivity : SDLActivity() {
 				messageReturnValue = editText.text.toString()
 				alertDialog.dismiss()
 				isInputActive = false
+				setInputDialogActive(false)
 				return@setOnEditorActionListener true
 			}
 			return@setOnEditorActionListener false
@@ -186,6 +192,7 @@ class GameActivity : SDLActivity() {
 					messageReturnValue = editText.text.toString()
 					alertDialog.dismiss()
 					isInputActive = false
+					setInputDialogActive(false)
 					return@setOnKeyListener true
 				}
 				return@setOnKeyListener false
@@ -196,12 +203,14 @@ class GameActivity : SDLActivity() {
 			messageReturnValue = editText.text.toString()
 			alertDialog.dismiss()
 			isInputActive = false
+			setInputDialogActive(false)
 		}
 		binding.rl.setOnClickListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			alertDialog.dismiss()
 			isInputActive = false
+			setInputDialogActive(false)
 		}
 		val alertWindow = alertDialog.window!!
 		// should be above `show()`
@@ -213,6 +222,7 @@ class GameActivity : SDLActivity() {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			isInputActive = false
+			setInputDialogActive(false)
 		}
 	}
 
@@ -239,6 +249,7 @@ class GameActivity : SDLActivity() {
 				messageReturnValue = editText.text.toString()
 				alertDialog.dismiss()
 				isInputActive = false
+				setInputDialogActive(false)
 				return@setOnEditorActionListener true
 			}
 			return@setOnEditorActionListener false
@@ -250,6 +261,7 @@ class GameActivity : SDLActivity() {
 					messageReturnValue = editText.text.toString()
 					alertDialog.dismiss()
 					isInputActive = false
+					setInputDialogActive(false)
 					return@setOnKeyListener true
 				}
 				return@setOnKeyListener false
@@ -260,12 +272,14 @@ class GameActivity : SDLActivity() {
 			messageReturnValue = editText.text.toString()
 			alertDialog.dismiss()
 			isInputActive = false
+			setInputDialogActive(false)
 		}
 		binding.multiRl.setOnClickListener {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			alertDialog.dismiss()
 			isInputActive = false
+			setInputDialogActive(false)
 		}
 		// should be above `show()`
 		val alertWindow = alertDialog.window!!
@@ -277,10 +291,9 @@ class GameActivity : SDLActivity() {
 			window.setSoftInputMode(SOFT_INPUT_STATE_ALWAYS_HIDDEN)
 			messageReturnValue = current.toString()
 			isInputActive = false
+			setInputDialogActive(false)
 		}
 	}
-
-	fun isDialogActive() = isInputActive
 
 	fun getDialogValue(): String {
 		val value = messageReturnValue
@@ -322,7 +335,8 @@ class GameActivity : SDLActivity() {
 		print(exc)
 	}
 
-	fun upgrade(item: String?): Boolean {
+	fun upgrade(item: String?, extra: String?): Boolean {
+		if (extra != "") return true
 		return item?.isEmpty() ?: false
 	}
 
@@ -340,4 +354,34 @@ class GameActivity : SDLActivity() {
 	}
 
 	fun needsExtractAssets() = isExtract
+
+	fun vibrationEffect(intensity: Int) {
+		val effect: Int = if (isAndroid10()) {
+			when (intensity) {
+				1 -> VibrationEffect.EFFECT_TICK
+				2 -> VibrationEffect.EFFECT_CLICK
+				3 -> VibrationEffect.EFFECT_HEAVY_CLICK
+				else -> return
+			}
+		} else {
+			when (intensity) {
+				1 -> 60
+				2 -> 120
+				3 -> 240
+				else -> return
+			}
+		}
+		if (isAndroid12()) {
+			val vibrator = getSystemService(VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+			vibrator?.defaultVibrator?.vibrate(VibrationEffect.createPredefined(effect))
+		} else if (isAndroid10()) @Suppress("DEPRECATION") {
+			val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
+			vibrator?.vibrate(VibrationEffect.createPredefined(effect))
+		} else if (isOreo()) @Suppress("DEPRECATION") {
+			val vibrator = getSystemService(VIBRATOR_SERVICE) as? Vibrator
+			vibrator?.vibrate(VibrationEffect.createOneShot(20L, effect))
+		}
+		// Vibration is not available in earlier versions,
+		// as it is difficult to predict the type of vibration.
+	}
 }

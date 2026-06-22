@@ -34,7 +34,7 @@ struct ChatSelection
 	};
 
 	ChatSelection() : selection_type(SELECTION_NONE), scroll(0), row(0),
-			line_index(0), line(0), fragment(0), character(0), x_max(false) {};
+			line_index(0), line(0), fragment(0), character(0) {};
 
 	void reset() {
 		selection_type = SELECTION_NONE;
@@ -44,7 +44,6 @@ struct ChatSelection
 		line = 0;
 		fragment = 0;
 		character = 0;
-		x_max = false;
 	}
 
 	bool operator== (const ChatSelection &other) const {
@@ -54,12 +53,10 @@ struct ChatSelection
 					line_index == other.line_index &&
 					line == other.line &&
 					fragment == other.fragment &&
-					character == other.character &&
-					x_max == other.x_max);
+					character == other.character);
 
 		} else {
-			return (scroll + character == other.scroll + other.character &&
-					x_max == other.x_max);
+			return (scroll + character == other.scroll + other.character);
 		}
 	}
 
@@ -76,16 +73,12 @@ struct ChatSelection
 				return (fragment < other.fragment);
 			if (character != other.character)
 				return (character < other.character);
-			if (x_max != other.x_max)
-				return (x_max < other.x_max);
 
 			return false;
 
 		} else {
 			if (scroll + character != other.scroll + other.character)
 				return (scroll + character < other.scroll + other.character);
-			if (x_max != other.x_max)
-				return (x_max < other.x_max);
 
 			return false;
 		}
@@ -114,7 +107,6 @@ struct ChatSelection
 	unsigned int line;
 	unsigned int fragment;
 	unsigned int character;
-	bool x_max;
 };
 
 class Client;
@@ -183,6 +175,9 @@ private:
 	void animate(u32 msec);
 	void drawBackground();
 	void drawText();
+	core::rect<s32> getPromptFrameRect();
+	core::rect<s32> getPromptTextRect();
+	void calculatePromptScrollPos();
 	void drawPrompt();
 
 	ChatSelection getCursorPos(s32 x, s32 y);
@@ -252,4 +247,5 @@ private:
 	s32 m_bottom_scroll_pos = 0;
 
 	u16 m_round_screen_offset = 0;
+	s32 m_hscroll_pos = 0;
 };

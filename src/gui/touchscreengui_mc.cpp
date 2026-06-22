@@ -2,8 +2,8 @@
 Copyright (C) 2014 sapier
 Copyright (C) 2018 srifqi, Muhammad Rifqi Priyo Susanto
 		<muhammadrifqipriyosusanto@gmail.com>
-Copyright (C) 2014-2025 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
-Copyright (C) 2023-2025 Dawid Gan <deveee@gmail.com>
+Copyright (C) 2014-2026 Maksim Gamarnik [MoNTE48] Maksym48@pm.me
+Copyright (C) 2023-2026 Dawid Gan <deveee@gmail.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -35,34 +35,34 @@ using namespace irr::core;
 
 const button_data buttons_data[] = {
 	// image, image_pressed, image_float, title, name, has_sound, group
-	{ "jump_btn.png", "", "", N_("Jump"), "jump", false, -1 },
-	{ "drop_btn.png", "", "drop_btn_float.png", N_("Drop"), "drop", false, -1 },
-	{ "sneak_btn.png", "", "sneak_btn_float.png", N_("Sneak"), "sneak", false, -1 },
-	{ "special1_btn.png", "", "", N_("Special"), "special1", false, -1 },
-	{ "inventory_btn.png", "", "inventory_btn_float.png", N_("Inventory"), "inventory", true, -1 },
-	{ "escape_btn.png", "", "escape_btn_float.png", N_("Exit"), "escape", true, 1 },
-	{ "minimap_btn.png", "", "minimap_btn_float.png", N_("Toggle minimap"), "minimap", true, 1 },
-	{ "camera_btn.png", "", "camera_btn_float.png", N_("Change camera"), "camera_mode", true, 1 },
-	{ "overflow_btn.png", "", "overflow_btn_float.png", N_("Overflow menu"), "overflow", true, 1 },
-	{ "chat_btn.png", "", "chat_btn_float.png", N_("Chat"), "chat", true, 2 },
-	{ "tab_btn.png", "", "tab_btn_float.png", N_("Tab"), "tabb", true, 2 },
-	{ "fly_btn.png", "", "", N_("Toggle fly"), "freemove", true, -1 },
-	{ "fast_btn.png", "", "", N_("Toggle fast"), "fastmove", true, -1 },
-	{ "noclip_btn.png", "", "", N_("Toggle noclip"), "noclip", true, -1 },
-	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true, -1 },
-	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true, -1 },
-	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true, -1 },
-	{ "hide_interface.png", "", "", N_("Hide interface"), "toggle_interface", true, -1 },
-	{ "joystick_off.png", "", "", "", "joystick", false, -1 },
-	{ "joystick_bg.png", "", "", "", "joystick", false, -1 },
-	{ "joystick_center.png", "", "", "", "joystick_center", false, -1 },
-	{ "", "", "", N_("Open editor"), "editor_open", true, -1 },
-	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", true, -1 },
-	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", true, -1 },
-	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", true, -1 },
-	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", true, -1 },
-	{ "edit_ui_undo.png", "edit_ui_undo_pressed.png", "", N_("Undo"), "editor_undo", true, -1 },
-	{ "edit_ui_redo.png", "edit_ui_redo_pressed.png", "", N_("Redo"), "editor_redo", true, -1 },
+	{ "jump_btn.png", "", "", N_("Jump"), "jump", false, -1, KeyType::JUMP },
+	{ "drop_btn.png", "", "drop_btn_float.png", N_("Drop"), "drop", false, -1, KeyType::DROP },
+	{ "sneak_btn.png", "", "sneak_btn_float.png", N_("Sneak"), "sneak", false, -1, KeyType::SNEAK },
+	{ "special1_btn.png", "", "", N_("Special"), "special1", false, -1, KeyType::SPECIAL1 },
+	{ "inventory_btn.png", "", "inventory_btn_float.png", N_("Inventory"), "inventory", true, -1, KeyType::INVENTORY },
+	{ "escape_btn.png", "", "escape_btn_float.png", N_("Exit"), "escape", true, 1, KeyType::ESC },
+	{ "minimap_btn.png", "", "minimap_btn_float.png", N_("Toggle minimap"), "minimap", true, 1, KeyType::MINIMAP },
+	{ "camera_btn.png", "", "camera_btn_float.png", N_("Change camera"), "camera_mode", true, 1, KeyType::CAMERA_MODE },
+	{ "overflow_btn.png", "", "overflow_btn_float.png", N_("Overflow menu"), "overflow", true, 1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "chat_btn.png", "", "chat_btn_float.png", N_("Chat"), "chat", true, 2, KeyType::CHAT },
+	{ "tab_btn.png", "", "tab_btn_float.png", N_("Tab"), "tabb", true, 2, KeyType::TABB },
+	{ "fly_btn.png", "", "", N_("Toggle fly"), "freemove", true, -1, KeyType::FREEMOVE },
+	{ "fast_btn.png", "", "", N_("Toggle fast"), "fastmove", true, -1, KeyType::FASTMOVE },
+	{ "noclip_btn.png", "", "", N_("Toggle noclip"), "noclip", true, -1, KeyType::NOCLIP },
+	{ "rangeview_btn.png", "", "", N_("Range select"), "rangeselect", true, -1, KeyType::RANGESELECT },
+	{ "chat_hide_btn.png", "", "", N_("Toggle chat log"), "toggle_chat", true, -1, KeyType::TOGGLE_CHAT },
+	{ "names_hide_btn.png", "", "", N_("Toggle nametags"), "toggle_nametags", true, -1, KeyType::TOGGLE_NAMETAGS },
+	{ "hide_interface.png", "", "", N_("Hide interface"), "toggle_interface", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "joystick_off.png", "", "", "", "joystick", false, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "joystick_bg.png", "", "", "", "joystick", false, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "joystick_center.png", "", "", "", "joystick_center", false, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "", "", "", N_("Open editor"), "editor_open", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_save.png", "edit_ui_save_pressed.png", "", N_("Save"), "editor_save", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_restore.png", "edit_ui_restore_pressed.png", "", N_("Restore"), "editor_default", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_move.png", "edit_ui_move_pressed.png", "", N_("Move"), "editor_move", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_scale.png", "edit_ui_scale_pressed.png", "", N_("Scale"), "editor_scale", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_undo.png", "edit_ui_undo_pressed.png", "", N_("Undo"), "editor_undo", true, -1, KeyType::INTERNAL_ENUM_COUNT },
+	{ "edit_ui_redo.png", "edit_ui_redo_pressed.png", "", N_("Redo"), "editor_redo", true, -1, KeyType::INTERNAL_ENUM_COUNT },
 };
 
 static const touch_gui_button_id overflow_buttons_id[] {
@@ -83,10 +83,6 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 	m_button_size = RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("hud_scaling") * 64.0f;
 
-	std::string keyname_dig = g_settings->get("keymap_dig");
-	m_keycode_dig = keyname_to_keycode(keyname_dig.c_str());
-	std::string keyname_place = g_settings->get("keymap_place");
-	m_keycode_place = keyname_to_keycode(keyname_place.c_str());
 	m_dig_and_move = g_settings->getBool("dig_and_move");
 	m_press_sound = g_settings->get("btn_press_sound");
 }
@@ -181,6 +177,9 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manag
 	m_editor.button_redo = initButton(editor_redo_id,
 			getButtonRect(editor_redo_id), STATE_EDITOR);
 	m_editor.button_redo->guibutton->setIsPushButton();
+
+	/*if (checkInvalidSettings())
+		resetAllValues();*/
 
 	updateButtons();
 
@@ -511,12 +510,12 @@ void TouchScreenGUI::initSettings(bool init)
 			m_settings->updateConfigFile(m_settings_path.c_str());
 		} else {
 			s32 old_button_size = m_settings->getS32("button_size");
-	
+
 			if (m_button_size != old_button_size) {
 				for (auto name : m_settings->getNames()) {
 					m_settings->remove(name);
 				}
-	
+
 				m_settings->setS32("button_size", m_button_size);
 				m_settings->updateConfigFile(m_settings_path.c_str());
 			}
@@ -708,6 +707,24 @@ void TouchScreenGUI::restoreAllValues()
 	initSettings();
 }
 
+/*bool TouchScreenGUI::checkInvalidSettings()
+{
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		rect<s32> button_rect = getButtonRect(button->id);
+
+		if (button_rect == getDefaultButtonRect(button->id))
+			continue;
+
+		if (isButtonCollided(button->id, button_rect))
+			return true;
+	}
+
+	return false;
+}*/
+
 bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 {
 	if (!m_buttons_initialized || m_close)
@@ -736,7 +753,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		return false;
 
 	bool result = false;
-	s32 id = (unsigned int)event.TouchInput.ID;
+	u64 id = event.TouchInput.ID;
 	s32 x = event.TouchInput.X;
 	s32 y = event.TouchInput.Y;
 
@@ -747,6 +764,9 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		for (auto button : m_buttons) {
 			if (m_current_state != button->state &&
 					!(m_current_state == STATE_HIDDEN && button->state == STATE_DEFAULT))
+				continue;
+
+			if (!m_visible_btns.empty() && m_visible_btns.count(buttons_data[button->id].name) == 0)
 				continue;
 
 			if (button->guibutton->isPointInside(core::position2d<s32>(x, y))) {
@@ -786,7 +806,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		}
 
 		if (m_current_state == STATE_DEFAULT || m_current_state == STATE_HIDDEN) {
-			if (m_joystick.button_off->isPointInside(core::position2d<s32>(x, y))) {
+			if (m_joystick.button_off->isPointInside(core::position2d<s32>(x, y)) &&
+					(m_visible_btns.empty() || m_visible_btns.count("joystick") > 0)) {
 				m_events[id] = true;
 				m_joystick.button_off->setVisible(false);
 				m_joystick.button_bg->setVisible(m_current_state == STATE_DEFAULT);
@@ -816,7 +837,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 
 			if (!m_events[id]) {
-				if (m_camera.event_id == -1) {
+				if (m_camera.event_id == 0) {
 					m_events[id] = true;
 					m_camera.downtime = porting::getTimeMs();
 					m_camera.x = x;
@@ -836,7 +857,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 							new_state = STATE_DEFAULT;
 						}
 					}
-				} else if (m_camera_additional.event_id == -1) {
+				} else if (m_camera_additional.event_id == 0) {
 					m_events[id] = true;
 					m_camera_additional.downtime = porting::getTimeMs();
 					m_camera_additional.x = x;
@@ -848,7 +869,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			}
 		}
 
-		if (m_current_state == STATE_EDITOR && !m_events[id] && m_editor.event_id == -1) {
+		if (m_current_state == STATE_EDITOR && !m_events[id] && m_editor.event_id == 0) {
 			for (auto button : m_buttons) {
 				if (button->state != STATE_DEFAULT)
 					continue;
@@ -969,7 +990,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 		if (m_joystick.event_id == id)
 			m_joystick.reset(m_visible && m_current_state == STATE_DEFAULT);
 
-		if (m_camera.event_id == id && m_camera_additional.event_id != -1) {
+		if (m_camera.event_id == id && m_camera_additional.event_id != 0) {
 			m_camera.reset();
 			m_camera.event_id = m_camera_additional.event_id;
 			m_camera.x = m_camera_additional.x;
@@ -1014,50 +1035,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					new_rect -= v2s32(0, new_rect.LowerRightCorner.Y - m_screensize.Y);
 			}
 
-			if (m_editor.button_id == escape_id) {
-				for (auto button : m_buttons) {
-					if (button->state != STATE_DEFAULT)
-						continue;
-
-					if (button->id == m_editor.button_id)
-						continue;
-
-					IGUIButton *guibutton = button->guibutton;
-
-					if (guibutton) {
-						rect<s32> btn_rect = guibutton->getRelativePosition();
-
-						if (new_rect.isRectCollided(btn_rect)) {
-							new_rect = m_editor.old_rect;
-							break;
-						}
-					}
-				}
-
-				IGUIButton *guibutton = m_joystick.button_off;
-				rect<s32> btn_rect = guibutton->getRelativePosition();
-
-				if (new_rect.isRectCollided(btn_rect))
-					new_rect = m_editor.old_rect;
-			} else {
-				for (auto button : m_buttons) {
-					if (button->state != STATE_DEFAULT)
-						continue;
-
-					if (button->id != escape_id)
-						continue;
-
-					IGUIButton *guibutton = button->guibutton;
-
-					if (guibutton) {
-						rect<s32> btn_rect = guibutton->getRelativePosition();
-
-						if (new_rect.isRectCollided(btn_rect)) {
-							new_rect = m_editor.old_rect;
-							break;
-						}
-					}
-				}
+			if (m_editor.button_id == escape_id && isButtonCollided(m_editor.button_id, new_rect)) {
+				new_rect = m_editor.old_rect;
 			}
 
 			setValues(m_editor.button_id,
@@ -1221,6 +1200,36 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 	return result;
 }
 
+bool TouchScreenGUI::isButtonCollided(touch_gui_button_id id, rect<s32> button_rect)
+{
+	for (auto button : m_buttons) {
+		if (button->state != STATE_DEFAULT)
+			continue;
+
+		if (button->id == id)
+			continue;
+
+		IGUIButton *guibutton = button->guibutton;
+
+		if (guibutton) {
+			rect<s32> button_rect2 = guibutton->getRelativePosition();
+
+			if (button_rect.isRectCollided(button_rect2))
+				return true;
+		}
+	}
+
+	IGUIButton *joystick_btn = m_joystick.button_off;
+	if (joystick_btn && m_editor.guibutton != joystick_btn) {
+		rect<s32> button_rect2 = joystick_btn->getRelativePosition();
+
+		if (button_rect.isRectCollided(button_rect2))
+			return true;
+	}
+
+	return false;
+}
+
 bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 {
 	rect<s32> joystick_rect = m_joystick.button_bg->getRelativePosition();
@@ -1316,21 +1325,18 @@ void TouchScreenGUI::updateCamera(camera_info &camera, s32 x, s32 y)
 			->getRayFromScreenCoordinates(v2s32(x, y));
 }
 
-bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
+bool TouchScreenGUI::isButtonPressed(KeyType::T key_type)
 {
 	for (auto button : m_buttons) {
 		if (!button->pressed)
 			continue;
 
-		std::string button_name = buttons_data[button->id].name;
+		KeyType::T button_key_type = buttons_data[button->id].key_type;
 
-		if (!g_settings->exists("keymap_" + button_name))
+		if (button_key_type == KeyType::INTERNAL_ENUM_COUNT)
 			continue;
 
-		std::string keyname = g_settings->get("keymap_" + button_name);
-		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
-
-		if (button_keycode == keycode)
+		if (key_type == button_key_type)
 			return true;
 	}
 
@@ -1338,68 +1344,56 @@ bool TouchScreenGUI::isButtonPressed(irr::EKEY_CODE keycode)
 		if (!hud_button.pressed)
 			continue;
 
-		irr::EKEY_CODE button_keycode = (irr::EKEY_CODE) (KEY_KEY_1 + hud_button.id);
+		KeyType::T button_key_type = (KeyType::T)((int)KeyType::SLOT_1 + hud_button.id);
 
-		if (button_keycode == keycode) {
+		if (key_type == button_key_type) {
 			hud_button.pressed = false;
 			return true;
 		}
 	}
 
 	if (m_joystick.move_sideward) {
-		std::string button_name = m_joystick.move_sideward < 0 ? "left" : "right";
-		std::string keyname = g_settings->get("keymap_" + button_name);
-		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
+		KeyType::T button_key_type = m_joystick.move_sideward < 0 ? KeyType::LEFT : KeyType::RIGHT;
 
-		if (button_keycode == keycode)
+		if (key_type == button_key_type)
 			return true;
 	}
 
 	if (m_joystick.move_forward) {
-		std::string button_name = m_joystick.move_forward < 0 ? "forward" : "backward";
-		std::string keyname = g_settings->get("keymap_" + button_name);
-		irr::EKEY_CODE button_keycode = keyname_to_keycode(keyname.c_str());
+		KeyType::T button_key_type = m_joystick.move_forward < 0 ? KeyType::FORWARD : KeyType::BACKWARD;
 
-		if (button_keycode == keycode)
+		if (key_type == button_key_type)
 			return true;
 	}
 
-	if (m_camera.dig) {
-		if (m_keycode_dig == keycode)
-			return true;
+	if (m_camera.dig && key_type == KeyType::DIG)
+		return true;
+
+	if (m_camera.place && key_type == KeyType::PLACE) {
+		m_camera.place = false;
+		return true;
 	}
 
-	if (m_camera.place) {
-		if (m_keycode_place == keycode) {
-			m_camera.place = false;
-			return true;
-		}
-	}
+	if (m_camera_additional.dig && key_type == KeyType::DIG)
+		return true;
 
-	if (m_camera_additional.dig) {
-		if (m_keycode_dig == keycode)
-			return true;
-	}
-
-	if (m_camera_additional.place) {
-		if (m_keycode_place == keycode) {
-			m_camera_additional.place = false;
-			return true;
-		}
+	if (m_camera_additional.place && key_type == KeyType::PLACE) {
+		m_camera_additional.place = false;
+		return true;
 	}
 
 	return false;
 }
 
-bool TouchScreenGUI::immediateRelease(irr::EKEY_CODE keycode)
+bool TouchScreenGUI::immediateRelease(KeyType::T key_type)
 {
-	if (m_keycode_place == keycode)
+	if (key_type == KeyType::PLACE)
 		return true;
 
 	for (auto &hud_button : m_hud_buttons) {
-		irr::EKEY_CODE button_keycode = (irr::EKEY_CODE) (KEY_KEY_1 + hud_button.id);
+		KeyType::T button_key_type = (KeyType::T)((int)KeyType::SLOT_1 + hud_button.id);
 
-		if (button_keycode == keycode)
+		if (key_type == button_key_type)
 			return true;
 	}
 
@@ -1422,7 +1416,7 @@ void TouchScreenGUI::step(float dtime)
 	if (m_current_state == STATE_OVERFLOW && m_overflow_close_schedule)
 		changeCurrentState(m_previous_state);
 
-	if (m_camera.event_id != -1 && (!m_camera.has_really_moved) &&
+	if (m_camera.event_id != 0 && (!m_camera.has_really_moved) &&
 			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
@@ -1431,12 +1425,35 @@ void TouchScreenGUI::step(float dtime)
 		}
 	}
 
-	if (m_camera_additional.event_id != -1 && (!m_camera_additional.has_really_moved) &&
+	if (m_camera_additional.event_id != 0 && (!m_camera_additional.has_really_moved) &&
 			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera_additional.dig = true;
 			wakeUpInputhandler();
+		}
+	}
+}
+
+void TouchScreenGUI::draw()
+{
+	IGUISkin* skin = m_guienv->getSkin();
+	if (!skin)
+		return;
+
+	if (m_current_state == STATE_EDITOR) {
+		IGUIButton *guibutton = m_editor.guibutton;
+
+		if (guibutton) {
+			rect<s32> outline_rect = guibutton->getRelativePosition();
+			bool collided = isButtonCollided(m_editor.button_id, outline_rect);
+
+			video::SColor outline_color = collided ?
+					video::SColor(255, 255, 0, 0) :
+					video::SColor(255, 0, 255, 0);
+
+			m_device->getVideoDriver()->draw2DRectangleOutline(outline_rect,
+					outline_color);
 		}
 	}
 }
@@ -1480,13 +1497,17 @@ void TouchScreenGUI::setVisible(bool visible)
 		else if (m_current_state == STATE_HIDDEN)
 			is_visible = false;
 
+		if (is_visible && !m_visible_btns.empty())
+			is_visible = m_visible_btns.count(buttons_data[button->id].name) > 0;
+
 		if (button->guibutton)
 			button->guibutton->setVisible(m_visible && is_visible);
 		if (button->text)
 			button->text->setVisible(m_visible && is_visible);
 	}
 
-	bool is_visible = (m_current_state != STATE_OVERFLOW) && (m_current_state != STATE_HIDDEN);
+	bool is_visible = (m_current_state != STATE_OVERFLOW) && (m_current_state != STATE_HIDDEN) &&
+			(m_visible_btns.empty() || m_visible_btns.count("joystick") > 0);
 
 	if (m_joystick.button_off)
 		m_joystick.button_off->setVisible(m_visible && is_visible);
@@ -1502,6 +1523,12 @@ void TouchScreenGUI::setVisible(bool visible)
 
 	if (!visible)
 		reset();
+}
+
+void TouchScreenGUI::setVisibleBtns(const std::set<std::string> &visible_btns)
+{
+	m_visible_btns = visible_btns;
+	setVisible(m_visible);
 }
 
 void TouchScreenGUI::changeCurrentState(touch_gui_state state)

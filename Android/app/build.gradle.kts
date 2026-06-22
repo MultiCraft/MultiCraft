@@ -1,15 +1,13 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
 	id("com.android.application")
-	kotlin("android")
 }
 
 android {
-	buildToolsVersion = "36.1.0"
-	compileSdk = 36
+	buildToolsVersion = "37.0.0"
+	compileSdk = 37
 	ndkVersion = "29.0.14206865"
 	namespace = "com.multicraft.game"
 
@@ -20,7 +18,7 @@ android {
 	defaultConfig {
 		applicationId = "com.multicraft.game"
 		minSdk = 23
-		targetSdk = 36
+		targetSdk = 37
 		versionName = "$versionMajor.$versionMinor.$versionPatch"
 		versionCode = rootProject.extra["versionCode"] as Int
 	}
@@ -73,12 +71,6 @@ android {
 		targetCompatibility = JavaVersion.VERSION_17
 	}
 
-	kotlin {
-		compilerOptions {
-			jvmTarget.set(JvmTarget.JVM_17)
-		}
-	}
-
 	buildFeatures {
 		viewBinding = true
 		buildConfig = true
@@ -93,7 +85,6 @@ val prepareAssetsFiles by tasks.registering {
 		copy {
 			from("$projRoot/builtin")
 			into("$assetsFolder/builtin")
-			exclude("*.txt")
 		}
 		copy {
 			from("$projRoot/client/shaders")
@@ -106,8 +97,7 @@ val prepareAssetsFiles by tasks.registering {
 		copy {
 			from(
 				"$projRoot/fonts/DroidSansFallback.ttf",
-				"$projRoot/fonts/MultiCraftFont.ttf",
-				"$projRoot/fonts/OpenMoji.ttf"
+				"$projRoot/fonts/MultiCraftFont.ttf"
 			)
 			into("$assetsFolder/fonts")
 		}
@@ -143,7 +133,7 @@ dependencies {
 	/* Third-party libraries */
 	implementation("androidx.appcompat:appcompat:1.7.1")
 	implementation("androidx.appcompat:appcompat-resources:1.7.1")
-	implementation("androidx.browser:browser:1.9.0")
+	implementation("androidx.browser:browser:1.10.0")
 	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
-	implementation("com.google.android.material:material:1.13.0")
+	implementation("com.google.android.material:material:1.14.0")
 }

@@ -213,7 +213,6 @@ src/inventorymanager.cpp
 src/inventorymanager.h
 src/irrlicht_changes/CGUITTFont.cpp
 src/irrlicht_changes/CGUITTFont.h
-src/irrlicht_changes/irrUString.h
 src/irrlicht_changes/static_text.cpp
 src/irrlicht_changes/static_text.h
 src/irrlichttypes.h

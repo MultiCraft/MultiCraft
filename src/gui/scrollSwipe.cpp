@@ -71,6 +71,12 @@ void ScrollSwipe::updateScrollCoasting()
 	if (!m_is_coasting || m_velocity == 0)
 		return;
 
+	if ((int)m_swipe_pos != m_scrollbar->getPos()) {
+		m_velocity = 0;
+		m_is_coasting = false;
+		return;
+	}
+
 	u64 current_time = porting::getTimeMs();
 	u64 dt = current_time - m_last_time;
 	m_last_time = current_time;

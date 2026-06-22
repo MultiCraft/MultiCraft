@@ -942,6 +942,11 @@ Call these functions only at load time!
 	* Shows a formspec to the player
 * `minetest.display_chat_message(message)` returns true on success
 	* Shows a chat message to the current player.
+* `minetest.set_visible_controls(btns)`
+    * Sets the visible touchscreen controls
+    * If the `btns` table is empty or nil, all controls are visible.
+    * Example: `{jump = true, joystick = true}`
+    * No-op if there is no touchscreen
 
 Setting-related
 ---------------

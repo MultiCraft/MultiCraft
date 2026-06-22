@@ -20,5 +20,6 @@ APP_CXXFLAGS += -Wno-deprecated-declarations -Wno-inconsistent-missing-override
 APP_CPPFLAGS := $(APP_CXXFLAGS)
 
 ifdef NDEBUG
-APP_LDFLAGS := -Wl,--gc-sections,--icf=all -Wl,-O2 -flto
+APP_LDFLAGS := -Wl,--gc-sections,--icf=all -Wl,-O2
 endif
+APP_LDFLAGS += -flto

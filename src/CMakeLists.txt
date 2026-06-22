@@ -140,6 +140,7 @@ endif()
 
 
 option(ENABLE_FREETYPE "Enable FreeType2 (TrueType fonts and basic unicode support)" TRUE)
+option(USE_CAIRO "Enable Cairo for COLRv1 emoji" TRUE)
 set(USE_FREETYPE FALSE)
 
 if(ENABLE_FREETYPE)
@@ -147,6 +148,25 @@ if(ENABLE_FREETYPE)
 	if(FREETYPE_FOUND)
 		message(STATUS "Freetype enabled.")
 		set(USE_FREETYPE TRUE)
+	endif()
+
+	find_library(HARFBUZZ_LIBRARY NAMES harfbuzz libharfbuzz)
+	find_path(HARFBUZZ_INCLUDE_DIR NAMES harfbuzz/hb.h hb.h PATHS)
+	if (HARFBUZZ_LIBRARY AND HARFBUZZ_INCLUDE_DIR)
+		message(STATUS "HarfBuzz found.")
+		include_directories(${HARFBUZZ_INCLUDE_DIR})
+	endif()
+	
+	if (USE_CAIRO)
+		find_library(CAIRO_LIBRARY NAMES cairo libcairo)
+		find_path(CAIRO_INCLUDE_DIR NAMES cairo/cairo.h cairo.h PATHS)
+		if (CAIRO_LIBRARY AND CAIRO_INCLUDE_DIR)
+			message(STATUS "Cairo found.")
+			include_directories(${CAIRO_INCLUDE_DIR})
+			add_definitions(-DUSE_CAIRO=1)
+		else()
+			message(STATUS "Cairo not found.")
+		endif()
 	endif()
 endif(ENABLE_FREETYPE)
 
@@ -569,6 +589,7 @@ include_directories(
 	${SQLITE3_INCLUDE_DIR}
 	${LUA_INCLUDE_DIR}
 	${CHACHA_INCLUDE_DIR}
+	${SHEENBIDI_INCLUDE_DIR}
 	${GMP_INCLUDE_DIR}
 	${JSON_INCLUDE_DIR}
 	${X11_INCLUDE_DIR}
@@ -613,6 +634,7 @@ if(BUILD_CLIENT)
 		luautf8
 		luachacha
 		chacha
+		sheenbidi
 	)
 	if(NOT USE_LUAJIT)
 		set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -697,6 +719,8 @@ if(BUILD_CLIENT)
 		target_link_libraries(
 			${PROJECT_NAME}
 			${FREETYPE_LIBRARY}
+			${HARFBUZZ_LIBRARY}
+			${CAIRO_LIBRARY}
 		)
 	endif()
 	if (USE_CURSES)
@@ -796,10 +820,8 @@ endif(BUILD_SERVER)
 # Blacklisted locales that don't work.
 # see issue #4638
 set(GETTEXT_BLACKLISTED_LOCALES
-	ar
 	he
 	ky
-	ms_Arab
 	th
 )
 

@@ -732,3 +732,20 @@ inline irr::core::stringw utf8_to_stringw(const std::string &input)
  * 2. Remove 'unsafe' characters from the name by replacing them with '_'
  */
 std::string sanitizeDirName(const std::string &str, const std::string &optional_prefix);
+
+
+// Helper functions for utf16 on windows to handle surrogate pairs
+inline bool isHighSurrogate(wchar_t c)
+{
+	return c >= 0xD800 && c <= 0xDBFF;
+}
+
+inline bool isLowSurrogate(wchar_t c)
+{
+	return c >= 0xDC00 && c <= 0xDFFF;
+}
+
+inline bool isSurrogatePair(wchar_t high, wchar_t low)
+{
+	return isHighSurrogate(high) && isLowSurrogate(low);
+}

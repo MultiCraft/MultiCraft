@@ -11,6 +11,8 @@ sh scripts/libjpeg.sh
 sh scripts/libpng.sh
 sh scripts/irrlicht.sh
 sh scripts/gettext.sh
+sh scripts/freetype.sh bootstrap
+sh scripts/harfbuzz.sh
 sh scripts/freetype.sh
 sh scripts/leveldb.sh
 sh scripts/nghttp2.sh

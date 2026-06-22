@@ -27,7 +27,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifdef __IOS__
 #include "porting.h"
-extern "C" void external_pause_game();
+extern "C" void external_pause_game(bool unpause = true);
+
+#if USE_SOUND
+#include "client/sound_openal.h"
+#endif
 #endif
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
@@ -151,9 +155,13 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		bool result = m_touchscreengui->preprocessEvent(event);
 
 		if (result) {
-			for (auto key : keysListenedFor) {
-				irr::EKEY_CODE key_code = key.getKeyCode();
-				bool pressed = m_touchscreengui->isButtonPressed(key_code);
+			for (int key_type = 0; key_type < KeyType::INTERNAL_ENUM_COUNT; key_type++) {
+				auto key = input->keycache.key[key_type];
+
+				if (!keysListenedFor[key])
+					continue;
+
+				bool pressed = m_touchscreengui->isButtonPressed((KeyType::T)key_type);
 				if (pressed) {
 					if (!IsKeyDown(key)) {
 						keyWasPressed.set(key);
@@ -161,7 +169,7 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 						keyWasDown.set(key);
 					}
 				}
-				if (!pressed || m_touchscreengui->immediateRelease(key_code)) {
+				if (!pressed || m_touchscreengui->immediateRelease((KeyType::T)key_type)) {
 					if (IsKeyDown(key))
 						keyWasReleased.set(key);
 
@@ -365,7 +373,19 @@ RealInputHandler::~RealInputHandler()
 bool RealInputHandler::SdlEventWatcher(void *userdata, SDL_Event *event)
 {
 	if (event->type == SDL_EVENT_WILL_ENTER_BACKGROUND) {
+#if USE_SOUND
+		if (g_sound_manager_singleton)
+			g_sound_manager_singleton->pauseDevice();
+#endif
+
 		external_pause_game();
+		return true;
+	}
+	if (event->type == SDL_EVENT_DID_ENTER_FOREGROUND) {
+#if USE_SOUND
+		if (g_sound_manager_singleton)
+			g_sound_manager_singleton->resumeDevice();
+#endif
 		return true;
 	}
 

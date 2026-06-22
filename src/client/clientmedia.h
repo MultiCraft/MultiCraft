@@ -49,9 +49,9 @@ public:
 	~ClientMediaDownloader();
 
 	float getProgress() const {
-		if (m_uncached_count >= 1)
-			return 1.0f * m_uncached_received_count /
-				m_uncached_count;
+		if (m_files.size() > 0)
+			return 1.0f * (m_cached_count + m_uncached_received_count) /
+				m_files.size();
 
 		return 0.0f;
 	}
@@ -135,6 +135,8 @@ private:
 
 	// Total number of media files to load
 	s32 m_uncached_count = 0;
+
+	s32 m_cached_count = 0;
 
 	// Number of media files that have been received
 	s32 m_uncached_received_count = 0;

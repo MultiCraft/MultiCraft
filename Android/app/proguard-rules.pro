@@ -21,9 +21,7 @@
 #-renamesourcefileattribute SourceFile
 -keep class com.multicraft.game.GameActivity {
 	public <methods>;
-	#noinspection ShrinkerUnresolvedReference
 	void showDialog(java.lang.String, java.lang.String, int);
-	boolean isDialogActive();
 	java.lang.String getDialogValue();
 	float getDensity();
 	void notifyServerConnect(boolean);
@@ -31,14 +29,12 @@
 	boolean openURI(java.lang.String, boolean);
 	void finishGame(java.lang.String);
 	void handleError(java.lang.String);
-	boolean upgrade(java.lang.String);
+	boolean upgrade(java.lang.String, java.lang.String);
 	java.lang.String getSecretKey(java.lang.String);
 	void hideSplashScreen();
 	boolean needsExtractAssets();
+	void vibrationEffect(int);
 }
 -keepclasseswithmembernames,includedescriptorclasses class * {
 	native <methods>;
 }
--keepclassmembers class androidx.lifecycle.ReportFragment$** { *; }
-# SDL
--keep public class org.libsdl.app.** { public *; }

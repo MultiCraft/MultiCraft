@@ -40,8 +40,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "version.h"
 #include "util/hex.h"
 #include "util/hashing.h"
+#include "util/string.h"
 #include <algorithm>
 #include "translation.h"
+#if defined(__ANDROID__) || defined(__APPLE__)
+#include "util/encryption.h"
+#endif
 #include "content/mods.h"
 #include "cpp_api/s_base.h"
 
@@ -89,7 +93,7 @@ int ModApiUtil::l_get_us_time(lua_State *L)
 	return 1;
 }
 
-// parse_json(str[, nullvalue])
+// parse_json(str[, nullvalue, return_error])
 int ModApiUtil::l_parse_json(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
@@ -103,40 +107,41 @@ int ModApiUtil::l_parse_json(lua_State *L)
 		nullindex = lua_gettop(L);
 	}
 
-	Json::Value root;
+	bool return_error = lua_toboolean(L, 3);
+	const auto handle_error = [&](const char *errmsg) {
+		if (return_error) {
+			lua_pushnil(L);
+			lua_pushstring(L, errmsg);
+			return 2;
+		}
+		errorstream << "Failed to parse json data: " << errmsg << std::endl;
+		errorstream << "data: \"";
+		if (strlen(jsonstr) <= 100) {
+			errorstream << jsonstr << "\"";
+		} else {
+			std::string s = jsonstr;
+			errorstream << s.substr(0, 100) << "\"... (truncated)";
+		}
+		errorstream << std::endl;
+		lua_pushnil(L);
+		return 1;
+	};
 
+	Json::Value root;
 	{
 		std::istringstream stream(jsonstr);
 
 		Json::CharReaderBuilder builder;
 		builder.settings_["collectComments"] = false;
-		std::string errs;
-
-		if (!Json::parseFromStream(builder, stream, &root, &errs)) {
-			errorstream << "Failed to parse json data " << errs << std::endl;
-			size_t jlen = strlen(jsonstr);
-			if (jlen > 100) {
-				errorstream << "Data (" << jlen
-#ifdef NDEBUG
-					<< " bytes) not printed." << std::endl;
-#else
-					<< " bytes) printed to warningstream." << std::endl;
-				warningstream << "data: \"" << jsonstr << "\"" << std::endl;
-#endif
-			} else {
-				errorstream << "data: \"" << jsonstr << "\"" << std::endl;
-			}
-			lua_pushnil(L);
-			return 1;
-		}
+		const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+		std::string errmsg;
+		if (!Json::parseFromStream(builder, stream, &root, &errmsg))
+			return handle_error(errmsg.c_str());
 	}
 
-	if (!push_json_value(L, root, nullindex)) {
-		errorstream << "Failed to parse json data, "
-			<< "depth exceeds lua stack limit" << std::endl;
-		errorstream << "data: \"" << jsonstr << "\"" << std::endl;
-		lua_pushnil(L);
-	}
+	if (!push_json_value(L, root, nullindex))
+		return handle_error("depth exceeds lua stack limit");
+
 	return 1;
 }
 
@@ -543,7 +548,10 @@ int ModApiUtil::l_upgrade(lua_State *L)
 	NO_MAP_LOCK_REQUIRED;
 #if defined(__ANDROID__) || defined(__APPLE__)
 	const std::string item_name = luaL_checkstring(L, 1);
-	const bool res = porting::upgrade(item_name);
+	std::string extra;
+	if (lua_gettop(L) >= 2 && lua_isstring(L, 2))
+		extra = lua_tostring(L, 2);
+	const bool res = porting::upgrade(item_name, extra);
 	lua_pushboolean(L, res);
 #else
 	// Not implemented on other platforms
@@ -575,6 +583,10 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	int top = lua_gettop(L);
 	lua_pushstring(L,"density");
 	lua_pushnumber(L,RenderingEngine::getDisplayDensity());
+	lua_settable(L, top);
+
+	lua_pushstring(L,"high_dpi");
+	lua_pushnumber(L,RenderingEngine::isHighDpi());
 	lua_settable(L, top);
 
 	lua_pushstring(L,"display_width");
@@ -622,6 +634,57 @@ int ModApiUtil::l_get_translated_string(lua_State * L)
 	std::string string = luaL_checkstring(L, 1);
 	string = wide_to_utf8(translate_string(utf8_to_wide(string), g_client_translations));
 	lua_pushstring(L, string.c_str());
+	return 1;
+}
+
+void load_tr_data(const std::string &tr_data)
+{
+#if defined(__ANDROID__) || defined(__APPLE__)
+	std::string decrypted_data;
+	if (Encryption::decryptSimple(tr_data, decrypted_data)) {
+		g_client_translations->loadTranslation(decrypted_data);
+		return;
+	}
+#endif
+
+	g_client_translations->loadTranslation(tr_data);
+}
+
+int ModApiUtil::l_load_translation(lua_State *L)
+{
+	size_t tr_data_length;
+	const char *tr_data_raw = luaL_checklstring(L, 1, &tr_data_length);
+	sanity_check(tr_data_raw != NULL);
+
+	std::string tr_data = std::string(tr_data_raw, tr_data_length);
+	load_tr_data(tr_data);
+	return 0;
+}
+
+int ModApiUtil::l_load_translation_from_file(lua_State *L)
+{
+	// This is intended to be used from CSMs which are not ordinarily permitted
+	// to read files, so to avoid abuse it's locked down
+
+	std::string path = luaL_checkstring(L, 1);
+	// Restrict to loading from cache path
+	path = fs::AbsolutePath(path);
+	if (!fs::PathStartsWith(path, fs::AbsolutePath(porting::path_cache)))
+		return 0;
+
+	// Restrict to filenames ending with .tr
+	const char *translate_ext[] = {".tr", NULL};
+	if (removeStringEnd(path, translate_ext).empty())
+		return 0;
+
+	std::string tr_data;
+	if (!fs::ReadFile(path, tr_data)) {
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	load_tr_data(tr_data);
+	lua_pushboolean(L, true);
 	return 1;
 }
 #endif
@@ -696,6 +759,8 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 	API_FCT(get_system_ram);
 	API_FCT(copy_to_clipboard);
 	API_FCT(get_translated_string);
+	API_FCT(load_translation);
+	API_FCT(load_translation_from_file);
 
 	LuaSettings::create(L, g_settings, g_settings_path);
 	lua_setfield(L, top, "settings");
@@ -743,6 +808,8 @@ void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	API_FCT(get_system_ram);
 	API_FCT(copy_to_clipboard);
 	API_FCT(get_translated_string);
+	API_FCT(load_translation);
+	API_FCT(load_translation_from_file);
 #else
 	FATAL_ERROR("InitializeMainMenu called from server");
 #endif

@@ -31,6 +31,8 @@ public:
 			const core::rect<s32> &rectangle, const std::string &orientation,
 			f32 scrollfactor);
 
+	virtual ~GUIScrollContainer();
+
 	virtual bool OnEvent(const SEvent &event) override;
 
 	virtual void draw() override;

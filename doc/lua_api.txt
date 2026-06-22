@@ -2985,7 +2985,8 @@ Some types may inherit styles from parent types.
     * scrollbar_thumb_bottom_img - The bottom half of the thumb image
     * scrollbar_up_img - The up arrow image to use for the scrollbar
     * scrollbar_down_img - The down arrow image to use for the scrollbar
-    * scrollbar_middle - The middle for all 9-sliced scrollbar textures
+    * scrollbar_arrows - Whether to show arrows in the scrollbar. Overrides `scrollbaroptions` when set.
+                         This can be either `hide`, `show`, or `default`.
     * sound - a sound to be played when the scrollbar arrow buttons are pressed
     * NOTE: Scrollbar textures will only be applied if all scrollbar image properties are specified.
 * tabheader
@@ -4585,6 +4586,13 @@ Utilities
           abm_min_max_y = true,
           -- "zstd" method for compress/decompress (5.7.0)
           compress_zstd = true,
+
+          -- Whether bidirectional text is supported
+          bidi_text_supported = true,
+
+          -- Whether the "scrollbar_arrows" style is supported and themed
+          -- scrollbars can have their arrows hidden
+          themed_scrollbar_hide_arrows = true,
       }
 
 * `minetest.has_feature(arg)`: returns `boolean, missing_features`
@@ -5865,11 +5873,14 @@ Misc.
     * Gets the internal content ID of `name`
 * `minetest.get_name_from_content_id(content_id)`: returns a string
     * Gets the name of the content with that content ID
-* `minetest.parse_json(string[, nullvalue])`: returns something
+* `minetest.parse_json(string[, nullvalue, return_error])`: returns something
     * Convert a string containing JSON data into the Lua equivalent
     * `nullvalue`: returned in place of the JSON null; defaults to `nil`
     * On success returns a table, a string, a number, a boolean or `nullvalue`
     * On failure outputs an error message and returns `nil`
+    * On failure: If `return_error` is not set or is `false`,
+      outputs an error message and returns `nil`.
+      Otherwise returns `nil, err` (error message).
     * Example: `parse_json("[10, {\"a\":false}]")`, returns `{10, {a = false}}`
 * `minetest.write_json(data[, styled])`: returns a string or `nil` and an error
   message.
@@ -8453,6 +8464,9 @@ Used by `Player:hud_add`. Returned by `Player:hud_get`.
 
         unhideable = false,
         -- If true, this HUD will still be visible if the player hides HUDs.
+
+        touch_only = false,
+        -- If true, the HUD will only be shown when touchscreen controls are visible.
     }
 
 Particle definition

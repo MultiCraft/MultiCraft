@@ -73,6 +73,8 @@ core.copy_dir(source,destination,keep_soure) (possible in async calls)
 ^ returns true/false
 core.is_dir(path) (possible in async calls)
 ^ returns true if path is a valid dir
+core.file_exists(path) (possible in async calls)
+^ returns true if path exists
 core.extract_zip(zipfile, destination[, password]) [unzip within path required]
 ^ zipfile to extract
 ^ destination folder to extract to
@@ -113,6 +115,12 @@ HTTP Requests
       `HTTPApiTable.fetch_async_get`
 * `HTTPApiTable.fetch_async_get(handle)`: returns HTTPRequestResult
     * Return response data for given asynchronous HTTP request
+* `HTTPApiTable.get_download_stats()`
+    * Returns `bytes_downloaded, total_bytes`
+    * This is the sum of all HTTP requests, including core.download_file.
+    * `bytes_downloaded` should never decrease, however `total_bytes` may
+      decrease if a request fails (so that when no requests are running,
+      bytes_downloaded == total_bytes).
 
 ### `HTTPRequest` definition
 
@@ -234,6 +242,7 @@ core.show_path_select_dialog(formname, caption, is_file_select)
 core.get_screen_info()
 ^ returns {
     density         = <screen density 0.75,1.0,2.0,3.0 ... (dpi)>,
+	high_dpi		= <high screen dpi>,
     display_width   = <width of display>,
     display_height  = <height of display>,
     window_width    = <current window width>,

@@ -733,7 +733,7 @@
 # vsync = true
 
 #    Field of view in degrees.
-#    type: int min: 45 max: 160
+#    type: int min: 45 max: 120
 # fov = 72
 
 #    Alters the light curve by applying 'gamma correction' to it.

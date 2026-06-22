@@ -33,6 +33,7 @@ local asyncpath = scriptdir .. "async" .. DIR_DELIM
 dofile(commonpath .. "strict.lua")
 dofile(commonpath .. "serialize.lua")
 dofile(commonpath .. "misc_helpers.lua")
+dofile(commonpath .. "features.lua")
 
 if core.global_exists("jit") and jit.status() then
 	jit.opt.start("maxtrace=4000", "maxrecord=8000", "minstitch=2", "maxmcode=8192")
@@ -45,6 +46,8 @@ if INIT == "game" then
 elseif INIT == "mainmenu" then
 	local mainmenudir = core.get_mainmenu_path() .. DIR_DELIM
 	dofile(mainmenudir .. "register.lua")
+	dofile(commonpath .. "after.lua")
+
 	local mm_script = core.settings:get("main_menu_script")
 	if not mm_script or mm_script == "" then
 		mm_script = scriptdir .. ".." .. DIR_DELIM .. "menu" .. DIR_DELIM .. "init.lua"

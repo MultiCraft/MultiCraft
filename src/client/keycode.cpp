@@ -384,5 +384,9 @@ void clearKeyCache()
 
 irr::EKEY_CODE keyname_to_keycode(const char *name)
 {
-	return lookup_keyname(name).Key;
+	try {
+		return lookup_keyname(name).Key;
+	} catch (UnknownKeycode &e) {};
+
+	return (irr::EKEY_CODE)0;
 }

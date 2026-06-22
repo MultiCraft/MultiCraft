@@ -87,6 +87,8 @@ enum HudElementStat {
 	HUD_STAT_TEXT2,
 	HUD_STAT_STYLE,
 	HUD_STAT_UNHIDEABLE,
+	// (some space so as to not conflict with Luanti)
+	HUD_STAT_TOUCH_ONLY = 100,
 };
 
 enum HudCompassDir {
@@ -112,6 +114,7 @@ struct HudElement {
 	s16 z_index = 0;
 	std::string text2;
 	bool unhideable = false;
+	bool touch_only = false;
 };
 
 extern const EnumString es_HudElementType[];

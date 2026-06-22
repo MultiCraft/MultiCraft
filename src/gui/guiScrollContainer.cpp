@@ -52,6 +52,15 @@ GUIScrollContainer::GUIScrollContainer(gui::IGUIEnvironment *env,
 #endif
 }
 
+GUIScrollContainer::~GUIScrollContainer()
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	delete m_scroll_swipe;
+#endif
+#endif
+}
+
 bool GUIScrollContainer::OnEvent(const SEvent &event)
 {
 	if (event.EventType == EET_MOUSE_INPUT_EVENT &&
