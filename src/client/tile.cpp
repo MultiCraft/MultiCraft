@@ -253,12 +253,14 @@ public:
 	}
 	void insert(const std::string &name, const std::string &data)
 	{
-		// Remove old image
+		// Remove old decoded image, if any. We must erase() the map entry,
+		// not just drop() it.
 		std::map<std::string, video::IImage*>::iterator n;
 		n = m_images.find(name);
 		if (n != m_images.end()){
 			if (n->second)
 				n->second->drop();
+			m_images.erase(n);
 		}
 
 		// TODO: Maybe skip storing this if a texture pack is active? At the
@@ -283,10 +285,8 @@ public:
 			// Read from compressed RAM	copy
 			video::IImage *img = loadImageFromString(name, image_data->second);
 
-			// No need to keep encoded image data around anymore
-			m_image_files.erase(image_data);
-
 			if (img) {
+				// insert() removes the encoded copy from m_image_files
 				insert(name, img, true);
 				img->drop();
 				// warningstream << "Loaded image file " << name << " from RAM cache! Images still in cache: " << m_image_files.size() << std::endl;
