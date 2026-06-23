@@ -584,6 +584,18 @@ static void apply_colorize(video::IImage *dst, v2u32 dst_pos, v2u32 size,
 static void apply_multiplication(video::IImage *dst, v2u32 dst_pos, v2u32 size,
 		const video::SColor &color);
 
+// Perform a Screen blend with the given color. The opposite effect of a
+// Multiply blend.
+static void apply_screen(video::IImage *dst, v2u32 dst_pos, v2u32 size,
+		const video::SColor color);
+
+// Adjust the hue, saturation, and lightness of destination. Like
+// "Hue-Saturation" in GIMP.
+// If colorize is true then the image will be converted to a grayscale
+// image as though seen through a colored glass, like "Colorize" in GIMP.
+static void apply_hue_saturation(video::IImage *dst, v2u32 dst_pos, v2u32 size,
+		s32 hue, s32 saturation, s32 lightness, bool colorize);
+
 // Apply a mask to an image
 static void apply_mask(video::IImage *mask, video::IImage *dst,
 		v2s32 mask_pos, v2s32 dst_pos, v2u32 size);
@@ -1614,18 +1626,24 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 		}
 		/*
 		[multiply:color
-			multiplys a given color to any pixel of an image
+		or
+		[screen:color
+			Multiply and Screen blend modes are basic blend modes for darkening and lightening
+			images, respectively.
+			A Multiply blend multiplies a given color to every pixel of an image.
+			A Screen blend has the opposite effect to a Multiply blend.
 			color = color as ColorString
 		*/
-		else if (str_starts_with(part_of_name, "[multiply:")) {
+		else if (str_starts_with(part_of_name, "[multiply:") ||
+		         str_starts_with(part_of_name, "[screen:")) {
 			Strfnd sf(part_of_name);
 			sf.next(":");
 			std::string color_str = sf.next(":");
 
 			if (baseimg == NULL) {
-				errorstream << "generateImagePart(): baseimg != NULL "
-						<< "for part_of_name=\"" << part_of_name
-						<< "\", cancelling." << std::endl;
+				errorstream<<"generateImagePart(): baseimg==NULL "
+						<<"for part_of_name=\""<<part_of_name
+						<<"\", cancelling."<<std::endl;
 				return false;
 			}
 
@@ -1633,8 +1651,52 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 
 			if (!parseColorString(color_str, color, false))
 				return false;
+			if (str_starts_with(part_of_name, "[multiply:")) {
+				apply_multiplication(baseimg, v2u32(0, 0),
+					baseimg->getDimension(), color);
+			} else {
+				apply_screen(baseimg, v2u32(0, 0), baseimg->getDimension(), color);
+			}
+		}
+		/*
+			[hsl:hue:saturation:lightness
+			or
+			[colorizehsl:hue:saturation:lightness
 
-			apply_multiplication(baseimg, v2u32(0, 0), baseimg->getDimension(), color);
+			Adjust the hue, saturation, and lightness of the base image. Like
+			"Hue-Saturation" in GIMP, but with 0 as the mid-point.
+			Hue should be from -180 to +180, though 0 to 360 is also supported.
+			Saturation and lightness are optional, with lightness from -100 to
+			+100, and sauration from -100 to +100-or-higher.
+
+			If colorize is true then saturation is from 0 to 100, and the image
+			will be converted to a grayscale image as though seen through a
+			colored glass, like	"Colorize" in GIMP.
+		*/
+		else if (str_starts_with(part_of_name, "[hsl:") ||
+		         str_starts_with(part_of_name, "[colorizehsl:")) {
+
+			if (baseimg == NULL) {
+				errorstream<<"generateImagePart(): baseimg==NULL "
+						<<"for part_of_name=\""<<part_of_name
+						<<"\", cancelling."<<std::endl;
+				return false;
+			}
+			
+			bool colorize = str_starts_with(part_of_name, "[colorizehsl:");
+
+			// saturation range is 0 to 100 when colorize is true
+			s32 defaultSaturation = colorize ? 50 : 0;
+
+			Strfnd sf(part_of_name);
+			sf.next(":");
+			s32 hue = mystoi(sf.next(":"), -180, 360);
+			s32 saturation = sf.at_end() ? defaultSaturation : mystoi(sf.next(":"), -100, 1000);
+			s32 lightness  = sf.at_end() ? 0 : mystoi(sf.next(":"), -100, 100);
+
+
+			apply_hue_saturation(baseimg, v2u32(0, 0), baseimg->getDimension(),
+				hue, saturation, lightness, colorize);
 		}
 		/*
 			[colorize:color
@@ -2028,6 +2090,102 @@ static void apply_multiplication(video::IImage *dst, v2u32 dst_pos, v2u32 size,
 				);
 		dst->setPixel(x, y, dst_c);
 	}
+}
+
+/*
+	Apply color to destination, using a Screen blend mode
+*/
+static void apply_screen(video::IImage *dst, v2u32 dst_pos, v2u32 size,
+		const video::SColor color)
+{
+	video::SColor dst_c;
+
+	for (u32 y = dst_pos.Y; y < dst_pos.Y + size.Y; y++)
+	for (u32 x = dst_pos.X; x < dst_pos.X + size.X; x++) {
+		dst_c = dst->getPixel(x, y);
+		dst_c.set(
+			dst_c.getAlpha(),
+			255 - ((255 - dst_c.getRed())   * (255 - color.getRed()))   / 255,
+			255 - ((255 - dst_c.getGreen()) * (255 - color.getGreen())) / 255,
+			255 - ((255 - dst_c.getBlue())  * (255 - color.getBlue()))  / 255
+		);
+		dst->setPixel(x, y, dst_c);
+	}
+}
+
+/*
+	Adjust the hue, saturation, and lightness of destination. Like
+	"Hue-Saturation" in GIMP, but with 0 as the mid-point.
+	Hue should be from -180 to +180, or from 0 to 360.
+	Saturation and Lightness are percentages.
+	Lightness is from -100 to +100.
+	Saturation goes down to -100 (fully desaturated) but can go above 100,
+	allowing for even muted colors to become saturated.
+
+	If colorize is true then saturation is from 0 to 100, and destination will
+	be converted to a grayscale image as seen through a colored glass, like
+	"Colorize" in GIMP.
+*/
+static void apply_hue_saturation(video::IImage *dst, v2u32 dst_pos, v2u32 size,
+	s32 hue, s32 saturation, s32 lightness, bool colorize)
+{
+	video::SColorf colorf;
+	video::SColorHSL hsl;
+	f32 norm_s = core::clamp(saturation, -100, 1000) / 100.0f;
+	f32 norm_l = core::clamp(lightness,  -100, 100) / 100.0f;
+
+	if (colorize) {
+		hsl.Saturation = core::clamp((f32)saturation, 0.0f, 100.0f);
+	}
+
+	for (u32 y = dst_pos.Y; y < dst_pos.Y + size.Y; y++)
+		for (u32 x = dst_pos.X; x < dst_pos.X + size.X; x++) {
+
+			if (colorize) {
+				f32 lum = dst->getPixel(x, y).getBrightness() / 255.0f;
+
+				if (norm_l < 0) {
+					lum *= norm_l + 1.0f;
+				} else {
+					lum = lum * (1.0f - norm_l) + norm_l;
+				}
+				hsl.Hue = 0;
+				hsl.Luminance = lum * 100;
+
+			} else {
+				// convert the RGB to HSL
+				colorf = video::SColorf(dst->getPixel(x, y));
+				hsl.fromRGB(colorf);
+
+				if (norm_l < 0) {
+					hsl.Luminance *= norm_l + 1.0f;
+				} else{
+					hsl.Luminance = hsl.Luminance + norm_l * (100.0f - hsl.Luminance);
+				}
+
+				// Adjusting saturation in the same manner as lightness resulted in
+				// muted colors being affected too much and bright colors not
+				// affected enough, so I'm borrowing a leaf out of gimp's book and
+				// using a different scaling approach for saturation.
+				// https://github.com/GNOME/gimp/blob/6cc1e035f1822bf5198e7e99a53f7fa6e281396a/app/operations/gimpoperationhuesaturation.c#L139-L145=
+				// This difference is why values over 100% are not necessary for
+				// lightness but are very useful with saturation. An alternative UI
+				// approach would be to have an upper saturation limit of 100, but
+				// multiply positive values by ~3 to make it a more useful positive
+				// range scale.
+				hsl.Saturation *= norm_s + 1.0f;
+				hsl.Saturation = core::clamp(hsl.Saturation, 0.0f, 100.0f);
+			}
+
+			// Apply the specified HSL adjustments
+			hsl.Hue = fmodf(hsl.Hue + hue, 360);
+			if (hsl.Hue < 0)
+				hsl.Hue += 360;
+
+			// Convert back to RGB
+			hsl.toRGB(colorf);
+			dst->setPixel(x, y, colorf.toSColor());
+		}
 }
 
 /*
