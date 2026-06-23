@@ -211,9 +211,6 @@ public:
 			m_image.second->drop();
 		}
 		m_images.clear();
-
-		// I have no idea if this is needed, but it won't hurt
-		m_image_files.clear();
 	}
 	void insert(const std::string &name, video::IImage *img, bool prefer_local)
 	{
