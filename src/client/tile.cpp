@@ -1677,9 +1677,9 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 		         str_starts_with(part_of_name, "[colorizehsl:")) {
 
 			if (baseimg == NULL) {
-				errorstream<<"generateImagePart(): baseimg==NULL "
-						<<"for part_of_name=\""<<part_of_name
-						<<"\", cancelling."<<std::endl;
+				errorstream << "generateImagePart(): baseimg != NULL "
+						<< "for part_of_name=\"" << part_of_name
+						<< "\", cancelling." << std::endl;
 				return false;
 			}
 			
