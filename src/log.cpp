@@ -78,7 +78,9 @@ public:
 //// Globals
 ////
 
-Logger g_logger;
+// Leaked on purpose: never destroyed, so its mutex stays valid for threads
+// still logging during exit() teardown (avoids EINVAL/SIGABRT on shutdown).
+Logger &g_logger = *(new Logger());
 
 StreamLogOutput stdout_output(std::cout);
 StreamLogOutput stderr_output(std::cerr);

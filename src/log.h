@@ -194,7 +194,7 @@ extern std::ostream *dout_con_ptr;
 extern std::ostream *derr_con_ptr;
 extern std::ostream *derr_server_ptr;
 
-extern Logger g_logger;
+extern Logger &g_logger;
 
 // Writes directly to all LL_NONE log outputs for g_logger with no prefix.
 extern std::ostream rawstream;
