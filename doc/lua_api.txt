@@ -612,6 +612,24 @@ the word "`alpha`", then each texture pixel will contain the RGB of
 `<color>` and the alpha of `<color>` multiplied by the alpha of the
 texture pixel.
 
+#### `[colorizehsl:<hue>:<saturation>:<lightness>`
+
+Colorize the texture to the given hue. The texture will be converted into a
+greyscale image as seen through a colored glass, like "Colorize" in GIMP.
+Saturation and lightness can optionally be adjusted.
+
+All arguments are integers.
+
+`<hue>` should be in range [-180, 180]. The hue at 0° on an HSL color wheel is
+red, 60° is yellow, 120° is green, and 180° is cyan, while -60° is magenta
+and -120° is blue.
+
+`<saturation>` and `<lightness>` are optional adjustments.
+
+`<lightness>` is in range [-100, 100], with a default of 0
+
+`<saturation>` is in range [0, 100], with a default of 50
+
 #### `[multiply:<color>`
 
 Multiplies texture colors with the given color.
@@ -619,6 +637,35 @@ Multiplies texture colors with the given color.
 Result is more like what you'd expect if you put a color on top of another
 color, meaning white surfaces get a lot of your new color while black parts
 don't change very much.
+
+#### `[screen:<color>`
+
+Apply a Screen blend with the given color. A Screen blend is the inverse of
+a Multiply blend, lightening images instead of darkening them.
+
+`<color>` is specified as a `ColorString`.
+
+A Screen blend can be applied between two textures by using the overlay
+modifier with a brightness adjustment:
+
+    textureA.png^[contrast:0:64^[overlay:textureB.png
+
+#### `[hsl:<hue>:<saturation>:<lightness>`
+
+Adjust the hue, saturation, and lightness of the texture. Like
+"Hue-Saturation" in GIMP, but with 0 as the mid-point.
+
+All 3 arguments are integers.
+
+`<hue>` should be in range [-180, 180]
+
+`<saturation>` and `<lightness>` are optional, and both percentages.
+
+`<lightness>` is in range [-100, 100].
+
+`<saturation>` is in range [-100, 1000]. -100 is fully desaturated,
+0 is no change and positive values increase saturation. Values
+above 100 allow for even muted colors to become highly saturated.
 
 Hardware coloring
 -----------------
