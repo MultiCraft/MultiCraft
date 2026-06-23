@@ -1641,9 +1641,9 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 			std::string color_str = sf.next(":");
 
 			if (baseimg == NULL) {
-				errorstream<<"generateImagePart(): baseimg==NULL "
-						<<"for part_of_name=\""<<part_of_name
-						<<"\", cancelling."<<std::endl;
+				errorstream << "generateImagePart(): baseimg != NULL "
+						<< "for part_of_name=\"" << part_of_name
+						<< "\", cancelling." << std::endl;
 				return false;
 			}
 
