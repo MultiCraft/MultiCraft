@@ -785,7 +785,7 @@ double getAvailableSystemMemory()
 	MEMORYSTATUSEX status;
 	status.dwLength = sizeof(status);
 	GlobalMemoryStatusEx(&status);
-	return static_cast<double>(status.ullAvailPhys) / 1024 / 1024;
+	return (double)status.ullAvailPhys / 1024 / 1024;
 
 //// Linux
 #elif defined(__linux__)
@@ -798,19 +798,28 @@ double getAvailableSystemMemory()
 			std::string available;
 			std::istringstream iss(line);
 			iss >> label >> available;
-			return static_cast<double>(stoi(available)) / 1024;
+			return (double)stoi(available) / 1024;
 		}
 	}
 
-	return -1;
-
-//// TODO: Mac OS X, Darwin
-// #elif defined(__APPLE__)
-
-#else
-	return -1;
+//// Darwin
+#elif defined(__APPLE__)
+	vm_size_t page_size;
+	host_page_size(mach_host_self(), &page_size);
+	vm_statistics64_data_t vm_stats;
+	mach_msg_type_number_t count = HOST_VM_INFO64_COUNT;
+	if (host_statistics64(mach_host_self(), HOST_VM_INFO64,
+			(host_info64_t)&vm_stats, &count) == KERN_SUCCESS) {
+		// Free, inactive and speculative pages can be reclaimed on demand
+		u64 free_memory = ((u64)vm_stats.free_count +
+				(u64)vm_stats.inactive_count +
+				(u64)vm_stats.speculative_count) * (u64)page_size;
+		return (double)free_memory / 1024 / 1024;
+	}
 
 #endif
+
+	return -1;
 }
 
 bool open_directory(const std::string &path)
