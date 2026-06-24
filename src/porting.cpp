@@ -782,7 +782,6 @@ double getAvailableSystemMemory()
 
 //// Windows
 #if defined(_WIN32)
-	// TODO: Test this (https://stackoverflow.com/a/2513561)
 	MEMORYSTATUSEX status;
 	status.dwLength = sizeof(status);
 	GlobalMemoryStatusEx(&status);
