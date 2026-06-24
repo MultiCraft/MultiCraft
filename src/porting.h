@@ -371,6 +371,12 @@ NORETURN void finishGame(const std::string &exc);
 
 int getTotalSystemMemory();
 
+/**
+ * Gets available (free) device memory in MiB (for parity with getTotalSystemMemory)
+ */
+
+double getAvailableSystemMemory();
+
 bool open_directory(const std::string &path);
 
 } // namespace porting

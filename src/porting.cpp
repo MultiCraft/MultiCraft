@@ -777,6 +777,43 @@ int getTotalSystemMemory()
 #endif
 }
 
+double getAvailableSystemMemory()
+{
+
+//// Windows
+#if defined(_WIN32)
+	// TODO: Test this (https://stackoverflow.com/a/2513561)
+	MEMORYSTATUSEX status;
+	status.dwLength = sizeof(status);
+	GlobalMemoryStatusEx(&status);
+	return static_cast<double>(status.ullAvailPhys) / 1024 / 1024;
+
+//// Linux
+#elif defined(__linux__)
+	// The "free" command also reads /proc/meminfo
+	std::ifstream infile("/proc/meminfo");
+	std::string line;
+	while (std::getline(infile, line)) {
+		if (str_starts_with(line, "MemAvailable:")) {
+			std::string label;
+			std::string available;
+			std::istringstream iss(line);
+			iss >> label >> available;
+			return static_cast<double>(stoi(available)) / 1024;
+		}
+	}
+
+	return -1;
+
+//// TODO: Mac OS X, Darwin
+// #elif defined(__APPLE__)
+
+#else
+	return -1;
+
+#endif
+}
+
 bool open_directory(const std::string &path)
 {
 	if (!fs::IsDir(path)) {

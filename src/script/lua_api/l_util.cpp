@@ -617,6 +617,15 @@ int ModApiUtil::l_get_system_ram(lua_State *L)
 	return 1;
 }
 
+int ModApiUtil::l_get_free_ram(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+	const double res = porting::getAvailableSystemMemory();
+	lua_pushnumber(L, res);
+
+	return 1;
+}
+
 int ModApiUtil::l_copy_to_clipboard(lua_State *L)
 {
 	IOSOperator *op = RenderingEngine::get_raw_device()->getOSOperator();
@@ -728,6 +737,7 @@ void ModApiUtil::Initialize(lua_State *L, int top)
 	API_FCT(upgrade);
 	API_FCT(get_secret_key);
 	API_FCT(get_system_ram);
+	API_FCT(get_free_ram);
 #endif
 
 	LuaSettings::create(L, g_settings, g_settings_path);
@@ -757,6 +767,7 @@ void ModApiUtil::InitializeClient(lua_State *L, int top)
 
 	API_FCT(get_screen_info);
 	API_FCT(get_system_ram);
+	API_FCT(get_free_ram);
 	API_FCT(copy_to_clipboard);
 	API_FCT(get_translated_string);
 	API_FCT(load_translation);
@@ -806,6 +817,7 @@ void ModApiUtil::InitializeMainMenu(lua_State *L, int top) {
 	API_FCT(get_secret_key);
 	API_FCT(get_screen_info);
 	API_FCT(get_system_ram);
+	API_FCT(get_free_ram);
 	API_FCT(copy_to_clipboard);
 	API_FCT(get_translated_string);
 	API_FCT(load_translation);
