@@ -228,6 +228,9 @@ public:
 	~TouchScreenGUI();
 
 	void init(ISimpleTextureSource *tsrc, ISoundManager *sound_manage);
+	static void settingChangedCallback(const std::string &setting_name, void *data);
+	void readSettings();
+
 	bool preprocessEvent(const SEvent &event);
 	bool isButtonPressed(KeyType::T key_type);
 	bool immediateRelease(KeyType::T key_type);

@@ -77,18 +77,24 @@ bool TouchScreenGUI::m_active = true;
 TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 		m_device(device), m_guienv(device->getGUIEnvironment())
 {
-	m_touchscreen_threshold = g_settings->getU16("touchscreen_threshold");
-	m_touch_sensitivity = rangelim(g_settings->getFloat("touch_sensitivity"), 0.1, 1.0);
 	m_screensize = m_device->getVideoDriver()->getScreenSize();
 	m_button_size = RenderingEngine::getDisplayDensity() *
 			g_settings->getFloat("hud_scaling") * 64.0f;
 
-	m_dig_and_move = g_settings->getBool("dig_and_move");
 	m_press_sound = g_settings->get("btn_press_sound");
+
+	g_settings->registerChangedCallback("touchscreen_threshold", &settingChangedCallback, this);
+	g_settings->registerChangedCallback("touch_sensitivity", &settingChangedCallback, this);
+	g_settings->registerChangedCallback("dig_and_move", &settingChangedCallback, this);
+	readSettings();
 }
 
 TouchScreenGUI::~TouchScreenGUI()
 {
+	g_settings->deregisterChangedCallback("touchscreen_threshold", &settingChangedCallback, this);
+	g_settings->deregisterChangedCallback("touch_sensitivity", &settingChangedCallback, this);
+	g_settings->deregisterChangedCallback("dig_and_move", &settingChangedCallback, this);
+
 	if (!m_buttons_initialized)
 		return;
 
@@ -125,6 +131,19 @@ TouchScreenGUI::~TouchScreenGUI()
 	}
 
 	delete m_settings;
+}
+
+void TouchScreenGUI::settingChangedCallback(const std::string &setting_name, void *data)
+{
+	((TouchScreenGUI *)data)->readSettings();
+}
+
+void TouchScreenGUI::readSettings()
+{
+	m_touchscreen_threshold = g_settings->getU16("touchscreen_threshold");
+	m_touch_sensitivity = rangelim(g_settings->getFloat("touch_sensitivity"), 0.1, 1.0);
+
+	m_dig_and_move = g_settings->getBool("dig_and_move");
 }
 
 void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manager)
