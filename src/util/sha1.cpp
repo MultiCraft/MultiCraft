@@ -24,6 +24,8 @@ SOFTWARE.
 
 */
 
+#ifndef USE_OPENSSL
+
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
@@ -196,3 +198,5 @@ unsigned char* SHA1::getDigest()
 	// return the digest
 	return digest;
 }
+
+#endif
