@@ -224,6 +224,9 @@ protected:
 	u32 m_scrollbar_width = 0;
 	GUIScrollBar *m_vscrollbar = nullptr;
 
+	IGUIFont *m_last_shaped_font = nullptr;
+	core::stringw m_last_shaped_text;
+	std::vector<core::stringw> m_last_shaped_broken_text;
 	std::vector<ShapedRun> m_text_shaped_runs;
 	std::vector<std::vector<ShapedRun>> m_broken_shaped_runs;
 

@@ -315,17 +315,17 @@ s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 //! Breaks the single text line.
 void GUIEditBoxWithScrollBar::breakText()
 {
-	if ((!m_word_wrap && !m_multiline))
-		return;
-
-	m_broken_text.clear(); // need to reallocate :/
-	m_broken_text_positions.clear();
-
 	IGUIFont* font = getActiveFont();
 	if (!font)
 		return;
 
 	m_last_break_font = font;
+
+	if ((!m_word_wrap && !m_multiline))
+		return;
+
+	m_broken_text.clear(); // need to reallocate :/
+	m_broken_text_positions.clear();
 
 	core::stringw line;
 	core::stringw word;

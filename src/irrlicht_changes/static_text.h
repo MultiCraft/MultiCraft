@@ -223,9 +223,12 @@ namespace gui
 
 		gui::IGUIFont* OverrideFont;
 		gui::IGUIFont* LastBreakFont; // stored because: if skin changes, line break must be recalculated.
+		gui::IGUIFont* LastShapedFont = nullptr;
 
 		EnrichedString ColoredText;
 		std::vector<EnrichedString> BrokenText;
+		EnrichedString LastShapedColoredText;
+		std::vector<EnrichedString> LastShapedBrokenText;
 		std::vector<ShapedRun> ColoredShapedRuns;
 		std::vector<std::vector<ShapedRun>> BrokenShapedRuns;
 	};

@@ -305,6 +305,13 @@ bool StaticText::isRightToLeft() const
 // Updates the font colors
 void StaticText::updateText()
 {
+	IGUISkin* skin = Environment->getSkin();
+	IGUIFont* font = getActiveFont();
+	if (!font)
+		return;
+
+	LastBreakFont = font;
+
 	const EnrichedString &cText = ColoredText;
 	BrokenText.clear();
 
@@ -327,13 +334,6 @@ void StaticText::updateText()
 	}
 
 	// Update word wrap
-
-	IGUISkin* skin = Environment->getSkin();
-	IGUIFont* font = getActiveFont();
-	if (!font)
-		return;
-
-	LastBreakFont = font;
 
 	EnrichedString line;
 	EnrichedString word;
@@ -546,14 +546,24 @@ void StaticText::updateText()
 void StaticText::updateShapedRuns()
 {
 	CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
+	if (!tt_font)
+		return;
 
-	ColoredShapedRuns = tt_font->shapeText(ColoredText.c_str());
-
-	BrokenShapedRuns.clear();
-
-	for (const EnrichedString &str : BrokenText) {
-		BrokenShapedRuns.push_back(tt_font->shapeText(str.c_str()));
+	if (tt_font != LastShapedFont || ColoredText != LastShapedColoredText) {
+		LastShapedColoredText = ColoredText;
+		ColoredShapedRuns = tt_font->shapeText(ColoredText.c_str());
 	}
+
+	if (tt_font != LastShapedFont || BrokenText != LastShapedBrokenText) {
+		LastShapedBrokenText = BrokenText;
+		BrokenShapedRuns.clear();
+
+		for (const EnrichedString &str : BrokenText) {
+			BrokenShapedRuns.push_back(tt_font->shapeText(str.c_str()));
+		}
+	}
+
+	LastShapedFont = tt_font;
 }
 
 //! Sets the new caption of this element.

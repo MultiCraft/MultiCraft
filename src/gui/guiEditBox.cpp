@@ -972,14 +972,24 @@ void GUIEditBox::updateVScrollBar()
 void GUIEditBox::updateShapedRuns()
 {
 	CGUITTFont *tt_font = (CGUITTFont *)getActiveFont();
+	if (!tt_font)
+		return;
 
-	m_text_shaped_runs = tt_font->shapeText(Text.c_str());
-
-	m_broken_shaped_runs.clear();
-
-	for (const core::stringw &str : m_broken_text) {
-		m_broken_shaped_runs.push_back(tt_font->shapeText(str.c_str()));
+	if (tt_font != m_last_shaped_font || Text != m_last_shaped_text) {
+		m_last_shaped_text = Text;
+		m_text_shaped_runs = tt_font->shapeText(Text.c_str());
 	}
+
+	if (tt_font != m_last_shaped_font || m_broken_text != m_last_shaped_broken_text) {
+		m_last_shaped_broken_text = m_broken_text;
+		m_broken_shaped_runs.clear();
+
+		for (const core::stringw &str : m_broken_text) {
+			m_broken_shaped_runs.push_back(tt_font->shapeText(str.c_str()));
+		}
+	}
+
+	m_last_shaped_font = tt_font;
 }
 
 void GUIEditBox::deserializeAttributes(
