@@ -3130,6 +3130,11 @@ void GUIFormSpecMenu::parseElement(parserData* data, const std::string &element)
 		return;
 	}
 
+	if (type == "pause_game") {
+		doPause = true;
+		return;
+	}
+
 	// Ignore others
 	infostream << "Unknown DrawSpec: type=" << type << ", data=\"" << description << "\""
 			<< std::endl;
