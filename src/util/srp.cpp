@@ -45,12 +45,7 @@
 #include <cstdint>
 
 #include <config.h>
-
-#if USE_OPENSSL
-#include <openssl/rand.h>
-#elif defined(__APPLE__)
-#include <CommonCrypto/CommonRandom.h>
-#endif
+#include "porting.h"
 
 #if USE_SYSTEM_GMP
 	#include <gmp.h>
@@ -538,35 +533,7 @@ static SRP_Result calculate_H_AMK(SRP_HashAlgorithm alg, unsigned char *dest,
 static SRP_Result fill_buff()
 {
 	g_rand_idx = 0;
-
-#if USE_OPENSSL
-
-	if (RAND_bytes(g_rand_buff, (int)sizeof(g_rand_buff)) != 1)
-		return SRP_ERR;
-
-#elif defined(__APPLE__)
-
-	if (CCRandomGenerateBytes(g_rand_buff, sizeof(g_rand_buff)) != kCCSuccess)
-		return SRP_ERR;
-
-#elif defined(WIN32)
-
-	HCRYPTPROV wctx;
-	if (!CryptAcquireContext(&wctx, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
-		return SRP_ERR;
-	if (!CryptGenRandom(wctx, sizeof(g_rand_buff), (BYTE *)g_rand_buff)) return SRP_ERR;
-	if (!CryptReleaseContext(wctx, 0)) return SRP_ERR;
-
-#else
-
-	FILE *fp = fopen("/dev/urandom", "r");
-
-	if (!fp) return SRP_ERR;
-
-	if (fread(g_rand_buff, sizeof(g_rand_buff), 1, fp) != 1) { fclose(fp); return SRP_ERR; }
-	if (fclose(fp)) return SRP_ERR;
-#endif
-	return SRP_OK;
+	return porting::secure_rand_fill_buf(g_rand_buff, sizeof(g_rand_buff)) ? SRP_OK : SRP_ERR;
 }
 
 static SRP_Result mpz_fill_random(mpz_t num)
