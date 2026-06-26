@@ -25,6 +25,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cstring>
 #include <random>
 
+#if USE_OPENSSL
+#include <openssl/rand.h>
+#elif defined(__APPLE__)
+#include <CommonCrypto/CommonRandom.h>
+#endif
+
 #if defined(__ANDROID__) || defined(__APPLE__)
 #include <porting.h>
 #endif
@@ -33,6 +39,16 @@ uint8_t Encryption::key[32] = {};
 
 void Encryption::generateSalt(unsigned char *salt, unsigned int size)
 {
+#if USE_OPENSSL
+	if (RAND_bytes(salt, (int)size) == 1)
+		return;
+	// Fall back to std::random_device if libcrypto's RNG is unavailable
+#elif defined(__APPLE__)
+	if (CCRandomGenerateBytes(salt, size) == kCCSuccess)
+		return;
+	// Fall back to std::random_device if CommonCrypto's RNG is unavailable
+#endif
+
 	std::random_device rd;
 
 	for (unsigned int i = 0; i < size; i++) {

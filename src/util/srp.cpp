@@ -46,6 +46,12 @@
 
 #include <config.h>
 
+#if USE_OPENSSL
+#include <openssl/rand.h>
+#elif defined(__APPLE__)
+#include <CommonCrypto/CommonRandom.h>
+#endif
+
 #if USE_SYSTEM_GMP
 	#include <gmp.h>
 #else
@@ -533,21 +539,27 @@ static SRP_Result fill_buff()
 {
 	g_rand_idx = 0;
 
-#ifdef WIN32
+#if USE_OPENSSL
+
+	if (RAND_bytes(g_rand_buff, (int)sizeof(g_rand_buff)) != 1)
+		return SRP_ERR;
+
+#elif defined(__APPLE__)
+
+	if (CCRandomGenerateBytes(g_rand_buff, sizeof(g_rand_buff)) != kCCSuccess)
+		return SRP_ERR;
+
+#elif defined(WIN32)
+
 	HCRYPTPROV wctx;
-#else
-	FILE *fp = 0;
-#endif
-
-#ifdef WIN32
-
 	if (!CryptAcquireContext(&wctx, NULL, NULL, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
 		return SRP_ERR;
 	if (!CryptGenRandom(wctx, sizeof(g_rand_buff), (BYTE *)g_rand_buff)) return SRP_ERR;
 	if (!CryptReleaseContext(wctx, 0)) return SRP_ERR;
 
 #else
-	fp = fopen("/dev/urandom", "r");
+
+	FILE *fp = fopen("/dev/urandom", "r");
 
 	if (!fp) return SRP_ERR;
 
