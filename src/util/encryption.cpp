@@ -42,11 +42,11 @@ void Encryption::generateSalt(unsigned char *salt, unsigned int size)
 #if USE_OPENSSL
 	if (RAND_bytes(salt, (int)size) == 1)
 		return;
-	// Fall back to std::random_device if libcrypto's RNG is unavailable
+		// Fall back to std::random_device if libcrypto's RNG is unavailable
 #elif defined(__APPLE__)
 	if (CCRandomGenerateBytes(salt, size) == kCCSuccess)
 		return;
-	// Fall back to std::random_device if CommonCrypto's RNG is unavailable
+		// Fall back to std::random_device if CommonCrypto's RNG is unavailable
 #endif
 
 	std::random_device rd;
