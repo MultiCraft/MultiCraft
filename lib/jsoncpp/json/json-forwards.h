@@ -1,4 +1,4 @@
-/// Json-cpp amalgamated forward header (http://jsoncpp.sourceforge.net/).
+/// Json-cpp amalgamated forward header (https://github.com/open-source-parsers/jsoncpp/).
 /// It is intended to be used with #include "json/json-forwards.h"
 /// This header provides forward declaration for all JsonCpp types.
 
@@ -7,28 +7,28 @@
 // //////////////////////////////////////////////////////////////////////
 
 /*
-The JsonCpp library's source code, including accompanying documentation, 
+The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following
 conditions...
 
-Baptiste Lepilleur and The JsonCpp Authors explicitly disclaim copyright in all 
-jurisdictions which recognize such a disclaimer. In such jurisdictions, 
+Baptiste Lepilleur and The JsonCpp Authors explicitly disclaim copyright in all
+jurisdictions which recognize such a disclaimer. In such jurisdictions,
 this software is released into the Public Domain.
 
 In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
 2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur and
 The JsonCpp Authors, and is released under the terms of the MIT License (see below).
 
-In jurisdictions which recognize Public Domain property, the user of this 
-software may choose to accept it either as 1) Public Domain, 2) under the 
-conditions of the MIT License (see below), or 3) under the terms of dual 
+In jurisdictions which recognize Public Domain property, the user of this
+software may choose to accept it either as 1) Public Domain, 2) under the
+conditions of the MIT License (see below), or 3) under the terms of dual
 Public Domain/MIT License conditions described here, as they choose.
 
 The MIT License is about as close to Public Domain as a license can get, and is
 described in clear, concise terms at:
 
    http://en.wikipedia.org/wiki/MIT_License
-   
+
 The full text of the MIT License follows:
 
 ========================================================================
@@ -86,27 +86,26 @@ license you like.
 #ifndef JSON_VERSION_H_INCLUDED
 #define JSON_VERSION_H_INCLUDED
 
-// Note: version must be updated in three places when doing a release. This
+// Note: version must be updated in four places when doing a release. This
 // annoying process ensures that amalgamate, CMake, and meson all report the
 // correct version.
 // 1. /meson.build
 // 2. /include/json/version.h
 // 3. /CMakeLists.txt
+// 4. /MODULE.bazel
 // IMPORTANT: also update the SOVERSION!!
 
-#define JSONCPP_VERSION_STRING "1.9.4"
+#define JSONCPP_VERSION_STRING "1.9.8"
 #define JSONCPP_VERSION_MAJOR 1
 #define JSONCPP_VERSION_MINOR 9
-#define JSONCPP_VERSION_PATCH 3
-#define JSONCPP_VERSION_QUALIFIER
+#define JSONCPP_VERSION_PATCH 8
 #define JSONCPP_VERSION_HEXA                                                   \
   ((JSONCPP_VERSION_MAJOR << 24) | (JSONCPP_VERSION_MINOR << 16) |             \
    (JSONCPP_VERSION_PATCH << 8))
 
-#ifdef JSONCPP_USING_SECURE_MEMORY
-#undef JSONCPP_USING_SECURE_MEMORY
+#if !defined(JSONCPP_USE_SECURE_MEMORY)
+#define JSONCPP_USE_SECURE_MEMORY 0
 #endif
-#define JSONCPP_USING_SECURE_MEMORY 0
 // If non-zero, the library zeroes any memory that it has allocated before
 // it frees its memory.
 
@@ -133,10 +132,12 @@ license you like.
 #ifndef JSON_ALLOCATOR_H_INCLUDED
 #define JSON_ALLOCATOR_H_INCLUDED
 
+#include <algorithm>
 #include <cstring>
 #include <memory>
 
-#pragma pack(push, 8)
+#pragma pack(push)
+#pragma pack()
 
 namespace Json {
 template <typename T> class SecureAllocator {
@@ -162,11 +163,18 @@ public:
    * Release memory which was allocated for N items at pointer P.
    *
    * The memory block is filled with zeroes before being released.
-   * The pointer argument is tagged as "volatile" to prevent the
-   * compiler optimizing out this critical step.
    */
-  void deallocate(volatile pointer p, size_type n) {
-    std::memset(p, 0, n * sizeof(T));
+  void deallocate(pointer p, size_type n) {
+    // These constructs will not be removed by the compiler during optimization,
+    // unlike memset.
+#if defined(HAVE_MEMSET_S)
+    memset_s(p, n * sizeof(T), 0, n * sizeof(T));
+#elif defined(_WIN32)
+    RtlSecureZeroMemory(p, n * sizeof(T));
+#else
+    std::fill_n(reinterpret_cast<volatile unsigned char*>(p), n, 0);
+#endif
+
     // free using "global operator delete"
     ::operator delete(p);
   }
@@ -196,7 +204,9 @@ public:
   // Boilerplate
   SecureAllocator() {}
   template <typename U> SecureAllocator(const SecureAllocator<U>&) {}
-  template <typename U> struct rebind { using other = SecureAllocator<U>; };
+  template <typename U> struct rebind {
+    using other = SecureAllocator<U>;
+  };
 };
 
 template <typename T, typename U>
@@ -335,6 +345,7 @@ extern JSON_API int msvc_pre1900_c99_snprintf(char* outBuf, size_t size,
 #endif // if !defined(JSON_IS_AMALGAMATION)
 
 namespace Json {
+JSON_API const char* version();
 using Int = int;
 using UInt = unsigned int;
 #if defined(JSON_NO_INT64)
@@ -352,12 +363,14 @@ using UInt64 = uint64_t;
 #endif                // if defined(_MSC_VER)
 using LargestInt = Int64;
 using LargestUInt = UInt64;
+#ifndef JSON_HAS_INT64
 #define JSON_HAS_INT64
+#endif // ifndef JSON_HAS_INT64
 #endif // if defined(JSON_NO_INT64)
 
 template <typename T>
 using Allocator =
-    typename std::conditional<JSONCPP_USING_SECURE_MEMORY, SecureAllocator<T>,
+    typename std::conditional<JSONCPP_USE_SECURE_MEMORY, SecureAllocator<T>,
                               std::allocator<T>>::type;
 using String = std::basic_string<char, std::char_traits<char>, Allocator<char>>;
 using IStringStream =
@@ -431,6 +444,8 @@ class Value;
 class ValueIteratorBase;
 class ValueIterator;
 class ValueConstIterator;
+class ValueMembersView;
+class ValueConstMembersView;
 
 } // namespace Json
 
