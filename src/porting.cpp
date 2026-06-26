@@ -65,6 +65,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include "config.h"
+#if USE_OPENSSL
+#include <openssl/rand.h>
+#elif defined(__APPLE__)
+#include <CommonCrypto/CommonRandom.h>
+#endif
 #include "debug.h"
 #include "filesys.h"
 #include "log.h"
@@ -639,7 +644,21 @@ bool hasRealKeyboard()
 //// OS-specific Secure Random
 ////
 
-#ifdef WIN32
+#if USE_OPENSSL
+
+bool secure_rand_fill_buf(void *buf, size_t len)
+{
+	return RAND_bytes((unsigned char *)buf, (int)len) == 1;
+}
+
+#elif defined(__APPLE__)
+
+bool secure_rand_fill_buf(void *buf, size_t len)
+{
+	return CCRandomGenerateBytes(buf, len) == kCCSuccess;
+}
+
+#elif defined(WIN32)
 
 bool secure_rand_fill_buf(void *buf, size_t len)
 {
