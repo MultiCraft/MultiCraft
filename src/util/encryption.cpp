@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h"
 #include "encryption.h"
 #include "ecrypt-sync.h"
+#include "debug.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -29,7 +30,8 @@ uint8_t Encryption::key[32] = {};
 
 void Encryption::generateSalt(unsigned char *salt, unsigned int size)
 {
-	porting::secure_rand_fill_buf(salt, size);
+	FATAL_ERROR_IF(!porting::secure_rand_fill_buf(salt, size),
+			"Secure RNG failed to generate salt");
 }
 
 void Encryption::hmacInit(SHA256_CTX *ctx, const uint8_t *key)
