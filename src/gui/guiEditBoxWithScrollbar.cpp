@@ -189,11 +189,11 @@ void GUIEditBoxWithScrollBar::draw()
 						updateShapedRuns();
 					}
 					txt_line = &m_broken_text[0];
-					shaped_runs = &m_broken_shaped_runs[0];
+					shaped_runs = &(getBrokenShapedRuns()[0]);
 					start_pos = 0;
 				} else {
 					txt_line = ml ? &m_broken_text[i] : &Text;
-					shaped_runs = ml ? &m_broken_shaped_runs[i] : &m_text_shaped_runs;
+					shaped_runs = ml ? &(getBrokenShapedRuns()[i]) : &getTextShapedRuns();
 					start_pos = ml ? m_broken_text_positions[i] : 0;
 				}
 
@@ -287,7 +287,7 @@ s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 		if (y >= m_current_text_rect.UpperLeftCorner.Y && y <= m_current_text_rect.LowerRightCorner.Y) {
 			// we've found the clicked line
 			txt_line = (m_word_wrap || m_multiline) ? &m_broken_text[i] : &Text;
-			shaped_runs = (m_word_wrap || m_multiline) ? &m_broken_shaped_runs[i] : &m_text_shaped_runs;
+			shaped_runs = (m_word_wrap || m_multiline) ? &(getBrokenShapedRuns()[i]) : &getTextShapedRuns();
 			start_pos = (m_word_wrap || m_multiline) ? m_broken_text_positions[i] : 0;
 			break;
 		}
@@ -436,9 +436,9 @@ void GUIEditBoxWithScrollBar::setTextRect(s32 line)
 	// get text dimension
 	const u32 line_count = (m_word_wrap || m_multiline) ? m_broken_text.size() : 1;
 	if (m_word_wrap || m_multiline) {
-		d = tt_font->getDimension(m_broken_shaped_runs[line], m_broken_text[line]);
+		d = tt_font->getDimension(getBrokenShapedRuns()[line], m_broken_text[line]);
 	} else {
-		d = tt_font->getDimension(m_text_shaped_runs, Text);
+		d = tt_font->getDimension(getTextShapedRuns(), Text);
 		d.Height = AbsoluteRect.getHeight();
 	}
 	d.Height += font->getKerningHeight();
@@ -519,7 +519,7 @@ void GUIEditBoxWithScrollBar::calculateScrollPos()
 		// get cursor area
 		irr::u32 cursor_width = font->getDimension(L"_").Width;
 		core::stringw *txt_line = has_broken_text ? &m_broken_text[curs_line] : &Text;
-		std::vector<ShapedRun> *shaped_runs = has_broken_text ? &m_broken_shaped_runs[curs_line] : &m_text_shaped_runs;
+		std::vector<ShapedRun> *shaped_runs = has_broken_text ? &(getBrokenShapedRuns()[curs_line]) : &getTextShapedRuns();
 		s32 cpos = has_broken_text ? m_cursor_pos - m_broken_text_positions[curs_line] : m_cursor_pos;	// column
 		s32 cstart = tt_font->getCursorPosition(*shaped_runs, *txt_line, cpos);
 		s32 cend = cstart + cursor_width;

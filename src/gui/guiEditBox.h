@@ -176,6 +176,8 @@ protected:
 	void updateVScrollBar();
 
 	void updateShapedRuns();
+	std::vector<ShapedRun>& getTextShapedRuns();
+	std::vector<std::vector<ShapedRun>>& getBrokenShapedRuns();
 
 	gui::IGUIFont *m_override_font = nullptr;
 
@@ -229,6 +231,7 @@ protected:
 	std::vector<core::stringw> m_last_shaped_broken_text;
 	std::vector<ShapedRun> m_text_shaped_runs;
 	std::vector<std::vector<ShapedRun>> m_broken_shaped_runs;
+	bool m_shaped_runs_dirty = true;
 
 private:
 	bool processMouse(const SEvent &event);

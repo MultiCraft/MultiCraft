@@ -212,6 +212,8 @@ namespace gui
 		//! Breaks the single text line.
 		void updateText();
 		void updateShapedRuns();
+		std::vector<ShapedRun>& getColoredShapedRuns();
+		std::vector<std::vector<ShapedRun>>& getBrokenShapedRuns();
 
 		EGUI_ALIGNMENT HAlign, VAlign;
 		bool Border;
@@ -231,6 +233,7 @@ namespace gui
 		std::vector<EnrichedString> LastShapedBrokenText;
 		std::vector<ShapedRun> ColoredShapedRuns;
 		std::vector<std::vector<ShapedRun>> BrokenShapedRuns;
+		bool ShapedRunsDirty = true;
 	};
 
 

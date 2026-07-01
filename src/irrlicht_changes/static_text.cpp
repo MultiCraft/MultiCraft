@@ -79,7 +79,7 @@ void StaticText::draw()
 	if (font && BrokenText.size()) {
 		if (font != LastBreakFont) {
 			updateText();
-			updateShapedRuns();
+			ShapedRunsDirty = true;
 		}
 
 		core::rect<s32> r = frameRect;
@@ -88,7 +88,7 @@ void StaticText::draw()
 		if (VAlign == EGUIA_CENTER && (WordWrap || CenterEachLine))
 		{
 			// Calculate the line height in the exact same way that it used to be
-			height_total = ((CGUITTFont *)font)->getDimension(ColoredShapedRuns, ColoredText.c_str()).Height;
+			height_total = ((CGUITTFont *)font)->getDimension(getColoredShapedRuns(), ColoredText.c_str()).Height;
 			height_line -= 1; // Remove the 1px offset added by getDimension
 			r.UpperLeftCorner.Y = r.getCenter().Y - (height_total / 2);
 		}
@@ -108,11 +108,11 @@ void StaticText::draw()
 			if (HAlign == EGUIA_LOWERRIGHT)
 			{
 				r.UpperLeftCorner.X = frameRect.LowerRightCorner.X -
-					((CGUITTFont *)font)->getTotalDimension(BrokenShapedRuns[i], str.c_str()).Width;
+					((CGUITTFont *)font)->getTotalDimension(getBrokenShapedRuns()[i], str.c_str()).Width;
 			}
 
 			irr::gui::CGUITTFont *tmp = static_cast<irr::gui::CGUITTFont*>(font);
-			tmp->draw(BrokenShapedRuns[i], str,
+			tmp->draw(getBrokenShapedRuns()[i], str,
 				r, HAlign == EGUIA_CENTER, VAlign == EGUIA_CENTER && !CenterEachLine,
 				(RestrainTextInside ? &AbsoluteClippingRect : NULL));
 
@@ -140,7 +140,7 @@ void StaticText::setOverrideFont(IGUIFont* font)
 		OverrideFont->grab();
 
 	updateText();
-	updateShapedRuns();
+	ShapedRunsDirty = true;
 }
 
 //! Gets the override font (if any)
@@ -165,7 +165,7 @@ void StaticText::setOverrideColor(video::SColor color)
 {
 	ColoredText.setDefaultColor(color);
 	updateText();
-	updateShapedRuns();
+	ShapedRunsDirty = true;
 }
 
 
@@ -274,7 +274,7 @@ void StaticText::setWordWrap(bool enable)
 {
 	WordWrap = enable;
 	updateText();
-	updateShapedRuns();
+	ShapedRunsDirty = true;
 }
 
 
@@ -290,7 +290,7 @@ void StaticText::setRightToLeft(bool rtl)
 	{
 		RightToLeft = rtl;
 		updateText();
-		updateShapedRuns();
+		ShapedRunsDirty = true;
 	}
 }
 
@@ -566,6 +566,26 @@ void StaticText::updateShapedRuns()
 	LastShapedFont = tt_font;
 }
 
+std::vector<ShapedRun>& StaticText::getColoredShapedRuns()
+{
+	if (ShapedRunsDirty) {
+		updateShapedRuns();
+		ShapedRunsDirty = false;
+	}
+
+	return ColoredShapedRuns;
+}
+
+std::vector<std::vector<ShapedRun>>& StaticText::getBrokenShapedRuns()
+{
+	if (ShapedRunsDirty) {
+		updateShapedRuns();
+		ShapedRunsDirty = false;
+	}
+
+	return BrokenShapedRuns;
+}
+
 //! Sets the new caption of this element.
 void StaticText::setText(const wchar_t* text)
 {
@@ -577,14 +597,14 @@ void StaticText::setText(const EnrichedString &text)
 	ColoredText = text;
 	IGUIElement::setText(ColoredText.c_str());
 	updateText();
-	updateShapedRuns();
+	ShapedRunsDirty = true;
 }
 
 void StaticText::updateAbsolutePosition()
 {
 	IGUIElement::updateAbsolutePosition();
 	updateText();
-	updateShapedRuns();
+	ShapedRunsDirty = true;
 }
 
 
@@ -600,7 +620,9 @@ s32 StaticText::getTextHeight() const
 		return height * BrokenText.size();
 	}
 	// There may be intentional new lines without WordWrap
-	return ((CGUITTFont *)font)->getDimension(BrokenShapedRuns[0], BrokenText[0].c_str()).Height;
+	return ((CGUITTFont *)font)->getDimension(
+			const_cast<StaticText*>(this)->getBrokenShapedRuns()[0],
+			BrokenText[0].c_str()).Height;
 }
 
 
@@ -615,7 +637,9 @@ s32 StaticText::getTextWidth() const
 	for (unsigned int i = 0; i < BrokenText.size(); i++) {
 		const EnrichedString &line = BrokenText[i];
 
-		s32 width = ((CGUITTFont *)font)->getDimension(BrokenShapedRuns[i], line.c_str()).Width;
+		s32 width = ((CGUITTFont *)font)->getDimension(
+				const_cast<StaticText*>(this)->getBrokenShapedRuns()[i],
+				line.c_str()).Width;
 
 		if (width > widest)
 			widest = width;
