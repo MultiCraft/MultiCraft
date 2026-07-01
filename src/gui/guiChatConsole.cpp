@@ -803,6 +803,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 							i == real_mark_begin.line &&
 							j == real_mark_begin.fragment &&
 							k == real_mark_begin.character) {
+
 						add_to_string = true;
 					}
 
@@ -821,10 +822,10 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 					}
 				}
 			}
+		}
 
-			if (row < mark_end_row_buf) {
-				text += L"\n";
-			}
+		if (add_to_string && row < mark_end_row_buf) {
+			text += L"\n";
 		}
 	}
 
