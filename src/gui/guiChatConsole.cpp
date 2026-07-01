@@ -35,10 +35,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "touchscreengui_mc.h"
 #endif
 
-#if USE_FREETYPE
-	#include "irrlicht_changes/CGUITTFont.h"
-#endif
-
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 #include <SDL3/SDL.h>
 #endif
@@ -357,12 +353,19 @@ void GUIChatConsole::drawText()
 	if (m_font == NULL)
 		return;
 
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
+
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	for (u32 row = 0; row < buf.getRows(); ++row)
 	{
 		const ChatFormattedLine &line = buf.getFormattedLine(row);
 		if (line.fragments.empty())
 			continue;
+
+		std::vector<std::vector<ShapedRun>> fragments_shaped_runs;
+		for (unsigned int i = 0; i < line.fragments.size(); i++) {
+			fragments_shaped_runs.push_back(tt_font->shapeText(line.fragments[i].text.c_str()));
+		}
 
 		s32 line_height = m_fontsize.Y;
 		s32 y = row * line_height + m_height - m_desired_height;
@@ -412,11 +415,12 @@ void GUIChatConsole::drawText()
 				for (u32 i = 0; i < line.fragments.size(); i++) {
 					const ChatFormattedFragment& frag = line.fragments[i];
 					irr::core::stringw frag_text = frag.text.c_str();
+
 					u32 frag_start = fragment_char_start[i];
 					u32 frag_end = frag_start + frag_text.size();
 
 					if (selection_end <= frag_start || selection_start >= frag_end) {
-						fragment_x += m_font->getDimension(frag_text.c_str()).Width;
+						fragment_x += tt_font->getDimension(fragments_shaped_runs[i], frag_text.c_str()).Width;
 						continue;
 					}
 
@@ -424,8 +428,8 @@ void GUIChatConsole::drawText()
 							selection_start - frag_start : 0;
 					u32 real_selection_end = std::min(selection_end, frag_end) - frag_start;
 
-					std::vector<core::recti> selection_rects = m_font->getSelectionRects(
-							frag_text, real_selection_start, real_selection_end);
+					std::vector<core::recti> selection_rects = tt_font->getSelectionRects(
+							fragments_shaped_runs[i], frag_text, real_selection_start, real_selection_end);
 
 					for (const core::recti& selection_rect : selection_rects) {
 						core::rect<s32> destrect(
@@ -436,29 +440,18 @@ void GUIChatConsole::drawText()
 								destrect, &AbsoluteClippingRect);
 					}
 
-					fragment_x += m_font->getDimension(frag_text.c_str()).Width;
+					fragment_x += tt_font->getDimension(fragments_shaped_runs[i], frag_text.c_str()).Width;
 				}
 			}
 		}
 
 		s32 x = start_pos_x;
-		for (const ChatFormattedFragment &fragment : line.fragments) {
-			s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
+		for (u32 i = 0; i < line.fragments.size(); i++) {
+			const ChatFormattedFragment& fragment = line.fragments[i];
+			s32 text_size = tt_font->getDimension(fragments_shaped_runs[i], fragment.text.c_str()).Width;
 			core::rect<s32> destrect(x, y, x + text_size, y + m_fontsize.Y);
 			x += text_size;
-#if USE_FREETYPE
-			if (m_font->getType() == irr::gui::EGFT_CUSTOM) {
-				// Draw colored text if FreeType is enabled
-				irr::gui::CGUITTFont* tmp = dynamic_cast<irr::gui::CGUITTFont*>(m_font);
-				tmp->draw(fragment.text, destrect, false, false, &AbsoluteClippingRect);
-			} else
-#endif
-			{
-				// Otherwise use standard text
-				m_font->draw(fragment.text.c_str(), destrect,
-						video::SColor(255, 255, 255, 255), false, false,
-						&AbsoluteClippingRect);
-			}
+			tt_font->draw(fragments_shaped_runs[i], fragment.text, destrect, false, false, &AbsoluteClippingRect);
 		}
 	}
 }
@@ -486,11 +479,13 @@ core::rect<s32> GUIChatConsole::getPromptTextRect()
 	if (!m_font)
 		return text_rect;
 
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
+
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring text = prompt.getLine();
 	std::replace_if(text.begin(), text.end(),
 			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
-	core::dimension2du d = m_font->getDimension(text.c_str());
+	core::dimension2du d = tt_font->getDimension(m_prompt_shaped_runs, text.c_str());
 	d.Height += m_font->getKerningHeight();
 
 	text_rect.UpperLeftCorner.X = 0;
@@ -510,6 +505,8 @@ void GUIChatConsole::calculatePromptScrollPos()
 	if (!m_font)
 		return;
 
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
+
 	irr::u32 cursor_width = m_font->getDimension(L"|").Width;
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 	std::wstring text = prompt.getLine();
@@ -518,9 +515,9 @@ void GUIChatConsole::calculatePromptScrollPos()
 	core::stringw txt_line = text.c_str();
 
 	s32 logical_cpos = prompt.getCursorPos();
-	s32 cstart = m_font->getCursorPosition(text.c_str(), logical_cpos);
+	s32 cstart = tt_font->getCursorPosition(m_prompt_shaped_runs, text.c_str(), logical_cpos);
 	s32 cend = cstart + cursor_width;
-	s32 txt_width = m_font->getDimension(text.c_str()).Width;
+	s32 txt_width = tt_font->getDimension(m_prompt_shaped_runs, text.c_str()).Width;
 
 	core::rect<s32> frame_rect = getPromptFrameRect();
 
@@ -536,7 +533,7 @@ void GUIChatConsole::calculatePromptScrollPos()
 		m_hscroll_pos += (text_rect.UpperLeftCorner.X + cend) - frame_rect.LowerRightCorner.X;
 	}
 
-	if (m_font->isRTL(text.c_str()))
+	if (tt_font->isRTL(m_prompt_shaped_runs, text.c_str()))
 	{
 		s32 rtl_offset = core::min_((int)m_font->getDimension(L"X").Width * 10, frame_rect.getWidth() / 4);
 		if (cstart > frame_rect.LowerRightCorner.X - text_rect.UpperLeftCorner.X - rtl_offset)
@@ -548,6 +545,8 @@ void GUIChatConsole::drawPrompt()
 {
 	if (!m_font)
 		return;
+
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
 
 	core::rect<s32> frame_rect = getPromptFrameRect();
 
@@ -580,7 +579,7 @@ void GUIChatConsole::drawPrompt()
 				s32 logical_start = real_mark_begin.scroll + real_mark_begin.character;
 				s32 logical_end = real_mark_end.scroll + real_mark_end.character;
 
-				std::vector<core::recti> mark_rects = m_font->getSelectionRects(text.c_str(),
+				std::vector<core::recti> mark_rects = tt_font->getSelectionRects(m_prompt_shaped_runs, text.c_str(),
 						logical_start, logical_end);
 
 				for (auto& mark_rect : mark_rects) {
@@ -593,7 +592,7 @@ void GUIChatConsole::drawPrompt()
 			}
 
 			// draw normal text
-			m_font->draw(text.c_str(), text_rect,
+			tt_font->draw(m_prompt_shaped_runs, text.c_str(), text_rect,
 					video::SColor(255, 255, 255, 255),
 					false, true, &local_clip_rect);
 		}
@@ -602,7 +601,7 @@ void GUIChatConsole::drawPrompt()
 	// draw cursor
 	if ((m_cursor_blink & 0x8000) != 0) {
 		s32 logical_cpos = prompt.getCursorPos();
-		s32 charcursorpos = m_font->getCursorPosition(text.c_str(), logical_cpos);
+		s32 charcursorpos = tt_font->getCursorPosition(m_prompt_shaped_runs, text.c_str(), logical_cpos);
 
 		core::rect<s32> text_rect = getPromptTextRect();
 		text_rect.UpperLeftCorner.X += charcursorpos;
@@ -628,6 +627,8 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 
 	if (m_font == NULL)
 		return selection;
+
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
 
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	selection.scroll = buf.getScrollPos();
@@ -671,12 +672,18 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	if (line.fragments.empty())
 		return selection;
 
+	std::vector<std::vector<ShapedRun>> fragments_shaped_runs;
+	for (unsigned int i = 0; i < line.fragments.size(); i++) {
+		fragments_shaped_runs.push_back(tt_font->shapeText(line.fragments[i].text.c_str()));
+	}
+
 	const ChatFormattedFragment &fragment_first = line.fragments[0];
 //	const ChatFormattedFragment &fragment_last = line.fragments[line.fragments.size() - 1];
 	s32 x_min = (fragment_first.column + 1) * m_fontsize.X + m_round_screen_offset;
 	s32 x_max = x_min;
-	for (const ChatFormattedFragment &fragment : line.fragments) {
-		x_max += m_font->getDimension(fragment.text.c_str()).Width;
+	for (unsigned int i = 0; i < line.fragments.size(); i++) {
+		x_max += tt_font->getDimension(fragments_shaped_runs[i],
+				line.fragments[i].text.c_str()).Width;
 	}
 
 	if (x < x_min) {
@@ -689,7 +696,8 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	for (unsigned int i = 0; i < line.fragments.size(); i++) {
 		const ChatFormattedFragment &fragment = line.fragments[i];
 		s32 current_fragment_x = fragment_x;
-		s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
+		s32 text_size = tt_font->getDimension(fragments_shaped_runs[i],
+				fragment.text.c_str()).Width;
 		fragment_x += text_size;
 
 		if (x < current_fragment_x)
@@ -700,7 +708,8 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 				continue;
 		}
 
-		s32 index = m_font->getCharacterFromPos(fragment.text.c_str(), x - current_fragment_x);
+		s32 index = tt_font->getCharacterFromPos(fragments_shaped_runs[i],
+				fragment.text.c_str(), x - current_fragment_x);
 
 		selection.fragment = i;
 		selection.character = index > -1 ? index : fragment.text.size() - 1;
@@ -717,6 +726,8 @@ ChatSelection GUIChatConsole::getPromptCursorPos(s32 x, s32 y)
 	if (m_font == NULL)
 		return selection;
 
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
+
 	ChatPrompt& prompt = m_chat_backend->getPrompt();
 
 	std::wstring text = prompt.getLine();
@@ -724,7 +735,8 @@ ChatSelection GUIChatConsole::getPromptCursorPos(s32 x, s32 y)
 			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
 
 	core::rect<s32> text_rect = getPromptTextRect();
-	s32 cursor_pos = m_font->getCharacterFromPos(text.c_str(), x - text_rect.UpperLeftCorner.X);
+	s32 cursor_pos = tt_font->getCharacterFromPos(m_prompt_shaped_runs,
+			text.c_str(), x - text_rect.UpperLeftCorner.X);
 
 	selection.selection_type = ChatSelection::SELECTION_PROMPT;
 	selection.scroll = prompt.getViewPosition();
@@ -791,6 +803,7 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 							i == real_mark_begin.line &&
 							j == real_mark_begin.fragment &&
 							k == real_mark_begin.character) {
+
 						add_to_string = true;
 					}
 
@@ -809,10 +822,10 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 					}
 				}
 			}
+		}
 
-			if (row < mark_end_row_buf) {
-				text += L"\n";
-			}
+		if (add_to_string && row < mark_end_row_buf) {
+			text += L"\n";
 		}
 	}
 
@@ -968,12 +981,13 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			int cursor_pos = prompt.getCursorPos();
 			core::stringw text = prompt.getLine().c_str();
 			ChatPrompt& prompt = m_chat_backend->getPrompt();
+			CGUITTFont *tt_font = (CGUITTFont *)m_font;
 			s32 cluster_size;
 			if (event.KeyInput.Key == KEY_LEFT) {
-				s32 prev_pos = m_font->getPrevClusterPos(text, cursor_pos);
+				s32 prev_pos = tt_font->getPrevClusterPos(m_prompt_shaped_runs, text, cursor_pos);
 				cluster_size = cursor_pos - prev_pos;
 			} else {
-				s32 next_pos = m_font->getNextClusterPos(text, cursor_pos);
+				s32 next_pos = tt_font->getNextClusterPos(m_prompt_shaped_runs, text, cursor_pos);
 				cluster_size = next_pos - cursor_pos;
 			}
 
@@ -1077,7 +1091,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			int cursor_pos = prompt.getCursorPos();
 			core::stringw text = prompt.getLine().c_str();
 			ChatPrompt& prompt = m_chat_backend->getPrompt();
-			s32 prev_pos = m_font->getPrevClusterPos(text, cursor_pos);
+			CGUITTFont *tt_font = (CGUITTFont *)m_font;
+			s32 prev_pos = tt_font->getPrevClusterPos(m_prompt_shaped_runs, text, cursor_pos);
 			s32 cluster_size = cursor_pos - prev_pos;
 
 			// Backspace or Ctrl-Backspace pressed
@@ -1106,7 +1121,8 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			int cursor_pos = prompt.getCursorPos();
 			core::stringw text = prompt.getLine().c_str();
 			ChatPrompt& prompt = m_chat_backend->getPrompt();
-			s32 next_pos = m_font->getNextClusterPos(text, cursor_pos);
+			CGUITTFont *tt_font = (CGUITTFont *)m_font;
+			s32 next_pos = tt_font->getNextClusterPos(m_prompt_shaped_runs, text, cursor_pos);
 			s32 cluster_size = next_pos - cursor_pos;
 
 			// Delete or Ctrl-Delete pressed
@@ -1628,6 +1644,15 @@ void GUIChatConsole::onPromptModified()
 		m_prompt_marking = false;
 		m_long_press = false;
 	}
+
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
+
+	ChatPrompt& prompt = m_chat_backend->getPrompt();
+	std::wstring text = prompt.getLine();
+	std::replace_if(text.begin(), text.end(),
+			[](wchar_t c) { return (c == L'\n' || c == L'\r'); }, L' ');
+
+	m_prompt_shaped_runs = tt_font->shapeText(text.c_str());
 }
 
 bool GUIChatConsole::hasFocus()

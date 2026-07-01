@@ -25,6 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "guiScrollBar.h"
 #include <vector>
 
+#if USE_FREETYPE
+#include "irrlicht_changes/CGUITTFont.h"
+#endif
+
 using namespace irr;
 using namespace irr::gui;
 
@@ -171,6 +175,10 @@ protected:
 	//! update the vertical scrollBar (visibilty & position)
 	void updateVScrollBar();
 
+	void updateShapedRuns();
+	std::vector<ShapedRun>& getTextShapedRuns();
+	std::vector<std::vector<ShapedRun>>& getBrokenShapedRuns();
+
 	gui::IGUIFont *m_override_font = nullptr;
 
 	bool m_override_color_enabled = false;
@@ -217,6 +225,13 @@ protected:
 
 	u32 m_scrollbar_width = 0;
 	GUIScrollBar *m_vscrollbar = nullptr;
+
+	IGUIFont *m_last_shaped_font = nullptr;
+	core::stringw m_last_shaped_text;
+	std::vector<core::stringw> m_last_shaped_broken_text;
+	std::vector<ShapedRun> m_text_shaped_runs;
+	std::vector<std::vector<ShapedRun>> m_broken_shaped_runs;
+	bool m_shaped_runs_dirty = true;
 
 private:
 	bool processMouse(const SEvent &event);

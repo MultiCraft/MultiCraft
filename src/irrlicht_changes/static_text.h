@@ -21,6 +21,10 @@
 #include <IGUIEnvironment.h>
 
 #if USE_FREETYPE
+	#include "CGUITTFont.h"
+#endif
+
+#if USE_FREETYPE
 
 namespace irr
 {
@@ -207,6 +211,9 @@ namespace gui
 
 		//! Breaks the single text line.
 		void updateText();
+		void updateShapedRuns();
+		std::vector<ShapedRun>& getColoredShapedRuns();
+		std::vector<std::vector<ShapedRun>>& getBrokenShapedRuns();
 
 		EGUI_ALIGNMENT HAlign, VAlign;
 		bool Border;
@@ -218,9 +225,15 @@ namespace gui
 
 		gui::IGUIFont* OverrideFont;
 		gui::IGUIFont* LastBreakFont; // stored because: if skin changes, line break must be recalculated.
+		gui::IGUIFont* LastShapedFont = nullptr;
 
 		EnrichedString ColoredText;
 		std::vector<EnrichedString> BrokenText;
+		EnrichedString LastShapedColoredText;
+		std::vector<EnrichedString> LastShapedBrokenText;
+		std::vector<ShapedRun> ColoredShapedRuns;
+		std::vector<std::vector<ShapedRun>> BrokenShapedRuns;
+		bool ShapedRunsDirty = true;
 	};
 
 
