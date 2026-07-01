@@ -353,12 +353,19 @@ void GUIChatConsole::drawText()
 	if (m_font == NULL)
 		return;
 
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
+
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	for (u32 row = 0; row < buf.getRows(); ++row)
 	{
 		const ChatFormattedLine &line = buf.getFormattedLine(row);
 		if (line.fragments.empty())
 			continue;
+
+		std::vector<std::vector<ShapedRun>> fragments_shaped_runs;
+		for (unsigned int i = 0; i < line.fragments.size(); i++) {
+			fragments_shaped_runs.push_back(tt_font->shapeText(line.fragments[i].text.c_str()));
+		}
 
 		s32 line_height = m_fontsize.Y;
 		s32 y = row * line_height + m_height - m_desired_height;
@@ -408,11 +415,12 @@ void GUIChatConsole::drawText()
 				for (u32 i = 0; i < line.fragments.size(); i++) {
 					const ChatFormattedFragment& frag = line.fragments[i];
 					irr::core::stringw frag_text = frag.text.c_str();
+
 					u32 frag_start = fragment_char_start[i];
 					u32 frag_end = frag_start + frag_text.size();
 
 					if (selection_end <= frag_start || selection_start >= frag_end) {
-						fragment_x += m_font->getDimension(frag_text.c_str()).Width;
+						fragment_x += tt_font->getDimension(fragments_shaped_runs[i], frag_text.c_str()).Width;
 						continue;
 					}
 
@@ -420,8 +428,8 @@ void GUIChatConsole::drawText()
 							selection_start - frag_start : 0;
 					u32 real_selection_end = std::min(selection_end, frag_end) - frag_start;
 
-					std::vector<core::recti> selection_rects = m_font->getSelectionRects(
-							frag_text, real_selection_start, real_selection_end);
+					std::vector<core::recti> selection_rects = tt_font->getSelectionRects(
+							fragments_shaped_runs[i], frag_text, real_selection_start, real_selection_end);
 
 					for (const core::recti& selection_rect : selection_rects) {
 						core::rect<s32> destrect(
@@ -432,29 +440,18 @@ void GUIChatConsole::drawText()
 								destrect, &AbsoluteClippingRect);
 					}
 
-					fragment_x += m_font->getDimension(frag_text.c_str()).Width;
+					fragment_x += tt_font->getDimension(fragments_shaped_runs[i], frag_text.c_str()).Width;
 				}
 			}
 		}
 
 		s32 x = start_pos_x;
-		for (const ChatFormattedFragment &fragment : line.fragments) {
-			s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
+		for (u32 i = 0; i < line.fragments.size(); i++) {
+			const ChatFormattedFragment& fragment = line.fragments[i];
+			s32 text_size = tt_font->getDimension(fragments_shaped_runs[i], fragment.text.c_str()).Width;
 			core::rect<s32> destrect(x, y, x + text_size, y + m_fontsize.Y);
 			x += text_size;
-#if USE_FREETYPE
-			if (m_font->getType() == irr::gui::EGFT_CUSTOM) {
-				// Draw colored text if FreeType is enabled
-				irr::gui::CGUITTFont* tmp = dynamic_cast<irr::gui::CGUITTFont*>(m_font);
-				tmp->draw(fragment.text, destrect, false, false, &AbsoluteClippingRect);
-			} else
-#endif
-			{
-				// Otherwise use standard text
-				m_font->draw(fragment.text.c_str(), destrect,
-						video::SColor(255, 255, 255, 255), false, false,
-						&AbsoluteClippingRect);
-			}
+			tt_font->draw(fragments_shaped_runs[i], fragment.text, destrect, false, false, &AbsoluteClippingRect);
 		}
 	}
 }
@@ -631,6 +628,8 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	if (m_font == NULL)
 		return selection;
 
+	CGUITTFont *tt_font = (CGUITTFont *)m_font;
+
 	ChatBuffer& buf = m_chat_backend->getConsoleBuffer();
 	selection.scroll = buf.getScrollPos();
 	selection.selection_type = ChatSelection::SELECTION_HISTORY;
@@ -673,12 +672,18 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	if (line.fragments.empty())
 		return selection;
 
+	std::vector<std::vector<ShapedRun>> fragments_shaped_runs;
+	for (unsigned int i = 0; i < line.fragments.size(); i++) {
+		fragments_shaped_runs.push_back(tt_font->shapeText(line.fragments[i].text.c_str()));
+	}
+
 	const ChatFormattedFragment &fragment_first = line.fragments[0];
 //	const ChatFormattedFragment &fragment_last = line.fragments[line.fragments.size() - 1];
 	s32 x_min = (fragment_first.column + 1) * m_fontsize.X + m_round_screen_offset;
 	s32 x_max = x_min;
-	for (const ChatFormattedFragment &fragment : line.fragments) {
-		x_max += m_font->getDimension(fragment.text.c_str()).Width;
+	for (unsigned int i = 0; i < line.fragments.size(); i++) {
+		x_max += tt_font->getDimension(fragments_shaped_runs[i],
+				line.fragments[i].text.c_str()).Width;
 	}
 
 	if (x < x_min) {
@@ -691,7 +696,8 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 	for (unsigned int i = 0; i < line.fragments.size(); i++) {
 		const ChatFormattedFragment &fragment = line.fragments[i];
 		s32 current_fragment_x = fragment_x;
-		s32 text_size = m_font->getDimension(fragment.text.c_str()).Width;
+		s32 text_size = tt_font->getDimension(fragments_shaped_runs[i],
+				fragment.text.c_str()).Width;
 		fragment_x += text_size;
 
 		if (x < current_fragment_x)
@@ -702,7 +708,8 @@ ChatSelection GUIChatConsole::getCursorPos(s32 x, s32 y)
 				continue;
 		}
 
-		s32 index = m_font->getCharacterFromPos(fragment.text.c_str(), x - current_fragment_x);
+		s32 index = tt_font->getCharacterFromPos(fragments_shaped_runs[i],
+				fragment.text.c_str(), x - current_fragment_x);
 
 		selection.fragment = i;
 		selection.character = index > -1 ? index : fragment.text.size() - 1;
