@@ -797,28 +797,25 @@ irr::core::stringc GUIChatConsole::getSelectedText()
 			for (unsigned int j = 0; j < line.fragments.size(); j++) {
 				const ChatFormattedFragment &fragment = line.fragments[j];
 
-				for (unsigned int k = 0; k < fragment.text.size(); k++) {
+				for (unsigned int k = 0; k <= fragment.text.size(); k++) {
 					if (!add_to_string &&
 							row == mark_begin_row_buf &&
 							i == real_mark_begin.line &&
 							j == real_mark_begin.fragment &&
 							k == real_mark_begin.character) {
-
 						add_to_string = true;
 					}
-
 					if (add_to_string) {
 						if (row == mark_end_row_buf &&
 								i == real_mark_end.line &&
 								j == real_mark_end.fragment &&
 								k == real_mark_end.character) {
-
 							irr::core::stringc text_c;
 							text_c = wide_to_utf8(text.c_str()).c_str();
 							return text_c;
 						}
-
-						text += fragment.text.c_str()[k];
+						if (k < fragment.text.size())
+							text += fragment.text.c_str()[k];
 					}
 				}
 			}
