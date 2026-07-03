@@ -176,8 +176,8 @@ protected:
 	void updateVScrollBar();
 
 	void updateShapedRuns();
-	std::vector<ShapedRun>& getTextShapedRuns();
-	std::vector<std::vector<ShapedRun>>& getBrokenShapedRuns();
+	std::vector<ShapedRun> &getTextShapedRuns();
+	std::vector<std::vector<ShapedRun>> &getBrokenShapedRuns();
 
 	gui::IGUIFont *m_override_font = nullptr;
 

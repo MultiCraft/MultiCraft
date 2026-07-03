@@ -992,7 +992,7 @@ void GUIEditBox::updateShapedRuns()
 	m_last_shaped_font = tt_font;
 }
 
-std::vector<ShapedRun>& GUIEditBox::getTextShapedRuns()
+std::vector<ShapedRun> &GUIEditBox::getTextShapedRuns()
 {
 	if (m_shaped_runs_dirty) {
 		updateShapedRuns();
@@ -1002,7 +1002,7 @@ std::vector<ShapedRun>& GUIEditBox::getTextShapedRuns()
 	return m_text_shaped_runs;
 }
 
-std::vector<std::vector<ShapedRun>>& GUIEditBox::getBrokenShapedRuns()
+std::vector<std::vector<ShapedRun>> &GUIEditBox::getBrokenShapedRuns()
 {
 	if (m_shaped_runs_dirty) {
 		updateShapedRuns();

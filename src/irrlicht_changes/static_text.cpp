@@ -566,7 +566,7 @@ void StaticText::updateShapedRuns()
 	LastShapedFont = tt_font;
 }
 
-std::vector<ShapedRun>& StaticText::getColoredShapedRuns()
+std::vector<ShapedRun> &StaticText::getColoredShapedRuns()
 {
 	if (ShapedRunsDirty) {
 		updateShapedRuns();
@@ -576,7 +576,7 @@ std::vector<ShapedRun>& StaticText::getColoredShapedRuns()
 	return ColoredShapedRuns;
 }
 
-std::vector<std::vector<ShapedRun>>& StaticText::getBrokenShapedRuns()
+std::vector<std::vector<ShapedRun>> &StaticText::getBrokenShapedRuns()
 {
 	if (ShapedRunsDirty) {
 		updateShapedRuns();
