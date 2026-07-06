@@ -576,6 +576,7 @@ void Client::step(float dtime)
 	if (m_media_downloader && m_media_downloader->isStarted()) {
 		m_media_downloader->step(this);
 		if (m_media_downloader->isDone()) {
+			m_all_media_names = m_media_downloader->getFileNames();
 			delete m_media_downloader;
 			m_media_downloader = NULL;
 		}

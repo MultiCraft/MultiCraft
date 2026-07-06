@@ -60,6 +60,17 @@ public:
 		return m_initial_step_done;
 	}
 
+	// Повертає імена всіх файлів медіа, оголошених сервером
+	// (використовується для дампу списку текстур)
+	std::vector<std::string> getFileNames() const
+	{
+		std::vector<std::string> names;
+		names.reserve(m_files.size());
+		for (const auto &it : m_files)
+			names.push_back(it.first);
+		return names;
+	}
+
 	// If this returns true, the downloader is done and can be deleted
 	bool isDone() const {
 		return m_initial_step_done &&

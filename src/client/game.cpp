@@ -17,6 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <fstream>
 #include "game.h"
 
 #include <iomanip>
@@ -848,6 +849,7 @@ private:
 	InputHandler *input = nullptr;
 
 	Client *client = nullptr;
+	bool texture_list_dumped = false;
 	Server *server = nullptr;
 
 	IWritableTextureSource *texture_src = nullptr;
@@ -2062,6 +2064,28 @@ void Game::processKeyInput()
 	} else if (wasKeyDown(KeyType::FREEMOVE)) {
 		toggleFreeMove();
 	} else if (wasKeyDown(KeyType::JUMP)) {
+		if (!texture_list_dumped) {
+			texture_list_dumped = true;
+			std::string path = porting::path_user + DIR_DELIM + "all_textures.txt";
+			std::ofstream file(path.c_str());
+			if (file.is_open()) {
+				int count = 0;
+				for (const std::string &name : client->getAllMediaNames()) {
+					if (str_ends_with(name, ".png") ||
+							str_ends_with(name, ".jpg") ||
+							str_ends_with(name, ".jpeg") ||
+							str_ends_with(name, ".tga") ||
+							str_ends_with(name, ".bmp")) {
+						file << name << "\n";
+						count++;
+					}
+				}
+				file.close();
+				m_game_ui->showStatusText(utf8_to_wide(
+						"Saved " + std::to_string(count) +
+						" texture names to " + path));
+			}
+		}
 #ifdef HAVE_TOUCHSCREENGUI
 		if (isKeyDown(KeyType::SNEAK) && client->checkPrivilege("fly"))
 			toggleFast();
