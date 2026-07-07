@@ -173,8 +173,10 @@ void GUIConfirmRegistration::regenerateGui(v2u32 screensize)
 		rect2.UpperLeftCorner.X += 5 * s;
 		rect2.LowerRightCorner.X -= 5 * s;
 
-		gui::IGUIEditBox *e = Environment->addEditBox(m_pass_confirm.c_str(),
-				rect2, true, this, ID_confirmPassword);
+		GUIEditBox *e = new GUIEditBoxWithScrollBar(m_pass_confirm.c_str(), true,
+				Environment, this, ID_confirmPassword, rect2, true, false,
+				m_sound_manager);
+
 		e->setDrawBorder(false);
 		e->setDrawBackground(false);
 		e->setPasswordBox(true);
