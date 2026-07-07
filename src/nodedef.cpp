@@ -1461,6 +1461,8 @@ bool NodeDefManager::updateTextures(IGameDef *gamedef,
 	}
 
 	return true;
+#else
+	return true;
 #endif
 }
 

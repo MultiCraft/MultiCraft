@@ -165,6 +165,18 @@ std::string getTexturePath(const std::string &filename, bool *is_base_pack)
 			*is_base_pack = true;
 	}
 
+	/*
+		Check from cache/user directories if specified
+	*/
+	if (fullpath.empty() && fs::IsPathAbsolute(filename))
+	{
+		const std::string path = fs::AbsolutePath(filename);
+		if ((fs::PathStartsWith(path, fs::AbsolutePath(porting::path_cache)) ||
+				fs::PathStartsWith(path, fs::AbsolutePath(porting::path_share))) &&
+				fs::PathExists(filename))
+			fullpath = filename;
+	}
+
 	// Add to cache (also an empty result is cached)
 	g_texturename_to_path_cache.set(filename, fullpath);
 
@@ -271,7 +283,7 @@ public:
 				<<"\""<<std::endl;
 		video::IImage *img;
 #if defined(__ANDROID__) || defined(__APPLE__)
-		if (m_main_menu && path.compare(path.size() - 2, 2, ".e") == 0) {
+		if (path.size() > 2 && path.compare(path.size() - 2, 2, ".e") == 0) {
 			std::string data;
 			if (!fs::ReadFile(path, data))
 				return nullptr;

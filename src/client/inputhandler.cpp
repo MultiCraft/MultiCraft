@@ -28,6 +28,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifdef __IOS__
 #include "porting.h"
 extern "C" void external_pause_game(bool unpause = true);
+
+#if USE_SOUND
+#include "client/sound_openal.h"
+#endif
 #endif
 
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
@@ -369,7 +373,19 @@ RealInputHandler::~RealInputHandler()
 bool RealInputHandler::SdlEventWatcher(void *userdata, SDL_Event *event)
 {
 	if (event->type == SDL_EVENT_WILL_ENTER_BACKGROUND) {
+#if USE_SOUND
+		if (g_sound_manager_singleton)
+			g_sound_manager_singleton->pauseDevice();
+#endif
+
 		external_pause_game();
+		return true;
+	}
+	if (event->type == SDL_EVENT_DID_ENTER_FOREGROUND) {
+#if USE_SOUND
+		if (g_sound_manager_singleton)
+			g_sound_manager_singleton->resumeDevice();
+#endif
 		return true;
 	}
 

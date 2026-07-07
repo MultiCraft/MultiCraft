@@ -131,11 +131,6 @@ struct TextDestPlayerInventory : public TextDest
 
 struct LocalFormspecHandler : public TextDest
 {
-	LocalFormspecHandler(const std::string &formname)
-	{
-		m_formname = formname;
-	}
-
 	LocalFormspecHandler(const std::string &formname, Client *client):
 		m_client(client)
 	{
@@ -145,26 +140,8 @@ struct LocalFormspecHandler : public TextDest
 	void gotText(const StringMap &fields)
 	{
 		if (m_formname == "MT_PAUSE_MENU") {
-			if (fields.find("btn_sound") != fields.end()) {
-				g_gamecallback->changeVolume();
-				return;
-			}
-
-			if (fields.find("btn_key_config") != fields.end()) {
-				g_gamecallback->keyConfig();
-				return;
-			}
-
-			if (fields.find("btn_key_touchscreen_edit") != fields.end()) {
-#ifdef HAVE_TOUCHSCREENGUI
-				if (g_touchscreengui) {
-					g_touchscreengui->openEditor();
-					g_touchscreengui->show();
-				}
-#endif
-				return;
-			}
-
+			// The exit buttons bypass CSMs in case a broken CSM always returns
+			// true on any kind of formspec input
 			if (fields.find("btn_exit_menu") != fields.end()) {
 				g_gamecallback->disconnect();
 				return;
@@ -177,13 +154,6 @@ struct LocalFormspecHandler : public TextDest
 #endif
 				return;
 			}
-
-			if (fields.find("btn_change_password") != fields.end()) {
-				g_gamecallback->changePassword();
-				return;
-			}
-
-			return;
 		}
 
 		if (m_formname == "MT_CHANGE_PW") {
@@ -209,7 +179,8 @@ struct LocalFormspecHandler : public TextDest
 
 		if (m_client->modsLoaded()) {
 			try {
-				m_client->getScript()->on_formspec_input(m_formname, fields);
+				if (m_client->getScript()->on_formspec_input(m_formname, fields))
+					return;
 			} catch (LuaError &e) {
 				const std::string error_message = std::string("LuaError: ") + e.what() +
 						strgettext("\nCheck debug.txt for details.");
@@ -217,6 +188,34 @@ struct LocalFormspecHandler : public TextDest
 #ifdef __ANDROID__
 				porting::handleError("LuaError (on_formspec_input)", error_message);
 #endif
+			}
+		}
+
+		// Pause menu buttons that can be intercepted by CSMs
+		if (m_formname == "MT_PAUSE_MENU") {
+			if (fields.find("btn_sound") != fields.end()) {
+				g_gamecallback->changeVolume();
+				return;
+			}
+
+			if (fields.find("btn_key_config") != fields.end()) {
+				g_gamecallback->keyConfig();
+				return;
+			}
+
+			if (fields.find("btn_key_touchscreen_edit") != fields.end()) {
+#ifdef HAVE_TOUCHSCREENGUI
+				if (g_touchscreengui) {
+					g_touchscreengui->openEditor();
+					g_touchscreengui->show();
+				}
+#endif
+				return;
+			}
+
+			if (fields.find("btn_change_password") != fields.end()) {
+				g_gamecallback->changePassword();
+				return;
 			}
 		}
 	}
@@ -745,7 +744,7 @@ protected:
 	void updateCameraDirection(CameraOrientation *cam, float dtime);
 	void updateCameraOrientation(CameraOrientation *cam, float dtime);
 	void updatePlayerControl(const CameraOrientation &cam);
-	void step(f32 *dtime);
+	void step(f32 dtime);
 	void processClientEvents(CameraOrientation *cam);
 	void updateCamera(u32 busy_time, f32 dtime);
 	void updateSound(f32 dtime);
@@ -931,6 +930,10 @@ private:
 	bool m_camera_offset_changed = false;
 
 	bool m_does_lost_focus_pause_game = false;
+
+	// if true, (almost) the whole game is paused
+	// this happens in pause menu in singleplayer
+	bool m_is_paused = false;
 
 	bool m_enable_vibrations = false;
 
@@ -1188,7 +1191,22 @@ void Game::run()
 		cam_view.camera_pitch += (cam_view_target.camera_pitch -
 				cam_view.camera_pitch) * m_cache_cam_smoothing;
 		updatePlayerControl(cam_view);
-		step(&dtime);
+
+		{
+			bool was_paused = m_is_paused;
+			m_is_paused = simple_singleplayer_mode && g_menumgr.pausesGame();
+			if (m_is_paused)
+				dtime = 0.0f;
+
+			if (!was_paused && m_is_paused)
+				pauseAnimation();
+			else if (was_paused && !m_is_paused)
+				resumeAnimation();
+		}
+
+		if (!m_is_paused)
+			step(dtime);
+
 		processClientEvents(&cam_view_target);
 		updateDebugState();
 		updateCamera(draw_times.busy_time, dtime);
@@ -2721,22 +2739,12 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 }
 
 
-inline void Game::step(f32 *dtime)
+inline void Game::step(f32 dtime)
 {
-	bool can_be_and_is_paused =
-			(simple_singleplayer_mode && g_menumgr.pausesGame());
+	if (server)
+		server->step(dtime);
 
-	if (can_be_and_is_paused) { // This is for a singleplayer server
-		*dtime = 0;             // No time passes
-	} else {
-		if (simple_singleplayer_mode && !paused_animated_nodes.empty())
-			resumeAnimation();
-
-		if (server)
-			server->step(*dtime);
-
-		client->step(*dtime);
-	}
+	client->step(dtime);
 }
 
 static void pauseNodeAnimation(PausedNodesList &paused, scene::ISceneNode *node) {
@@ -2865,11 +2873,21 @@ void Game::handleClientEvent_ShowFormSpec(ClientEvent *event, CameraOrientation 
 
 void Game::handleClientEvent_ShowLocalFormSpec(ClientEvent *event, CameraOrientation *cam)
 {
-	FormspecFormSource *fs_src = new FormspecFormSource(*event->show_formspec.formspec);
-	LocalFormspecHandler *txt_dst =
-		new LocalFormspecHandler(*event->show_formspec.formname, client);
-	GUIFormSpecMenu::create(m_game_ui->getFormspecGUI(), client, &input->joystick,
-			fs_src, txt_dst, client->getFormspecPrepend(), sound);
+	if (event->show_formspec.formspec->empty()) {
+		auto formspec = m_game_ui->getFormspecGUI();
+		if (formspec && (event->show_formspec.formname->empty()
+				|| *(event->show_formspec.formname) == m_game_ui->getFormspecName())) {
+			formspec->quitMenu();
+		}
+	} else {
+		FormspecFormSource *fs_src = new FormspecFormSource(*event->show_formspec.formspec);
+		LocalFormspecHandler *txt_dst =
+			new LocalFormspecHandler(*event->show_formspec.formname, client);
+
+		auto *&formspec = m_game_ui->updateFormspec(*(event->show_formspec.formname));
+		GUIFormSpecMenu::create(formspec, client, &input->joystick,
+				fs_src, txt_dst, client->getFormspecPrepend(), sound);
+	}
 
 	delete event->show_formspec.formspec;
 	delete event->show_formspec.formname;
@@ -4504,8 +4522,8 @@ void Game::showDeathFormspec()
 	formspec->setFocus("btn_respawn");
 }
 
-void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple<const char*, std::string,
-		std::string, bool>> &buttons, float center_y, float btn_h, float gap)
+void createPauseMenuButtons(std::ostringstream &os, const std::vector<PauseMenuButton> &buttons,
+		float center_y, float btn_h, float gap)
 {
 	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
 	float y = center_y + gap * 0.5f - total_height * 0.5f;
@@ -4514,14 +4532,13 @@ void createPauseMenuButtons(std::ostringstream &os, const std::vector<std::tuple
 	if (buttons.size() <= 4)
 		y = y - gap * 3;
 
-	for (auto &[id, text, icon, is_exit] : buttons) {
+	for (auto &[id, text, is_exit] : buttons) {
 		if (is_exit)
 			os << "image_button_exit[3," << y << ";5," << btn_h
 			<< ";;" << id << ";" << text << ";;false]";
 		else
 			os << "image_button[3," << y << ";5," << btn_h
 			<< ";;" << id << ";" << text << ";;false]";
-		os << "image[3.12," << (y + 0.1f) << ";" << icon_size << "," << icon_size << ";" << icon << "]";
 		y += btn_h + gap;
 	}
 }
@@ -4603,23 +4620,16 @@ void Game::showPauseMenu()
 	ypos += 0.5f;
 #endif
 
-	std::ostringstream os;
-	os << "formspec_version[1]" << "size[11,6]"
-		<< "no_prepend[]"
-		<< "bgcolor[#00000060;true]";
-	getButtonStyle(os);
-
-	const std::string sheet = "gui/pause_menu_icons.png^[sheet:2x4:";
-	auto buttons = std::vector<std::tuple<const char*, std::string, std::string, bool>>{
-		{"btn_continue", strgettext("Continue"), sheet + "0,0", true}
+	auto buttons = std::vector<PauseMenuButton>{
+		{"btn_continue", strgettext("Continue"), true}
 	};
 
 	if (!simple_singleplayer_mode)
-		buttons.emplace_back("btn_change_password", strgettext("Change Password"), sheet + "0,2", false);
+		buttons.emplace_back("btn_change_password", strgettext("Change Password"), false);
 
 #if USE_SOUND
 	if (g_settings->getBool("enable_sound"))
-		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), sheet + "0,3", true);
+		buttons.emplace_back("btn_sound", strgettext("Sound Volume"), true);
 #endif
 
 #ifdef HAVE_TOUCHSCREENGUI
@@ -4629,18 +4639,29 @@ void Game::showPauseMenu()
 	} else
 #endif
 	if ((input->last_input_device == IDT_KEYBOARD || input->last_input_device == IDT_MOUSE) && porting::hasRealKeyboard())
-		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
+		buttons.emplace_back("btn_key_config", strgettext("Change Keys"), true);
 	else
-		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), sheet + "0,1", true);
+		buttons.emplace_back("btn_key_touchscreen_edit", strgettext("Change Keys"), true);
 #else
-	buttons.emplace_back("btn_key_config", strgettext("Change Keys"), sheet + "1,1", true);
+	buttons.emplace_back("btn_key_config", strgettext("Change Keys"), true);
 #endif
 
-	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), sheet + "1,0", true);
+	buttons.emplace_back("btn_exit_menu", strgettext("Exit to Menu"), true);
 
 #if !defined(__ANDROID__) && !defined(__IOS__)
-	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), sheet + "1,2", true);
+	buttons.emplace_back("btn_exit_os", strgettext("Exit to OS"), true);
 #endif
+
+	if (client->modsLoaded() && client->getScript()->on_pause_menu_open(buttons))
+		return;
+
+	std::ostringstream os;
+	os << "formspec_version[1]" << "size[11,6]"
+		<< "no_prepend[]"
+		<< "bgcolor[#00000060;true]"
+		<< "pause_game[]"
+		<< "set_focus[btn_continue;true]";
+	getButtonStyle(os);
 
 	createPauseMenuButtons(os, buttons, 3.0f, 0.95f, 0.2f);
 
@@ -4687,17 +4708,13 @@ void Game::showPauseMenu()
 	/* Create menu */
 	/* Note: FormspecFormSource and LocalFormspecHandler  *
 	 * are deleted by guiFormSpecMenu                     */
+
 	FormspecFormSource *fs_src = new FormspecFormSource(os.str());
-	LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU");
+	LocalFormspecHandler *txt_dst = new LocalFormspecHandler("MT_PAUSE_MENU", client);
 
 	auto *&formspec = m_game_ui->getFormspecGUI();
 	GUIFormSpecMenu::create(formspec, client, &input->joystick,
 			fs_src, txt_dst, client->getFormspecPrepend(), sound);
-	formspec->setFocus("btn_continue");
-	formspec->doPause = true;
-
-	if (simple_singleplayer_mode)
-		pauseAnimation();
 }
 
 void Game::showChangePasswordDialog(std::string old_pw, std::string new_pw,

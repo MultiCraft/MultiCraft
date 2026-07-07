@@ -114,6 +114,9 @@ private:
 	// set_visible_controls(buttons)
 	static int l_set_visible_controls(lua_State *L);
 
+	// texture_exists(texture_name)
+	static int l_texture_exists(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };

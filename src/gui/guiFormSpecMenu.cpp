@@ -736,8 +736,6 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 		e->setMax(max);
 		e->setMin(min);
 
-		e->setPos(stoi(parts[4]));
-
 		e->setSmallStep(data->scrollbar_options.small_step);
 		e->setLargeStep(data->scrollbar_options.large_step);
 
@@ -756,6 +754,8 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 
 			e->setTextures(itextures);
 		}
+
+		e->setPos(stoi(parts[4]));
 
 		if (spec.fname == m_focused_element) {
 			Environment->setFocus(e);
@@ -3118,6 +3118,11 @@ void GUIFormSpecMenu::parseElement(parserData* data, const std::string &element)
 
 	if (type == "model") {
 		parseModel(data, description);
+		return;
+	}
+
+	if (type == "pause_game") {
+		doPause = true;
 		return;
 	}
 

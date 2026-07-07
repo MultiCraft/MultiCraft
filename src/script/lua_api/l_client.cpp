@@ -478,6 +478,14 @@ int ModApiClient::l_set_visible_controls(lua_State *L)
 	return 0;
 }
 
+int ModApiClient::l_texture_exists(lua_State *L)
+{
+	std::string img = luaL_checkstring(L, 1);
+	const bool exists = getClient(L)->getTextureSource()->isKnownSourceImage(img);
+	lua_pushboolean(L, exists);
+	return 1;
+}
+
 void ModApiClient::Initialize(lua_State *L, int top)
 {
 	API_FCT(get_current_modname);
@@ -508,4 +516,5 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(upgrade);
 	API_FCT(get_secret_key);
 	API_FCT(set_visible_controls);
+	API_FCT(texture_exists);
 }

@@ -240,21 +240,25 @@ void GUIScrollBar::draw()
 
 	slider_rect = AbsoluteRect;
 
-	if (m_textures.size() >= 1) {
+	if (m_textures.size() < 1) {
+		skin->draw2DRectangle(this, skin->getColor(EGDC_SCROLLBAR),
+			slider_rect, &AbsoluteClippingRect);
+	} else if (m_textures[0] != nullptr) {
 		s32 w = RelativeRect.getWidth();
 		s32 h = RelativeRect.getHeight();
-		core::rect<s32> rect{0, w, w, h - w};
+		core::rect<s32> rect;
 
-		if (is_horizontal)
+		if (arrow_visibility == HIDE)
+			rect = {0, 0, w, h};
+		else if (is_horizontal)
 			rect = {h, 0, w - h, h};
+		else
+			rect = {0, w, w, h - w};
 
 		if (!bg_image)
 			bg_image = addImage(rect, m_textures[0]);
 		else
 			bg_image->setRelativePosition(rect);
-	} else {
-		skin->draw2DRectangle(this, skin->getColor(EGDC_SCROLLBAR),
-			slider_rect, &AbsoluteClippingRect);
 	}
 
 	// Always show scrollbar thumb
@@ -279,28 +283,30 @@ void GUIScrollBar::draw()
 			if (is_horizontal)
 				rect = {draw_center - (w / 2), 0, draw_center + w - (w / 2), h};
 
-			if (!slider_image)
-				slider_image = addImage(rect, m_textures[1]);
-			else
-				slider_image->setRelativePosition(rect);
-
 			// Add top and bottom images if required
 			// TODO: Horizontal scrollbars
 			if (m_textures.size() >= 6 && !is_horizontal) {
 				core::rect<s32> top_rect = rect;
-				top_rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + w / 2;
+				rect.UpperLeftCorner.Y += w / 2;
+				top_rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y;
 				if (!slider_top_image)
 					slider_top_image = addImage(top_rect, m_textures[4]);
 				else
 					slider_top_image->setRelativePosition(top_rect);
 
 				core::rect<s32> bottom_rect = rect;
-				bottom_rect.UpperLeftCorner.Y = rect.LowerRightCorner.Y - w / 2;
+				rect.LowerRightCorner.Y -= w / 2;
+				bottom_rect.UpperLeftCorner.Y = rect.LowerRightCorner.Y;
 				if (!slider_bottom_image)
 					slider_bottom_image = addImage(bottom_rect, m_textures[5]);
 				else
 					slider_bottom_image->setRelativePosition(bottom_rect);
 			}
+
+			if (!slider_image)
+				slider_image = addImage(rect, m_textures[1]);
+			else
+				slider_image->setRelativePosition(rect);
 		} else {
 			skin->draw3DButtonPaneStandard(this, slider_rect, &AbsoluteClippingRect);
 		}
@@ -416,16 +422,30 @@ void GUIScrollBar::setTextures(const std::vector<video::ITexture *> &textures)
 
 void GUIScrollBar::setStyle(const StyleSpec &style, ISimpleTextureSource *tsrc)
 {
-	if (style.isNotDefault(StyleSpec::SCROLLBAR_BGIMG) &&
-			style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_IMG) &&
-			style.isNotDefault(StyleSpec::SCROLLBAR_UP_IMG) &&
-			style.isNotDefault(StyleSpec::SCROLLBAR_DOWN_IMG)) {
-		arrow_visibility = ArrowVisibility::SHOW;
+	const std::string arrows = style.get(StyleSpec::SCROLLBAR_ARROWS, "");
+	if (arrows == "hide")
+		arrow_visibility = HIDE;
+	else if (arrows == "show")
+		arrow_visibility = SHOW;
+	else if (arrows == "default")
+		arrow_visibility = DEFAULT;
+
+	if (style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_IMG)) {
+		if (arrow_visibility == DEFAULT) {
+			// With a custom image, arrows are always shown where
+			// If they were shown when the scrollbar is any shorter, there'd be
+			// visual glitches.
+			if (is_horizontal)
+				arrow_visibility = RelativeRect.getWidth() > RelativeRect.getHeight() * 3 ? SHOW : HIDE;
+			else
+				arrow_visibility = RelativeRect.getHeight() > RelativeRect.getWidth() * 3 ? SHOW : HIDE;
+		}
+
 		std::vector<video::ITexture *> textures = {
-			style.getTexture(StyleSpec::SCROLLBAR_BGIMG, tsrc),
+			style.getTexture(StyleSpec::SCROLLBAR_BGIMG, tsrc, nullptr),
 			style.getTexture(StyleSpec::SCROLLBAR_THUMB_IMG, tsrc),
-			style.getTexture(StyleSpec::SCROLLBAR_UP_IMG, tsrc),
-			style.getTexture(StyleSpec::SCROLLBAR_DOWN_IMG, tsrc)
+			style.getTexture(StyleSpec::SCROLLBAR_UP_IMG, tsrc, nullptr),
+			style.getTexture(StyleSpec::SCROLLBAR_DOWN_IMG, tsrc, nullptr)
 		};
 		if (style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_TOP_IMG) &&
 				style.isNotDefault(StyleSpec::SCROLLBAR_THUMB_BOTTOM_IMG)) {
@@ -522,7 +542,7 @@ void GUIScrollBar::refreshControls()
 			up_button->setTabStop(false);
 		}
 
-		if (m_textures.size() >= 3) {
+		if (m_textures.size() >= 3 && m_textures[2] != nullptr) {
 			up_button->setImage(m_textures[2]);
 			up_button->setScaleImage(true);
 			up_button->setDrawBorder(false);
@@ -548,7 +568,7 @@ void GUIScrollBar::refreshControls()
 			down_button->setTabStop(false);
 		}
 
-		if (m_textures.size() >= 4) {
+		if (m_textures.size() >= 4 && m_textures[3] != nullptr) {
 			down_button->setImage(m_textures[3]);
 			down_button->setScaleImage(true);
 			down_button->setDrawBorder(false);

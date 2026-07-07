@@ -81,6 +81,9 @@ public:
 	Camera(MapDrawControl &draw_control, Client *client);
 	~Camera();
 
+	static void settingChangedCallback(const std::string &name, void *data);
+	void readSettings();
+
 	// Get camera scene node.
 	// It has the eye transformation, pitch and view bobbing applied.
 	inline scene::ICameraSceneNode* getCameraNode() const

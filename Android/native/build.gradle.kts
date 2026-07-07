@@ -68,6 +68,7 @@ val depsZip = File(buildDirFile, "deps.zip")
 val depsDir = file("deps")
 
 val downloadDeps = tasks.register("downloadDeps") {
+	description = "Download deps"
 	doLast {
 		if (!depsZip.exists()) {
 			println("Downloading dependencies...")
@@ -89,6 +90,7 @@ val downloadDeps = tasks.register("downloadDeps") {
 }
 
 val getDeps = tasks.register<Copy>("getDeps") {
+	description = "Get deps"
 	dependsOn(downloadDeps)
 
 	from(zipTree(depsZip))

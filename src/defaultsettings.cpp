@@ -563,7 +563,6 @@ void set_default_settings()
 		settings->setDefault("dedicated_server_step", "0.2");
 		settings->setDefault("abm_interval", "2.0");
 		settings->setDefault("nodetimer_interval", "0.4");
-		settings->setDefault("chunksize", "3");
 		settings->setDefault("arm_inertia", "false");
 		settings->setDefault("enable_particles", "false");
 	}

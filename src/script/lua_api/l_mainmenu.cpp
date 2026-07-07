@@ -875,6 +875,15 @@ int ModApiMainMenu::l_is_dir(lua_State *L)
 }
 
 /******************************************************************************/
+int ModApiMainMenu::l_file_exists(lua_State *L)
+{
+	const char *path = luaL_checkstring(L, 1);
+
+	lua_pushboolean(L, fs::PathExists(path));
+	return 1;
+}
+
+/******************************************************************************/
 int ModApiMainMenu::l_extract_zip(lua_State *L)
 {
 	const char *zipfile	= luaL_checkstring(L, 1);
@@ -1161,6 +1170,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(delete_dir);
 	API_FCT(copy_dir);
 	API_FCT(is_dir);
+	API_FCT(file_exists);
 	API_FCT(extract_zip);
 	API_FCT(may_modify_path);
 	API_FCT(get_mainmenu_path);
@@ -1196,6 +1206,7 @@ void ModApiMainMenu::InitializeAsync(lua_State *L, int top)
 	API_FCT(delete_dir);
 	API_FCT(copy_dir);
 	API_FCT(is_dir);
+	API_FCT(file_exists);
 	API_FCT(extract_zip);
 	API_FCT(may_modify_path);
 	API_FCT(download_file);
