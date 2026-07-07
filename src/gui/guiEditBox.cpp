@@ -436,7 +436,7 @@ bool GUIEditBox::processKey(const SEvent &event)
 		} break;
 		case KEY_RIGHT: {
 			IGUIFont *font = getActiveFont();
-			s32 next_pos = font->getPrevClusterPos(Text, m_cursor_pos);
+			s32 next_pos = font->getNextClusterPos(Text, m_cursor_pos);
 
 			if (event.KeyInput.Shift) {
 				if (Text.size() > (u32)m_cursor_pos) {
