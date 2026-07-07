@@ -61,7 +61,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     private static final String TAG = "SDL";
     private static final int SDL_MAJOR_VERSION = 3;
     private static final int SDL_MINOR_VERSION = 4;
-    private static final int SDL_MICRO_VERSION = 9;
+    private static final int SDL_MICRO_VERSION = 10;
 /*
     // Display InputType.SOURCE/CLASS of events and devices
     //
@@ -530,7 +530,8 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         if (mHIDDeviceManager != null) {
             mHIDDeviceManager.setFrozen(true);
-        }
+        }        
+
         if (!mHasMultiWindow) {
             pauseNativeThread();
         }
@@ -543,7 +544,8 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
 
         if (mHIDDeviceManager != null) {
             mHIDDeviceManager.setFrozen(false);
-        }
+        }        
+
         if (!mHasMultiWindow) {
             resumeNativeThread();
         }
@@ -615,6 +617,14 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
         Log.v(TAG, "onWindowFocusChanged(): " + hasFocus);
+
+        // If we are gaining focus, we can always try to restore our USB devices. If we are losing focus,
+        // only try to relinquish them if we don't have background events allowed (for multi-window Android setups).
+        if (hasFocus || !SDLActivity.nativeGetHintBoolean("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", false)) {
+            if (mHIDDeviceManager != null) {
+                mHIDDeviceManager.setFrozen(!hasFocus);
+            }            
+        }
 
         if (SDLActivity.mBrokenLibraries) {
            return;
@@ -1478,9 +1488,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         // Furthermore, it's possible a game controller has SOURCE_KEYBOARD and
         // SOURCE_JOYSTICK, while its key events arrive from the keyboard source
         // So, retrieve the device itself and check all of its sources
-        //
-        // Echo events (event.getRepeatCount() > 0) should be ignored
-        if (SDLControllerManager.isDeviceSDLJoystick(deviceId) && event.getRepeatCount() == 0) {
+        if (SDLControllerManager.isDeviceSDLJoystick(deviceId)) {
             // Note that we process events with specific key codes here
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 if (SDLControllerManager.onNativePadDown(deviceId, keyCode, event.getScanCode())) {

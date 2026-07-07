@@ -77,7 +77,8 @@ android {
 	}
 }
 
-val prepareAssetsFiles by tasks.registering {
+val prepareAssetsFiles = tasks.register("prepareAssetsFiles") {
+	description = "Prepare assets"
 	val assetsFolder = "build/assets/Files"
 	val projRoot = "../../"
 
@@ -109,7 +110,8 @@ val prepareAssetsFiles by tasks.registering {
 	}
 }
 
-val zipAssetsFiles by tasks.registering(Zip::class) {
+val zipAssetsFiles = tasks.register<Zip>("zipAssetsFiles") {
+	description = "Compress assets"
 	dependsOn(prepareAssetsFiles)
 	archiveFileName.set("assets.zip")
 	destinationDirectory.set(file("src/main/assets"))
@@ -134,6 +136,6 @@ dependencies {
 	implementation("androidx.appcompat:appcompat:1.7.1")
 	implementation("androidx.appcompat:appcompat-resources:1.7.1")
 	implementation("androidx.browser:browser:1.10.0")
-	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.10.0")
+	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
 	implementation("com.google.android.material:material:1.14.0")
 }
