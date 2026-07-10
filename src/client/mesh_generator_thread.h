@@ -118,6 +118,9 @@ public:
 	v3s16 m_camera_offset;
 	MutexedQueue<MeshUpdateResult> m_queue_out;
 
+	// Set on OOM by the worker; Client::step() aborts to the main menu.
+	bool m_out_of_memory = false;
+
 private:
 	MeshUpdateQueue m_queue_in;
 

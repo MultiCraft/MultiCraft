@@ -681,6 +681,9 @@ void *EmergeThread::run()
 		if (blockpos_over_max_limit(pos))
 			continue;
 
+#if defined(__ANDROID__) || defined(__APPLE__)
+		try {
+#endif
 		bool allow_gen = bedata.flags & BLOCK_EMERGE_ALLOW_GEN;
 		EMERGE_DBG_OUT("pos=" PP(pos) " allow_gen=" << allow_gen);
 
@@ -703,6 +706,13 @@ void *EmergeThread::run()
 
 		if (!modified_blocks.empty())
 			m_server->SetBlocksNotSent(modified_blocks);
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+	} catch (const std::bad_alloc &) {
+		m_server->setAsyncFatalError("Out of memory");
+		break;
+	}
+#endif
 	}
 	} catch (VersionMismatchException &e) {
 		std::ostringstream err;
