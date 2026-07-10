@@ -353,9 +353,11 @@ void Client::step(float dtime)
 
 	m_time_of_day_update_timer += dtime;
 
+#if defined(__ANDROID__) || defined(__APPLE__)
 	// Mesh worker hit OOM: abort to the main menu to free the world.
 	if (m_mesh_update_thread.m_out_of_memory)
 		setFatalError("Out of memory");
+#endif
 
 	ReceiveAll();
 

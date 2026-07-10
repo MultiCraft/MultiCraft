@@ -119,8 +119,10 @@ public:
 	v3s16 m_camera_offset;
 	MutexedQueue<MeshUpdateResult> m_queue_out;
 
+#if defined(__ANDROID__) || defined(__APPLE__)
 	// Set on OOM by the worker; Client::step() aborts to the main menu.
 	std::atomic<bool> m_out_of_memory = false;
+#endif
 
 private:
 	MeshUpdateQueue m_queue_in;
