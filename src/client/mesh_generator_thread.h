@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include <atomic>
 #include <ctime>
 #include <mutex>
 #include "mapblock_mesh.h"
@@ -119,7 +120,7 @@ public:
 	MutexedQueue<MeshUpdateResult> m_queue_out;
 
 	// Set on OOM by the worker; Client::step() aborts to the main menu.
-	bool m_out_of_memory = false;
+	std::atomic<bool> m_out_of_memory = false;
 
 private:
 	MeshUpdateQueue m_queue_in;
