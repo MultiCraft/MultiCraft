@@ -366,8 +366,8 @@ Server::~Server()
 	}
 
 	// Delete things in the reverse order of creation
-	delete m_emerge;
 	delete m_env;
+	delete m_emerge;
 #if USE_SQLITE
 	delete m_rollback;
 #endif
