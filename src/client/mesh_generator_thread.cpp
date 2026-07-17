@@ -287,7 +287,19 @@ void MeshUpdateThread::doUpdate()
 			sleep_ms(m_generation_interval);
 		ScopeProfiler sp(g_profiler, "Client: Mesh making (sum)");
 
+#if defined(__ANDROID__) || defined(__APPLE__)
+		MapBlockMesh *mesh_new;
+		try {
+			mesh_new = new MapBlockMesh(q->data, m_camera_offset);
+		} catch (const std::bad_alloc &) {
+			// OOM: signal Client::step to abort to the main menu.
+			m_out_of_memory = true;
+			delete q;
+			return;
+		}
+#else
 		MapBlockMesh *mesh_new = new MapBlockMesh(q->data, m_camera_offset);
+#endif
 
 		MeshUpdateResult r;
 		r.p = q->p;
