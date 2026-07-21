@@ -126,6 +126,9 @@ public:
 	void getBlocksInViewRange(v3s16 cam_pos_nodes,
 		v3s16 *p_blocks_min, v3s16 *p_blocks_max);
 	void updateDrawList();
+	// Collects the visible mesh buffers into m_drawbufs_solid/transparent.
+	// Called once per frame from the solid render pass.
+	void updateDrawBufs(video::IVideoDriver *driver);
 	void renderMap(video::IVideoDriver* driver, s32 pass);
 
 	int getBackgroundBrightness(float max_d, u32 daylight_factor,
@@ -152,6 +155,12 @@ private:
 	v3s16 m_camera_offset;
 
 	std::vector<DrawListItem> m_drawlist;
+
+	// Visible mesh buffers split by transparency. Rebuilt once per frame during
+	// the solid pass and reused by the transparent pass, so the draw list is
+	// walked and every buffer classified only once instead of twice.
+	MeshBufListList m_drawbufs_solid;
+	MeshBufListList m_drawbufs_transparent;
 
 	std::set<v2s16> m_last_drawn_sectors;
 

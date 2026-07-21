@@ -269,22 +269,8 @@ void ClientMap::updateDrawList()
 	g_profiler->avg("MapBlocks loaded [#]", blocks_loaded);
 }
 
-void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
+void ClientMap::updateDrawBufs(video::IVideoDriver *driver)
 {
-	bool is_transparent_pass = pass == scene::ESNRP_TRANSPARENT;
-
-	std::string prefix;
-	if (pass == scene::ESNRP_SOLID)
-		prefix = "renderMap(SOLID): ";
-	else
-		prefix = "renderMap(TRANSPARENT): ";
-
-	/*
-		This is called two times per frame, reset on the non-transparent one
-	*/
-	if (pass == scene::ESNRP_SOLID)
-		m_last_drawn_sectors.clear();
-
 	/*
 		Get animation parameters
 	*/
@@ -296,22 +282,16 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 	const v3f camera_direction = m_camera_direction;
 	const f32 camera_fov = m_camera_fov;
 
-	/*
-		Get all blocks and draw all visible ones
-	*/
-
-	u32 vertex_count = 0;
-	u32 drawcall_count = 0;
-
 	// For limiting number of mesh animations per frame
 	u32 mesh_animate_count = 0;
 	//u32 mesh_animate_count_far = 0;
 
 	/*
-		Draw the selected MapBlocks
+		Collect and classify the visible MapBlocks once. clear() keeps the
+		vector capacity, so this does not churn allocations frame to frame.
 	*/
-
-	MeshBufListList drawbufs;
+	m_drawbufs_solid.clear();
+	m_drawbufs_transparent.clear();
 
 	for (auto &item : m_drawlist) {
 		MapBlock *block = item.block;
@@ -326,7 +306,7 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 			continue;
 
 		// Mesh animation
-		if (pass == scene::ESNRP_SOLID) {
+		{
 			// Pretty random but this should work somewhat nicely
 			bool faraway = d >= BS * 50;
 			if (mapBlockMesh->isAnimationForced() || !faraway ||
@@ -344,39 +324,68 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 		/*
 			Get the meshbuffers of the block
 		*/
-		{
-			for (int layer = 0; layer < MAX_TILE_LAYERS; layer++) {
-				scene::IMesh *mesh = mapBlockMesh->getMesh(layer);
-				assert(mesh);
+		for (int layer = 0; layer < MAX_TILE_LAYERS; layer++) {
+			scene::IMesh *mesh = mapBlockMesh->getMesh(layer);
+			assert(mesh);
 
-				u32 c = mesh->getMeshBufferCount();
-				for (u32 i = 0; i < c; i++) {
-					scene::IMeshBuffer *buf = mesh->getMeshBuffer(i);
+			u32 c = mesh->getMeshBufferCount();
+			for (u32 i = 0; i < c; i++) {
+				scene::IMeshBuffer *buf = mesh->getMeshBuffer(i);
 
-					video::SMaterial& material = buf->getMaterial();
-					video::IMaterialRenderer* rnd =
-						driver->getMaterialRenderer(material.MaterialType);
-					bool transparent = (rnd && rnd->isTransparent());
-					if (transparent == is_transparent_pass) {
-						if (buf->getVertexCount() == 0)
-							errorstream << "Block [" << analyze_block(block)
-								<< "] contains an empty meshbuf" << std::endl;
+				video::SMaterial& material = buf->getMaterial();
+				video::IMaterialRenderer* rnd =
+					driver->getMaterialRenderer(material.MaterialType);
+				bool transparent = (rnd && rnd->isTransparent());
 
-						material.setFlag(video::EMF_TRILINEAR_FILTER,
-							m_cache_trilinear_filter);
-						material.setFlag(video::EMF_BILINEAR_FILTER,
-							m_cache_bilinear_filter);
-						material.setFlag(video::EMF_ANISOTROPIC_FILTER,
-							m_cache_anistropic_filter);
-						material.setFlag(video::EMF_WIREFRAME,
-							m_control.show_wireframe);
+				if (buf->getVertexCount() == 0)
+					errorstream << "Block [" << analyze_block(block)
+						<< "] contains an empty meshbuf" << std::endl;
 
-						drawbufs.add(buf, block_pos, layer);
-					}
-				}
+				material.setFlag(video::EMF_TRILINEAR_FILTER,
+					m_cache_trilinear_filter);
+				material.setFlag(video::EMF_BILINEAR_FILTER,
+					m_cache_bilinear_filter);
+				material.setFlag(video::EMF_ANISOTROPIC_FILTER,
+					m_cache_anistropic_filter);
+				material.setFlag(video::EMF_WIREFRAME,
+					m_control.show_wireframe);
+
+				if (transparent)
+					m_drawbufs_transparent.add(buf, block_pos, layer);
+				else
+					m_drawbufs_solid.add(buf, block_pos, layer);
 			}
 		}
 	}
+
+	g_profiler->avg("renderMap(): animated meshes [#]", mesh_animate_count);
+}
+
+void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
+{
+	bool is_transparent_pass = pass == scene::ESNRP_TRANSPARENT;
+
+	std::string prefix;
+	if (pass == scene::ESNRP_SOLID)
+		prefix = "renderMap(SOLID): ";
+	else
+		prefix = "renderMap(TRANSPARENT): ";
+
+	/*
+		This is called two times per frame, once per pass. The solid pass runs
+		first, so collect and classify the visible mesh buffers there once; the
+		transparent pass reuses the cached result.
+	*/
+	if (pass == scene::ESNRP_SOLID) {
+		m_last_drawn_sectors.clear();
+		updateDrawBufs(driver);
+	}
+
+	MeshBufListList &drawbufs = is_transparent_pass ?
+		m_drawbufs_transparent : m_drawbufs_solid;
+
+	u32 vertex_count = 0;
+	u32 drawcall_count = 0;
 
 	TimeTaker draw("Drawing mesh buffers");
 
@@ -416,11 +425,6 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 		}
 	}
 	g_profiler->avg(prefix + "draw meshes [ms]", draw.stop(true));
-
-	// Log only on solid pass because values are the same
-	if (pass == scene::ESNRP_SOLID) {
-		g_profiler->avg("renderMap(): animated meshes [#]", mesh_animate_count);
-	}
 
 	g_profiler->avg(prefix + "vertices drawn [#]", vertex_count);
 	g_profiler->avg(prefix + "drawcalls [#]", drawcall_count);
