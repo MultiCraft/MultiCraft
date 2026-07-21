@@ -117,6 +117,9 @@ private:
 	// texture_exists(texture_name)
 	static int l_texture_exists(lua_State *L);
 
+	// change_password(current_password, new_password)
+	static int l_change_password(lua_State *L);
+
 public:
 	static void Initialize(lua_State *L, int top);
 };

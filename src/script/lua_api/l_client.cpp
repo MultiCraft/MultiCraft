@@ -486,6 +486,22 @@ int ModApiClient::l_texture_exists(lua_State *L)
 	return 1;
 }
 
+// change_password(current_password, new_password)
+int ModApiClient::l_change_password(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+
+	std::string newpassword = readParam<std::string>(L, 2);
+
+	if (lua_isnil(L, 1)) {
+		getClient(L)->sendChangePassword(newpassword);
+	} else {
+		std::string currentpassword = readParam<std::string>(L, 1);
+		getClient(L)->sendChangePassword(currentpassword, newpassword, false);
+	}
+	return 0;
+}
+
 void ModApiClient::Initialize(lua_State *L, int top)
 {
 	API_FCT(get_current_modname);
@@ -517,4 +533,5 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(get_secret_key);
 	API_FCT(set_visible_controls);
 	API_FCT(texture_exists);
+	API_FCT(change_password);
 }
