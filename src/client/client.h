@@ -241,6 +241,10 @@ public:
 	void clearOutChatQueue();
 	void sendChangePassword(const std::string &oldpassword,
 		const std::string &newpassword, const bool close_form = false);
+	void sendChangePassword(const std::string &newpassword)
+	{
+		sendChangePassword(m_password, newpassword, false);
+	}
 	void sendDamage(u16 damage);
 	void sendRespawn();
 	void sendReady();

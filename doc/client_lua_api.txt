@@ -851,6 +851,12 @@ Call these functions only at load time!
     * Returns [server info](#server-info).
 * `minetest.send_respawn()`
     * Sends a respawn request to the server.
+* `minetest.change_password(current_password, new_password)`
+    * Requests a password change to `new_password`.
+    * If `current_password` is a string, the server will reject the change if
+      it is incorrect.
+    * If `current_password` is `nil`, the client uses the password it logged in
+      with as the old password, so the caller does not need to know it.
 
 ### Storage API
 * `minetest.get_mod_storage()`:
