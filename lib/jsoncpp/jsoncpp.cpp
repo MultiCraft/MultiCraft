@@ -1281,6 +1281,15 @@ bool OurReader::parse(const char* beginDoc, const char* endDoc, Value& root,
   return successful;
 }
 
+// -ffast-math assumes infinity away, so keep it behind an opaque call
+#if defined(__clang__)
+#pragma clang optimize off
+#endif
+static double jsonInfinity() { return std::numeric_limits<double>::infinity(); }
+#if defined(__clang__)
+#pragma clang optimize on
+#endif
+
 bool OurReader::readValue() {
   //  To preserve the old behaviour we cast size_t to int.
   if (nodes_.size() > features_.stackLimit_)
@@ -1334,13 +1343,13 @@ bool OurReader::readValue() {
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
   case tokenPosInf: {
-    Value v(std::numeric_limits<double>::infinity());
+    Value v(jsonInfinity());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
   } break;
   case tokenNegInf: {
-    Value v(-std::numeric_limits<double>::infinity());
+    Value v(-jsonInfinity());
     currentValue().swapPayload(v);
     currentValue().setOffsetStart(token.start_ - begin_);
     currentValue().setOffsetLimit(token.end_ - begin_);
@@ -4183,6 +4192,10 @@ String valueToString(UInt value) { return valueToString(LargestUInt(value)); }
 #endif // # if defined(JSON_HAS_INT64)
 
 namespace {
+// The isfinite guard below is what -ffast-math assumes away
+#if defined(__clang__)
+#pragma clang optimize off
+#endif
 String valueToString(double value, bool useSpecialFloats,
                      unsigned int precision, PrecisionType precisionType) {
   // Print into the buffer. We need not request the alternative representation
@@ -4225,6 +4238,9 @@ String valueToString(double value, bool useSpecialFloats,
   }
   return buffer;
 }
+#if defined(__clang__)
+#pragma clang optimize on
+#endif
 } // namespace
 
 String valueToString(double value, unsigned int precision,
