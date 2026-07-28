@@ -350,10 +350,11 @@ void ClientMap::updateDrawBufs(video::IVideoDriver *driver)
 				material.setFlag(video::EMF_WIREFRAME,
 					m_control.show_wireframe);
 
+				const v3s16 bake = mapBlockMesh->getCameraOffset();
 				if (transparent)
-					m_drawbufs_transparent.add(buf, block_pos, layer);
+					m_drawbufs_transparent.add(buf, bake, layer);
 				else
-					m_drawbufs_solid.add(buf, block_pos, layer);
+					m_drawbufs_solid.add(buf, bake, layer);
 			}
 		}
 	}
@@ -393,6 +394,11 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 	v3f offset = intToFloat(m_camera_offset, BS);
 
 	// Render all layers in order
+	u32 material_count = 0;
+	u32 transform_count = 0;
+	for (auto &lists : drawbufs.lists)
+		material_count += lists.size();
+
 	for (auto &lists : drawbufs.lists) {
 		if (m_cache_transparency_sorting) {
 			static const auto comparator = [] (MeshBufList const &a, MeshBufList const &b) {
@@ -412,13 +418,20 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 			driver->setMaterial(list.m);
 
 			drawcall_count += list.bufs.size();
+
+			v3s16 last_bake(-32768, -32768, -32768);
 			for (auto &pair : list.bufs) {
 				scene::IMeshBuffer *buf = pair.second;
 
-				v3f block_wpos = intToFloat(pair.first * MAP_BLOCKSIZE, BS);
-				m.setTranslation(block_wpos - offset);
+				// Vertices already carry the block position, so the transform
+				// only differs between meshes built at different camera offsets.
+				if (pair.first != last_bake) {
+					m.setTranslation(intToFloat(pair.first - m_camera_offset, BS));
+					driver->setTransform(video::ETS_WORLD, m);
+					last_bake = pair.first;
+					transform_count++;
+				}
 
-				driver->setTransform(video::ETS_WORLD, m);
 				driver->drawMeshBuffer(buf);
 				vertex_count += buf->getVertexCount();
 			}
@@ -428,6 +441,8 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 
 	g_profiler->avg(prefix + "vertices drawn [#]", vertex_count);
 	g_profiler->avg(prefix + "drawcalls [#]", drawcall_count);
+	g_profiler->avg(prefix + "materials [#]", material_count);
+	g_profiler->avg(prefix + "transforms [#]", transform_count);
 }
 
 static bool getVisibleBrightness(Map *map, const v3f &p0, v3f dir, float step,

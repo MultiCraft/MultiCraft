@@ -1011,6 +1011,8 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 	m_last_crack(-1),
 	m_last_daynight_ratio((u32) -1)
 {
+	m_camera_offset = camera_offset;
+
 	for (auto &m : m_mesh)
 		m = new scene::SMesh();
 	m_enable_shaders = data->m_use_shaders;
@@ -1164,6 +1166,13 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 			}
 
 			scene::SMesh *mesh = (scene::SMesh *)m_mesh[layer];
+
+			// Bake the block position in, so that every buffer built against
+			// the same camera offset shares one world transform.
+			const v3f bake = intToFloat(data->m_blockpos * MAP_BLOCKSIZE
+					- camera_offset, BS);
+			for (video::S3DVertex &v : p.vertices)
+				v.Pos += bake;
 
 			scene::SMeshBuffer *buf = new scene::SMeshBuffer();
 			buf->Material = material;

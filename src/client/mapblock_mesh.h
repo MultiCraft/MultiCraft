@@ -102,6 +102,9 @@ public:
 		return m_mesh[0];
 	}
 
+	//! Camera offset the vertices were baked against.
+	v3s16 getCameraOffset() const { return m_camera_offset; }
+
 	scene::IMesh *getMesh(u8 layer)
 	{
 		return m_mesh[layer];
@@ -133,6 +136,7 @@ private:
 
 	bool m_enable_shaders;
 	bool m_enable_vbo;
+	v3s16 m_camera_offset;
 
 	// Must animate() be called before rendering?
 	bool m_has_animation;
