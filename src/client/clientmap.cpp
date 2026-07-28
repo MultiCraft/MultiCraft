@@ -36,6 +36,8 @@ void MeshBufListList::clear()
 {
 	for (auto &list : lists)
 		list.clear();
+	for (auto &i : index)
+		i.clear();
 }
 
 void MeshBufListList::add(scene::IMeshBuffer *buf, v3s16 position, u8 layer)
@@ -43,21 +45,21 @@ void MeshBufListList::add(scene::IMeshBuffer *buf, v3s16 position, u8 layer)
 	// Append to the correct layer
 	std::vector<MeshBufList> &list = lists[layer];
 	const video::SMaterial &m = buf->getMaterial();
-	for (MeshBufList &l : list) {
-		// comparing a full material is quite expensive so we don't do it if
-		// not even first texture is equal
-		if (l.m.TextureLayer[0].Texture != m.TextureLayer[0].Texture)
-			continue;
 
-		if (l.m == m) {
-			l.bufs.emplace_back(position, buf);
+	// Materials sharing the first texture are few, so the full comparison
+	// runs about once per buffer instead of once per material.
+	std::vector<u32> &candidates = index[layer][m.TextureLayer[0].Texture];
+	for (u32 i : candidates) {
+		if (list[i].m == m) {
+			list[i].bufs.emplace_back(position, buf);
 			return;
 		}
 	}
-	MeshBufList l;
-	l.m = m;
-	l.bufs.emplace_back(position, buf);
-	list.emplace_back(l);
+
+	candidates.push_back(list.size());
+	list.emplace_back();
+	list.back().m = m;
+	list.back().bufs.emplace_back(position, buf);
 }
 
 // ClientMap

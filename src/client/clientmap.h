@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "camera.h"
 #include <set>
 #include <map>
+#include <unordered_map>
 
 struct MapDrawControl
 {
@@ -53,6 +54,13 @@ struct MeshBufListList
 
 	void clear();
 	void add(scene::IMeshBuffer *buf, v3s16 position, u8 layer);
+
+private:
+	/*!
+	 * Maps the first layer's texture to the lists using it, so that adding a
+	 * buffer costs one lookup instead of a walk over every material.
+	 */
+	std::unordered_map<video::ITexture *, std::vector<u32>> index[MAX_TILE_LAYERS];
 };
 
 struct DrawListItem {
