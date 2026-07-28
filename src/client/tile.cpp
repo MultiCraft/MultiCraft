@@ -215,7 +215,9 @@ struct TextureInfo
 class SourceImageCache
 {
 public:
-	SourceImageCache(bool main_menu) : m_main_menu(main_menu) {};
+	SourceImageCache(bool main_menu) : m_main_menu(main_menu) {
+		m_convert_to_16bit = g_settings->getBool("convert_to_16bit");
+	}
 	~SourceImageCache() {
 		for (auto &m_image : m_images) {
 			m_image.second->drop();
@@ -232,6 +234,9 @@ public:
 			if (n->second)
 				n->second->drop();
 		}
+		const auto image_data = m_image_files.find(name);
+		if (image_data != m_image_files.end())
+			m_image_files.erase(image_data);
 
 		video::IImage* toadd = img;
 		bool need_to_grab = true;
@@ -255,6 +260,24 @@ public:
 			toadd->grab();
 		m_images[name] = toadd;
 	}
+	void insert(const std::string &name, const std::string &data)
+	{
+		// Remove old decoded image, if any. We must erase() the map entry,
+		// not just drop() it.
+		std::map<std::string, video::IImage*>::iterator n;
+		n = m_images.find(name);
+		if (n != m_images.end()){
+			if (n->second)
+				n->second->drop();
+			m_images.erase(n);
+		}
+
+		// TODO: Maybe skip storing this if a texture pack is active? At the
+		// moment the image is stored, loaded, then discarded by the
+		// prefer_local check (as it was before this PR)
+
+		m_image_files[name] = data;
+	}
 	video::IImage* get(const std::string &name)
 	{
 		std::map<std::string, video::IImage*>::iterator n;
@@ -266,12 +289,26 @@ public:
 	// Primarily fetches from cache, secondarily tries to read from filesystem
 	video::IImage *getOrLoad(const std::string &name)
 	{
+		const auto image_data = m_image_files.find(name);
+		if (image_data != m_image_files.end()) {
+			// Read from compressed RAM	copy
+			video::IImage *img = loadImageFromString(name, image_data->second);
+
+			if (img) {
+				// insert() removes the encoded copy from m_image_files
+				insert(name, img, true);
+				img->drop();
+				// warningstream << "Loaded image file " << name << " from RAM cache! Images still in cache: " << m_image_files.size() << std::endl;
+			}
+		}
+
 		std::map<std::string, video::IImage*>::iterator n;
 		n = m_images.find(name);
 		if (n != m_images.end()){
 			n->second->grab(); // Grab for caller
 			return n->second;
 		}
+
 		video::IVideoDriver *driver = RenderingEngine::get_video_driver();
 		std::string path = m_main_menu ? name : getTexturePath(name);
 		if (path.empty()) {
@@ -324,7 +361,72 @@ public:
 	}
 private:
 	std::map<std::string, video::IImage*> m_images;
+	std::unordered_map<std::string, std::string> m_image_files;
 	bool m_main_menu;
+	bool m_convert_to_16bit;
+
+	video::IImage* loadImageFromString(const std::string &filename, const std::string &data) {
+		TRACESTREAM(<< "Client: Attempting to process image "
+			<< "file \"" << filename << "\" from RAM" << std::endl);
+
+		io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
+		video::IVideoDriver *vdrv = RenderingEngine::get_video_driver();
+
+		// Silly irrlicht's const-incorrectness
+		Buffer<char> data_rw(data.c_str(), data.size());
+
+		// Create an irrlicht memory file
+		io::IReadFile *rfile = irrfs->createMemoryReadFile(
+				*data_rw, data_rw.getSize(), filename.c_str());
+
+		FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");
+
+		// Read image
+		video::IImage *img = vdrv->createImageFromFile(rfile);
+		if (!img) {
+			errorstream<<"Client: Cannot create image from data of "
+					<<"file \""<<filename<<"\""<<std::endl;
+			rfile->drop();
+			return nullptr;
+		}
+
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
+		if (m_convert_to_16bit) {
+			irr::video::ECOLOR_FORMAT format = img->getColorFormat();
+			irr::video::ECOLOR_FORMAT new_format = irr::video::ECF_UNKNOWN;
+
+			if (format == irr::video::ECF_R8G8B8) {
+				new_format = irr::video::ECF_R5G6B5;
+			} else if (format == irr::video::ECF_A8R8G8B8) {
+				bool can_convert = true;
+
+				u32 data_size = img->getImageDataSizeInBytes();
+				u8 *data = (u8*) img->getData();
+				for (u32 i = 0; i < data_size; i += 4) {
+					u8 alpha = data[i + 3];
+					if (alpha > 0 && alpha < 255) {
+						can_convert = false;
+						break;
+					}
+				}
+
+				if (can_convert)
+					new_format = irr::video::ECF_A1R5G5B5;
+			}
+
+			if (new_format != irr::video::ECF_UNKNOWN) {
+				core::dimension2du dimensions = img->getDimension();
+				irr::video::IImage* converted_img = vdrv->createImage(new_format, dimensions);
+				img->copyTo(converted_img, core::position2d<s32>(0, 0));
+				img->drop();
+				img = converted_img;
+			}
+		}
+#endif
+
+		rfile->drop();
+		return img;
+	}
 };
 
 /*
@@ -422,6 +524,7 @@ public:
 	// Insert an image into the cache without touching the filesystem.
 	// Shall be called from the main thread.
 	void insertSourceImage(const std::string &name, video::IImage *img);
+	void insertSourceImage(const std::string &name, const std::string &data);
 
 	// Rebuild images and textures from the current set of source images
 	// Shall be called from the main thread.
@@ -807,6 +910,14 @@ void TextureSource::insertSourceImage(const std::string &name, video::IImage *im
 	sanity_check(std::this_thread::get_id() == m_main_thread);
 
 	m_sourcecache.insert(name, img, true);
+	m_source_image_existence.set(name, true);
+}
+
+void TextureSource::insertSourceImage(const std::string &name, const std::string &data)
+{
+	sanity_check(std::this_thread::get_id() == m_main_thread);
+
+	m_sourcecache.insert(name, data);
 	m_source_image_existence.set(name, true);
 }
 
