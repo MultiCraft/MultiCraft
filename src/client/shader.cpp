@@ -40,21 +40,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/tile.h"
 #include "config.h"
 
-#if ENABLE_GLES && !defined(__APPLE__)
-#ifdef _IRR_COMPILE_WITH_OGLES1_
-#include <GLES/gl.h>
-#else
-#include <GLES2/gl2.h>
-#endif
-#else
-#ifndef __APPLE__
-#include <GL/gl.h>
-#elif !defined(__IOS__)
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/gl.h>
-#endif
-#endif
-
 /*
 	A cache from shader name to shader path
 */
