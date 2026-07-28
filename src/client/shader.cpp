@@ -231,6 +231,8 @@ class MainShaderConstantSetter : public IShaderConstantSetter
 	// Texture matrix
 	CachedVertexShaderSetting<float, 16> m_texture;
 #endif
+	core::matrix4 m_world_in, m_view_in, m_proj_in;
+	core::matrix4 m_mat_world_view, m_mat_world_view_proj;
 
 public:
 	MainShaderConstantSetter() :
@@ -248,23 +250,27 @@ public:
 		video::IVideoDriver *driver = services->getVideoDriver();
 		sanity_check(driver);
 
-		// Set world matrix
-		core::matrix4 world = driver->getTransform(video::ETS_WORLD);
-		m_world.set(*reinterpret_cast<float(*)[16]>(world.pointer()), services);
+		const core::matrix4 &world = driver->getTransform(video::ETS_WORLD);
+		const core::matrix4 &view = driver->getTransform(video::ETS_VIEW);
+		const core::matrix4 &proj = driver->getTransform(video::ETS_PROJECTION);
 
-		// Set clip matrix
-		core::matrix4 worldView;
-		worldView = driver->getTransform(video::ETS_VIEW);
-		worldView *= world;
+		// View and projection hold for the whole frame, and blocks baked
+		// against one camera offset share a world matrix, so the products
+		// survive across most of the draw calls.
+		if (world != m_world_in || view != m_view_in || proj != m_proj_in) {
+			m_world_in = world;
+			m_view_in = view;
+			m_proj_in = proj;
+			m_mat_world_view = view * world;
+			m_mat_world_view_proj = proj * m_mat_world_view;
+		}
 
-		core::matrix4 worldViewProj;
-		worldViewProj = driver->getTransform(video::ETS_PROJECTION);
-		worldViewProj *= worldView;
-		m_world_view_proj.set(*reinterpret_cast<float(*)[16]>(worldViewProj.pointer()), services);
+		m_world.set(*reinterpret_cast<float(*)[16]>(m_world_in.pointer()), services);
+		m_world_view_proj.set(*reinterpret_cast<float(*)[16]>(m_mat_world_view_proj.pointer()), services);
 
 #if ENABLE_GLES
 		core::matrix4 texture = driver->getTransform(video::ETS_TEXTURE_0);
-		m_world_view.set(*reinterpret_cast<float(*)[16]>(worldView.pointer()), services);
+		m_world_view.set(*reinterpret_cast<float(*)[16]>(m_mat_world_view.pointer()), services);
 		m_texture.set(*reinterpret_cast<float(*)[16]>(texture.pointer()), services);
 #endif
 	}
