@@ -71,6 +71,23 @@ class GameGlobalShaderConstantSetter : public IShaderConstantSetter
 	CachedPixelShaderSetting<SamplerLayer_t> m_normal_texture;
 	Client *m_client;
 
+	//! Values every shader gets, all of them constant within one frame.
+	struct FrameConstants {
+		float bg_color[4];
+		float fog_distance;
+		float day_light[3];
+		float star_color[4];
+		float animation_timer;
+		float eye_position[3];
+		float camera_offset[3];
+		float minimap_yaw[3];
+		bool has_minimap;
+	};
+	static FrameConstants s_frame;
+	static bool s_frame_valid;
+
+	void updateFrameConstants();
+
 public:
 	GameGlobalShaderConstantSetter(Sky *sky, bool *force_fog_off,
 			f32 *fog_range, Client *client);
@@ -80,6 +97,9 @@ public:
 	static void settingsCallback(const std::string &name, void *userdata);
 	void setSky(Sky *sky) { m_sky = sky; }
 	void onSetConstants(video::IMaterialRendererServices *services) override;
+
+	//! Drops the snapshot so the next shader in line rebuilds it.
+	static void beginFrame() { s_frame_valid = false; }
 };
 
 class GameGlobalShaderConstantSetterFactory : public IShaderConstantSetterFactory

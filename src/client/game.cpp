@@ -474,89 +474,77 @@ GameGlobalShaderConstantSetter::~GameGlobalShaderConstantSetter()
 	g_settings->deregisterChangedCallback("enable_fog", settingsCallback, this);
 }
 
-void GameGlobalShaderConstantSetter::onSetConstants(video::IMaterialRendererServices *services)
+GameGlobalShaderConstantSetter::FrameConstants GameGlobalShaderConstantSetter::s_frame;
+bool GameGlobalShaderConstantSetter::s_frame_valid = false;
+
+void GameGlobalShaderConstantSetter::updateFrameConstants()
 {
-	// Background color
-	video::SColor bgcolor = m_sky->getBgColor();
-	video::SColorf bgcolorf(bgcolor);
-	float bgcolorfa[4] = {
-		bgcolorf.r,
-		bgcolorf.g,
-		bgcolorf.b,
-		bgcolorf.a,
-	};
-	m_sky_bg_color.set(bgcolorfa, services);
+	const video::SColorf bgcolorf(m_sky->getBgColor());
+	s_frame.bg_color[0] = bgcolorf.r;
+	s_frame.bg_color[1] = bgcolorf.g;
+	s_frame.bg_color[2] = bgcolorf.b;
+	s_frame.bg_color[3] = bgcolorf.a;
 
-	// Fog distance
-	float fog_distance = -1.0f; // sentinel for disabled fog
+	// -1 is the sentinel for disabled fog
+	s_frame.fog_distance = (m_fog_enabled && !*m_force_fog_off) ? *m_fog_range : -1.0f;
 
-	if (m_fog_enabled && !*m_force_fog_off)
-		fog_distance = *m_fog_range;
-
-	m_fog_distance.set(&fog_distance, services);
-
-	u32 daynight_ratio = 0;
-	if (m_client)
-		daynight_ratio = m_client->getEnv().getDayNightRatio();
-	else
-		daynight_ratio = time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);
+	const u32 daynight_ratio = m_client
+			? m_client->getEnv().getDayNightRatio()
+			: time_to_daynight_ratio(GUIEngine::g_timeofday * 24000.0f, true);
 
 	video::SColorf sunlight;
 	get_sunlight_color(&sunlight, daynight_ratio);
-	float dnc[3] = {
-		sunlight.r,
-		sunlight.g,
-		sunlight.b };
-	m_day_light.set(dnc, services);
+	s_frame.day_light[0] = sunlight.r;
+	s_frame.day_light[1] = sunlight.g;
+	s_frame.day_light[2] = sunlight.b;
 
-	video::SColorf star_color = m_sky->getCurrentStarColor();
-	float clr[4] = {star_color.r, star_color.g, star_color.b, star_color.a};
-	m_star_color.set(clr, services);
+	const video::SColorf star_color = m_sky->getCurrentStarColor();
+	s_frame.star_color[0] = star_color.r;
+	s_frame.star_color[1] = star_color.g;
+	s_frame.star_color[2] = star_color.b;
+	s_frame.star_color[3] = star_color.a;
 
-	u32 animation_timer = porting::getTimeMs() % 1000000;
-	float animation_timer_f = (float)animation_timer / 100000.f;
-	m_animation_timer_vertex.set(&animation_timer_f, services);
-	m_animation_timer_pixel.set(&animation_timer_f, services);
+	s_frame.animation_timer = (float)(porting::getTimeMs() % 1000000) / 100000.f;
 
+	s_frame.has_minimap = false;
 	if (m_client) {
-		float eye_position_array[3];
-		v3f epos = m_client->getEnv().getLocalPlayer()->getEyePosition();
-#if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
-		eye_position_array[0] = epos.X;
-		eye_position_array[1] = epos.Y;
-		eye_position_array[2] = epos.Z;
-#else
-		epos.getAs3Values(eye_position_array);
-#endif
-		m_eye_position_pixel.set(eye_position_array, services);
-		m_eye_position_vertex.set(eye_position_array, services);
+		m_client->getEnv().getLocalPlayer()->getEyePosition()
+				.getAs3Values(s_frame.eye_position);
+		intToFloat(m_client->getCamera()->getOffset(), BS)
+				.getAs3Values(s_frame.camera_offset);
+
+		if (Minimap *minimap = m_client->getMinimap()) {
+			minimap->getYawVec().getAs3Values(s_frame.minimap_yaw);
+			s_frame.has_minimap = true;
+		}
+	}
+}
+
+void GameGlobalShaderConstantSetter::onSetConstants(video::IMaterialRendererServices *services)
+{
+	// The menu has no frame hook to drop the snapshot, and its handful of draws
+	// makes reusing one pointless anyway.
+	if (!s_frame_valid || !m_client) {
+		updateFrameConstants();
+		s_frame_valid = true;
 	}
 
-	if (m_client && m_client->getMinimap()) {
-		float minimap_yaw_array[3];
-		v3f minimap_yaw = m_client->getMinimap()->getYawVec();
-#if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
-		minimap_yaw_array[0] = minimap_yaw.X;
-		minimap_yaw_array[1] = minimap_yaw.Y;
-		minimap_yaw_array[2] = minimap_yaw.Z;
-#else
-		minimap_yaw.getAs3Values(minimap_yaw_array);
-#endif
-		m_minimap_yaw.set(minimap_yaw_array, services);
-	}
+	m_sky_bg_color.set(s_frame.bg_color, services);
+	m_fog_distance.set(&s_frame.fog_distance, services);
+	m_day_light.set(s_frame.day_light, services);
+	m_star_color.set(s_frame.star_color, services);
+	m_animation_timer_vertex.set(&s_frame.animation_timer, services);
+	m_animation_timer_pixel.set(&s_frame.animation_timer, services);
 
 	if (m_client) {
-		float camera_offset_array[3];
-		v3f offset = intToFloat(m_client->getCamera()->getOffset(), BS);
-#if (IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR < 8)
-		camera_offset_array[0] = offset.X;
-		camera_offset_array[1] = offset.Y;
-		camera_offset_array[2] = offset.Z;
-#else
-		offset.getAs3Values(camera_offset_array);
-#endif
-		m_camera_offset_pixel.set(camera_offset_array, services);
-		m_camera_offset_vertex.set(camera_offset_array, services);
+		m_eye_position_pixel.set(s_frame.eye_position, services);
+		m_eye_position_vertex.set(s_frame.eye_position, services);
+
+		if (s_frame.has_minimap)
+			m_minimap_yaw.set(s_frame.minimap_yaw, services);
+
+		m_camera_offset_pixel.set(s_frame.camera_offset, services);
+		m_camera_offset_vertex.set(s_frame.camera_offset, services);
 
 		SamplerLayer_t base_tex = 0, normal_tex = 1;
 		m_base_texture.set(&base_tex, services);
@@ -4220,6 +4208,8 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 
 	TimeTaker tt_draw("Draw scene");
 	driver->beginScene(true, true, skycolor);
+
+	GameGlobalShaderConstantSetter::beginFrame();
 
 	bool draw_wield_tool = (m_game_ui->m_flags.show_hud &&
 			(player->hud_flags & HUD_FLAG_WIELDITEM_VISIBLE) &&
