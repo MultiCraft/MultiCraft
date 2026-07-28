@@ -185,9 +185,15 @@ int ModApiHttp::l_request_http_api(lua_State *L)
 	// We have to make sure that this function is being called directly by
 	// a mod, otherwise a malicious mod could override this function and
 	// steal its return value.
-	lua_Debug info;
+
+	// Coroutines start with an empty stack too, so we can't allow those.
+	bool coro = lua_pushthread(L) != 1;
+	lua_pop(L, 1);
+	if (coro)
+		return 0;
 
 	// Make sure there's only one item below this function on the stack...
+	lua_Debug info;
 	if (lua_getstack(L, 2, &info)) {
 		return 0;
 	}
