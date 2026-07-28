@@ -60,7 +60,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <winuser.h>
 #endif
 
-#if defined(__ANDROID__) || defined(__IOS__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 #include "defaultsettings.h"
 #endif
 
@@ -184,7 +184,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	m_device->getGUIEnvironment()->setSkin(skin);
 	skin->drop();
 
-#if defined(__ANDROID__) || defined(__IOS__)
+#if defined(__ANDROID__) || defined(__APPLE__)
 	// Apply settings according to screen size
 	// We can get real screen size only after device initialization finished
 	set_default_settings();
@@ -835,6 +835,31 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 	return driver_names[type];
 }
 
+float RenderingEngine::getScreenScale()
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+	const SDL_DisplayID display = SDL_GetPrimaryDisplay();
+	const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(display);
+	if (!mode)
+		return 0.0f;
+
+	// Apple reports the scale as pixel density, Android as content scale
+	return SDL_GetDisplayContentScale(display) * mode->pixel_density;
+#else
+	return 0.0f;
+#endif
+}
+
+#if defined(__ANDROID__) || defined(__APPLE__)
+
+float RenderingEngine::getDisplayDensity()
+{
+	const float scale = getScreenScale();
+	return (scale > 0.0f ? scale : 1.0f) * g_settings->getFloat("display_density_factor");
+}
+
+#endif
+
 #if !defined(__ANDROID__) && !defined(__IOS__)
 #if defined(XORG_USED)
 
@@ -908,15 +933,11 @@ float RenderingEngine::getDisplayDensity()
 	return display_density * g_settings->getFloat("display_density_factor");
 }
 
-#else
+#elif !defined(__APPLE__)
 
 float RenderingEngine::getDisplayDensity()
 {
-#ifdef __APPLE__
-	return (g_settings->getFloat("screen_dpi") / 72.0) * g_settings->getFloat("display_density_factor");
-#else
 	return (g_settings->getFloat("screen_dpi") / 96.0) * g_settings->getFloat("display_density_factor");
-#endif
 }
 
 #endif
@@ -933,11 +954,6 @@ v2u32 RenderingEngine::getDisplaySize()
 }
 
 #else // __ANDROID__/__IOS__
-float RenderingEngine::getDisplayDensity()
-{
-	static const float density = porting::getScreenScale();
-	return density;
-}
 
 v2u32 RenderingEngine::getDisplaySize()
 {

@@ -290,21 +290,6 @@ void showToast(const std::string &msg)
 	SDL_ShowAndroidToast(msg.c_str(), 1, -1, 0, 0);
 }
 
-float getScreenScale()
-{
-	static const float value = [](){
-		jmethodID getDensity = jnienv->GetMethodID(activityClass,
-				"getDensity", "()F");
-
-		FATAL_ERROR_IF(getDensity == nullptr,
-			"porting::getDisplayDensity unable to find Java getDensity method");
-
-		return jnienv->CallFloatMethod(activityObj, getDensity);
-	}();
-
-	return value;
-}
-
 void finishGame(const std::string &exc)
 {
 	if (jnienv->ExceptionCheck())

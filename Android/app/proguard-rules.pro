@@ -23,7 +23,6 @@
 	public <methods>;
 	void showDialog(java.lang.String, java.lang.String, int);
 	java.lang.String getDialogValue();
-	float getDensity();
 	void notifyServerConnect(boolean);
 	void notifyExitGame();
 	boolean openURI(java.lang.String, boolean);

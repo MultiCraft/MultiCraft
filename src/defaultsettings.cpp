@@ -505,14 +505,17 @@ void set_default_settings()
 	settings->setDefault("screen_h", "0");
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 
-	float ScaleFactor = porting::getScreenScale();
-	settings->setDefault("display_density_factor", std::to_string(ScaleFactor));
-	if (ScaleFactor >= 2.0f) {
-		settings->setDefault("hud_scaling", "1.25");
-	} else {
-		settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
-		settings->setDefault("gui_scaling", "1.5");
+#ifndef SERVER
+	float ScaleFactor = RenderingEngine::getScreenScale();
+	if (ScaleFactor > 0.0f) {
+		if (ScaleFactor >= 2.0f) {
+			settings->setDefault("hud_scaling", "1.25");
+		} else {
+			settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
+			settings->setDefault("gui_scaling", "1.5");
+		}
 	}
+#endif
 
 #ifdef __aarch64__
 	// Enable visual shader effects on M1
