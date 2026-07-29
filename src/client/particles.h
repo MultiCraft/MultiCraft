@@ -37,12 +37,22 @@ struct ContentFeatures;
 
 class ParticleBuffer;
 
+//! View state every particle billboards against, evaluated once per frame
+struct ParticleFrameView
+{
+	ParticleFrameView(ClientEnvironment *env);
+
+	v3f player_pos;
+	v3s16 camera_offset;
+	f32 pitch_sin, pitch_cos;
+	f32 yaw_sin, yaw_cos;
+};
+
 class Particle
 {
 	public:
 	Particle(
 		IGameDef* gamedef,
-		LocalPlayer *player,
 		ClientEnvironment *env,
 		const ParticleParameters &p,
 		video::ITexture *texture,
@@ -57,14 +67,14 @@ class Particle
 	ParticleBuffer *getBuffer() const { return m_buffer; }
 	bool attachToBuffer(ParticleBuffer *buffer);
 
-	void step(float dtime);
+	void step(float dtime, const ParticleFrameView &view);
 
 	bool get_expired ()
 	{ return m_expiration < m_time; }
 
 private:
 	void updateLight();
-	void updateVertices();
+	void updateVertices(const ParticleFrameView &view);
 
 	ParticleBuffer *m_buffer = nullptr;
 	u16 m_index; // index in m_buffer
@@ -81,7 +91,6 @@ private:
 	v3f m_pos;
 	v3f m_velocity;
 	v3f m_acceleration;
-	LocalPlayer *m_player;
 	float m_size;
 	//! Color without lighting
 	video::SColor m_base_color;

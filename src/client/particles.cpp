@@ -56,7 +56,6 @@ static v3f random_v3f(v3f min, v3f max)
 
 Particle::Particle(
 	IGameDef *gamedef,
-	LocalPlayer *player,
 	ClientEnvironment *env,
 	const ParticleParameters &p,
 	video::ITexture *texture,
@@ -90,7 +89,6 @@ Particle::Particle(
 	m_velocity = p.vel;
 	m_acceleration = p.acc;
 	m_expiration = p.expirationtime;
-	m_player = player;
 	m_size = p.size;
 	m_collisiondetection = p.collisiondetection;
 	m_collision_removal = p.collision_removal;
@@ -106,7 +104,21 @@ Particle::Particle(
 	updateLight();
 
 	// Init model
-	updateVertices();
+	updateVertices(ParticleFrameView(env));
+}
+
+ParticleFrameView::ParticleFrameView(ClientEnvironment *env)
+{
+	LocalPlayer *player = env->getLocalPlayer();
+	player_pos = player->getPosition() / BS;
+	camera_offset = env->getCameraOffset();
+
+	const f32 pitch = player->getPitch() * core::DEGTORAD;
+	const f32 yaw = player->getYaw() * core::DEGTORAD;
+	pitch_sin = std::sin(pitch);
+	pitch_cos = std::cos(pitch);
+	yaw_sin = std::sin(yaw);
+	yaw_cos = std::cos(yaw);
 }
 
 Particle::~Particle()
@@ -126,7 +138,7 @@ bool Particle::attachToBuffer(ParticleBuffer *buffer)
 	return true;
 }
 
-void Particle::step(float dtime)
+void Particle::step(float dtime, const ParticleFrameView &view)
 {
 	m_time += dtime;
 	if (m_collisiondetection) {
@@ -164,7 +176,7 @@ void Particle::step(float dtime)
 	updateLight();
 
 	// Update model
-	updateVertices();
+	updateVertices(view);
 }
 
 void Particle::updateLight()
@@ -190,7 +202,7 @@ void Particle::updateLight()
 		m_light * m_base_color.getBlue() / 255);
 }
 
-void Particle::updateVertices()
+void Particle::updateVertices(const ParticleFrameView &view)
 {
 	if (!m_buffer)
 		return;
@@ -226,27 +238,22 @@ void Particle::updateVertices()
 	m_vertices[3] = video::S3DVertex(-m_size / 2, m_size / 2,
 		0, 0, 0, 0, m_color, tx0, ty0);
 
-	v3s16 camera_offset = m_env->getCameraOffset();
-
 	// All four corners turn by the same angles, so the trigonometry is done
 	// once here rather than inside every rotate call
 	f32 yz_sin = 0.0f, yz_cos = 1.0f, xz_sin, xz_cos;
 	if (m_vertical) {
-		const v3f ppos = m_player->getPosition() / BS;
-		const f32 yaw = std::atan2(ppos.Z - m_pos.Z, ppos.X - m_pos.X)
-			+ core::PI / 2;
+		const f32 yaw = std::atan2(view.player_pos.Z - m_pos.Z,
+			view.player_pos.X - m_pos.X) + core::PI / 2;
 		xz_sin = std::sin(yaw);
 		xz_cos = std::cos(yaw);
 	} else {
-		const f32 pitch = m_player->getPitch() * core::DEGTORAD;
-		const f32 yaw = m_player->getYaw() * core::DEGTORAD;
-		yz_sin = std::sin(pitch);
-		yz_cos = std::cos(pitch);
-		xz_sin = std::sin(yaw);
-		xz_cos = std::cos(yaw);
+		yz_sin = view.pitch_sin;
+		yz_cos = view.pitch_cos;
+		xz_sin = view.yaw_sin;
+		xz_cos = view.yaw_cos;
 	}
 
-	const v3f origin = m_pos * BS - intToFloat(camera_offset, BS);
+	const v3f origin = m_pos * BS - intToFloat(view.camera_offset, BS);
 	for (u16 i = 0; i < 4; i++) {
 		v3f &pos = m_vertices[i].Pos;
 		const v3f p = pos;
@@ -344,7 +351,6 @@ void ParticleSpawner::spawnParticle(ClientEnvironment *env, float radius,
 
 	m_particlemanager->addParticle(new Particle(
 		m_gamedef,
-		m_player,
 		env,
 		pp,
 		texture,
@@ -563,12 +569,13 @@ void ParticleManager::stepSpawners(float dtime)
 void ParticleManager::stepParticles(float dtime)
 {
 	MutexAutoLock lock(m_particle_list_lock);
+	const ParticleFrameView view(m_env);
 	for (auto i = m_particles.begin(); i != m_particles.end();) {
 		if ((*i)->get_expired()) {
 			delete *i;
 			i = m_particles.erase(i);
 		} else {
-			(*i)->step(dtime);
+			(*i)->step(dtime, view);
 			++i;
 		}
 	}
@@ -643,7 +650,7 @@ void ParticleManager::handleParticleEvent(ClientEvent *event, Client *client,
 				p.size = oldsize;
 
 			if (texture) {
-				Particle *toadd = new Particle(client, player, m_env,
+				Particle *toadd = new Particle(client, m_env,
 						p, texture, texpos, texsize, color);
 
 				addParticle(toadd);
@@ -745,7 +752,6 @@ void ParticleManager::addNodeParticle(IGameDef *gamedef,
 
 	Particle *toadd = new Particle(
 		gamedef,
-		player,
 		m_env,
 		p,
 		texture,
