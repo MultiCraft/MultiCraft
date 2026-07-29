@@ -123,6 +123,26 @@ ParticleFrameView::ParticleFrameView(ClientEnvironment *env)
 	const MapDrawControl &control = env->getClientMap().getControl();
 	range_sq = control.range_all ? -1.0f
 		: control.wanted_range * control.wanted_range;
+
+	// Particles are stepped before the camera is moved, so this still describes
+	// the previous frame
+	has_cone = false;
+	const scene::ICameraSceneNode *camera =
+		RenderingEngine::get_scene_manager()->getActiveCamera();
+	if (camera) {
+		view_pos = camera->getAbsolutePosition();
+		view_dir = camera->getTarget() - view_pos;
+		if (view_dir.getLengthSQ() > 0.0f) {
+			view_dir.normalize();
+			const f32 aspect = camera->getAspectRatio();
+			const f32 half = std::atan(std::tan(camera->getFOV() * 0.5f) *
+				std::sqrt(1.0f + aspect * aspect));
+			const f32 cos_half = std::cos(std::min(
+				half + 20.0f * core::DEGTORAD, core::PI * 0.5f));
+			view_cos_sq = cos_half * cos_half;
+			has_cone = true;
+		}
+	}
 }
 
 Particle::~Particle()
@@ -176,9 +196,19 @@ void Particle::step(float dtime, const ParticleFrameView &view)
 		}
 	}
 
-	// Beyond the draw range there is nothing to light or to shape
-	const bool drawn = view.range_sq < 0.0f ||
+	// Out of range or out of sight there is nothing to light or to shape
+	bool drawn = view.range_sq < 0.0f ||
 		m_pos.getDistanceFromSQ(view.player_pos) <= view.range_sq;
+	if (drawn && view.has_cone) {
+		const v3f offset = m_pos * BS
+			- intToFloat(view.camera_offset, BS) - view.view_pos;
+		const f32 dist_sq = offset.getLengthSQ();
+		const f32 along = offset.dotProduct(view.view_dir);
+		// Same as along > view_cos * sqrt(dist_sq), without the root.
+		// Right on top of the camera the direction says nothing useful.
+		drawn = dist_sq < BS * BS ||
+			(along > 0.0f && along * along > view.view_cos_sq * dist_sq);
+	}
 	if (drawn != m_drawn) {
 		if (m_buffer)
 			m_buffer->setQuadDrawn(m_index, drawn);

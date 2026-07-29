@@ -48,6 +48,11 @@ struct ParticleFrameView
 	f32 yaw_sin, yaw_cos;
 	//! Squared draw range, negative when everything is drawn
 	f32 range_sq;
+	//! Camera in render coordinates, and the cone that covers its frustum
+	v3f view_pos;
+	v3f view_dir;
+	f32 view_cos_sq;
+	bool has_cone;
 };
 
 class Particle
