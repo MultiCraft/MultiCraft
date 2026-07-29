@@ -227,17 +227,34 @@ void Particle::updateVertices()
 		0, 0, 0, 0, m_color, tx0, ty0);
 
 	v3s16 camera_offset = m_env->getCameraOffset();
+
+	// All four corners turn by the same angles, so the trigonometry is done
+	// once here rather than inside every rotate call
+	f32 yz_sin = 0.0f, yz_cos = 1.0f, xz_sin, xz_cos;
+	if (m_vertical) {
+		const v3f ppos = m_player->getPosition() / BS;
+		const f32 yaw = std::atan2(ppos.Z - m_pos.Z, ppos.X - m_pos.X)
+			+ core::PI / 2;
+		xz_sin = std::sin(yaw);
+		xz_cos = std::cos(yaw);
+	} else {
+		const f32 pitch = m_player->getPitch() * core::DEGTORAD;
+		const f32 yaw = m_player->getYaw() * core::DEGTORAD;
+		yz_sin = std::sin(pitch);
+		yz_cos = std::cos(pitch);
+		xz_sin = std::sin(yaw);
+		xz_cos = std::cos(yaw);
+	}
+
+	const v3f origin = m_pos * BS - intToFloat(camera_offset, BS);
 	for (u16 i = 0; i < 4; i++) {
-		video::S3DVertex &vertex = m_vertices[i];
-		if (m_vertical) {
-			v3f ppos = m_player->getPosition()/BS;
-			vertex.Pos.rotateXZBy(std::atan2(ppos.Z - m_pos.Z, ppos.X - m_pos.X) /
-				core::DEGTORAD + 90);
-		} else {
-			vertex.Pos.rotateYZBy(m_player->getPitch());
-			vertex.Pos.rotateXZBy(m_player->getYaw());
-		}
-		vertex.Pos += m_pos*BS - intToFloat(camera_offset, BS);
+		v3f &pos = m_vertices[i].Pos;
+		const v3f p = pos;
+		const f32 z = p.Y * yz_sin + p.Z * yz_cos;
+		pos.set(p.X * xz_cos - z * xz_sin,
+			p.Y * yz_cos - p.Z * yz_sin,
+			p.X * xz_sin + z * xz_cos);
+		pos += origin;
 	}
 }
 
