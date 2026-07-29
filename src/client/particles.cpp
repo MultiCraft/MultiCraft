@@ -119,6 +119,10 @@ ParticleFrameView::ParticleFrameView(ClientEnvironment *env)
 	pitch_cos = std::cos(pitch);
 	yaw_sin = std::sin(yaw);
 	yaw_cos = std::cos(yaw);
+
+	const MapDrawControl &control = env->getClientMap().getControl();
+	range_sq = control.range_all ? -1.0f
+		: control.wanted_range * control.wanted_range;
 }
 
 Particle::~Particle()
@@ -171,6 +175,17 @@ void Particle::step(float dtime, const ParticleFrameView &view)
 			m_animation_time -= frame_length;
 		}
 	}
+
+	// Beyond the draw range there is nothing to light or to shape
+	const bool drawn = view.range_sq < 0.0f ||
+		m_pos.getDistanceFromSQ(view.player_pos) <= view.range_sq;
+	if (drawn != m_drawn) {
+		if (m_buffer)
+			m_buffer->setQuadDrawn(m_index, drawn);
+		m_drawn = drawn;
+	}
+	if (!drawn)
+		return;
 
 	// Update lighting
 	updateLight();
@@ -461,6 +476,15 @@ void ParticleBuffer::release(u16 index)
 	for (u16 i = 0; i < 6; i++)
 		indices[6 * index + i] = 0;
 	m_free_list.push_back(index);
+}
+
+void ParticleBuffer::setQuadDrawn(u16 index, bool drawn)
+{
+	assert(index < m_count);
+	u16 *indices = m_mesh_buffer->getIndices();
+	for (u16 i = 0; i < 6; i++)
+		indices[6 * index + i] = drawn ? 4 * index + quad_indices[i] : 0;
+	m_bounding_box_dirty = true;
 }
 
 video::S3DVertex *ParticleBuffer::getVertices(u16 index)

@@ -46,6 +46,8 @@ struct ParticleFrameView
 	v3s16 camera_offset;
 	f32 pitch_sin, pitch_cos;
 	f32 yaw_sin, yaw_cos;
+	//! Squared draw range, negative when everything is drawn
+	f32 range_sq;
 };
 
 class Particle
@@ -78,6 +80,7 @@ private:
 
 	ParticleBuffer *m_buffer = nullptr;
 	u16 m_index; // index in m_buffer
+	bool m_drawn = true;
 
 	float m_time = 0.0f;
 	float m_expiration;
@@ -122,6 +125,8 @@ public:
 	std::optional<u16> allocate();
 	//! Frees the particle at `index`
 	void release(u16 index);
+	//! Drops the quad at `index` from drawing without giving up its slot
+	void setQuadDrawn(u16 index, bool drawn);
 
 	//! @return video::S3DVertex[4]
 	video::S3DVertex *getVertices(u16 index);
