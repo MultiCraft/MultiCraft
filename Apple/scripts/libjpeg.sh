@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-JPEG_VERSION=3.1.4.1
+JPEG_VERSION=3.2.0
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps

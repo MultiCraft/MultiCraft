@@ -849,7 +849,7 @@
 		84FA0A142F19178E00394A7F /* scrollSwipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = scrollSwipe.h; path = ../../../src/gui/scrollSwipe.h; sourceTree = "<group>"; };
 		84FA0A152F19178E00394A7F /* scrollSwipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scrollSwipe.cpp; path = ../../../src/gui/scrollSwipe.cpp; sourceTree = "<group>"; };
 		84FA0A172F2C107600394A7F /* libharfbuzz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libharfbuzz.a; path = ../deps/harfbuzz/libharfbuzz.a; sourceTree = "<group>"; };
-		84FA0A1B2F4BB3CE00394A7F /* SheenBidi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SheenBidi.c; path = ../../../../lib/sheenbidi/Source/SheenBidi.c; sourceTree = "<group>"; };
+		84FA0A1B2F4BB3CE00394A7F /* SheenBidi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SheenBidi.c; path = ../../lib/sheenbidi/Source/SheenBidi.c; sourceTree = "<group>"; };
 		84FD8E2F26A0B01D00EF2BFA /* guiEditBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiEditBox.h; path = ../../../src/gui/guiEditBox.h; sourceTree = "<group>"; };
 		84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiEditBox.cpp; path = ../../../src/gui/guiEditBox.cpp; sourceTree = "<group>"; };
 		84FD8E3226A0B04900EF2BFA /* guiScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiScene.h; path = ../../../src/gui/guiScene.h; sourceTree = "<group>"; };
@@ -1687,7 +1687,8 @@
 			children = (
 				84FA0A1B2F4BB3CE00394A7F /* SheenBidi.c */,
 			);
-			path = sheenbidi;
+			name = sheenbidi;
+			path = ../../../lib/sheenbidi;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1766,6 +1767,8 @@
 				"zh-Hant",
 				ms,
 				hr,
+				uz,
+				az,
 			);
 			mainGroup = 845856A024B1322C0040BA4F;
 			packageReferences = (
@@ -2106,6 +2109,7 @@
 				ENABLE_NS_ASSERTIONS = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_FAST_MATH = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = YES;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
@@ -2129,6 +2133,8 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OBJC_INTEROP_MODE = objcxx;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_REFLECTION_METADATA_LEVEL = "without-names";
 				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};

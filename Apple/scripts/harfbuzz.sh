@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-HARFBUZZ_VERSION=14.2.0
+HARFBUZZ_VERSION=14.2.1
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
@@ -22,8 +22,9 @@ cmake .. \
 	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
 	-DCMAKE_CXX_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
 	-DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURES \
-	-DFREETYPE_LIBRARY="../../freetype/lib/$TARGET_ABI/libfreetype.a ../../libpng/lib/$TARGET_ABI/libpng.a" \
+	-DFREETYPE_LIBRARY="../../freetype/libfreetype.a ../../libpng/libpng.a" \
 	-DFREETYPE_INCLUDE_DIRS=$FREETYPE_INCLUDE \
+	-DHB_HAVE_CORETEXT=OFF \
 	-DHB_HAVE_GLIB=OFF \
 	-DHB_HAVE_GOBJECT=OFF \
 	-DHB_HAVE_ICU=OFF \
@@ -36,4 +37,4 @@ mkdir -p ../../harfbuzz/include/harfbuzz
 cp -v libharfbuzz.a ../../harfbuzz
 cp -v ../src/*.h ../../harfbuzz/include/harfbuzz
 
-echo "Freetype build successful"
+echo "Harfbuzz build successful"

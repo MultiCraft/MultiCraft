@@ -19,7 +19,10 @@ LIBRARY_DIRS="-L$(pwd)/nghttp2"
 
 cd libcurl-src
 
-CFLAGS="$INCLUDE_DIRS $LIBRARY_DIRS $CFLAGS $OSX_FLAGS $OSX_ARCH" \
+CPPFLAGS="$INCLUDE_DIRS" \
+LDFLAGS="$LIBRARY_DIRS" \
+CFLAGS="$CFLAGS $OSX_FLAGS $OSX_ARCH" \
+PKG_CONFIG_LIBDIR=/nonexistent \
 ./configure --host=arm-apple-darwin --prefix=/ --disable-shared --enable-static \
 	--with-nghttp2 \
 	--disable-debug --disable-verbose --disable-versioned-symbols \

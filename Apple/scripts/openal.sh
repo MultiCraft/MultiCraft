@@ -1,12 +1,16 @@
 #!/bin/bash -e
 
-OPENAL_VERSION=1.25.1
+OPENAL_VERSION=1.25.2
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
 
-[ ! -d openal-src ] && \
-	git clone -b $OPENAL_VERSION --depth 1 https://github.com/kcat/openal-soft openal-src
+if [ ! -d openal-src ]; then
+	git clone -b $OPENAL_VERSION https://github.com/kcat/openal-soft openal-src
+	cd openal-src
+	git cherry-pick 681d049
+	cd ..
+fi
 
 rm -rf openal
 
