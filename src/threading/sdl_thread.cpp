@@ -27,7 +27,8 @@ DEALINGS IN THE SOFTWARE.
 #include "threading/sdl_thread.h"
 #include "threading/mutex_auto_lock.h"
 #include "log.h"
-#include "porting.h"
+
+#include <cassert>
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 
@@ -52,13 +53,13 @@ bool Thread::start()
 {
 	MutexAutoLock lock(m_mutex);
 
-	if (m_running)
+	if (m_running || m_thread_obj)
 		return false;
 
 	m_request_stop = false;
+	m_started = false;
 
-	// The mutex may already be locked if the thread is being restarted
-	m_start_finished_mutex.try_lock();
+	MutexAutoLock start_finished_lock(m_start_finished_mutex);
 
 	m_thread_obj = SDL_CreateThread(&threadProc, m_name.c_str(), this);
 
@@ -66,10 +67,10 @@ bool Thread::start()
 		return false;
 
 	// Allow spawned thread to continue
-	m_start_finished_mutex.unlock();
+	start_finished_lock.unlock();
 
-	while (!m_running)
-		sleep_ms(1);
+	// start() promises that the thread has begun executing once it returns
+	m_running_cv.wait(lock, [this] { return m_started; });
 
 	m_joinable = true;
 
@@ -113,7 +114,13 @@ int Thread::threadProc(void *data)
 	current_thread = thr;
 
 	g_logger.registerThread(thr->m_name);
-	thr->m_running = true;
+
+	{
+		MutexAutoLock lock(thr->m_mutex);
+		thr->m_running = true;
+		thr->m_started = true;
+	}
+	thr->m_running_cv.notify_all();
 
 	// Wait for the thread that started this one to finish initializing the
 	// thread handle so that getThreadId/getThreadHandle will work.
@@ -154,8 +161,7 @@ bool Thread::bindToProcessor(unsigned int proc_number)
 
 bool Thread::setPriority(SDL_ThreadPriority prio)
 {
-	int result = SDL_SetCurrentThreadPriority(prio);
-	return result == 0;
+	return SDL_SetCurrentThreadPriority(prio);
 }
 
 #endif

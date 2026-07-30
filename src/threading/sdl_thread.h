@@ -34,6 +34,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <string>
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 
 #include <SDL3/SDL.h>
@@ -124,9 +125,11 @@ private:
 
 	void *m_retval = nullptr;
 	bool m_joinable = false;
+	bool m_started = false;
 	std::atomic<bool> m_request_stop;
 	std::atomic<bool> m_running;
 	std::mutex m_mutex;
+	std::condition_variable m_running_cv;
 	std::mutex m_start_finished_mutex;
 
 	SDL_Thread *m_thread_obj = nullptr;

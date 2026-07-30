@@ -24,14 +24,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <cassert>
 
-#define UNUSED(expr)                                                                     \
-	do {                                                                             \
-		(void)(expr);                                                            \
-	} while (0)
-
 Semaphore::Semaphore(int val)
 {
 	semaphore = SDL_CreateSemaphore(val);
+	FATAL_ERROR_IF(!semaphore, "SDL_CreateSemaphore failed");
 }
 
 Semaphore::~Semaphore()

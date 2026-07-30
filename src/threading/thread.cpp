@@ -118,7 +118,7 @@ bool Thread::start()
 	m_request_stop = false;
 
 	// The mutex may already be locked if the thread is being restarted
-	m_start_finished_mutex.try_lock();
+	(void)m_start_finished_mutex.try_lock();
 
 	try {
 		m_thread_obj = new std::thread(threadProc, this);
