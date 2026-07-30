@@ -3,7 +3,6 @@ uniform sampler2D baseTexture;
 uniform vec4 emissiveColor;
 uniform vec4 skyBgColor;
 uniform mediump float fogDistance;
-uniform vec3 eyePosition;
 
 varying vec3 vNormal;
 varying vec3 vPosition;

@@ -644,7 +644,8 @@ void Camera::updateViewingRange()
 	f32 viewing_range = g_settings->getFloat("viewing_range");
 
 	// Ignore near_plane setting on all other platforms to prevent abuse
-#if ENABLE_GLES
+	// macOS goes through ANGLE but is a desktop platform
+#if ENABLE_GLES && !defined(_IRR_COMPILE_WITH_ANGLE_)
 	m_cameranode->setNearValue(rangelim(
 		g_settings->getFloat("near_plane"), 0.0f, 0.25f) * BS);
 #else

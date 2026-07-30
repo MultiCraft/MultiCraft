@@ -119,10 +119,12 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	bool stereo_buffer = g_settings->get("3d_mode") == "pageflip";
 
 	// Determine driver
-#if !defined(__ANDROID__) && !defined(__IOS__)
-	video::E_DRIVER_TYPE driverType = video::EDT_OPENGL;
-#else
+#if defined(_IRR_COMPILE_WITH_ANGLE_)
+	video::E_DRIVER_TYPE driverType = video::EDT_METAL;
+#elif defined(__ANDROID__) || defined(__IOS__)
 	video::E_DRIVER_TYPE driverType = video::EDT_OGLES2;
+#else
+	video::E_DRIVER_TYPE driverType = video::EDT_OPENGL;
 #endif
 	const std::string &driverstring = g_settings->get("video_driver");
 	std::vector<video::E_DRIVER_TYPE> drivers =
@@ -141,8 +143,9 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 			    << std::endl;
 	}
 #if defined(__ANDROID__) || defined(__IOS__)
-	// Shaders are required on OpenGL ES2
-	g_settings->setBool("enable_shaders", driverType == video::EDT_OGLES2);
+	// Shaders are required on OpenGL ES2, and on the ANGLE-backed context too
+	g_settings->setBool("enable_shaders", driverType == video::EDT_OGLES2 ||
+			driverType == video::EDT_METAL);
 #endif
 
 	SIrrlichtCreationParameters params = SIrrlichtCreationParameters();
@@ -814,6 +817,8 @@ const char *RenderingEngine::getVideoDriverName(irr::video::E_DRIVER_TYPE type)
 			"opengl",
 			"ogles1",
 			"ogles2",
+			"webgl1",
+			"metal",
 	};
 
 	return driver_ids[type];
@@ -830,6 +835,8 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 			"OpenGL",
 			"OpenGL ES1",
 			"OpenGL ES2",
+			"WebGL 1",
+			"Metal",
 	};
 
 	return driver_names[type];

@@ -2,11 +2,6 @@ uniform sampler2D baseTexture;
 
 uniform vec4 skyBgColor;
 uniform mediump float fogDistance;
-uniform vec3 eyePosition;
-
-// The cameraOffset is the current center of the visible world.
-uniform vec3 cameraOffset;
-uniform float animationTimer;
 
 varying vec3 vPosition;
 // World position in the visible world (i.e. relative to the cameraOffset.)
