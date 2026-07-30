@@ -6,7 +6,9 @@ if [ ! -d MultiCraft/MultiCraft.xcodeproj ]; then
 fi
 
 DEST=$(pwd)/assets/locale
-broken_langs=(fil gd gl dv eo he hi jbo kn kk ky ms_Arab nn pt_BR sr_Cyrl sr_Latn zh_TW minetest.pot)
+rm -rf $DEST
+
+broken_langs=(be ca eu fil gd gl dv eo he hi jbo kn kk ky ms_Arab nn pt_BR sr_Cyrl sr_Latn sw zh_TW ko minetest.pot)
 
 pushd ../po
 for lang in *; do
