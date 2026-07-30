@@ -9,6 +9,7 @@ echo "Build libraries:"
 sh scripts/libSDL.sh
 sh scripts/libjpeg.sh
 sh scripts/libpng.sh
+sh scripts/angle.sh
 sh scripts/irrlicht.sh
 sh scripts/gettext.sh
 sh scripts/freetype.sh bootstrap

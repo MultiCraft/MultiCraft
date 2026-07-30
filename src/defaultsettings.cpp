@@ -201,12 +201,12 @@ void set_default_settings()
 	settings->setDefault("lighting_boost_spread", "0.2");
 	settings->setDefault("texture_path", "");
 	settings->setDefault("shader_path", "");
-#if ENABLE_GLES
-#ifdef _IRR_COMPILE_WITH_OGLES1_
+#if defined(_IRR_COMPILE_WITH_ANGLE_)
+	settings->setDefault("video_driver", "metal");
+#elif ENABLE_GLES && defined(_IRR_COMPILE_WITH_OGLES1_)
 	settings->setDefault("video_driver", "ogles1");
-#else
+#elif ENABLE_GLES
 	settings->setDefault("video_driver", "ogles2");
-#endif
 #else
 	settings->setDefault("video_driver", "opengl");
 #endif
@@ -540,7 +540,9 @@ void set_default_settings()
 
 	// Mobile Platform
 #if defined(__ANDROID__) || defined(__IOS__)
+#if !defined(_IRR_COMPILE_WITH_ANGLE_)
 	settings->setDefault("video_driver", "ogles2");
+#endif
 	settings->setDefault("emergequeue_limit_diskonly", "16");
 	settings->setDefault("emergequeue_limit_generate", "16");
 	settings->setDefault("gui_scaling_filter_txr2img", "false");

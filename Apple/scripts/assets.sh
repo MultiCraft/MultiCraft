@@ -9,6 +9,10 @@ fi
 
 DEST=$(pwd)/assets
 
+mkdir -p $DEST/client/shaders
+cp -rv ../client/shaders $DEST/client
+cp -rv deps/irrlicht/shaders $DEST/client/shaders/Irrlicht
+
 mkdir -p $DEST/fonts
 
 if $ALL_FONTS
