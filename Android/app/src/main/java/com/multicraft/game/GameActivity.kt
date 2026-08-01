@@ -301,6 +301,8 @@ class GameActivity : SDLActivity() {
 		return value
 	}
 
+	fun getDensity() = resources.displayMetrics.density
+
 	fun notifyServerConnect(multiplayer: Boolean) {
 		isMultiPlayer = multiplayer
 	}

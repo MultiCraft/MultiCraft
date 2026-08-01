@@ -85,6 +85,11 @@ void notifyExitGame();
 void showToast(const std::string &msg);
 
 /**
+ * get screen density
+ */
+float getScreenScale();
+
+/**
  * call Android function to finish
  */
 NORETURN void finishGame(const std::string &exc);

@@ -844,13 +844,16 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 
 float RenderingEngine::getScreenScale()
 {
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#if defined(__ANDROID__)
+	// SDL only knows the density once its video subsystem is up, JNI always does
+	return porting::getScreenScale();
+#elif defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	const SDL_DisplayID display = SDL_GetPrimaryDisplay();
 	const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(display);
 	if (!mode)
 		return 0.0f;
 
-	// Apple reports the scale as pixel density, Android as content scale
+	// Apple reports the scale as pixel density
 	return SDL_GetDisplayContentScale(display) * mode->pixel_density;
 #else
 	return 0.0f;
