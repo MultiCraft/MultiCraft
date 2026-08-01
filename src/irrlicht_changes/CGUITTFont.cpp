@@ -31,8 +31,8 @@
 
 #include <irrlicht.h>
 #include <cstring>
-#include <iostream>
 #include "CGUITTFont.h"
+#include "debug.h"
 #include "porting.h"
 #include "util/string.h"
 
@@ -76,12 +76,8 @@ scene::SMesh CGUITTFont::shared_plane_;
  */
 inline void checkFontBitmapSize(const FT_Bitmap &bits)
 {
-	if ((s32)bits.rows < 0 || (s32)bits.width < 0) {
-		std::cout << "Insane font glyph size. File: "
-		          << __FILE__ << " Line " << __LINE__
-		          << std::endl;
-		abort();
-	}
+	FATAL_ERROR_IF((s32)bits.rows < 0 || (s32)bits.width < 0,
+			"Insane font glyph size");
 }
 
 u32 getBestFixedSizeIndex(FT_Face face, u32 font_size)
