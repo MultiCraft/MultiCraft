@@ -756,6 +756,7 @@ desynchronize_mapblock_texture_animation (Desynchronize block animation) bool fa
 hud_hotbar_max_width (Maximum hotbar width) float 1.0
 
 #    Modifies the size of the hudbar elements.
+#    While unset, a touchscreen interface is fitted to the screen instead.
 hud_scaling (HUD scale factor) float 1.0
 
 #    Enables caching of facedir rotated meshes.

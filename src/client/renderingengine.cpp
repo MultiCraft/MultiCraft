@@ -853,7 +853,13 @@ float RenderingEngine::getScreenScale()
 {
 #if defined(__ANDROID__) || defined(__APPLE__)
 	// the platform knows its own scale, SDL only reports a window against a drawable
-	return porting::getScreenScale();
+	const float scale = porting::getScreenScale();
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	// pre-retina panels cluster around 128ppi, the middle of the legibility band
+	if (scale <= 1.0f)
+		return 128.0f / 96.0f;
+#endif
+	return scale;
 #elif defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	const SDL_DisplayID display = SDL_GetPrimaryDisplay();
 	const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(display);
@@ -875,6 +881,35 @@ float RenderingEngine::getDisplayDensity()
 }
 
 #endif
+
+float RenderingEngine::getHudScaling()
+{
+#if defined(HAVE_TOUCHSCREENGUI) || \
+		(defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__))
+	// a value of its own is the user's, an inherited default is ours to fit
+	if (!g_settings->existsLocal("hud_scaling")) {
+		// this runs per frame while a menu is open
+		static v2u32 fitted_size;
+		static float fitted_scaling = 1.0f;
+
+#ifdef HAVE_TOUCHSCREENGUI
+		const v2u32 size = getDisplaySize();
+#else
+		const RenderingEngine *engine = get_instance();
+		const v2u32 size = engine ? engine->getWindowSize() : v2u32(0, 0);
+#endif
+		if (size.X > 0 && size.Y > 0) {
+			if (size != fitted_size) {
+				fitted_size = size;
+				fitted_scaling = getAutoHudScaling(size, getDisplayDensity());
+			}
+			return fitted_scaling;
+		}
+	}
+#endif
+
+	return g_settings->getFloat("hud_scaling");
+}
 
 #if !defined(__ANDROID__) && !defined(__IOS__)
 #if defined(XORG_USED)

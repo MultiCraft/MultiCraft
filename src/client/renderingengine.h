@@ -50,6 +50,7 @@ public:
 	static const char *getVideoDriverFriendlyName(irr::video::E_DRIVER_TYPE type);
 	static float getDisplayDensity();
 	static float getScreenScale();
+	static float getHudScaling();
 	static v2u32 getDisplaySize();
 	static int getWindowSafeArea();
 #ifdef HAVE_TOUCHSCREENGUI

@@ -1552,7 +1552,7 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 		}
 
 		if (label.length() >= 1) {
-			int font_height = g_fontengine->getTextHeight();
+			int font_height = font_line_height(m_font);
 			rect.UpperLeftCorner.Y -= font_height;
 			rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + font_height;
 			gui::StaticText::add(Environment, spec.flabel.c_str(), rect, false, true,
@@ -1647,7 +1647,7 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 	}
 
 	if (!spec.flabel.empty()) {
-		int font_height = g_fontengine->getTextHeight();
+		int font_height = font_line_height(m_font);
 		rect.UpperLeftCorner.Y -= font_height;
 		rect.LowerRightCorner.Y = rect.UpperLeftCorner.Y + font_height;
 		IGUIElement *t = gui::StaticText::add(Environment, spec.flabel.c_str(),
@@ -3361,6 +3361,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 			// default window (800 pixels wide) at 96 DPI
 			// and default scaling (1.00).
 			use_imgsize = 0.5555 * screen_dpi * gui_scaling;
+			m_font_scale = 1.0;
 		} else {
 			// Variables for the maximum imgsize that can fit in the screen.
 			double fitx_imgsize;
@@ -3429,11 +3430,22 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 #else
 			// Desktop computers have more space, so try to fit 15 coordinates.
 			double prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+			// a 1x panel reports fewer pixels than its pitch warrants, so boost
+			prefer_imgsize *= RenderingEngine::getDisplayDensity() /
+					porting::getScreenScale();
+#endif
 #endif
 			// Try to use the preferred imgsize, but if that's bigger than the maximum
 			// size, use the maximum size.
 			use_imgsize = std::min(prefer_imgsize,
 					std::min(fitx_imgsize, fity_imgsize));
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+			// text keeps its share of the slot it sits in, but never drops below default
+			m_font_scale = MYMAX(1.0, use_imgsize /
+					RenderingEngine::getDisplayDensity() *
+					FORMSPEC_FONT_SHARE / TTF_DEFAULT_FONT_SIZE);
+#endif
 		}
 
 		// Everything else is scaled in proportion to the
@@ -3449,7 +3461,9 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 		padding = v2s32(use_imgsize*3.0/8, use_imgsize*3.0/8);
 		m_btn_height = use_imgsize*15.0/13 * 0.35;
 
-		m_font = g_fontengine->getFont();
+		// the slot grows with the screen, so the text in it has to follow
+		const u32 want = std::max(1.0, g_fontengine->getDefaultFontSize() * m_font_scale);
+		m_font = g_fontengine->getFont(want);
 
 		if (mydata.real_coordinates) {
 			mydata.size = v2s32(
@@ -3473,6 +3487,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 		// Non-size[] form must consist only of text fields and
 		// implicit "Proceed" button.  Use default font, and
 		// temporary form size which will be recalculated below.
+		m_font_scale = 1.0;
 		m_font = g_fontengine->getFont();
 		m_btn_height = font_line_height(m_font) * 0.875;
 		DesiredRect = core::rect<s32>(
@@ -5030,6 +5045,10 @@ std::array<StyleSpec, StyleSpec::NUM_STATES> GUIFormSpecMenu::getStyleForElement
 		for (const StyleSpec &spec : it->second)
 			ret[(u32)spec.getState()] |= spec;
 	}
+
+	// styled text keeps its share of the slot too
+	for (StyleSpec &spec : ret)
+		spec.setFontScale(m_font_scale);
 
 	return ret;
 }

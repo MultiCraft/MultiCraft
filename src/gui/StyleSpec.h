@@ -112,8 +112,12 @@ private:
 	std::array<bool, NUM_PROPERTIES> property_set{};
 	std::array<std::string, NUM_PROPERTIES> properties;
 	State state_map = STATE_DEFAULT;
+	float font_scale = 1.0f;
 
 public:
+	// text keeps its share of the slot it sits in, stamped by the formspec
+	void setFontScale(float scale) { font_scale = scale; }
+
 	static Property GetPropertyByName(const std::string &name)
 	{
 		if (name == "textcolor") {
@@ -408,6 +412,12 @@ public:
 			}
 
 			spec.size = (unsigned)std::min(std::max(calc_size, 1), 999);
+		}
+
+		if (font_scale != 1.0f) {
+			const int base = spec.size != FONT_SIZE_UNSPECIFIED ?
+					(int)spec.size : (int)g_fontengine->getFontSize(spec.mode);
+			spec.size = (unsigned)std::clamp((int)(base * font_scale + 0.5f), 1, 999);
 		}
 
 		if (!outline.empty()) {

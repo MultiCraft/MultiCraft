@@ -41,6 +41,9 @@ class Client;
 class GUIScrollContainer;
 class ISoundManager;
 
+// Em size of the formspec text as a share of the inventory slot it sits in
+#define FORMSPEC_FONT_SHARE 0.21
+
 enum FormspecFieldType {
 	f_Button,
 	f_Table,
@@ -345,6 +348,7 @@ protected:
 	bool m_allowclose = true;
 	bool m_lock = false;
 	v2u32 m_lockscreensize;
+	double m_font_scale = 1.0;
 
 	bool m_bgnonfullscreen;
 	bool m_bgfullscreen;

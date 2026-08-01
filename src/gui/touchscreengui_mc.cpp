@@ -25,6 +25,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/keycode.h"
 #include "filesys.h"
 #include "gettext.h"
+#include "hud.h" // TOUCH_BUTTON_SIZE
 #include "porting.h"
 #include "client/guiscalingfilter.h"
 #include "client/renderingengine.h"
@@ -79,7 +80,7 @@ TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 {
 	m_screensize = m_device->getVideoDriver()->getScreenSize();
 	m_button_size = RenderingEngine::getDisplayDensity() *
-			g_settings->getFloat("hud_scaling") * 64.0f;
+			RenderingEngine::getHudScaling() * TOUCH_BUTTON_SIZE;
 
 	m_press_sound = g_settings->get("btn_press_sound");
 
@@ -323,7 +324,7 @@ void TouchScreenGUI::initJoystickButton()
 void TouchScreenGUI::updateButtons()
 {
 	m_button_size = RenderingEngine::getDisplayDensity() *
-			g_settings->getFloat("hud_scaling") * 64.0f;
+			RenderingEngine::getHudScaling() * TOUCH_BUTTON_SIZE;
 
 	for (auto button : m_buttons) {
 		if (button->state == STATE_OVERFLOW)

@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include <string>
 #include "common/c_types.h"
+#include "util/numeric.h"
 
 #define HUD_DIR_LEFT_RIGHT 0
 #define HUD_DIR_RIGHT_LEFT 1
@@ -57,6 +58,32 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #define HOTBAR_IMAGE_SIZE 48
+
+// Unscaled edge of a touchscreen button; every button rect is a multiple of it
+#define TOUCH_BUTTON_SIZE 64
+
+// Share of the screen height one hotbar slot is tuned to cover
+#define HOTBAR_SCREEN_SHARE 0.054f
+
+// Largest hud_scaling the screen has room for
+inline float getAutoHudScaling(v2u32 screen_size, float display_density)
+{
+#ifdef HAVE_TOUCHSCREENGUI
+	// half the widest hotbar a game may ask for, and the joystick, in unscaled pixels
+	const float hotbar = HUD_HOTBAR_ITEMCOUNT_MAX * HOTBAR_IMAGE_SIZE * 7 / 12.0f;
+	// the joystick reaches 4.8 button sizes in once shifted on a round screen
+	const float joystick = TOUCH_BUTTON_SIZE * 4.8f;
+
+	return rangelim(screen_size.X / (2.0f * display_density * (hotbar + joystick)),
+			0.5f, 1.0f);
+#else
+	// the height sets the size, the width has to hold the stat bars flanking the hotbar
+	const float wanted = screen_size.Y * HOTBAR_SCREEN_SHARE;
+	const float fits = screen_size.X / (HUD_HOTBAR_ITEMCOUNT_DEFAULT * 7.0f / 3.0f);
+	return rangelim(MYMIN(wanted, fits) / (HOTBAR_IMAGE_SIZE * display_density),
+			0.75f, 2.0f);
+#endif
+}
 
 enum HudElementType {
 	HUD_ELEM_IMAGE     = 0,
