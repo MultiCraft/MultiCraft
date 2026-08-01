@@ -119,7 +119,8 @@ Hud::Hud(gui::IGUIEnvironment *guienv, Client *client, LocalPlayer *player,
 
 	if (m_mode == HIGHLIGHT_BOX) {
 		m_selection_material.Thickness =
-			rangelim(g_settings->getS16("selectionbox_width"), 1, 6);
+			rangelim(g_settings->getS16("selectionbox_width"), 1, 6) *
+			RenderingEngine::getDisplayDensity();
 	} else if (m_mode == HIGHLIGHT_HALO) {
 		m_selection_material.setTexture(0, tsrc->getTextureForMesh("halo.png"));
 		m_selection_material.setFlag(video::EMF_BACK_FACE_CULLING, true);

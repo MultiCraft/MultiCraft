@@ -229,7 +229,7 @@ void set_default_settings()
 	settings->setDefault("formspec_default_bg_color", "(0,0,0)");
 	settings->setDefault("formspec_default_bg_opacity", "140");
 	settings->setDefault("selectionbox_color", "(0,0,0)");
-	settings->setDefault("selectionbox_width", "4");
+	settings->setDefault("selectionbox_width", "2");
 	settings->setDefault("node_highlighting", "box");
 	settings->setDefault("crosshair_color", "(255,255,255)");
 	settings->setDefault("crosshair_alpha", "255");
@@ -654,7 +654,6 @@ void set_default_settings()
 		} else if (x_inches > 3.7 && x_inches <= 4.5) {
 			// medium phones
 			settings->setDefault("hud_scaling", "0.6");
-			settings->setDefault("selectionbox_width", "6");
 			settings->setDefault("console_message_height", "0");
 		} else if (x_inches > 4.5 && x_inches <= 5.5) {
 			// large 6" phones
@@ -663,7 +662,6 @@ void set_default_settings()
 			} else {
 				settings->setDefault("hud_scaling", "0.7");
 			}
-			settings->setDefault("selectionbox_width", "6");
 		} else if (x_inches > 5.5 && x_inches <= 6.5) {
 			// 7" tablets
 			if (ratio > 2.1f) {
@@ -671,7 +669,6 @@ void set_default_settings()
 			} else {
 				settings->setDefault("hud_scaling", "0.85");
 			}
-			settings->setDefault("selectionbox_width", "6");
 		}
 
 		if (x_inches <= 4.5) {
@@ -708,24 +705,19 @@ void set_default_settings()
 		// 5.8" and 6.1" iPhones
 		settings->setDefault("hud_scaling", "0.8");
 		settings->setDefault("touch_sensitivity", "0.35");
-		settings->setDefault("selectionbox_width", "6");
 	} else if (isDevice6and5Inch(model)) {
 		// 6.5" iPhone
 		settings->setDefault("hud_scaling", "0.85");
 		settings->setDefault("touch_sensitivity", "0.35");
-		settings->setDefault("selectionbox_width", "6");
 	} else if (isDevice7and9Inch(model)) {
 		// iPad mini
 		settings->setDefault("hud_scaling", "0.9");
 		settings->setDefault("touch_sensitivity", "0.25");
-		settings->setDefault("selectionbox_width", "6");
 	} else if (isDevice8and3Inch(model)) {
 		settings->setDefault("touch_sensitivity", "0.25");
-		settings->setDefault("selectionbox_width", "6");
 	} else {
 		// iPad
 		settings->setDefault("touch_sensitivity", "0.3");
-		settings->setDefault("selectionbox_width", "6");
 	}
 
 	if (isDevice4Inch(model) || isDevice4and7Inch(model)) {

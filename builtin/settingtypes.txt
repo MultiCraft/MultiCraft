@@ -735,7 +735,7 @@ formspec_default_bg_color (Formspec Default Background Color) string (0,0,0)
 selectionbox_color (Selection box color) string (0,0,0)
 
 #    Width of the selection box lines around nodes.
-selectionbox_width (Selection box width) int 2 1 5
+selectionbox_width (Selection box width) int 2 1 6
 
 #    Crosshair color (R,G,B).
 #    Also controls the object crosshair color
