@@ -170,7 +170,8 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	m_device = createDeviceEx(params);
 #if defined(__ANDROID__) || defined(__IOS__)
 	FATAL_ERROR_IF(!m_device, ("Device create failed. Driver Type: \"" +
-			std::string(RenderingEngine::getVideoDriverName(driverType)) + "\".").c_str());
+			std::string(RenderingEngine::getVideoDriverName(driverType)) +
+			"\". SDL: " + SDL_GetError()).c_str());
 #endif
 	driver = m_device->getVideoDriver();
 
@@ -844,8 +845,8 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 
 float RenderingEngine::getScreenScale()
 {
-#if defined(__ANDROID__)
-	// SDL only knows the density once its video subsystem is up, JNI always does
+#if defined(__ANDROID__) || defined(__APPLE__)
+	// the platform knows its own scale, SDL only reports a window against a drawable
 	return porting::getScreenScale();
 #elif defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
 	const SDL_DisplayID display = SDL_GetPrimaryDisplay();
@@ -853,7 +854,6 @@ float RenderingEngine::getScreenScale()
 	if (!mode)
 		return 0.0f;
 
-	// Apple reports the scale as pixel density
 	return SDL_GetDisplayContentScale(display) * mode->pixel_density;
 #else
 	return 0.0f;

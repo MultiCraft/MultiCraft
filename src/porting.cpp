@@ -774,6 +774,12 @@ std::string getSecretKey(const std::string &key)
 	return std::string(MultiCraft::getSecretKey(key.c_str()));
 }
 
+float getScreenScale()
+{
+	static const float retval = MultiCraft::getScreenScale();
+	return retval;
+}
+
 void finishGame(const std::string &exc)
 {
 	MultiCraft::finishGame(exc.c_str());

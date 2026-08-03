@@ -19,6 +19,11 @@ public func initApple() {
 	AppLogic.shared.initialize()
 }
 
+public func getScreenScale() -> Float {
+	let scale = NSScreen.main?.backingScaleFactor ?? 1.0
+	return Float(scale)
+}
+
 public func getUpgrade(key: UnsafePointer<CChar>, extra: UnsafePointer<CChar>) -> Bool {
 	AppLogic.log(message: "[EVENT] got upgrade event: \(key)")
 	return false
