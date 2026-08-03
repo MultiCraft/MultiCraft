@@ -631,7 +631,7 @@ bool GUIEngine::downloadFile(HTTPFetchRequest fetch_request, const std::string &
 	fetch_request.caller = HTTPFETCH_SYNC;
 	bool completed = httpfetch_sync_interruptible(fetch_request, fetch_result, 100, is_cancelled);
 
-	if (!completed || !fetch_result.succeeded) {
+	if (!completed || !fetch_result.succeeded || fetch_result.response_code >= 400) {
 		target_file.close();
 		fs::DeleteSingleFileOrEmptyDirectory(target);
 		return false;
