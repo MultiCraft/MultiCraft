@@ -345,7 +345,13 @@ void Client::handleCommand_Inventory(NetworkPacket* pkt)
 	LocalPlayer *player = m_env.getLocalPlayer();
 	assert(player != NULL);
 
-	player->inventory.deSerialize(is);
+	std::stringstream sstr;
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode) {
+		decompressZstd(is, sstr);
+		player->inventory.deSerialize(sstr);
+	} else {
+		player->inventory.deSerialize(is);
+	}
 
 	m_update_wielded_item = true;
 
@@ -431,7 +437,22 @@ void Client::handleCommand_ChatMessage(NetworkPacket *pkt)
 
 	ChatMessage *chatMessage = new ChatMessage();
 	u8 version, message_type;
-	*pkt >> version >> message_type;
+	*pkt >> version;
+
+	if ((m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode)
+			&& version > 100) {
+		version -= 100;
+
+		std::istringstream is(pkt->readLongString(), std::ios::binary);
+		std::stringstream sstr;
+		decompressZstd(is, sstr);
+		pkt->clearData();
+		*pkt << version;
+		pkt->putRawString(sstr.str().c_str(), sstr.str().size());
+		pkt->setReadOffset(1);
+	}
+
+	*pkt >> message_type;
 
 	if (version != 1 || message_type >= CHATMESSAGE_TYPE_MAX) {
 		delete chatMessage;
@@ -469,6 +490,15 @@ void Client::handleCommand_ActiveObjectRemoveAdd(NetworkPacket* pkt)
 			string initialization data
 		}
 	*/
+
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode) {
+		std::istringstream is(pkt->readLongString(), std::ios::binary);
+		std::stringstream sstr;
+		decompressZstd(is, sstr);
+		pkt->clearData();
+		pkt->putRawString(sstr.str().c_str(), sstr.str().size());
+		pkt->setReadOffset(0);
+	}
 
 	try {
 		u8 type;
@@ -509,6 +539,16 @@ void Client::handleCommand_ActiveObjectMessages(NetworkPacket* pkt)
 			string message
 		}
 	*/
+
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode) {
+		std::istringstream is(pkt->readLongString(), std::ios::binary);
+		std::stringstream sstr;
+		decompressZstd(is, sstr);
+		pkt->clearData();
+		pkt->putRawString(sstr.str().c_str(), sstr.str().size());
+		pkt->setReadOffset(0);
+	}
+
 	std::string datastring(pkt->getString(0), pkt->getSize());
 	std::istringstream is(datastring, std::ios_base::binary);
 
@@ -659,8 +699,16 @@ void Client::handleCommand_DeathScreen(NetworkPacket* pkt)
 
 void Client::handleCommand_AnnounceMedia(NetworkPacket* pkt)
 {
-	u16 num_files;
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode) {
+		std::istringstream is(pkt->readLongString(), std::ios::binary);
+		std::stringstream sstr;
+		decompressZstd(is, sstr);
+		pkt->clearData();
+		pkt->putRawString(sstr.str().c_str(), sstr.str().size());
+		pkt->setReadOffset(0);
+	}
 
+	u16 num_files;
 	*pkt >> num_files;
 
 	infostream << "Client: Received media announcement: packet size: "
@@ -937,8 +985,14 @@ void Client::handleCommand_InventoryFormSpec(NetworkPacket* pkt)
 	LocalPlayer *player = m_env.getLocalPlayer();
 	assert(player != NULL);
 
-	// Store formspec in LocalPlayer
-	player->inventory_formspec = pkt->readLongString();
+	std::stringstream sstr;
+	if (m_compression_mode == NETPROTO_COMPRESSION_ENC || m_simple_singleplayer_mode) {
+		 std::istringstream is(pkt->readLongString(), std::ios::binary);
+		decompressZstd(is, sstr);
+		player->inventory_formspec = sstr.str();
+	} else {
+		player->inventory_formspec = pkt->readLongString();
+	}
 }
 
 void Client::handleCommand_DetachedInventory(NetworkPacket* pkt)
