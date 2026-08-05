@@ -137,6 +137,25 @@ bool ScriptApiServer::setPassword(const std::string &playername,
 	return lua_toboolean(L, -1);
 }
 
+// Returns the provided player name with proper casing
+std::string ScriptApiServer::getCanonicalPlayerName(const std::string &playername)
+{
+	SCRIPTAPI_PRECHECKHEADER
+
+	int error_handler = PUSH_ERROR_HANDLER(L);
+	getAuthHandler();
+	lua_getfield(L, -1, "get_canonical_name");
+	// No-op if it doesn't exist for compatibility with 3rd-party auth mods
+	if (lua_type(L, -1) != LUA_TFUNCTION)
+		return playername;
+	lua_pushstring(L, playername.c_str());
+	PCALL_RES(lua_pcall(L, 1, 1, error_handler));
+	lua_remove(L, -2); // Remove auth handler
+	lua_remove(L, error_handler);
+
+	return luaL_checkstring(L, -1);
+}
+
 bool ScriptApiServer::on_chat_message(const std::string &name,
 		const std::string &message)
 {
