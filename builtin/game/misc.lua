@@ -120,14 +120,18 @@ function core.is_valid_pos(pos)
 	if not pos or type(pos) ~= "table" then
 		return false
 	end
-	for _, v in pairs({"x", "y", "z"}) do
-		if not pos[v] or pos[v] ~= pos[v] or
-				pos[v] < -mapgen_limit or pos[v] > mapgen_limit then
-			return false
-		end
+	local x, y, z = pos.x, pos.y, pos.z
+	if not x or not y or not z then
+		return false
+	end
+	-- NaN fails every comparison
+	if x ~= x or y ~= y or z ~= z then
+		return false
 	end
 
-	return true
+	return x >= -mapgen_limit and x <= mapgen_limit
+		and y >= -mapgen_limit and y <= mapgen_limit
+		and z >= -mapgen_limit and z <= mapgen_limit
 end
 
 
