@@ -632,63 +632,58 @@ core.registered_on_rightclickplayers, core.register_on_rightclickplayer = make_r
 -- Player step iteration
 --
 
-players_per_step = tonumber(core.settings:get("players_per_globalstep")) or 20
+local players_per_step = tonumber(core.settings:get("players_per_globalstep")) or 20
 
-local player_iter
-local player_iter_forced
-local playerstep_iter
+local player_names, player_pos
+local player_names_forced, player_pos_forced
+local playerstep_pos = 0
 local playerstep_funcs = {}
 local playerstep_funcs_forced = {}
 local playernames = {}
+local playerobjs, playerobjs_n = {}, 0
 
 core.register_playerstep = function(func, force)
 	local funcs = force and playerstep_funcs_forced or playerstep_funcs
 	funcs[#funcs + 1] = func
 end
 
-local function table_iter(t)
-	local i = 0
-	local n = table.getn(t)
-	return function ()
-		i = i + 1
-		if i <= n then
-			return t[i]
-		end
-	end
-end
-
-function core.get_player_iter()
+local function connected_player_names()
 	local names = {}
-	for player in table_iter(core.get_connected_players()) do
+	for _, player in ipairs(core.get_connected_players()) do
 		local name = player:get_player_name()
 		if name then
 			names[#names + 1] = name
 		end
 	end
-	return table_iter(names)
+	return names
 end
 
 local function get_playerstep_func()
-	if playerstep_iter == nil then
-		playerstep_iter = table_iter(playerstep_funcs)
+	playerstep_pos = playerstep_pos + 1
+	if playerstep_pos > #playerstep_funcs then
+		playerstep_pos = 1
+	end
+
+	-- Start of a pass, take the next batch
+	if playerstep_pos == 1 then
 		playernames = {}
 		for _ = 1, players_per_step do
-			if player_iter == nil then
-				player_iter = core.get_player_iter()
+			if player_names == nil then
+				player_names = connected_player_names()
+				player_pos = 0
 			end
-			local name = player_iter()
+			player_pos = player_pos + 1
+			local name = player_names[player_pos]
 			if not name then
-				player_iter = nil
+				player_names = nil
 				break
 			end
-			if core.get_player_by_name(name) then
-				playernames[#playernames + 1] = name
-			end
+			-- Offline players are dropped on hand-out
+			playernames[#playernames + 1] = name
 		end
 	end
-	local func = playerstep_iter()
-	playerstep_iter = func and playerstep_iter
-	return func or get_playerstep_func()
+
+	return playerstep_funcs[playerstep_pos]
 end
 
 -- Run playerstep callbacks
@@ -696,23 +691,27 @@ end
 core.register_globalstep(function(dtime)
 	-- Run forced callbacks
 	if #playerstep_funcs_forced ~= 0 then
-		local playernames_forced = {}
+		local playernames_forced, players_forced = {}, {}
 		for _ = 1, players_per_step do
-			if player_iter_forced == nil then
-				player_iter_forced = core.get_player_iter()
+			if player_names_forced == nil then
+				player_names_forced = connected_player_names()
+				player_pos_forced = 0
 			end
-			local name = player_iter_forced()
+			player_pos_forced = player_pos_forced + 1
+			local name = player_names_forced[player_pos_forced]
 			if not name then
-				player_iter_forced = nil
+				player_names_forced = nil
 				break
 			end
-			if core.get_player_by_name(name) then
+			local player = core.get_player_by_name(name)
+			if player then
 				playernames_forced[#playernames_forced + 1] = name
+				players_forced[#players_forced + 1] = player
 			end
 		end
-		for func in table_iter(playerstep_funcs_forced) do
+		for _, func in ipairs(playerstep_funcs_forced) do
 			if type(func) == "function" then
-				func(dtime, playernames_forced)
+				func(dtime, playernames_forced, players_forced)
 			end
 		end
 	end
@@ -720,7 +719,25 @@ core.register_globalstep(function(dtime)
 		-- Run single step callbacks
 		local func = get_playerstep_func()
 		if type(func) == "function" then
-			func(dtime, playernames)
+			-- Batch is a pass old, so drop whoever left
+			local count, n = #playernames, 0
+			for i = 1, count do
+				local name = playernames[i]
+				local player = core.get_player_by_name(name)
+				if player then
+					n = n + 1
+					playernames[n] = name
+					playerobjs[n] = player
+				end
+			end
+			for i = count, n + 1, -1 do
+				playernames[i] = nil
+			end
+			for i = playerobjs_n, n + 1, -1 do
+				playerobjs[i] = nil
+			end
+			playerobjs_n = n
+			func(dtime, playernames, playerobjs)
 		end
 	end
 end)
