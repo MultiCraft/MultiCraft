@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gettime.h"
 #include "porting.h"
 #include "renderingengine.h"
+#include "util/numeric.h"
 #include "util/string.h"
 
 bool JoystickButtonCmb::isTriggered(const irr::SEvent::SJoystickEvent &ev) const
@@ -275,28 +276,16 @@ void SDLGameController::handleMouseMovement(int x, int y)
 	u32 current_time = device->getTimer()->getRealTime();
 	v2s32 mouse_pos = device->getCursorControl()->getPosition();
 	int deadzone = g_settings->getU16("joystick_deadzone");
+	core::dimension2du screen = device->getVideoDriver()->getScreenSize();
+	s32 dt = m_mouse_time ? current_time - m_mouse_time : 0;
 
 	if (x > deadzone || x < -deadzone) {
-		s32 dt = current_time - m_mouse_time;
-
-		mouse_pos.X += (x * dt / 30000);
-		if (mouse_pos.X < 0)
-			mouse_pos.X = 0;
-		if (mouse_pos.X > device->getVideoDriver()->getScreenSize().Width)
-			mouse_pos.X = device->getVideoDriver()->getScreenSize().Width;
-
+		mouse_pos.X = rangelim(mouse_pos.X + (x * dt / 30000), 0, (s32)screen.Width - 1);
 		changed = true;
 	}
 
 	if (y > deadzone || y < -deadzone) {
-		s32 dt = current_time - m_mouse_time;
-
-		mouse_pos.Y += (y * dt / 30000);
-		if (mouse_pos.Y < 0)
-			mouse_pos.Y = 0;
-		if (mouse_pos.Y > device->getVideoDriver()->getScreenSize().Height)
-			mouse_pos.Y = device->getVideoDriver()->getScreenSize().Height;
-
+		mouse_pos.Y = rangelim(mouse_pos.Y + (y * dt / 30000), 0, (s32)screen.Height - 1);
 		changed = true;
 	}
 
@@ -625,7 +614,7 @@ void SDLGameController::translateEvent(const SEvent &event)
 			if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_STICK ||
 					event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
 				handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
-			} else if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
+			} else if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER) {
 				handleMouseClickRight(event.SDLControllerButtonEvent.Pressed);
 			} else {
 				handleButtonInMenu(event);
@@ -634,8 +623,6 @@ void SDLGameController::translateEvent(const SEvent &event)
 			if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_RIGHT_STICK ||
 				event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
 					handleMouseClickLeft(event.SDLControllerButtonEvent.Pressed);
-			} else if (event.SDLControllerButtonEvent.Button == SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) {
-				handleMouseClickRight(event.SDLControllerButtonEvent.Pressed);
 			} else {
 				handleButton(event);
 			}
@@ -646,6 +633,7 @@ void SDLGameController::translateEvent(const SEvent &event)
 		if (isMenuActive()) {
 			handleMouseMovement(value[SDL_GAMEPAD_AXIS_LEFTX], value[SDL_GAMEPAD_AXIS_LEFTY]);
 		} else {
+			m_mouse_time = RenderingEngine::get_raw_device()->getTimer()->getRealTime();
 			handleTriggerLeft(value[SDL_GAMEPAD_AXIS_LEFT_TRIGGER]);
 			handleTriggerRight(value[SDL_GAMEPAD_AXIS_RIGHT_TRIGGER]);
 			handlePlayerMovement(value[SDL_GAMEPAD_AXIS_LEFTX], value[SDL_GAMEPAD_AXIS_LEFTY]);
