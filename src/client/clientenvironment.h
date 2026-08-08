@@ -125,6 +125,18 @@ public:
 		return m_ao_manager.getActiveObjects(origin, max_d, dest);
 	}
 
+	// Objects that light their surroundings, collected once per step
+	struct PointLight {
+		v3f pos;
+		f32 rank;
+		u8 level;
+	};
+
+	const std::vector<PointLight> &getPointLights() const { return m_point_lights; }
+
+	// Brightness the light sources add at pos, one level lost per node
+	u8 getPointLightBrightness(const v3f &pos) const;
+
 	bool hasClientEnvEvents() const { return !m_client_event_queue.empty(); }
 
 	// Get event from queue. If queue is empty, it triggers an assertion failure.
@@ -148,6 +160,7 @@ private:
 	Client *m_client;
 	ClientScripting *m_script = nullptr;
 	client::ActiveObjectMgr m_ao_manager;
+	std::vector<PointLight> m_point_lights, m_point_lights_next;
 	std::vector<ClientSimpleObject*> m_simple_objects;
 	std::queue<ClientEnvEvent> m_client_event_queue;
 	IntervalLimiter m_active_object_light_update_interval;

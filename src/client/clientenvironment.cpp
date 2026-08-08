@@ -137,6 +137,17 @@ void ClientEnvironment::setLocalPlayer(LocalPlayer *player)
 	m_local_player = player;
 }
 
+u8 ClientEnvironment::getPointLightBrightness(const v3f &pos) const
+{
+	u8 level = 0;
+	for (const PointLight &pl : m_point_lights) {
+		f32 nodes = pl.pos.getDistanceFrom(pos) / BS;
+		if (nodes < pl.level)
+			level = MYMAX(level, (u8)(pl.level - nodes));
+	}
+	return level ? decode_light(level) : 0;
+}
+
 void ClientEnvironment::step(float dtime)
 {
 	/* Step time of day */
@@ -301,6 +312,8 @@ void ClientEnvironment::step(float dtime)
 		node_at_lplayer = m_map->getNode(p);
 
 		u16 light = getInteriorLight(node_at_lplayer, 0, m_client->ndef());
+		if (u8 lit = getPointLightBrightness(lplayer->getEyePosition()))
+			light = MYMAX(light & 0xff, lit) | (MYMAX(light >> 8, lit) << 8);
 		final_color_blend(&lplayer->light_color, light, day_night_ratio);
 	}
 
@@ -309,9 +322,19 @@ void ClientEnvironment::step(float dtime)
 	*/
 
 	bool update_lighting = m_active_object_light_update_interval.step(dtime, 0.21);
-	auto cb_state = [this, dtime, update_lighting, day_night_ratio] (ClientActiveObject *cao) {
+	const bool point_lights = g_settings->getBool("smooth_lighting");
+	const v3f eye = lplayer->getEyePosition();
+	auto cb_state = [this, dtime, update_lighting, day_night_ratio, point_lights,
+			eye] (ClientActiveObject *cao) {
 		// Step object
 		cao->step(dtime, this);
+
+		if (u8 level = point_lights ? cao->getLightSource() : 0) {
+			const v3f pos = cao->getLightPos();
+			f32 d = pos.getDistanceFrom(eye);
+			if (d < (LIGHT_MAX + 2) * BS)
+				m_point_lights_next.push_back({pos, level * BS - d, level});
+		}
 
 		if (update_lighting)
 			cao->updateLight(day_night_ratio);
@@ -319,6 +342,11 @@ void ClientEnvironment::step(float dtime)
 
 	m_ao_manager.step(dtime, cb_state);
 
+	// Hand the sources over brightest first, the shader takes the first few
+	m_point_lights.swap(m_point_lights_next);
+	m_point_lights_next.clear();
+	std::sort(m_point_lights.begin(), m_point_lights.end(),
+		[] (const PointLight &a, const PointLight &b) { return a.rank > b.rank; });
 	/*
 		Step and handle simple objects
 	*/

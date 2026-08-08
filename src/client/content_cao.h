@@ -172,6 +172,10 @@ public:
 
 	inline const v3f &getRotation() const { return m_rotation; }
 
+	u8 getLightSource() const override { return m_prop.light_source; }
+
+	v3f getLightPos() const override;
+
 	const bool isImmortal();
 
 	scene::ISceneNode *getSceneNode() const;

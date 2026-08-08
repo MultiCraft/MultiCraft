@@ -64,6 +64,9 @@ namespace irr { namespace video {
 } }
 
 
+// Light sources the node shader takes, one per column of `pointLights`
+constexpr u32 MAX_POINT_LIGHTS = 4;
+
 class IShaderConstantSetter {
 public:
 	virtual ~IShaderConstantSetter() = default;

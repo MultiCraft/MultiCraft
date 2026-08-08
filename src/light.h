@@ -67,6 +67,15 @@ float decode_light_f(float light_f);
 
 void set_light_table(float gamma);
 
+struct LightingParams
+{
+	float a, b, c;		    // Lighting curve polynomial coefficients
+	float boost, center, sigma; // Lighting curve parametric boost
+	float gamma;		    // Lighting curve gamma correction
+};
+
+const LightingParams &get_lighting_params();
+
 #endif // ifndef SERVER
 
 // 0 <= daylight_factor <= 1000

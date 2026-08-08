@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "exceptions.h"
 #include "util/serialize.h"
 #include "util/basic_macros.h"
+#include "light.h"
 #include <sstream>
 
 static const video::SColor NULL_BGCOLOR{0, 1, 1, 1};
@@ -169,6 +170,8 @@ void ObjectProperties::serialize(std::ostream &os) const
 	else
 		writeARGB8(os, nametag_bgcolor.value());
 
+	writeU8(os, light_source);
+
 	// Add stuff only at the bottom.
 	// Never remove anything, because we don't want new versions of this
 }
@@ -236,5 +239,8 @@ void ObjectProperties::deSerialize(std::istream &is)
 			nametag_bgcolor = bgcolor;
 		else
 			nametag_bgcolor = std::nullopt;
+
+		light_source = readU8(is);
+		light_source = MYMIN(light_source, LIGHT_MAX);
 	} catch (SerializationError &e) {}
 }

@@ -461,6 +461,7 @@ GameGlobalShaderConstantSetter::GameGlobalShaderConstantSetter(Sky *sky, bool *f
 	m_minimap_yaw("yawVec"),
 	m_camera_offset_pixel("cameraOffset"),
 	m_camera_offset_vertex("cameraOffset"),
+	m_point_lights_pixel("pointLights"),
 	m_base_texture("baseTexture"),
 	m_normal_texture("normalTexture"),
 	m_client(client)
@@ -508,14 +509,25 @@ void GameGlobalShaderConstantSetter::updateFrameConstants()
 
 	s_frame.has_minimap = false;
 	if (m_client) {
-		m_client->getEnv().getLocalPlayer()->getEyePosition()
-				.getAs3Values(s_frame.eye_position);
+		const v3f eye = m_client->getEnv().getLocalPlayer()->getEyePosition();
+		eye.getAs3Values(s_frame.eye_position);
 		intToFloat(m_client->getCamera()->getOffset(), BS)
 				.getAs3Values(s_frame.camera_offset);
 
 		if (Minimap *minimap = m_client->getMinimap()) {
 			minimap->getYawVec().getAs3Values(s_frame.minimap_yaw);
 			s_frame.has_minimap = true;
+		}
+
+		// The environment hands them over brightest first
+		const auto &lights = m_client->getEnv().getPointLights();
+		for (u32 i = 0; i < MAX_POINT_LIGHTS; i++) {
+			if (i < lights.size()) {
+				(lights[i].pos - eye).getAs3Values(&s_frame.point_lights[i * 4]);
+				s_frame.point_lights[i * 4 + 3] = lights[i].level / (float)LIGHT_SUN;
+			} else {
+				s_frame.point_lights[i * 4 + 3] = 0.0f;
+			}
 		}
 	}
 }
@@ -545,6 +557,7 @@ void GameGlobalShaderConstantSetter::onSetConstants(video::IMaterialRendererServ
 
 		m_camera_offset_pixel.set(s_frame.camera_offset, services);
 		m_camera_offset_vertex.set(s_frame.camera_offset, services);
+		m_point_lights_pixel.set(s_frame.point_lights, services);
 
 		SamplerLayer_t base_tex = 0, normal_tex = 1;
 		m_base_texture.set(&base_tex, services);

@@ -17,6 +17,39 @@ varying mediump vec2 varTexCoord;
 centroid varying vec2 varTexCoord;
 #endif
 varying vec3 eyeVec;
+#if POINT_LIGHTS
+varying float vShade;
+varying vec3 vRelPos;
+
+// Light sources, one per column: xyz relative to the eye, w = level / 15
+uniform mat4 pointLights;
+// Maximum with a rounded corner, a plain max() shows the rim as a crease
+vec3 softMax(vec3 a, vec3 b)
+{
+	const float k = 0.08;
+	vec3 h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+	return mix(a, b, h) + k * h * (1.0 - h);
+}
+
+vec3 pointLight(vec4 light)
+{
+	if (light.w <= 0.0)
+		return vec3(0.0);
+	vec3 dir = light.xyz - vRelPos;
+	// One level per node, like spreading node light, but round
+	float level = light.w - length(dir) / 150.0;
+	if (level <= 0.0)
+		return vec3(0.0);
+	// Brightness of that level, mirrors decode_light_f() in light.cpp
+	float lit = ((LIGHT_CURVE.x * level + LIGHT_CURVE.y) * level + LIGHT_CURVE.z) * level;
+	float spread = level - LIGHT_BOOST.y;
+	lit += LIGHT_BOOST.x * exp(LIGHT_BOOST.z * spread * spread);
+	lit = clamp(lit, 0.0, 1.0);
+	if (LIGHT_CURVE.w != 1.0)
+		lit = pow(lit, LIGHT_CURVE.w);
+	return vec3(lit * vShade * LIGHT_SCALE);
+}
+#endif
 
 const float fogStart = FOG_START;
 const float fogShadingParameter = 1.0 / ( 1.0 - fogStart);
@@ -76,7 +109,17 @@ void main(void)
 
 	color = base.rgb;
 
-	vec4 col = vec4(color.rgb * varColor.rgb, 1.0);
+	vec3 lightColor = varColor.rgb;
+#if POINT_LIGHTS
+	for (int i = 0; i < POINT_LIGHTS; i++) {
+		vec3 lit = pointLight(pointLights[i]);
+		if (lit.r > 0.0)
+			lightColor = softMax(lightColor, lit);
+	}
+	lightColor = min(lightColor, vec3(1.0));
+#endif
+
+	vec4 col = vec4(color.rgb * lightColor, 1.0);
 
 #if ENABLE_TONE_MAPPING
 	col = applyToneMapping(col);

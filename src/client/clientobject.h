@@ -53,6 +53,8 @@ public:
 	virtual scene::IAnimatedMeshSceneNode *getAnimatedMeshSceneNode() const
 	{ return NULL; }
 	virtual bool isLocalPlayer() const { return false; }
+	virtual u8 getLightSource() const { return 0; }
+	virtual v3f getLightPos() const { return getPosition(); }
 
 	virtual ClientActiveObject *getParent() const { return nullptr; };
 	virtual const std::unordered_set<int> &getAttachmentChildIds() const

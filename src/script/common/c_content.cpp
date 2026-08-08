@@ -303,7 +303,13 @@ void read_object_properties(lua_State *L, int index,
 	lua_pop(L, 1);
 	getboolfield(L, -1, "backface_culling", prop->backface_culling);
 	getintfield(L, -1, "glow", prop->glow);
-
+	prop->light_source = getintfield_default(L, -1,
+			"light_source", prop->light_source);
+	if (prop->light_source > LIGHT_MAX) {
+		warningstream << "Object had greater light_source than " << LIGHT_MAX
+			<< ", it was reduced." << std::endl;
+		prop->light_source = LIGHT_MAX;
+	}
 	getstringfield(L, -1, "nametag", prop->nametag);
 	lua_getfield(L, -1, "nametag_color");
 	if (!lua_isnil(L, -1)) {
@@ -410,6 +416,8 @@ void push_object_properties(lua_State *L, ObjectProperties *prop)
 	lua_setfield(L, -2, "backface_culling");
 	lua_pushnumber(L, prop->glow);
 	lua_setfield(L, -2, "glow");
+	lua_pushnumber(L, prop->light_source);
+	lua_setfield(L, -2, "light_source");
 	lua_pushlstring(L, prop->nametag.c_str(), prop->nametag.size());
 	lua_setfield(L, -2, "nametag");
 	push_ARGB8(L, prop->nametag_color);

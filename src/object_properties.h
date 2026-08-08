@@ -52,6 +52,7 @@ struct ObjectProperties
 	f32 automatic_face_movement_dir_offset = 0.0f;
 	bool backface_culling = true;
 	s8 glow = 0;
+	u8 light_source = 0;
 	std::string nametag = "";
 	video::SColor nametag_color = video::SColor(255, 255, 255, 255);
 	std::optional<video::SColor> nametag_bgcolor = std::nullopt;

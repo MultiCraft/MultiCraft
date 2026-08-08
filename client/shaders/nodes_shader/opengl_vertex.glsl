@@ -26,6 +26,10 @@ varying mediump vec2 varTexCoord;
 centroid varying vec2 varTexCoord;
 #endif
 varying vec3 eyeVec;
+#if POINT_LIGHTS
+varying float vShade;
+varying vec3 vRelPos;
+#endif
 
 // Color of the light emitted by the light sources.
 const vec3 artificialLight = vec3(1.04, 1.04, 1.04);
@@ -105,6 +109,12 @@ void main(void)
 #endif
 
 	worldPosition = (mWorld * inVertexPosition).xyz;
+#if POINT_LIGHTS
+	vec3 sq = inVertexNormal * inVertexNormal;
+	vShade = sq.x + sq.y + sq.z < 0.5 ? 1.0 : sqrt(0.45) * sq.x +
+		(inVertexNormal.y < 0.0 ? sqrt(0.2) : 1.0) * sq.y + sqrt(0.7) * sq.z;
+	vRelPos = worldPosition - (eyePosition - cameraOffset);
+#endif
 
 // OpenGL < 4.3 does not support continued preprocessor lines
 #if (MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT || MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_OPAQUE || MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_BASIC) && ENABLE_WAVING_WATER

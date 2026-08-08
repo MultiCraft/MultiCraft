@@ -92,8 +92,7 @@ core.register_entity(":__builtin:item", {
 		local count = min(stack:get_count(), max_count)
 		local size = 0.2 + 0.1 * (count / max_count) ^ (1 / 3)
 		local def = core.registered_items[itemname]
-		local glow = def and def.light_source and
-			floor(def.light_source / 2 + 0.5)
+		local light = def and def.light_source or 0
 
 		self.object:set_properties({
 			is_visible = true,
@@ -103,7 +102,8 @@ core.register_entity(":__builtin:item", {
 			collisionbox = {-size, -size, -size, size, size, size},
 			automatic_rotate = pi * 0.5 * 0.15 / size,
 			wield_item = self.itemstring,
-			glow = glow,
+			glow = floor(light * 0.75 + 0.5),
+			light_source = floor(light / 2 + 0.5),
 			infotext = def and def.description or ""
 		})
 

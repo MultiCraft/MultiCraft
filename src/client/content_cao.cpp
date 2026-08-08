@@ -409,6 +409,14 @@ bool GenericCAO::getSelectionBox(aabb3f *toset) const
 	return true;
 }
 
+v3f GenericCAO::getLightPos() const
+{
+	const v3f pos = m_is_local_player
+		? m_env->getLocalPlayer()->getPosition()
+		: getPosition();
+	return pos + m_prop.collisionbox.getCenter() * BS;
+}
+
 const v3f GenericCAO::getPosition() const
 {
 	if (!getParent())
@@ -849,6 +857,12 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 		light_at_pos = blend_light(day_night_ratio, LIGHT_SUN, 0);
 
 	u8 light = decode_light(light_at_pos + m_glow);
+
+	// Not darker than its own light, brightened by others, like node sources
+	light = MYMAX(light, decode_light(m_prop.light_source));
+	if (u8 lit = m_env->getPointLightBrightness(getLightPos()))
+		light = MYMAX(light, lit);
+
 	if (light != m_last_light) {
 		m_last_light = light;
 		setNodeLight(light);

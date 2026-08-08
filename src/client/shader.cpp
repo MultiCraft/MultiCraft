@@ -38,6 +38,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "log.h"
 #include "gamedef.h"
 #include "client/tile.h"
+#include "light.h"
 #include "config.h"
 
 /*
@@ -647,11 +648,24 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 		shaders_header << "#define WATER_WAVE_SPEED " << g_settings->getFloat("water_wave_speed") << "\n";
 	}
 
+	shaders_header << "#define POINT_LIGHTS "
+		<< (g_settings->getBool("smooth_lighting") ? MAX_POINT_LIGHTS : 0) << "\n";
 	shaders_header << "#define ENABLE_WAVING_LEAVES " << g_settings->getBool("enable_waving_leaves") << "\n";
 	shaders_header << "#define ENABLE_WAVING_PLANTS " << g_settings->getBool("enable_waving_plants") << "\n";
 	shaders_header << "#define ENABLE_TONE_MAPPING " << g_settings->getBool("tone_mapping") << "\n";
 
 	shaders_header << "#define FOG_START " << core::clamp(g_settings->getFloat("fog_start"), 0.0f, 0.99f) << "\n";
+
+	// The light source color folds into the curve, but not past a pow()
+	const LightingParams &lp = get_lighting_params();
+	const bool fold = lp.gamma == 1.0f;
+	const float f = fold ? 1.04f : 1.0f;
+	const float sigma = std::fmax(lp.sigma, 0.001f);
+	shaders_header << "#define LIGHT_CURVE vec4(" << lp.a * f << "," << lp.b * f
+		<< "," << lp.c * f << "," << 1.0f / lp.gamma << ")\n";
+	shaders_header << "#define LIGHT_BOOST vec3(" << lp.boost * f << "," << lp.center
+		<< "," << -0.5f / (sigma * sigma) << ")\n";
+	shaders_header << "#define LIGHT_SCALE " << (fold ? 1.0f : 1.04f) << "\n";
 
 	std::string common_header = shaders_header.str();
 

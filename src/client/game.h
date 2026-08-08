@@ -67,6 +67,7 @@ class GameGlobalShaderConstantSetter : public IShaderConstantSetter
 	CachedPixelShaderSetting<float, 3> m_minimap_yaw;
 	CachedPixelShaderSetting<float, 3> m_camera_offset_pixel;
 	CachedPixelShaderSetting<float, 3> m_camera_offset_vertex;
+	CachedPixelShaderSetting<float, 16> m_point_lights_pixel;
 	CachedPixelShaderSetting<SamplerLayer_t> m_base_texture;
 	CachedPixelShaderSetting<SamplerLayer_t> m_normal_texture;
 	Client *m_client;
@@ -81,6 +82,7 @@ class GameGlobalShaderConstantSetter : public IShaderConstantSetter
 		float eye_position[3];
 		float camera_offset[3];
 		float minimap_yaw[3];
+		float point_lights[16];
 		bool has_minimap;
 	};
 	static FrameConstants s_frame;

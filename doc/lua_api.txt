@@ -7180,6 +7180,11 @@ Player properties need to be saved manually.
         -- For faking self-lighting, UI style entities, or programmatic coloring
         -- in mods.
 
+        light_source = 0,
+        -- Light this much of the surroundings, like a node's `light_source`.
+        -- Values 0-14. Lights nodes, other objects and the wielded item,
+        -- without touching the map, so it can follow a moving object.
+
         nametag = "",
         -- The name to display on the head of the object. By default empty.
         -- If the object is a player, a nil or empty nametag is replaced by the player's name.

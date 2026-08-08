@@ -31,13 +31,12 @@ static u8 light_LUT[LIGHT_SUN + 1];
 const u8 *light_decode_table = light_LUT;
 
 
-struct LightingParams {
-	float a, b, c; // Lighting curve polynomial coefficients
-	float boost, center, sigma; // Lighting curve parametric boost
-	float gamma; // Lighting curve gamma correction
-};
-
 static LightingParams params;
+
+const LightingParams &get_lighting_params()
+{
+	return params;
+}
 
 
 float decode_light_f(float x)
