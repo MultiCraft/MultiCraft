@@ -1579,6 +1579,8 @@ void GUIFormSpecMenu::parsePwdField(parserData* data, const std::string &element
 		evt.KeyInput.PressedDown = true;
 		e->OnEvent(evt);
 
+		e->drop();
+
 		// Note: Before 5.2.0 "parts.size() >= 5" resulted in a
 		// warning referring to field_close_on_enter[]!
 
