@@ -62,6 +62,15 @@ namespace con
 
 #define PING_TIMEOUT 5.0
 
+// exponent base
+#define RESEND_SCALE_BASE 1.5f
+
+// since spacing is exponential the numbers here shouldn't be too high
+// (it's okay to start out quick)
+#define RESEND_TIMEOUT_MIN 0.1f
+#define RESEND_TIMEOUT_MAX 2.0f
+#define RESEND_TIMEOUT_FACTOR 2
+
 BufferedPacket makePacket(Address &address, const SharedBuffer<u8> &data,
 		u32 protocol_id, session_t sender_peer_id, u8 channel)
 {
@@ -360,16 +369,21 @@ std::list<BufferedPacket>
 	MutexAutoLock listlock(m_list_mutex);
 	std::list<BufferedPacket> timed_outs;
 	for (BufferedPacket &bufferedPacket : m_list) {
-		if (bufferedPacket.time >= timeout) {
-			// caller will resend packet so reset time and increase counter
-			bufferedPacket.time = 0.0f;
-			bufferedPacket.resend_count++;
+		// resend time scales exponentially with each cycle
+		const float pkt_timeout = timeout *
+				powf(RESEND_SCALE_BASE, bufferedPacket.resend_count);
 
-			timed_outs.push_back(bufferedPacket);
+		if (bufferedPacket.time < pkt_timeout)
+			continue;
 
-			if (timed_outs.size() >= max_packets)
-				break;
-		}
+		// caller will resend packet so reset time and increase counter
+		bufferedPacket.time = 0.0f;
+		bufferedPacket.resend_count++;
+
+		timed_outs.push_back(bufferedPacket);
+
+		if (timed_outs.size() >= max_packets)
+			break;
 	}
 	return timed_outs;
 }
