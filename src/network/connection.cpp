@@ -687,37 +687,25 @@ void Channel::UpdateTimers(float dtime)
 		if (packets_successful > 0) {
 			successful_to_lost_ratio = packet_loss/packets_successful;
 		} else if (packet_loss > 0) {
-			window_size = std::max(
-					(window_size - 10),
-					MIN_RELIABLE_WINDOW_SIZE);
+			setWindowSize(window_size - 10);
 			done = true;
 		}
 
 		if (!done) {
-			if ((successful_to_lost_ratio < 0.01f) &&
-				(window_size < MAX_RELIABLE_WINDOW_SIZE)) {
+			if (successful_to_lost_ratio < 0.01f) {
 				/* don't even think about increasing if we didn't even
 				 * use major parts of our window */
 				if (reasonable_amount_of_data_transmitted)
-					window_size = std::min(
-							(window_size + 100),
-							MAX_RELIABLE_WINDOW_SIZE);
-			} else if ((successful_to_lost_ratio < 0.05f) &&
-					(window_size < MAX_RELIABLE_WINDOW_SIZE)) {
+					setWindowSize(window_size + 100);
+			} else if (successful_to_lost_ratio < 0.05f) {
 				/* don't even think about increasing if we didn't even
 				 * use major parts of our window */
 				if (reasonable_amount_of_data_transmitted)
-					window_size = std::min(
-							(window_size + 50),
-							MAX_RELIABLE_WINDOW_SIZE);
+					setWindowSize(window_size + 50);
 			} else if (successful_to_lost_ratio > 0.15f) {
-				window_size = std::max(
-						(window_size - 100),
-						MIN_RELIABLE_WINDOW_SIZE);
+				setWindowSize(window_size - 100);
 			} else if (successful_to_lost_ratio > 0.1f) {
-				window_size = std::max(
-						(window_size - 50),
-						MIN_RELIABLE_WINDOW_SIZE);
+				setWindowSize(window_size - 50);
 			}
 		}
 #endif

@@ -375,10 +375,12 @@ struct ConnectionCommand
  * will occur
  */
 #define MAX_RELIABLE_WINDOW_SIZE 0x8000
+/* maximum window size to use for reliable packet sending */
+#define MAX_RELIABLE_WINDOW_SIZE_SEND 2048
 /* starting value for window size */
-#define START_RELIABLE_WINDOW_SIZE 0x400
+#define START_RELIABLE_WINDOW_SIZE 64
 /* minimum value for window size */
-#define MIN_RELIABLE_WINDOW_SIZE 0x40
+#define MIN_RELIABLE_WINDOW_SIZE 32
 
 class Channel
 {
@@ -444,7 +446,11 @@ public:
 
 	const unsigned int getWindowSize() const { return window_size; };
 
-	void setWindowSize(unsigned int size) { window_size = size; };
+	void setWindowSize(long size)
+	{
+		window_size = (int)rangelim(size,
+				MIN_RELIABLE_WINDOW_SIZE, MAX_RELIABLE_WINDOW_SIZE_SEND);
+	};
 private:
 	std::mutex m_internal_mutex;
 	int window_size = MIN_RELIABLE_WINDOW_SIZE;
