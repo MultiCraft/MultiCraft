@@ -688,7 +688,6 @@ void Channel::UpdateTimers(float dtime)
 			current_packet_successful = 0;
 		}
 
-#if !(defined(__ANDROID__) && defined(__aarch64__))
 		// Packets too late means either packet duplication along the way
 		// or we were too fast in resending it (which should be self-regulating).
 		// Count this a signal of congestion, like packet loss.
@@ -699,7 +698,7 @@ void Channel::UpdateTimers(float dtime)
 		bool done = false;
 
 		if (packets_successful > 0) {
-			successful_to_lost_ratio = packet_loss/packets_successful;
+			successful_to_lost_ratio = (float)packet_loss / packets_successful;
 		} else if (packet_loss > 0) {
 			setWindowSize(window_size - 10);
 			done = true;
@@ -722,7 +721,6 @@ void Channel::UpdateTimers(float dtime)
 				setWindowSize(window_size - 50);
 			}
 		}
-#endif
 	}
 
 	if (bpm_counter > 10.0f) {
@@ -921,10 +919,8 @@ void Peer::Drop()
 UDPPeer::UDPPeer(u16 a_id, Address a_address, Connection* connection) :
 	Peer(a_address,a_id,connection)
 {
-#if !(defined(__ANDROID__) && defined(__aarch64__))
 	for (Channel &channel : channels)
 		channel.setWindowSize(START_RELIABLE_WINDOW_SIZE);
-#endif
 }
 
 bool UDPPeer::getAddress(MTProtocols type,Address& toset)
