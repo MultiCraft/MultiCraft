@@ -850,8 +850,8 @@ void Peer::RTTStatistics(float rtt, const std::string &profiler_id,
 		if (m_rtt.avg_rtt < 0.0)
 			m_rtt.avg_rtt  = rtt;
 		else
-			m_rtt.avg_rtt  = m_rtt.avg_rtt * (num_samples/(num_samples-1)) +
-								rtt * (1/num_samples);
+			m_rtt.avg_rtt  = m_rtt.avg_rtt * (num_samples - 1.0f) / num_samples +
+								rtt / num_samples;
 
 		/* do jitter calculation */
 
@@ -872,8 +872,8 @@ void Peer::RTTStatistics(float rtt, const std::string &profiler_id,
 		if (m_rtt.jitter_avg < 0.0)
 			m_rtt.jitter_avg  = jitter;
 		else
-			m_rtt.jitter_avg  = m_rtt.jitter_avg * (num_samples/(num_samples-1)) +
-								jitter * (1/num_samples);
+			m_rtt.jitter_avg  = m_rtt.jitter_avg * (num_samples - 1.0f) / num_samples +
+								jitter / num_samples;
 
 		if (!profiler_id.empty()) {
 			g_profiler->graphAdd(profiler_id + " RTT [ms]", rtt * 1000.f);
@@ -942,7 +942,8 @@ void UDPPeer::reportRTT(float rtt)
 {
 	if (rtt < 0)
 		return;
-	RTTStatistics(rtt,"rudp",MAX_RELIABLE_WINDOW_SIZE*10);
+	// a ~100 sample horizon adapts within a burst instead of over minutes
+	RTTStatistics(rtt, "rudp", 100);
 
 	// use this value to decide the resend timeout
 	const float rtt_stat = getStat(AVG_RTT);
