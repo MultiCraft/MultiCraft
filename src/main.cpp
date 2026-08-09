@@ -480,7 +480,6 @@ static bool setup_log_params(const Settings &cmd_args)
 		dstream << _("Enabling trace level debug output") << std::endl;
 		g_logger.setTraceEnabled(true);
 		dout_con_ptr = &verbosestream; // This is somewhat old
-		socket_enable_debug_output = true; // Sockets doesn't use log.h
 	}
 
 	// In certain cases, output info level on stderr

@@ -940,8 +940,13 @@ void UDPPeer::reportRTT(float rtt)
 	if (timeout > RESEND_TIMEOUT_MAX)
 		timeout = RESEND_TIMEOUT_MAX;
 
-	MutexAutoLock usage_lock(m_exclusive_access_mutex);
-	resend_timeout = timeout;
+	float timeout_old = getResendTimeout();
+	setResendTimeout(timeout);
+
+	if (std::abs(timeout - timeout_old) >= 0.001f) {
+		dout_con << m_connection->getDesc() << " set resend timeout " << timeout
+			<< " (rtt=" << rtt_stat << ") for peer id: " << id << std::endl;
+	}
 }
 
 bool UDPPeer::Ping(float dtime,SharedBuffer<u8>& data)

@@ -58,9 +58,6 @@ typedef int socklen_t;
 typedef int socket_t;
 #endif
 
-// Set to true to enable verbose debug output
-bool socket_enable_debug_output = false; // yuck
-
 static bool g_sockets_initialized = false;
 
 // Initialize sockets
@@ -103,12 +100,6 @@ bool UDPSocket::init(bool ipv6, bool noExceptions)
 	m_addr_family = ipv6 ? AF_INET6 : AF_INET;
 	m_handle = socket(m_addr_family, SOCK_DGRAM, IPPROTO_UDP);
 
-	if (socket_enable_debug_output) {
-		dstream << "UDPSocket(" << (int)m_handle
-			<< ")::UDPSocket(): ipv6 = " << (ipv6 ? "true" : "false")
-			<< std::endl;
-	}
-
 	if (m_handle <= 0) {
 		if (noExceptions) {
 			return false;
@@ -139,11 +130,6 @@ bool UDPSocket::init(bool ipv6, bool noExceptions)
 
 UDPSocket::~UDPSocket()
 {
-	if (socket_enable_debug_output) {
-		dstream << "UDPSocket( " << (int)m_handle << ")::~UDPSocket()"
-			<< std::endl;
-	}
-
 #ifdef _WIN32
 	closesocket(m_handle);
 #else
@@ -153,12 +139,6 @@ UDPSocket::~UDPSocket()
 
 void UDPSocket::Bind(Address addr)
 {
-	if (socket_enable_debug_output) {
-		dstream << "UDPSocket(" << (int)m_handle
-			<< ")::Bind(): " << addr.serializeString() << ":"
-			<< addr.getPort() << std::endl;
-	}
-
 	if (addr.getFamily() != m_addr_family) {
 		static const char *errmsg =
 				"Socket and bind address families do not match";
@@ -203,30 +183,6 @@ void UDPSocket::Send(const Address &destination, const void *data, int size)
 
 	if (INTERNET_SIMULATOR)
 		dumping_packet = myrand() % INTERNET_SIMULATOR_PACKET_LOSS == 0;
-
-	if (socket_enable_debug_output) {
-		// Print packet destination and size
-		dstream << (int)m_handle << " -> ";
-		destination.print(&dstream);
-		dstream << ", size=" << size;
-
-		// Print packet contents
-		dstream << ", data=";
-		for (int i = 0; i < size && i < 20; i++) {
-			if (i % 2 == 0)
-				dstream << " ";
-			unsigned int a = ((const unsigned char *)data)[i];
-			dstream << std::hex << std::setw(2) << std::setfill('0') << a;
-		}
-
-		if (size > 20)
-			dstream << "...";
-
-		if (dumping_packet)
-			dstream << " (DUMPED BY INTERNET_SIMULATOR)";
-
-		dstream << std::endl;
-	}
 
 	if (dumping_packet) {
 		// Lol let's forget it
@@ -293,26 +249,6 @@ int UDPSocket::Receive(Address &sender, void *data, int size)
 		u16 address_port = ntohs(address.sin_port);
 
 		sender = Address(address_ip, address_port);
-	}
-
-	if (socket_enable_debug_output) {
-		// Print packet sender and size
-		dstream << (int)m_handle << " <- ";
-		sender.print(&dstream);
-		dstream << ", size=" << received;
-
-		// Print packet contents
-		dstream << ", data=";
-		for (int i = 0; i < received && i < 20; i++) {
-			if (i % 2 == 0)
-				dstream << " ";
-			unsigned int a = ((const unsigned char *)data)[i];
-			dstream << std::hex << std::setw(2) << std::setfill('0') << a;
-		}
-		if (received > 20)
-			dstream << "...";
-
-		dstream << std::endl;
 	}
 
 	return received;
