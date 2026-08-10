@@ -1232,8 +1232,11 @@ video::IImage * Align2Npot2(video::IImage * image,
 			driver->createImage(video::ECF_A8R8G8B8,
 					core::dimension2d<u32>(width, height));
 
-	if (targetimage != NULL)
-		image->copyToScaling(targetimage);
+	// an npot image is still better than no image at all when memory runs out
+	if (targetimage == NULL)
+		return image;
+
+	image->copyToScaling(targetimage);
 	image->drop();
 	return targetimage;
 }
@@ -1267,9 +1270,6 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 	// Stuff starting with [ are special commands
 	if (part_of_name.empty() || part_of_name[0] != '[') {
 		video::IImage *image = m_sourcecache.getOrLoad(part_of_name);
-#if ENABLE_GLES && !defined(__APPLE__)
-		image = Align2Npot2(image, driver);
-#endif
 		if (image == NULL) {
 			if (!part_of_name.empty()) {
 
