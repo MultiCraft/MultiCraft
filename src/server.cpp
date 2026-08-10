@@ -3685,8 +3685,13 @@ v3f Server::findSpawnPos()
 	ServerMap &map = m_env->getServerMap();
 	v3f nodeposf;
 	if (g_settings->getV3FNoEx("static_spawnpoint", nodeposf) ||
-			m_env->getWorldSpawnpoint(nodeposf))
-		return nodeposf * BS;
+			m_env->getWorldSpawnpoint(nodeposf)) {
+		if (!objectpos_over_limit(nodeposf * BS))
+			return nodeposf * BS;
+
+		warningstream << "Spawn point " << PP(nodeposf)
+			<< " is outside map limits, ignoring" << std::endl;
+	}
 
 	bool is_good = false;
 	// Limit spawn range to mapgen edges (determined by 'mapgen_limit')

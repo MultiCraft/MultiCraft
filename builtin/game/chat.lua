@@ -1189,16 +1189,21 @@ core.register_chatcommand("spawn", {
 			spawnpoint, yaw, pitch = core.get_world_spawnpoint()
 		end
 
-		if spawnpoint then
-			player:set_pos(spawnpoint)
-			if yaw and pitch then
-				player:set_look_horizontal(yaw)
-				player:set_look_vertical(pitch)
-			end
-			return true, "Teleporting to spawn..."
-		else
+		if not spawnpoint then
 			return false, "The spawn point is not set!"
 		end
+
+		if not core.is_valid_pos(spawnpoint) then
+			return false, "The spawn point is outside the map limits!"
+		end
+
+		player:set_pos(spawnpoint)
+		if yaw and pitch then
+			player:set_look_horizontal(yaw)
+			player:set_look_vertical(pitch)
+		end
+
+		return true, "Teleporting to spawn..."
 	end
 })
 
@@ -1215,6 +1220,10 @@ core.register_chatcommand("setspawn", {
 		local pos = vector.apply(player:get_pos(), function(dir)
 			return math.floor(dir * 10 + 0.5) / 10
 		end)
+
+		if not core.is_valid_pos(pos) then
+			return false, "You are outside the map limits!"
+		end
 
 		-- Remove the static_spawnpoint setting if it exists
 		if core.settings:get("static_spawnpoint") then
