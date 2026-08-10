@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <map>
 #include "irrlichttypes_extrabloated.h"
+#include "irr_ptr.h"
 #include "clientobject.h"
 #include "object_properties.h"
 #include "itemgroup.h"
@@ -267,6 +268,9 @@ public:
 	// ffs this HAS TO BE a string copy! See #5739 if you think otherwise
 	// Reason: updateTextures(m_previous_texture_modifier);
 	void updateTextures(std::string mod);
+
+	video::ITexture *pinTexture(ITextureSource *tsrc, const std::string &name);
+	std::vector<irr_ptr<video::ITexture>> m_pinned_textures;
 
 	void updateAnimation();
 

@@ -32,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "network/networkprotocol.h"
 #include "client/joystick_controller.h"
 #include "util/string.h"
+#include "irr_ptr.h"
 #include "util/enriched_string.h"
 #include "StyleSpec.h"
 
@@ -303,6 +304,8 @@ protected:
 
 	InventoryManager *m_invmgr;
 	ISimpleTextureSource *m_tsrc;
+	std::vector<irr_ptr<video::ITexture>> m_pinned_textures;
+	video::ITexture *pinTexture(const std::string &name);
 	ISoundManager *m_sound_manager;
 	Client *m_client;
 

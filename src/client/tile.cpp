@@ -188,6 +188,8 @@ struct TextureInfo
 {
 	std::string name;
 	video::ITexture *texture;
+	bool transient = false;
+	u64 last_used = 0;
 
 	TextureInfo(
 			const std::string &name_,
@@ -492,6 +494,10 @@ public:
 	video::ITexture* getTexture(u32 id);
 
 	video::ITexture* getTexture(const std::string &name, u32 *id = NULL);
+	video::ITexture* getTextureTransient(const std::string &name, u32 *id = NULL);
+	video::ITexture* getTextureForMeshTransient(const std::string &name, u32 *id = NULL);
+
+	u32 evictUnused(u64 idle_ms);
 
 	/*
 		Get a texture specifically intended for mesh
@@ -548,7 +554,7 @@ private:
 	SourceImageCache m_sourcecache;
 
 	// Generate a texture
-	u32 generateTexture(const std::string &name);
+	u32 generateTexture(const std::string &name, bool transient = false);
 
 	// Generate image based on a string like "stone.png" or "[crack:1:0".
 	// if baseimg is NULL, it is created. Otherwise stuff is made on it.
@@ -574,6 +580,11 @@ private:
 
 	// Queued texture fetches (to be processed by the main thread)
 	RequestQueue<std::string, u32, u8, u8> m_get_texture_queue;
+
+	u32 resolveTextureId(const std::string &name, bool transient);
+	video::ITexture* getTextureInternal(const std::string &name, u32 *id, bool transient);
+	video::ITexture* getTextureForMeshInternal(const std::string &name, u32 *id,
+			bool transient);
 
 	// Textures that have been overwritten with other ones
 	// but can't be deleted because the ITexture* might still be used
@@ -633,6 +644,11 @@ TextureSource::~TextureSource()
 
 u32 TextureSource::getTextureId(const std::string &name)
 {
+	return resolveTextureId(name, false);
+}
+
+u32 TextureSource::resolveTextureId(const std::string &name, bool transient)
+{
 	//infostream<<"getTextureId(): \""<<name<<"\""<<std::endl;
 
 	{
@@ -644,6 +660,10 @@ u32 TextureSource::getTextureId(const std::string &name)
 		n = m_name_to_id.find(name);
 		if (n != m_name_to_id.end())
 		{
+			// A texture asked for as resident stays
+			if (!transient)
+				m_textureinfo_cache[n->second].transient = false;
+			m_textureinfo_cache[n->second].last_used = porting::getTimeMs();
 			return n->second;
 		}
 	}
@@ -652,7 +672,7 @@ u32 TextureSource::getTextureId(const std::string &name)
 		Get texture
 	*/
 	if (std::this_thread::get_id() == m_main_thread) {
-		return generateTexture(name);
+		return generateTexture(name, transient);
 	}
 
 
@@ -661,8 +681,9 @@ u32 TextureSource::getTextureId(const std::string &name)
 	// We're gonna ask the result to be put into here
 	static ResultQueue<std::string, u32, u8, u8> result_queue;
 
-	// Throw a request in
-	m_get_texture_queue.add(name, 0, 0, &result_queue);
+	// Throw a request in. The queue merges the requests of one caller, so resident and transient
+	// ones come as two callers and keep apart
+	m_get_texture_queue.add(name, transient, 0, &result_queue);
 
 	try {
 		while(true) {
@@ -729,7 +750,12 @@ void imageTransform(u32 transform, video::IImage *src, video::IImage *dst);
 /*
 	This method generates all the textures
 */
-u32 TextureSource::generateTexture(const std::string &name)
+static bool is_generated_name(const std::string &name)
+{
+	return name.find('^') != std::string::npos || (!name.empty() && name[0] == '[');
+}
+
+u32 TextureSource::generateTexture(const std::string &name, bool transient)
 {
 	//infostream << "generateTexture(): name=\"" << name << "\"" << std::endl;
 
@@ -747,6 +773,9 @@ u32 TextureSource::generateTexture(const std::string &name)
 		std::map<std::string, u32>::iterator n;
 		n = m_name_to_id.find(name);
 		if (n != m_name_to_id.end()) {
+			if (!transient)
+				m_textureinfo_cache[n->second].transient = false;
+			m_textureinfo_cache[n->second].last_used = porting::getTimeMs();
 			return n->second;
 		}
 	}
@@ -786,6 +815,8 @@ u32 TextureSource::generateTexture(const std::string &name)
 
 	u32 id = m_textureinfo_cache.size();
 	TextureInfo ti(name, tex);
+	ti.transient = transient && is_generated_name(name);
+	ti.last_used = porting::getTimeMs();
 	m_textureinfo_cache.push_back(ti);
 	m_name_to_id[name] = id;
 
@@ -819,7 +850,18 @@ video::ITexture* TextureSource::getTexture(u32 id)
 
 video::ITexture* TextureSource::getTexture(const std::string &name, u32 *id)
 {
-	u32 actual_id = getTextureId(name);
+	return getTextureInternal(name, id, false);
+}
+
+video::ITexture* TextureSource::getTextureTransient(const std::string &name, u32 *id)
+{
+	return getTextureInternal(name, id, true);
+}
+
+video::ITexture* TextureSource::getTextureInternal(const std::string &name, u32 *id,
+		bool transient)
+{
+	u32 actual_id = resolveTextureId(name, transient);
 	if (id){
 		*id = actual_id;
 	}
@@ -828,14 +870,25 @@ video::ITexture* TextureSource::getTexture(const std::string &name, u32 *id)
 
 video::ITexture* TextureSource::getTextureForMesh(const std::string &name, u32 *id)
 {
+	return getTextureForMeshInternal(name, id, false);
+}
+
+video::ITexture* TextureSource::getTextureForMeshTransient(const std::string &name, u32 *id)
+{
+	return getTextureForMeshInternal(name, id, true);
+}
+
+video::ITexture* TextureSource::getTextureForMeshInternal(const std::string &name, u32 *id,
+		bool transient)
+{
 	static thread_local bool filter_needed =
 		g_settings->getBool("texture_clean_transparent") ||
 		((m_setting_trilinear_filter || m_setting_bilinear_filter) &&
 		g_settings->getS32("texture_min_size") > 1);
 	// Avoid duplicating texture if it won't actually change
 	if (filter_needed)
-		return getTexture(name + "^[applyfiltersformesh", id);
-	return getTexture(name, id);
+		return getTextureInternal(name + "^[applyfiltersformesh", id, transient);
+	return getTextureInternal(name, id, transient);
 }
 
 Palette* TextureSource::getPalette(const std::string &name)
@@ -909,7 +962,10 @@ void TextureSource::processQueue()
 				<<"name=\""<<request.key<<"\""
 				<<std::endl;*/
 
-		m_get_texture_queue.pushResult(request, generateTexture(request.key));
+		// Transient only if every caller asked for it so
+		const bool transient = std::all_of(request.callers.begin(), request.callers.end(),
+				[] (const CallerInfo<u8, u8, std::string, u32> &c) { return c.caller != 0; });
+		m_get_texture_queue.pushResult(request, generateTexture(request.key, transient));
 	}
 }
 
@@ -929,6 +985,56 @@ void TextureSource::insertSourceImage(const std::string &name, const std::string
 
 	m_sourcecache.insert(name, data);
 	m_source_image_existence.set(name, true);
+}
+
+u32 TextureSource::evictUnused(u64 idle_ms)
+{
+	if (std::this_thread::get_id() != m_main_thread)
+		return 0;
+
+	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
+	const u64 now = porting::getTimeMs();
+	u32 resident = 0, held = 0, warm = 0, evicted = 0;
+	u64 freed_pixels = 0;
+
+	MutexAutoLock lock(m_textureinfo_cache_mutex);
+
+	for (u32 id = 1; id < m_textureinfo_cache.size(); id++) {
+		TextureInfo &ti = m_textureinfo_cache[id];
+		if (ti.name.empty())
+			continue;
+		if (!ti.transient) {
+			resident++;
+			continue;
+		}
+		if (ti.texture && ti.texture->getReferenceCount() > 1) {
+			held++;
+			continue;
+		}
+		if (now - ti.last_used < idle_ms) {
+			warm++;
+			continue;
+		}
+
+		m_name_to_id.erase(ti.name);
+		if (ti.texture) {
+			const core::dimension2d<u32> &size = ti.texture->getSize();
+			freed_pixels += (u64)size.Width * size.Height;
+			verbosestream << "TextureSource: evict " << size.Width << "x"
+					<< size.Height << " '" << ti.name << "'" << std::endl;
+			driver->removeTexture(ti.texture);
+			ti.texture = nullptr;
+		}
+		ti.name.clear();
+		evicted++;
+	}
+
+	if (evicted)
+		infostream << "TextureSource: evicted " << evicted
+				<< " (~" << (freed_pixels * 4 >> 10) << " KiB), kept "
+				<< warm << " warm + " << held << " held + "
+				<< resident << " resident" << std::endl;
+	return evicted;
 }
 
 void TextureSource::rebuildImagesAndTextures()

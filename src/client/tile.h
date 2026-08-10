@@ -80,6 +80,13 @@ public:
 
 	virtual video::ITexture* getTexture(
 			const std::string &name, u32 *id = nullptr) = 0;
+
+	/*!
+	 * Resolves a name whose texture may be dropped once it goes idle.
+	 * Any ordinary lookup of the same name makes it resident again for good.
+	 */
+	virtual video::ITexture* getTextureTransient(
+			const std::string &name, u32 *id = nullptr) { return getTexture(name, id); }
 };
 
 class ITextureSource : public ISimpleTextureSource
@@ -95,6 +102,9 @@ public:
 	virtual video::ITexture* getTexture(
 			const std::string &name, u32 *id = nullptr)=0;
 	virtual video::ITexture* getTextureForMesh(
+			const std::string &name, u32 *id = nullptr) = 0;
+	//! getTextureForMesh for a texture that may be dropped once it goes idle
+	virtual video::ITexture* getTextureForMeshTransient(
 			const std::string &name, u32 *id = nullptr) = 0;
 	/*!
 	 * Returns a palette from the given texture name.
@@ -130,6 +140,7 @@ public:
 	virtual bool isKnownSourceImage(const std::string &name)=0;
 
 	virtual void processQueue()=0;
+	virtual u32 evictUnused(u64 idle_ms) { return 0; }
 	virtual void insertSourceImage(const std::string &name, video::IImage *img)=0;
 	virtual void insertSourceImage(const std::string &name, const std::string &data)=0;
 	virtual void rebuildImagesAndTextures()=0;

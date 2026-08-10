@@ -1,6 +1,7 @@
 #pragma once
 
 #include "irrlichttypes_extrabloated.h"
+#include "irr_ptr.h"
 #include <algorithm>
 #include <string>
 
@@ -14,13 +15,10 @@ public:
 
 	virtual void draw() override;
 
-	void setTexture(video::ITexture *texture) { m_texture = texture; };
-	video::ITexture *getTexture() const { return m_texture; };
-
 	void setTextureName(const std::string &texture_name) {
 		if (texture_name != m_texture_name) {
 			m_texture_name = texture_name;
-			m_texture = nullptr;
+			m_texture.reset();
 		}
 	};
 	const std::string &getTextureName() const { return m_texture_name; };
@@ -39,7 +37,8 @@ public:
 
 private:
 	ISimpleTextureSource *m_tsrc;
-	video::ITexture *m_texture = nullptr;
+	// Held, so eviction of idle textures cannot free it while shown
+	irr_ptr<video::ITexture> m_texture;
 	std::string m_texture_name = "";
 	bool m_use_scaling_filter;
 

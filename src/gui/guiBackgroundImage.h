@@ -34,5 +34,6 @@ private:
 	std::string m_name;
 	core::rect<s32> m_middle;
 	ISimpleTextureSource *m_tsrc;
+	video::ITexture *m_texture = nullptr;
 	bool m_autoclip;
 };

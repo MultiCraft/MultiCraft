@@ -126,6 +126,14 @@ GUIFormSpecMenu::GUIFormSpecMenu(JoystickController *joystick,
 	m_tooltip_append_itemname = g_settings->getBool("tooltip_append_itemname");
 }
 
+video::ITexture *GUIFormSpecMenu::pinTexture(const std::string &name)
+{
+	video::ITexture *texture = m_tsrc->getTextureTransient(name);
+	if (texture)
+		m_pinned_textures.push_back(::grab(texture));
+	return texture;
+}
+
 GUIFormSpecMenu::~GUIFormSpecMenu()
 {
 	removeChildren();
@@ -750,7 +758,7 @@ void GUIFormSpecMenu::parseScrollBar(parserData* data, const std::string &elemen
 		if (!textures.empty()) {
 			// Legacy texture support
 			for (u32 i = 0; i < textures.size(); ++i)
-				itextures.push_back(m_tsrc->getTexture(textures[i]));
+				itextures.push_back(pinTexture(textures[i]));
 
 			e->setTextures(itextures);
 		}
@@ -842,12 +850,12 @@ void GUIFormSpecMenu::parseImage(parserData* data, const std::string &element)
 		}
 
 		std::string name = unescape_string(parts[1 + offset]);
+		video::ITexture *texture = pinTexture(name);
 
 		v2s32 pos;
 		v2s32 geom;
 
 		if (parts.size() < 3) {
-			video::ITexture *texture = m_tsrc->getTexture(name);
 			if (texture != nullptr) {
 				core::dimension2du dim = texture->getOriginalSize();
 				geom.X = dim.Width;
@@ -919,6 +927,7 @@ void GUIFormSpecMenu::parseAnimatedImage(parserData *data, const std::string &el
 	std::vector<std::string> v_geom = split(parts[1], ',');
 	std::string name = parts[2];
 	std::string texture_name = unescape_string(parts[3]);
+	pinTexture(texture_name);
 	s32 frame_count = stoi(parts[4]);
 	s32 frame_duration = stoi(parts[5]);
 
@@ -1139,6 +1148,7 @@ void GUIFormSpecMenu::parseBackground(parserData* data, const std::string &eleme
 		std::vector<std::string> v_pos = split(parts[0],',');
 		std::vector<std::string> v_geom = split(parts[1],',');
 		std::string name = unescape_string(parts[2]);
+		pinTexture(name);
 
 		MY_CHECKPOS("background",0);
 		MY_CHECKGEOM("background",1);
@@ -2044,6 +2054,7 @@ void GUIFormSpecMenu::parseImageButton(parserData* data, const std::string &elem
 		std::string image_name = parts[2];
 		std::string name = parts[3];
 		std::string label = parts[4];
+		pinTexture(unescape_string(image_name));
 
 		MY_CHECKPOS("imagebutton",0);
 		MY_CHECKGEOM("imagebutton",1);
@@ -2052,6 +2063,7 @@ void GUIFormSpecMenu::parseImageButton(parserData* data, const std::string &elem
 
 		if (parts.size() >= 8) {
 			pressed_image_name = parts[7];
+			pinTexture(unescape_string(pressed_image_name));
 		}
 
 		v2s32 pos;
@@ -2896,7 +2908,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 	mesh->drop();
 
 	for (u32 i = 0; i < textures.size() && i < meshnode->getMaterialCount(); ++i)
-		e->setTexture(i, m_tsrc->getTexture(unescape_string(textures[i])));
+		e->setTexture(i, pinTexture(unescape_string(textures[i])));
 
 	if (vec_rot.size() >= 2)
 		e->setRotation(v2f(stof(vec_rot[0]), stof(vec_rot[1])));
@@ -3139,6 +3151,8 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 	if ((screensize.X <= 0) || (screensize.Y <= 0)) {
 		return;
 	}
+
+	m_pinned_textures.clear();
 
 	// Update m_tooltip_append_itemname depending on debug privilege
 	if (m_client != nullptr) {

@@ -21,11 +21,10 @@ void GUIAnimatedImage::draw()
 	video::IVideoDriver *driver = Environment->getVideoDriver();
 
 	// Fill in m_texture when not clipped by a scroll container
-	if (m_texture == nullptr && m_tsrc != nullptr && !m_texture_name.empty()) {
-		m_texture = m_tsrc->getTexture(m_texture_name);
-	}
+	if (!m_texture && m_tsrc != nullptr && !m_texture_name.empty())
+		m_texture.grab(m_tsrc->getTextureTransient(m_texture_name));
 
-	if (m_texture == nullptr)
+	if (!m_texture)
 		return;
 
 	core::dimension2d<u32> size = m_texture->getOriginalSize();
@@ -45,16 +44,16 @@ void GUIAnimatedImage::draw()
 		const video::SColor colors[] = {color, color, color, color};
 
 		if (m_use_scaling_filter) {
-			draw2DImageFilterScaled(driver, m_texture, AbsoluteRect, rect, cliprect,
+			draw2DImageFilterScaled(driver, m_texture.get(), AbsoluteRect, rect, cliprect,
 				colors, true);
 		} else {
 			// Temporary fix for issue #12581 in 5.6.0.
 			// Use legacy image when not rendering 9-slice image because draw2DImage9Slice
 			// uses NNAA filter which causes visual artifacts when image uses alpha blending.
-			driver->draw2DImage(m_texture, AbsoluteRect, rect, cliprect, colors, true);
+			driver->draw2DImage(m_texture.get(), AbsoluteRect, rect, cliprect, colors, true);
 		}
 	} else {
-		draw2DImage9Slice(driver, m_texture, AbsoluteRect, rect, m_middle, cliprect);
+		draw2DImage9Slice(driver, m_texture.get(), AbsoluteRect, rect, m_middle, cliprect);
 	}
 
 	// Step the animation

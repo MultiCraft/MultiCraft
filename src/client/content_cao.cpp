@@ -1290,9 +1290,18 @@ void GenericCAO::updateTexturePos()
 }
 
 // Do not pass by reference, see header.
+video::ITexture *GenericCAO::pinTexture(ITextureSource *tsrc, const std::string &name)
+{
+	video::ITexture *texture = tsrc->getTextureForMeshTransient(name);
+	if (texture)
+		m_pinned_textures.push_back(::grab(texture));
+	return texture;
+}
+
 void GenericCAO::updateTextures(std::string mod)
 {
 	ITextureSource *tsrc = m_client->tsrc();
+	m_pinned_textures.clear();
 
 	bool use_trilinear_filter = g_settings->getBool("trilinear_filter");
 	bool use_bilinear_filter = g_settings->getBool("bilinear_filter");
@@ -1310,8 +1319,7 @@ void GenericCAO::updateTextures(std::string mod)
 			texturestring += mod;
 			m_spritenode->getMaterial(0).MaterialType = m_material_type;
 			m_spritenode->getMaterial(0).MaterialTypeParam = 0.5f;
-			m_spritenode->setMaterialTexture(0,
-					tsrc->getTextureForMesh(texturestring));
+			m_spritenode->setMaterialTexture(0, pinTexture(tsrc, texturestring));
 
 			// This allows setting per-material colors. However, until a real lighting
 			// system is added, the code below will have no effect. Once MineTest
@@ -1336,7 +1344,7 @@ void GenericCAO::updateTextures(std::string mod)
 				if (texturestring.empty())
 					continue; // Empty texture string means don't modify that material
 				texturestring += mod;
-				video::ITexture* texture = tsrc->getTextureForMesh(texturestring);
+				video::ITexture* texture = pinTexture(tsrc, texturestring);
 				if (!texture) {
 					errorstream<<"GenericCAO::updateTextures(): Could not load texture "<<texturestring<<std::endl;
 					continue;
@@ -1365,6 +1373,10 @@ void GenericCAO::updateTextures(std::string mod)
 				m_animated_meshnode->getMaterial(i)
 						.setFlag(video::EMF_ANISOTROPIC_FILTER, use_anisotropic_filter);
 			}
+			// Materials this update leaves alone keep their texture pinned too
+			for (u32 i = 0; i < m_animated_meshnode->getMaterialCount(); ++i)
+				if (video::ITexture *texture = m_animated_meshnode->getMaterial(i).getTexture(0))
+					m_pinned_textures.push_back(::grab(texture));
 			for (u32 i = 0; i < m_prop.colors.size() &&
 			i < m_animated_meshnode->getMaterialCount(); ++i)
 			{
@@ -1395,8 +1407,7 @@ void GenericCAO::updateTextures(std::string mod)
 				material.MaterialTypeParam = 0.5f;
 				material.setFlag(video::EMF_LIGHTING, false);
 				material.setFlag(video::EMF_BILINEAR_FILTER, false);
-				material.setTexture(0,
-						tsrc->getTextureForMesh(texturestring));
+				material.setTexture(0, pinTexture(tsrc, texturestring));
 				material.getTextureMatrix(0).makeIdentity();
 
 				// This allows setting per-material colors. However, until a real lighting
@@ -1421,8 +1432,7 @@ void GenericCAO::updateTextures(std::string mod)
 					tname = m_prop.textures[0];
 				tname += mod;
 				scene::IMeshBuffer *buf = mesh->getMeshBuffer(0);
-				buf->getMaterial().setTexture(0,
-						tsrc->getTextureForMesh(tname));
+				buf->getMaterial().setTexture(0, pinTexture(tsrc, tname));
 
 				// This allows setting per-material colors. However, until a real lighting
 				// system is added, the code below will have no effect. Once MineTest
@@ -1445,8 +1455,7 @@ void GenericCAO::updateTextures(std::string mod)
 					tname = m_prop.textures[0];
 				tname += mod;
 				scene::IMeshBuffer *buf = mesh->getMeshBuffer(1);
-				buf->getMaterial().setTexture(0,
-						tsrc->getTextureForMesh(tname));
+				buf->getMaterial().setTexture(0, pinTexture(tsrc, tname));
 
 				// This allows setting per-material colors. However, until a real lighting
 				// system is added, the code below will have no effect. Once MineTest

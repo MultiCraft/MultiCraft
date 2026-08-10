@@ -354,7 +354,7 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 {
 	IItemDefManager *idef = client->getItemDefManager();
 
-	if (!m_item || m_item->name != item.name ||
+	if (!m_item || m_item->name != item.name || m_item->getTiles() != item.getTiles() ||
 			m_item->getWieldImage(idef) != item.getWieldImage(idef) ||
 			m_item->getInventoryImage(idef) != item.getInventoryImage(idef))
 		buildMesh(item, client, check_wield_image);
@@ -474,7 +474,7 @@ void WieldMeshSceneNode::buildMesh(const ItemStack &item, Client *client, bool c
 
 void WieldMeshSceneNode::setTiles(const std::string &tiles, ITextureSource *tsrc)
 {
-	m_tiles.grab(tiles.empty() ? nullptr : tsrc->getTextureForMesh(tiles));
+	m_tiles.grab(tiles.empty() ? nullptr : tsrc->getTextureForMeshTransient(tiles));
 	if (!m_tiles)
 		return;
 

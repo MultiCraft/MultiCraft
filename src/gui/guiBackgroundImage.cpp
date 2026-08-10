@@ -33,7 +33,9 @@ void GUIBackgroundImage::draw()
 	if (!IsVisible)
 		return;
 
-	video::ITexture *texture = m_tsrc->getTexture(m_name);
+	if (!m_texture)
+		m_texture = m_tsrc->getTextureTransient(m_name);
+	video::ITexture *texture = m_texture;
 
 	if (!texture) {
 		errorstream << "GUIBackgroundImage::draw() Unable to load texture:"

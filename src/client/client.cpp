@@ -549,6 +549,15 @@ void Client::step(float dtime)
 	}
 
 	/*
+		Drop generated textures nothing has used for a while
+	*/
+	m_texture_evict_timer += dtime;
+	if (m_texture_evict_timer >= 10.0f) {
+		m_texture_evict_timer = 0.0f;
+		m_tsrc->evictUnused(60 * 1000);
+	}
+
+	/*
 		Replace updated meshes
 	*/
 	{

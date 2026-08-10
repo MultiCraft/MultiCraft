@@ -1035,7 +1035,7 @@ void drawItemStack(
 
 		const std::string &tiles = item.getTiles();
 		video::ITexture *tiles_texture = tiles.empty() ? nullptr :
-			client->getTextureSource()->getTextureForMesh(tiles);
+			client->getTextureSource()->getTextureForMeshTransient(tiles);
 
 		driver->clearZBuffer();
 		s32 delta = 0;
@@ -1137,7 +1137,7 @@ void drawItemStack(
 		draw_overlay = def.type == ITEM_NODE && inventory_image.empty();
 	} else { // Otherwise just draw as 2D
 		video::ITexture *texture =
-			client->getTextureSource()->getTexture(inventory_image);
+			client->getTextureSource()->getTextureTransient(inventory_image);
 		if (!texture)
 			return;
 		video::SColor color =
