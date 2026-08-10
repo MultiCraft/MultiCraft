@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 */
 
 #include "guiscalingfilter.h"
+
+#if 0
 #include "imagefilters.h"
 #include "porting.h"
 #include "settings.h"
@@ -168,6 +170,18 @@ void draw2DImageFilterScaled(video::IVideoDriver *driver, video::ITexture *txr,
 		: srcrect;
 
 	driver->draw2DImage(scaled, destrect, mysrcrect, cliprect, colors, usealpha);
+}
+#endif
+
+void draw2DImageFilterScaled(video::IVideoDriver *driver, video::ITexture *txr,
+		const core::rect<s32> &destrect, const core::rect<s32> &srcrect,
+		const core::rect<s32> *cliprect, const video::SColor *const colors,
+		bool usealpha)
+{
+	if (txr == NULL)
+		return;
+
+	driver->draw2DImage(txr, destrect, srcrect, cliprect, colors, usealpha);
 }
 
 void draw2DImage9Slice(video::IVideoDriver *driver, video::ITexture *texture,

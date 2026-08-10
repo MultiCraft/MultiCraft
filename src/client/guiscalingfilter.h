@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "irrlichttypes_extrabloated.h"
 
+#if 0
 /* Manually insert an image into the cache, useful to avoid texture-to-image
  * conversion whenever we can intercept it.
  */
@@ -40,6 +41,20 @@ video::ITexture *guiScalingResizeCached(video::IVideoDriver *driver, video::ITex
  */
 video::ITexture *guiScalingImageButton(video::IVideoDriver *driver, video::ITexture *src,
 		s32 width, s32 height);
+#else
+inline void guiScalingCache(const io::path &, video::IVideoDriver *, video::IImage *) {}
+inline void guiScalingCacheClear() {}
+inline video::ITexture *guiScalingResizeCached(video::IVideoDriver *,
+		video::ITexture *src, const core::rect<s32> &, const core::rect<s32> &)
+{
+	return src;
+}
+inline video::ITexture *guiScalingImageButton(video::IVideoDriver *,
+		video::ITexture *src, s32, s32)
+{
+	return src;
+}
+#endif
 
 /* Replacement for driver->draw2DImage() that uses the high-quality pre-scaled
  * texture, if configured.
