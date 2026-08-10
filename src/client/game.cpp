@@ -1431,6 +1431,10 @@ bool Game::createClient(const GameStartData &start_data)
 	load_last_time_ms = load_time_ms;
 	load_time_ms = porting::getTimeMs();
 	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+
+	if (!simple_singleplayer_mode)
+		RenderingEngine::set_load_screen_cancel(&m_connect_aborted);
+
 	showOverlayMessage(N_("Creating client..."), dtime, 10);
 
 	draw_control = new MapDrawControl;

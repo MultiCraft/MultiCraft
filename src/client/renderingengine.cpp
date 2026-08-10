@@ -40,6 +40,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "inputhandler.h"
 #include "gettext.h"
 #include "../gui/guiSkin.h"
+#include "gui/guiButton.h"
+#include "gui/mainmenumanager.h"
 
 #if !defined(_WIN32) && !defined(__APPLE__) && !defined(__ANDROID__) && \
 		!defined(SERVER) && !defined(__HAIKU__)
@@ -65,6 +67,27 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 RenderingEngine *RenderingEngine::s_singleton = nullptr;
+
+
+class LoadScreenRoot : public gui::IGUIElement
+{
+public:
+	LoadScreenRoot(gui::IGUIEnvironment *env, gui::IGUIElement *parent,
+			const core::rect<s32> &rect) :
+		gui::IGUIElement(gui::EGUIET_ELEMENT, env, parent, -1, rect)
+	{
+	}
+
+	bool OnEvent(const SEvent &event) override
+	{
+		if (event.EventType == EET_GUI_EVENT &&
+				event.GUIEvent.EventType == gui::EGET_BUTTON_CLICKED) {
+			RenderingEngine::cancel_load_screen();
+			return true;
+		}
+		return gui::IGUIElement::OnEvent(event);
+	}
+};
 
 
 static gui::GUISkin *createSkin(gui::IGUIEnvironment *environment,
@@ -564,92 +587,112 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 	m_last_time = cur_time;
 	m_percent = percent;
 
-	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
+	if (percent >= 100 || percent < m_percent_shown) {
+		m_percent_shown = percent;
+	} else {
+		m_percent_shown += (percent - m_percent_shown) * MYMIN(1.0f, dtime * 6.0f);
+		if (std::fabs(percent - m_percent_shown) < 0.5f)
+			m_percent_shown = percent;
+	}
 
-	v2s32 textsize(g_fontengine->getTextWidth(text), g_fontengine->getLineHeight());
-	v2s32 center(screensize.X / 2, screensize.Y / 2);
-	core::rect<s32> textrect(center - textsize / 2, center + textsize / 2);
+	const v2u32 window = getWindowSize();
 
-	gui::IGUIStaticText *guitext =
-			guienv->addStaticText(text.c_str(), textrect, false, false);
-	guitext->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_UPPERLEFT);
+	video::ITexture *bar_bg = tsrc->getTexture("progress_bar_bg.png");
+	video::ITexture *bar_fg = tsrc->getTexture("progress_bar_fg.png");
+	video::ITexture *bar_top = tsrc->getTexture("progress_bar.png");
+
+	const core::dimension2d<u32> art = bar_bg ? bar_bg->getOriginalSize() :
+			core::dimension2d<u32>(512, 64);
+#ifdef HAVE_TOUCHSCREENGUI
+	const s32 bar_w = MYMIN(window.X * 0.5f, window.Y * 2.0f);
+#else
+	const s32 bar_w = 7.5 * (MYMIN(window.X, window.Y) * 0.9 / 15.0);
+#endif
+	const s32 bar_h = art.Width > 0 ? bar_w * art.Height / art.Width : bar_w / 8;
+	const s32 bar_x = (s32)window.X / 2 - bar_w / 2;
+	const s32 bar_y = (s32)window.Y / 2 - bar_h / 2;
 
 	_draw_load_bg(guienv, tsrc, dtime);
 
 	// draw progress bar
-	if ((percent >= 0) && (percent <= 100)) {
-		std::string texture_path = porting::path_share + DIR_DELIM + "textures"
-				+ DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM;
-		video::ITexture *progress_img =
-				driver->getTexture((texture_path + "progress_bar.png").c_str());
-		video::ITexture *progress_img_bg =
-				driver->getTexture((texture_path + "progress_bar_bg.png").c_str());
-		video::ITexture *progress_img_fg =
-				driver->getTexture((texture_path + "progress_bar_fg.png").c_str());
+	if (percent >= 0 && percent <= 100 && bar_bg) {
+		const core::rect<s32> whole(0, 0, art.Width, art.Height);
+		draw2DImageFilterScaled(driver, bar_bg,
+				core::rect<s32>(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h),
+				whole, nullptr, nullptr, true);
 
-		if (progress_img && progress_img_bg && progress_img_fg) {
-			const core::dimension2d<u32> &img_size =
-					progress_img_bg->getSize();
-#if !defined(__ANDROID__) && !defined(__IOS__)
-			float density = RenderingEngine::getDisplayDensity();
-#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
-			u32 imgW = rangelim(img_size.Width, 256, 1024) * density;
-			u32 imgH = rangelim(img_size.Height, 32, 128) * density;
-#else
-			float gui_scaling = g_settings->getFloat("gui_scaling");
-			float scale = density * gui_scaling;
-			u32 imgW = rangelim(img_size.Width, 256, 1024) * scale;
-			u32 imgH = rangelim(img_size.Height, 32, 128) * scale;
-#endif
-#else
-			float imgRatio = (float) img_size.Height / img_size.Width;
-			u32 imgW = screensize.X / 2;
-#if ENABLE_GLES && !defined(__APPLE__)
-			if (!hasNPotSupport()) {
-				imgW = npot2(imgW);
-				if (imgW > (screensize.X * 0.7) && imgW >= 1024)
-					imgW /= 2;
-			}
-#endif
-			u32 imgH = imgW * imgRatio;
-#endif
-			v2s32 img_pos((screensize.X - imgW) / 2,
-					(screensize.Y - imgH) / 2);
+		const s32 done = MYMAX(bar_w * m_percent_shown / 100.0f, bar_h);
+		const s32 left = done / 2;
+		const s32 right = done - left;
 
-			draw2DImageFilterScaled(driver, progress_img_bg,
-					core::rect<s32>(img_pos.X, img_pos.Y,
-							img_pos.X + imgW,
-							img_pos.Y + imgH),
-					core::rect<s32>(0, 0, img_size.Width,
-							img_size.Height),
-					0, 0, true);
+		const video::SColor tint(255, 255 - (u32)m_percent_shown * 2,
+				(u32)m_percent_shown * 2, 25);
+		const video::SColor tints[] = {tint, tint, tint, tint};
 
-			const video::SColor color(255, 255 - percent * 2, percent * 2, 25);
-			const video::SColor colors[] = {color, color, color, color};
+		for (video::ITexture *layer : {bar_fg, bar_top}) {
+			if (!layer)
+				continue;
+			const video::SColor *colors = layer == bar_fg ? tints : nullptr;
 
-			draw2DImageFilterScaled(driver, progress_img_fg,
-					core::rect<s32>(img_pos.X, img_pos.Y,
-							img_pos.X + (percent * imgW) / 100,
-							img_pos.Y + imgH),
-					core::rect<s32>(0, 0,
-							(percent * img_size.Width) / 100,
-							img_size.Height),
-					0, colors, true);
+			if (left > 0)
+				draw2DImageFilterScaled(driver, layer,
+						core::rect<s32>(bar_x, bar_y, bar_x + left, bar_y + bar_h),
+						core::rect<s32>(0, 0, left * art.Width / bar_w, art.Height),
+						nullptr, colors, true);
 
-			draw2DImageFilterScaled(driver, progress_img,
-					core::rect<s32>(img_pos.X, img_pos.Y,
-							img_pos.X + (percent * imgW) / 100,
-							img_pos.Y + imgH),
-					core::rect<s32>(0, 0,
-							(percent * img_size.Width) / 100,
-							img_size.Height),
-					0, 0, true);
+			if (right > 0)
+				draw2DImageFilterScaled(driver, layer,
+						core::rect<s32>(bar_x + left, bar_y,
+								bar_x + done, bar_y + bar_h),
+						core::rect<s32>(art.Width - right * (s32)art.Width / bar_w, 0,
+								art.Width, art.Height),
+						nullptr, colors, true);
 		}
 	}
 
+	const core::rect<s32> textrect(bar_x, bar_y, bar_x + bar_w, bar_y + bar_h);
+	// the text grows with the bar on large screens, but never shrinks below default
+	const u32 font_size = MYMAX(g_fontengine->getDefaultFontSize(),
+			bar_h * FORMSPEC_FONT_SHARE / getDisplayDensity());
+
+	if (!m_load_text) {
+		m_load_text = guienv->addStaticText(text.c_str(), textrect, false, false);
+		m_load_text->setTextAlignment(gui::EGUIA_CENTER, gui::EGUIA_CENTER);
+		// hovering it would steal the focus away from the cancel button
+		m_load_text->setSubElement(true);
+	} else {
+		m_load_text->setText(text.c_str());
+		m_load_text->setRelativePosition(textrect);
+	}
+	m_load_text->setOverrideFont(g_fontengine->getFont(font_size));
+
+#ifdef HAVE_TOUCHSCREENGUI
+	if (m_load_cancel) {
+		const s32 touch_min = 9.0f * getDisplayDensity();
+		const s32 btn_w = MYMAX(bar_w * 0.4f, touch_min * 3);
+		const s32 btn_h = MYMAX(bar_h * 0.6f, touch_min);
+		const core::rect<s32> btn(window.X / 2 - btn_w / 2, bar_y + bar_h + bar_h / 4,
+				window.X / 2 + btn_w / 2, bar_y + bar_h + bar_h / 4 + btn_h);
+
+		if (!m_load_root) {
+			m_load_root = new LoadScreenRoot(guienv, guiroot,
+					core::rect<s32>(0, 0, window.X, window.Y));
+			const wchar_t *caption = wgettext("Cancel");
+			m_load_button = GUIButton::addButton(guienv, btn, tsrc, m_load_root,
+					-1, caption);
+			delete[] caption;
+			m_load_button->setStyles(StyleSpec::getButtonStyle());
+			m_load_root->drop();
+		} else {
+			m_load_root->setRelativePosition(
+					core::rect<s32>(0, 0, window.X, window.Y));
+			m_load_button->setRelativePosition(btn);
+		}
+	}
+#endif
+
 	guienv->drawAll();
 	driver->endScene();
-	guitext->remove();
 
 	m_load_screen_drawn = true;
 }
@@ -734,8 +777,51 @@ void RenderingEngine::_draw_load_bg(gui::IGUIEnvironment *guienv,
 			NULL, NULL, true);
 }
 
+bool RenderingEngine::handle_load_screen_touch(const SEvent &event)
+{
+	if (!s_singleton || !s_singleton->m_load_button)
+		return false;
+
+	SEvent mouse = {};
+	mouse.EventType = EET_MOUSE_INPUT_EVENT;
+	mouse.MouseInput.X = event.TouchInput.X;
+	mouse.MouseInput.Y = event.TouchInput.Y;
+
+	switch (event.TouchInput.Event) {
+	case ETIE_PRESSED_DOWN:
+		mouse.MouseInput.Event = EMIE_LMOUSE_PRESSED_DOWN;
+		mouse.MouseInput.ButtonStates = EMBSM_LEFT;
+		break;
+	case ETIE_MOVED:
+		mouse.MouseInput.Event = EMIE_MOUSE_MOVED;
+		mouse.MouseInput.ButtonStates = EMBSM_LEFT;
+		break;
+	case ETIE_LEFT_UP:
+		mouse.MouseInput.Event = EMIE_LMOUSE_LEFT_UP;
+		break;
+	default:
+		return false;
+	}
+
+	return get_gui_env()->postEventFromUser(mouse);
+}
+
 void RenderingEngine::_draw_load_cleanup()
 {
+	if (m_load_text) {
+		m_load_text->remove();
+		m_load_text = nullptr;
+	}
+
+	if (m_load_root) {
+		m_load_root->remove();
+		m_load_root = nullptr;
+		m_load_button = nullptr;
+	}
+
+	m_load_cancel = nullptr;
+	m_percent_shown = 0.0f;
+
 	if (!m_load_bg_texture.empty()) {
 		video::ITexture *texture = driver->getTexture(m_load_bg_texture.c_str());
 

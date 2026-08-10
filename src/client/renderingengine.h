@@ -32,6 +32,7 @@ class Client;
 class LocalPlayer;
 class Hud;
 class Minimap;
+class GUIButton;
 
 class RenderingCore;
 
@@ -124,6 +125,21 @@ public:
 		s_singleton->_draw_load_cleanup();
 	}
 
+	inline static void set_load_screen_cancel(bool *flag)
+	{
+		if (s_singleton)
+			s_singleton->m_load_cancel = flag;
+	}
+
+	inline static void cancel_load_screen()
+	{
+		if (s_singleton && s_singleton->m_load_cancel)
+			*s_singleton->m_load_cancel = true;
+	}
+
+	//! Feeds a tap to the cancel button, which the GUI cannot reach on its own
+	static bool handle_load_screen_touch(const SEvent &event);
+
 	inline static void draw_menu_scene(
 			gui::IGUIEnvironment *guienv, ITextureSource *tsrc,
 			float dtime)
@@ -192,6 +208,11 @@ private:
 	irr::video::IVideoDriver *driver;
 	static RenderingEngine *s_singleton;
 
+	gui::IGUIStaticText *m_load_text = nullptr;
+	gui::IGUIElement *m_load_root = nullptr;
+	GUIButton *m_load_button = nullptr;
+	bool *m_load_cancel = nullptr;
+
 	bool m_load_bg_clouds = false;
 	std::string m_load_bg_texture = "";
 	video::SColor m_sky_color;
@@ -199,4 +220,5 @@ private:
 	float m_load_screen_dtime = 0;
 	bool m_load_screen_drawn = false;
 	int m_percent = 0;
+	float m_percent_shown = 0.0f;
 };
