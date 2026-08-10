@@ -2395,6 +2395,10 @@ void Game::toggleCinematic()
 void Game::toggleAutoforward()
 {
 	bool autorun_enabled = !g_settings->getBool("continuous_forward");
+#if !DEBUG
+	if (autorun_enabled && !simple_singleplayer_mode && !server)
+		return;
+#endif
 	g_settings->set("continuous_forward", bool_to_cstr(autorun_enabled));
 
 	if (autorun_enabled)
@@ -2715,6 +2719,9 @@ void Game::updatePlayerControl(const CameraOrientation &cam)
 
 	// autoforward if set: simulate "up" key
 	if (player->getPlayerSettings().continuous_forward &&
+#if !DEBUG
+			(simple_singleplayer_mode || server) &&
+#endif
 			client->activeObjectsReceived() && !player->isDead()) {
 		control.up = true;
 		keypress_bits |= 1U << 0;
