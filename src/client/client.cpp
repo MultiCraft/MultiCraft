@@ -637,9 +637,16 @@ void Client::step(float dtime)
 			if(!m_sound->soundExists(client_id)) {
 				m_sounds_server_to_client.erase(server_id);
 				m_sounds_client_to_server.erase(client_id);
-				m_sounds_to_objects.erase(client_id);
 				removed_server_ids.push_back(server_id);
 			}
+		}
+
+		// Ephemeral sounds are absent from the map above, so drop them here
+		for (auto i = m_sounds_to_objects.begin(); i != m_sounds_to_objects.end();) {
+			if (m_sound->soundExists(i->first))
+				++i;
+			else
+				i = m_sounds_to_objects.erase(i);
 		}
 
 		// Sync to server
