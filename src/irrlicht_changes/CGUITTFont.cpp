@@ -33,7 +33,6 @@
 #include <cstring>
 #include "CGUITTFont.h"
 #include "debug.h"
-#include "porting.h"
 #include "util/string.h"
 
 
@@ -604,32 +603,42 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 				return false;
 			}
 
-			// For devices with low RAM only fonts smaller than 5MB are loaded into memory. Otherwise just use FT_New_Face.
-			int systemMemory = porting::getTotalSystemMemory();
-			int maxFontSize = 5 * 1024 * 1024;
-			size_t fileSize = file->getSize();
-			if (systemMemory < 3072 && (int)fileSize > maxFontSize) {
-				use_memory_face = false;
-			} else {
+			// A big font is mapped from disk instead of copied into the heap: its
+			// pages arrive on demand and the system can reclaim them under pressure
+			const size_t fileSize = file->getSize();
+			use_memory_face = fileSize <= (size_t)5 * 1024 * 1024;
+
+			if (!use_memory_face)
+			{
+				std::string filename_utf8 = stringw_to_utf8(filename);
+				// no readable path behind the name, so fall back to a copy
+				if (FT_New_Face(c_library, filename_utf8.c_str(), 0, &face->face))
+					use_memory_face = true;
+			}
+
+			if (use_memory_face)
+			{
 				face->face_buffer = new FT_Byte[fileSize];
 				file->read(face->face_buffer, fileSize);
 				face->face_buffer_size = fileSize;
-				file->drop();
 
 				// Create the face.
 				if (FT_New_Memory_Face(c_library, face->face_buffer, face->face_buffer_size, 0, &face->face))
 				{
 					if (logger) logger->log(L"CGUITTFont", L"FT_New_Memory_Face failed.", irr::ELL_INFORMATION);
 
+					file->drop();
 					c_faces.remove(filename);
 					delete face;
 					face = 0;
 					return false;
 				}
 			}
+
+			file->drop();
 		}
 
-		if (!filesystem || !use_memory_face)
+		if (!filesystem)
 		{
 			std::string filename_utf8 = stringw_to_utf8(filename);
 			if (FT_New_Face(c_library, filename_utf8.c_str(), 0, &face->face))
