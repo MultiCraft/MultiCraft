@@ -1649,6 +1649,8 @@ core::dimension2d<u32> CGUITTFont::getTotalDimension(const core::stringw& text) 
 		text_dimension.Width += bold_extra_width;
 	}
 
+	text_dimension.Width += outline * 2;
+
 	return text_dimension;
 }
 
