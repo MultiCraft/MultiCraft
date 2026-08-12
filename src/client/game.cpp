@@ -3270,7 +3270,7 @@ void Game::updateSound(f32 dtime)
 			      camera->getCameraNode()->getUpVector());
 
 	bool mute_sound = g_settings->getBool("mute_sound");
-	if (mute_sound) {
+	if (mute_sound || m_is_paused) {
 		sound->setListenerGain(0.0f);
 	} else {
 		// Check if volume is in the proper range, else fix it.
