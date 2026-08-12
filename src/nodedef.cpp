@@ -701,7 +701,6 @@ static void fillTileAttribs(ITextureSource *tsrc, TileLayer *layer,
 
 bool ContentFeatures::textureAlphaCheck(ITextureSource *tsrc, const TileDef *tiles, int length)
 {
-	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
 	static thread_local bool long_warning_printed = false;
 	std::set<std::string> seen;
 
@@ -710,12 +709,8 @@ bool ContentFeatures::textureAlphaCheck(ITextureSource *tsrc, const TileDef *til
 			continue;
 		seen.insert(tiles[i].name);
 
-		// Load the texture and see if there's any transparent pixels
-		video::ITexture *texture = tsrc->getTexture(tiles[i].name);
-		if (!texture)
-			continue;
-		video::IImage *image = driver->createImage(texture,
-			core::position2d<s32>(0, 0), texture->getOriginalSize());
+		// Build the image and see if there's any transparent pixels
+		video::IImage *image = tsrc->getTextureImage(tiles[i].name);
 		if (!image)
 			continue;
 		core::dimension2d<u32> dim = image->getDimension();

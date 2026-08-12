@@ -534,6 +534,12 @@ public:
 	video::SColor getTextureAverageColor(const std::string &name);
 	video::ITexture *getShaderFlagsTexture(bool normamap_present);
 
+	video::IImage* getTextureImage(const std::string &name)
+	{
+		sanity_check(std::this_thread::get_id() == m_main_thread);
+		return generateImage(name);
+	}
+
 private:
 
 	// The id of the thread that is allowed to use irrlicht directly
@@ -2391,14 +2397,8 @@ video::ITexture* TextureSource::getNormalTexture(const std::string &name)
 
 video::SColor TextureSource::getTextureAverageColor(const std::string &name)
 {
-	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
 	video::SColor c(0, 0, 0, 0);
-	video::ITexture *texture = getTexture(name);
-	if (!texture)
-		return c;
-	video::IImage *image = driver->createImage(texture,
-		core::position2d<s32>(0, 0),
-		texture->getOriginalSize());
+	video::IImage *image = getTextureImage(name);
 	if (!image)
 		return c;
 

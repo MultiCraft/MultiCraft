@@ -103,6 +103,12 @@ public:
 	 * Should be called from the main thread.
 	 */
 	virtual Palette* getPalette(const std::string &name) = 0;
+	/*!
+	 * Builds the image a texture name resolves to, without creating a texture.
+	 * The returned image should be dropped by the caller.
+	 * Should be called from the main thread.
+	 */
+	virtual video::IImage* getTextureImage(const std::string &name) = 0;
 	virtual bool isKnownSourceImage(const std::string &name)=0;
 	virtual video::ITexture* getNormalTexture(const std::string &name)=0;
 	virtual video::SColor getTextureAverageColor(const std::string &name)=0;
