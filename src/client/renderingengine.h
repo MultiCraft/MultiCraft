@@ -196,5 +196,6 @@ private:
 	video::SColor m_sky_color;
 	u64 m_last_time = 0;
 	float m_load_screen_dtime = 0;
+	bool m_load_screen_drawn = false;
 	int m_percent = 0;
 };

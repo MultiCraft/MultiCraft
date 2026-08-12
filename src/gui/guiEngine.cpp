@@ -256,6 +256,7 @@ void GUIEngine::run()
 
 	u64 t_last_frame = porting::getTimeUs();
 	f32 dtime = 0.0f;
+	bool drawn = false;
 
 	while (RenderingEngine::run() && (!m_startgame) && (!m_kill)) {
 		const video::SColor sky_color = g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245);
@@ -264,9 +265,9 @@ void GUIEngine::run()
 
 		IrrlichtDevice *device = RenderingEngine::get_raw_device();
 #ifdef __IOS__
-		if (device->isWindowMinimized())
+		if (device->isWindowMinimized() && drawn)
 #else
-		if (!device->isWindowFocused())
+		if (!device->isWindowFocused() && drawn)
 #endif
 		{
 			m_sound_manager->setListenerGain(0.0f);
@@ -319,6 +320,7 @@ void GUIEngine::run()
 		RenderingEngine::get_gui_env()->drawAll();
 
 		driver->endScene();
+		drawn = true;
 
 		u32 frametime_min = 1000 / (device->isWindowFocused()
 			? g_settings->getFloat("fps_max")

@@ -542,11 +542,11 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 		int percent)
 {
 #ifdef __IOS__
-		if (m_device->isWindowMinimized())
-			return;
+	if (m_device->isWindowMinimized() && m_load_screen_drawn)
+		return;
 #else
-		if (!m_device->isWindowFocused())
-			return;
+	if (!m_device->isWindowFocused() && m_load_screen_drawn)
+		return;
 #endif
 
 	float fps_max = std::min(g_settings->getFloat("fps_max"), 30.0f);
@@ -647,6 +647,8 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 	guienv->drawAll();
 	driver->endScene();
 	guitext->remove();
+
+	m_load_screen_drawn = true;
 }
 
 /*
@@ -739,6 +741,7 @@ void RenderingEngine::_draw_load_cleanup()
 	}
 
 	m_load_screen_dtime = 0;
+	m_load_screen_drawn = false;
 	m_percent = 0;
 }
 
