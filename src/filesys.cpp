@@ -854,7 +854,20 @@ bool extractZipFile(io::IFileSystem *fs, const char *filename,
 		return false;
 	}
 
-	irr_ptr<io::IFileArchive> opened_zip(zip_loader->createArchive(filename, false, false));
+	irr_ptr<io::IFileArchive> opened_zip;
+	io::IReadFile* file = fs->createAndOpenFile(filename);
+	if (file) {
+		if (!zip_loader->isALoadableFileFormat(file)) {
+			file->drop();
+			if (errorMessage != nullptr)
+				*errorMessage = "not a zip file";
+			return false;
+		}
+
+		file->seek(0); // createArchive() calls seek but I don't want to rely on that
+		opened_zip.reset(zip_loader->createArchive(filename, false, false));
+		file->drop();
+	}
 
 	return extractZipFileInternal(fs, opened_zip, destination, password, errorMessage);
 }
