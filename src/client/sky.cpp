@@ -99,9 +99,9 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 	m_moon_texture = tsrc && tsrc->isKnownSourceImage(m_moon_params.texture) ?
 		tsrc->getTextureForMesh(m_moon_params.texture) : nullptr;
 	m_sun_tonemap = tsrc && tsrc->isKnownSourceImage(m_sun_params.tonemap) ?
-		tsrc->getTexture(m_sun_params.tonemap) : nullptr;
+		tsrc->getTextureImage(m_sun_params.tonemap) : nullptr;
 	m_moon_tonemap = tsrc && tsrc->isKnownSourceImage(m_moon_params.tonemap) ?
-		tsrc->getTexture(m_moon_params.tonemap) : nullptr;
+		tsrc->getTextureImage(m_moon_params.tonemap) : nullptr;
 
 	if (m_sun_texture) {
 		m_sun_texture->grab();
@@ -117,10 +117,6 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 			m_materials[3].Lighting = true;
 	}
 
-	// Grab m_sun_tonemap in case it is set but m_sun_texture isn't
-	if (m_sun_tonemap)
-		m_sun_tonemap->grab();
-
 	if (m_moon_texture) {
 		m_moon_texture->grab();
 		m_materials[4] = baseMaterial();
@@ -134,9 +130,6 @@ Sky::Sky(s32 id, ITextureSource *tsrc, IShaderSource *ssrc, scene::ISceneManager
 		if (m_moon_tonemap)
 			m_materials[4].Lighting = true;
 	}
-
-	if (m_moon_tonemap)
-		m_moon_tonemap->grab();
 
 	for (int i = 5; i < 11; i++) {
 		m_materials[i] = baseMaterial();
@@ -229,20 +222,14 @@ void Sky::render()
 		float offset = (1.0 - fabs(sin((m_time_of_day - 0.5) * irr::core::PI))) * 511;
 
 		if (m_sun_tonemap) {
-			u8 * texels = (u8 *)m_sun_tonemap->lock();
-			video::SColor* texel = (video::SColor *)(texels + (u32)offset * 4);
-			video::SColor texel_color (255, texel->getRed(),
-				texel->getGreen(), texel->getBlue());
-			m_sun_tonemap->unlock();
+			video::SColor texel_color = m_sun_tonemap->getPixel((u32)offset, 0);
+			texel_color.setAlpha(255);
 			m_materials[3].EmissiveColor = texel_color;
 		}
 
 		if (m_moon_tonemap) {
-			u8 * texels = (u8 *)m_moon_tonemap->lock();
-			video::SColor* texel = (video::SColor *)(texels + (u32)offset * 4);
-			video::SColor texel_color (255, texel->getRed(),
-				texel->getGreen(), texel->getBlue());
-			m_moon_tonemap->unlock();
+			video::SColor texel_color = m_moon_tonemap->getPixel((u32)offset, 0);
+			texel_color.setAlpha(255);
 			m_materials[4].EmissiveColor = texel_color;
 		}
 
@@ -809,16 +796,15 @@ void Sky::setSunTexture(const std::string &sun_texture,
 {
 	// Ignore matching textures (with modifiers) entirely,
 	// but lets at least update the tonemap before hand.
-	if (m_sun_tonemap)
-		m_sun_tonemap->drop();
+	if (m_sun_params.tonemap != sun_tonemap) {
+		if (m_sun_tonemap)
+			m_sun_tonemap->drop();
 
-	m_sun_params.tonemap = sun_tonemap;
-	m_sun_tonemap = tsrc->isKnownSourceImage(m_sun_params.tonemap) ?
-		tsrc->getTexture(m_sun_params.tonemap) : nullptr;
-	m_materials[3].Lighting = !!m_sun_tonemap;
-
-	if (m_sun_tonemap)
-		m_sun_tonemap->grab();
+		m_sun_params.tonemap = sun_tonemap;
+		m_sun_tonemap = tsrc->isKnownSourceImage(m_sun_params.tonemap) ?
+			tsrc->getTextureImage(m_sun_params.tonemap) : nullptr;
+		m_materials[3].Lighting = !!m_sun_tonemap;
+	}
 
 	if (m_sun_params.texture == sun_texture)
 		return;
@@ -868,16 +854,15 @@ void Sky::setMoonTexture(const std::string &moon_texture,
 {
 	// Ignore matching textures (with modifiers) entirely,
 	// but lets at least update the tonemap before hand.
-	if (m_moon_tonemap)
-		m_moon_tonemap->drop();
+	if (m_moon_params.tonemap != moon_tonemap) {
+		if (m_moon_tonemap)
+			m_moon_tonemap->drop();
 
-	m_moon_params.tonemap = moon_tonemap;
-	m_moon_tonemap = tsrc->isKnownSourceImage(m_moon_params.tonemap) ?
-		tsrc->getTexture(m_moon_params.tonemap) : nullptr;
-	m_materials[4].Lighting = !!m_moon_tonemap;
-
-	if (m_moon_tonemap)
-		m_moon_tonemap->grab();
+		m_moon_params.tonemap = moon_tonemap;
+		m_moon_tonemap = tsrc->isKnownSourceImage(m_moon_params.tonemap) ?
+			tsrc->getTextureImage(m_moon_params.tonemap) : nullptr;
+		m_materials[4].Lighting = !!m_moon_tonemap;
+	}
 
 	if (m_moon_params.texture == moon_texture)
 		return;

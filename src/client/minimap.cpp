@@ -207,17 +207,11 @@ Minimap::Minimap(Client *client)
 	data->minimap_shape_round = g_settings->getBool("minimap_shape_round");
 
 	// Get round minimap textures
-	data->minimap_mask_round = driver->createImage(
-		m_tsrc->getTexture("minimap_mask_round.png"),
-		core::position2d<s32>(0, 0),
-		core::dimension2d<u32>(MINIMAP_MAX_SX, MINIMAP_MAX_SY));
+	data->minimap_mask_round = m_tsrc->getTextureImage("minimap_mask_round.png");
 	data->minimap_overlay_round = m_tsrc->getTexture("minimap_overlay_round.png");
 
 	// Get square minimap textures
-	data->minimap_mask_square = driver->createImage(
-		m_tsrc->getTexture("minimap_mask_square.png"),
-		core::position2d<s32>(0, 0),
-		core::dimension2d<u32>(MINIMAP_MAX_SX, MINIMAP_MAX_SY));
+	data->minimap_mask_square = m_tsrc->getTextureImage("minimap_mask_square.png");
 	data->minimap_overlay_square = m_tsrc->getTexture("minimap_overlay_square.png");
 
 	// Create player marker texture
@@ -534,11 +528,10 @@ video::ITexture *Minimap::getMinimapTexture()
 		blitMinimapPixelsToImageRadar(map_image);
 		break;
 	case MINIMAP_TYPE_TEXTURE:
-		// Want to use texture source, to : 1 find texture, 2 cache it
-		video::ITexture* texture = m_tsrc->getTexture(data->mode.texture);
-		video::IImage* image = driver->createImageFromData(
-			 texture->getColorFormat(), texture->getSize(), texture->lock(), true, false);
-		texture->unlock();
+		// Built from the source image on every call, nothing caches the result
+		video::IImage* image = m_tsrc->getTextureImage(data->mode.texture);
+		if (!image)
+			break;
 
 		auto dim = image->getDimension();
 

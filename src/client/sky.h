@@ -201,8 +201,8 @@ private:
 
 	video::ITexture *m_sun_texture;
 	video::ITexture *m_moon_texture;
-	video::ITexture *m_sun_tonemap;
-	video::ITexture *m_moon_tonemap;
+	video::IImage *m_sun_tonemap;
+	video::IImage *m_moon_tonemap;
 
 	bool m_use_custom_sky_body_pos = false;
 	float m_custom_moon_horizon_pos = -90;

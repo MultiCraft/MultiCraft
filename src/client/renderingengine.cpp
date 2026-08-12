@@ -175,6 +175,9 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 #endif
 	driver = m_device->getVideoDriver();
 
+	// Textures live on the GPU, a copy in main memory only doubles their cost
+	driver->setTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY, false);
+
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
 	SDL_Window *window = exposedData.OpenGLSDL.Window;
