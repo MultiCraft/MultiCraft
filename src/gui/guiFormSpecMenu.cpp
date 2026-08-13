@@ -1042,8 +1042,8 @@ void GUIFormSpecMenu::parseButton(parserData* data, const std::string &element,
 	int expected_parts = (type == "button_url" || type == "button_url_exit") ? 5 : 4;
 	std::vector<std::string> parts = split(element,';');
 
-	if ((parts.size() == expected_parts) ||
-		((parts.size() > expected_parts) && (m_formspec_version > FORMSPEC_API_VERSION)))
+	if ((parts.size() == (size_t)expected_parts) ||
+		((parts.size() > (size_t)expected_parts) && (m_formspec_version > FORMSPEC_API_VERSION)))
 	{
 		std::vector<std::string> v_pos = split(parts[0],',');
 		std::vector<std::string> v_geom = split(parts[1],',');

@@ -505,9 +505,10 @@ bool GUIKeyChangeMenu::OnEvent(const SEvent& event)
 						ks->button->setText(text);
 						delete[] text;
 					}
-					if (this->key_used_text)
+					if (this->key_used_text) {
 						this->key_used_text->remove();
 						this->key_used_text = nullptr;
+					}
 					return true;
 				default:
 					resetMenu();

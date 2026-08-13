@@ -951,7 +951,6 @@ bool extractZipFileFromAssets(io::IFileSystem *fs,
 		return false;
 	}
 
-	size_t length = 0;
 	bool result = porting::createAssetManager();
 
 	if (!result) {

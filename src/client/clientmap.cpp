@@ -403,7 +403,6 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 	TimeTaker draw("Drawing mesh buffers");
 
 	core::matrix4 m; // Model matrix
-	v3f offset = intToFloat(m_camera_offset, BS);
 
 	// The cube each light source's point light reaches, in the frame's coordinates
 	std::vector<core::aabbox3df> reach;

@@ -1086,10 +1086,10 @@ bool Game::startup(bool *kill,
 void Game::run()
 {
 	ProfilerGraph graph;
-	RunStats stats              = { 0 };
-	CameraOrientation cam_view_target  = { 0 };
-	CameraOrientation cam_view  = { 0 };
-	FpsControl draw_times       = { 0 };
+	RunStats stats              = {};
+	CameraOrientation cam_view_target  = {};
+	CameraOrientation cam_view  = {};
+	FpsControl draw_times       = {};
 	f32 dtime = 0; // in seconds
 
 	/* Clear the profiler */
@@ -1636,7 +1636,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 	try {
 		input->clear();
 
-		FpsControl fps_control = { 0 };
+		FpsControl fps_control = {};
 		f32 dtime;
 		f32 wait_time = 0; // in seconds
 
@@ -1713,7 +1713,7 @@ bool Game::getServerContent()
 {
 	input->clear();
 
-	FpsControl fps_control = { 0 };
+	FpsControl fps_control = {};
 	f32 dtime; // in seconds
 
 	fps_control.last_time = RenderingEngine::get_timer_time();
@@ -4524,7 +4524,6 @@ void createPauseMenuButtons(std::ostringstream &os, const std::vector<PauseMenuB
 {
 	float total_height = buttons.size() * btn_h + (buttons.size() - 1) * gap;
 	float y = center_y + gap * 0.5f - total_height * 0.5f;
-	float icon_size = btn_h - 0.25f;
 
 	if (buttons.size() <= 4)
 		y = y - gap * 3;
@@ -4608,14 +4607,6 @@ void Game::showPauseMenu()
 	std::string control_text = std::string(control_text_buf);
 	str_formspec_escape(control_text);
 #endif*/
-
-	float ypos = simple_singleplayer_mode ? 0.7f : 0.1f;
-	bool hasRealKeyboard = porting::hasRealKeyboard();
-#if defined(__ANDROID__) || defined(__IOS__)
-	if (simple_singleplayer_mode && (hasRealKeyboard || g_touchscreengui))
-		ypos -= 0.6f;
-	ypos += 0.5f;
-#endif
 
 	auto buttons = std::vector<PauseMenuButton>{
 		{"btn_continue", strgettext("Continue"), true}

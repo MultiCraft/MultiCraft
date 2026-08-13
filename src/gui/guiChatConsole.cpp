@@ -99,9 +99,7 @@ GUIChatConsole::GUIChatConsole(
 	m_fontsize.X = MYMAX(m_fontsize.X, 1);
 	m_fontsize.Y = MYMAX(m_fontsize.Y, 1);
 
-#if defined(__ANDROID__) || defined(__IOS__)
 	m_round_screen_offset = g_settings->getU16("round_screen");
-#endif
 
 	createVScrollBar();
 
@@ -1305,7 +1303,7 @@ bool GUIChatConsole::OnEvent(const SEvent& event)
 			m_chat_backend->scroll(rows);
 			m_vscrollbar->setPos(m_vscrollbar->getPos() + rows);
 		} else if (event.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN) {
-			if (event.MouseInput.X <= m_screensize.X - m_round_screen_offset &&
+			if (event.MouseInput.X <= (s32)(m_screensize.X - m_round_screen_offset) &&
 					event.MouseInput.X >= m_round_screen_offset) {
 				u32 row = m_chat_backend->getConsoleBuffer().getRows();
 				s32 prompt_y = row * m_fontsize.Y + m_height - m_desired_height;
