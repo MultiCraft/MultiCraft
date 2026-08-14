@@ -2003,6 +2003,83 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 	return true;
 }
 
+// Clips a blit to the destination image, false when nothing lands inside it
+static bool clipToDest(const core::dimension2d<u32> &dst_dim,
+		v2s32 &src_pos, v2s32 &dst_pos, v2u32 &size)
+{
+	const s32 x_start = std::max(0, -dst_pos.X);
+	const s32 y_start = std::max(0, -dst_pos.Y);
+	const s32 x_end = std::min((s32)size.X, (s32)dst_dim.Width - dst_pos.X);
+	const s32 y_end = std::min((s32)size.Y, (s32)dst_dim.Height - dst_pos.Y);
+
+	if (x_start >= x_end || y_start >= y_end)
+		return false;
+
+	src_pos.X += x_start;
+	src_pos.Y += y_start;
+	dst_pos.X += x_start;
+	dst_pos.Y += y_start;
+	size.X = x_end - x_start;
+	size.Y = y_end - y_start;
+
+	return true;
+}
+
+// True when the rectangle lies entirely inside the image
+static bool rectInside(const core::dimension2d<u32> &dim, v2s32 pos, v2u32 size)
+{
+	return pos.X >= 0 && pos.Y >= 0 &&
+			(u32)pos.X + size.X <= dim.Width &&
+			(u32)pos.Y + size.Y <= dim.Height;
+}
+
+// True when the image can be addressed as a plain array of A8R8G8B8 pixels
+static inline bool isRawAddressable(const video::IImage *img)
+{
+	return img->getColorFormat() == video::ECF_A8R8G8B8;
+}
+
+// Split from applyPerPixel so the direct case is inlined
+template<bool RAW, typename F>
+static inline void applyPerPixelInlined(video::IImage *dst, v2u32 offset, v2u32 size,
+		const F &fn)
+{
+	u32 *const data = reinterpret_cast<u32 *>(dst->getData());
+	const u32 stride = dst->getPitch() >> 2;
+
+	for (u32 y = offset.Y; y < offset.Y + size.Y; y++)
+	for (u32 x = offset.X; x < offset.X + size.X; x++) {
+		video::SColor col;
+		if constexpr (RAW)
+			col = video::SColor(data[y * stride + x]);
+		else
+			col = dst->getPixel(x, y);
+
+		col = fn(col);
+
+		if constexpr (RAW)
+			data[y * stride + x] = col.color;
+		else
+			dst->setPixel(x, y, col);
+	}
+}
+
+// Runs fn over a rectangle of dst, addressing the buffer directly where possible
+template<typename F>
+static void applyPerPixel(video::IImage *dst, v2u32 offset, v2u32 size, const F &fn)
+{
+	const core::dimension2d<u32> dim = dst->getDimension();
+	if (offset.X >= dim.Width || offset.Y >= dim.Height)
+		return;
+	size.X = std::min(size.X, dim.Width - offset.X);
+	size.Y = std::min(size.Y, dim.Height - offset.Y);
+
+	if (isRawAddressable(dst))
+		applyPerPixelInlined<true>(dst, offset, size, fn);
+	else
+		applyPerPixelInlined<false>(dst, offset, size, fn);
+}
+
 /*
 	Calculate the color of a single pixel drawn on top of another pixel.
 
@@ -2028,9 +2105,42 @@ static inline video::SColor blitPixel(const video::SColor &src_c, const video::S
 	This exists because IImage::copyToWithAlpha() doesn't seem to always
 	work.
 */
+// Blits between two pixel buffers, false when the per-pixel path has to run
+static bool blitRectDirect(video::IImage *src, video::IImage *dst,
+		v2s32 src_pos, v2s32 dst_pos, v2u32 size, bool overlay)
+{
+	if (!clipToDest(dst->getDimension(), src_pos, dst_pos, size))
+		return true;
+
+	if (!isRawAddressable(src) || !isRawAddressable(dst) ||
+			!rectInside(src->getDimension(), src_pos, size))
+		return false;
+
+	const u32 *const src_data = reinterpret_cast<const u32 *>(src->getData());
+	u32 *const dst_data = reinterpret_cast<u32 *>(dst->getData());
+	const u32 src_stride = src->getPitch() >> 2;
+	const u32 dst_stride = dst->getPitch() >> 2;
+
+	for (u32 y0 = 0; y0 < size.Y; y0++) {
+		const u32 *s = src_data + (src_pos.Y + y0) * src_stride + src_pos.X;
+		u32 *d = dst_data + (dst_pos.Y + y0) * dst_stride + dst_pos.X;
+		for (u32 x0 = 0; x0 < size.X; x0++, s++, d++) {
+			const video::SColor src_c(*s), dst_c(*d);
+			if (overlay && (dst_c.getAlpha() != 255 || src_c.getAlpha() == 0))
+				continue;
+			*d = blitPixel(src_c, dst_c, src_c.getAlpha()).color;
+		}
+	}
+
+	return true;
+}
+
 static void blit_with_alpha(video::IImage *src, video::IImage *dst,
 		v2s32 src_pos, v2s32 dst_pos, v2u32 size)
 {
+	if (blitRectDirect(src, dst, src_pos, dst_pos, size, false))
+		return;
+
 	for (u32 y0=0; y0<size.Y; y0++)
 	for (u32 x0=0; x0<size.X; x0++)
 	{
@@ -2052,6 +2162,9 @@ static void blit_with_alpha(video::IImage *src, video::IImage *dst,
 static void blit_with_alpha_overlay(video::IImage *src, video::IImage *dst,
 		v2s32 src_pos, v2s32 dst_pos, v2u32 size)
 {
+	if (blitRectDirect(src, dst, src_pos, dst_pos, size, true))
+		return;
+
 	for (u32 y0=0; y0<size.Y; y0++)
 	for (u32 x0=0; x0<size.X; x0++)
 	{
@@ -2106,35 +2219,29 @@ static void blit_with_interpolate_overlay(video::IImage *src, video::IImage *dst
 static void apply_colorize(video::IImage *dst, v2u32 dst_pos, v2u32 size,
 		const video::SColor &color, int ratio, bool keep_alpha)
 {
-	u32 alpha = color.getAlpha();
-	video::SColor dst_c;
+	const u32 alpha = color.getAlpha();
 	if ((ratio == -1 && alpha == 255) || ratio == 255) { // full replacement of color
 		if (keep_alpha) { // replace the color with alpha = dest alpha * color alpha
-			dst_c = color;
-			for (u32 y = dst_pos.Y; y < dst_pos.Y + size.Y; y++)
-			for (u32 x = dst_pos.X; x < dst_pos.X + size.X; x++) {
-				u32 dst_alpha = dst->getPixel(x, y).getAlpha();
-				if (dst_alpha > 0) {
-					dst_c.setAlpha(dst_alpha * alpha / 255);
-					dst->setPixel(x, y, dst_c);
-				}
-			}
+			applyPerPixel(dst, dst_pos, size, [=](video::SColor pixel) {
+				const u32 dst_alpha = pixel.getAlpha();
+				if (dst_alpha == 0)
+					return pixel;
+				video::SColor dst_c = color;
+				dst_c.setAlpha(dst_alpha * alpha / 255);
+				return dst_c;
+			});
 		} else { // replace the color including the alpha
-			for (u32 y = dst_pos.Y; y < dst_pos.Y + size.Y; y++)
-			for (u32 x = dst_pos.X; x < dst_pos.X + size.X; x++)
-				if (dst->getPixel(x, y).getAlpha() > 0)
-					dst->setPixel(x, y, color);
+			applyPerPixel(dst, dst_pos, size, [=](video::SColor pixel) {
+				return pixel.getAlpha() > 0 ? color : pixel;
+			});
 		}
 	} else {  // interpolate between the color and destination
-		float interp = (ratio == -1 ? color.getAlpha() / 255.0f : ratio / 255.0f);
-		for (u32 y = dst_pos.Y; y < dst_pos.Y + size.Y; y++)
-		for (u32 x = dst_pos.X; x < dst_pos.X + size.X; x++) {
-			dst_c = dst->getPixel(x, y);
-			if (dst_c.getAlpha() > 0) {
-				dst_c = color.getInterpolated(dst_c, interp);
-				dst->setPixel(x, y, dst_c);
-			}
-		}
+		const float interp = (ratio == -1 ? (s32)color.getAlpha() : ratio) / 255.0f;
+		applyPerPixel(dst, dst_pos, size, [=](video::SColor pixel) {
+			if (pixel.getAlpha() > 0)
+				pixel = color.getInterpolated(pixel, interp);
+			return pixel;
+		});
 	}
 }
 
@@ -2144,27 +2251,52 @@ static void apply_colorize(video::IImage *dst, v2u32 dst_pos, v2u32 size,
 static void apply_multiplication(video::IImage *dst, v2u32 dst_pos, v2u32 size,
 		const video::SColor &color)
 {
-	video::SColor dst_c;
-
-	for (u32 y = dst_pos.Y; y < dst_pos.Y + size.Y; y++)
-	for (u32 x = dst_pos.X; x < dst_pos.X + size.X; x++) {
-		dst_c = dst->getPixel(x, y);
+	applyPerPixel(dst, dst_pos, size, [=](video::SColor dst_c) {
 		dst_c.set(
 				dst_c.getAlpha(),
 				(dst_c.getRed() * color.getRed()) / 255,
 				(dst_c.getGreen() * color.getGreen()) / 255,
 				(dst_c.getBlue() * color.getBlue()) / 255
 				);
-		dst->setPixel(x, y, dst_c);
-	}
+		return dst_c;
+	});
 }
 
 /*
 	Apply mask to destination
 */
+// Ands a mask between two pixel buffers, false when the per-pixel path has to run
+static bool applyMaskDirect(video::IImage *mask, video::IImage *dst,
+		v2s32 mask_pos, v2s32 dst_pos, v2u32 size)
+{
+	if (!clipToDest(dst->getDimension(), mask_pos, dst_pos, size))
+		return true;
+
+	if (!isRawAddressable(mask) || !isRawAddressable(dst) ||
+			!rectInside(mask->getDimension(), mask_pos, size))
+		return false;
+
+	const u32 *const mask_data = reinterpret_cast<const u32 *>(mask->getData());
+	u32 *const dst_data = reinterpret_cast<u32 *>(dst->getData());
+	const u32 mask_stride = mask->getPitch() >> 2;
+	const u32 dst_stride = dst->getPitch() >> 2;
+
+	for (u32 y0 = 0; y0 < size.Y; y0++) {
+		const u32 *m = mask_data + (mask_pos.Y + y0) * mask_stride + mask_pos.X;
+		u32 *d = dst_data + (dst_pos.Y + y0) * dst_stride + dst_pos.X;
+		for (u32 x0 = 0; x0 < size.X; x0++)
+			*d++ &= *m++;
+	}
+
+	return true;
+}
+
 static void apply_mask(video::IImage *mask, video::IImage *dst,
 		v2s32 mask_pos, v2s32 dst_pos, v2u32 size)
 {
+	if (applyMaskDirect(mask, dst, mask_pos, dst_pos, size))
+		return;
+
 	for (u32 y0 = 0; y0 < size.Y; y0++) {
 		for (u32 x0 = 0; x0 < size.X; x0++) {
 			s32 mask_x = x0 + mask_pos.X;
