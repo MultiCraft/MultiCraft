@@ -153,7 +153,7 @@ void ToolCapabilities::deserializeJson(std::istream &is)
 
 	if (!Json::parseFromStream(builder, is, &root, &errs)) {
 		warningstream << "ToolCapabilities: failed to parse metadata " << errs << std::endl;
-	} else {
+	} else if (root.isObject()) {
 		if (root["full_punch_interval"].isDouble())
 			full_punch_interval = root["full_punch_interval"].asFloat();
 		if (root["max_drop_level"].isInt())
