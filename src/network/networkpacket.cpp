@@ -83,6 +83,14 @@ const char* NetworkPacket::getString(u32 from_offset)
 	return (char*)&m_data[from_offset];
 }
 
+void NetworkPacket::setPayload(const char *src, u32 len)
+{
+	m_datasize = len;
+	m_data.resize(m_datasize);
+	memcpy(m_data.data(), src, len);
+	m_read_offset = 0;
+}
+
 void NetworkPacket::putRawString(const char* src, u32 len)
 {
 	if (m_read_offset + len > m_datasize) {

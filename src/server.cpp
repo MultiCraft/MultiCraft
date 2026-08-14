@@ -1489,6 +1489,19 @@ void Server::SendNodeDef(session_t peer_id,
 	Non-static send methods
 */
 
+// Compresses a payload behind the marker when that makes it smaller
+static std::string compressPayload(const std::string &data, bool client_reads_zstd)
+{
+	if (!client_reads_zstd || data.size() < 512)
+		return data;
+
+	std::ostringstream os(std::ios::binary);
+	compressZstd(data, os);
+
+	const std::string &packed = os.str();
+	return packed.size() < data.size() ? packed : data;
+}
+
 void Server::SendInventory(PlayerSAO *sao, bool incremental)
 {
 	RemotePlayer *player = sao->getPlayer();
@@ -1509,7 +1522,9 @@ void Server::SendInventory(PlayerSAO *sao, bool incremental)
 	sao->getInventory()->setModified(false);
 	player->setModified(true);
 
-	const std::string &s = os.str();
+	const std::string s = compressPayload(os.str(),
+			m_clients.getMulticraftProtocolVersion(sao->getPeerID()) > 4 ||
+			m_simple_singleplayer_mode);
 	pkt.putRawString(s.c_str(), s.size());
 	Send(&pkt);
 }
@@ -1547,7 +1562,9 @@ void Server::SendShowFormspecMessage(session_t peer_id, const std::string &forms
 		pkt.putLongString("");
 	} else {
 		m_formspec_state_data[peer_id] = formname;
-		pkt.putLongString(formspec);
+		pkt.putLongString(compressPayload(formspec,
+				m_clients.getMulticraftProtocolVersion(peer_id) > 4 ||
+				m_simple_singleplayer_mode));
 	}
 	pkt << formname;
 
@@ -1944,7 +1961,9 @@ void Server::SendPlayerInventoryFormspec(session_t peer_id)
 		return;
 
 	NetworkPacket pkt(TOCLIENT_INVENTORY_FORMSPEC, 0, peer_id);
-	pkt.putLongString(player->inventory_formspec);
+	pkt.putLongString(compressPayload(player->inventory_formspec,
+			m_clients.getMulticraftProtocolVersion(peer_id) > 4 ||
+			m_simple_singleplayer_mode));
 
 	Send(&pkt);
 }
@@ -2051,8 +2070,12 @@ void Server::SendActiveObjectRemoveAdd(RemoteClient *client, PlayerSAO *playersa
 		obj->m_known_by_count++;
 	}
 
-	NetworkPacket pkt(TOCLIENT_ACTIVE_OBJECT_REMOVE_ADD, data.size(), client->peer_id);
-	pkt.putRawString(data.c_str(), data.size());
+	const std::string payload = compressPayload(data,
+			m_clients.getMulticraftProtocolVersion(client->peer_id) > 4 ||
+			m_simple_singleplayer_mode);
+
+	NetworkPacket pkt(TOCLIENT_ACTIVE_OBJECT_REMOVE_ADD, payload.size(), client->peer_id);
+	pkt.putRawString(payload.c_str(), payload.size());
 	Send(&pkt);
 
 	verbosestream << "Server::SendActiveObjectRemoveAdd: "
@@ -2063,10 +2086,14 @@ void Server::SendActiveObjectRemoveAdd(RemoteClient *client, PlayerSAO *playersa
 void Server::SendActiveObjectMessages(session_t peer_id, const std::string &datas,
 		bool reliable)
 {
-	NetworkPacket pkt(TOCLIENT_ACTIVE_OBJECT_MESSAGES,
-			datas.size(), peer_id);
+	const std::string payload = compressPayload(datas,
+			m_clients.getMulticraftProtocolVersion(peer_id) > 4 ||
+			m_simple_singleplayer_mode);
 
-	pkt.putRawString(datas.c_str(), datas.size());
+	NetworkPacket pkt(TOCLIENT_ACTIVE_OBJECT_MESSAGES,
+			payload.size(), peer_id);
+
+	pkt.putRawString(payload.c_str(), payload.size());
 
 	m_clients.send(pkt.getPeerId(),
 			reliable ? clientCommandFactoryTable[pkt.getCommand()].channel : 1,
@@ -2603,7 +2630,17 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 	if (g_settings->getBool("disable_texture_packs"))
 		pkt << true;
 
-	Send(&pkt);
+	const std::string payload = compressPayload(std::string(pkt.getString(0), pkt.getSize()),
+			m_clients.getMulticraftProtocolVersion(peer_id) > 4 ||
+			m_simple_singleplayer_mode);
+
+	if (payload.size() < pkt.getSize()) {
+		NetworkPacket packed(TOCLIENT_ANNOUNCE_MEDIA, payload.size(), peer_id);
+		packed.putRawString(payload.c_str(), payload.size());
+		Send(&packed);
+	} else {
+		Send(&pkt);
+	}
 
 	verbosestream << "Server: Announcing files to id(" << peer_id
 		<< "): count=" << media_sent << " size=" << pkt.getSize() << std::endl;

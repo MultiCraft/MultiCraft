@@ -85,6 +85,40 @@ void PacketCounter::print(std::ostream &o) const
 	}
 }
 
+// Commands whose payload the server may send compressed
+static bool mayBeCompressed(ToClientCommand command)
+{
+	switch (command) {
+	case TOCLIENT_INVENTORY:
+	case TOCLIENT_ACTIVE_OBJECT_REMOVE_ADD:
+	case TOCLIENT_ACTIVE_OBJECT_MESSAGES:
+	case TOCLIENT_ANNOUNCE_MEDIA:
+		return true;
+	default:
+		return false;
+	}
+}
+
+// Unpacks a payload the server compressed, leaving a plain one untouched
+static void decompressPacket(NetworkPacket *pkt)
+{
+	const u32 size = pkt->getSize();
+	if (!isCompressedZstd(pkt->getString(0), size))
+		return;
+
+	std::istringstream is(std::string(pkt->getString(0), size), std::ios::binary);
+	std::ostringstream os(std::ios::binary);
+	try {
+		decompressZstd(is, os, 16 * 1024 * 1024);
+	} catch (SerializationError &) {
+		// Whatever matched the marker was not compressed, hand it over as is
+		return;
+	}
+
+	const std::string &data = os.str();
+	pkt->setPayload(data.c_str(), data.size());
+}
+
 /*
 	Client
 */
@@ -903,6 +937,9 @@ void Client::ProcessData(NetworkPacket *pkt)
 	ToClientCommand command = (ToClientCommand) pkt->getCommand();
 	u32 sender_peer_id = pkt->getPeerId();
 
+	if (mayBeCompressed(command))
+		decompressPacket(pkt);
+
 	//infostream<<"Client: received command="<<command<<std::endl;
 	m_packetcounter.add((u16)command);
 	g_profiler->graphAdd("client_received_packets", 1);
@@ -1089,7 +1126,7 @@ void Client::sendInit(const std::string &playerName)
 	pkt << (u16) CLIENT_PROTOCOL_VERSION_MIN << (u16) CLIENT_PROTOCOL_VERSION_MAX;
 	pkt << playerName;
 #if defined(__ANDROID__) || defined(__APPLE__)
-	pkt << (u8) 4;
+	pkt << (u8) 5;
 #else
 	pkt << (u8) 2;
 #endif

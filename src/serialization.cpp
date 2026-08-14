@@ -254,7 +254,19 @@ void compressZstd(const std::string &data, std::ostream &os, int level)
 	compressZstd((u8*)data.c_str(), data.size(), os, level);
 }
 
-void decompressZstd(std::istream &is, std::ostream &os)
+bool isCompressedZstd(const char *data, size_t size)
+{
+	if (size <= 4)
+		return false;
+
+	const u8 *bytes = (const u8 *)data;
+	const u32 magic = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) |
+			((u32)bytes[3] << 24);
+
+	return magic == ZSTD_MAGICNUMBER;
+}
+
+void decompressZstd(std::istream &is, std::ostream &os, size_t limit)
 {
 	// reusing the context is recommended for performance
 	// it will destroyed when the thread ends
@@ -269,6 +281,7 @@ void decompressZstd(std::istream &is, std::ostream &os)
 	ZSTD_outBuffer output = { output_buffer, bufsize, 0 };
 	ZSTD_inBuffer input = { input_buffer, 0, 0 };
 	size_t ret;
+	size_t written = 0;
 	do
 	{
 		if (input.size == input.pos) {
@@ -283,6 +296,10 @@ void decompressZstd(std::istream &is, std::ostream &os)
 			throw SerializationError("decompressZstd: failed");
 		}
 		if (output.pos) {
+			written += output.pos;
+			if (limit && written > limit)
+				throw SerializationError("decompressZstd: limit exceeded");
+
 			os.write(output_buffer, output.pos);
 			output.pos = 0;
 		}

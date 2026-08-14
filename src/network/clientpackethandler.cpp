@@ -932,13 +932,26 @@ void Client::handleCommand_Privileges(NetworkPacket* pkt)
 	infostream << std::endl;
 }
 
+// A formspec arrives either as plain text or compressed behind a marker
+static std::string readFormspec(NetworkPacket *pkt)
+{
+	std::string formspec = pkt->readLongString();
+	if (!isCompressedZstd(formspec))
+		return formspec;
+
+	std::istringstream is(formspec, std::ios::binary);
+	std::ostringstream os(std::ios::binary);
+	decompressZstd(is, os, 16 * 1024 * 1024);
+	return os.str();
+}
+
 void Client::handleCommand_InventoryFormSpec(NetworkPacket* pkt)
 {
 	LocalPlayer *player = m_env.getLocalPlayer();
 	assert(player != NULL);
 
 	// Store formspec in LocalPlayer
-	player->inventory_formspec = pkt->readLongString();
+	player->inventory_formspec = readFormspec(pkt);
 }
 
 void Client::handleCommand_DetachedInventory(NetworkPacket* pkt)
@@ -976,7 +989,7 @@ void Client::handleCommand_DetachedInventory(NetworkPacket* pkt)
 
 void Client::handleCommand_ShowFormSpec(NetworkPacket* pkt)
 {
-	std::string formspec = pkt->readLongString();
+	std::string formspec = readFormspec(pkt);
 	std::string formname;
 
 	*pkt >> formname;
