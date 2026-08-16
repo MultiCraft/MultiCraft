@@ -204,6 +204,7 @@ private:
 
 	scene::ISceneManager *m_wieldmgr = nullptr;
 	WieldMeshSceneNode *m_wieldnode = nullptr;
+	WieldMeshSceneNode *m_offhandnode = nullptr;
 
 	// draw control
 	MapDrawControl& m_draw_control;
@@ -260,6 +261,7 @@ private:
 	// Animation when changing wielded item
 	f32 m_wield_change_timer = 0.125f;
 	ItemStack m_wield_item_next;
+	ItemStack m_offhand_item_next;
 
 	CameraMode m_camera_mode = CAMERA_MODE_FIRST;
 

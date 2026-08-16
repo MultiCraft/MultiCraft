@@ -32,6 +32,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "sound.h"
 #include "mtevent.h"
 #include "nodedef.h"
+#include "light.h"
 #include "util/numeric.h"
 #include "constants.h"
 #include "fontengine.h"
@@ -67,6 +68,12 @@ Camera::Camera(MapDrawControl &draw_control, Client *client):
 	m_wieldnode = new WieldMeshSceneNode(m_wieldmgr, -1, false);
 	m_wieldnode->setItem(ItemStack(), m_client);
 	m_wieldnode->drop(); // m_wieldmgr grabbed it
+
+	m_offhandnode = new WieldMeshSceneNode(m_wieldmgr, -1, false);
+	m_offhandnode->setItem(ItemStack(), m_client);
+	m_offhandnode->setScale(v3f(-1, 1, 1));
+	m_offhandnode->setVisible(false);
+	m_offhandnode->drop(); // m_wieldmgr grabbed it
 
 	m_nametags.clear();
 
@@ -175,6 +182,19 @@ inline f32 my_modf(f32 x)
 {
 	double dummy;
 	return modf(x, &dummy);
+}
+
+// Brightens the wield light to the item's own glow
+static video::SColor itemLightColor(video::SColor base, const ItemStack &item, Client *client)
+{
+	u8 glow = client->getNodeDefManager()->get(item.name).light_source;
+	if (glow > 0) {
+		u8 b = decode_light(glow);
+		base.setRed(MYMAX(base.getRed(), b));
+		base.setGreen(MYMAX(base.getGreen(), b));
+		base.setBlue(MYMAX(base.getBlue(), b));
+	}
+	return base;
 }
 
 void Camera::step(f32 dtime)
@@ -613,7 +633,35 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 busytime, f32 tool_r
 	m_wieldnode->setPosition(wield_position);
 	m_wieldnode->setRotation(wield_rotation);
 
-	m_wieldnode->setNodeLightColor(player->light_color);
+	m_wieldnode->setNodeLightColor(
+			itemLightColor(player->light_color, m_wield_item_next, m_client));
+
+	const InventoryList *offhand_list = player->inventory.getList("offhand");
+	ItemStack offhand_item = offhand_list ? offhand_list->getItem(0) : ItemStack();
+	if (offhand_item.name != m_offhand_item_next.name ||
+			offhand_item.metadata != m_offhand_item_next.metadata) {
+		m_offhand_item_next = offhand_item;
+		m_offhandnode->setItem(offhand_item, m_client);
+		// Drop back-face culling: the mirror scale flips the winding
+		for (auto *child : m_offhandnode->getChildren())
+			child->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
+	}
+	if (offhand_item.empty()) {
+		m_offhandnode->setVisible(false);
+	} else {
+		m_offhandnode->setVisible(true);
+		v3f offhand_position = v3f(-m_wieldmesh_offset.X, m_wieldmesh_offset.Y, 65);
+		v3f offhand_rotation = v3f(-100, -120, 100);
+		if (m_digging_button == -1) {
+			f32 bobfrac = my_modf(m_view_bobbing_anim);
+			offhand_position.X += sin(bobfrac * M_PI * 2.0) * 3.0;
+			offhand_position.Y += sin(my_modf(bobfrac * 2.0) * M_PI) * 3.0;
+		}
+		m_offhandnode->setPosition(offhand_position);
+		m_offhandnode->setRotation(offhand_rotation);
+		m_offhandnode->setNodeLightColor(
+				itemLightColor(player->light_color, offhand_item, m_client));
+	}
 
 	// Set render distance
 	updateViewingRange();
