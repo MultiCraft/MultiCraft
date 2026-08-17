@@ -275,12 +275,12 @@ int ModApiClient::l_set_object_bone_position(lua_State *L)
 	v3f rotation = read_v3f(L, 4);
 
 	ClientActiveObject *cao = getClient(L)->getEnv().getActiveObject(id);
-	GenericCAO *gcao = cao ? dynamic_cast<GenericCAO*>(cao) : nullptr;
-	if (!gcao) {
+	if (!cao || cao->getType() != ACTIVEOBJECT_TYPE_GENERIC) {
 		lua_pushboolean(L, false);
 		return 1;
 	}
 
+	GenericCAO *gcao = static_cast<GenericCAO*>(cao);
 	gcao->setBonePositionCSM(bone, position, rotation);
 	lua_pushboolean(L, true);
 	return 1;
