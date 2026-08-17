@@ -29,6 +29,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 	#include <unistd.h>
 #endif
 #include "irrlichttypes.h"
+#include "threading/mutex_auto_lock.h"
 
 class ILogOutput;
 
@@ -163,17 +164,20 @@ public:
 
 	void clear()
 	{
+		MutexAutoLock lock(m_mutex);
 		m_buffer = std::queue<std::string>();
 	}
 
 	bool empty() const
 	{
+		MutexAutoLock lock(m_mutex);
 		return m_buffer.empty();
 	}
 
 	std::string get()
 	{
-		if (empty())
+		MutexAutoLock lock(m_mutex);
+		if (m_buffer.empty())
 			return "";
 		std::string s = m_buffer.front();
 		m_buffer.pop();
@@ -181,6 +185,8 @@ public:
 	}
 
 private:
+	// logRaw() runs on the logging threads, get() on the main one
+	mutable std::mutex m_mutex;
 	std::queue<std::string> m_buffer;
 	Logger &m_logger;
 };

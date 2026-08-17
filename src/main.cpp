@@ -127,7 +127,8 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 /**********************************************************************/
 
 
-FileLogOutput file_log_output;
+// Leaked like g_logger, which keeps using it during exit() teardown
+FileLogOutput &file_log_output = *(new FileLogOutput());
 
 static OptionList allowed_options;
 

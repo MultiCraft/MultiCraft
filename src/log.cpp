@@ -37,26 +37,32 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 const int BUFFER_LENGTH = 256;
 
+// Every thread gathers its own line in each buffer, so lines of different threads never mix
+struct LogLine {
+	char text[BUFFER_LENGTH];
+	int length;
+};
+static thread_local LogLine g_log_lines[LL_MAX + 1];
+
 class StringBuffer : public std::streambuf {
 public:
-	StringBuffer() {
-		buffer_index = 0;
-	}
+	StringBuffer(int slot) : slot(slot) {}
 
 	int overflow(int c);
 	virtual void flush(const std::string &buf) = 0;
 	std::streamsize xsputn(const char *s, std::streamsize n);
-	void push_back(char c);
 
 private:
-	char buffer[BUFFER_LENGTH];
-	int buffer_index;
+	void push_back(LogLine &line, char c);
+
+	const int slot;
 };
 
 
 class LogBuffer : public StringBuffer {
 public:
 	LogBuffer(Logger &logger, LogLevel lev) :
+		StringBuffer(lev),
 		logger(logger),
 		level(lev)
 	{}
@@ -71,6 +77,8 @@ private:
 
 class RawLogBuffer : public StringBuffer {
 public:
+	RawLogBuffer() : StringBuffer(LL_MAX) {}
+
 	void flush(const std::string &buffer);
 };
 
@@ -86,27 +94,18 @@ StreamLogOutput stdout_output(std::cout);
 StreamLogOutput stderr_output(std::cerr);
 std::ostream null_stream(NULL);
 
-RawLogBuffer raw_buf;
-
-LogBuffer none_buf(g_logger, LL_NONE);
-LogBuffer error_buf(g_logger, LL_ERROR);
-LogBuffer warning_buf(g_logger, LL_WARNING);
-LogBuffer action_buf(g_logger, LL_ACTION);
-LogBuffer info_buf(g_logger, LL_INFO);
-LogBuffer verbose_buf(g_logger, LL_VERBOSE);
-
 // Connection
 std::ostream *dout_con_ptr = &null_stream;
 std::ostream *derr_con_ptr = &verbosestream;
 
-// Common streams
-std::ostream rawstream(&raw_buf);
-std::ostream dstream(&none_buf);
-std::ostream errorstream(&error_buf);
-std::ostream warningstream(&warning_buf);
-std::ostream actionstream(&action_buf);
-std::ostream infostream(&info_buf);
-std::ostream verbosestream(&verbose_buf);
+// Buffers leaked like g_logger: threads still write to them during exit() teardown
+std::ostream rawstream(new RawLogBuffer());
+std::ostream dstream(new LogBuffer(g_logger, LL_NONE));
+std::ostream errorstream(new LogBuffer(g_logger, LL_ERROR));
+std::ostream warningstream(new LogBuffer(g_logger, LL_WARNING));
+std::ostream actionstream(new LogBuffer(g_logger, LL_ACTION));
+std::ostream infostream(new LogBuffer(g_logger, LL_INFO));
+std::ostream verbosestream(new LogBuffer(g_logger, LL_VERBOSE));
 
 // Android
 #ifdef __ANDROID__
@@ -185,11 +184,13 @@ void Logger::addOutput(ILogOutput *out)
 
 void Logger::addOutput(ILogOutput *out, LogLevel lev)
 {
+	MutexAutoLock lock(m_mutex);
 	m_outputs[lev].push_back(out);
 }
 
 void Logger::addOutputMasked(ILogOutput *out, LogLevelMask mask)
 {
+	MutexAutoLock lock(m_mutex);
 	for (size_t i = 0; i < LL_MAX; i++) {
 		if (mask & LOGLEVEL_TO_MASKLEVEL(i))
 			m_outputs[i].push_back(out);
@@ -199,12 +200,14 @@ void Logger::addOutputMasked(ILogOutput *out, LogLevelMask mask)
 void Logger::addOutputMaxLevel(ILogOutput *out, LogLevel lev)
 {
 	assert(lev < LL_MAX);
+	MutexAutoLock lock(m_mutex);
 	for (size_t i = 0; i <= lev; i++)
 		m_outputs[i].push_back(out);
 }
 
 LogLevelMask Logger::removeOutput(ILogOutput *out)
 {
+	MutexAutoLock lock(m_mutex);
 	LogLevelMask ret_mask = 0;
 	for (size_t i = 0; i < LL_MAX; i++) {
 		std::vector<ILogOutput *>::iterator it;
@@ -260,6 +263,7 @@ const std::string Logger::getThreadName()
 	std::map<std::thread::id, std::string>::const_iterator it;
 
 	std::thread::id id = std::this_thread::get_id();
+	MutexAutoLock lock(m_mutex);
 	it = m_thread_names.find(id);
 	if (it != m_thread_names.end())
 		return it->second;
@@ -440,6 +444,7 @@ void LogOutputBuffer::logRaw(LogLevel lev, const std::string &line)
 		}
 	}
 
+	MutexAutoLock lock(m_mutex);
 	m_buffer.push(color.append(line));
 }
 
@@ -449,31 +454,32 @@ void LogOutputBuffer::logRaw(LogLevel lev, const std::string &line)
 
 int StringBuffer::overflow(int c)
 {
-	push_back(c);
+	push_back(g_log_lines[slot], c);
 	return c;
 }
 
 
 std::streamsize StringBuffer::xsputn(const char *s, std::streamsize n)
 {
+	LogLine &line = g_log_lines[slot];
 	for (int i = 0; i < n; ++i)
-		push_back(s[i]);
+		push_back(line, s[i]);
 	return n;
 }
 
-void StringBuffer::push_back(char c)
+void StringBuffer::push_back(LogLine &line, char c)
 {
 	if (c == '\n' || c == '\r') {
-		if (buffer_index)
-			flush(std::string(buffer, buffer_index));
-		buffer_index = 0;
+		if (line.length)
+			flush(std::string(line.text, line.length));
+		line.length = 0;
 	} else {
 		// Check if buffer is full before writing to prevent out-of-bounds access
-		if (buffer_index >= BUFFER_LENGTH) {
-			flush(std::string(buffer, buffer_index));
-			buffer_index = 0;
+		if (line.length >= BUFFER_LENGTH) {
+			flush(std::string(line.text, line.length));
+			line.length = 0;
 		}
-		buffer[buffer_index++] = c;
+		line.text[line.length++] = c;
 	}
 }
 
