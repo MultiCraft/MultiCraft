@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/clientevent.h"
 #include "client/sound.h"
 #include "client/clientenvironment.h"
+#include "client/content_cao.h"
 #include "common/c_content.h"
 #include "common/c_converter.h"
 #include "cpp_api/s_base.h"
@@ -262,6 +263,26 @@ int ModApiClient::l_get_meta(lua_State *L)
 
 	NodeMetadata *meta = getEnv(L)->getMap().getNodeMetadata(p);
 	NodeMetaRef::createClient(L, meta);
+	return 1;
+}
+
+// set_object_bone_position(id, bone, position, rotation)
+int ModApiClient::l_set_object_bone_position(lua_State *L)
+{
+	u16 id = (u16)luaL_checknumber(L, 1);
+	std::string bone = luaL_checkstring(L, 2);
+	v3f position = read_v3f(L, 3);
+	v3f rotation = read_v3f(L, 4);
+
+	ClientActiveObject *cao = getClient(L)->getEnv().getActiveObject(id);
+	GenericCAO *gcao = cao ? dynamic_cast<GenericCAO*>(cao) : nullptr;
+	if (!gcao) {
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	gcao->setBonePositionCSM(bone, position, rotation);
+	lua_pushboolean(L, true);
 	return 1;
 }
 
@@ -519,6 +540,7 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(get_node_or_nil);
 	API_FCT(disconnect);
 	API_FCT(get_meta);
+	API_FCT(set_object_bone_position);
 	API_FCT(sound_play);
 	API_FCT(sound_stop);
 	API_FCT(sound_fade);

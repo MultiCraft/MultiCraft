@@ -78,6 +78,9 @@ private:
 	// get_meta(pos)
 	static int l_get_meta(lua_State *L);
 
+	// set_object_bone_position(id, bone, position, rotation)
+	static int l_set_object_bone_position(lua_State *L);
+
 	// sound_play(spec, parameters)
 	static int l_sound_play(lua_State *L);
 

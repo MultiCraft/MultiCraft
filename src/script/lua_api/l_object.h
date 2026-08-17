@@ -71,6 +71,9 @@ private:
 	// get_pos(self)
 	static int l_get_pos(lua_State *L);
 
+	// get_id(self) -> integer AO id shared with clients
+	static int l_get_id(lua_State *L);
+
 	// set_pos(self, pos)
 	static int l_set_pos(lua_State *L);
 

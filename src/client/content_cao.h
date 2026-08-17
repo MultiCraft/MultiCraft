@@ -274,6 +274,13 @@ public:
 
 	void updateBonePosition();
 
+	// Sets a bone position directly, bypassing the network (used by the CSM
+	// bone-control primitive); picked up on the next updateBonePosition().
+	void setBonePositionCSM(const std::string &bone, v3f position, v3f rotation)
+	{
+		m_bone_position[bone] = core::vector2d<v3f>(position, rotation);
+	}
+
 	void processMessage(const std::string &data);
 
 	bool directReportPunch(v3f dir, const ItemStack *punchitem=NULL,
