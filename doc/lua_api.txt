@@ -2061,6 +2061,16 @@ Some of the values in the key-value store are handled specially:
 * `color`: A `ColorString`, which sets the stack's color.
 * `palette_index`: If the item has a palette, this is used to get the
   current color from the palette.
+* `inventory_image`: Overrides the item's `inventory_image`, so that one item
+  can be shown in many ways instead of registering one item per look.
+* `wield_image`: Overrides the item's `wield_image`.
+* `tiles`: Overrides the texture of the mesh the item is drawn with, one texture
+  for the whole mesh. It has no effect where the item is drawn as a flat icon,
+  use `inventory_image` for that. The player's hand uses this to wear their skin.
+
+The images are used wherever the item is drawn: in the hand, in the inventory, in
+the hotbar and on the ground. Placing a node does not carry them over, a node is
+drawn with the tiles of its definition.
 
 Example:
 
@@ -6427,6 +6437,7 @@ object you are working with still exists.
 ### Methods
 
 * `get_pos()`: returns `{x=num, y=num, z=num}`
+* `get_id()`: returns the object id used by client-side mods
 * `set_pos(pos)`: `pos`=`{x=num, y=num, z=num}`
 * `get_velocity()`: returns the velocity, a vector.
 * `add_velocity(vel)`

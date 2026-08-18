@@ -1021,15 +1021,21 @@ void drawItemStack(
 	const bool enable_animations = client->getInvItemAnimEnabled();
 
 	const ItemDefinition &def = item.getDefinition(client->idef());
+	const std::string &inventory_image = item.getInventoryImage(client->idef());
 
 	bool draw_overlay = false;
 
 	// Render as mesh if animated or no inventory image
-	if ((enable_animations && rotation_kind < IT_ROT_NONE) || def.inventory_image.empty()) {
+	if ((enable_animations && rotation_kind < IT_ROT_NONE) || inventory_image.empty()) {
 		ItemMesh *imesh = client->idef()->getWieldMesh(def.name, client);
 		if (!imesh || !imesh->mesh)
 			return;
 		scene::IMesh *mesh = imesh->mesh;
+
+		const std::string &tiles = item.getTiles();
+		video::ITexture *tiles_texture = tiles.empty() ? nullptr :
+			client->getTextureSource()->getTextureForMesh(tiles);
+
 		driver->clearZBuffer();
 		s32 delta = 0;
 		if (rotation_kind < IT_ROT_NONE) {
@@ -1109,17 +1115,28 @@ void drawItemStack(
 			video::SMaterial &material = buf->getMaterial();
 			material.MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;
 			material.Lighting = false;
+
+			video::ITexture *own_texture = nullptr;
+			if (tiles_texture) {
+				own_texture = material.getTexture(0);
+				material.setTexture(0, tiles_texture);
+			}
+
 			driver->setMaterial(material);
 			driver->drawMeshBuffer(buf);
+
+			if (own_texture)
+				material.setTexture(0, own_texture);
 		}
 
 		driver->setTransform(video::ETS_VIEW, oldViewMat);
 		driver->setTransform(video::ETS_PROJECTION, oldProjMat);
 		driver->setViewPort(oldViewPort);
 
-		draw_overlay = def.type == ITEM_NODE && def.inventory_image.empty();
+		draw_overlay = def.type == ITEM_NODE && inventory_image.empty();
 	} else { // Otherwise just draw as 2D
-		video::ITexture *texture = client->idef()->getInventoryTexture(def.name, client);
+		video::ITexture *texture =
+			client->getTextureSource()->getTexture(inventory_image);
 		if (!texture)
 			return;
 		video::SColor color =

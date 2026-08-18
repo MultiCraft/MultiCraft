@@ -352,6 +352,20 @@ static scene::SMesh *createSpecialNodeMesh(Client *client, content_t id, std::ve
 
 void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool check_wield_image)
 {
+	IItemDefManager *idef = client->getItemDefManager();
+
+	if (!m_item || m_item->name != item.name ||
+			m_item->getWieldImage(idef) != item.getWieldImage(idef) ||
+			m_item->getInventoryImage(idef) != item.getInventoryImage(idef))
+		buildMesh(item, client, check_wield_image);
+	m_item = item;
+
+	m_base_color = idef->getItemstackColor(item, client);
+	setTiles(item.getTiles(), client->getTextureSource());
+}
+
+void WieldMeshSceneNode::buildMesh(const ItemStack &item, Client *client, bool check_wield_image)
+{
 	ITextureSource *tsrc = client->getTextureSource();
 	IItemDefManager *idef = client->getItemDefManager();
 	IShaderSource *shdrsrc = client->getShaderSource();
@@ -367,13 +381,12 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 		m_material_type = shdrsrc->getShaderInfo(shader_id).material;
 	}
 
-	// Color-related
 	m_colors.clear();
-	m_base_color = idef->getItemstackColor(item, client);
 
 	// If wield_image needs to be checked and is defined, it overrides everything else
-	if (!def.wield_image.empty() && check_wield_image) {
-		setExtruded(def.wield_image, def.wield_overlay, def.wield_scale, tsrc,
+	const std::string &wield_image = item.getWieldImage(idef);
+	if (!wield_image.empty() && check_wield_image) {
+		setExtruded(wield_image, def.wield_overlay, def.wield_scale, tsrc,
 			1);
 		m_colors.emplace_back();
 		// overlay is white, if present
@@ -443,8 +456,11 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 			material.setFlag(video::EMF_TRILINEAR_FILTER, m_trilinear_filter);
 		}
 		return;
-	} else if (!def.inventory_image.empty()) {
-		setExtruded(def.inventory_image, def.inventory_overlay, def.wield_scale,
+	}
+
+	const std::string &inventory_image = item.getInventoryImage(idef);
+	if (!inventory_image.empty()) {
+		setExtruded(inventory_image, def.inventory_overlay, def.wield_scale,
 			tsrc, 1);
 		m_colors.emplace_back();
 		// overlay is white, if present
@@ -454,6 +470,17 @@ void WieldMeshSceneNode::setItem(const ItemStack &item, Client *client, bool che
 
 	// no wield mesh found
 	changeToMesh(nullptr);
+}
+
+void WieldMeshSceneNode::setTiles(const std::string &tiles, ITextureSource *tsrc)
+{
+	m_tiles.grab(tiles.empty() ? nullptr : tsrc->getTextureForMesh(tiles));
+	if (!m_tiles)
+		return;
+
+	u32 material_count = m_meshnode->getMaterialCount();
+	for (u32 i = 0; i < material_count; ++i)
+		m_meshnode->getMaterial(i).setTexture(0, m_tiles.get());
 }
 
 void WieldMeshSceneNode::setColor(video::SColor c)
