@@ -130,6 +130,9 @@ namespace gui
 		//! If true, the glyph has been loaded.
 		bool isLoaded = false;
 
+		//! True when no atlas page can ever hold this glyph.
+		bool tooLarge = false;
+
 		//! If true, the glyph has been loaded from color font.
 		bool isColor = false;
 
@@ -375,7 +378,8 @@ namespace gui
 			//! Create a new glyph page texture.
 			//! \param pixel_mode the pixel mode defined by FT_Pixel_Mode
 			//should be better typed. fix later.
-			CGUITTGlyphPage* createGlyphPage(const u8& pixel_mode);
+			CGUITTGlyphPage* createGlyphPage(const u8& pixel_mode,
+					const core::dimension2du& needed = core::dimension2du(0, 0));
 
 			//! Get the last glyph page's index.
 			u32 getLastGlyphPageIndex() const { return Glyph_Pages.size() - 1; }
@@ -416,6 +420,7 @@ namespace gui
 
 			float getColorEmojiOffset() const { return color_emoji_offset; }
 			float getColorEmojiScale() const { return color_emoji_scale; }
+			u32 getColorEmojiTargetHeight() const { return color_emoji_target_height; }
 
 			bool loadAdditionalFont(const io::path& filename, bool is_emoji_font = false);
 
@@ -494,6 +499,7 @@ namespace gui
 			u8 outline_type = 0;
 			s8 character_spacing = 0;
 			float color_emoji_scale = 1.0f;
+			u32 color_emoji_target_height = 0;
 			u32 color_emoji_offset = 0;
 			u32 max_font_height = 0;
 			f32 density = 1.0f;

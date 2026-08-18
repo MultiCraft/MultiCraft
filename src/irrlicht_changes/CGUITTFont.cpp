@@ -79,16 +79,21 @@ inline void checkFontBitmapSize(const FT_Bitmap &bits)
 			"Insane font glyph size");
 }
 
+// Smallest strike that still covers font_size, or the largest one when none does
 u32 getBestFixedSizeIndex(FT_Face face, u32 font_size)
 {
 	u32 index = 0;
-	u32 last_font_size =0;
+	u32 best_size = 0;
 
 	for (u32 i = 0; i < (u32)(face->num_fixed_sizes); i++) {
 		u32 current_size = face->available_sizes[i].height;
+		bool current_covers = current_size >= font_size;
+		bool best_covers = best_size >= font_size;
 
-		if (current_size > last_font_size) {
-			last_font_size = current_size;
+		if (best_size == 0 ||
+				(current_covers && (!best_covers || current_size < best_size)) ||
+				(!current_covers && !best_covers && current_size > best_size)) {
+			best_size = current_size;
 			index = i;
 		}
 	}
@@ -209,6 +214,12 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 {
 	if (isLoaded) return;
 
+	// an earlier attempt may have bailed out after taking a surface
+	if (surface) {
+		surface->drop();
+		surface = 0;
+	}
+
 	float scale = 1.0f;
 	float bold_offset = 0;
 
@@ -216,7 +227,9 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	FT_Set_Pixel_Sizes(face, 0, font_size);
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-		best_fixed_size_index = getBestFixedSizeIndex(face, font_size);
+		// the same target the scale was measured against, or the glyph comes out wrong
+		u32 target = parent->getColorEmojiTargetHeight();
+		best_fixed_size_index = getBestFixedSizeIndex(face, target ? target : font_size);
 		FT_Select_Size(face, best_fixed_size_index);
 		scale = parent->getColorEmojiScale();
 	}
@@ -354,35 +367,57 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 #endif
 	}
 
+	const u32 glyph_width = (u32)(bits.width * scale);
+	const u32 glyph_height = (u32)(bits.rows * scale);
+
 	// Try to get the last page with available slots.
 	CGUITTGlyphPage* page = parent->getLastGlyphPage();
 
 	if (page) {
-		if (page->used_width + bits.width * scale > page->texture->getOriginalSize().Width) {
+		const core::dimension2du page_size = page->texture->getOriginalSize();
+
+		if (page->used_width + glyph_width > page_size.Width) {
 			page->used_width = 0;
 			page->used_height += page->line_height;
 			page->line_height = 0;
 		}
+
+		// The first page is deliberately small, a glyph too big for it needs a full one
+		if (glyph_width > page_size.Width ||
+				page->used_height + glyph_height > page_size.Height)
+			page = 0;
 	}
 
 	// If we need to make a new page, do that now.
-	if (!page || page->used_height + font_size > page->texture->getOriginalSize().Height)
+	if (!page)
 	{
-		page = parent->createGlyphPage(bits.pixel_mode);
-		if (!page)
-			// TODO: add error message?
+		page = parent->createGlyphPage(bits.pixel_mode,
+				core::dimension2du(glyph_width, glyph_height));
+		if (!page) {
+			// Retrying it would take another page on every draw
+			tooLarge = true;
+#ifdef USE_CAIRO
+			if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
+				cairo_font_face_destroy(cairo_font_face);
+				cairo_destroy(cairo);
+				cairo_surface_destroy(cairo_surface);
+			}
+#endif
+			if (glyph)
+				FT_Done_Glyph(glyph);
 			return;
+		}
 	}
 
 	glyph_page = parent->getLastGlyphPageIndex();
 
 	core::vector2di page_position(page->used_width, page->used_height);
 	source_rect.UpperLeftCorner = page_position;
-	source_rect.LowerRightCorner = core::vector2di(page_position.X + bits.width * scale, page_position.Y + bits.rows * scale);
+	source_rect.LowerRightCorner = core::vector2di(page_position.X + glyph_width, page_position.Y + glyph_height);
 
 	page->dirty = true;
-	page->used_width += bits.width * scale;
-	page->line_height = std::max(page->line_height, (u32)(bits.rows * scale));
+	page->used_width += glyph_width;
+	page->line_height = std::max(page->line_height, glyph_height);
 
 	video::SColor color;
 	if (outline > 0 && !FT_HAS_COLOR(face))
@@ -460,7 +495,9 @@ void SGUITTGlyph::unload()
 		surface->drop();
 		surface = 0;
 	}
+	glyph_page = 0;
 	isLoaded = false;
+	tooLarge = false;
 }
 
 //////////////////////
@@ -747,7 +784,8 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	FT_Set_Pixel_Sizes(face, 0, size);
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-		u32 best_fixed_size_index = getBestFixedSizeIndex(face, size);
+		u32 best_fixed_size_index = getBestFixedSizeIndex(face,
+				color_emoji_target_height ? color_emoji_target_height : size);
 		FT_Select_Size(face, best_fixed_size_index);
 	}
 
@@ -830,6 +868,8 @@ void CGUITTFont::calculateColorEmojiParams(FT_Face face)
 	u32 height = std::round((float)(max_font_height) * 0.9f);
 	float scale = 1.0f;
 	u32 bitmap_top = height;
+
+	color_emoji_target_height = height;
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
 		u32 best_index = getBestFixedSizeIndex(face, height);
@@ -1060,7 +1100,9 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	FT_Set_Pixel_Sizes(face, 0, size);
 
 	if (FT_HAS_COLOR(face) && face->num_fixed_sizes > 0) {
-		u32 best_index = getBestFixedSizeIndex(face, size);
+		// advances must come from the strike the scale was measured against
+		u32 best_index = getBestFixedSizeIndex(face,
+				color_emoji_target_height ? color_emoji_target_height : size);
 		FT_Select_Size(face, best_index);
 	}
 
@@ -1149,14 +1191,16 @@ void CGUITTFont::loadGlyphsForShapedText(const std::vector<ShapedRun>& runs)
 				Glyphs[key] = glyph;
 			}
 
-			if (!glyph->isLoaded) {
+			if (!glyph->isLoaded && !glyph->tooLarge) {
 				FT_Int32 flags = load_flags;
 				if (FT_HAS_COLOR(face))
 					flags |= FT_LOAD_COLOR;
 
 				glyph->preload(glyph_idx, face, Driver, size, flags,
 						bold, italic, outline, outline_type, character_spacing);
-				Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
+
+				if (glyph->isLoaded && glyph->glyph_page < Glyph_Pages.size())
+					Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
 			}
 		}
 	}
@@ -1381,7 +1425,8 @@ CGUITTGlyphPage* CGUITTFont::getLastGlyphPage() const
 		return Glyph_Pages[getLastGlyphPageIndex()];
 }
 
-CGUITTGlyphPage* CGUITTFont::createGlyphPage(const u8& pixel_mode)
+CGUITTGlyphPage* CGUITTFont::createGlyphPage(const u8& pixel_mode,
+		const core::dimension2du& needed)
 {
 	CGUITTGlyphPage* page = 0;
 
@@ -1410,12 +1455,30 @@ CGUITTGlyphPage* CGUITTFont::createGlyphPage(const u8& pixel_mode)
 	core::dimension2du page_texture_size;
 	if (size <= 21) page_texture_size = core::dimension2du(256, 256);
 	else if (size <= 42) page_texture_size = core::dimension2du(512, 512);
-	else if (size <= 84) page_texture_size = core::dimension2du(1024, 1024);
-	else if (size <= 168) page_texture_size = core::dimension2du(2048, 2048);
-	else page_texture_size = core::dimension2du(4096, 4096);
+	// Past this a page buys little batching and costs 4 MB a piece
+	else page_texture_size = core::dimension2du(1024, 1024);
+
+	// The first page holds a handful of glyphs in sizes used once or twice,
+	// so start small there and let later pages take the full atlas
+	if (Glyph_Pages.empty()) {
+		u32 dimension = 64;
+		while (dimension < (size + 2) * 4 ||
+				dimension < needed.Width || dimension < needed.Height)
+			dimension <<= 1;
+
+		page_texture_size = core::dimension2du(
+				std::min(dimension, page_texture_size.Width),
+				std::min(dimension, page_texture_size.Height));
+	}
 
 	if (page_texture_size.Width > max_texture_size.Width || page_texture_size.Height > max_texture_size.Height)
 		page_texture_size = max_texture_size;
+
+	if (needed.Width > page_texture_size.Width ||
+			needed.Height > page_texture_size.Height) {
+		delete page;
+		return 0;
+	}
 
 	if (!page->createPageTexture(pixel_mode, page_texture_size)) {
 		// TODO: add error message?
@@ -1525,6 +1588,9 @@ void CGUITTFont::draw(const EnrichedString &text, const core::rect<s32>& positio
 				// Calculate the glyph offset.
 				s32 offx = glyph->offset.X + shaped_glyph.x_offset;
 				s32 offy = (font_metrics.ascender / 64) - glyph->offset.Y + shaped_glyph.y_offset;
+
+				if (!glyph->isLoaded || glyph->glyph_page >= Glyph_Pages.size())
+					continue;
 
 				// Determine rendering information.
 				CGUITTGlyphPage* const page = Glyph_Pages[glyph->glyph_page];
