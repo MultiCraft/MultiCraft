@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <map>
 #include "irrlichttypes_extrabloated.h"
+#include "irr_ptr.h"
 #include "clientobject.h"
 #include "object_properties.h"
 #include "itemgroup.h"
@@ -274,12 +275,7 @@ public:
 
 	void updateBonePosition();
 
-	// Sets a bone position directly, bypassing the network (used by the CSM
-	// bone-control primitive); picked up on the next updateBonePosition().
-	void setBonePositionCSM(const std::string &bone, v3f position, v3f rotation)
-	{
-		m_bone_position[bone] = core::vector2d<v3f>(position, rotation);
-	}
+	void setBonePosition(const std::string &bone, v3f position, v3f rotation) override;
 
 	void processMessage(const std::string &data);
 

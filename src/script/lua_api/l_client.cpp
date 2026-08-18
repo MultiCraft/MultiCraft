@@ -24,7 +24,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/clientevent.h"
 #include "client/sound.h"
 #include "client/clientenvironment.h"
-#include "client/content_cao.h"
 #include "common/c_content.h"
 #include "common/c_converter.h"
 #include "cpp_api/s_base.h"
@@ -269,19 +268,18 @@ int ModApiClient::l_get_meta(lua_State *L)
 // set_object_bone_position(id, bone, position, rotation)
 int ModApiClient::l_set_object_bone_position(lua_State *L)
 {
-	u16 id = (u16)luaL_checknumber(L, 1);
-	std::string bone = luaL_checkstring(L, 2);
-	v3f position = read_v3f(L, 3);
-	v3f rotation = read_v3f(L, 4);
+	u16 id = luaL_checkinteger(L, 1);
+	std::string bone = readParam<std::string>(L, 2, "");
+	v3f position = readParam<v3f>(L, 3, v3f(0, 0, 0));
+	v3f rotation = readParam<v3f>(L, 4, v3f(0, 0, 0));
 
 	ClientActiveObject *cao = getClient(L)->getEnv().getActiveObject(id);
-	if (!cao || cao->getType() != ACTIVEOBJECT_TYPE_GENERIC) {
+	if (!cao) {
 		lua_pushboolean(L, false);
 		return 1;
 	}
 
-	GenericCAO *gcao = static_cast<GenericCAO*>(cao);
-	gcao->setBonePositionCSM(bone, position, rotation);
+	cao->setBonePosition(bone, position, rotation);
 	lua_pushboolean(L, true);
 	return 1;
 }
