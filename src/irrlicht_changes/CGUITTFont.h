@@ -43,7 +43,7 @@
 
 #include <harfbuzz/hb.h>
 #include <harfbuzz/hb-ft.h>
-#include <SheenBidi.h>
+#include <SheenBidi/SheenBidi.h>
 #ifdef USE_CAIRO
 #include <cairo/cairo.h>
 #include <cairo/cairo-ft.h>

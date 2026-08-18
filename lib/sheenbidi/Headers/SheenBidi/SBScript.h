@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2018-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 #ifndef _SB_PUBLIC_SCRIPT_H
 #define _SB_PUBLIC_SCRIPT_H
 
-#include "SBBase.h"
+#include <SheenBidi/SBBase.h>
+
+SB_EXTERN_C_BEGIN
 
 /**
  * Constants that specify the script of a character.
@@ -219,7 +221,27 @@ enum {
     SBScriptCHRS = 0x9A,    /**< Chorasmian */
     SBScriptDIAK = 0x9B,    /**< Dives_Akuru */
     SBScriptKITS = 0x9C,    /**< Khitan_Small_Script */
-    SBScriptYEZI = 0x9D     /**< Yezidi */
+    SBScriptYEZI = 0x9D,    /**< Yezidi */
+
+    /* Unicde 14.0 */
+    SBScriptCPMN = 0x9E,    /**< Cypro_Minoan */
+    SBScriptOUGR = 0x9F,    /**< Old_Uyghur */
+    SBScriptTNSA = 0xA0,    /**< Tangsa */
+    SBScriptTOTO = 0xA1,    /**< Toto */
+    SBScriptVITH = 0xA2,    /**< Vithkuqi */
+
+    /* Unicde 15.1 */
+    SBScriptKAWI = 0xA3,    /**< Kawi */
+    SBScriptNAGM = 0xA4,    /**< Nag_Mundari */
+
+    /* Unicde 16.0 */
+    SBScriptGARA = 0xA5,    /**< Garay */
+    SBScriptGUKH = 0xA6,    /**< Gurung_Khema */
+    SBScriptKRAI = 0xA7,    /**< Kirat_Rai */
+    SBScriptONAO = 0xA8,    /**< Ol_Onal */
+    SBScriptSUNU = 0xA9,    /**< Sunuwar */
+    SBScriptTODR = 0xAA,    /**< Todhri */
+    SBScriptTUTG = 0xAB     /**< Tulu_Tigalari */
 };
 
 /**
@@ -242,6 +264,26 @@ typedef SBUInt8 SBScript;
  * @return
  *      The OpenType tag of specified script as UInt32 in big endian byte order.
  */
-SBUInt32 SBScriptGetOpenTypeTag(SBScript script);
+SB_DEPRECATED
+SB_PUBLIC SBUInt32 SBScriptGetOpenTypeTag(SBScript script);
+
+/**
+ * Returns the 4-letter Unicode Script abbreviation tag for a given SBScript value.
+ *
+ * The tag is returned as a UInt32 value in big-endian byte order (e.g., 'Arab' is 0x41726162),
+ * suitable for use in shaping engines and script tagging.
+ *
+ * The tag is based on the Unicode Script property aliases as defined in PropertyValueAliases.txt,
+ * section: "sc" (Script).
+ *
+ * @param script
+ *      The SBScript enum value.
+ * @return
+ *      A big-endian UInt32 representing the 4-letter script tag, or 0 if the script has no
+ *      associated tag.
+ */
+SB_PUBLIC SBUInt32 SBScriptGetUnicodeTag(SBScript script);
+
+SB_EXTERN_C_END
 
 #endif

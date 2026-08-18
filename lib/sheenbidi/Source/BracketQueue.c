@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,44 @@
  * limitations under the License.
  */
 
-#include <SBConfig.h>
 #include <stddef.h>
-#include <stdlib.h>
+
+#include <SheenBidi/SBConfig.h>
 
 #include "BidiChain.h"
+#include "Object.h"
 #include "SBAssert.h"
 #include "SBBase.h"
+#include "SBCodepoint.h"
 #include "BracketQueue.h"
+
+static SBBoolean BracketQueueInsertElement(BracketQueueRef queue)
+{
+    if (queue->_rearTop != BracketQueueList_MaxIndex) {
+        queue->_rearTop += 1;
+    } else {
+        BracketQueueListRef previousList = queue->_rearList;
+        BracketQueueListRef rearList = previousList->next;
+
+        if (!rearList) {
+            rearList = ObjectAddMemory(&queue->_object, sizeof(BracketQueueList));
+            if (!rearList) {
+                return SBFalse;
+            }
+
+            rearList->previous = previousList;
+            rearList->next = NULL;
+
+            previousList->next = rearList;
+        }
+
+        queue->_rearList = rearList;
+        queue->_rearTop = 0;
+    }
+    queue->count += 1;
+
+    return SBTrue;
+}
 
 static void BracketQueueFinalizePairs(BracketQueueRef queue, BracketQueueListRef list, SBInteger top)
 {
@@ -42,6 +72,8 @@ static void BracketQueueFinalizePairs(BracketQueueRef queue, BracketQueueListRef
 
 SB_INTERNAL void BracketQueueInitialize(BracketQueueRef queue)
 {
+    ObjectInitialize(&queue->_object);
+
     queue->_firstList.previous = NULL;
     queue->_firstList.next = NULL;
     queue->_frontList = NULL;
@@ -61,42 +93,26 @@ SB_INTERNAL void BracketQueueReset(BracketQueueRef queue, SBBidiType direction)
     queue->_direction = direction;
 }
 
-SB_INTERNAL void BracketQueueEnqueue(BracketQueueRef queue,
+SB_INTERNAL SBBoolean BracketQueueEnqueue(BracketQueueRef queue,
    BidiLink priorStrongLink, BidiLink openingLink, SBCodepoint bracket)
 {
-    BracketQueueListRef list;
-    SBInteger top;
-
     /* The queue can only take a maximum of 63 elements. */
     SBAssert(queue->count < BracketQueueGetMaxCapacity());
 
-    if (queue->_rearTop != BracketQueueList_MaxIndex) {
-        list = queue->_rearList;
-        top = ++queue->_rearTop;
-    } else {
-        BracketQueueListRef rearList;
+    if (BracketQueueInsertElement(queue)) {
+        BracketQueueListRef list = queue->_rearList;
+        SBInteger top = queue->_rearTop;
 
-        rearList = queue->_rearList;
-        list = rearList->next;
+        list->priorStrongLink[top] = priorStrongLink;
+        list->openingLink[top] = openingLink;
+        list->closingLink[top] = BidiLinkNone;
+        list->bracket[top] = bracket;
+        list->strongType[top] = SBBidiTypeNil;
 
-        if (!list) {
-            list = malloc(sizeof(BracketQueueList));
-            list->previous = rearList;
-            list->next = NULL;
-
-            rearList->next = list;
-        }
-
-        queue->_rearList = list;
-        queue->_rearTop = top = 0;
+        return SBTrue;
     }
-    queue->count += 1;
 
-    list->priorStrongLink[top] = priorStrongLink;
-    list->openingLink[top] = openingLink;
-    list->closingLink[top] = BidiLinkNone;
-    list->bracket[top] = bracket;
-    list->strongType[top] = SBBidiTypeNil;
+    return SBFalse;
 }
 
 SB_INTERNAL void BracketQueueDequeue(BracketQueueRef queue)
@@ -149,21 +165,6 @@ SB_INTERNAL void BracketQueueClosePair(BracketQueueRef queue, BidiLink closingLi
 {
     BracketQueueListRef list = queue->_rearList;
     SBInteger top = queue->_rearTop;
-    SBCodepoint canonical;
-
-    switch (bracket) {
-    case 0x232A:
-        canonical = 0x3009;
-        break;
-
-    case 0x3009:
-        canonical = 0x232A;
-        break;
-
-    default:
-        canonical = bracket;
-        break;
-    }
 
     while (1) {
         SBBoolean isFrontList = (list == queue->_frontList);
@@ -172,7 +173,7 @@ SB_INTERNAL void BracketQueueClosePair(BracketQueueRef queue, BidiLink closingLi
         do {
             if (list->openingLink[top] != BidiLinkNone
                 && list->closingLink[top] == BidiLinkNone
-                && (list->bracket[top] == bracket || list->bracket[top] == canonical)) {
+                && SBCodepointIsCanonicalEquivalentBracket(list->bracket[top], bracket)) {
                 list->closingLink[top] = closingLink;
                 BracketQueueFinalizePairs(queue, list, top);
 
@@ -220,11 +221,5 @@ SB_INTERNAL SBBidiType BracketQueueGetStrongType(BracketQueueRef queue)
 
 SB_INTERNAL void BracketQueueFinalize(BracketQueueRef queue)
 {
-    BracketQueueListRef list = queue->_firstList.next;
-
-    while (list) {
-        BracketQueueListRef next = list->next;
-        free(list);
-        list = next;
-    }
+    ObjectFinalize(&queue->_object);
 }

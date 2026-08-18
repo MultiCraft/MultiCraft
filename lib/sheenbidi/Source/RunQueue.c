@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,43 @@
  * limitations under the License.
  */
 
-#include <SBConfig.h>
 #include <stddef.h>
-#include <stdlib.h>
+
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBConfig.h>
 
 #include "LevelRun.h"
+#include "Object.h"
 #include "SBAssert.h"
-#include "SBBase.h"
 #include "RunQueue.h"
+
+static SBBoolean RunQueueInsertElement(RunQueueRef queue)
+{
+    if (queue->_rearTop != RunQueueList_MaxIndex) {
+        queue->_rearTop += 1;
+    } else {
+        RunQueueListRef previousList = queue->_rearList;
+        RunQueueListRef rearList = previousList->next;
+
+        if (!rearList) {
+            rearList = ObjectAddMemory(&queue->_object, sizeof(RunQueueList));
+            if (!rearList) {
+                return SBFalse;
+            }
+
+            rearList->previous = previousList;
+            rearList->next = NULL;
+
+            previousList->next = rearList;
+        }
+
+        queue->_rearList = rearList;
+        queue->_rearTop = 0;
+    }
+    queue->count += 1;
+
+    return SBTrue;
+}
 
 static void FindPreviousPartialRun(RunQueueRef queue)
 {
@@ -51,6 +80,8 @@ static void FindPreviousPartialRun(RunQueueRef queue)
 
 SB_INTERNAL void RunQueueInitialize(RunQueueRef queue)
 {
+    ObjectInitialize(&queue->_object);
+
     /* Initialize first list. */
     queue->_firstList.previous = NULL;
     queue->_firstList.next = NULL;
@@ -67,50 +98,34 @@ SB_INTERNAL void RunQueueInitialize(RunQueueRef queue)
 
     /* Initialize rest of the elements. */
     queue->count = 0;
-    queue->peek = &queue->_frontList->elements[queue->_frontTop];
     queue->shouldDequeue = SBFalse;
 }
 
-SB_INTERNAL void RunQueueEnqueue(RunQueueRef queue, const LevelRunRef levelRun)
+SB_INTERNAL SBBoolean RunQueueEnqueue(RunQueueRef queue, const LevelRunRef levelRun)
 {
-    LevelRunRef element;
+    if (RunQueueInsertElement(queue)) {
+        LevelRunRef element = &queue->_rearList->elements[queue->_rearTop];
 
-    if (queue->_rearTop != RunQueueList_MaxIndex) {
-        element = &queue->_rearList->elements[++queue->_rearTop];
-    } else {
-        RunQueueListRef previousList = queue->_rearList;
-        RunQueueListRef rearList = previousList->next;
+        /* Copy the level run into the current element. */
+        *element = *levelRun;
 
-        if (!rearList) {
-            rearList = malloc(sizeof(RunQueueList));
-            rearList->previous = previousList;
-            rearList->next = NULL;
-
-            previousList->next = rearList;
+        /* Complete the latest isolating run with this terminating run. */
+        if (queue->_partialTop != -1 && RunKindIsTerminating(element->kind)) {
+            LevelRunRef incompleteRun = &queue->_partialList->elements[queue->_partialTop];
+            LevelRunAttach(incompleteRun, element);
+            FindPreviousPartialRun(queue);
         }
 
-        queue->_rearList = rearList;
-        queue->_rearTop = 0;
+        /* Save the location of the isolating run. */
+        if (RunKindIsIsolate(element->kind)) {
+            queue->_partialList = queue->_rearList;
+            queue->_partialTop = queue->_rearTop;
+        }
 
-        element = &rearList->elements[0];
-    }
-    queue->count += 1;
-
-    /* Copy the level run into current element. */
-    *element = *levelRun;
-
-    /* Complete the latest isolating run with this terminating run */
-    if (queue->_partialTop != -1 && RunKindIsTerminating(element->kind)) {
-        LevelRunRef incompleteRun = &queue->_partialList->elements[queue->_partialTop];
-        LevelRunAttach(incompleteRun, element);
-        FindPreviousPartialRun(queue);
+        return SBTrue;
     }
 
-    /* Save the location of the isolating run */
-    if (RunKindIsIsolate(element->kind)) {
-        queue->_partialList = queue->_rearList;
-        queue->_partialTop = queue->_rearTop;
-    }
+    return SBFalse;
 }
 
 SB_INTERNAL void RunQueueDequeue(RunQueueRef queue)
@@ -133,16 +148,17 @@ SB_INTERNAL void RunQueueDequeue(RunQueueRef queue)
     }
 
     queue->count -= 1;
-    queue->peek = &queue->_frontList->elements[queue->_frontTop];
+}
+
+SB_INTERNAL LevelRunRef RunQueueGetFront(RunQueueRef queue)
+{
+    /* The queue should not be empty. */
+    SBAssert(queue->count != 0);
+
+    return &queue->_frontList->elements[queue->_frontTop];
 }
 
 SB_INTERNAL void RunQueueFinalize(RunQueueRef queue)
 {
-    RunQueueListRef list = queue->_firstList.next;
-
-    while (list) {
-        RunQueueListRef next = list->next;
-        free(list);
-        list = next;
-    };
+    ObjectFinalize(&queue->_object);
 }
