@@ -715,8 +715,7 @@ void Camera::setDigging(s32 button)
 
 void Camera::wield(const ItemStack &item, const bool no_change_anim)
 {
-	if (item.name != m_wield_item_next.name ||
-			item.metadata != m_wield_item_next.metadata) {
+	if (item.name != m_wield_item_next.name) {
 		m_wield_item_next = item;
 		if (no_change_anim) {
 			// Change items immediately
@@ -727,6 +726,10 @@ void Camera::wield(const ItemStack &item, const bool no_change_anim)
 		} else if (m_wield_change_timer == 0) {
 			m_wield_change_timer = -0.001;
 		}
+	} else if (item.metadata != m_wield_item_next.metadata) {
+		m_wield_item_next = item;
+		if (m_wield_change_timer >= 0)
+			m_wieldnode->setItem(item, m_client);
 	}
 }
 
