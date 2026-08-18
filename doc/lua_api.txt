@@ -6424,6 +6424,10 @@ object you are working with still exists.
 ### Methods
 
 * `get_pos()`: returns `{x=num, y=num, z=num}`
+* `get_id()`: returns the object id
+	* The same id client-side mods and engine logs use
+	* Unique among loaded objects, but reused after the object is gone and not
+	  stable across restarts
 * `set_pos(pos)`: `pos`=`{x=num, y=num, z=num}`
 * `get_velocity()`: returns the velocity, a vector.
 * `add_velocity(vel)`
