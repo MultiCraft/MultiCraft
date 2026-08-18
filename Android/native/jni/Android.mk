@@ -64,12 +64,12 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libssl
-LOCAL_SRC_FILES := deps/openssl/lib/$(APP_ABI)/libssl.a
+LOCAL_SRC_FILES := deps/boringssl/lib/$(APP_ABI)/libssl.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := libcrypto
-LOCAL_SRC_FILES := deps/openssl/lib/$(APP_ABI)/libcrypto.a
+LOCAL_SRC_FILES := deps/boringssl/lib/$(APP_ABI)/libcrypto.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -145,7 +145,7 @@ LOCAL_C_INCLUDES := \
 	deps/libcurl/include                           \
 	deps/luajit/include                            \
 	deps/openal/include                            \
-	deps/openssl/include                           \
+	deps/boringssl/include                         \
 	deps/vorbis/include                            \
 	deps/zstd/include
 
