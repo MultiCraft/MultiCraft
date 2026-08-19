@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <cmath>
 #include "client/renderingengine.h"
 #include "config.h"
-#include "porting.h"
 #include "filesys.h"
 #include "gettext.h"
 
@@ -119,6 +118,8 @@ irr::gui::IGUIFont *FontEngine::getFont(FontSpec spec)
 	if (spec.size == FONT_SIZE_UNSPECIFIED)
 		spec.size = m_default_size[spec.mode];
 
+	spec.size = std::min(spec.size, 72u);
+
 	const auto &cache = m_font_cache[spec.getHash()];
 	auto it = cache.find(spec.size);
 	if (it != cache.end())
@@ -204,7 +205,7 @@ unsigned int FontEngine::getFontSize(FontMode mode)
 /******************************************************************************/
 void FontEngine::readSettings()
 {
-	if (USE_FREETYPE && g_settings->getBool("freetype")) {
+	if (USE_FREETYPE) {
 		m_default_size[FM_Standard] = g_settings->getU16("font_size");
 		m_default_size[FM_Fallback] = g_settings->getU16("font_size"); // fallback_font_size
 		m_default_size[FM_Mono]     = g_settings->getU16("mono_font_size");
@@ -402,17 +403,12 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	}
 
 
-	// give up
-	std::string msg = "MultiCraft can not continue without a valid font. "
-			"Please correct the 'font_path' setting or install the font "
-			"file in the proper location";
-	errorstream << msg << std::endl;
+	errorstream << "FontEngine: No usable font, using the built-in one" << std::endl;
 
-#if !defined(__ANDROID__) && !defined(__APPLE__)
-	abort();
-#else
-	porting::finishGame(msg);
-#endif
+	gui::IGUIFont *builtin = m_env->getBuiltInFont();
+	if (builtin)
+		builtin->grab(); // the cache drops whatever it holds
+	return builtin;
 
 #else
 	errorstream << "FontEngine: Tried to load freetype fonts but MultiCraft was"
@@ -432,7 +428,8 @@ gui::IGUIFont *FontEngine::initSimpleFont(const FontSpec &spec)
 
 	size_t pos_dot = font_path.find_last_of('.');
 	std::string basename = font_path;
-	std::string ending = lowercase(font_path.substr(pos_dot));
+	std::string ending = pos_dot == std::string::npos ?
+			"" : lowercase(font_path.substr(pos_dot));
 
 	if (ending == ".ttf") {
 		errorstream << "FontEngine: Found font \"" << font_path

@@ -376,8 +376,7 @@ void GUITable::setTable(const TableOptions &options,
 				TempRow *row = &rows[i];
 				row->content_index = allocString(content[i * colcount + j]);
 				const core::stringw &text = m_strings[row->content_index];
-				row->content_width = m_font ?
-					((CGUITTFont *)m_font)->getTotalDimension(text.c_str()).Width : 0;
+				row->content_width = getTotalDimension(m_font, text.c_str()).Width;
 				row->content_width = MYMAX(row->content_width, width);
 				s32 row_xmax = row->x + padding + row->content_width;
 				xmax = MYMAX(xmax, row_xmax);
