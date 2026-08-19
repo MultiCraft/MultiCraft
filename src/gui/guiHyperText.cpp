@@ -249,15 +249,12 @@ void ParsedText::endParagraph(EndReason reason)
 
 	EndReason previous = m_end_paragraph_reason;
 	m_end_paragraph_reason = reason;
-	if (m_empty_paragraph && (reason == ER_TAG ||
-			(reason == ER_NEWLINE && previous == ER_TAG))) {
-		// Ignore last empty paragraph
-		m_paragraph = nullptr;
-		m_paragraphs.pop_back();
-		return;
-	}
 	endElement();
-	m_paragraph = NULL;
+	m_paragraph = nullptr;
+	// Ignore last empty paragraph
+	if (m_empty_paragraph && (reason == ER_TAG ||
+			(reason == ER_NEWLINE && previous == ER_TAG)))
+		m_paragraphs.pop_back();
 }
 
 void ParsedText::enterParagraph()
@@ -405,15 +402,13 @@ u32 ParsedText::parseTag(const wchar_t *text, u32 cursor)
 	if (c == L'/') {
 		end = true;
 		c = text[++cursor];
-		if (c == L'\0')
-			return 0;
 	}
 
 	while (c != ' ' && c != '>') {
-		name += c;
-		c = text[++cursor];
 		if (c == L'\0')
 			return 0;
+		name += c;
+		c = text[++cursor];
 	}
 
 	// Tag attributes
@@ -624,7 +619,7 @@ TextDrawer::TextDrawer(const wchar_t *text, Client *client,
 			case ParsedText::ELEMENT_SEPARATOR:
 			case ParsedText::ELEMENT_TEXT:
 				if (e.font) {
-					e.dim.Width = e.font->getDimension(e.text.c_str()).Width;
+					e.dim.Width = getTotalDimension(e.font, e.text.c_str()).Width;
 					e.dim.Height = e.font->getDimension(L"Yy").Height;
 #if USE_FREETYPE
 					if (e.font->getType() == irr::gui::EGFT_CUSTOM) {
@@ -745,7 +740,7 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 				p.elements.erase(next);
 			}
 
-			e->dim.Width = e->font->getDimension(e->text.c_str()).Width;
+			e->dim.Width = getTotalDimension(e->font, e->text.c_str()).Width;
 		}
 
 		// Place non floating stuff
@@ -832,14 +827,12 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 
 				if (el->floating == ParsedText::FLOAT_NONE) {
 					if (el->type == ParsedText::ELEMENT_TEXT && el->dim.Width > linewidth) {
-						core::dimension2d<u32> d = el->font->getDimension(el->text.c_str());
-
 						// Find the longest substring that we can fit on this line
 						// This is not efficient but hopefully means text shaping will work
 						u32 fit_chars = 1;
 						for (u32 i = 2; i <= el->text.size(); i++) {
 							const core::stringw s = el->text.subString(0, i);
-							core::dimension2d<u32> dim = el->font->getDimension(s.c_str());
+							core::dimension2d<u32> dim = getTotalDimension(el->font, s.c_str());
 							if (dim.Width > linewidth) {
 								fit_chars = i - 1;
 								break;
@@ -853,8 +846,8 @@ void TextDrawer::place(const core::rect<s32> &dest_rect)
 						split.text = split.text.subString(fit_chars, split.text.size() - fit_chars);
 
 						// Re-calculate the width
-						el->dim.Width = el->font->getDimension(el->text.c_str()).Width;
-						split.dim.Width = split.font->getDimension(split.text.c_str()).Width;
+						el->dim.Width = getTotalDimension(el->font, el->text.c_str()).Width;
+						split.dim.Width = getTotalDimension(split.font, split.text.c_str()).Width;
 
 						// Add the split element after the current one
 						p.elements.insert(std::next(el), split);
