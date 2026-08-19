@@ -106,11 +106,17 @@ void PlayerSAO::removingFromEnvironment()
 
 std::string PlayerSAO::getClientInitializationData(u16 protocol_version)
 {
+	return getClientInitializationDataWithPlayerName(protocol_version, m_player->getName());
+}
+
+std::string PlayerSAO::getClientInitializationDataWithPlayerName(u16 protocol_version,
+		const std::string &playername)
+{
 	std::ostringstream os(std::ios::binary);
 
 	// Protocol >= 15
 	writeU8(os, 1); // version
-	os << serializeString16(m_player->getName()); // name
+	os << serializeString16(playername); // name
 	writeU8(os, 1); // is_player
 	writeS16(os, getId()); // id
 	writeV3F32(os, m_base_position);

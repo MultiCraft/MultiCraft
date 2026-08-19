@@ -85,6 +85,8 @@ public:
 	bool isStaticAllowed() const { return false; }
 	bool shouldUnload() const { return false; }
 	std::string getClientInitializationData(u16 protocol_version);
+	std::string getClientInitializationDataWithPlayerName(
+			u16 protocol_version, const std::string &playername);
 	void getStaticData(std::string *result) const;
 	void step(float dtime, bool send_recommended);
 	void setBasePosition(const v3f &position);

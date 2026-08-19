@@ -1042,6 +1042,22 @@ int ObjectRef::l_get_player_name(lua_State *L)
 	return 1;
 }
 
+// get_uncanonical_player_name(self)
+int ObjectRef::l_get_uncanonical_player_name(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+	ObjectRef *ref = checkobject(L, 1);
+	RemotePlayer *player = getplayer(ref);
+	if (player == nullptr) {
+		lua_pushlstring(L, "", 0);
+		return 1;
+	}
+
+	const std::string name = player->getUncanonicalName();
+	lua_pushstring(L, name.c_str());
+	return 1;
+}
+
 // get_look_dir(self)
 int ObjectRef::l_get_look_dir(lua_State *L)
 {
@@ -2377,6 +2393,7 @@ luaL_Reg ObjectRef::methods[] = {
 	// Player-only
 	luamethod(ObjectRef, is_player),
 	luamethod(ObjectRef, get_player_name),
+	luamethod(ObjectRef, get_uncanonical_player_name),
 	luamethod(ObjectRef, get_look_dir),
 	luamethod(ObjectRef, get_look_pitch),
 	luamethod(ObjectRef, get_look_yaw),
