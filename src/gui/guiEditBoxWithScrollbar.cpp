@@ -13,6 +13,8 @@
 #include "porting.h"
 #include "Keycodes.h"
 
+#include "irrlicht_changes/CGUITTFont.h"
+
 /*
 todo:
 optional scrollbars [done]
@@ -53,6 +55,7 @@ GUIEditBoxWithScrollBar::GUIEditBoxWithScrollBar(const wchar_t* text, bool borde
 
 	calculateFrameRect();
 	breakText();
+	updateShapedRuns();
 
 	calculateScrollPos();
 	setWritable(writable);
@@ -72,6 +75,7 @@ void GUIEditBoxWithScrollBar::updateAbsolutePosition()
 	if (old_absolute_rect != AbsoluteRect) {
 		calculateFrameRect();
 		breakText();
+		updateShapedRuns();
 		calculateScrollPos();
 	}
 }
@@ -123,18 +127,18 @@ void GUIEditBoxWithScrollBar::draw()
 
 	IGUIFont* font = getActiveFont();
 
-	s32 cursor_line = 0;
-	s32 charcursorpos = 0;
-
 	if (font) {
 		if (m_last_break_font != font) {
 			breakText();
+			updateShapedRuns();
 		}
 
 		// calculate cursor pos
 
 		core::stringw *txt_line = &Text;
 		s32 start_pos = 0;
+		s32 cursor_line = 0;
+		s32 charcursorpos = 0;
 
 		core::stringw s, s2;
 
@@ -155,6 +159,10 @@ void GUIEditBoxWithScrollBar::draw()
 				m_override_color = skin->getColor(EGDC_GRAY_TEXT);
 			}
 
+			if (IsEnabled && m_writable && ml) {
+				cursor_line = getLineFromPos(m_cursor_pos);
+			}
+
 			for (s32 i = 0; i < line_count; ++i) {
 				setTextRect(i);
 
@@ -163,6 +171,8 @@ void GUIEditBoxWithScrollBar::draw()
 				c.clipAgainst(m_current_text_rect);
 				if (!c.isValid())
 					continue;
+
+				std::vector<ShapedRun> *shaped_runs = nullptr;
 
 				// get current line
 				if (m_passwordbox) {
@@ -176,12 +186,22 @@ void GUIEditBoxWithScrollBar::draw()
 						{
 							m_broken_text[0][q] = m_passwordchar;
 						}
+						updateShapedRuns();
 					}
 					txt_line = &m_broken_text[0];
+					shaped_runs = &(getBrokenShapedRuns()[0]);
 					start_pos = 0;
 				} else {
 					txt_line = ml ? &m_broken_text[i] : &Text;
+					shaped_runs = ml ? &(getBrokenShapedRuns()[i]) : &getTextShapedRuns();
 					start_pos = ml ? m_broken_text_positions[i] : 0;
+				}
+
+				CGUITTFont *tt_font = (CGUITTFont *)font;
+
+				if (IsEnabled && m_writable && i == cursor_line) {
+					charcursorpos = tt_font->getCursorPosition(*shaped_runs,
+							*txt_line, m_cursor_pos - start_pos);
 				}
 
 				// draw mark and marked text
@@ -193,8 +213,8 @@ void GUIEditBoxWithScrollBar::draw()
 							0, (s32)txt_line->size());
 
 					if (local_start < local_end) {
-						std::vector<core::recti> mark_rects = font->getSelectionRects(
-								*txt_line, (u32)local_start, (u32)local_end);
+						std::vector<core::recti> mark_rects = tt_font->getSelectionRects(
+								*shaped_runs, *txt_line, (u32)local_start, (u32)local_end);
 
 						for (auto& mark_rect : mark_rects) {
 							core::rect<s32> current_rect = m_current_text_rect;
@@ -208,7 +228,7 @@ void GUIEditBoxWithScrollBar::draw()
 				}
 
 				// draw normal text
-				font->draw(txt_line->c_str(), m_current_text_rect,
+				tt_font->draw(*shaped_runs, txt_line->c_str(), m_current_text_rect,
 					m_override_color_enabled ? m_override_color : skin->getColor(EGDC_BUTTON_TEXT),
 					false, true, &local_clip_rect);
 			}
@@ -220,13 +240,6 @@ void GUIEditBoxWithScrollBar::draw()
 
 		// draw cursor
 		if (IsEnabled && m_writable) {
-			if (m_word_wrap || m_multiline) {
-				cursor_line = getLineFromPos(m_cursor_pos);
-				txt_line = &m_broken_text[cursor_line];
-				start_pos = m_broken_text_positions[cursor_line];
-			}
-			charcursorpos = font->getCursorPosition(*txt_line, m_cursor_pos - start_pos);
-
 			if (focus && (porting::getTimeMs() - m_blink_start_time) % 700 < 350) {
 				setTextRect(cursor_line);
 				m_current_text_rect.UpperLeftCorner.X += charcursorpos;
@@ -260,6 +273,7 @@ s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 	const u32 line_count = (m_word_wrap || m_multiline) ? m_broken_text.size() : 1;
 
 	core::stringw *txt_line = 0;
+	std::vector<ShapedRun> *shaped_runs = nullptr;
 	s32 start_pos = 0;
 
 	for (u32 i = 0; i < line_count; ++i) {
@@ -273,6 +287,7 @@ s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 		if (y >= m_current_text_rect.UpperLeftCorner.Y && y <= m_current_text_rect.LowerRightCorner.Y) {
 			// we've found the clicked line
 			txt_line = (m_word_wrap || m_multiline) ? &m_broken_text[i] : &Text;
+			shaped_runs = (m_word_wrap || m_multiline) ? &(getBrokenShapedRuns()[i]) : &getTextShapedRuns();
 			start_pos = (m_word_wrap || m_multiline) ? m_broken_text_positions[i] : 0;
 			break;
 		}
@@ -284,7 +299,9 @@ s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 	if (!txt_line)
 		return 0;
 
-	s32 idx = font->getCharacterFromPos(txt_line->c_str(), x - m_current_text_rect.UpperLeftCorner.X);
+	CGUITTFont *tt_font = (CGUITTFont *)font;
+	s32 idx = tt_font->getCharacterFromPos(*shaped_runs, txt_line->c_str(),
+			x - m_current_text_rect.UpperLeftCorner.X);
 
 	// click was on or left of the line
 	if (idx != -1)
@@ -298,17 +315,17 @@ s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 //! Breaks the single text line.
 void GUIEditBoxWithScrollBar::breakText()
 {
-	if ((!m_word_wrap && !m_multiline))
-		return;
-
-	m_broken_text.clear(); // need to reallocate :/
-	m_broken_text_positions.clear();
-
 	IGUIFont* font = getActiveFont();
 	if (!font)
 		return;
 
 	m_last_break_font = font;
+
+	if ((!m_word_wrap && !m_multiline))
+		return;
+
+	m_broken_text.clear(); // need to reallocate :/
+	m_broken_text_positions.clear();
 
 	core::stringw line;
 	core::stringw word;
@@ -413,14 +430,15 @@ void GUIEditBoxWithScrollBar::setTextRect(s32 line)
 	if (!font)
 		return;
 
+	CGUITTFont *tt_font = (CGUITTFont *)font;
 	core::dimension2du d;
 
 	// get text dimension
 	const u32 line_count = (m_word_wrap || m_multiline) ? m_broken_text.size() : 1;
 	if (m_word_wrap || m_multiline) {
-		d = font->getDimension(m_broken_text[line].c_str());
+		d = tt_font->getDimension(getBrokenShapedRuns()[line], m_broken_text[line]);
 	} else {
-		d = font->getDimension(Text.c_str());
+		d = tt_font->getDimension(getTextShapedRuns(), Text);
 		d.Height = AbsoluteRect.getHeight();
 	}
 	d.Height += font->getKerningHeight();
@@ -496,13 +514,16 @@ void GUIEditBoxWithScrollBar::calculateScrollPos()
 		if (!font)
 			return;
 
+		CGUITTFont *tt_font = (CGUITTFont *)font;
+
 		// get cursor area
 		irr::u32 cursor_width = font->getDimension(L"_").Width;
 		core::stringw *txt_line = has_broken_text ? &m_broken_text[curs_line] : &Text;
+		std::vector<ShapedRun> *shaped_runs = has_broken_text ? &(getBrokenShapedRuns()[curs_line]) : &getTextShapedRuns();
 		s32 cpos = has_broken_text ? m_cursor_pos - m_broken_text_positions[curs_line] : m_cursor_pos;	// column
-		s32 cstart = font->getCursorPosition(*txt_line, cpos);
+		s32 cstart = tt_font->getCursorPosition(*shaped_runs, *txt_line, cpos);
 		s32 cend = cstart + cursor_width;
-		s32 txt_width = font->getDimension(txt_line->c_str()).Width;
+		s32 txt_width = tt_font->getDimension(*shaped_runs, txt_line->c_str()).Width;
 
 		if (txt_width < m_frame_rect.getWidth()) {
 			// TODO: Needs a clean left and right gap removal depending on HAlign, similar to vertical scrolling tests for top/bottom.
@@ -525,7 +546,7 @@ void GUIEditBoxWithScrollBar::calculateScrollPos()
 			setTextRect(curs_line);
 		}
 
-		if (font->isRTL(*txt_line))
+		if (tt_font->isRTL(*shaped_runs, *txt_line))
 		{
 			s32 rtl_offset = core::min_((int)font->getDimension(L"X").Width * 10, m_frame_rect.getWidth() / 4);
 			if (cstart > m_frame_rect.LowerRightCorner.X - m_current_text_rect.UpperLeftCorner.X - rtl_offset)
