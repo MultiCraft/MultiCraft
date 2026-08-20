@@ -23,6 +23,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "inventory.h"
 #include "client/tile.h"
 #include <ICameraSceneNode.h>
+#include <IGUIFont.h>
 #include <ISceneNode.h>
 #include <list>
 #include <optional>
@@ -39,6 +40,11 @@ struct Nametag
 	video::SColor textcolor;
 	std::optional<video::SColor> bgcolor;
 	v3f pos;
+
+	std::string prepared_from;
+	const gui::IGUIFont *prepared_with = nullptr;
+	std::wstring wide_text;
+	core::dimension2d<u32> textsize;
 
 	Nametag(scene::ISceneNode *a_parent_node,
 			const std::string &text,

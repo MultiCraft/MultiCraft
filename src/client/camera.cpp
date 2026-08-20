@@ -768,17 +768,23 @@ void Camera::drawNametags()
 	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
 	v2u32 screensize = driver->getScreenSize();
 
-	for (const Nametag *nametag : m_nametags) {
+	for (Nametag *nametag : m_nametags) {
 		// Nametags are hidden in GenericCAO::updateNametag()
 
 		v3f pos = nametag->parent_node->getAbsolutePosition() + nametag->pos * BS;
 		f32 transformed_pos[4] = { pos.X, pos.Y, pos.Z, 1.0f };
 		trans.multiplyWith1x4Matrix(transformed_pos);
 		if (transformed_pos[3] > 0) {
-			std::wstring nametag_colorless =
-				unescape_translate(utf8_to_wide(nametag->text));
-			core::dimension2d<u32> textsize = font->getDimension(
-				nametag_colorless.c_str());
+			if (nametag->prepared_with != font ||
+					nametag->prepared_from != nametag->text) {
+				nametag->prepared_from = nametag->text;
+				nametag->prepared_with = font;
+				nametag->wide_text = translate_string(utf8_to_wide(nametag->text));
+				nametag->textsize = font->getDimension(
+					unescape_enriched(nametag->wide_text).c_str());
+			}
+
+			const core::dimension2d<u32> &textsize = nametag->textsize;
 			f32 zDiv = transformed_pos[3] == 0.0f ? 1.0f :
 				core::reciprocal(transformed_pos[3]);
 			v2s32 screen_pos;
@@ -793,9 +799,8 @@ void Camera::drawNametags()
 			if (bgcolor.getAlpha() != 0)
 				driver->draw2DRectangle(bgcolor, bg_size + screen_pos);
 
-			font->draw(
-				translate_string(utf8_to_wide(nametag->text)).c_str(),
-				size + screen_pos, nametag->textcolor);
+			font->draw(nametag->wide_text.c_str(), size + screen_pos,
+				nametag->textcolor);
 		}
 	}
 }
