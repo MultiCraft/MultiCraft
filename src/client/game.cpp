@@ -4207,7 +4207,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		if (!formspec)
 			break;
 
-		if (formspec->getReferenceCount() == 1) {
+		if (formspec->getReferenceCount() == 1 || !formspec->getParent()) {
 			m_game_ui->deleteFormspec();
 			break;
 		}

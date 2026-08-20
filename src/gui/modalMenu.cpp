@@ -158,6 +158,9 @@ void GUIModalMenu::drawCursor()
 */
 void GUIModalMenu::quitMenu()
 {
+#ifdef HAVE_TOUCHSCREENGUI
+	leave();
+#endif
 	allowFocusRemoval(true);
 	// This removes Environment's grab on us
 	Environment->removeFocus(this);
