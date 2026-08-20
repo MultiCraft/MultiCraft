@@ -481,6 +481,8 @@ namespace gui
 			video::IVideoDriver* Driver = nullptr;
 			std::vector<io::path> filenames;
 			std::vector<FT_Face> tt_faces;
+
+			mutable std::map<core::stringw, std::vector<ShapedRun>> shaped_cache[2];
 			std::vector<int> tt_offsets;
 			FT_Size_Metrics font_metrics;
 			FT_Int32 load_flags = 0;
