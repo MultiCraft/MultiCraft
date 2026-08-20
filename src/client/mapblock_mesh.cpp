@@ -1088,7 +1088,8 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 		{
 			PreMeshBuffer &p = collector.prebuffers[layer][i];
 
-			applyTileColor(p);
+			if (!m_enable_shaders)
+				applyTileColor(p);
 
 			// Generate animation data
 			// - Cracks
@@ -1160,6 +1161,7 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 			if (m_enable_shaders) {
 				material.MaterialType = m_shdrsrc->getShaderInfo(
 						p.layer.shader_id).material;
+				material.DiffuseColor = p.layer.color;
 				p.layer.applyMaterialOptionsWithShaders(material);
 			} else {
 				p.layer.applyMaterialOptions(material);

@@ -1,6 +1,8 @@
 uniform sampler2D baseTexture;
 
 uniform vec4 skyBgColor;
+// Colour the node is drawn with, white unless a mod picked one
+uniform vec3 nodeColor;
 uniform mediump float fogDistance;
 
 varying vec3 vPosition;
@@ -31,15 +33,15 @@ vec3 softMax(vec3 a, vec3 b)
 	return mix(a, b, h) + k * h * (1.0 - h);
 }
 
-vec3 pointLight(vec4 light)
+float pointLight(vec4 light)
 {
 	if (light.w <= 0.0)
-		return vec3(0.0);
+		return 0.0;
 	vec3 dir = light.xyz - vRelPos;
 	// One level per node, like spreading node light, but round
 	float level = light.w - length(dir) / 150.0;
 	if (level <= 0.0)
-		return vec3(0.0);
+		return 0.0;
 	// Brightness of that level, mirrors decode_light_f() in light.cpp
 	float lit = ((LIGHT_CURVE.x * level + LIGHT_CURVE.y) * level + LIGHT_CURVE.z) * level;
 	float spread = level - LIGHT_BOOST.y;
@@ -47,7 +49,7 @@ vec3 pointLight(vec4 light)
 	lit = clamp(lit, 0.0, 1.0);
 	if (LIGHT_CURVE.w != 1.0)
 		lit = pow(lit, LIGHT_CURVE.w);
-	return vec3(lit * vShade * LIGHT_SCALE);
+	return lit * vShade * LIGHT_SCALE;
 }
 #endif
 
@@ -107,14 +109,14 @@ void main(void)
 	}
 #endif
 
-	color = base.rgb;
+	color = base.rgb * nodeColor;
 
 	vec3 lightColor = varColor.rgb;
 #if POINT_LIGHTS
 	for (int i = 0; i < POINT_LIGHTS; i++) {
-		vec3 lit = pointLight(pointLights[i]);
-		if (lit.r > 0.0)
-			lightColor = softMax(lightColor, lit);
+		float point = pointLight(pointLights[i]);
+		if (point > 0.0)
+			lightColor = softMax(lightColor, vec3(point));
 	}
 	lightColor = min(lightColor, vec3(1.0));
 #endif
