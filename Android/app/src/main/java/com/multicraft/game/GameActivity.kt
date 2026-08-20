@@ -73,6 +73,9 @@ class GameActivity : SDLActivity() {
 	private var splashView: View? = null
 	private var isExtract: Boolean = false
 	private var messageReturnValue = ""
+	// Set just before launching an embedded browser tab; cleared in onResume.
+	private var browserOpen: Boolean = false
+	private var browserUrl: String? = null
 	private var hasKeyboard = false
 	override fun getLibraries() = arrayOf("MultiCraft")
 
@@ -123,6 +126,18 @@ class GameActivity : SDLActivity() {
 
 	override fun onResume() {
 		super.onResume()
+		// When an embedded browser tab closes, Android returns here.
+		if (browserOpen) {
+			browserOpen = false
+			val url = browserUrl
+			browserUrl = null
+			if (url != null) {
+				try {
+					update("_browser_closed", url)
+				} catch (_: UnsatisfiedLinkError) {
+				}
+			}
+		}
 		if (hasKeyboard) {
 			try {
 				keyboardEvent(true)
@@ -321,6 +336,8 @@ class GameActivity : SDLActivity() {
 			.setStartAnimations(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
 			.setExitAnimations(this, R.anim.slide_in_top, R.anim.slide_out_bottom)
 			.build()
+		browserUrl = uri
+		browserOpen = true
 		builder.launchUrl(this, uri.toUri())
 
 		return true
