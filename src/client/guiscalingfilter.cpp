@@ -185,6 +185,19 @@ void draw2DImage9Slice(video::IVideoDriver *driver, video::ITexture *texture,
 	core::vector2di lower_right_offset = core::vector2di(srcrect.getWidth(),
 			srcrect.getHeight()) - middle.LowerRightCorner;
 
+	core::vector2di cap_ul = middle.UpperLeftCorner;
+	core::vector2di cap_lr = lower_right_offset;
+	const s32 need_w = cap_ul.X + cap_lr.X;
+	const s32 need_h = cap_ul.Y + cap_lr.Y;
+	if (need_w > 0 && destrect.getWidth() < need_w) {
+		cap_ul.X = cap_ul.X * destrect.getWidth() / need_w;
+		cap_lr.X = destrect.getWidth() - cap_ul.X;
+	}
+	if (need_h > 0 && destrect.getHeight() < need_h) {
+		cap_ul.Y = cap_ul.Y * destrect.getHeight() / need_h;
+		cap_lr.Y = destrect.getHeight() - cap_ul.Y;
+	}
+
 	for (int y = 0; y < 3; ++y) {
 		for (int x = 0; x < 3; ++x) {
 			core::rect<s32> src = srcrect;
@@ -192,41 +205,44 @@ void draw2DImage9Slice(video::IVideoDriver *driver, video::ITexture *texture,
 
 			switch (x) {
 			case 0:
-				dest.LowerRightCorner.X = destrect.UpperLeftCorner.X + middle.UpperLeftCorner.X;
-				src.LowerRightCorner.X = srcrect.UpperLeftCorner.X + middle.UpperLeftCorner.X;
+				dest.LowerRightCorner.X = destrect.UpperLeftCorner.X + cap_ul.X;
+				src.LowerRightCorner.X = srcrect.UpperLeftCorner.X + cap_ul.X;
 				break;
 
 			case 1:
-				dest.UpperLeftCorner.X += middle.UpperLeftCorner.X;
-				dest.LowerRightCorner.X -= lower_right_offset.X;
-				src.UpperLeftCorner.X += middle.UpperLeftCorner.X;
-				src.LowerRightCorner.X -= lower_right_offset.X;
+				dest.UpperLeftCorner.X += cap_ul.X;
+				dest.LowerRightCorner.X -= cap_lr.X;
+				src.UpperLeftCorner.X += cap_ul.X;
+				src.LowerRightCorner.X -= cap_lr.X;
 				break;
 
 			case 2:
-				dest.UpperLeftCorner.X = destrect.LowerRightCorner.X - lower_right_offset.X;
-				src.UpperLeftCorner.X = srcrect.LowerRightCorner.X - lower_right_offset.X;
+				dest.UpperLeftCorner.X = destrect.LowerRightCorner.X - cap_lr.X;
+				src.UpperLeftCorner.X = srcrect.LowerRightCorner.X - cap_lr.X;
 				break;
 			}
 
 			switch (y) {
 			case 0:
-				dest.LowerRightCorner.Y = destrect.UpperLeftCorner.Y + middle.UpperLeftCorner.Y;
-				src.LowerRightCorner.Y = srcrect.UpperLeftCorner.Y + middle.UpperLeftCorner.Y;
+				dest.LowerRightCorner.Y = destrect.UpperLeftCorner.Y + cap_ul.Y;
+				src.LowerRightCorner.Y = srcrect.UpperLeftCorner.Y + cap_ul.Y;
 				break;
 
 			case 1:
-				dest.UpperLeftCorner.Y += middle.UpperLeftCorner.Y;
-				dest.LowerRightCorner.Y -= lower_right_offset.Y;
-				src.UpperLeftCorner.Y += middle.UpperLeftCorner.Y;
-				src.LowerRightCorner.Y -= lower_right_offset.Y;
+				dest.UpperLeftCorner.Y += cap_ul.Y;
+				dest.LowerRightCorner.Y -= cap_lr.Y;
+				src.UpperLeftCorner.Y += cap_ul.Y;
+				src.LowerRightCorner.Y -= cap_lr.Y;
 				break;
 
 			case 2:
-				dest.UpperLeftCorner.Y = destrect.LowerRightCorner.Y - lower_right_offset.Y;
-				src.UpperLeftCorner.Y = srcrect.LowerRightCorner.Y - lower_right_offset.Y;
+				dest.UpperLeftCorner.Y = destrect.LowerRightCorner.Y - cap_lr.Y;
+				src.UpperLeftCorner.Y = srcrect.LowerRightCorner.Y - cap_lr.Y;
 				break;
 			}
+
+			if (dest.getWidth() <= 0 || dest.getHeight() <= 0)
+				continue;
 
 			draw2DImageFilterScaled(driver, texture, dest, src, cliprect, colors, true);
 		}
