@@ -333,7 +333,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 
 #ifdef NDEBUG
 		catch (std::exception &e) {
-			std::string error_message = "Some exception: \"";
+			error_message = "Some exception: \"";
 			error_message += e.what();
 			error_message += "\"";
 			errorstream << error_message << std::endl;

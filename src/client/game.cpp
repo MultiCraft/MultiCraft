@@ -4815,13 +4815,20 @@ void the_game(bool *kill,
 #ifdef __ANDROID__
 		porting::handleError("ModError", error_message);
 #endif
+	} catch (DatabaseException &e) {
+		error_message = std::string("DatabaseException: ") + e.what() +
+				strgettext("\nCheck debug.txt for details.");
+		errorstream << error_message << std::endl;
+#ifdef __ANDROID__
+		porting::handleError("DatabaseException", error_message);
+#endif
 	} catch (con::PeerNotFoundException &e) {
 			error_message = gettext("Connection error (timed out?)");
 			errorstream << error_message << std::endl;
 	}
 #ifdef NDEBUG
 	catch (std::exception &e) {
-		std::string error_message = "Some exception: \"";
+		error_message = "Some exception: \"";
 		error_message += e.what();
 		error_message += "\"";
 		errorstream << error_message << std::endl;
