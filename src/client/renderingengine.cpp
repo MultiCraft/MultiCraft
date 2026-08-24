@@ -627,7 +627,11 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 #ifdef HAVE_TOUCHSCREENGUI
 	const s32 bar_w = MYMIN(window.X * 0.5f, window.Y * 2.0f);
 #else
-	const s32 bar_w = 7.5 * (MYMIN(window.X, window.Y) * 0.9 / 15.0);
+	s32 bar_w = 7.5 * (MYMIN(window.X, window.Y) * 0.9 / 15.0);
+#if defined(__MACH__) && defined(__APPLE__) && !defined(__IOS__)
+	if (porting::getScreenScale() <= 1.0f)
+		bar_w = bar_w * 128 / 96;
+#endif
 #endif
 	const s32 bar_h = art.Width > 0 ? bar_w * art.Height / art.Width : bar_w / 8;
 	const s32 bar_x = (s32)window.X / 2 - bar_w / 2;

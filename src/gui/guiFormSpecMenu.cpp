@@ -3458,7 +3458,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 			// text keeps its share of the slot it sits in, but never drops below default
 			m_font_scale = MYMAX(1.0, use_imgsize /
 					RenderingEngine::getDisplayDensity() *
-					FORMSPEC_FONT_SHARE / TTF_DEFAULT_FONT_SIZE);
+					FORMSPEC_FONT_SHARE / g_fontengine->getDefaultFontSize());
 #endif
 		}
 
