@@ -416,6 +416,11 @@ s32 GUIScrollBar::getPos() const
 
 void GUIScrollBar::setTextures(const std::vector<video::ITexture *> &textures)
 {
+	m_pinned_textures.clear();
+	for (video::ITexture *texture : textures)
+		if (texture)
+			m_pinned_textures.push_back(::grab(texture));
+
 	m_textures = textures;
 	refreshControls();
 };

@@ -17,6 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <memory>
+
 #include "irrlichttypes.h" // must be included before anything irrlicht, see comment in the file
 #include "irrlicht.h" // createDevice
 #include "irrlichttypes_extrabloated.h"
@@ -1024,8 +1026,10 @@ static bool migrate_map_database(const GameParams &game_params, const Settings &
 		return false;
 	}
 
-	MapDatabase *old_db = ServerMap::createDatabase(backend, game_params.world_path, world_mt),
-		*new_db = ServerMap::createDatabase(migrate_to, game_params.world_path, world_mt);
+	std::unique_ptr<MapDatabase> old_db(
+		ServerMap::createDatabase(backend, game_params.world_path, world_mt));
+	std::unique_ptr<MapDatabase> new_db(
+		ServerMap::createDatabase(migrate_to, game_params.world_path, world_mt));
 
 	u32 count = 0;
 	time_t last_update_time = 0;
@@ -1035,7 +1039,10 @@ static bool migrate_map_database(const GameParams &game_params, const Settings &
 	old_db->listAllLoadableBlocks(blocks);
 	new_db->beginSave();
 	for (std::vector<v3s16>::const_iterator it = blocks.begin(); it != blocks.end(); ++it) {
-		if (kill) return false;
+		if (kill) {
+			new_db->endSave();
+			return false;
+		}
 
 		std::string data;
 		old_db->loadBlock(*it, &data);
@@ -1054,8 +1061,6 @@ static bool migrate_map_database(const GameParams &game_params, const Settings &
 	}
 	std::cerr << std::endl;
 	new_db->endSave();
-	delete old_db;
-	delete new_db;
 
 	actionstream << "Successfully migrated " << count << " blocks" << std::endl;
 	world_mt.set("backend", migrate_to);
@@ -1078,7 +1083,8 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 	}
 	const std::string &backend = world_mt.get("backend");
 	Server server(game_params.world_path, game_params.game_spec, false, addr, false);
-	MapDatabase *db = ServerMap::createDatabase(backend, game_params.world_path, world_mt);
+	std::unique_ptr<MapDatabase> db(
+		ServerMap::createDatabase(backend, game_params.world_path, world_mt));
 
 	u32 count = 0;
 	u64 last_update_time = 0;
@@ -1093,12 +1099,16 @@ static bool recompress_map_database(const GameParams &game_params, const Setting
 	std::istringstream iss(std::ios_base::binary);
 	std::ostringstream oss(std::ios_base::binary);
 	for (auto it = blocks.begin(); it != blocks.end(); ++it) {
-		if (kill) return false;
+		if (kill) {
+			db->endSave();
+			return false;
+		}
 
 		std::string data;
 		db->loadBlock(*it, &data);
 		if (data.empty()) {
 			errorstream << "Failed to load block " << PP(*it) << std::endl;
+			db->endSave();
 			return false;
 		}
 

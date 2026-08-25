@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2016-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,10 @@
 #ifndef _SB_INTERNAL_BASE_H
 #define _SB_INTERNAL_BASE_H
 
-#include <SBBase.h>
-#include <SBBidiType.h>
-#include <SBCodepoint.h>
-#include <SBConfig.h>
-#include <SBGeneralCategory.h>
-#include <SBScript.h>
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBBidiType.h>
+#include <SheenBidi/SBConfig.h>
+#include <SheenBidi/SBScript.h>
 
 /**
  * A value that indicates an invalid unsigned index.
@@ -95,13 +93,6 @@ SB_INTERNAL SBBoolean SBUIntegerVerifyRange(SBUInteger actualLength,
 #define SBBidiTypeIsIsolateInitiator(t)     SBUInt8InRange(t, SBBidiTypeLRI, SBBidiTypeFSI)
 #define SBBidiTypeIsIsolateTerminator(t)    SBBidiTypeIsEqual(t, SBBidiTypePDI)
 #define SBBidiTypeIsNeutralOrIsolate(t)     SBUInt8InRange(t, SBBidiTypeWS, SBBidiTypePDI)
-
-
-#define SBCodepointMax                      0x10FFFF
-#define SBCodepointInRange(v, s, e)         SBUInt32InRange(v, s, e)
-#define SBCodepointIsSurrogate(c)           SBCodepointInRange(c, 0xD800, 0xDFFF)
-#define SBCodepointIsValid(c)               (!SBCodepointIsSurrogate(c) && (c) <= SBCodepointMax)
-
 
 #define SBScriptIsCommonOrInherited(s)      ((s) <= SBScriptZYYY)
 

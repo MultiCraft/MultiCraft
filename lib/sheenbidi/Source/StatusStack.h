@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +17,31 @@
 #ifndef _SB_INTERNAL_STATUS_STACK_H
 #define _SB_INTERNAL_STATUS_STACK_H
 
-#include <SBConfig.h>
+#include <SheenBidi/SBConfig.h>
+
+#include "Object.h"
 #include "SBBase.h"
 
-#define _SBStatusStackList_Length       16
-#define _SBStatusStackList_MaxIndex     (_SBStatusStackList_Length - 1)
+#define _StatusStackList_Length         16
+#define _StatusStackList_MaxIndex       (_StatusStackList_Length - 1)
 
-typedef struct _SBStatusStackElement {
+typedef struct _StatusStackElement {
     SBBoolean isolateStatus;
     SBBidiType overrideStatus;
     SBLevel embeddingLevel;
-} _SBStatusStackElement, *_SBStatusStackElementRef;
+} _StatusStackElement, *_StatusStackElementRef;
 
-typedef struct _SBStatusStackList {
-    _SBStatusStackElement elements[_SBStatusStackList_Length];
+typedef struct _StatusStackList {
+    _StatusStackElement elements[_StatusStackList_Length];
 
-    struct _SBStatusStackList *previous;
-    struct _SBStatusStackList *next;
-} _SBStatusStackList, *_SBStatusStackListRef;
+    struct _StatusStackList *previous;
+    struct _StatusStackList *next;
+} _StatusStackList, *_StatusStackListRef;
 
-typedef struct _SBStatusStack {
-    _SBStatusStackList _firstList;
-    _SBStatusStackListRef _peekList;
+typedef struct _StatusStack {
+    Object _object;
+    _StatusStackList _firstList;
+    _StatusStackListRef _peekList;
     SBUInteger _peekTop;
     SBUInteger count;
 } StatusStack, *StatusStackRef;
@@ -46,7 +49,7 @@ typedef struct _SBStatusStack {
 SB_INTERNAL void StatusStackInitialize(StatusStackRef stack);
 SB_INTERNAL void StatusStackFinalize(StatusStackRef stack);
 
-SB_INTERNAL void StatusStackPush(StatusStackRef stack,
+SB_INTERNAL SBBoolean StatusStackPush(StatusStackRef stack,
    SBLevel embeddingLevel, SBBidiType overrideStatus, SBBoolean isolateStatus);
 SB_INTERNAL void StatusStackPop(StatusStackRef stack);
 SB_INTERNAL void StatusStackSetEmpty(StatusStackRef stack);

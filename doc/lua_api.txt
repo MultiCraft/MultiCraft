@@ -3137,6 +3137,9 @@ Player Inventory lists
 * `hand`: list containing an override for the empty hand
     * Is not created automatically, use `InvRef:set_size`
     * Is only used to enhance the empty hand's tool capabilities
+* `offhand`: list holding the item shown in the player's left hand
+    * Is not created automatically, use `InvRef:set_size` with size 1
+    * Slot 1 is rendered in first person as a mirror of the wielded item
 
 Colors
 ======

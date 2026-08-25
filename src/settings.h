@@ -151,6 +151,8 @@ public:
 	// return all keys used
 	std::vector<std::string> getNames() const;
 	bool exists(const std::string &name) const;
+	// ignores the fallback layers, unlike exists()
+	bool existsLocal(const std::string &name) const;
 
 
 	/***************************************

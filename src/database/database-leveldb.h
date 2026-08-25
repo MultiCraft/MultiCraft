@@ -23,9 +23,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #if USE_LEVELDB
 
+#include <memory>
 #include <string>
 #include "database.h"
 #include "leveldb/db.h"
+#include "leveldb/write_batch.h"
 
 class Database_LevelDB : public MapDatabase
 {
@@ -40,11 +42,17 @@ public:
 
 	void compact();
 
-	void beginSave() {}
-	void endSave() {}
+	void beginSave();
+	void endSave();
 
 private:
+	leveldb::Status flushBatch();
+
 	leveldb::DB *m_database;
+	std::unique_ptr<leveldb::WriteBatch> m_batch =
+			std::make_unique<leveldb::WriteBatch>();
+	size_t m_batch_bytes = 0;
+	bool m_batching = false;
 };
 
 class PlayerDatabaseLevelDB : public PlayerDatabase

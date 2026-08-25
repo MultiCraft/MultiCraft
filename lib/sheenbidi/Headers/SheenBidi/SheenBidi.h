@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,18 @@
 #ifndef _SHEEN_BIDI_H
 #define _SHEEN_BIDI_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "SBAlgorithm.h"
-#include "SBBase.h"
-#include "SBBidiType.h"
-#include "SBCodepoint.h"
-#include "SBCodepointSequence.h"
-#include "SBGeneralCategory.h"
-#include "SBLine.h"
-#include "SBMirrorLocator.h"
-#include "SBParagraph.h"
-#include "SBRun.h"
-#include "SBScript.h"
-#include "SBScriptLocator.h"
-
-#ifdef __cplusplus
-}
-#endif
+#include <SheenBidi/SBAlgorithm.h>
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBBidiType.h>
+#include <SheenBidi/SBCodepoint.h>
+#include <SheenBidi/SBCodepointSequence.h>
+#include <SheenBidi/SBGeneralCategory.h>
+#include <SheenBidi/SBLine.h>
+#include <SheenBidi/SBMirrorLocator.h>
+#include <SheenBidi/SBParagraph.h>
+#include <SheenBidi/SBRun.h>
+#include <SheenBidi/SBScript.h>
+#include <SheenBidi/SBScriptLocator.h>
+#include <SheenBidi/SBVersion.h>
 
 #endif

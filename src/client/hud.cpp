@@ -54,7 +54,7 @@ Hud::Hud(gui::IGUIEnvironment *guienv, Client *client, LocalPlayer *player,
 	this->player      = player;
 	this->inventory   = inventory;
 
-	m_hud_scaling      = g_settings->getFloat("hud_scaling");
+	m_hud_scaling      = RenderingEngine::getHudScaling();
 	m_scale_factor     = m_hud_scaling * RenderingEngine::getDisplayDensity();
 	m_hotbar_imagesize = std::floor(HOTBAR_IMAGE_SIZE *
 		RenderingEngine::getDisplayDensity() + 0.5f);
@@ -981,6 +981,9 @@ void Hud::resizeHotbar() {
 	const v2u32 &window_size = RenderingEngine::get_instance()->getWindowSize();
 
 	if (m_screensize != window_size) {
+		// an automatic scaling follows the screen it came from
+		m_hud_scaling = RenderingEngine::getHudScaling();
+		m_scale_factor = m_hud_scaling * RenderingEngine::getDisplayDensity();
 		m_hotbar_imagesize = floor(HOTBAR_IMAGE_SIZE *
 			RenderingEngine::getDisplayDensity() + 0.5);
 		m_hotbar_imagesize *= m_hud_scaling;

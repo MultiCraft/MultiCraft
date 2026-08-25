@@ -13,6 +13,7 @@ the arrow buttons where there is insufficient space.
 #pragma once
 
 #include "guiAnimatedImage.h"
+#include "irr_ptr.h"
 #include "irrlichttypes_extrabloated.h"
 #include "StyleSpec.h"
 #include <vector>
@@ -89,6 +90,8 @@ private:
 	s32 border_size;
 
 	std::vector<video::ITexture *> m_textures;
+	// The same textures, held until replaced or destroyed
+	std::vector<irr_ptr<video::ITexture>> m_pinned_textures;
 	core::rect<s32> m_texture_middle;
 
 	core::rect<s32> slider_rect;

@@ -362,6 +362,7 @@ void Map::timerUpdate(float dtime, float unload_timeout, u32 max_loaded_blocks,
 	Profiler modprofiler;
 
 	std::vector<v2s16> sector_deletion_queue;
+	std::vector<std::pair<MapSector *, MapBlock *>> block_deletion_queue;
 	u32 deleted_blocks_count = 0;
 	u32 saved_blocks_count = 0;
 	u32 block_count_all = 0;
@@ -369,7 +370,8 @@ void Map::timerUpdate(float dtime, float unload_timeout, u32 max_loaded_blocks,
 	beginSave();
 
 	// If there is no practical limit, we spare creation of mapblock_queue
-	if (max_loaded_blocks == U32_MAX) {
+	const bool no_block_limit = max_loaded_blocks == U32_MAX;
+	if (no_block_limit) {
 		for (auto &sector_it : m_sectors) {
 			MapSector *sector = sector_it.second;
 
@@ -383,24 +385,21 @@ void Map::timerUpdate(float dtime, float unload_timeout, u32 max_loaded_blocks,
 
 				if (block->refGet() == 0
 						&& block->getUsageTimer() > unload_timeout) {
-					v3s16 p = block->getPos();
-
 					// Save if modified
 					if (block->getModified() != MOD_STATE_CLEAN
 							&& save_before_unloading) {
 						modprofiler.add(block->getModifiedReasonString(), 1);
-						if (!saveBlock(block))
+						if (!saveBlock(block)) {
+							all_blocks_deleted = false;
+							block_count_all++;
 							continue;
+						}
 						saved_blocks_count++;
 					}
 
 					// Delete from memory
-					sector->deleteBlock(block);
-
-					if (unloaded_blocks)
-						unloaded_blocks->push_back(p);
-
-					deleted_blocks_count++;
+					block_count_all++;
+					block_deletion_queue.emplace_back(sector, block);
 				} else {
 					all_blocks_deleted = false;
 					block_count_all++;
@@ -436,8 +435,6 @@ void Map::timerUpdate(float dtime, float unload_timeout, u32 max_loaded_blocks,
 			if (block->refGet() != 0)
 				continue;
 
-			v3s16 p = block->getPos();
-
 			// Save if modified
 			if (block->getModified() != MOD_STATE_CLEAN && save_before_unloading) {
 				modprofiler.add(block->getModifiedReasonString(), 1);
@@ -447,22 +444,29 @@ void Map::timerUpdate(float dtime, float unload_timeout, u32 max_loaded_blocks,
 			}
 
 			// Delete from memory
-			b.sect->deleteBlock(block);
-
-			if (unloaded_blocks)
-				unloaded_blocks->push_back(p);
-
-			deleted_blocks_count++;
-			block_count_all--;
+			block_deletion_queue.emplace_back(b.sect, block);
 		}
-		// Delete empty sectors
+	}
+	endSave();
+
+	for (auto &it : block_deletion_queue) {
+		v3s16 p = it.second->getPos();
+		it.first->deleteBlock(it.second);
+
+		if (unloaded_blocks)
+			unloaded_blocks->push_back(p);
+
+		deleted_blocks_count++;
+		block_count_all--;
+	}
+	// Delete empty sectors
+	if (!no_block_limit) {
 		for (auto &sector_it : m_sectors) {
 			if (sector_it.second->empty()) {
 				sector_deletion_queue.push_back(sector_it.first);
 			}
 		}
 	}
-	endSave();
 
 	// Finally delete the empty sectors
 	deleteSectors(sector_deletion_queue);

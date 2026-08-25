@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,29 @@
  * limitations under the License.
  */
 
-#include <SBConfig.h>
 #include <stddef.h>
-#include <stdlib.h>
 
+#include <SheenBidi/SBConfig.h>
+
+#include "Object.h"
 #include "SBAssert.h"
 #include "SBBase.h"
 #include "StatusStack.h"
 
-SB_INTERNAL void StatusStackInitialize(StatusStackRef stack)
+static SBBoolean StatusStackInsertElement(StatusStackRef stack)
 {
-    stack->_firstList.previous = NULL;
-    stack->_firstList.next = NULL;
-    
-    StatusStackSetEmpty(stack);
-}
-
-SB_INTERNAL void StatusStackPush(StatusStackRef stack, SBLevel embeddingLevel, SBBidiType overrideStatus, SBBoolean isolateStatus)
-{
-    _SBStatusStackElementRef element;
-
-    /* The stack can hold upto 127 elements. */
-    SBAssert(stack->count <= 127);
-
-    if (stack->_peekTop != _SBStatusStackList_MaxIndex) {
-        element = &stack->_peekList->elements[++stack->_peekTop];
+    if (stack->_peekTop != _StatusStackList_MaxIndex) {
+        stack->_peekTop += 1;
     } else {
-        _SBStatusStackListRef previousList = stack->_peekList;
-        _SBStatusStackListRef peekList = previousList->next;
+        _StatusStackListRef previousList = stack->_peekList;
+        _StatusStackListRef peekList = previousList->next;
 
         if (!peekList) {
-            peekList = malloc(sizeof(_SBStatusStackList));
+            peekList = ObjectAddMemory(&stack->_object, sizeof(_StatusStackList));
+            if (!peekList) {
+                return SBFalse;
+            }
+
             peekList->previous = previousList;
             peekList->next = NULL;
 
@@ -53,14 +45,38 @@ SB_INTERNAL void StatusStackPush(StatusStackRef stack, SBLevel embeddingLevel, S
 
         stack->_peekList = peekList;
         stack->_peekTop = 0;
-
-        element = &peekList->elements[0];
     }
     stack->count += 1;
 
-    element->embeddingLevel = embeddingLevel;
-    element->overrideStatus = overrideStatus;
-    element->isolateStatus = isolateStatus;
+    return SBTrue;
+}
+
+SB_INTERNAL void StatusStackInitialize(StatusStackRef stack)
+{
+    ObjectInitialize(&stack->_object);
+
+    stack->_firstList.previous = NULL;
+    stack->_firstList.next = NULL;
+    
+    StatusStackSetEmpty(stack);
+}
+
+SB_INTERNAL SBBoolean StatusStackPush(StatusStackRef stack,
+    SBLevel embeddingLevel, SBBidiType overrideStatus, SBBoolean isolateStatus)
+{
+    /* The stack can hold upto 127 elements. */
+    SBAssert(stack->count <= 127);
+
+    if (StatusStackInsertElement(stack)) {
+        _StatusStackElementRef element = &stack->_peekList->elements[stack->_peekTop];
+        element->embeddingLevel = embeddingLevel;
+        element->overrideStatus = overrideStatus;
+        element->isolateStatus = isolateStatus;
+
+        return SBTrue;
+    }
+
+    return SBFalse;
 }
 
 SB_INTERNAL void StatusStackPop(StatusStackRef stack)
@@ -72,7 +88,7 @@ SB_INTERNAL void StatusStackPop(StatusStackRef stack)
         stack->_peekTop -= 1;
     } else {
         stack->_peekList = stack->_peekList->previous;
-        stack->_peekTop = _SBStatusStackList_MaxIndex;
+        stack->_peekTop = _StatusStackList_MaxIndex;
     }
     stack->count -= 1;
 }
@@ -101,11 +117,5 @@ SB_INTERNAL SBBoolean StatusStackGetIsolateStatus(StatusStackRef stack)
 
 SB_INTERNAL void StatusStackFinalize(StatusStackRef stack)
 {
-    _SBStatusStackListRef list = stack->_firstList.next;
-
-    while (list) {
-        _SBStatusStackListRef next = list->next;
-        free(list);
-        list = next;
-    };
+    ObjectFinalize(&stack->_object);
 }

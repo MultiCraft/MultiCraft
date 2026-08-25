@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2016-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,35 +14,44 @@
  * limitations under the License.
  */
 
-#include <SBConfig.h>
 #include <stddef.h>
-#include <stdlib.h>
+
+#include <SheenBidi/SBConfig.h>
 
 #include "BidiTypeLookup.h"
+#include "Object.h"
 #include "SBBase.h"
+#include "SBCodepoint.h"
 #include "SBCodepointSequence.h"
 #include "SBLog.h"
 #include "SBParagraph.h"
 #include "SBAlgorithm.h"
 
-static SBAlgorithmRef AlgorithmAllocate(SBUInteger stringLength)
+#define ALGORITHM  0
+#define BIDI_TYPES 1
+#define COUNT      2
+
+static SBAlgorithmRef AllocateAlgorithm(SBUInteger stringLength)
 {
-    const SBUInteger sizeAlgorithm = sizeof(SBAlgorithm);
-    const SBUInteger sizeTypes     = sizeof(SBBidiType) * stringLength;
+    void *pointers[COUNT] = { NULL };
+    SBUInteger sizes[COUNT];
 
-    const SBUInteger sizeMemory    = sizeAlgorithm
-                                   + sizeTypes;
+    sizes[ALGORITHM]  = sizeof(SBAlgorithm);
+    sizes[BIDI_TYPES] = sizeof(SBBidiType) * stringLength;
 
-    SBUInt8 *memory = (SBUInt8 *)malloc(sizeMemory);
+    if (ObjectCreate(sizes, COUNT, pointers)) {
+        SBAlgorithmRef algorithm = pointers[ALGORITHM];
+        SBBidiType *fixedTypes = pointers[BIDI_TYPES];
 
-    SBUInteger offset = 0;
-    SBAlgorithmRef algorithm = (SBAlgorithmRef)(memory + offset);
+        algorithm->fixedTypes = fixedTypes;
+    }
 
-    offset += sizeAlgorithm;
-    algorithm->fixedTypes = (SBBidiType *)(memory + offset);
-
-    return algorithm;
+    return pointers[ALGORITHM];
 }
+
+#undef ALGORITHM
+#undef BIDI_TYPES
+#undef COUNT
 
 static void DetermineBidiTypes(const SBCodepointSequence *sequence, SBBidiType *types)
 {
@@ -60,17 +69,18 @@ static void DetermineBidiTypes(const SBCodepointSequence *sequence, SBBidiType *
     }
 }
 
-SBAlgorithmRef SBAlgorithmCreate(const SBCodepointSequence *codepointSequence)
+static SBAlgorithmRef CreateAlgorithm(const SBCodepointSequence *codepointSequence)
 {
-    if (SBCodepointSequenceIsValid(codepointSequence)) {
-        SBUInteger stringLength = codepointSequence->stringLength;
-        SBAlgorithmRef algorithm;
+    SBUInteger stringLength = codepointSequence->stringLength;
+    SBAlgorithmRef algorithm;
 
-        SB_LOG_BLOCK_OPENER("Algorithm Input");
-        SB_LOG_STATEMENT("Codepoints", 1, SB_LOG_CODEPOINT_SEQUENCE(codepointSequence));
-        SB_LOG_BLOCK_CLOSER();
+    SB_LOG_BLOCK_OPENER("Algorithm Input");
+    SB_LOG_STATEMENT("Codepoints", 1, SB_LOG_CODEPOINT_SEQUENCE(codepointSequence));
+    SB_LOG_BLOCK_CLOSER();
 
-        algorithm = AlgorithmAllocate(stringLength);
+    algorithm = AllocateAlgorithm(stringLength);
+
+    if (algorithm) {
         algorithm->codepointSequence = *codepointSequence;
         algorithm->retainCount = 1;
 
@@ -81,8 +91,15 @@ SBAlgorithmRef SBAlgorithmCreate(const SBCodepointSequence *codepointSequence)
         SB_LOG_BLOCK_CLOSER();
 
         SB_LOG_BREAKER();
-        
-        return algorithm;
+    }
+
+    return algorithm;
+}
+
+SBAlgorithmRef SBAlgorithmCreate(const SBCodepointSequence *codepointSequence)
+{
+    if (SBCodepointSequenceIsValid(codepointSequence)) {
+        return CreateAlgorithm(codepointSequence);
     }
 
     return NULL;
@@ -126,6 +143,10 @@ void SBAlgorithmGetParagraphBoundary(SBAlgorithmRef algorithm,
     SBUInteger limitIndex;
     SBUInteger startIndex;
 
+    if (separatorLength) {
+        *separatorLength = 0;
+    }
+
     SBUIntegerNormalizeRange(codepointSequence->stringLength, &paragraphOffset, &suggestedLength);
     limitIndex = paragraphOffset + suggestedLength;
 
@@ -133,8 +154,12 @@ void SBAlgorithmGetParagraphBoundary(SBAlgorithmRef algorithm,
         SBBidiType currentType = bidiTypes[startIndex];
 
         if (currentType == SBBidiTypeB) {
+            SBUInteger codeUnitCount = SBAlgorithmGetSeparatorLength(algorithm, startIndex);
+
+            startIndex += codeUnitCount;
+
             if (separatorLength) {
-                *separatorLength = SBAlgorithmGetSeparatorLength(algorithm, startIndex);
+                *separatorLength = codeUnitCount;
             }
             break;
         }
@@ -172,6 +197,6 @@ SBAlgorithmRef SBAlgorithmRetain(SBAlgorithmRef algorithm)
 void SBAlgorithmRelease(SBAlgorithmRef algorithm)
 {
     if (algorithm && --algorithm->retainCount == 0) {
-        free(algorithm);
+        ObjectDispose(&algorithm->_object);
     }
 }

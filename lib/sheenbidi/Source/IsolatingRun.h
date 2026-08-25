@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2022 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef _SB_INTERNAL_ISOLATING_RUN_H
 #define _SB_INTERNAL_ISOLATING_RUN_H
 
-#include <SBConfig.h>
+#include <SheenBidi/SBConfig.h>
 
 #include "BidiChain.h"
 #include "BracketQueue.h"
@@ -40,7 +40,7 @@ typedef struct _IsolatingRun {
 } IsolatingRun, *IsolatingRunRef;
 
 SB_INTERNAL void IsolatingRunInitialize(IsolatingRunRef isolatingRun);
-SB_INTERNAL void IsolatingRunResolve(IsolatingRunRef isolatingRun);
+SB_INTERNAL SBBoolean IsolatingRunResolve(IsolatingRunRef isolatingRun);
 
 SB_INTERNAL void IsolatingRunFinalize(IsolatingRunRef isolatingRun);
 

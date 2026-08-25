@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2019 Muhammad Tayyab Akram
+ * Copyright (C) 2014-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,17 @@
 #ifndef _SB_INTERNAL_LINE_H
 #define _SB_INTERNAL_LINE_H
 
-#include <SBBase.h>
-#include <SBCodepointSequence.h>
-#include <SBConfig.h>
-#include <SBLine.h>
-#include <SBParagraph.h>
-#include <SBRun.h>
+#include <SheenBidi/SBBase.h>
+#include <SheenBidi/SBCodepointSequence.h>
+#include <SheenBidi/SBConfig.h>
+#include <SheenBidi/SBLine.h>
+#include <SheenBidi/SBParagraph.h>
+#include <SheenBidi/SBRun.h>
+
+#include "Object.h"
 
 typedef struct _SBLine {
+    Object _object;
     SBCodepointSequence codepointSequence;
     SBRun *fixedRuns;
     SBUInteger runCount;

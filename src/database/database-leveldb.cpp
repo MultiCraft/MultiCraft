@@ -31,11 +31,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/serialize.h"
 #include "util/string.h"
 
+#include <sstream>
+
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
+#include "leveldb/write_batch.h"
 #ifdef SERVER
 #include "leveldb/filter_policy.h"
 #endif
+
+static const size_t BATCH_FLUSH_BYTES = 8 * 1024 * 1024;
+static const size_t BATCH_KEEP_BYTES = 1024 * 1024;
 
 #define ENSURE_STATUS_OK(s) \
 	if (!(s).ok()) { \
@@ -60,19 +66,64 @@ Database_LevelDB::Database_LevelDB(const std::string &savedir)
 	ENSURE_STATUS_OK(status);
 }
 
+void Database_LevelDB::beginSave()
+{
+#ifdef SERVER
+	m_batching = true;
+#endif
+}
+
+void Database_LevelDB::endSave()
+{
+	if (!m_batching)
+		return;
+
+	m_batching = false;
+	ENSURE_STATUS_OK(flushBatch());
+}
+
+leveldb::Status Database_LevelDB::flushBatch()
+{
+	if (m_batch_bytes == 0)
+		return leveldb::Status::OK();
+
+	leveldb::Status status = m_database->Write(leveldb::WriteOptions(), m_batch.get());
+	if (m_batch_bytes > BATCH_KEEP_BYTES)
+		m_batch = std::make_unique<leveldb::WriteBatch>();
+	else
+		m_batch->Clear();
+	m_batch_bytes = 0;
+
+	return status;
+}
+
 Database_LevelDB::~Database_LevelDB()
 {
+	leveldb::Status status = flushBatch();
+	if (!status.ok()) {
+		errorstream << "LevelDB error writing block batch: "
+			<< status.ToString() << std::endl;
+	}
 	delete m_database;
 }
 
 bool Database_LevelDB::saveBlock(const v3s16 &pos, const std::string &data)
 {
+	if (m_batching) {
+		m_batch->Put(i64tos(getBlockAsInteger(pos)), data);
+		m_batch_bytes += data.size();
+		if (m_batch_bytes >= BATCH_FLUSH_BYTES)
+			ENSURE_STATUS_OK(flushBatch());
+
+		return true;
+	}
+
 	leveldb::Status status = m_database->Put(leveldb::WriteOptions(),
 			i64tos(getBlockAsInteger(pos)), data);
 	if (!status.ok()) {
-		warningstream << "saveBlock: LevelDB error saving block "
-			<< PP(pos) << ": " << status.ToString() << std::endl;
-		return false;
+		std::ostringstream os;
+		os << "LevelDB error saving block " << PP(pos) << ": " << status.ToString();
+		throw DatabaseException(os.str());
 	}
 
 	return true;
@@ -89,6 +140,8 @@ void Database_LevelDB::loadBlock(const v3s16 &pos, std::string *block)
 
 bool Database_LevelDB::deleteBlock(const v3s16 &pos)
 {
+	ENSURE_STATUS_OK(flushBatch());
+
 	leveldb::Status status = m_database->Delete(leveldb::WriteOptions(),
 			i64tos(getBlockAsInteger(pos)));
 	if (!status.ok()) {

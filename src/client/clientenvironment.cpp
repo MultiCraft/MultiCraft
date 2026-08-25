@@ -514,7 +514,7 @@ void ClientEnvironment::getSelectedActiveObjects(
 {
 	std::vector<DistanceSortedActiveObject> allObjects;
 	getActiveObjects(shootline_on_map.start,
-		shootline_on_map.getLength() + 10.0f, allObjects);
+		shootline_on_map.getLength() + 10.0f * BS, allObjects);
 	const v3f line_vector = shootline_on_map.getVector();
 
 	for (const auto &allObject : allObjects) {

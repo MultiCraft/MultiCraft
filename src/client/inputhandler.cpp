@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "inputhandler.h"
 #include "gui/guiChatConsole.h"
 #include "gui/mainmenumanager.h"
+#include "client/renderingengine.h"
 #include "hud.h"
 #include "settings.h"
 
@@ -136,6 +137,11 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 #endif
 
 #ifdef HAVE_TOUCHSCREENGUI
+	// The loading screen is not a menu, so nothing else turns its taps into clicks
+	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT && !isMenuActive() &&
+			RenderingEngine::handle_load_screen_touch(event))
+		return true;
+
 	if (event.EventType == irr::EET_TOUCH_INPUT_EVENT) {
 		TouchScreenGUI::setActive(true);
 		if (m_touchscreengui && !isMenuActive())

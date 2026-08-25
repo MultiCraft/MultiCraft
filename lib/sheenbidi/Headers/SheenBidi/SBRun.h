@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 Muhammad Tayyab Akram
+ * Copyright (C) 2016-2025 Muhammad Tayyab Akram
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 #ifndef _SB_PUBLIC_RUN_H
 #define _SB_PUBLIC_RUN_H
 
-#include "SBBase.h"
+#include <SheenBidi/SBBase.h>
+
+SB_EXTERN_C_BEGIN
 
 /**
  * A structure containing the information of a sequence of characters having the same embedding
@@ -28,5 +30,7 @@ typedef struct _SBRun {
     SBUInteger length; /**< The number of code units covering the length of the run. */
     SBLevel level;     /**< The embedding level of the run. */
 } SBRun;
+
+SB_EXTERN_C_END
 
 #endif

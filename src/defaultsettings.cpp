@@ -505,18 +505,6 @@ void set_default_settings()
 	settings->setDefault("screen_h", "0");
 	settings->setDefault("keymap_camera_mode", "KEY_KEY_C");
 
-#ifndef SERVER
-	float ScaleFactor = RenderingEngine::getScreenScale();
-	if (ScaleFactor > 0.0f) {
-		if (ScaleFactor >= 2.0f) {
-			settings->setDefault("hud_scaling", "1.25");
-		} else {
-			settings->setDefault("font_size", std::to_string(TTF_DEFAULT_FONT_SIZE - 2));
-			settings->setDefault("gui_scaling", "1.5");
-		}
-	}
-#endif
-
 #ifdef __aarch64__
 	// Enable visual shader effects on M1
 	settings->setDefault("enable_waving_water", "true");
@@ -645,30 +633,17 @@ void set_default_settings()
 	v2u32 window_size = RenderingEngine::getDisplaySize();
 	if (window_size.X > 0) {
 		float x_inches = window_size.X / (160.f * RenderingEngine::getDisplayDensity());
-		float ratio = (float) window_size.X / (float) window_size.Y;
 		if (x_inches <= 3.7) {
 			// small 4" phones
-			settings->setDefault("hud_scaling", "0.55");
 			settings->setDefault("touch_sensitivity", "0.3");
 			settings->setDefault("console_message_height", "0");
 		} else if (x_inches > 3.7 && x_inches <= 4.5) {
 			// medium phones
-			settings->setDefault("hud_scaling", "0.6");
 			settings->setDefault("console_message_height", "0");
 		} else if (x_inches > 4.5 && x_inches <= 5.5) {
 			// large 6" phones
-			if (ratio > 2.1f) {
-				settings->setDefault("hud_scaling", "0.75");
-			} else {
-				settings->setDefault("hud_scaling", "0.7");
-			}
 		} else if (x_inches > 5.5 && x_inches <= 6.5) {
 			// 7" tablets
-			if (ratio > 2.1f) {
-				settings->setDefault("hud_scaling", "0.9");
-			} else {
-				settings->setDefault("hud_scaling", "0.85");
-			}
 		}
 
 		if (x_inches <= 4.5) {
@@ -689,29 +664,23 @@ void set_default_settings()
 	// Set the size of the elements depending on the screen size
 	if (isDevice4Inch(model)) {
 		// 4" iPhone and iPod Touch
-		settings->setDefault("hud_scaling", "0.55");
 		settings->setDefault("touch_sensitivity", "0.33");
 		settings->setDefault("console_message_height", "0");
 	} else if (isDevice4and7Inch(model)) {
 		// 4.7" iPhone
-		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("touch_sensitivity", "0.27");
 		settings->setDefault("console_message_height", "0");
 	} else if (isDevice5and5Inch(model)) {
 		// 5.5" iPhone Plus
-		settings->setDefault("hud_scaling", "0.6");
 		settings->setDefault("touch_sensitivity", "0.3");
 	} else if (isDevice5and8Inch(model) || isDevice6and1Inch(model)) {
 		// 5.8" and 6.1" iPhones
-		settings->setDefault("hud_scaling", "0.8");
 		settings->setDefault("touch_sensitivity", "0.35");
 	} else if (isDevice6and5Inch(model)) {
 		// 6.5" iPhone
-		settings->setDefault("hud_scaling", "0.85");
 		settings->setDefault("touch_sensitivity", "0.35");
 	} else if (isDevice7and9Inch(model)) {
 		// iPad mini
-		settings->setDefault("hud_scaling", "0.9");
 		settings->setDefault("touch_sensitivity", "0.25");
 	} else if (isDevice8and3Inch(model)) {
 		settings->setDefault("touch_sensitivity", "0.25");

@@ -1431,6 +1431,10 @@ bool Game::createClient(const GameStartData &start_data)
 	load_last_time_ms = load_time_ms;
 	load_time_ms = porting::getTimeMs();
 	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
+
+	if (!simple_singleplayer_mode)
+		RenderingEngine::set_load_screen_cancel(&m_connect_aborted);
+
 	showOverlayMessage(N_("Creating client..."), dtime, 10);
 
 	draw_control = new MapDrawControl;
@@ -4203,7 +4207,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		if (!formspec)
 			break;
 
-		if (formspec->getReferenceCount() == 1) {
+		if (formspec->getReferenceCount() == 1 || !formspec->getParent()) {
 			m_game_ui->deleteFormspec();
 			break;
 		}
@@ -4811,13 +4815,20 @@ void the_game(bool *kill,
 #ifdef __ANDROID__
 		porting::handleError("ModError", error_message);
 #endif
+	} catch (DatabaseException &e) {
+		error_message = std::string("DatabaseException: ") + e.what() +
+				strgettext("\nCheck debug.txt for details.");
+		errorstream << error_message << std::endl;
+#ifdef __ANDROID__
+		porting::handleError("DatabaseException", error_message);
+#endif
 	} catch (con::PeerNotFoundException &e) {
 			error_message = gettext("Connection error (timed out?)");
 			errorstream << error_message << std::endl;
 	}
 #ifdef NDEBUG
 	catch (std::exception &e) {
-		std::string error_message = "Some exception: \"";
+		error_message = "Some exception: \"";
 		error_message += e.what();
 		error_message += "\"";
 		errorstream << error_message << std::endl;

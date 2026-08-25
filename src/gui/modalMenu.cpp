@@ -122,7 +122,7 @@ void GUIModalMenu::drawCursor()
 	video::SColor crosshair_argb = video::SColor(cross_a, cross_r, cross_g, cross_b);
 
 	const int cursor_line_size = 16;
-	float hud_scaling = g_settings->getFloat("hud_scaling");
+	float hud_scaling = RenderingEngine::getHudScaling();
 	float scale_factor = hud_scaling * RenderingEngine::getDisplayDensity();
 	int cursor_size = (int)(cursor_line_size * scale_factor);
 
@@ -158,6 +158,9 @@ void GUIModalMenu::drawCursor()
 */
 void GUIModalMenu::quitMenu()
 {
+#ifdef HAVE_TOUCHSCREENGUI
+	leave();
+#endif
 	allowFocusRemoval(true);
 	// This removes Environment's grab on us
 	Environment->removeFocus(this);

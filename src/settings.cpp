@@ -635,6 +635,14 @@ bool Settings::exists(const std::string &name) const
 }
 
 
+bool Settings::existsLocal(const std::string &name) const
+{
+	MutexAutoLock lock(m_mutex);
+
+	return m_settings.find(name) != m_settings.end();
+}
+
+
 std::vector<std::string> Settings::getNames() const
 {
 	MutexAutoLock lock(m_mutex);

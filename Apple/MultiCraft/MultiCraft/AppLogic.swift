@@ -20,8 +20,8 @@ public func initApple() {
 }
 
 public func getScreenScale() -> Float {
-	let scale = NSScreen.main?.backingScaleFactor ?? 1.0
-	return Float(scale)
+	let screen = NSApp.mainWindow?.screen ?? NSScreen.main
+	return Float(screen?.backingScaleFactor ?? 1.0)
 }
 
 public func getUpgrade(key: UnsafePointer<CChar>, extra: UnsafePointer<CChar>) -> Bool {
