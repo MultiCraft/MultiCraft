@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <map>
 #include "irrlichttypes_extrabloated.h"
-#include "irr_ptr.h"
 #include "clientobject.h"
 #include "object_properties.h"
 #include "itemgroup.h"
