@@ -205,11 +205,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 		Updated set_sky packet
 		Adds new sun, moon and stars packets
 		Minimap modes
-	PROTOCOL VERSION 40:
-		Append third person camera distance to TOCLIENT_EYE_OFFSET
 */
 
-#define LATEST_PROTOCOL_VERSION 40
+#define LATEST_PROTOCOL_VERSION 39
 #define LATEST_PROTOCOL_VERSION_STRING TOSTRING(LATEST_PROTOCOL_VERSION)
 
 // Server's supported network protocol range
@@ -230,6 +228,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 // See also formspec [Version History] in doc/lua_api.txt
 #define FORMSPEC_API_VERSION 4
+
+// Marks MultiCraft's optional trailing block in TOCLIENT_EYE_OFFSET so a foreign
+// server's packet is never misread as camera data. Bytes read "MC".
+#define EYE_OFFSET_MC_MAGIC 0x4D43
 
 #define TEXTURENAME_ALLOWED_CHARS "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-"
 
@@ -664,7 +666,9 @@ enum ToClientCommand
 	/*
 		v3f1000 first
 		v3f1000 third
-		f32 third person camera distance (optional, protocol >= 40)
+		-- MultiCraft only, absent from Minetest servers:
+		u16 EYE_OFFSET_MC_MAGIC
+		f32 third person camera distance
 	*/
 
 	TOCLIENT_DELETE_PARTICLESPAWNER = 0x53,

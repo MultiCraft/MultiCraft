@@ -1929,7 +1929,7 @@ void Server::SendLocalPlayerAnimations(session_t peer_id, v2s32 animation_frames
 void Server::SendEyeOffset(session_t peer_id, v3f first, v3f third, f32 camera_distance_third)
 {
 	NetworkPacket pkt(TOCLIENT_EYE_OFFSET, 0, peer_id);
-	pkt << first << third << camera_distance_third;
+	pkt << first << third << (u16)EYE_OFFSET_MC_MAGIC << camera_distance_third;
 	Send(&pkt);
 }
 
