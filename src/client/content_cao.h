@@ -274,6 +274,8 @@ public:
 
 	void updateBonePosition();
 
+	void setBonePosition(const std::string &bone, v3f position, v3f rotation) override;
+
 	void processMessage(const std::string &data);
 
 	bool directReportPunch(v3f dir, const ItemStack *punchitem=NULL,

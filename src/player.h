@@ -162,6 +162,8 @@ public:
 	v3f eye_offset_first;
 	v3f eye_offset_third;
 
+	f32 camera_distance_third = 0.0f;
+
 	Inventory inventory;
 
 	f32 movement_acceleration_default;

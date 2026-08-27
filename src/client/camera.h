@@ -229,6 +229,10 @@ private:
 	bool m_fov_transition_active = false;
 	f32 m_fov_diff, m_transition_time;
 
+	// Extra third person camera distance in nodes, moved linearly toward the
+	// server-sent target LocalPlayer::camera_distance_third
+	f32 m_camera_distance_third_current = 0.0f;
+
 	v2f m_wieldmesh_offset = v2f(55.0f, -35.0f);
 	v2f m_arm_dir;
 	v2f m_cam_vel;
