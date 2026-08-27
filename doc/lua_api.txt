@@ -6831,11 +6831,18 @@ object you are working with still exists.
     * `frame_speed` sets the animations frame speed. Default is 30.
 * `get_local_animation()`: returns idle, walk, dig, walk_while_dig tables and
   `frame_speed`.
-* `set_eye_offset([firstperson, thirdperson])`: defines offset vectors for
-  camera per player. An argument defaults to `{x=0, y=0, z=0}` if unspecified.
-    * in first person view
-    * in third person view (max. values `{x=-10/10,y=-10,15,z=-5/5}`)
-* `get_eye_offset()`: returns first and third person offsets.
+* `set_eye_offset([firstperson, thirdperson, camera_distance])`: defines camera
+  parameters per player. The vector arguments default to `{x=0, y=0, z=0}` and
+  `camera_distance` defaults to `0` if unspecified.
+    * `firstperson`: offset vector in first person view
+    * `thirdperson`: offset vector in third person view
+      (max. values `{x=-10/10,y=-10,15,z=-5/5}`)
+    * `camera_distance`: extra third person camera pull-back in nodes,
+      `0`...`30`. The camera eases to the new distance instead of jumping and
+      the camera mode is left unchanged.
+* `get_eye_offset()`: returns the first person offset, the third person offset
+  and the extra third person camera distance (its target value, not the
+  in-progress eased one).
 * `send_mapblock(blockpos)`:
     * Sends a server-side loaded mapblock to the player.
     * Returns `false` if failed.

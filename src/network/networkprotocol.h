@@ -205,9 +205,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 		Updated set_sky packet
 		Adds new sun, moon and stars packets
 		Minimap modes
+	PROTOCOL VERSION 40:
+		Append third person camera distance to TOCLIENT_EYE_OFFSET
 */
 
-#define LATEST_PROTOCOL_VERSION 39
+#define LATEST_PROTOCOL_VERSION 40
 #define LATEST_PROTOCOL_VERSION_STRING TOSTRING(LATEST_PROTOCOL_VERSION)
 
 // Server's supported network protocol range
@@ -662,6 +664,7 @@ enum ToClientCommand
 	/*
 		v3f1000 first
 		v3f1000 third
+		f32 third person camera distance (optional, protocol >= 40)
 	*/
 
 	TOCLIENT_DELETE_PARTICLESPAWNER = 0x53,

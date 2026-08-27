@@ -1445,6 +1445,11 @@ void Client::handleCommand_EyeOffset(NetworkPacket* pkt)
 	assert(player != NULL);
 
 	*pkt >> player->eye_offset_first >> player->eye_offset_third;
+
+	// Optional since protocol 40
+	player->camera_distance_third = 0.0f;
+	if (pkt->getRemainingBytes() >= 4)
+		*pkt >> player->camera_distance_third;
 }
 
 void Client::handleCommand_UpdatePlayerList(NetworkPacket* pkt)
