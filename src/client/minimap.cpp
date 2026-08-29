@@ -216,8 +216,9 @@ Minimap::Minimap(Client *client)
 
 	// Create player marker texture
 	data->player_marker = m_tsrc->getTexture("player_marker.png");
-	// Create object marker texture
+	// Create object marker textures, players are red and everything else green
 	data->object_marker_red = m_tsrc->getTexture("object_marker_red.png");
+	data->object_marker_green = m_tsrc->getTexture("object_marker_green.png");
 
 	setOrUseSavedModeIndex(0);
 
@@ -245,6 +246,7 @@ Minimap::~Minimap()
 	driver->removeTexture(data->minimap_overlay_round);
 	driver->removeTexture(data->minimap_overlay_square);
 	driver->removeTexture(data->object_marker_red);
+	driver->removeTexture(data->object_marker_green);
 
 	for (MinimapMarker *m : m_markers)
 		delete m;
@@ -697,19 +699,15 @@ void Minimap::drawMinimap(core::rect<s32> rect) {
 	driver->setTransform(video::ETS_PROJECTION, oldProjMat);
 	driver->setViewPort(oldViewPort);
 
-	// Draw player markers
+	// Draw object markers
 	v2s32 s_pos(rect.UpperLeftCorner.X, rect.UpperLeftCorner.Y);
-	core::dimension2di imgsize(data->object_marker_red->getOriginalSize());
-	core::rect<s32> img_rect(0, 0, imgsize.Width, imgsize.Height);
 	static const video::SColor col(255, 255, 255, 255);
 	static const video::SColor c[4] = {col, col, col, col};
 	f32 sin_angle = std::sin(m_angle * core::DEGTORAD);
 	f32 cos_angle = std::cos(m_angle * core::DEGTORAD);
 	s32 marker_size2 =  0.025 * (float)rect.getWidth();;
-	for (std::list<v2f>::const_iterator
-			i = m_active_markers.begin();
-			i != m_active_markers.end(); ++i) {
-		v2f posf = *i;
+	for (const auto &marker : m_active_markers) {
+		v2f posf = marker.first;
 		if (data->minimap_shape_round) {
 			f32 t1 = posf.X * cos_angle - posf.Y * sin_angle;
 			f32 t2 = posf.X * sin_angle + posf.Y * cos_angle;
@@ -723,14 +721,16 @@ void Minimap::drawMinimap(core::rect<s32> rect) {
 			s_pos.Y + posf.Y - marker_size2,
 			s_pos.X + posf.X + marker_size2,
 			s_pos.Y + posf.Y + marker_size2);
-		driver->draw2DImage(data->object_marker_red, dest_rect,
+		core::dimension2di imgsize(marker.second->getOriginalSize());
+		core::rect<s32> img_rect(0, 0, imgsize.Width, imgsize.Height);
+		driver->draw2DImage(marker.second, dest_rect,
 			img_rect, &dest_rect, &c[0], true);
 	}
 }
 
-MinimapMarker* Minimap::addMarker(scene::ISceneNode *parent_node)
+MinimapMarker* Minimap::addMarker(scene::ISceneNode *parent_node, bool is_player)
 {
-	MinimapMarker *m = new MinimapMarker(parent_node);
+	MinimapMarker *m = new MinimapMarker(parent_node, is_player);
 	m_markers.push_back(m);
 	return m;
 }
@@ -768,8 +768,10 @@ void Minimap::updateActiveMarkers()
 			continue;
 		}
 
-		m_active_markers.emplace_back(((float)pos.X / (float)MINIMAP_MAX_SX) - 0.5,
-			(1.0 - (float)pos.Z / (float)MINIMAP_MAX_SY) - 0.5);
+		m_active_markers.emplace_back(
+			v2f(((float)pos.X / (float)MINIMAP_MAX_SX) - 0.5,
+				(1.0 - (float)pos.Z / (float)MINIMAP_MAX_SY) - 0.5),
+			marker->is_player ? data->object_marker_red : data->object_marker_green);
 	}
 }
 

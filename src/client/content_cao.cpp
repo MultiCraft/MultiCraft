@@ -940,7 +940,7 @@ void GenericCAO::updateMarker()
 	scene::ISceneNode *node = getSceneNode();
 	if (!node)
 		return;
-	m_marker = m_client->getMinimap()->addMarker(node);
+	m_marker = m_client->getMinimap()->addMarker(node, m_is_player);
 }
 
 void GenericCAO::updateNametag()

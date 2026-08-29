@@ -49,11 +49,12 @@ struct MinimapModeDef {
 };
 
 struct MinimapMarker {
-	MinimapMarker(scene::ISceneNode *parent_node):
-		parent_node(parent_node)
+	MinimapMarker(scene::ISceneNode *parent_node, bool is_player):
+		parent_node(parent_node), is_player(is_player)
 	{
 	}
 	scene::ISceneNode *parent_node;
+	bool is_player;
 };
 struct MinimapPixel {
 	//! The topmost node that the minimap displays.
@@ -84,6 +85,7 @@ struct MinimapData {
 	video::ITexture *minimap_overlay_square = nullptr;
 	video::ITexture *player_marker = nullptr;
 	video::ITexture *object_marker_red = nullptr;
+	video::ITexture *object_marker_green = nullptr;
 };
 
 struct QueuedMinimapUpdate {
@@ -150,7 +152,7 @@ public:
 
 	scene::SMeshBuffer *getMinimapMeshBuffer();
 
-	MinimapMarker* addMarker(scene::ISceneNode *parent_node);
+	MinimapMarker* addMarker(scene::ISceneNode *parent_node, bool is_player);
 	void removeMarker(MinimapMarker **marker);
 
 	void updateActiveMarkers();
@@ -174,5 +176,5 @@ private:
 	f32 m_angle;
 	std::mutex m_mutex;
 	std::list<MinimapMarker*> m_markers;
-	std::list<v2f> m_active_markers;
+	std::list<std::pair<v2f, video::ITexture *>> m_active_markers;
 };
