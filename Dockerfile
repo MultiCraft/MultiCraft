@@ -1,6 +1,7 @@
 FROM alpine:3.14
 
 ENV MINETEST_GAME_VERSION master
+ENV PROMETHEUS_CPP_VERSION v1.3.0
 
 COPY .git /usr/src/multicraft/.git
 COPY CMakeLists.txt /usr/src/multicraft/CMakeLists.txt
@@ -26,7 +27,7 @@ RUN apk add --no-cache git build-base irrlicht-dev cmake bzip2-dev libpng-dev \
 	rm -fr ./games/minetest_game/.git
 
 WORKDIR /usr/src/
-RUN git clone --recursive https://github.com/jupp0r/prometheus-cpp/ && \
+RUN git clone --recursive --depth=1 -b ${PROMETHEUS_CPP_VERSION} https://github.com/jupp0r/prometheus-cpp/ && \
 	mkdir prometheus-cpp/build && \
 	cd prometheus-cpp/build && \
 	cmake .. \
