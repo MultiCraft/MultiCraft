@@ -31,7 +31,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #else
 	#include <AL/al.h>
 	#include <AL/alc.h>
-#ifdef __IOS__
+#if defined(__IOS__) || defined(__ANDROID__)
 	#include <AL/alext.h>
 #endif
 #endif
@@ -51,7 +51,7 @@ public:
 
 	bool init();
 
-#ifdef __IOS__
+#if defined(__IOS__) || defined(__ANDROID__)
 	void pauseDevice();
 	void resumeDevice();
 #endif

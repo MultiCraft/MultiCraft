@@ -372,7 +372,7 @@ public:
 	}
 
 private:
-#ifdef __IOS__
+#if defined(__IOS__) || defined(__ANDROID__)
 	static bool SdlEventWatcher(void *userdata, SDL_Event *event);
 #endif
 
