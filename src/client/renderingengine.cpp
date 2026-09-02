@@ -36,7 +36,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "clientmap.h"
 #include "renderingengine.h"
 #include "render/core.h"
+#if 0
 #include "render/factory.h"
+#endif
+#include "render/plain.h"
 #include "inputhandler.h"
 #include "gettext.h"
 #include "../gui/guiSkin.h"
@@ -867,8 +870,11 @@ std::vector<irr::video::E_DRIVER_TYPE> RenderingEngine::getSupportedVideoDrivers
 
 void RenderingEngine::_initialize(Client *client, Hud *hud)
 {
+#if 0
 	const std::string &draw_mode = g_settings->get("3d_mode");
 	core.reset(createRenderingCore(draw_mode, m_device, client, hud));
+#endif
+	core.reset(new RenderingCorePlain(m_device, client, hud));
 	core->initialize();
 }
 
