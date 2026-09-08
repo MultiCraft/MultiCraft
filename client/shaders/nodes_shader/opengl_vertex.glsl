@@ -9,13 +9,6 @@ uniform mediump float fogDistance;
 uniform vec3 cameraOffset;
 uniform float animationTimer;
 
-varying vec3 vPosition;
-// World position in the visible world (i.e. relative to the cameraOffset.)
-// This can be used for many shader effects without loss of precision.
-// If the absolute position is required it can be calculated with
-// cameraOffset + worldPosition (for large coordinates the limits of float
-// precision must be considered).
-varying vec3 worldPosition;
 varying lowp vec4 varColor;
 // The centroid keyword ensures that after interpolation the texture coordinates
 // lie within the same bounds when MSAA is en- and disabled.
@@ -33,8 +26,6 @@ varying vec3 vRelPos;
 
 // Color of the light emitted by the light sources.
 const vec3 artificialLight = vec3(1.04, 1.04, 1.04);
-const float e = 2.718281828459;
-const float BS = 10.0;
 
 
 float smoothCurve(float x)
@@ -108,7 +99,8 @@ void main(void)
 		smoothTriangleWave(animationTimer * 13.0 + tOffset)) * 0.5;
 #endif
 
-	worldPosition = (mWorld * inVertexPosition).xyz;
+	// Relative to cameraOffset, which keeps float precision far from the origin
+	vec3 worldPosition = (mWorld * inVertexPosition).xyz;
 #if POINT_LIGHTS
 	vec3 sq = inVertexNormal * inVertexNormal;
 	vShade = sq.x + sq.y + sq.z < 0.5 ? 1.0 : sqrt(0.45) * sq.x +
@@ -148,7 +140,6 @@ void main(void)
 #endif
 
 	eyeVec = -(mWorldView * inVertexPosition).xyz / fogDistance;
-	vPosition = gl_Position.xyz;
 
 
 	// Calculate color.

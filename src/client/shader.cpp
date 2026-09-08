@@ -270,9 +270,12 @@ public:
 		m_world_view_proj.set(*reinterpret_cast<float(*)[16]>(m_mat_world_view_proj.pointer()), services);
 
 #if ENABLE_GLES
-		core::matrix4 texture = driver->getTransform(video::ETS_TEXTURE_0);
+		// What OpenGL loads into gl_TextureMatrix: Irrlicht keeps the 2D move in the third column
+		const core::matrix4 &t = driver->getTransform(video::ETS_TEXTURE_0);
+		const float texture[16] = {t[0], t[1], 0.f, 0.f, t[4], t[5], 0.f, 0.f,
+				0.f, 0.f, 1.f, 0.f, t[8], t[9], 0.f, 1.f};
 		m_world_view.set(*reinterpret_cast<float(*)[16]>(m_mat_world_view.pointer()), services);
-		m_texture.set(*reinterpret_cast<float(*)[16]>(texture.pointer()), services);
+		m_texture.set(texture, services);
 #endif
 	}
 };
@@ -577,11 +580,11 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 		vertex_header = R"(
 			uniform highp mat4 mWorldView;
 			uniform highp mat4 mWorldViewProj;
-			uniform mediump mat4 mTexture;
+			uniform highp mat4 mTexture;
 
 			attribute highp vec4 inVertexPosition;
 			attribute lowp vec4 inVertexColor;
-			attribute mediump vec4 inTexCoord0;
+			attribute highp vec4 inTexCoord0;
 			attribute mediump vec3 inVertexNormal;
 			attribute mediump vec4 inVertexTangent;
 			attribute mediump vec4 inVertexBinormal;
@@ -614,7 +617,7 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 		if (shaderinfo.base_material == video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF)
 			shaders_header << "#define USE_ALPHA_TEST_DISCARD 1\n";
 		else if (shaderinfo.base_material != video::EMT_SOLID)
-			shaders_header << "#define USE_DISCARD 1\n";
+			shaders_header << "#define USE_ALPHA_REF_DISCARD 1\n";
 	}
 
 #define PROVIDE(constant) shaders_header << "#define " #constant " " << (int)constant << "\n"

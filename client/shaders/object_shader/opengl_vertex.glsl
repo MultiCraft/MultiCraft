@@ -1,13 +1,5 @@
-uniform mat4 mWorld;
-
-uniform vec3 eyePosition;
 uniform mediump float fogDistance;
 
-uniform float animationTimer;
-
-varying vec3 vNormal;
-varying vec3 vPosition;
-varying vec3 worldPosition;
 varying lowp vec4 varColor;
 #ifdef GL_ES
 varying mediump vec2 varTexCoord;
@@ -17,9 +9,6 @@ centroid varying vec2 varTexCoord;
 
 varying mediump vec3 eyeVec;
 varying float vIDiff;
-
-const float e = 2.718281828459;
-const float BS = 10.0;
 
 float directional_ambient(vec3 normal)
 {
@@ -36,9 +25,6 @@ void main(void)
 	varTexCoord = (mTexture * inTexCoord0).st;
 	gl_Position = mWorldViewProj * inVertexPosition;
 
-	vPosition = gl_Position.xyz;
-	vNormal = inVertexNormal;
-	worldPosition = (mWorld * inVertexPosition).xyz;
 	eyeVec = -(mWorldView * inVertexPosition).xyz / fogDistance;
 
 #if (MATERIAL_TYPE == TILE_MATERIAL_PLAIN) || (MATERIAL_TYPE == TILE_MATERIAL_PLAIN_ALPHA)

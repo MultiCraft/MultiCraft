@@ -4,14 +4,12 @@ uniform vec4 skyBgColor;
 // Colour the node is drawn with, white unless a mod picked one
 uniform vec3 nodeColor;
 uniform mediump float fogDistance;
+#ifdef USE_ALPHA_REF_DISCARD
+uniform float alphaRef;
+#elif defined(USE_ALPHA_TEST_DISCARD)
+#define alphaRef 0.5
+#endif
 
-varying vec3 vPosition;
-// World position in the visible world (i.e. relative to the cameraOffset.)
-// This can be used for many shader effects without loss of precision.
-// If the absolute position is required it can be calculated with
-// cameraOffset + worldPosition (for large coordinates the limits of float
-// precision must be considered).
-varying vec3 worldPosition;
 varying lowp vec4 varColor;
 #ifdef GL_ES
 varying mediump vec2 varTexCoord;
@@ -81,20 +79,10 @@ vec4 applyToneMapping(vec4 color)
 void main(void)
 {
 	vec3 color;
-	vec2 uv = varTexCoord.st;
 
-	vec4 base = texture2D(baseTexture, uv).rgba;
-#ifdef USE_DISCARD
-	// If alpha is zero, we can just discard the pixel. This fixes transparency
-	// on GPUs like GC7000L, where GL_ALPHA_TEST is not implemented in mesa,
-	// and also on GLES 2, where GL_ALPHA_TEST is missing entirely.
-	if (base.a == 0.0) {
-		discard;
-	}
-#endif
-
-#ifdef USE_ALPHA_TEST_DISCARD
-	if (base.a < 0.5) {
+	vec4 base = texture2D(baseTexture, varTexCoord).rgba;
+#if defined(USE_ALPHA_REF_DISCARD) || defined(USE_ALPHA_TEST_DISCARD)
+	if (!(base.a > alphaRef)) {
 		discard;
 	}
 #endif

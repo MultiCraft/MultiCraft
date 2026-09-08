@@ -5,8 +5,7 @@ varying mediump vec2 varTexCoord;
 
 void main(void)
 {
-	vec2 uv = varTexCoord.st;
-	vec4 color = texture2D(baseTexture, uv);
+	vec4 color = texture2D(baseTexture, varTexCoord);
 	color.rgb *= varColor.rgb;
 	gl_FragColor = color;
 }
