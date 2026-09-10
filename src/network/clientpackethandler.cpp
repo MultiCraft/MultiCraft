@@ -1446,13 +1446,18 @@ void Client::handleCommand_EyeOffset(NetworkPacket* pkt)
 
 	*pkt >> player->eye_offset_first >> player->eye_offset_third;
 
-	// MultiCraft servers tag an extra camera distance; other servers send nothing here
+	// MultiCraft servers tag extra fields with a magic word; other servers send
+	// nothing here
 	player->camera_distance_third = 0.0f;
+	player->eye_offset_third_front = v3f(0, 0, 0);
 	if (pkt->getRemainingBytes() >= 6) {
 		u16 magic;
 		*pkt >> magic;
-		if (magic == EYE_OFFSET_MC_MAGIC)
+		if (magic == EYE_OFFSET_MC_MAGIC) {
 			*pkt >> player->camera_distance_third;
+			if (pkt->getRemainingBytes() >= 12)
+				*pkt >> player->eye_offset_third_front;
+		}
 	}
 }
 
