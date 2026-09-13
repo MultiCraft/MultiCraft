@@ -83,6 +83,11 @@ LOCAL_SRC_FILES := deps/openal/lib/$(APP_ABI)/libopenal.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := oboe
+LOCAL_SRC_FILES := deps/oboe/lib/$(APP_ABI)/liboboe.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := Vorbis
 LOCAL_SRC_FILES := deps/vorbis/lib/$(APP_ABI)/libvorbis.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -310,7 +315,7 @@ LOCAL_SRC_FILES += ../../lib/sheenbidi/Source/SheenBidi.c
 LOCAL_STATIC_LIBRARIES += \
 	Curl libssl libcrypto libnghttp2 \
 	Freetype HarfBuzz Cairo Pixman \
-	OpenAL \
+	oboe OpenAL \
 	Gettext \
 	Irrlicht libpng libjpeg SDL \
 	LevelDB \
