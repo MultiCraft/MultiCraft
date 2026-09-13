@@ -361,6 +361,11 @@ void ClientMap::updateDrawBufs(video::IVideoDriver *driver)
 		}
 	}
 
+	// The solid pass goes near to far, so the depth test drops hidden fragments before shading
+	for (auto &list : m_drawbufs_solid.lists)
+		for (auto &entry : list)
+			std::reverse(entry.bufs.begin(), entry.bufs.end());
+
 	g_profiler->avg("renderMap(): animated meshes [#]", mesh_animate_count);
 }
 
