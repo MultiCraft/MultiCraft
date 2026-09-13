@@ -203,6 +203,8 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 
 	// Textures live on the GPU, a copy in main memory only doubles their cost
 	driver->setTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY, false);
+	// 16 bit textures stay 16 bit on the GPU when textures are converted to them
+	driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, !g_settings->getBool("convert_to_16bit"));
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	const video::SExposedVideoData exposedData = driver->getExposedVideoData();

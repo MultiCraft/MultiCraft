@@ -212,6 +212,32 @@ struct TextureInfo
 	SourceImageCache: A cache used for storing source images.
 */
 
+// The image in 16 bits: R5G6B5 when opaque, A1R5G5B5 when its alpha is only 0 or 255,
+// nullptr when it has partial alpha
+static video::IImage *convertTo16bit(video::IVideoDriver *driver, video::IImage *img)
+{
+#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
+	video::ECOLOR_FORMAT format = video::ECF_R5G6B5;
+	if (img->getColorFormat() == video::ECF_A8R8G8B8) {
+		const u8 *data = (const u8 *)img->getData();
+		const u32 size = img->getImageDataSizeInBytes();
+		for (u32 i = 3; i < size; i += 4) {
+			if (data[i] > 0 && data[i] < 255)
+				return nullptr;
+			if (data[i] == 0)
+				format = video::ECF_A1R5G5B5;
+		}
+	} else if (img->getColorFormat() != video::ECF_R8G8B8) {
+		return nullptr;
+	}
+	video::IImage *converted = driver->createImage(format, img->getDimension());
+	img->copyTo(converted, core::position2d<s32>(0, 0));
+	return converted;
+#else
+	return nullptr;
+#endif
+}
+
 class SourceImageCache
 {
 public:
@@ -390,39 +416,12 @@ private:
 			return nullptr;
 		}
 
-#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
 		if (m_convert_to_16bit) {
-			irr::video::ECOLOR_FORMAT format = img->getColorFormat();
-			irr::video::ECOLOR_FORMAT new_format = irr::video::ECF_UNKNOWN;
-
-			if (format == irr::video::ECF_R8G8B8) {
-				new_format = irr::video::ECF_R5G6B5;
-			} else if (format == irr::video::ECF_A8R8G8B8) {
-				bool can_convert = true;
-
-				u32 data_size = img->getImageDataSizeInBytes();
-				u8 *data = (u8*) img->getData();
-				for (u32 i = 0; i < data_size; i += 4) {
-					u8 alpha = data[i + 3];
-					if (alpha > 0 && alpha < 255) {
-						can_convert = false;
-						break;
-					}
-				}
-
-				if (can_convert)
-					new_format = irr::video::ECF_A1R5G5B5;
-			}
-
-			if (new_format != irr::video::ECF_UNKNOWN) {
-				core::dimension2du dimensions = img->getDimension();
-				irr::video::IImage* converted_img = vdrv->createImage(new_format, dimensions);
-				img->copyTo(converted_img, core::position2d<s32>(0, 0));
+			if (video::IImage *converted = convertTo16bit(vdrv, img)) {
 				img->drop();
-				img = converted_img;
+				img = converted;
 			}
 		}
-#endif
 
 		rfile->drop();
 		return img;
@@ -587,6 +586,7 @@ private:
 	// Cached settings needed for making textures from meshes
 	bool m_setting_trilinear_filter;
 	bool m_setting_bilinear_filter;
+	bool m_setting_convert_to_16bit;
 };
 
 IWritableTextureSource *createTextureSource(bool main_menu)
@@ -607,6 +607,7 @@ TextureSource::TextureSource(bool main_menu) : m_sourcecache(SourceImageCache(ma
 	// for these settings to take effect
 	m_setting_trilinear_filter = g_settings->getBool("trilinear_filter");
 	m_setting_bilinear_filter = g_settings->getBool("bilinear_filter");
+	m_setting_convert_to_16bit = g_settings->getBool("convert_to_16bit");
 }
 
 TextureSource::~TextureSource()
@@ -768,8 +769,12 @@ u32 TextureSource::generateTexture(const std::string &name)
 #if ENABLE_GLES && !defined(__APPLE__)
 		img = Align2Npot2(img, driver);
 #endif
-		// Create texture from resulting image
-		tex = driver->addTexture(name.c_str(), img);
+		// Create texture from resulting image, in 16 bits when textures are converted to them
+		video::IImage *converted = m_setting_convert_to_16bit ?
+				convertTo16bit(driver, img) : nullptr;
+		tex = driver->addTexture(name.c_str(), converted ? converted : img);
+		if (converted)
+			converted->drop();
 		guiScalingCache(io::path(name.c_str()), driver, img);
 		img->drop();
 	}
@@ -949,7 +954,11 @@ void TextureSource::rebuildImagesAndTextures()
 		// Create texture from resulting image
 		video::ITexture *t = NULL;
 		if (img) {
-			t = driver->addTexture(ti.name.c_str(), img);
+			video::IImage *converted = m_setting_convert_to_16bit ?
+					convertTo16bit(driver, img) : nullptr;
+			t = driver->addTexture(ti.name.c_str(), converted ? converted : img);
+			if (converted)
+				converted->drop();
 			guiScalingCache(io::path(ti.name.c_str()), driver, img);
 			img->drop();
 		}
