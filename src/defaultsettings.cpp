@@ -202,7 +202,7 @@ void set_default_settings()
 	settings->setDefault("texture_path", "");
 	settings->setDefault("shader_path", "");
 #if defined(_IRR_COMPILE_WITH_ANGLE_)
-	settings->setDefault("video_driver", "metal");
+	settings->setDefault("video_driver", "angle");
 #elif ENABLE_GLES && defined(_IRR_COMPILE_WITH_OGLES1_)
 	settings->setDefault("video_driver", "ogles1");
 #elif ENABLE_GLES

@@ -159,7 +159,7 @@ local function formspec(tabview, name, tabdata)
 		tab_string = tab_string ..
 			"checkbox[8.25,0;cb_shaders;" .. fgettext("Shaders") .. ";"
 					.. tostring(shaders_enabled) .. "]"
-	elseif video_driver == "ogles2" then
+	elseif video_driver == "ogles2" or video_driver == "angle" then
 		tab_string = tab_string ..
 			"checkbox[8.25,0;cb_shaders;" .. fgettext("Shaders (experimental)") .. ";"
 					.. tostring(shaders_enabled) .. "]"

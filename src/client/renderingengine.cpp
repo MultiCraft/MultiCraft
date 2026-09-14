@@ -146,7 +146,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 
 	// Determine driver
 #if defined(_IRR_COMPILE_WITH_ANGLE_)
-	video::E_DRIVER_TYPE driverType = video::EDT_METAL;
+	video::E_DRIVER_TYPE driverType = video::EDT_ANGLE;
 #elif defined(__ANDROID__) || defined(__IOS__)
 	video::E_DRIVER_TYPE driverType = video::EDT_OGLES2;
 #else
@@ -171,7 +171,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 #if defined(__ANDROID__) || defined(__IOS__)
 	// Shaders are required on OpenGL ES2, and on the ANGLE-backed context too
 	g_settings->setBool("enable_shaders", driverType == video::EDT_OGLES2 ||
-			driverType == video::EDT_METAL);
+			driverType == video::EDT_ANGLE);
 #endif
 
 	SIrrlichtCreationParameters params = SIrrlichtCreationParameters();
@@ -917,7 +917,7 @@ const char *RenderingEngine::getVideoDriverName(irr::video::E_DRIVER_TYPE type)
 			"ogles1",
 			"ogles2",
 			"webgl1",
-			"metal",
+			"angle",
 	};
 
 	return driver_ids[type];
@@ -935,7 +935,7 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 			"OpenGL ES1",
 			"OpenGL ES2",
 			"WebGL 1",
-			"Metal",
+			"ANGLE",
 	};
 
 	return driver_names[type];
