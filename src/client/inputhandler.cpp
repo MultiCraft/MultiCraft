@@ -281,6 +281,8 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		default: break;
 		}
 	} else if (event.EventType == irr::EET_LOG_TEXT_EVENT) {
+		if (event.LogEvent.Level == irr::ELL_ERROR)
+			RenderingEngine::noteEngineError(event.LogEvent.Text);
 #ifndef NDEBUG
 		static const LogLevel irr_loglev_conv[] = {
 				LL_VERBOSE, // ELL_DEBUG

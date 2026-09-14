@@ -8,8 +8,8 @@ echo "Build libraries:"
 
 ./scripts/libSDL.sh
 ./scripts/libpng.sh
-./scripts/angle.sh
 ./scripts/irrlicht.sh
+./scripts/shaders.sh
 ./scripts/gettext.sh
 ./scripts/freetype.sh bootstrap
 ./scripts/harfbuzz.sh

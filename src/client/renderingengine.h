@@ -69,6 +69,9 @@ public:
 
 	static RenderingEngine *get_instance() { return s_singleton; }
 
+	// The last error Irrlicht logged, for the message of a device that did not start
+	static void noteEngineError(const std::string &text) { s_engine_error = text; }
+
 	static io::IFileSystem *get_filesystem()
 	{
 		sanity_check(s_singleton && s_singleton->m_device);
@@ -207,6 +210,7 @@ private:
 	irr::IrrlichtDevice *m_device = nullptr;
 	irr::video::IVideoDriver *driver;
 	static RenderingEngine *s_singleton;
+	static std::string s_engine_error;
 
 	gui::IGUIStaticText *m_load_text = nullptr;
 	gui::IGUIElement *m_load_root = nullptr;

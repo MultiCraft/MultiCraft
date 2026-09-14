@@ -123,6 +123,7 @@
 		847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4A25D6F483008F5FC8 /* lutf8lib.c */; };
 		848920FD29984994001CB194 /* sdl_semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FA29984994001CB194 /* sdl_semaphore.cpp */; };
 		848920FE29984994001CB194 /* sdl_thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FB29984994001CB194 /* sdl_thread.cpp */; };
+		8489DC86306BDC7C00F4C98C /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8489DC85306BDC7C00F4C98C /* QuartzCore.framework */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
 		8495BD1628B80B14009FCF4D /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
@@ -139,6 +140,7 @@
 		84C2AB5328DA7776001968EE /* libpng.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84C2AB5228DA7770001968EE /* libpng.a */; };
 		84C9A9592B228D9A00909EFF /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 84C9A9562B228D9A00909EFF /* chacha.c */; };
 		84CA12AF2EF4B8BA004899E0 /* libnghttp2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */; };
+		84D08D03306BDB86009AC33E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D08D02306BDB86009AC33E /* OpenGL.framework */; };
 		84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */ = {isa = PBXBuildFile; productRef = 84D1BF552CD7EFF10077DD47 /* libzstd */; };
 		84D5A584306BE7FD007E5260 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A583306BE7FD007E5260 /* CoreFoundation.framework */; };
 		84D5A586306BE7FD007E5260 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A585306BE7FD007E5260 /* CoreGraphics.framework */; };
@@ -148,8 +150,7 @@
 		84D5A58E306BE7FD007E5260 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A58D306BE7FD007E5260 /* IOKit.framework */; };
 		84D5A590306BE7FD007E5260 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A58F306BE7FD007E5260 /* Security.framework */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
-		84E592883016A448002EC373 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84E592873016A448002EC373 /* MetalANGLE.framework */; };
-		84E592893016A448002EC373 /* MetalANGLE.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84E592873016A448002EC373 /* MetalANGLE.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		84E1B5DA306BDC1E00304E16 /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84E1B5D9306BDC1E00304E16 /* Metal.framework */; };
 		84E97FC72D1393F800C85934 /* hashing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84E97FC52D1393F800C85934 /* hashing.cpp */; };
 		84EA1B952CA4BC8B00CDCE7C /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */; };
 		84F0B4DA2B44CAEE000D8546 /* encryption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F0B4D92B44CAEE000D8546 /* encryption.cpp */; };
@@ -292,6 +293,7 @@
 		84FA1AB1306BCDC700A04E82 /* selection_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA4306BCDC700A04E82 /* selection_shader */; };
 		84FA1AB2306BCDC700A04E82 /* stars_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA5306BCDC700A04E82 /* stars_shader */; };
 		84FA1AB3306BCDC700A04E82 /* Irrlicht in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA6306BCDC700A04E82 /* Irrlicht */; };
+		84FA1AB4306BCDC700A04E82 /* Metal in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA7306BCDC700A04E82 /* Metal */; };
 		84FA1AB6306BCDC700A04E82 /* MultiCraftFont.ttf in Copy Fonts */ = {isa = PBXBuildFile; fileRef = 84FA1AA8306BCDC700A04E82 /* MultiCraftFont.ttf */; };
 		84FD8E3126A0B01D00EF2BFA /* guiEditBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */; };
 		84FD8E3426A0B04900EF2BFA /* guiScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3326A0B04900EF2BFA /* guiScene.cpp */; };
@@ -303,7 +305,6 @@
 			dstPath = "";
 			dstSubfolder = Frameworks;
 			files = (
-				84E592893016A448002EC373 /* MetalANGLE.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 		};
@@ -319,6 +320,7 @@
 				84FA1AB1306BCDC700A04E82 /* selection_shader in Copy Shaders */,
 				84FA1AB2306BCDC700A04E82 /* stars_shader in Copy Shaders */,
 				84FA1AB3306BCDC700A04E82 /* Irrlicht in Copy Shaders */,
+				84FA1AB4306BCDC700A04E82 /* Metal in Copy Shaders */,
 			);
 			name = "Copy Shaders";
 		};
@@ -578,6 +580,7 @@
 		848920FA29984994001CB194 /* sdl_semaphore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_semaphore.cpp; path = ../../../src/threading/sdl_semaphore.cpp; sourceTree = "<group>"; };
 		848920FB29984994001CB194 /* sdl_thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_thread.cpp; path = ../../../src/threading/sdl_thread.cpp; sourceTree = "<group>"; };
 		848920FC29984994001CB194 /* sdl_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sdl_thread.h; path = ../../../src/threading/sdl_thread.h; sourceTree = "<group>"; };
+		8489DC85306BDC7C00F4C98C /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		8495BD1528B80B00009FCF4D /* libSDL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL.a; path = ../deps/libSDL/libSDL.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
@@ -604,6 +607,7 @@
 		84C9A9562B228D9A00909EFF /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/chacha/chacha.c; sourceTree = "<group>"; };
 		84C9A9572B228D9A00909EFF /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../lib/chacha/ecrypt-sync.h"; sourceTree = "<group>"; };
 		84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnghttp2.a; path = ../deps/nghttp2/libnghttp2.a; sourceTree = "<group>"; };
+		84D08D02306BDB86009AC33E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		84D5A583306BE7FD007E5260 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
 		84D5A585306BE7FD007E5260 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		84D5A587306BE7FD007E5260 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -612,7 +616,7 @@
 		84D5A58D306BE7FD007E5260 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		84D5A58F306BE7FD007E5260 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		84DEC4702ECFE7900003B5C4 /* MultiCraft.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MultiCraft.entitlements; sourceTree = "<group>"; };
-		84E592873016A448002EC373 /* MetalANGLE.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalANGLE.framework; path = ../deps/angle/MetalANGLE.framework; sourceTree = "<group>"; };
+		84E1B5D9306BDC1E00304E16 /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
 		84E97FC52D1393F800C85934 /* hashing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hashing.cpp; path = ../../../src/util/hashing.cpp; sourceTree = "<group>"; };
 		84E97FC62D1393F800C85934 /* hashing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hashing.h; path = ../../../src/util/hashing.h; sourceTree = "<group>"; };
 		84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -901,6 +905,7 @@
 		84FA1AA4306BCDC700A04E82 /* selection_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = selection_shader; path = ../../../client/shaders/selection_shader; sourceTree = "<group>"; };
 		84FA1AA5306BCDC700A04E82 /* stars_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = stars_shader; path = ../../../client/shaders/stars_shader; sourceTree = "<group>"; };
 		84FA1AA6306BCDC700A04E82 /* Irrlicht */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Irrlicht; path = ../../deps/irrlicht/Irrlicht; sourceTree = "<group>"; };
+		84FA1AA7306BCDC700A04E82 /* Metal */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Metal; path = ../../assets/client/shaders/Metal; sourceTree = "<group>"; };
 		84FA1AA8306BCDC700A04E82 /* MultiCraftFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = MultiCraftFont.ttf; path = ../../../fonts/MultiCraftFont.ttf; sourceTree = "<group>"; };
 		84FD8E2F26A0B01D00EF2BFA /* guiEditBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiEditBox.h; path = ../../../src/gui/guiEditBox.h; sourceTree = "<group>"; };
 		84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiEditBox.cpp; path = ../../../src/gui/guiEditBox.cpp; sourceTree = "<group>"; };
@@ -926,7 +931,9 @@
 				84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */,
 				84D5A58C306BE7FD007E5260 /* ImageIO.framework in Frameworks */,
 				84D5A58E306BE7FD007E5260 /* IOKit.framework in Frameworks */,
-				84E592883016A448002EC373 /* MetalANGLE.framework in Frameworks */,
+				84E1B5DA306BDC1E00304E16 /* Metal.framework in Frameworks */,
+				84D08D03306BDB86009AC33E /* OpenGL.framework in Frameworks */,
+				8489DC86306BDC7C00F4C98C /* QuartzCore.framework in Frameworks */,
 				84D5A590306BE7FD007E5260 /* Security.framework in Frameworks */,
 				84A5FD912E57319F009F0F5A /* SystemConfiguration.framework in Frameworks */,
 				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
@@ -1136,7 +1143,9 @@
 				84BE974228CA1291004E8CEC /* GameController.framework */,
 				84D5A58B306BE7FD007E5260 /* ImageIO.framework */,
 				84D5A58D306BE7FD007E5260 /* IOKit.framework */,
-				84E592873016A448002EC373 /* MetalANGLE.framework */,
+				84E1B5D9306BDC1E00304E16 /* Metal.framework */,
+				84D08D02306BDB86009AC33E /* OpenGL.framework */,
+				8489DC85306BDC7C00F4C98C /* QuartzCore.framework */,
 				84D5A58F306BE7FD007E5260 /* Security.framework */,
 				84A5FD902E57319F009F0F5A /* SystemConfiguration.framework */,
 				849FD2C72DFD8FCE00C8B942 /* libcurl.a */,
@@ -1758,6 +1767,7 @@
 				84FA1AA4306BCDC700A04E82 /* selection_shader */,
 				84FA1AA5306BCDC700A04E82 /* stars_shader */,
 				84FA1AA6306BCDC700A04E82 /* Irrlicht */,
+				84FA1AA7306BCDC700A04E82 /* Metal */,
 			);
 			name = shaders;
 			sourceTree = "<group>";
@@ -2288,7 +2298,6 @@
 				MARKETING_VERSION = 2.0.15;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-F${SRCROOT}/../deps/angle",
 					"-L${SRCROOT}/../deps/freetype",
 					"-L${SRCROOT}/../deps/harfbuzz",
 					"-L${SRCROOT}/../deps/gettext",
@@ -2383,7 +2392,6 @@
 				MARKETING_VERSION = 2.0.15;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
-					"-F${SRCROOT}/../deps/angle",
 					"-L${SRCROOT}/../deps/freetype",
 					"-L${SRCROOT}/../deps/harfbuzz",
 					"-L${SRCROOT}/../deps/gettext",

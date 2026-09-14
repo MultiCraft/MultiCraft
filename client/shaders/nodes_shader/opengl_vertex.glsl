@@ -48,6 +48,13 @@ float smoothTriangleWave(float x)
 // OpenGL < 4.3 does not support continued preprocessor lines
 #if (MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT || MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_OPAQUE || MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_BASIC) && ENABLE_WAVING_WATER
 
+#ifdef SETTINGS_UNIFORMS
+uniform vec3 waterWave;
+#define WATER_WAVE_HEIGHT waterWave.x
+#define WATER_WAVE_LENGTH waterWave.y
+#define WATER_WAVE_SPEED waterWave.z
+#endif
+
 //
 // Simple, fast noise function.
 // See: https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83

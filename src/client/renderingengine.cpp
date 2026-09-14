@@ -35,6 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "minimap.h"
 #include "clientmap.h"
 #include "renderingengine.h"
+#include "shader.h"
 #include "render/core.h"
 #if 0
 #include "render/factory.h"
@@ -70,6 +71,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 RenderingEngine *RenderingEngine::s_singleton = nullptr;
+std::string RenderingEngine::s_engine_error;
 
 
 class LoadScreenRoot : public gui::IGUIElement
@@ -147,27 +149,31 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	// Determine driver
 #if defined(_IRR_COMPILE_WITH_ANGLE_)
 	video::E_DRIVER_TYPE driverType = video::EDT_ANGLE;
+#elif defined(_IRR_COMPILE_WITH_METAL_)
+	video::E_DRIVER_TYPE driverType = video::EDT_METAL;
 #elif defined(__ANDROID__) || defined(__IOS__)
 	video::E_DRIVER_TYPE driverType = video::EDT_OGLES2;
 #else
 	video::E_DRIVER_TYPE driverType = video::EDT_OPENGL;
 #endif
-	const std::string &driverstring = g_settings->get("video_driver");
 	std::vector<video::E_DRIVER_TYPE> drivers =
 			RenderingEngine::getSupportedVideoDrivers();
-	u32 i;
-	for (i = 0; i != drivers.size(); i++) {
-		if (!strcasecmp(driverstring.c_str(),
-				RenderingEngine::getVideoDriverName(drivers[i]))) {
-			driverType = drivers[i];
-			break;
-		}
-	}
+	auto indexOf = [&drivers](const std::string &name) {
+		u32 i = 0;
+		while (i < drivers.size() &&
+				strcasecmp(name.c_str(), RenderingEngine::getVideoDriverName(drivers[i])))
+			i++;
+		return i;
+	};
+	u32 i = indexOf(g_settings->get("video_driver"));
+	// A name the build does not have, as a typo in /set, leaves the platform's driver
 	if (i == drivers.size()) {
-		errorstream << "Invalid video_driver specified; "
-			       "defaulting to opengl"
-			    << std::endl;
+		errorstream << "Invalid video_driver specified; defaulting to "
+				<< RenderingEngine::getVideoDriverName(driverType) << std::endl;
+		i = indexOf(RenderingEngine::getVideoDriverName(driverType));
 	}
+	if (i < drivers.size())
+		driverType = drivers[i];
 
 	SIrrlichtCreationParameters params = SIrrlichtCreationParameters();
 	params.DriverType = driverType;
@@ -189,12 +195,27 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 #endif
 
 	m_device = createDeviceEx(params);
-#if defined(__ANDROID__) || defined(__IOS__)
+	// A driver that does not start hands over to the next one the build has
+	while (!m_device && ++i < drivers.size()) {
+		warningstream << RenderingEngine::getVideoDriverName(driverType) <<
+				" did not start, the game goes on with "
+				<< RenderingEngine::getVideoDriverName(drivers[i]) << std::endl;
+		driverType = drivers[i];
+		params.DriverType = driverType;
+		m_device = createDeviceEx(params);
+	}
+#if defined(__ANDROID__) || defined(__APPLE__)
+	// SDL names a window that did not open, Irrlicht a driver that did not start
+	const char *sdl_error = SDL_GetError();
 	FATAL_ERROR_IF(!m_device, ("Device create failed. Driver Type: \"" +
-			std::string(RenderingEngine::getVideoDriverName(driverType)) +
-			"\". SDL: " + SDL_GetError()).c_str());
+			std::string(RenderingEngine::getVideoDriverName(driverType)) + "\". " +
+			(sdl_error &&
+			*sdl_error ?
+			"SDL: " + std::string(sdl_error) : "Irrlicht: " + s_engine_error)).c_str());
 #endif
 	driver = m_device->getVideoDriver();
+
+	registerPrecompiledShaders(driver);
 
 	// Textures live on the GPU, a copy in main memory only doubles their cost
 	driver->setTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY, false);
@@ -853,15 +874,19 @@ std::vector<core::vector3d<u32>> RenderingEngine::getSupportedVideoModes()
 	return mlist;
 }
 
+// The build's drivers, preferred first
 std::vector<irr::video::E_DRIVER_TYPE> RenderingEngine::getSupportedVideoDrivers()
 {
+	static const irr::video::E_DRIVER_TYPE preferred[] = {
+		irr::video::EDT_METAL,
+		irr::video::EDT_ANGLE,
+		irr::video::EDT_OGLES2,
+		irr::video::EDT_OPENGL,
+	};
 	std::vector<irr::video::E_DRIVER_TYPE> drivers;
-
-	for (int i = 0; i != irr::video::EDT_COUNT; i++) {
-		if (irr::IrrlichtDevice::isDriverSupported((irr::video::E_DRIVER_TYPE)i))
-			drivers.push_back((irr::video::E_DRIVER_TYPE)i);
-	}
-
+	for (irr::video::E_DRIVER_TYPE type : preferred)
+		if (irr::IrrlichtDevice::isDriverSupported(type))
+			drivers.push_back(type);
 	return drivers;
 }
 
@@ -915,6 +940,7 @@ const char *RenderingEngine::getVideoDriverName(irr::video::E_DRIVER_TYPE type)
 			"ogles2",
 			"webgl1",
 			"angle",
+			"metal",
 	};
 
 	return driver_ids[type];
@@ -933,6 +959,7 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 			"OpenGL ES2",
 			"WebGL 1",
 			"ANGLE",
+			"Metal",
 	};
 
 	return driver_names[type];

@@ -23,6 +23,17 @@ varying vec3 vRelPos;
 
 // Light sources, one per column: xyz relative to the eye, w = level / 15
 uniform mat4 pointLights;
+#ifdef SETTINGS_UNIFORMS
+// Lighting curve as the header spells it, LIGHT_SCALE in the w of the boost
+uniform vec4 lightCurve;
+uniform vec4 lightBoost;
+// Copies main fills, since a Metal function cannot take a constant buffer by reference
+vec4 curve;
+vec4 boost;
+#define LIGHT_CURVE curve
+#define LIGHT_BOOST boost.xyz
+#define LIGHT_SCALE boost.w
+#endif
 // Maximum with a rounded corner, a plain max() shows the rim as a crease
 vec3 softMax(vec3 a, vec3 b)
 {
@@ -51,8 +62,12 @@ float pointLight(vec4 light)
 }
 #endif
 
+#ifdef SETTINGS_UNIFORMS
+uniform float fogShadingParameter;
+#else
 const float fogStart = FOG_START;
 const float fogShadingParameter = 1.0 / ( 1.0 - fogStart);
+#endif
 
 #if ENABLE_TONE_MAPPING
 
@@ -91,6 +106,10 @@ void main(void)
 
 	vec3 lightColor = varColor.rgb;
 #if POINT_LIGHTS
+#ifdef SETTINGS_UNIFORMS
+	curve = lightCurve;
+	boost = lightBoost;
+#endif
 	for (int i = 0; i < POINT_LIGHTS; i++) {
 		float point = pointLight(pointLights[i]);
 		if (point > 0.0)

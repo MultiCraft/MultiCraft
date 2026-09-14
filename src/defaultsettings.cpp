@@ -203,6 +203,8 @@ void set_default_settings()
 	settings->setDefault("shader_path", "");
 #if defined(_IRR_COMPILE_WITH_ANGLE_)
 	settings->setDefault("video_driver", "angle");
+#elif defined(_IRR_COMPILE_WITH_METAL_)
+	settings->setDefault("video_driver", "metal");
 #elif ENABLE_GLES
 	settings->setDefault("video_driver", "ogles2");
 #else
@@ -508,9 +510,6 @@ void set_default_settings()
 	settings->setDefault("enable_waving_water", "true");
 	settings->setDefault("enable_waving_leaves", "true");
 	settings->setDefault("enable_waving_plants", "true");
-#else
-	// Shaders work but may reduce performance on iGPU
-	settings->setDefault("enable_shaders", "false");
 #endif
 #endif
 

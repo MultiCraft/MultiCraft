@@ -154,5 +154,8 @@ public:
 
 IWritableShaderSource *createShaderSource();
 
+//! Hands the programs built alongside the client to a driver that cannot compile shader source
+void registerPrecompiledShaders(video::IVideoDriver *driver);
+
 void dumpShaderProgram(std::ostream &output_stream,
 	const std::string &program_type, const std::string &program);

@@ -40,6 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/tile.h"
 #include "light.h"
 #include "config.h"
+#include "util/string.h"
 
 /*
 	A cache from shader name to shader path
@@ -186,6 +187,11 @@ public:
 			m_setters.push_back(std::unique_ptr<IShaderConstantSetter>(factory->create()));
 	}
 
+	void addSetter(IShaderConstantSetter *setter)
+	{
+		m_setters.emplace_back(setter);
+	}
+
 	virtual void OnSetConstants(video::IMaterialRendererServices *services, s32 userData) override
 	{
 		video::IVideoDriver *driver = services->getVideoDriver();
@@ -287,6 +293,82 @@ public:
 	virtual IShaderConstantSetter* create()
 		{ return new MainShaderConstantSetter(); }
 };
+
+
+/*
+	SettingsShaderConstantSetter: Sets the settings the header bakes in, for programs built ahead of
+	time
+*/
+
+class SettingsShaderConstantSetter : public IShaderConstantSetter
+{
+	CachedPixelShaderSetting<float> m_fog_shading;
+	CachedPixelShaderSetting<float, 4> m_light_curve;
+	CachedPixelShaderSetting<float, 4> m_light_boost;
+	CachedVertexShaderSetting<float, 3> m_water_wave;
+	float m_fog_shading_value;
+	float m_light_curve_value[4];
+	float m_light_boost_value[4];
+	float m_water_wave_value[3];
+
+public:
+	SettingsShaderConstantSetter(float fog_shading, const float light_curve[4],
+			const float light_boost[4], const float water_wave[3]) :
+		  m_fog_shading("fogShadingParameter")
+		, m_light_curve("lightCurve")
+		, m_light_boost("lightBoost")
+		, m_water_wave("waterWave")
+		, m_fog_shading_value(fog_shading)
+	{
+		std::copy(light_curve, light_curve + 4, m_light_curve_value);
+		std::copy(light_boost, light_boost + 4, m_light_boost_value);
+		std::copy(water_wave, water_wave + 3, m_water_wave_value);
+	}
+
+	virtual void onSetConstants(video::IMaterialRendererServices *services) override
+	{
+		m_fog_shading.set(&m_fog_shading_value, services);
+		m_light_curve.set(m_light_curve_value, services);
+		m_light_boost.set(m_light_boost_value, services);
+		m_water_wave.set(m_water_wave_value, services);
+	}
+};
+
+
+/*
+	AlphaRefShaderConstantSetter: Sets the alpha reference of the material, for programs that
+	discard by it
+*/
+
+class AlphaRefShaderConstantSetter : public IShaderConstantSetter
+{
+	CachedPixelShaderSetting<float> m_alpha_ref;
+	float m_alpha_ref_value = 0.0f;
+
+public:
+	AlphaRefShaderConstantSetter() :
+		  m_alpha_ref("alphaRef")
+	{}
+
+	virtual void onSetMaterial(const video::SMaterial &material) override
+	{
+		m_alpha_ref_value = material.MaterialTypeParam;
+	}
+
+	virtual void onSetConstants(video::IMaterialRendererServices *services) override
+	{
+		m_alpha_ref.set(&m_alpha_ref_value, services);
+	}
+};
+
+// The number a GLSL compiler reads where the header spells the value out
+static float asSpelled(float value)
+{
+	std::stringstream spelled;
+	spelled << std::showpoint << value;
+	spelled >> value;
+	return value;
+}
 
 
 /*
@@ -500,6 +582,11 @@ void ShaderSource::insertSourceShader(const std::string &name_of_shader,
 
 void ShaderSource::rebuildShaders()
 {
+	// Programs built ahead take the settings as uniforms, so the first build already stands
+	const video::E_DRIVER_TYPE type = RenderingEngine::get_video_driver()->getDriverType();
+	if (type == video::EDT_METAL)
+		return;
+
 	MutexAutoLock lock(m_shaderinfo_cache_mutex);
 
 	/*// Oh well... just clear everything, they'll load sometime.
@@ -518,6 +605,88 @@ void ShaderSource::rebuildShaders()
 		if (!info->name.empty()) {
 			*info = generateShader(info->name, info->material_type, info->drawtype);
 		}
+	}
+}
+
+
+//! Names the branch a driver without a shader compiler builds as a program of its own
+static std::string shaderVariant(const std::string &name, MaterialType material_type,
+		video::E_MATERIAL_TYPE base_material)
+{
+	// Every other shader is one program
+	if (name != "nodes_shader" && name != "object_shader")
+		return "";
+
+	std::string variant;
+
+	if (name == "nodes_shader") {
+		if (g_settings->getBool("enable_waving_leaves") &&
+				material_type == TILE_MATERIAL_WAVING_LEAVES)
+			variant = ":leaves";
+		else if (g_settings->getBool("enable_waving_plants") &&
+				material_type == TILE_MATERIAL_WAVING_PLANTS)
+			variant = ":plants";
+		else if (g_settings->getBool("enable_waving_water") &&
+				(material_type == TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT ||
+				material_type == TILE_MATERIAL_WAVING_LIQUID_OPAQUE ||
+				material_type == TILE_MATERIAL_WAVING_LIQUID_BASIC))
+			variant = ":liquid";
+	} else if (material_type == TILE_MATERIAL_PLAIN ||
+			material_type == TILE_MATERIAL_PLAIN_ALPHA) {
+		variant = ":plain";
+	}
+
+	// Which test throws pixels away comes from the base material
+	if (base_material == video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF)
+		variant += ":ref";
+	else if (base_material != video::EMT_SOLID)
+		variant += ":blend";
+
+	if (g_settings->getBool("tone_mapping"))
+		variant += ":tonemap";
+
+	// Only the nodes read the lights around them
+	if (name == "nodes_shader" && g_settings->getBool("smooth_lighting"))
+		variant += ":lights";
+
+	return variant;
+}
+
+// One row per line, its fields split on '|'
+static std::vector<std::vector<std::string>> readTable(const std::string &path)
+{
+	std::vector<std::vector<std::string>> rows;
+	std::string text;
+	if (fs::ReadFile(path, text))
+		for (const std::string &line : str_split(text, '\n'))
+			rows.push_back(str_split(line, '|'));
+	return rows;
+}
+
+void registerPrecompiledShaders(video::IVideoDriver *driver)
+{
+	if (!driver || driver->getDriverType() != video::EDT_METAL)
+		return;
+
+	const std::string dir = porting::path_share + DIR_DELIM + "client" + DIR_DELIM +
+			"shaders" + DIR_DELIM + "Metal" + DIR_DELIM;
+
+	// Metal takes the MSL of both stages of each program
+	std::unordered_map<std::string, std::string> sources;
+	for (const std::vector<std::string> &p : readTable(dir + "programs.txt")) {
+		if (p.size() != 3)
+			continue;
+		std::string vertex = "vs_" + p[1], fragment = "fs_" + p[2];
+		for (std::string *stage : {&vertex, &fragment}) {
+			std::string &source = sources[*stage];
+			if (source.empty())
+				fs::ReadFile(dir + *stage + ".metal", source);
+			*stage = source;
+		}
+		if (vertex.empty() || fragment.empty() ||
+				!driver->addPrecompiledShader(p[0].c_str(), vertex.c_str(),
+				(u32)vertex.size() + 1, fragment.c_str(), (u32)fragment.size() + 1))
+			errorstream << "Could not register the Metal program " << p[0] << std::endl;
 	}
 }
 
@@ -557,7 +726,13 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 
 	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
 	if (!driver->queryFeature(video::EVDF_ARB_GLSL)) {
-		errorstream << "Shaders are enabled but GLSL is not supported by the driver\n";
+		// The setting outlives a driver change, so say so once and keep the fixed pipeline
+		static bool warned = false;
+		if (!warned) {
+			warned = true;
+			errorstream << "Shaders are enabled but GLSL is not supported by the driver"
+				    << std::endl;
+		}
 		return shaderinfo;
 	}
 	video::IGPUProgrammingServices *gpu = driver->getGPUProgrammingServices();
@@ -660,10 +835,14 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 
 	bool enable_waving_water = g_settings->getBool("enable_waving_water");
 	shaders_header << "#define ENABLE_WAVING_WATER " << enable_waving_water << "\n";
+	float water_wave[3] = {};
 	if (enable_waving_water) {
-		shaders_header << "#define WATER_WAVE_HEIGHT " << g_settings->getFloat("water_wave_height") << "\n";
-		shaders_header << "#define WATER_WAVE_LENGTH " << g_settings->getFloat("water_wave_length") << "\n";
-		shaders_header << "#define WATER_WAVE_SPEED " << g_settings->getFloat("water_wave_speed") << "\n";
+		water_wave[0] = g_settings->getFloat("water_wave_height");
+		water_wave[1] = g_settings->getFloat("water_wave_length");
+		water_wave[2] = g_settings->getFloat("water_wave_speed");
+		shaders_header << "#define WATER_WAVE_HEIGHT " << water_wave[0] << "\n";
+		shaders_header << "#define WATER_WAVE_LENGTH " << water_wave[1] << "\n";
+		shaders_header << "#define WATER_WAVE_SPEED " << water_wave[2] << "\n";
 	}
 
 	shaders_header << "#define POINT_LIGHTS "
@@ -672,18 +851,23 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 	shaders_header << "#define ENABLE_WAVING_PLANTS " << g_settings->getBool("enable_waving_plants") << "\n";
 	shaders_header << "#define ENABLE_TONE_MAPPING " << g_settings->getBool("tone_mapping") << "\n";
 
-	shaders_header << "#define FOG_START " << core::clamp(g_settings->getFloat("fog_start"), 0.0f, 0.99f) << "\n";
+	const float fog_start = core::clamp(g_settings->getFloat("fog_start"), 0.0f, 0.99f);
+	shaders_header << "#define FOG_START " << fog_start << "\n";
 
 	// The light source color folds into the curve, but not past a pow()
 	const LightingParams &lp = get_lighting_params();
 	const bool fold = lp.gamma == 1.0f;
 	const float f = fold ? 1.04f : 1.0f;
 	const float sigma = std::fmax(lp.sigma, 0.001f);
-	shaders_header << "#define LIGHT_CURVE vec4(" << lp.a * f << "," << lp.b * f
-		<< "," << lp.c * f << "," << 1.0f / lp.gamma << ")\n";
-	shaders_header << "#define LIGHT_BOOST vec3(" << lp.boost * f << "," << lp.center
-		<< "," << -0.5f / (sigma * sigma) << ")\n";
-	shaders_header << "#define LIGHT_SCALE " << (fold ? 1.0f : 1.04f) << "\n";
+	// The boost carries LIGHT_SCALE in its last component
+	const float light_curve[4] = { lp.a * f, lp.b * f, lp.c * f, 1.0f / lp.gamma };
+	const float light_boost[4] = { lp.boost * f, lp.center, -0.5f / (sigma * sigma),
+			fold ? 1.0f : 1.04f };
+	shaders_header << "#define LIGHT_CURVE vec4(" << light_curve[0] << "," << light_curve[1]
+		<< "," << light_curve[2] << "," << light_curve[3] << ")\n";
+	shaders_header << "#define LIGHT_BOOST vec3(" << light_boost[0] << "," << light_boost[1]
+		<< "," << light_boost[2] << ")\n";
+	shaders_header << "#define LIGHT_SCALE " << light_boost[3] << "\n";
 
 	std::string common_header = shaders_header.str();
 
@@ -699,7 +883,28 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 		geometry_shader_ptr = geometry_shader.c_str();
 	}
 
+	// The name a driver without a shader compiler picks its prebuilt program by, branch included
+	vertex_shader = "//SHADER:" + name +
+			shaderVariant(name, material_type, shaderinfo.base_material) + "\n" + vertex_shader;
+
 	irr_ptr<ShaderCallback> cb{new ShaderCallback(m_setter_factories)};
+
+	// A program built ahead of time takes the values the header spells out as uniforms
+	if (driver->getDriverType() == video::EDT_METAL) {
+		float spelled_curve[4], spelled_boost[4], spelled_wave[3];
+		for (int i = 0; i < 4; i++) {
+			spelled_curve[i] = asSpelled(light_curve[i]);
+			spelled_boost[i] = asSpelled(light_boost[i]);
+		}
+		for (int i = 0; i < 3; i++)
+			spelled_wave[i] = asSpelled(water_wave[i]);
+		cb->addSetter(new SettingsShaderConstantSetter(
+				1.0f / (1.0f - asSpelled(fog_start)), spelled_curve, spelled_boost, spelled_wave));
+		// A blending base alpha tests inside the program, against the reference of the material
+		if (shaderinfo.base_material == video::EMT_TRANSPARENT_ALPHA_CHANNEL)
+			cb->addSetter(new AlphaRefShaderConstantSetter());
+	}
+
 	infostream<<"Compiling high level shaders for "<<name<<std::endl;
 	s32 shadermat = gpu->addHighLevelShaderMaterial(
 		vertex_shader.c_str(), nullptr, video::EVST_VS_1_1,
@@ -711,9 +916,11 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 				"failed to generate \""<<name<<"\", "
 				"addHighLevelShaderMaterial failed."
 				<<std::endl;
+#ifndef NDEBUG
 		dumpShaderProgram(warningstream, "Vertex", vertex_shader);
 		dumpShaderProgram(warningstream, "Fragment", fragment_shader);
 		dumpShaderProgram(warningstream, "Geometry", geometry_shader);
+#endif
 		return shaderinfo;
 	}
 

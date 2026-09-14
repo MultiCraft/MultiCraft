@@ -19,8 +19,12 @@ centroid varying vec2 varTexCoord;
 varying mediump vec3 eyeVec;
 varying float vIDiff;
 
+#ifdef SETTINGS_UNIFORMS
+uniform float fogShadingParameter;
+#else
 const float fogStart = FOG_START;
 const float fogShadingParameter = 1.0 / (1.0 - fogStart);
+#endif
 
 #if ENABLE_TONE_MAPPING
 
