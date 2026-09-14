@@ -1926,11 +1926,10 @@ void Server::SendLocalPlayerAnimations(session_t peer_id, v2s32 animation_frames
 	Send(&pkt);
 }
 
-void Server::SendEyeOffset(session_t peer_id, v3f first, v3f third, v3f third_front,
-	f32 camera_distance_third)
+void Server::SendEyeOffset(session_t peer_id, v3f first, v3f third)
 {
 	NetworkPacket pkt(TOCLIENT_EYE_OFFSET, 0, peer_id);
-	pkt << first << third << (u16)EYE_OFFSET_MC_MAGIC << camera_distance_third << third_front;
+	pkt << first << third;
 	Send(&pkt);
 }
 
@@ -3439,15 +3438,12 @@ void Server::setLocalPlayerAnimations(RemotePlayer *player,
 	SendLocalPlayerAnimations(player->getPeerId(), animation_frames, frame_speed);
 }
 
-void Server::setPlayerEyeOffset(RemotePlayer *player, const v3f &first, const v3f &third,
-		const v3f &third_front, f32 camera_distance_third)
+void Server::setPlayerEyeOffset(RemotePlayer *player, const v3f &first, const v3f &third)
 {
 	sanity_check(player);
 	player->eye_offset_first = first;
 	player->eye_offset_third = third;
-	player->eye_offset_third_front = third_front;
-	player->camera_distance_third = camera_distance_third;
-	SendEyeOffset(player->getPeerId(), first, third, third_front, camera_distance_third);
+	SendEyeOffset(player->getPeerId(), first, third);
 }
 
 void Server::setSky(RemotePlayer *player, const SkyboxParams &params)
