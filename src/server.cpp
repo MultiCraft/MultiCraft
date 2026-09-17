@@ -320,8 +320,11 @@ Server::~Server()
 
 	actionstream << "Server: Shutting down" << std::endl;
 
-	// Do this before stopping the server in case mapgen callbacks need to access
-	// server-controlled resources (like ModStorages). Also do them before
+	// Stop server step from happening, which would start the emerge threads again
+	if (m_thread)
+		stop();
+
+	// Stop all emerge activity and finish off mapgen callbacks. Do this before
 	// shutdown callbacks since they may modify state that is finalized in a
 	// callback.
 	if (m_emerge)
@@ -359,11 +362,7 @@ Server::~Server()
 		}
 	}
 
-	// Stop threads
-	if (m_thread) {
-		stop();
-		delete m_thread;
-	}
+	delete m_thread;
 
 	// Delete things in the reverse order of creation
 	delete m_env;
