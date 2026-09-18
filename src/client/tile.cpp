@@ -36,15 +36,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "guiscalingfilter.h"
 #include "renderingengine.h"
 
-
-#if ENABLE_GLES && !defined(__APPLE__)
-#ifdef _IRR_COMPILE_WITH_OGLES1_
-#include <GLES/gl.h>
-#else
-#include <GLES2/gl2.h>
-#endif
-#endif
-
 /*
 	A cache from texture name to texture path
 */
@@ -766,9 +757,6 @@ u32 TextureSource::generateTexture(const std::string &name)
 	video::ITexture *tex = NULL;
 
 	if (img != NULL) {
-#if ENABLE_GLES && !defined(__APPLE__)
-		img = Align2Npot2(img, driver);
-#endif
 		// Create texture from resulting image, in 16 bits when textures are converted to them
 		video::IImage *converted = m_setting_convert_to_16bit ?
 				convertTo16bit(driver, img) : nullptr;
@@ -948,9 +936,6 @@ void TextureSource::rebuildImagesAndTextures()
 			continue; // Skip dummy entry
 
 		video::IImage *img = generateImage(ti.name);
-#if ENABLE_GLES && !defined(__APPLE__)
-		img = Align2Npot2(img, driver);
-#endif
 		// Create texture from resulting image
 		video::ITexture *t = NULL;
 		if (img) {
@@ -1188,75 +1173,6 @@ video::IImage* TextureSource::generateImage(const std::string &name)
 
 	return baseimg;
 }
-
-#if ENABLE_GLES && !defined(__APPLE__)
-
-#ifndef __ANDROID__
-static inline u16 get_GL_major_version()
-{
-	const GLubyte *gl_version = glGetString(GL_VERSION);
-	return (u16) (gl_version[0] - '0');
-}
-
-/**
- * Check if hardware requires npot2 aligned textures
- * @return true if alignment NOT(!) requires, false otherwise
- */
-
-bool hasNPotSupport()
-{
-	// Only GLES2 is trusted to correctly report npot support
-	// Note: we cache the boolean result, the GL context will never change.
-	static const bool supported = get_GL_major_version() > 1 &&
-		glGetString(GL_EXTENSIONS) &&
-		strstr((char *)glGetString(GL_EXTENSIONS), "GL_OES_texture_npot");
-	return supported;
-}
-#else
-bool hasNPotSupport()
-{
-	static const std::string &driverstring = g_settings->get("video_driver");
-	return (driverstring != "ogles1"); // gles3 has NPot Support and used instead of gles2
-}
-#endif
-
-/**
- * Check and align image to npot2 if required by hardware
- * @param image image to check for npot2 alignment
- * @param driver driver to use for image operations
- * @return image or copy of image aligned to npot2
- */
-
-video::IImage * Align2Npot2(video::IImage * image,
-		video::IVideoDriver* driver)
-{
-	if (image == NULL)
-		return image;
-
-	if (hasNPotSupport())
-		return image;
-
-	core::dimension2d<u32> dim = image->getDimension();
-	unsigned int height = npot2(dim.Height);
-	unsigned int width  = npot2(dim.Width);
-
-	if (dim.Width == width)
-		return image;
-
-	video::IImage *targetimage =
-			driver->createImage(video::ECF_A8R8G8B8,
-					core::dimension2d<u32>(width, height));
-
-	// an npot image is still better than no image at all when memory runs out
-	if (targetimage == NULL)
-		return image;
-
-	image->copyToScaling(targetimage);
-	image->drop();
-	return targetimage;
-}
-
-#endif
 
 static std::string unescape_string(const std::string &str, const char esc = '\\')
 {
