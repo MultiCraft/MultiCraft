@@ -1043,6 +1043,14 @@ int ModApiMainMenu::l_get_video_drivers(lua_State *L)
 }
 
 /******************************************************************************/
+int ModApiMainMenu::l_get_active_driver(lua_State *L)
+{
+	video::E_DRIVER_TYPE type = RenderingEngine::get_video_driver()->getDriverType();
+	lua_pushstring(L, RenderingEngine::getVideoDriverName(type));
+	return 1;
+}
+
+/******************************************************************************/
 int ModApiMainMenu::l_get_video_modes(lua_State *L)
 {
 	std::vector<core::vector3d<u32> > videomodes
@@ -1179,6 +1187,7 @@ void ModApiMainMenu::Initialize(lua_State *L, int top)
 	API_FCT(cancel_all_download_files);
 	API_FCT(gettext);
 	API_FCT(get_video_drivers);
+	API_FCT(get_active_driver);
 	API_FCT(get_video_modes);
 	API_FCT(get_min_supp_proto);
 	API_FCT(get_max_supp_proto);

@@ -112,9 +112,12 @@ void GameUI::update(const RunStats &stats, Client *client, MapDrawControl *draw_
 		drawtime_avg = drawtime_avg * 0.95 + stats.drawtime * 0.05;
 		u16 fps = 1.0 / stats.dtime_jitter.avg;
 
+		const wchar_t *driver_name = RenderingEngine::get_video_driver()->getName();
+
 		os << std::fixed
 			<< PROJECT_NAME_C " " << g_version_hash
 			<< " | FPS: " << fps
+			<< " | " << (driver_name ? wide_to_utf8(std::wstring(driver_name).substr(0, 25)) : "")
 			<< std::setprecision(0)
 			<< " | drawtime: " << drawtime_avg << "ms"
 			<< std::setprecision(1)

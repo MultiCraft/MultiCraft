@@ -158,6 +158,8 @@ private:
 
 	static int l_get_video_drivers(lua_State *L);
 
+	static int l_get_active_driver(lua_State *L);
+
 	static int l_get_video_modes(lua_State *L);
 
 	//version compatibility

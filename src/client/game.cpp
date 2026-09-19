@@ -1043,6 +1043,10 @@ bool Game::startup(bool *kill,
 
 	// "cache"
 	this->device              = RenderingEngine::get_raw_device();
+	video::IVideoDriver *run_driver = device->getVideoDriver();
+	actionstream << "Video driver " << RenderingEngine::getVideoDriverName(run_driver->getDriverType())
+			<< ", shaders " << (g_settings->getBool("enable_shaders") ? "on" : "off")
+			<< ", GLSL " << (run_driver->queryFeature(video::EVDF_ARB_GLSL) ? "yes" : "no") << std::endl;
 	this->kill                = kill;
 	this->error_message       = &error_message;
 	this->reconnect_requested = reconnect;
