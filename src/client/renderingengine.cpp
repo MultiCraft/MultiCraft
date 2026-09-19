@@ -168,11 +168,6 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 			       "defaulting to opengl"
 			    << std::endl;
 	}
-#if defined(__ANDROID__) || defined(__IOS__)
-	// Shaders are required on OpenGL ES2, and on the ANGLE-backed context too
-	g_settings->setBool("enable_shaders", driverType == video::EDT_OGLES2 ||
-			driverType == video::EDT_ANGLE);
-#endif
 
 	SIrrlichtCreationParameters params = SIrrlichtCreationParameters();
 	params.DriverType = driverType;

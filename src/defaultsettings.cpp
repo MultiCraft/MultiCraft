@@ -203,8 +203,6 @@ void set_default_settings()
 	settings->setDefault("shader_path", "");
 #if defined(_IRR_COMPILE_WITH_ANGLE_)
 	settings->setDefault("video_driver", "angle");
-#elif ENABLE_GLES && defined(_IRR_COMPILE_WITH_OGLES1_)
-	settings->setDefault("video_driver", "ogles1");
 #elif ENABLE_GLES
 	settings->setDefault("video_driver", "ogles2");
 #else
@@ -623,10 +621,6 @@ void set_default_settings()
 
 	// Android Settings
 #ifdef __ANDROID__
-	// Switch to ogles1 without shaders on low-end Android devices
-	if (memoryMax < 4 && !porting::isIntelDevice())
-		settings->setDefault("video_driver", "ogles1");
-
 	if (porting::isGooglePC())
 		settings->setDefault("mouse_sensitivity", "0.8");
 

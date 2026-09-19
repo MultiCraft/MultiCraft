@@ -381,41 +381,6 @@ bool upgrade(const std::string &item, const std::string &extra)
 	return res == JNI_TRUE;
 }
 
-bool isIntelDevice()
-{
-	if (jnienv == nullptr)
-		return false;
-
-	static const bool value = []() {
-		jclass buildClass = jnienv->FindClass("android/os/Build");
-		jfieldID abisField = jnienv->GetStaticFieldID(buildClass,
-				"SUPPORTED_ABIS", "[Ljava/lang/String;");
-
-		jobjectArray abisArray = (jobjectArray) jnienv->GetStaticObjectField(buildClass, abisField);
-		jsize abiCount = jnienv->GetArrayLength(abisArray);
-		bool isIntel = false;
-
-		for (jsize index = 0; index < abiCount; ++index) {
-			jstring abiString = (jstring) jnienv->GetObjectArrayElement(abisArray, index);
-			const char *abiCString = jnienv->GetStringUTFChars(abiString, nullptr);
-			isIntel = (strcmp(abiCString, "x86") == 0 || strcmp(abiCString, "x86_64") == 0);
-
-			jnienv->ReleaseStringUTFChars(abiString, abiCString);
-			jnienv->DeleteLocalRef(abiString);
-
-			if (isIntel)
-				break;
-		}
-
-		jnienv->DeleteLocalRef(abisArray);
-		jnienv->DeleteLocalRef(buildClass);
-
-		return isIntel;
-	}();
-
-	return value;
-}
-
 std::string getSecretKey(const std::string &key)
 {
 	JNIEnv *env = (JNIEnv*) SDL_GetAndroidJNIEnv();
