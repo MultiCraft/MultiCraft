@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-HARFBUZZ_VERSION=14.2.1
+HARFBUZZ_VERSION=14.4.0
 
 . scripts/sdk.sh
 mkdir -p deps; cd deps
@@ -19,10 +19,10 @@ cd harfbuzz-src/build
 cmake .. \
 	-DBUILD_SHARED_LIBS=FALSE \
 	-DCMAKE_BUILD_TYPE=Release \
-	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
-	-DCMAKE_CXX_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
+	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS -fno-finite-math-only $OSX_ARCH" \
+	-DCMAKE_CXX_FLAGS_RELEASE="$OSX_FLAGS -fno-finite-math-only $OSX_ARCH" \
 	-DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURES \
-	-DFREETYPE_LIBRARY="../../freetype/libfreetype.a ../../libpng/libpng.a" \
+	-DFREETYPE_LIBRARY="../../freetype/libfreetype.a" \
 	-DFREETYPE_INCLUDE_DIRS=$FREETYPE_INCLUDE \
 	-DHB_HAVE_CORETEXT=OFF \
 	-DHB_HAVE_GLIB=OFF \

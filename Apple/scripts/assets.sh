@@ -11,7 +11,8 @@ DEST=$(pwd)/assets
 
 mkdir -p $DEST/client/shaders
 cp -rv ../client/shaders $DEST/client
-cp -rv deps/irrlicht/shaders $DEST/client/shaders/Irrlicht
+rm -rf $DEST/client/shaders/Irrlicht
+cp -rv deps/irrlicht/shaders/. $DEST/client/shaders/Irrlicht
 
 mkdir -p $DEST/fonts
 

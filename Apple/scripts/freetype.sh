@@ -19,14 +19,21 @@ rm -rf freetype
 
 if [ ! -z "$1" ] && [ "$1" = "bootstrap" ]; then
 	cd freetype-src/build-bootstrap
-	HARFBUZZ_FLAGS="-DFT_DISABLE_HARFBUZZ=TRUE"
+	FEATURE_FLAGS=" \
+		-DFT_DISABLE_HARFBUZZ=TRUE \
+		-DFT_DISABLE_PNG=TRUE \
+		-DFT_DISABLE_ZLIB=TRUE"
 else
 	cd freetype-src/build
-	HARFBUZZ_FLAGS=" \
+	FEATURE_FLAGS=" \
 		-DFT_REQUIRE_HARFBUZZ=TRUE \
 		-DFT_DYNAMIC_HARFBUZZ=FALSE \
 		-DHarfBuzz_LIBRARY=../../harfbuzz/libharfbuzz.a \
-		-DHarfBuzz_INCLUDE_DIR=../../harfbuzz/include/harfbuzz"
+		-DHarfBuzz_INCLUDE_DIR=../../harfbuzz/include/harfbuzz \
+		-DFT_REQUIRE_PNG=TRUE \
+		-DFT_REQUIRE_ZLIB=TRUE \
+		-DPNG_LIBRARY=../../libpng/libpng.a \
+		-DPNG_PNG_INCLUDE_DIR=../../libpng/include"
 fi
 
 cmake .. \
@@ -34,11 +41,7 @@ cmake .. \
 	-DBUILD_SHARED_LIBS=FALSE \
 	-DFT_DISABLE_BZIP2=TRUE \
 	-DFT_DISABLE_BROTLI=TRUE \
-	-DFT_REQUIRE_PNG=TRUE \
-	-DFT_REQUIRE_ZLIB=TRUE \
-	$HARFBUZZ_FLAGS \
-	-DPNG_LIBRARY="../../libpng/libpng.a" \
-	-DPNG_PNG_INCLUDE_DIR="../../libpng/include" \
+	$FEATURE_FLAGS \
 	-DCMAKE_C_FLAGS_RELEASE="$OSX_FLAGS $OSX_ARCH" \
 	-DCMAKE_OSX_ARCHITECTURES=$OSX_ARCHITECTURES
 
