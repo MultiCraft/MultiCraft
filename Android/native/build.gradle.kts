@@ -7,7 +7,7 @@ plugins {
 android {
 	buildToolsVersion = "37.0.0"
 	compileSdk = 37
-	ndkVersion = "29.0.14206865"
+	ndkVersion = "30.0.16248370"
 	namespace = "com.multicraft"
 
 	val versionMajor = rootProject.extra["versionMajor"] as Int

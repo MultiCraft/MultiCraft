@@ -7,14 +7,14 @@
 	<string name="input_password">Введите пароль</string>
 
 	<!-- диалог отсутствия подключения -->
-	<string name="conn_title">Нет Интернет Подключения!</string>
-	<string name="conn_message">Для полноценной игры, MultiCraft требует подключение к Интернету.\nВ противном случае Обновление игры и режим Мультиплеера будут недоступны!</string>
+	<string name="conn_title">Нет подключения к Интернету!</string>
+	<string name="conn_message">Для полноценной игры MultiCraft требует подключения к Интернету.\nВ противном случае обновления игры и режим мультиплеера будут недоступны!</string>
 	<string name="ignore">Пропустить</string>
 
 	<!-- Crash -->
 	<string name="sorry">Нам очень жаль!</string>
 	<string name="restart">К сожалению, произошла непредвиденная ошибка, хотите перезапустить игру?</string>
-	<string name="no_space">Недостаточно места для записи файлов игры, пожалуйста освободите место на диске</string>
+	<string name="no_space">Недостаточно места для файлов игры, пожалуйста, освободите место на диске</string>
 	<string name="close_game">Закрыть игру</string>
 	<string name="restart_game">Перезапустить</string>
 </resources>

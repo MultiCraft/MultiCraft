@@ -8,7 +8,7 @@ plugins {
 android {
 	buildToolsVersion = "37.0.0"
 	compileSdk = 37
-	ndkVersion = "29.0.14206865"
+	ndkVersion = "30.0.16248370"
 	namespace = "com.multicraft.game"
 
 	val versionMajor = rootProject.extra["versionMajor"] as Int
@@ -133,8 +133,8 @@ dependencies {
 	implementation(project(":native"))
 
 	/* Third-party libraries */
-	implementation("androidx.appcompat:appcompat:1.7.1")
-	implementation("androidx.appcompat:appcompat-resources:1.7.1")
+	implementation("androidx.appcompat:appcompat:1.8.0")
+	implementation("androidx.appcompat:appcompat-resources:1.8.0")
 	implementation("androidx.browser:browser:1.10.0")
 	implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.11.0")
 	implementation("com.google.android.material:material:1.14.0")

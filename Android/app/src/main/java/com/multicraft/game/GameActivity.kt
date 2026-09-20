@@ -87,7 +87,6 @@ class GameActivity : SDLActivity() {
 		} catch (_: Exception) {
 			exitProcess(0)
 		}
-		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 		isExtract = intent.getBooleanExtra("update", false)
 		if (isExtract) {
 			val container = FrameLayout(this).apply {

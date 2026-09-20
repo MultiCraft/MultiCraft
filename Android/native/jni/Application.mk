@@ -15,7 +15,7 @@ APP_CFLAGS += -flto -std=gnu17 -ffunction-sections -fdata-sections
 APP_CXXFLAGS := $(APP_CFLAGS) -fvisibility-inlines-hidden -fexceptions -frtti -std=gnu++17 #-Werror=shorten-64-to-32
 
 # Silence Irrlicht warnings. Comment out with real debugging!
-APP_CXXFLAGS += -Wno-deprecated-declarations -Wno-inconsistent-missing-override
+APP_CXXFLAGS += -Wno-inconsistent-missing-override
 
 APP_CPPFLAGS := $(APP_CXXFLAGS)
 
