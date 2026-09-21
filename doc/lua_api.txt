@@ -5689,6 +5689,13 @@ Server
       unless they reconnect to the server. (callback won't be called)
     * Since media transferred this way currently does not use client caching
        or HTTP transfers, dynamic media should not be used with big files.
+* `minetest.dynamic_remove_media(filename)`
+    * Removes the media that was added with the specified name.
+    * Does not remove media from existing clients (yet).
+    * The media entry is kept in the server's memory so that any clients that
+      try and request it can still be sent a copy.
+    * The file is not safe to delete for at least 30 seconds after calling this,
+      since clients that are connecting may still be requesting this file.
 
 Bans
 ----

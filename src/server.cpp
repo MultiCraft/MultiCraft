@@ -2612,6 +2612,8 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
+		if (i.second.no_announce)
+			continue;
 		media_sent++;
 	}
 
@@ -2621,6 +2623,8 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 		if (str_ends_with(i.first, ".tr") && !str_ends_with(i.first, lang_suffix))
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
+			continue;
+		if (i.second.no_announce)
 			continue;
 
 		pkt << i.first << i.second.sha1_digest;
@@ -3562,7 +3566,7 @@ void Server::deleteParticleSpawner(const std::string &playername, u32 id)
 }
 
 bool Server::dynamicAddMedia(const std::string &filepath,
-	std::vector<RemotePlayer*> &sent_to)
+	bool client_cache, std::vector<RemotePlayer*> &sent_to)
 {
 	std::string filename = fs::GetFilenameFromPath(filepath.c_str());
 	if (m_media.find(filename) != m_media.end()) {
@@ -3579,7 +3583,7 @@ bool Server::dynamicAddMedia(const std::string &filepath,
 
 	// Push file to existing clients
 	NetworkPacket pkt(TOCLIENT_MEDIA_PUSH, 0);
-	pkt << raw_hash << filename << (bool) true;
+	pkt << raw_hash << filename << (bool) client_cache;
 	pkt.putLongString(filedata);
 
 	m_clients.lock();
@@ -3607,6 +3611,21 @@ bool Server::dynamicAddMedia(const std::string &filepath,
 	m_clients.unlock();
 
 	return true;
+}
+
+void Server::dynamicRemoveMedia(const std::string &filename)
+{
+	if (m_media.find(filename) == m_media.end()) {
+		errorstream << "Server::dynamicRemoveMedia(): file \"" << filename
+			<< "\" does not exist in media cache" << std::endl;
+		return;
+	}
+
+	// Just add a "no_announce" flag so that any clients that have already
+	// requested it can still get it sent to them.
+	m_media[filename].no_announce = true;
+
+	// TODO: Tell clients about the removal later?
 }
 
 // actions: time-reversed list
