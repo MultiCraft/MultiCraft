@@ -448,6 +448,23 @@ bool needsExtractAssets()
 	return jnienv->CallBooleanMethod(activityObj, needsExtract);
 }
 
+std::string getRecommendedDriver()
+{
+	if (jnienv == nullptr || activityObj == nullptr)
+		return "";
+
+	jmethodID recommended = jnienv->GetMethodID(activityClass,
+			"getRecommendedDriver", "()Ljava/lang/String;");
+
+	FATAL_ERROR_IF(recommended == nullptr,
+		"porting::getRecommendedDriver unable to find Java getRecommendedDriver method");
+
+	jstring result = (jstring) jnienv->CallObjectMethod(activityObj, recommended);
+	std::string driver = readJavaString(jnienv, result);
+	jnienv->DeleteLocalRef(result);
+	return driver;
+}
+
 int getMaxRefreshRate()
 {
 	jmethodID getMaxRefreshRate = jnienv->GetMethodID(activityClass,

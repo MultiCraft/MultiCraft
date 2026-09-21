@@ -35,6 +35,7 @@
 	void hideSplashScreen();
 	boolean needsExtractAssets();
 	boolean isGooglePC();
+	java.lang.String getRecommendedDriver();
 	void vibrationEffect(int);
 }
 -keepclasseswithmembernames,includedescriptorclasses class * {

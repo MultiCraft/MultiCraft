@@ -646,7 +646,7 @@ void ShaderSource::rebuildShaders()
 {
 	// Programs built ahead take the settings as uniforms, so the first build already stands
 	const video::E_DRIVER_TYPE type = RenderingEngine::get_video_driver()->getDriverType();
-	if (type == video::EDT_METAL)
+	if (type == video::EDT_METAL || type == video::EDT_VULKAN)
 		return;
 
 	MutexAutoLock lock(m_shaderinfo_cache_mutex);
@@ -725,7 +725,8 @@ static std::vector<std::vector<std::string>> readTable(const std::string &path)
 
 void registerPrecompiledShaders(video::IVideoDriver *driver)
 {
-	if (!driver || driver->getDriverType() != video::EDT_METAL)
+	const video::E_DRIVER_TYPE type = driver ? driver->getDriverType() : video::EDT_NULL;
+	if (type != video::EDT_METAL && type != video::EDT_VULKAN)
 		return;
 
 	// The programs build anew when a game starts with the setting changed in the main menu
@@ -735,25 +736,36 @@ void registerPrecompiledShaders(video::IVideoDriver *driver)
 	for (u32 i = 0; i < light.size(); i++)
 		driver->setPrecompiledConstant(17 + i, asSpelled(light[i]));
 
+	const bool vulkan = type == video::EDT_VULKAN;
+	const std::string api = vulkan ? "Vulkan" : "Metal";
 	const std::string dir = porting::path_share + DIR_DELIM + "client" + DIR_DELIM +
-			"shaders" + DIR_DELIM + "Metal" + DIR_DELIM;
+			"shaders" + DIR_DELIM + api + DIR_DELIM;
 
-	// Metal takes the MSL of both stages of each program
+	// Vulkan names 2 functions of its library per program, Metal takes the MSL of both stages
+	std::string library;
+	if (vulkan && (!fs::ReadFile(dir + "vulkan_shaders.spvlib", library) || library.empty() ||
+			!driver->addPrecompiledShaderLibrary(library.data(), (u32)library.size()))) {
+		errorstream << "The Vulkan shader library did not open" << std::endl;
+		return;
+	}
+
 	std::unordered_map<std::string, std::string> sources;
 	for (const std::vector<std::string> &p : readTable(dir + "programs.txt")) {
 		if (p.size() != 3)
 			continue;
 		std::string vertex = "vs_" + p[1], fragment = "fs_" + p[2];
-		for (std::string *stage : {&vertex, &fragment}) {
-			std::string &source = sources[*stage];
-			if (source.empty())
-				fs::ReadFile(dir + *stage + ".metal", source);
-			*stage = source;
+		if (!vulkan) {
+			for (std::string *stage : {&vertex, &fragment}) {
+				std::string &source = sources[*stage];
+				if (source.empty())
+					fs::ReadFile(dir + *stage + ".metal", source);
+				*stage = source;
+			}
 		}
 		if (vertex.empty() || fragment.empty() ||
 				!driver->addPrecompiledShader(p[0].c_str(), vertex.c_str(),
 				(u32)vertex.size() + 1, fragment.c_str(), (u32)fragment.size() + 1))
-			errorstream << "Could not register the Metal program " << p[0] << std::endl;
+			errorstream << "Could not register the " << api << " program " << p[0] << std::endl;
 	}
 }
 
@@ -969,7 +981,8 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 	irr_ptr<ShaderCallback> cb{new ShaderCallback(m_setter_factories)};
 
 	// A program built ahead of time takes the values the header spells out as uniforms
-	if (driver->getDriverType() == video::EDT_METAL) {
+	if (driver->getDriverType() == video::EDT_METAL ||
+			driver->getDriverType() == video::EDT_VULKAN) {
 		float spelled_wave[3];
 		for (int i = 0; i < 3; i++)
 			spelled_wave[i] = asSpelled(water_wave[i]);

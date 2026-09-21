@@ -184,7 +184,7 @@ local function formspec(tabview, name, tabdata)
 		tab_string = tab_string ..
 			"checkbox[8.25,0;cb_shaders;" .. fgettext("Shaders (experimental)") .. ";"
 					.. tostring(shaders_enabled) .. "]"
-	elseif video_driver ~= "metal" then
+	elseif video_driver ~= "metal" and video_driver ~= "vulkan" then
 		core.settings:set_bool("enable_shaders", false)
 		shaders_enabled = false
 		tab_string = tab_string ..

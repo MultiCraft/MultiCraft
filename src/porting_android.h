@@ -129,6 +129,8 @@ void hideSplashScreen();
  */
 bool needsExtractAssets();
 
+std::string getRecommendedDriver();
+
 /**
  * create asset manager for direct access files in apk
  */

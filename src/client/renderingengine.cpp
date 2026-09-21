@@ -164,6 +164,16 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 		return i;
 	};
 	u32 i = indexOf(g_settings->get("video_driver"));
+#ifdef __ANDROID__
+	// The driver for this device, unless the player set one the build has
+	if (!g_settings->existsLocal("video_driver") || i == drivers.size()) {
+		const std::string recommended = porting::getRecommendedDriver();
+		if (!recommended.empty()) {
+			actionstream << "Recommended video driver " << recommended << std::endl;
+			i = indexOf(recommended);
+		}
+	}
+#endif
 	// A name the build does not have, as a typo in /set, leaves the platform's driver
 	if (i == drivers.size()) {
 		errorstream << "Invalid video_driver specified; defaulting to "
@@ -249,6 +259,16 @@ RenderingEngine::~RenderingEngine()
 	m_device->closeDevice();
 	m_device->drop();
 	s_singleton = nullptr;
+}
+
+bool RenderingEngine::run()
+{
+	// A driver that lost its device draws nothing more: the game ends instead of freezing
+	if (driver->checkDriverReset()) {
+		errorstream << "The video driver lost its device" << std::endl;
+		return false;
+	}
+	return m_device->run();
 }
 
 v2u32 RenderingEngine::_getWindowSize() const
@@ -822,6 +842,7 @@ void RenderingEngine::draw_load_cleanup()
 std::vector<irr::video::E_DRIVER_TYPE> RenderingEngine::getSupportedVideoDrivers()
 {
 	static const irr::video::E_DRIVER_TYPE preferred[] = {
+		irr::video::EDT_VULKAN,
 		irr::video::EDT_METAL,
 		irr::video::EDT_ANGLE,
 		irr::video::EDT_OGLES2,
@@ -880,6 +901,7 @@ const VideoDriverInfo &RenderingEngine::getVideoDriverInfo(irr::video::E_DRIVER_
 		{(int)video::EDT_OGLES2, {"ogles2", "OpenGL ES2"}},
 		{(int)video::EDT_ANGLE,  {"angle",  "ANGLE"}},
 		{(int)video::EDT_METAL,  {"metal",  "Metal"}},
+		{(int)video::EDT_VULKAN, {"vulkan", "Vulkan"}},
 	};
 	return driver_info_map.at((int)type);
 }

@@ -372,6 +372,8 @@ class GameActivity : SDLActivity() {
 	fun isGooglePC() =
 		packageManager.hasSystemFeature("com.google.android.play.feature.HPE_EXPERIENCE")
 
+	fun getRecommendedDriver() = if (isAndroid11()) "vulkan" else ""
+
 	fun vibrationEffect(intensity: Int) {
 		val effect: Int = if (isAndroid10()) {
 			when (intensity) {

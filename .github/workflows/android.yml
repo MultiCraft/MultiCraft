@@ -33,6 +33,13 @@ jobs:
       uses: gradle/actions/setup-gradle@v6
     - name: Install GNU gettext
       run: sudo apt-get update && sudo apt-get install -y gettext
+    # Ubuntu's glslang is built without the SPIR-V optimizer that -O needs
+    - name: Install glslang
+      run: |
+        v=16.6.0
+        curl -sSL https://github.com/KhronosGroup/glslang/releases/download/$v/glslang-$v-linux-x86_64-release.tar.gz |
+          sudo tar xz -C /usr/local bin/glslang bin/glslangValidator
+        glslangValidator --version
     - name: Build with Gradle
       run: cd Android; ./gradlew assemblerelease
     - name: Save armeabi artifact
