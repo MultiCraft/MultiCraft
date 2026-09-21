@@ -84,13 +84,13 @@ struct MediaInfo
 {
 	std::string path;
 	std::string sha1_digest;
-	bool removed;
+	bool no_announce;
 
 	MediaInfo(const std::string &path_="",
 	          const std::string &sha1_digest_=""):
 		path(path_),
 		sha1_digest(sha1_digest_),
-		removed(false)
+		no_announce(false)
 	{
 	}
 };

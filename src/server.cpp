@@ -2612,7 +2612,7 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
-		if (i.second.removed)
+		if (i.second.no_announce)
 			continue;
 		media_sent++;
 	}
@@ -2624,7 +2624,7 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
-		if (i.second.removed)
+		if (i.second.no_announce)
 			continue;
 
 		pkt << i.first << i.second.sha1_digest;
@@ -3621,9 +3621,9 @@ void Server::dynamicRemoveMedia(const std::string &filename)
 		return;
 	}
 
-	// Just add a "removed" flag so that any clients that have already
+	// Just add a "no_announce" flag so that any clients that have already
 	// requested it can still get it sent to them.
-	m_media[filename].removed = true;
+	m_media[filename].no_announce = true;
 
 	// TODO: Tell clients about the removal later?
 }
