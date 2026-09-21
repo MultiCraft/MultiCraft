@@ -3566,7 +3566,7 @@ void Server::deleteParticleSpawner(const std::string &playername, u32 id)
 }
 
 bool Server::dynamicAddMedia(const std::string &filepath,
-	std::vector<RemotePlayer*> &sent_to)
+	bool client_cache, std::vector<RemotePlayer*> &sent_to)
 {
 	std::string filename = fs::GetFilenameFromPath(filepath.c_str());
 	if (m_media.find(filename) != m_media.end()) {
@@ -3583,7 +3583,7 @@ bool Server::dynamicAddMedia(const std::string &filepath,
 
 	// Push file to existing clients
 	NetworkPacket pkt(TOCLIENT_MEDIA_PUSH, 0);
-	pkt << raw_hash << filename << (bool) true;
+	pkt << raw_hash << filename << (bool) client_cache;
 	pkt.putLongString(filedata);
 
 	m_clients.lock();

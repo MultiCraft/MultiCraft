@@ -262,7 +262,8 @@ public:
 
 	void deleteParticleSpawner(const std::string &playername, u32 id);
 
-	bool dynamicAddMedia(const std::string &filepath, std::vector<RemotePlayer*> &sent_to);
+	bool dynamicAddMedia(const std::string &filepath, bool client_cache,
+			std::vector<RemotePlayer*> &sent_to);
 	void dynamicRemoveMedia(const std::string &filename);
 	bool addMediaFile(const std::string &filename, const std::string &filepath,
 			std::string *filedata = nullptr, std::string *digest = nullptr);

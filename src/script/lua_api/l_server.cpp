@@ -485,11 +485,19 @@ int ModApiServer::l_dynamic_add_media_raw(lua_State *L)
 	if (!getEnv(L))
 		throw LuaError("Dynamic media cannot be added before server has started up");
 
-	std::string filepath = readParam<std::string>(L, 1);
+	std::string filepath;
+	bool client_cache = true;
+	if (lua_istable(L, 1)) {
+		// We do not support dynamic media v2 at the moment
+		getstringfield(L, 1, "filepath", filepath);
+		getboolfield(L, 1, "client_cache", client_cache);
+	} else {
+		filepath = readParam<std::string>(L, 1);
+	}
 	CHECK_SECURE_PATH(L, filepath.c_str(), false);
 
 	std::vector<RemotePlayer*> sent_to;
-	bool ok = getServer(L)->dynamicAddMedia(filepath, sent_to);
+	bool ok = getServer(L)->dynamicAddMedia(filepath, client_cache, sent_to);
 	if (ok) {
 		// (see wrapper code in builtin)
 		lua_createtable(L, sent_to.size(), 0);
