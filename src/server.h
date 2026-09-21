@@ -84,11 +84,13 @@ struct MediaInfo
 {
 	std::string path;
 	std::string sha1_digest;
+	bool removed;
 
 	MediaInfo(const std::string &path_="",
 	          const std::string &sha1_digest_=""):
 		path(path_),
-		sha1_digest(sha1_digest_)
+		sha1_digest(sha1_digest_),
+		removed(false)
 	{
 	}
 };
@@ -261,6 +263,7 @@ public:
 	void deleteParticleSpawner(const std::string &playername, u32 id);
 
 	bool dynamicAddMedia(const std::string &filepath, std::vector<RemotePlayer*> &sent_to);
+	void dynamicRemoveMedia(const std::string &filename);
 	bool addMediaFile(const std::string &filename, const std::string &filepath,
 			std::string *filedata = nullptr, std::string *digest = nullptr);
 

@@ -2612,6 +2612,8 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
 			continue;
+		if (i.second.removed)
+			continue;
 		media_sent++;
 	}
 
@@ -2621,6 +2623,8 @@ void Server::sendMediaAnnouncement(session_t peer_id, const std::string &lang_co
 		if (str_ends_with(i.first, ".tr") && !str_ends_with(i.first, lang_suffix))
 			continue;
 		if (str_ends_with(i.first, ".tr.e") && !str_ends_with(i.first, lang_suffix + ".e"))
+			continue;
+		if (i.second.removed)
 			continue;
 
 		pkt << i.first << i.second.sha1_digest;
@@ -3607,6 +3611,21 @@ bool Server::dynamicAddMedia(const std::string &filepath,
 	m_clients.unlock();
 
 	return true;
+}
+
+void Server::dynamicRemoveMedia(const std::string &filename)
+{
+	if (m_media.find(filename) == m_media.end()) {
+		errorstream << "Server::dynamicRemoveMedia(): file \"" << filename
+			<< "\" does not exist in media cache" << std::endl;
+		return;
+	}
+
+	// Just add a "removed" flag so that any clients that have already
+	// requested it can still get it sent to them.
+	m_media[filename].removed = true;
+
+	// TODO: Tell clients about the removal later?
 }
 
 // actions: time-reversed list
