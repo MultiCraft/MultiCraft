@@ -506,6 +506,25 @@ void Minimap::blitMinimapPixelsToImageSurface(
 	}
 }
 
+// Writes the image into the texture when their sizes match, else replaces the texture
+static void updateTexture(video::IVideoDriver *driver, video::ITexture *&texture,
+	const char *name, video::IImage *image)
+{
+	const core::dimension2d<u32> &dim = image->getDimension();
+	if (texture && texture->getSize() == dim && texture->getOriginalSize() == dim) {
+		if (void *pixels = texture->lock(video::ETLM_WRITE_ONLY)) {
+			image->copyToScaling(pixels, dim.Width, dim.Height,
+				texture->getColorFormat(), texture->getPitch());
+			texture->unlock();
+			texture->regenerateMipMapLevels();
+			return;
+		}
+	}
+
+	driver->removeTexture(texture);
+	texture = driver->addTexture(name, image);
+}
+
 video::ITexture *Minimap::getMinimapTexture()
 {
 	// update minimap textures when new scan is ready
@@ -569,14 +588,8 @@ video::ITexture *Minimap::getMinimapTexture()
 		}
 	}
 
-	if (data->texture)
-		driver->removeTexture(data->texture);
-	if (data->heightmap_texture)
-		driver->removeTexture(data->heightmap_texture);
-
-	data->texture = driver->addTexture("minimap__", minimap_image);
-	data->heightmap_texture =
-		driver->addTexture("minimap_heightmap__", heightmap_image);
+	updateTexture(driver, data->texture, "minimap__", minimap_image);
+	updateTexture(driver, data->heightmap_texture, "minimap_heightmap__", heightmap_image);
 	minimap_image->drop();
 	heightmap_image->drop();
 
