@@ -127,6 +127,19 @@ int ObjectRef::l_get_pos(lua_State *L)
 	return 1;
 }
 
+// get_id(self)
+int ObjectRef::l_get_id(lua_State *L)
+{
+	NO_MAP_LOCK_REQUIRED;
+	ObjectRef *ref = checkobject(L, 1);
+	ServerActiveObject *sao = getobject(ref);
+	if (sao == nullptr)
+		return 0;
+
+	lua_pushinteger(L, sao->getId());
+	return 1;
+}
+
 // set_pos(self, pos)
 int ObjectRef::l_set_pos(lua_State *L)
 {
@@ -2329,6 +2342,7 @@ luaL_Reg ObjectRef::methods[] = {
 	// ServerActiveObject
 	luamethod(ObjectRef, remove),
 	luamethod_aliased(ObjectRef, get_pos, getpos),
+	luamethod(ObjectRef, get_id),
 	luamethod_aliased(ObjectRef, set_pos, setpos),
 	luamethod_aliased(ObjectRef, move_to, moveto),
 	luamethod(ObjectRef, punch),

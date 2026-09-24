@@ -265,6 +265,25 @@ int ModApiClient::l_get_meta(lua_State *L)
 	return 1;
 }
 
+// set_object_bone_position(id, bone, position, rotation)
+int ModApiClient::l_set_object_bone_position(lua_State *L)
+{
+	u16 id = luaL_checkinteger(L, 1);
+	std::string bone = readParam<std::string>(L, 2, "");
+	v3f position = readParam<v3f>(L, 3, v3f(0, 0, 0));
+	v3f rotation = readParam<v3f>(L, 4, v3f(0, 0, 0));
+
+	ClientActiveObject *cao = getClient(L)->getEnv().getActiveObject(id);
+	if (!cao) {
+		lua_pushboolean(L, false);
+		return 1;
+	}
+
+	cao->setBonePosition(bone, position, rotation);
+	lua_pushboolean(L, true);
+	return 1;
+}
+
 // sound_play(spec, parameters)
 int ModApiClient::l_sound_play(lua_State *L)
 {
@@ -519,6 +538,7 @@ void ModApiClient::Initialize(lua_State *L, int top)
 	API_FCT(get_node_or_nil);
 	API_FCT(disconnect);
 	API_FCT(get_meta);
+	API_FCT(set_object_bone_position);
 	API_FCT(sound_play);
 	API_FCT(sound_stop);
 	API_FCT(sound_fade);

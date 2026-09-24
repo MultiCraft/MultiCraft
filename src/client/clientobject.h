@@ -61,6 +61,8 @@ public:
 	{ static std::unordered_set<int> rv; return rv; }
 	virtual void updateAttachments() {};
 
+	virtual void setBonePosition(const std::string &bone, v3f position, v3f rotation) {}
+
 	virtual bool doShowSelectionBox() { return true; }
 
 	// Step object in time

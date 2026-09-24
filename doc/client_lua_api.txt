@@ -849,6 +849,14 @@ Call these functions only at load time!
     * Returns `false` if the client is already disconnecting otherwise returns `true`.
 * `minetest.get_server_info()`
     * Returns [server info](#server-info).
+* `minetest.set_object_bone_position(id, bone, position, rotation)`
+    * Moves a bone of a loaded object, `false` if there is no such object
+    * `id`: object id, as returned by `get_id()` on the server
+    * `bone`: string, `""` for the root bone
+    * `position`: `{x=num, y=num, z=num}`, relative to the parent bone
+    * `rotation`: `{x=num, y=num, z=num}`, in degrees
+    * Affects this client only, and until the server sends its own position
+      for that bone
 * `minetest.send_respawn()`
     * Sends a respawn request to the server.
 * `minetest.change_password(current_password, new_password)`

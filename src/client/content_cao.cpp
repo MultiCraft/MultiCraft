@@ -1501,6 +1501,12 @@ void GenericCAO::updateAnimationSpeed()
 	m_animated_meshnode->setAnimationSpeed(m_animation_speed);
 }
 
+// Holds until the server sends its own position for that bone
+void GenericCAO::setBonePosition(const std::string &bone, v3f position, v3f rotation)
+{
+	m_bone_position[bone] = core::vector2d<v3f>(position, rotation);
+}
+
 void GenericCAO::updateBonePosition()
 {
 	if (m_bone_position.empty() || !m_animated_meshnode)
