@@ -14,7 +14,7 @@ cd irrlicht-src/source/Irrlicht
 
 xcodebuild build \
 	 ARCHS="$OSX_ARCHES" \
-	 OTHER_CFLAGS="-I$DEPS_DIR/libpng/include -I$DEPS_DIR/libjpeg/include -I$DEPS_DIR/libSDL/include -I$DEPS_DIR/angle/include" \
+	 OTHER_CFLAGS="\$(inherited) -I$DEPS_DIR/libpng/include -I$DEPS_DIR/libjpeg/include -I$DEPS_DIR/libSDL/include -I$DEPS_DIR/angle/include" \
 	-project Irrlicht.xcodeproj \
 	-configuration Release \
 	-scheme Irrlicht_OSX

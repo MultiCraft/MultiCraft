@@ -233,7 +233,6 @@
 		84F20E8F25D52868009562A9 /* directiontables.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E7D25D52868009562A9 /* directiontables.cpp */; };
 		84F20EA125D528C5009562A9 /* core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9425D528C5009562A9 /* core.cpp */; };
 		84F20EA325D528C5009562A9 /* plain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9725D528C5009562A9 /* plain.cpp */; };
-		84F20EA525D528C5009562A9 /* factory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9B25D528C5009562A9 /* factory.cpp */; };
 		84F20EB025D528D7009562A9 /* subgames.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EA825D528D6009562A9 /* subgames.cpp */; };
 		84F20EB125D528D7009562A9 /* packages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAD25D528D7009562A9 /* packages.cpp */; };
 		84F20EB225D528D7009562A9 /* mods.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAE25D528D7009562A9 /* mods.cpp */; };
@@ -754,12 +753,10 @@
 		84F20E7D25D52868009562A9 /* directiontables.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = directiontables.cpp; path = ../../../src/util/directiontables.cpp; sourceTree = "<group>"; };
 		84F20E7E25D52868009562A9 /* pointer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pointer.h; path = ../../../src/util/pointer.h; sourceTree = "<group>"; };
 		84F20E7F25D52868009562A9 /* quicktune.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = quicktune.h; path = ../../../src/util/quicktune.h; sourceTree = "<group>"; };
-		84F20E9225D528C5009562A9 /* factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = factory.h; path = ../../../src/client/render/factory.h; sourceTree = "<group>"; };
 		84F20E9325D528C5009562A9 /* plain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = plain.h; path = ../../../src/client/render/plain.h; sourceTree = "<group>"; };
 		84F20E9425D528C5009562A9 /* core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = core.cpp; path = ../../../src/client/render/core.cpp; sourceTree = "<group>"; };
 		84F20E9725D528C5009562A9 /* plain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = plain.cpp; path = ../../../src/client/render/plain.cpp; sourceTree = "<group>"; };
 		84F20E9825D528C5009562A9 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = core.h; path = ../../../src/client/render/core.h; sourceTree = "<group>"; };
-		84F20E9B25D528C5009562A9 /* factory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = factory.cpp; path = ../../../src/client/render/factory.cpp; sourceTree = "<group>"; };
 		84F20EA825D528D6009562A9 /* subgames.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = subgames.cpp; path = ../../../src/content/subgames.cpp; sourceTree = "<group>"; };
 		84F20EA925D528D6009562A9 /* subgames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = subgames.h; path = ../../../src/content/subgames.h; sourceTree = "<group>"; };
 		84F20EAA25D528D6009562A9 /* mods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mods.h; path = ../../../src/content/mods.h; sourceTree = "<group>"; };
@@ -942,8 +939,6 @@
 			children = (
 				84F20E9425D528C5009562A9 /* core.cpp */,
 				84F20E9825D528C5009562A9 /* core.h */,
-				84F20E9B25D528C5009562A9 /* factory.cpp */,
-				84F20E9225D528C5009562A9 /* factory.h */,
 				84F20E9725D528C5009562A9 /* plain.cpp */,
 				84F20E9325D528C5009562A9 /* plain.h */,
 			);
@@ -1980,7 +1975,6 @@
 				84F20F0C25D52958009562A9 /* guiAnimatedImage.cpp in Sources */,
 				84135C1A25D526D700CA4DCF /* clientmap.cpp in Sources */,
 				84F20F0125D52958009562A9 /* guiInventoryList.cpp in Sources */,
-				84F20EA525D528C5009562A9 /* factory.cpp in Sources */,
 				84F20E2425D5282A009562A9 /* l_env.cpp in Sources */,
 				84135B8E25D5264C00CA4DCF /* main.cpp in Sources */,
 				84F20E2825D5282A009562A9 /* l_nodemeta.cpp in Sources */,

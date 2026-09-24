@@ -160,6 +160,7 @@ private:
 	float m_usage_timer = 0;
 	// total count of contained particles
 	u16 m_count = 0;
+	u16 m_drawn_count = 0;
 	mutable bool m_bounding_box_dirty = true;
 };
 

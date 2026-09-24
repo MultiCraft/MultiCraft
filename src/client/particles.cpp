@@ -487,6 +487,7 @@ std::optional<u16> ParticleBuffer::allocate()
 			vertices[4 * index + i] = video::S3DVertex();
 		for (u16 i = 0; i < 6; i++)
 			indices[6 * index + i] = 4 * index + quad_indices[i];
+		m_drawn_count++;
 		return index;
 	}
 
@@ -496,6 +497,7 @@ std::optional<u16> ParticleBuffer::allocate()
 	// The buffer never shrinks, ParticleManager drops it once it falls idle
 	video::S3DVertex vertices[4] = {};
 	m_mesh_buffer->append(vertices, 4, quad_indices, 6);
+	m_drawn_count++;
 	return m_count++;
 }
 
@@ -503,6 +505,8 @@ void ParticleBuffer::release(u16 index)
 {
 	assert(index < m_count);
 	u16 *indices = m_mesh_buffer->getIndices();
+	if (indices[6 * index + 1] != 0)
+		m_drawn_count--;
 	for (u16 i = 0; i < 6; i++)
 		indices[6 * index + i] = 0;
 	m_free_list.push_back(index);
@@ -512,8 +516,12 @@ void ParticleBuffer::setQuadDrawn(u16 index, bool drawn)
 {
 	assert(index < m_count);
 	u16 *indices = m_mesh_buffer->getIndices();
+	if ((indices[6 * index + 1] != 0) == drawn)
+		return;
+
 	for (u16 i = 0; i < 6; i++)
 		indices[6 * index + i] = drawn ? 4 * index + quad_indices[i] : 0;
+	m_drawn_count += drawn ? 1 : -1;
 	m_bounding_box_dirty = true;
 }
 
@@ -557,7 +565,7 @@ const aabb3f &ParticleBuffer::getBoundingBox() const
 
 void ParticleBuffer::render()
 {
-	if (isEmpty())
+	if (m_drawn_count == 0)
 		return;
 
 	video::IVideoDriver *driver = SceneManager->getVideoDriver();

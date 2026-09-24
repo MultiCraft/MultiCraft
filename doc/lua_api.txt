@@ -2061,6 +2061,16 @@ Some of the values in the key-value store are handled specially:
 * `color`: A `ColorString`, which sets the stack's color.
 * `palette_index`: If the item has a palette, this is used to get the
   current color from the palette.
+* `inventory_image`: Overrides the item's `inventory_image`, so that one item
+  can be shown in many ways instead of registering one item per look.
+* `wield_image`: Overrides the item's `wield_image`.
+* `tiles`: Overrides the texture of the mesh the item is drawn with, one texture
+  for the whole mesh. It has no effect where the item is drawn as a flat icon,
+  use `inventory_image` for that. The player's hand uses this to wear their skin.
+
+The images are used wherever the item is drawn: in the hand, in the inventory, in
+the hotbar and on the ground. Placing a node does not carry them over, a node is
+drawn with the tiles of its definition.
 
 Example:
 
@@ -5679,6 +5689,13 @@ Server
       unless they reconnect to the server. (callback won't be called)
     * Since media transferred this way currently does not use client caching
        or HTTP transfers, dynamic media should not be used with big files.
+* `minetest.dynamic_remove_media(filename)`
+    * Removes the media that was added with the specified name.
+    * Does not remove media from existing clients (yet).
+    * The media entry is kept in the server's memory so that any clients that
+      try and request it can still be sent a copy.
+    * The file is not safe to delete for at least 30 seconds after calling this,
+      since clients that are connecting may still be requesting this file.
 
 Bans
 ----

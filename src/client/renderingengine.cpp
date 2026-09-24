@@ -36,7 +36,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "clientmap.h"
 #include "renderingengine.h"
 #include "render/core.h"
+#if 0
 #include "render/factory.h"
+#endif
+#include "render/plain.h"
 #include "inputhandler.h"
 #include "gettext.h"
 #include "../gui/guiSkin.h"
@@ -143,7 +146,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 
 	// Determine driver
 #if defined(_IRR_COMPILE_WITH_ANGLE_)
-	video::E_DRIVER_TYPE driverType = video::EDT_METAL;
+	video::E_DRIVER_TYPE driverType = video::EDT_ANGLE;
 #elif defined(__ANDROID__) || defined(__IOS__)
 	video::E_DRIVER_TYPE driverType = video::EDT_OGLES2;
 #else
@@ -168,7 +171,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 #if defined(__ANDROID__) || defined(__IOS__)
 	// Shaders are required on OpenGL ES2, and on the ANGLE-backed context too
 	g_settings->setBool("enable_shaders", driverType == video::EDT_OGLES2 ||
-			driverType == video::EDT_METAL);
+			driverType == video::EDT_ANGLE);
 #endif
 
 	SIrrlichtCreationParameters params = SIrrlichtCreationParameters();
@@ -200,6 +203,8 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 
 	// Textures live on the GPU, a copy in main memory only doubles their cost
 	driver->setTextureCreationFlag(video::ETCF_ALLOW_MEMORY_COPY, false);
+	// 16 bit textures stay 16 bit on the GPU when textures are converted to them
+	driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, !g_settings->getBool("convert_to_16bit"));
 
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
 	const video::SExposedVideoData exposedData = driver->getExposedVideoData();
@@ -867,8 +872,11 @@ std::vector<irr::video::E_DRIVER_TYPE> RenderingEngine::getSupportedVideoDrivers
 
 void RenderingEngine::_initialize(Client *client, Hud *hud)
 {
+#if 0
 	const std::string &draw_mode = g_settings->get("3d_mode");
 	core.reset(createRenderingCore(draw_mode, m_device, client, hud));
+#endif
+	core.reset(new RenderingCorePlain(m_device, client, hud));
 	core->initialize();
 }
 
@@ -911,7 +919,7 @@ const char *RenderingEngine::getVideoDriverName(irr::video::E_DRIVER_TYPE type)
 			"ogles1",
 			"ogles2",
 			"webgl1",
-			"metal",
+			"angle",
 	};
 
 	return driver_ids[type];
@@ -929,7 +937,7 @@ const char *RenderingEngine::getVideoDriverFriendlyName(irr::video::E_DRIVER_TYP
 			"OpenGL ES1",
 			"OpenGL ES2",
 			"WebGL 1",
-			"Metal",
+			"ANGLE",
 	};
 
 	return driver_names[type];

@@ -860,8 +860,8 @@ void GenericCAO::updateLight(u32 day_night_ratio)
 
 	// Not darker than its own light, brightened by others, like node sources
 	light = MYMAX(light, decode_light(m_prop.light_source));
-	if (u8 lit = m_env->getPointLightBrightness(getLightPos()))
-		light = MYMAX(light, lit);
+	if (u8 point = m_env->getPointLightLevel(getLightPos()))
+		light = MYMAX(light, decode_light(point + m_glow));
 
 	if (light != m_last_light) {
 		m_last_light = light;
@@ -940,7 +940,7 @@ void GenericCAO::updateMarker()
 	scene::ISceneNode *node = getSceneNode();
 	if (!node)
 		return;
-	m_marker = m_client->getMinimap()->addMarker(node);
+	m_marker = m_client->getMinimap()->addMarker(node, m_is_player);
 }
 
 void GenericCAO::updateNametag()

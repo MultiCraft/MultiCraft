@@ -293,7 +293,7 @@ bool SoundManagerSingleton::init()
 	return true;
 }
 
-#ifdef __IOS__
+#if defined(__IOS__) || defined(__ANDROID__)
 void SoundManagerSingleton::pauseDevice()
 {
 	alcDevicePauseSOFT(m_device.get());

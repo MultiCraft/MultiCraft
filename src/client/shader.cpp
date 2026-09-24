@@ -220,6 +220,9 @@ class MainShaderConstantSetter : public IShaderConstantSetter
 	core::matrix4 m_world_in, m_view_in, m_proj_in;
 	core::matrix4 m_mat_world_view, m_mat_world_view_proj;
 
+	CachedPixelShaderSetting<float, 3> m_node_color;
+	video::SColor m_material_color = 0xFFFFFFFF;
+
 public:
 	MainShaderConstantSetter() :
 		  m_world_view_proj("mWorldViewProj")
@@ -228,13 +231,25 @@ public:
 		, m_world_view("mWorldView")
 		, m_texture("mTexture")
 #endif
+		, m_node_color("nodeColor")
 	{}
 	~MainShaderConstantSetter() = default;
+
+	virtual void onSetMaterial(const video::SMaterial &material) override
+	{
+		m_material_color = material.DiffuseColor;
+	}
 
 	virtual void onSetConstants(video::IMaterialRendererServices *services) override
 	{
 		video::IVideoDriver *driver = services->getVideoDriver();
 		sanity_check(driver);
+
+		float node_color[3] = {
+			m_material_color.getRed() / 255.0f,
+			m_material_color.getGreen() / 255.0f,
+			m_material_color.getBlue() / 255.0f };
+		m_node_color.set(node_color, services);
 
 		const core::matrix4 &world = driver->getTransform(video::ETS_WORLD);
 		const core::matrix4 &view = driver->getTransform(video::ETS_VIEW);

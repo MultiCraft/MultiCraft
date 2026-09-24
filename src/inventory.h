@@ -110,6 +110,23 @@ struct ItemStack
 		return itemdef->get(name);
 	}
 
+	const std::string &getInventoryImage(IItemDefManager *itemdef) const
+	{
+		const std::string &image = metadata.getString("inventory_image");
+		return image.empty() ? getDefinition(itemdef).inventory_image : image;
+	}
+
+	const std::string &getWieldImage(IItemDefManager *itemdef) const
+	{
+		const std::string &image = metadata.getString("wield_image");
+		return image.empty() ? getDefinition(itemdef).wield_image : image;
+	}
+
+	const std::string &getTiles() const
+	{
+		return metadata.getString("tiles");
+	}
+
 	// Get tool digging properties, or those of the hand if not a tool
 	const ToolCapabilities& getToolCapabilities(
 			IItemDefManager *itemdef) const

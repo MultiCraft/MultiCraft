@@ -19,11 +19,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 #include "irrlichttypes_extrabloated.h"
+#include "irr_ptr.h"
+#include "inventory.h"
 
-struct ItemStack;
 class Client;
 class ITextureSource;
 struct ContentFeatures;
@@ -100,6 +102,11 @@ private:
 
 	// Child scene node with the current wield mesh
 	scene::IMeshSceneNode *m_meshnode = nullptr;
+	std::optional<ItemStack> m_item;
+	irr_ptr<video::ITexture> m_tiles;
+
+	void buildMesh(const ItemStack &item, Client *client, bool check_wield_image);
+	void setTiles(const std::string &tiles, ITextureSource *tsrc);
 	video::E_MATERIAL_TYPE m_material_type;
 
 	// True if EMF_LIGHTING should be enabled.

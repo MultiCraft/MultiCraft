@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "porting.h" // for sleep_ms(), get_sysinfo(), secure_rand_fill_buf()
 #include <iostream>
 #include <sstream>
+#include <utility>
 #include <list>
 #include <map>
 #include <cerrno>
@@ -54,12 +55,12 @@ HTTPFetchRequest::HTTPFetchRequest() :
 }
 
 
-static void httpfetch_deliver_result(const HTTPFetchResult &fetch_result)
+static void httpfetch_deliver_result(HTTPFetchResult &&fetch_result)
 {
 	unsigned long caller = fetch_result.caller;
 	if (caller != HTTPFETCH_DISCARD) {
 		MutexAutoLock lock(g_httpfetch_mutex);
-		g_httpfetch_results[caller].push(fetch_result);
+		g_httpfetch_results[caller].push(std::move(fetch_result));
 	}
 }
 
@@ -158,9 +159,9 @@ bool httpfetch_async_get(unsigned long caller, HTTPFetchResult &fetch_result)
 static size_t httpfetch_writefunction(
 		char *ptr, size_t size, size_t nmemb, void *userdata)
 {
-	std::ostringstream *stream = (std::ostringstream*)userdata;
+	std::string *body = (std::string *)userdata;
 	size_t count = size * nmemb;
-	stream->write(ptr, count);
+	body->append(ptr, count);
 	return count;
 }
 
@@ -213,12 +214,12 @@ public:
 	~HTTPFetchOngoing();
 
 	CURLcode start(CURLM *multi);
-	const HTTPFetchResult * complete(CURLcode res);
+	HTTPFetchResult * complete(CURLcode res);
 
 	const HTTPFetchRequest &getRequest()    const { return request; };
 	const CURL             *getEasyHandle() const { return curl; };
 
-	size_t getDownloadedBytes() { return oss.tellp(); }
+	size_t getDownloadedBytes() { return result.data.size(); }
 	void getContentLength(curl_off_t *content_length) {
 		CURLcode error = curl_easy_getinfo(curl,
 				CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, content_length);
@@ -232,7 +233,6 @@ private:
 	CURLM *multi = nullptr;
 	HTTPFetchRequest request;
 	HTTPFetchResult result;
-	std::ostringstream oss;
 	struct curl_slist *http_header = nullptr;
 	curl_mime *multipart_mime = nullptr;
 };
@@ -242,8 +242,7 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 		CurlHandlePool *pool_):
 	pool(pool_),
 	request(request_),
-	result(request_),
-	oss(std::ios::binary)
+	result(request_)
 {
 	curl = pool->alloc();
 	if (!curl)
@@ -293,9 +292,6 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 	if (!request.useragent.empty())
 		curl_easy_setopt(curl, CURLOPT_USERAGENT, request.useragent.c_str());
 
-	// Set up a write callback that writes to the
-	// ostringstream ongoing->oss, unless the data
-	// is to be discarded
 	if (request.caller == HTTPFETCH_DISCARD) {
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
 				httpfetch_discardfunction);
@@ -303,7 +299,7 @@ HTTPFetchOngoing::HTTPFetchOngoing(const HTTPFetchRequest &request_,
 	} else {
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
 				httpfetch_writefunction);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &oss);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &result.data);
 	}
 
 	// Set data from fields or raw_data
@@ -394,11 +390,10 @@ CURLcode HTTPFetchOngoing::start(CURLM *multi_)
 	return CURLE_OK;
 }
 
-const HTTPFetchResult * HTTPFetchOngoing::complete(CURLcode res)
+HTTPFetchResult * HTTPFetchOngoing::complete(CURLcode res)
 {
 	result.succeeded = (res == CURLE_OK);
 	result.timeout = (res == CURLE_OPERATION_TIMEDOUT);
-	result.data = oss.str();
 
 	// Get HTTP/FTP response code
 	result.response_code = 0;
@@ -597,7 +592,7 @@ protected:
 			}
 			else {
 				m_completed_download_bytes += ongoing->getDownloadedBytes();
-				httpfetch_deliver_result(*ongoing->complete(res));
+				httpfetch_deliver_result(std::move(*ongoing->complete(res)));
 				delete ongoing;
 			}
 		}
@@ -619,7 +614,7 @@ protected:
 			// m_all_ongoing[i] succeeded or failed.
 			HTTPFetchOngoing *ongoing = m_all_ongoing[i];
 			m_completed_download_bytes += ongoing->getDownloadedBytes();
-			httpfetch_deliver_result(*ongoing->complete(msg->data.result));
+			httpfetch_deliver_result(std::move(*ongoing->complete(msg->data.result)));
 			delete ongoing;
 			m_all_ongoing.erase(m_all_ongoing.begin() + i);
 		}
@@ -892,7 +887,7 @@ void httpfetch_async(const HTTPFetchRequest &fetch_request)
 			<< " because USE_CURL=0" << std::endl;
 
 	HTTPFetchResult fetch_result(fetch_request); // sets succeeded = false etc.
-	httpfetch_deliver_result(fetch_result);
+	httpfetch_deliver_result(std::move(fetch_result));
 }
 
 static void httpfetch_request_clear(unsigned long caller)

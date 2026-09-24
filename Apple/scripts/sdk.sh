@@ -12,4 +12,4 @@ export CC=$(xcrun --sdk macosx --find clang)
 export CXX=$(xcrun --sdk macosx --find clang++)
 export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
 
-export OSX_FLAGS="-fdata-sections -ffunction-sections -fvisibility=hidden -fvisibility-inlines-hidden -O3 -ffast-math -flto -D__FILE__=__FILE_NAME__ -Wno-builtin-macro-redefined"
+export OSX_FLAGS="-fdata-sections -ffunction-sections -fvisibility=hidden -fvisibility-inlines-hidden -O3 -ffast-math -flto -DNDEBUG -D__FILE__=__FILE_NAME__ -Wno-builtin-macro-redefined"

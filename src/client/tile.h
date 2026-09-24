@@ -140,11 +140,6 @@ public:
 
 IWritableTextureSource *createTextureSource(bool main_menu);
 
-#if ENABLE_GLES && !defined(__APPLE__)
-bool hasNPotSupport();
-video::IImage * Align2Npot2(video::IImage * image, irr::video::IVideoDriver* driver);
-#endif
-
 enum MaterialType{
 	TILE_MATERIAL_BASIC,
 	TILE_MATERIAL_ALPHA,

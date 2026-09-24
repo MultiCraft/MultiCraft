@@ -135,6 +135,7 @@ public:
 	const std::vector<PointLight> &getPointLights() const { return m_point_lights; }
 
 	// Brightness the light sources add at pos, one level lost per node
+	u8 getPointLightLevel(const v3f &pos) const;
 	u8 getPointLightBrightness(const v3f &pos) const;
 
 	bool hasClientEnvEvents() const { return !m_client_event_queue.empty(); }

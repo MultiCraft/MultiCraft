@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "hud.h"
 #include "settings.h"
 
-#ifdef __IOS__
+#if defined(__IOS__) || defined(__ANDROID__)
 #include "porting.h"
 extern "C" void external_pause_game(bool unpause = true);
 
@@ -355,7 +355,7 @@ RealInputHandler::RealInputHandler(MyEventReceiver *receiver) : m_receiver(recei
 	m_receiver->sdl_game_controller = &sdl_game_controller;
 	m_receiver->input = this;
 
-#ifdef __IOS__
+#if defined(__IOS__) || defined(__ANDROID__)
 	SDL_AddEventWatch(SdlEventWatcher, nullptr);
 #endif
 #endif
@@ -367,7 +367,7 @@ RealInputHandler::RealInputHandler(MyEventReceiver *receiver) : m_receiver(recei
 RealInputHandler::~RealInputHandler()
 {
 #if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-#ifdef __IOS__
+#if defined(__IOS__) || defined(__ANDROID__)
 	SDL_RemoveEventWatch(SdlEventWatcher, nullptr);
 #endif
 #endif
@@ -375,7 +375,7 @@ RealInputHandler::~RealInputHandler()
 	g_settings->deregisterChangedCallback("enable_joysticks", settingsCallback, this);
 }
 
-#ifdef __IOS__
+#if defined(__IOS__) || defined(__ANDROID__)
 bool RealInputHandler::SdlEventWatcher(void *userdata, SDL_Event *event)
 {
 	if (event->type == SDL_EVENT_WILL_ENTER_BACKGROUND) {

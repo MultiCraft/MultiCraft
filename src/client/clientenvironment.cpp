@@ -137,7 +137,7 @@ void ClientEnvironment::setLocalPlayer(LocalPlayer *player)
 	m_local_player = player;
 }
 
-u8 ClientEnvironment::getPointLightBrightness(const v3f &pos) const
+u8 ClientEnvironment::getPointLightLevel(const v3f &pos) const
 {
 	u8 level = 0;
 	for (const PointLight &pl : m_point_lights) {
@@ -145,6 +145,12 @@ u8 ClientEnvironment::getPointLightBrightness(const v3f &pos) const
 		if (nodes < pl.level)
 			level = MYMAX(level, (u8)(pl.level - nodes));
 	}
+	return level;
+}
+
+u8 ClientEnvironment::getPointLightBrightness(const v3f &pos) const
+{
+	u8 level = getPointLightLevel(pos);
 	return level ? decode_light(level) : 0;
 }
 
