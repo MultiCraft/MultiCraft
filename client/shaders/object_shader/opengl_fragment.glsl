@@ -35,22 +35,12 @@ const float fogShadingParameter = 1.0 / (1.0 - fogStart);
 	equation used:  ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F
 */
 
-vec3 uncharted2Tonemap(vec3 x)
-{
-	return ((x * (0.12 * x + 0.03) + 0.002) / (x * (0.12 * x + 0.3) + 0.06)) - 0.03333;
-}
-
+// pow(1.25 * curve(5.5 * pow(c, 2.2)), 1 / 1.6) as 1 polynomial over [0, 1], off by 2 of 255 at most in mediump
 vec4 applyToneMapping(vec4 color)
 {
-	color = vec4(pow(color.rgb, vec3(2.2)), color.a);
-	const float gamma = 1.6;
-	const float exposureBias = 5.5;
-	color.rgb = uncharted2Tonemap(exposureBias * color.rgb);
-	// Precalculated white_scale from
-	//vec3 whiteScale = 1.0 / uncharted2Tonemap(vec3(W));
-	vec3 whiteScale = vec3(1.25);
-	color.rgb *= whiteScale;
-	return vec4(pow(color.rgb, vec3(1.0 / gamma)), color.a);
+	vec3 c = clamp(color.rgb, 0.0, 1.0);
+	c = ((((-1.65916 * c + 5.95602) * c - 8.01241) * c + 4.24287) * c + 0.374687) * c - 0.000941302;
+	return vec4(max(c, 0.0), color.a);
 }
 #endif
 
