@@ -476,7 +476,7 @@ int ObjectRef::l_get_local_animation(lua_State *L)
 	return 5;
 }
 
-// set_eye_offset(self, firstperson, thirdperson)
+// set_eye_offset(self, firstperson, thirdperson_back, thirdperson_front, camera_distance)
 int ObjectRef::l_set_eye_offset(lua_State *L)
 {
 	NO_MAP_LOCK_REQUIRED;
@@ -487,6 +487,7 @@ int ObjectRef::l_set_eye_offset(lua_State *L)
 
 	v3f offset_first = readParam<v3f>(L, 2, v3f(0, 0, 0));
 	v3f offset_third = readParam<v3f>(L, 3, v3f(0, 0, 0));
+	v3f offset_third_front = readParam<v3f>(L, 4, v3f(0, 0, 0));
 
 	// Prevent abuse of offset values (keep player always visible)
 	offset_third.X = rangelim(offset_third.X,-10,10);
@@ -494,7 +495,15 @@ int ObjectRef::l_set_eye_offset(lua_State *L)
 	/* TODO: if possible: improve the camera collision detection to allow Y <= -1.5) */
 	offset_third.Y = rangelim(offset_third.Y,-10,15); //1.5*BS
 
-	getServer(L)->setPlayerEyeOffset(player, offset_first, offset_third);
+	offset_third_front.X = rangelim(offset_third_front.X,-10,10);
+	offset_third_front.Z = rangelim(offset_third_front.Z,-5,5);
+	offset_third_front.Y = rangelim(offset_third_front.Y,-10,15);
+
+	float camera_distance_third = rangelim(readParam<float>(L, 5, 0.0f), 0.0f,
+		CAMERA_THIRD_PERSON_MAX_EXTRA_DISTANCE);
+
+	getServer(L)->setPlayerEyeOffset(player, offset_first, offset_third,
+		offset_third_front, camera_distance_third);
 	lua_pushboolean(L, true);
 	return 1;
 }
@@ -510,7 +519,9 @@ int ObjectRef::l_get_eye_offset(lua_State *L)
 
 	push_v3f(L, player->eye_offset_first);
 	push_v3f(L, player->eye_offset_third);
-	return 2;
+	push_v3f(L, player->eye_offset_third_front);
+	lua_pushnumber(L, player->camera_distance_third);
+	return 4;
 }
 
 // send_mapblock(self, pos)
