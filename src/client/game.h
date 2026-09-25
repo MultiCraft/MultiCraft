@@ -62,8 +62,6 @@ class GameGlobalShaderConstantSetter : public IShaderConstantSetter
 	CachedPixelShaderSetting<float> m_animation_timer_pixel;
 	CachedPixelShaderSetting<float, 3> m_day_light;
 	CachedPixelShaderSetting<float, 4> m_star_color;
-	CachedPixelShaderSetting<float, 3> m_eye_position_pixel;
-	CachedVertexShaderSetting<float, 3> m_eye_position_vertex;
 	CachedPixelShaderSetting<float, 3> m_minimap_yaw;
 	CachedPixelShaderSetting<float, 3> m_camera_offset_pixel;
 	CachedPixelShaderSetting<float, 3> m_camera_offset_vertex;
@@ -79,7 +77,6 @@ class GameGlobalShaderConstantSetter : public IShaderConstantSetter
 		float day_light[3];
 		float star_color[4];
 		float animation_timer;
-		float eye_position[3];
 		float camera_offset[3];
 		float minimap_yaw[3];
 		float point_lights[16];

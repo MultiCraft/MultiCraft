@@ -18,10 +18,7 @@ centroid varying vec2 varTexCoord;
 #endif
 varying vec3 eyeVec;
 #if POINT_LIGHTS
-varying float vShade;
-varying vec3 vRelPos;
-
-// Light sources, one per column: xyz relative to the eye, w = level / 15
+// Light sources, one per column: xyz in view space, w = level / 15
 uniform mat4 pointLights;
 #ifdef SETTINGS_UNIFORMS
 // Lighting curve as the header spells it, LIGHT_SCALE in the w of the boost
@@ -42,13 +39,10 @@ vec3 softMax(vec3 a, vec3 b)
 	return mix(a, b, h) + k * h * (1.0 - h);
 }
 
-float pointLight(vec4 light)
+float pointLight(vec4 light, vec3 pos)
 {
-	if (light.w <= 0.0)
-		return 0.0;
-	vec3 dir = light.xyz - vRelPos;
 	// One level per node, like spreading node light, but round
-	float level = light.w - length(dir) / 150.0;
+	float level = light.w - length(light.xyz - pos) / 150.0;
 	if (level <= 0.0)
 		return 0.0;
 	// Brightness of that level, mirrors decode_light_f() in light.cpp
@@ -58,7 +52,7 @@ float pointLight(vec4 light)
 	lit = clamp(lit, 0.0, 1.0);
 	if (LIGHT_CURVE.w != 1.0)
 		lit = pow(lit, LIGHT_CURVE.w);
-	return lit * vShade * LIGHT_SCALE;
+	return lit * varColor.a * LIGHT_SCALE;
 }
 #endif
 
@@ -110,8 +104,13 @@ void main(void)
 	curve = lightCurve;
 	boost = lightBoost;
 #endif
+	// The fragment in view space, as eyeVec carries it for the fog
+	vec3 pos = -eyeVec * fogDistance;
 	for (int i = 0; i < POINT_LIGHTS; i++) {
-		float point = pointLight(pointLights[i]);
+		// The sources come brightest first, the absent ones last
+		if (pointLights[i].w <= 0.0)
+			break;
+		float point = pointLight(pointLights[i], pos);
 		if (point > 0.0)
 			lightColor = softMax(lightColor, vec3(point));
 	}

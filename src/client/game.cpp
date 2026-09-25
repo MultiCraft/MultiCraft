@@ -456,8 +456,6 @@ GameGlobalShaderConstantSetter::GameGlobalShaderConstantSetter(Sky *sky, bool *f
 	m_animation_timer_pixel("animationTimer"),
 	m_day_light("dayLight"),
 	m_star_color("starColor"),
-	m_eye_position_pixel("eyePosition"),
-	m_eye_position_vertex("eyePosition"),
 	m_minimap_yaw("yawVec"),
 	m_camera_offset_pixel("cameraOffset"),
 	m_camera_offset_vertex("cameraOffset"),
@@ -509,21 +507,22 @@ void GameGlobalShaderConstantSetter::updateFrameConstants()
 
 	s_frame.has_minimap = false;
 	if (m_client) {
-		const v3f eye = m_client->getEnv().getLocalPlayer()->getEyePosition();
-		eye.getAs3Values(s_frame.eye_position);
-		intToFloat(m_client->getCamera()->getOffset(), BS)
-				.getAs3Values(s_frame.camera_offset);
+		const v3f offset = intToFloat(m_client->getCamera()->getOffset(), BS);
+		offset.getAs3Values(s_frame.camera_offset);
 
 		if (Minimap *minimap = m_client->getMinimap()) {
 			minimap->getYawVec().getAs3Values(s_frame.minimap_yaw);
 			s_frame.has_minimap = true;
 		}
 
-		// The environment hands them over brightest first
+		// In view space, where eyeVec puts the fragment; the environment gives them brightest first
+		const core::matrix4 &view = m_client->getCamera()->getCameraNode()->getViewMatrix();
 		const auto &lights = m_client->getEnv().getPointLights();
 		for (u32 i = 0; i < MAX_POINT_LIGHTS; i++) {
 			if (i < lights.size()) {
-				(lights[i].pos - eye).getAs3Values(&s_frame.point_lights[i * 4]);
+				v3f pos = lights[i].pos - offset;
+				view.transformVect(pos);
+				pos.getAs3Values(&s_frame.point_lights[i * 4]);
 				s_frame.point_lights[i * 4 + 3] = lights[i].level / (float)LIGHT_SUN;
 			} else {
 				s_frame.point_lights[i * 4 + 3] = 0.0f;
@@ -549,9 +548,6 @@ void GameGlobalShaderConstantSetter::onSetConstants(video::IMaterialRendererServ
 	m_animation_timer_pixel.set(&s_frame.animation_timer, services);
 
 	if (m_client) {
-		m_eye_position_pixel.set(s_frame.eye_position, services);
-		m_eye_position_vertex.set(s_frame.eye_position, services);
-
 		if (s_frame.has_minimap)
 			m_minimap_yaw.set(s_frame.minimap_yaw, services);
 

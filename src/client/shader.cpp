@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <fstream>
 #include <iterator>
+#include <unordered_map>
 #include "shader.h"
 #include "irrlichttypes_extrabloated.h"
 #include "irr_ptr.h"
@@ -403,6 +404,7 @@ public:
 		MaterialType material_type, NodeDrawType drawtype) override;
 
 	ShaderInfo getShaderInfo(u32 id) override;
+	video::E_MATERIAL_TYPE getMaterialWithoutPointLights(video::E_MATERIAL_TYPE material) override;
 
 	// Processes queued shader requests from other threads.
 	// Shall be called from the main thread.
@@ -443,9 +445,12 @@ private:
 	// Global constant setter factories
 	std::vector<std::unique_ptr<IShaderConstantSetterFactory>> m_setter_factories;
 
+	// The node programs with point lights and the same programs without, main thread only
+	std::unordered_map<video::E_MATERIAL_TYPE, video::E_MATERIAL_TYPE> m_without_point_lights;
+
 	// Generate shader given the shader name.
 	ShaderInfo generateShader(const std::string &name,
-			MaterialType material_type, NodeDrawType drawtype);
+			MaterialType material_type, NodeDrawType drawtype, bool point_lights = true);
 };
 
 IWritableShaderSource *createShaderSource()
@@ -600,6 +605,7 @@ void ShaderSource::rebuildShaders()
 	*/
 
 	// Recreate shaders
+	m_without_point_lights.clear();
 	for (ShaderInfo &i : m_shaderinfo_cache) {
 		ShaderInfo *info = &i;
 		if (!info->name.empty()) {
@@ -611,7 +617,7 @@ void ShaderSource::rebuildShaders()
 
 //! Names the branch a driver without a shader compiler builds as a program of its own
 static std::string shaderVariant(const std::string &name, MaterialType material_type,
-		video::E_MATERIAL_TYPE base_material)
+		video::E_MATERIAL_TYPE base_material, bool point_lights)
 {
 	// Every other shader is one program
 	if (name != "nodes_shader" && name != "object_shader")
@@ -645,8 +651,7 @@ static std::string shaderVariant(const std::string &name, MaterialType material_
 	if (g_settings->getBool("tone_mapping"))
 		variant += ":tonemap";
 
-	// Only the nodes read the lights around them
-	if (name == "nodes_shader" && g_settings->getBool("smooth_lighting"))
+	if (point_lights)
 		variant += ":lights";
 
 	return variant;
@@ -692,7 +697,7 @@ void registerPrecompiledShaders(video::IVideoDriver *driver)
 
 
 ShaderInfo ShaderSource::generateShader(const std::string &name,
-		MaterialType material_type, NodeDrawType drawtype)
+		MaterialType material_type, NodeDrawType drawtype, bool point_lights)
 {
 	ShaderInfo shaderinfo;
 	shaderinfo.name = name;
@@ -845,8 +850,9 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 		shaders_header << "#define WATER_WAVE_SPEED " << water_wave[2] << "\n";
 	}
 
+	const bool smooth_lighting = g_settings->getBool("smooth_lighting");
 	shaders_header << "#define POINT_LIGHTS "
-		<< (g_settings->getBool("smooth_lighting") ? MAX_POINT_LIGHTS : 0) << "\n";
+		<< (smooth_lighting && point_lights ? MAX_POINT_LIGHTS : 0) << "\n";
 	shaders_header << "#define ENABLE_WAVING_LEAVES " << g_settings->getBool("enable_waving_leaves") << "\n";
 	shaders_header << "#define ENABLE_WAVING_PLANTS " << g_settings->getBool("enable_waving_plants") << "\n";
 	shaders_header << "#define ENABLE_TONE_MAPPING " << g_settings->getBool("tone_mapping") << "\n";
@@ -883,9 +889,11 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 		geometry_shader_ptr = geometry_shader.c_str();
 	}
 
+	// Only the nodes read the lights around them
+	const bool lights = name == "nodes_shader" && smooth_lighting && point_lights;
 	// The name a driver without a shader compiler picks its prebuilt program by, branch included
-	vertex_shader = "//SHADER:" + name +
-			shaderVariant(name, material_type, shaderinfo.base_material) + "\n" + vertex_shader;
+	vertex_shader = "//SHADER:" + name + shaderVariant(name, material_type,
+			shaderinfo.base_material, lights) + "\n" + vertex_shader;
 
 	irr_ptr<ShaderCallback> cb{new ShaderCallback(m_setter_factories)};
 
@@ -926,7 +934,20 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 
 	// Apply the newly created material type
 	shaderinfo.material = (video::E_MATERIAL_TYPE) shadermat;
+
+	// Frames with no light source near draw the nodes with the same program without point lights
+	if (lights) {
+		const ShaderInfo unlit = generateShader(name, material_type, drawtype, false);
+		if (unlit.material != unlit.base_material)
+			m_without_point_lights[shaderinfo.material] = unlit.material;
+	}
 	return shaderinfo;
+}
+
+video::E_MATERIAL_TYPE ShaderSource::getMaterialWithoutPointLights(video::E_MATERIAL_TYPE material)
+{
+	const auto it = m_without_point_lights.find(material);
+	return it == m_without_point_lights.end() ? material : it->second;
 }
 
 void dumpShaderProgram(std::ostream &output_stream,

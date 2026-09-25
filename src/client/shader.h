@@ -136,6 +136,9 @@ public:
 	virtual ShaderInfo getShaderInfo(u32 id){return ShaderInfo();}
 	virtual u32 getShader(const std::string &name,
 		MaterialType material_type, NodeDrawType drawtype = NDT_NORMAL){return 0;}
+	// The same program without point lights, or the material itself when it has none
+	virtual video::E_MATERIAL_TYPE getMaterialWithoutPointLights(
+			video::E_MATERIAL_TYPE material){return material;}
 };
 
 class IWritableShaderSource : public IShaderSource {

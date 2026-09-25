@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "clientmap.h"
 #include "client.h"
 #include "mapblock_mesh.h"
+#include "shader.h"
 #include <IMaterialRenderer.h>
 #include <matrix4.h>
 #include "mapsector.h"
@@ -400,6 +401,14 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 	core::matrix4 m; // Model matrix
 	v3f offset = intToFloat(m_camera_offset, BS);
 
+	// The cube each light source's point light reaches, in the frame's coordinates
+	std::vector<core::aabbox3df> reach;
+	for (const auto &light : m_client->getEnv().getPointLights()) {
+		const v3f pos = light.pos - intToFloat(m_camera_offset, BS);
+		reach.emplace_back(pos - light.level * BS, pos + light.level * BS);
+	}
+	IShaderSource *shdrsrc = m_client->getShaderSource();
+
 	// Render all layers in order
 	u32 material_count = 0;
 	u32 transform_count = 0;
@@ -422,26 +431,47 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 						"returning." << std::endl;
 				return;
 			}
+			// Buffers out of every light's reach draw with the same program without point lights
+			const video::E_MATERIAL_TYPE lit = list.m.MaterialType;
+			const video::E_MATERIAL_TYPE unlit = shdrsrc->getMaterialWithoutPointLights(lit);
+			list.m.MaterialType = unlit;
 			driver->setMaterial(list.m);
 
 			drawcall_count += list.bufs.size();
 
 			v3s16 last_bake(-32768, -32768, -32768);
+			v3f shift;
 			for (auto &pair : list.bufs) {
 				scene::IMeshBuffer *buf = pair.second;
 
 				// Vertices already carry the block position, so the transform
 				// only differs between meshes built at different camera offsets.
 				if (pair.first != last_bake) {
-					m.setTranslation(intToFloat(pair.first - m_camera_offset, BS));
+					shift = intToFloat(pair.first - m_camera_offset, BS);
+					m.setTranslation(shift);
 					driver->setTransform(video::ETS_WORLD, m);
 					last_bake = pair.first;
 					transform_count++;
 				}
 
+				if (lit != unlit && !reach.empty()) {
+					core::aabbox3df box = buf->getBoundingBox();
+					box.MinEdge += shift;
+					box.MaxEdge += shift;
+					const video::E_MATERIAL_TYPE type = std::any_of(reach.begin(), reach.end(),
+						[&box] (const core::aabbox3df &cube) {
+							return cube.intersectsWithBox(box);
+						}) ? lit : unlit;
+					if (type != list.m.MaterialType) {
+						list.m.MaterialType = type;
+						driver->setMaterial(list.m);
+					}
+				}
 				driver->drawMeshBuffer(buf);
 				vertex_count += buf->getVertexCount();
 			}
+			// The list outlives the frame, so it goes back to the program with point lights
+			list.m.MaterialType = lit;
 		}
 	}
 	g_profiler->avg(prefix + "draw meshes [ms]", draw.stop(true));

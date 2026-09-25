@@ -241,6 +241,8 @@ void Particle::updateLight()
 		light = blend_light(m_env->getDayNightRatio(), LIGHT_SUN, 0);
 
 	u8 m_light = decode_light(light + m_glow);
+	if (u8 point = m_env->getPointLightLevel(m_pos * BS))
+		m_light = MYMAX(m_light, decode_light(point + m_glow));
 	m_color.set(255,
 		m_light * m_base_color.getRed() / 255,
 		m_light * m_base_color.getGreen() / 255,

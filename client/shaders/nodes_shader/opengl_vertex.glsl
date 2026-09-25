@@ -2,7 +2,6 @@ uniform mat4 mWorld;
 
 // Color of the light emitted by the sun.
 uniform vec3 dayLight;
-uniform vec3 eyePosition;
 uniform mediump float fogDistance;
 
 // The cameraOffset is the current center of the visible world.
@@ -19,10 +18,6 @@ varying mediump vec2 varTexCoord;
 centroid varying vec2 varTexCoord;
 #endif
 varying vec3 eyeVec;
-#if POINT_LIGHTS
-varying float vShade;
-varying vec3 vRelPos;
-#endif
 
 // Color of the light emitted by the light sources.
 const vec3 artificialLight = vec3(1.04, 1.04, 1.04);
@@ -106,22 +101,13 @@ void main(void)
 		smoothTriangleWave(animationTimer * 13.0 + tOffset)) * 0.5;
 #endif
 
-	// Relative to cameraOffset, which keeps float precision far from the origin
-	vec3 worldPosition = (mWorld * inVertexPosition).xyz;
-#if POINT_LIGHTS
-	vec3 sq = inVertexNormal * inVertexNormal;
-	vShade = sq.x + sq.y + sq.z < 0.5 ? 1.0 : sqrt(0.45) * sq.x +
-		(inVertexNormal.y < 0.0 ? sqrt(0.2) : 1.0) * sq.y + sqrt(0.7) * sq.z;
-	vRelPos = worldPosition - (eyePosition - cameraOffset);
-#endif
-
 // OpenGL < 4.3 does not support continued preprocessor lines
 #if (MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_TRANSPARENT || MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_OPAQUE || MATERIAL_TYPE == TILE_MATERIAL_WAVING_LIQUID_BASIC) && ENABLE_WAVING_WATER
 	// Generate waves with Perlin-type noise.
 	// The constants are calibrated such that they roughly
 	// correspond to the old sine waves.
 	vec4 pos = inVertexPosition;
-	vec3 wavePos = worldPosition + cameraOffset;
+	vec3 wavePos = (mWorld * inVertexPosition).xyz + cameraOffset;
 	// The waves are slightly compressed along the z-axis to get
 	// wave-fronts along the x-axis.
 	wavePos.x /= WATER_WAVE_LENGTH * 3.0;
@@ -169,4 +155,10 @@ void main(void)
 		0.07 * brightness);
 
 	varColor = clamp(color, 0.0, 1.0);
+#if POINT_LIGHTS
+	// The shading of the face for the point lights, in the alpha the fragment has no other use for
+	vec3 sq = inVertexNormal * inVertexNormal;
+	varColor.a = sq.x + sq.y + sq.z < 0.5 ? 1.0 : sqrt(0.45) * sq.x +
+		(inVertexNormal.y < 0.0 ? sqrt(0.2) : 1.0) * sq.y + sqrt(0.7) * sq.z;
+#endif
 }
