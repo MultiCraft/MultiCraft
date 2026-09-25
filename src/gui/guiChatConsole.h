@@ -25,6 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "config.h"
 #include "guiScrollBar.h"
 
+#if USE_FREETYPE
+	#include "irrlicht_changes/CGUITTFont.h"
+#endif
+
 struct ChatSelection
 {
 	enum SelectionType {
@@ -248,4 +252,6 @@ private:
 
 	u16 m_round_screen_offset = 0;
 	s32 m_hscroll_pos = 0;
+
+	std::vector<ShapedRun> m_prompt_shaped_runs;
 };
