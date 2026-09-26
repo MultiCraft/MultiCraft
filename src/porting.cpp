@@ -65,6 +65,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 #include "config.h"
+#include <cmath>
 #if USE_OPENSSL
 #include <openssl/rand.h>
 #elif defined(__APPLE__)
@@ -646,6 +647,17 @@ void initializePaths()
 bool hasRealKeyboard()
 {
 	return true;
+}
+
+int getMaxRefreshRate()
+{
+#if defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	// The desktop mode of the primary display, the current rate rather than the fastest
+	const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+	return mode ? std::lround(mode->refresh_rate) : 0;
+#else
+	return 0;
+#endif
 }
 #endif
 

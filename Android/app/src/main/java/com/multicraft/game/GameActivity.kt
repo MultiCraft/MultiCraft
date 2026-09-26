@@ -40,11 +40,13 @@ import androidx.core.net.toUri
 import com.multicraft.game.databinding.*
 import com.multicraft.game.helpers.*
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid10
+import com.multicraft.game.helpers.ApiLevelHelper.isAndroid11
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
 import com.multicraft.game.helpers.PreferenceHelper.set
 import org.libsdl.app.SDLActivity
+import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
 class GameActivity : SDLActivity() {
@@ -301,6 +303,12 @@ class GameActivity : SDLActivity() {
 	}
 
 	fun getDensity() = resources.displayMetrics.density
+
+	fun getMaxRefreshRate() =
+		(if (isAndroid11()) display else @Suppress("DEPRECATION") windowManager.defaultDisplay)?.run {
+			supportedModes.filter { it.physicalWidth == mode.physicalWidth && it.physicalHeight == mode.physicalHeight }
+				.maxOfOrNull { it.refreshRate }?.roundToInt()
+		} ?: 0
 
 	fun notifyServerConnect(multiplayer: Boolean) {
 		isMultiPlayer = multiplayer

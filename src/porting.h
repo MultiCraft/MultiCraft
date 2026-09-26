@@ -319,6 +319,9 @@ inline const char *getPlatformName()
 // Touchscreen device specific function
 bool hasRealKeyboard();
 
+// The refresh rate of the display in Hz: the fastest on Android and iOS, the current one on desktops with SDL, else 0
+int getMaxRefreshRate();
+
 bool secure_rand_fill_buf(void *buf, size_t len);
 
 // This attaches to the parents process console, or creates a new one if it doesnt exist.

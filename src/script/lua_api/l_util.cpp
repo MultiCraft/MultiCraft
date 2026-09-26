@@ -612,6 +612,10 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	lua_pushstring(L,"window_height");
 	lua_pushnumber(L, window_size.Y);
 	lua_settable(L, top);
+
+	lua_pushstring(L, "max_refresh_rate");
+	lua_pushinteger(L, porting::getMaxRefreshRate());
+	lua_settable(L, top);
 	return 1;
 }
 

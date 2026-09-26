@@ -465,6 +465,13 @@ bool needsExtractAssets()
 	return jnienv->CallBooleanMethod(activityObj, needsExtract);
 }
 
+int getMaxRefreshRate()
+{
+	jmethodID getMaxRefreshRate = jnienv->GetMethodID(activityClass,
+			"getMaxRefreshRate", "()I");
+	return jnienv->CallIntMethod(activityObj, getMaxRefreshRate);
+}
+
 bool createAssetManager()
 {
 	jmethodID midGetContext = jnienv->GetStaticMethodID(activityClass,

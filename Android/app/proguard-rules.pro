@@ -24,6 +24,7 @@
 	void showDialog(java.lang.String, java.lang.String, int);
 	java.lang.String getDialogValue();
 	float getDensity();
+	int getMaxRefreshRate();
 	void notifyServerConnect(boolean);
 	void notifyExitGame();
 	boolean openURI(java.lang.String, boolean);
