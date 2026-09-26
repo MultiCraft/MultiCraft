@@ -211,13 +211,21 @@ static video::IImage *convertTo16bit(video::IVideoDriver *driver, video::IImage 
 	video::ECOLOR_FORMAT format = video::ECF_R5G6B5;
 	if (img->getColorFormat() == video::ECF_A8R8G8B8) {
 		const u8 *data = (const u8 *)img->getData();
-		const u32 size = img->getImageDataSizeInBytes();
-		for (u32 i = 3; i < size; i += 4) {
-			if (data[i] > 0 && data[i] < 255)
+		const core::dimension2d<u32> dim = img->getDimension();
+		bool transparent = false;
+		for (u32 y = 0; y < dim.Height; y++) {
+			const u8 *alpha = data + y * img->getPitch() + 3;
+			u8 partial = 0, zero = 0;
+			for (u32 x = 0; x < dim.Width; x++) {
+				partial |= (u8)(alpha[x * 4] - 1) < 254;
+				zero |= alpha[x * 4] == 0;
+			}
+			if (partial)
 				return nullptr;
-			if (data[i] == 0)
-				format = video::ECF_A1R5G5B5;
+			transparent |= zero;
 		}
+		if (transparent)
+			format = video::ECF_A1R5G5B5;
 	} else if (img->getColorFormat() != video::ECF_R8G8B8) {
 		return nullptr;
 	}
@@ -700,6 +708,9 @@ static void apply_multiplication(video::IImage *dst, v2u32 dst_pos, v2u32 size,
 // Apply a mask to an image
 static void apply_mask(video::IImage *mask, video::IImage *dst,
 		v2s32 mask_pos, v2s32 dst_pos, v2u32 size);
+
+template<typename F>
+static void applyPerPixel(video::IImage *dst, v2u32 offset, v2u32 size, const F &fn);
 
 // Draw or overlay a crack
 static void draw_crack(video::IImage *crack, video::IImage *dst,
@@ -1244,18 +1255,24 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 					myrand()%256,myrand()%256));*/
 		}
 
+		/*
+			Copy it this way to get an alpha channel.
+			Otherwise images with alpha cannot be blitted on
+			images that don't have alpha in the original file.
+		*/
+		if (baseimg == NULL || image->getColorFormat() != video::ECF_A8R8G8B8) {
+			video::IImage *copy = driver->createImage(video::ECF_A8R8G8B8, image->getDimension());
+			image->copyTo(copy);
+			image->drop();
+			image = copy;
+		}
+
 		// If base image is NULL, load as base.
 		if (baseimg == NULL)
 		{
 			//infostream<<"Setting "<<part_of_name<<" as base"<<std::endl;
-			/*
-				Copy it this way to get an alpha channel.
-				Otherwise images with alpha cannot be blitted on
-				images that don't have alpha in the original file.
-			*/
-			core::dimension2d<u32> dim = image->getDimension();
-			baseimg = driver->createImage(video::ECF_A8R8G8B8, dim);
-			image->copyTo(baseimg);
+			baseimg = image;
+			baseimg->grab();
 		}
 		// Else blit on base.
 		else
@@ -1438,13 +1455,10 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 			core::dimension2d<u32> dim = baseimg->getDimension();
 
 			// Set alpha to full
-			for (u32 y=0; y<dim.Height; y++)
-			for (u32 x=0; x<dim.Width; x++)
-			{
-				video::SColor c = baseimg->getPixel(x,y);
+			applyPerPixel(baseimg, v2u32(0, 0), v2u32(dim.Width, dim.Height), [](video::SColor c) {
 				c.setAlpha(255);
-				baseimg->setPixel(x,y,c);
-			}
+				return c;
+			});
 		}
 		/*
 			[makealpha:R,G,B
@@ -1472,18 +1486,14 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 			oldbaseimg->drop();*/
 
 			// Set alpha to full
-			for (u32 y=0; y<dim.Height; y++)
-			for (u32 x=0; x<dim.Width; x++)
-			{
-				video::SColor c = baseimg->getPixel(x,y);
+			applyPerPixel(baseimg, v2u32(0, 0), v2u32(dim.Width, dim.Height), [=](video::SColor c) {
 				u32 r = c.getRed();
 				u32 g = c.getGreen();
 				u32 b = c.getBlue();
-				if (!(r == r1 && g == g1 && b == b1))
-					continue;
-				c.setAlpha(0);
-				baseimg->setPixel(x,y,c);
-			}
+				if (r == r1 && g == g1 && b == b1)
+					c.setAlpha(0);
+				return c;
+			});
 		}
 		/*
 			[transformN
@@ -1843,13 +1853,10 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 
 			core::dimension2d<u32> dim = baseimg->getDimension();
 
-			for (u32 y = 0; y < dim.Height; y++)
-			for (u32 x = 0; x < dim.Width; x++)
-			{
-				video::SColor c = baseimg->getPixel(x, y);
+			applyPerPixel(baseimg, v2u32(0, 0), v2u32(dim.Width, dim.Height), [=](video::SColor c) {
 				c.setAlpha(floor((c.getAlpha() * ratio) / 255 + 0.5));
-				baseimg->setPixel(x, y, c);
-			}
+				return c;
+			});
 		}
 		/*
 			[invert:mode
@@ -1882,13 +1889,10 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 
 			core::dimension2d<u32> dim = baseimg->getDimension();
 
-			for (u32 y = 0; y < dim.Height; y++)
-			for (u32 x = 0; x < dim.Width; x++)
-			{
-				video::SColor c = baseimg->getPixel(x, y);
+			applyPerPixel(baseimg, v2u32(0, 0), v2u32(dim.Width, dim.Height), [=](video::SColor c) {
 				c.color ^= mask;
-				baseimg->setPixel(x, y, c);
-			}
+				return c;
+			});
 		}
 		/*
 			[sheet:WxH:X,Y
@@ -2338,15 +2342,12 @@ void brighten(video::IImage *image)
 
 	core::dimension2d<u32> dim = image->getDimension();
 
-	for (u32 y=0; y<dim.Height; y++)
-	for (u32 x=0; x<dim.Width; x++)
-	{
-		video::SColor c = image->getPixel(x,y);
+	applyPerPixel(image, v2u32(0, 0), v2u32(dim.Width, dim.Height), [](video::SColor c) {
 		c.setRed(0.5 * 255 + 0.5 * (float)c.getRed());
 		c.setGreen(0.5 * 255 + 0.5 * (float)c.getGreen());
 		c.setBlue(0.5 * 255 + 0.5 * (float)c.getBlue());
-		image->setPixel(x,y,c);
-	}
+		return c;
+	});
 }
 
 u32 parseImageTransform(const std::string& s)
@@ -2417,6 +2418,7 @@ void imageTransform(u32 transform, video::IImage *src, video::IImage *dst)
 	// Pre-conditions
 	assert(dstdim == imageTransformDimension(transform, src->getDimension()));
 	assert(transform <= 7);
+	assert(isRawAddressable(src) && isRawAddressable(dst));
 
 	/*
 		Compute the transformation from source coordinates (sx,sy)
@@ -2441,14 +2443,18 @@ void imageTransform(u32 transform, video::IImage *src, video::IImage *dst)
 	else if (transform == 7)    // flip y then rotate by 90 degrees ccw
 		sxn = 3, syn = 1;  //   sx = (H-1) - dy, sy = (W-1) - dx
 
+	const u32 *const src_data = reinterpret_cast<const u32 *>(src->getData());
+	u32 *const dst_data = reinterpret_cast<u32 *>(dst->getData());
+	const u32 src_stride = src->getPitch() >> 2;
+	const u32 dst_stride = dst->getPitch() >> 2;
+
 	for (u32 dy=0; dy<dstdim.Height; dy++)
 	for (u32 dx=0; dx<dstdim.Width; dx++)
 	{
 		u32 entries[4] = {dx, dstdim.Width-1-dx, dy, dstdim.Height-1-dy};
 		u32 sx = entries[sxn];
 		u32 sy = entries[syn];
-		video::SColor c = src->getPixel(sx,sy);
-		dst->setPixel(dx,dy,c);
+		dst_data[dy * dst_stride + dx] = src_data[sy * src_stride + sx];
 	}
 }
 
