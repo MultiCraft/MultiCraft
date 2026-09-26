@@ -1165,6 +1165,15 @@ video::IImage* TextureSource::generateImage(const std::string &name)
 				<< std::endl;
 	}
 
+	// A modifier that leaves no pixels gives an empty texture, not one of no size
+	if (baseimg && (baseimg->getDimension().Width == 0 || baseimg->getDimension().Height == 0)) {
+		warningstream << "generateImage(): \"" << name << "\" has no size, it stays empty" << std::endl;
+		baseimg->drop();
+		baseimg = RenderingEngine::get_video_driver()->createImage(
+				video::ECF_A8R8G8B8, core::dimension2d<u32>(1, 1));
+		baseimg->fill(video::SColor(0, 0, 0, 0));
+	}
+
 	// If no resulting image, print a warning
 	if (baseimg == NULL) {
 		errorstream << "generateImage(): baseimg is NULL (attempted to"
@@ -1607,6 +1616,12 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 			u32 frame_count = stoi(sf.next(":"));
 			u32 frame_index = stoi(sf.next(":"));
 
+			if (frame_count == 0 || frame_index >= frame_count) {
+				errorstream << "generateImagePart(): invalid frame in \""
+						<< part_of_name << "\", cancelling." << std::endl;
+				return false;
+			}
+
 			if (baseimg == NULL){
 				errorstream<<"generateImagePart(): baseimg != NULL "
 						<<"for part_of_name=\""<<part_of_name
@@ -1895,6 +1910,12 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 			u32 h0 = stoi(sf.next(":"));
 			u32 x0 = stoi(sf.next(","));
 			u32 y0 = stoi(sf.next(":"));
+
+			if (w0 == 0 || h0 == 0 || x0 >= w0 || y0 >= h0) {
+				errorstream << "generateImagePart(): invalid tile in \""
+						<< part_of_name << "\", cancelling." << std::endl;
+				return false;
+			}
 
 			core::dimension2d<u32> img_dim = baseimg->getDimension();
 			core::dimension2d<u32> tile_dim(v2u32(img_dim) / v2u32(w0, h0));
