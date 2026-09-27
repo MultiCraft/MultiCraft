@@ -255,6 +255,9 @@ function sscsm.com_send(pname, channel, msg)
 		pname = pname:get_player_name()
 	end
 	validate_channel(channel)
+	if not has_sscsms[pname] then
+		return
+	end
 	if type(msg) == "string" then
 		msg = "\002" .. msg
 	else
