@@ -1162,6 +1162,11 @@ void RenderingEngine::startTextInput()
 	RenderingEngine *engine = RenderingEngine::get_instance();
 
 	SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, porting::hasRealKeyboard() ? "0" : "1");
+#ifdef __ANDROID__
+	// Google Play Games on PC delivers Windows keys only through the input method, which needs SDL's hidden text view
+	if (porting::isGooglePC())
+		SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, "1");
+#endif
 
 	if (engine && porting::hasRealKeyboard()) {
 		video::IVideoDriver* driver = engine->getVideoDriver();
