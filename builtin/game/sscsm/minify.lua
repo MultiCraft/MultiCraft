@@ -20,6 +20,7 @@
 --
 
 local find, sub, byte = string.find, string.sub, string.byte
+local floor = math.floor
 local QUOTE, APOSTROPHE, LBRACKET, BACKSLASH, SPACE, TAB, CR, NEWLINE, HYPHEN,
 		DOT, EQUALS, COLON = byte('"\'[\\ \t\r\n-.=:', 1, -1)
 
@@ -137,11 +138,35 @@ local function copy_scope(scope)
 	return setmetatable({}, {__index = scope})
 end
 
-local function minify(code)
-	local locals_count = 0
+local COUNT = "\0count"
+local lua_keywords = set("and", "break", "do", "else", "elseif", "end", "false",
+	"for", "function", "goto", "if", "in", "local", "nil", "not", "or", "repeat",
+	"return", "then", "true", "until", "while")
+local FIRST = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+local REST = FIRST .. "0123456789_"
+local function minify(code, excluded)
+	local short, short_idx = {}, 0
+	local function short_name(n)
+		while #short < n do
+			local i = short_idx
+			short_idx = short_idx + 1
+			local s = FIRST:sub(i % #FIRST + 1, i % #FIRST + 1)
+			i = floor(i / #FIRST)
+			while i > 0 do
+				i = i - 1
+				s = s .. REST:sub(i % #REST + 1, i % #REST + 1)
+				i = floor(i / #REST)
+			end
+			if not lua_keywords[s] and not excluded[s] then
+				short[#short + 1] = s
+			end
+		end
+		return short[n]
+	end
 	local function new_var_name(scope, name)
-		locals_count = locals_count + 1
-		local var = ("_%x"):format(locals_count)
+		local n = (scope[COUNT] or 0) + 1
+		scope[COUNT] = n
+		local var = excluded and short_name(n) or ("_%x"):format(n)
 		scope[name] = var
 		return var
 	end
@@ -452,4 +477,21 @@ local function minify(code)
 	return table.concat(res)
 end
 
-return minify
+local function free_identifiers(out)
+	local res, prev = {}, nil
+	for token in tokenise(out) do
+		if not whitespace_bytes[byte(token, 1)] then
+			if token:find("^[A-Za-z_][A-Za-z0-9_]*$") and not token:find("^_[0-9a-f]+$")
+					and prev ~= "." and prev ~= ":" then
+				res[token] = true
+			end
+			prev = token
+		end
+	end
+	return res
+end
+
+return function(code)
+	local pass1 = minify(code)
+	return minify(code, free_identifiers(pass1))
+end
