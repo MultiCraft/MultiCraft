@@ -113,8 +113,9 @@ GUIChatConsole::~GUIChatConsole()
 {
 	m_chat_console = nullptr;
 
+	// The GUI environment may still hold it as the hovered element
 	removeChild(m_vscrollbar);
-	delete m_vscrollbar;
+	m_vscrollbar->drop();
 
 	RenderingEngine::stopTextInput();
 

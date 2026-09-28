@@ -1236,6 +1236,14 @@ void Game::shutdown()
 	if (formspec)
 		formspec->quitMenu();
 
+	// Left in the GUI, it would take the next Enter for a client that is gone
+	// Always closed: a console hidden under a menu is still in the menu stack
+	if (gui_chat_console) {
+		gui_chat_console->closeConsole();
+		gui_chat_console->remove();
+		gui_chat_console->drop();
+	}
+
 #ifdef HAVE_TOUCHSCREENGUI
 	if (g_touchscreengui) {
 		g_touchscreengui->hide();
@@ -1249,9 +1257,6 @@ void Game::shutdown()
 
 	if (clouds)
 		clouds->drop();
-
-	if (gui_chat_console)
-		gui_chat_console->drop();
 
 	if (sky)
 		sky->drop();
