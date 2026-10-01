@@ -79,6 +79,38 @@ if not core.get_node then
 	end
 end
 
+-- Clients have no get_item_group, and get_item_def builds a new table on every call
+do
+	local get_item_def = core.get_item_def
+	-- An item's groups are fetched once while any of its groups is still being looked up
+	local groups_cache = setmetatable({}, {__mode = 'v'})
+	local group_cache = {}
+	function core.get_item_group(name, group)
+		if type(name) ~= "string" or group == nil then
+			error("Invalid core.get_item_group() invocation")
+		end
+
+		local cache = group_cache[group]
+		if not cache then
+			cache = {}
+			group_cache[group] = cache
+		end
+
+		local value = cache[name]
+		if value == nil then
+			local groups = groups_cache[name]
+			if not groups then
+				local def = get_item_def(name)
+				groups = def and def.groups or {}
+				groups_cache[name] = groups
+			end
+			value = groups[group] or 0
+			cache[name] = value
+		end
+		return value
+	end
+end
+
 -- Make core.run_server_chatcommand allow param to be unspecified.
 function core.run_server_chatcommand(cmd, param)
 	core.send_chat_message('/' .. cmd .. ' ' .. (param or ''))
