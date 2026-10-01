@@ -16,11 +16,14 @@ rm -rf gettext
 
 cd gettext-src/gettext-runtime
 
+# Without iconv: the catalogs and the codeset the game binds are both UTF-8
 CFLAGS="$OSX_FLAGS $OSX_ARCH -Dlocale_charset=intl_locale_charset" \
 PKG_CONFIG=/bin/false \
+am_cv_func_iconv=no \
 ./configure --prefix=/ \
 	--disable-shared --enable-static
 
+make clean
 make -j
 make DESTDIR=$PWD/build install
 

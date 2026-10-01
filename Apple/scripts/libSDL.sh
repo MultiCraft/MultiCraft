@@ -8,6 +8,7 @@ mkdir -p deps; cd deps
 if [ ! -d libSDL-src ]; then
 	git clone -b $SDL_VERSION --depth 1 https://github.com/libsdl-org/SDL.git libSDL-src
 	sed -i '' 's/^#pragma STDC FENV_ACCESS ON/\/\/&/' libSDL-src/src/audio/SDL_audiotypecvt.c
+	sed -i '' 's/^#define SDL_DYNAMIC_API 1$/#define SDL_DYNAMIC_API 0/' libSDL-src/src/dynapi/SDL_dynapi.h
 fi
 
 rm -rf libSDL
@@ -32,7 +33,7 @@ do
 		-DSDL_CAMERA=OFF \
 		-DSDL_METAL=ON \
 		-DSDL_OPENGL=OFF \
-		-DSDL_OPENGLES=OFF \
+		-DSDL_OPENGLES=ON \
 		-DSDL_GPU=OFF \
 		-DSDL_HAPTIC=OFF \
 		-DSDL_POWER=OFF \

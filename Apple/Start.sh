@@ -7,7 +7,6 @@ echo
 echo "Build libraries:"
 
 ./scripts/libSDL.sh
-./scripts/libjpeg.sh
 ./scripts/libpng.sh
 ./scripts/angle.sh
 ./scripts/irrlicht.sh
@@ -25,11 +24,6 @@ echo "Build libraries:"
 
 echo
 echo "All libraries were built!"
-
-echo
-echo "Preparing assets:"
-
-./scripts/assets.sh
 
 echo
 echo "Preparing locales:"

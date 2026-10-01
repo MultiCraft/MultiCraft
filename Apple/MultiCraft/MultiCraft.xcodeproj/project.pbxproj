@@ -109,10 +109,8 @@
 		841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B828D0E2E40042E335 /* libvorbisfile.a */; };
 		841AD8BB28D12E980042E335 /* libintl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EEE5E62782728E00F61929 /* libintl.a */; };
 		84287CA6291ED0F000E30F96 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA4291ED0F000E30F96 /* locale */; };
-		84287CA7291ED0F000E30F96 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA5291ED0F000E30F96 /* fonts */; };
 		844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844436EE28DA80C100662A9D /* libfreetype.a */; };
 		84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84585C0024B1347B0040BA4F /* Foundation.framework */; };
-		8453A49E24DB22F00087ECF9 /* client in Resources */ = {isa = PBXBuildFile; fileRef = 8453A49D24DB22F00087ECF9 /* client */; };
 		845856B324B1322D0040BA4F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 845856B224B1322D0040BA4F /* Assets.xcassets */; };
 		8458610724B13BDF0040BA4F /* mini-gmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 8458610524B13BDF0040BA4F /* mini-gmp.c */; };
 		8458610A24B13BF90040BA4F /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8458610924B13BF90040BA4F /* jsoncpp.cpp */; };
@@ -123,11 +121,8 @@
 		8467285B2C45F27F00269215 /* AppLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846728512C45F27F00269215 /* AppLogic.swift */; };
 		846F883B27A59704007B6210 /* libluajit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 846F883A27A596F9007B6210 /* libluajit.a */; };
 		847C6D4B25D6F483008F5FC8 /* lutf8lib.c in Sources */ = {isa = PBXBuildFile; fileRef = 847C6D4A25D6F483008F5FC8 /* lutf8lib.c */; };
-		8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8488539E28DA4851004AD90F /* libjpeg.a */; };
 		848920FD29984994001CB194 /* sdl_semaphore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FA29984994001CB194 /* sdl_semaphore.cpp */; };
 		848920FE29984994001CB194 /* sdl_thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 848920FB29984994001CB194 /* sdl_thread.cpp */; };
-		848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848A7CE22DD8042E00CC49EB /* AVFoundation.framework */; };
-		848A7CE52DD8048500CC49EB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848A7CE42DD8048400CC49EB /* CoreMedia.framework */; };
 		848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 848CE6E427778E30001D3E0F /* libz.tbd */; };
 		8495BD1628B80B14009FCF4D /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1528B80B00009FCF4D /* libSDL.a */; };
 		8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */; };
@@ -145,6 +140,13 @@
 		84C9A9592B228D9A00909EFF /* chacha.c in Sources */ = {isa = PBXBuildFile; fileRef = 84C9A9562B228D9A00909EFF /* chacha.c */; };
 		84CA12AF2EF4B8BA004899E0 /* libnghttp2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */; };
 		84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */ = {isa = PBXBuildFile; productRef = 84D1BF552CD7EFF10077DD47 /* libzstd */; };
+		84D5A584306BE7FD007E5260 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A583306BE7FD007E5260 /* CoreFoundation.framework */; };
+		84D5A586306BE7FD007E5260 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A585306BE7FD007E5260 /* CoreGraphics.framework */; };
+		84D5A588306BE7FD007E5260 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A587306BE7FD007E5260 /* CoreServices.framework */; };
+		84D5A58A306BE7FD007E5260 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A589306BE7FD007E5260 /* CoreVideo.framework */; };
+		84D5A58C306BE7FD007E5260 /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A58B306BE7FD007E5260 /* ImageIO.framework */; };
+		84D5A58E306BE7FD007E5260 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A58D306BE7FD007E5260 /* IOKit.framework */; };
+		84D5A590306BE7FD007E5260 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84D5A58F306BE7FD007E5260 /* Security.framework */; };
 		84DE114525D55D2400EDB067 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84A1F9A8252E616A00000717 /* event.cpp */; };
 		84E592883016A448002EC373 /* MetalANGLE.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84E592873016A448002EC373 /* MetalANGLE.framework */; };
 		84E592893016A448002EC373 /* MetalANGLE.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84E592873016A448002EC373 /* MetalANGLE.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -234,7 +236,6 @@
 		84F20EA125D528C5009562A9 /* core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9425D528C5009562A9 /* core.cpp */; };
 		84F20EA325D528C5009562A9 /* plain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20E9725D528C5009562A9 /* plain.cpp */; };
 		84F20EB025D528D7009562A9 /* subgames.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EA825D528D6009562A9 /* subgames.cpp */; };
-		84F20EB125D528D7009562A9 /* packages.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAD25D528D7009562A9 /* packages.cpp */; };
 		84F20EB225D528D7009562A9 /* mods.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAE25D528D7009562A9 /* mods.cpp */; };
 		84F20EB325D528D7009562A9 /* content.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EAF25D528D7009562A9 /* content.cpp */; };
 		84F20EC425D528EC009562A9 /* database.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84F20EB725D528EB009562A9 /* database.cpp */; };
@@ -284,6 +285,14 @@
 		84FA0A162F19178E00394A7F /* scrollSwipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FA0A152F19178E00394A7F /* scrollSwipe.cpp */; };
 		84FA0A182F2C10AC00394A7F /* libharfbuzz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FA0A172F2C107600394A7F /* libharfbuzz.a */; };
 		84FA0A1C2F4BB3CE00394A7F /* SheenBidi.c in Sources */ = {isa = PBXBuildFile; fileRef = 84FA0A1B2F4BB3CE00394A7F /* SheenBidi.c */; };
+		84FA1AAD306BCDC700A04E82 /* default_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA0306BCDC700A04E82 /* default_shader */; };
+		84FA1AAE306BCDC700A04E82 /* minimap_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA1306BCDC700A04E82 /* minimap_shader */; };
+		84FA1AAF306BCDC700A04E82 /* nodes_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA2306BCDC700A04E82 /* nodes_shader */; };
+		84FA1AB0306BCDC700A04E82 /* object_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA3306BCDC700A04E82 /* object_shader */; };
+		84FA1AB1306BCDC700A04E82 /* selection_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA4306BCDC700A04E82 /* selection_shader */; };
+		84FA1AB2306BCDC700A04E82 /* stars_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA5306BCDC700A04E82 /* stars_shader */; };
+		84FA1AB3306BCDC700A04E82 /* Irrlicht in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA6306BCDC700A04E82 /* Irrlicht */; };
+		84FA1AB6306BCDC700A04E82 /* MultiCraftFont.ttf in Copy Fonts */ = {isa = PBXBuildFile; fileRef = 84FA1AA8306BCDC700A04E82 /* MultiCraftFont.ttf */; };
 		84FD8E3126A0B01D00EF2BFA /* guiEditBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */; };
 		84FD8E3426A0B04900EF2BFA /* guiScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FD8E3326A0B04900EF2BFA /* guiScene.cpp */; };
 /* End PBXBuildFile section */
@@ -297,6 +306,30 @@
 				84E592893016A448002EC373 /* MetalANGLE.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
+		};
+		84FA1AAB306BCDC700A04E82 /* Copy Shaders */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = client/shaders;
+			dstSubfolder = Resources;
+			files = (
+				84FA1AAD306BCDC700A04E82 /* default_shader in Copy Shaders */,
+				84FA1AAE306BCDC700A04E82 /* minimap_shader in Copy Shaders */,
+				84FA1AAF306BCDC700A04E82 /* nodes_shader in Copy Shaders */,
+				84FA1AB0306BCDC700A04E82 /* object_shader in Copy Shaders */,
+				84FA1AB1306BCDC700A04E82 /* selection_shader in Copy Shaders */,
+				84FA1AB2306BCDC700A04E82 /* stars_shader in Copy Shaders */,
+				84FA1AB3306BCDC700A04E82 /* Irrlicht in Copy Shaders */,
+			);
+			name = "Copy Shaders";
+		};
+		84FA1AB5306BCDC700A04E82 /* Copy Fonts */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = fonts;
+			dstSubfolder = Resources;
+			files = (
+				84FA1AB6306BCDC700A04E82 /* MultiCraftFont.ttf in Copy Fonts */,
+			);
+			name = "Copy Fonts";
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -524,9 +557,7 @@
 		841AD8B428D0E2340042E335 /* libvorbis.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbis.a; path = ../deps/libvorbis/libvorbis.a; sourceTree = "<group>"; };
 		841AD8B828D0E2E40042E335 /* libvorbisfile.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisfile.a; path = ../deps/libvorbis/libvorbisfile.a; sourceTree = "<group>"; };
 		84287CA4291ED0F000E30F96 /* locale */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locale; path = ../../assets/locale; sourceTree = "<group>"; };
-		84287CA5291ED0F000E30F96 /* fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; name = fonts; path = ../../assets/fonts; sourceTree = "<group>"; };
 		844436EE28DA80C100662A9D /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../deps/freetype/libfreetype.a; sourceTree = "<group>"; };
-		8453A49D24DB22F00087ECF9 /* client */ = {isa = PBXFileReference; lastKnownFileType = folder; name = client; path = ../../assets/client; sourceTree = "<group>"; };
 		845856A924B1322C0040BA4F /* MultiCraft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultiCraft.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		845856B224B1322D0040BA4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		845856B724B1322D0040BA4F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -543,13 +574,10 @@
 		846F883A27A596F9007B6210 /* libluajit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libluajit.a; path = ../deps/luajit/libluajit.a; sourceTree = "<group>"; };
 		847C6D4925D6F483008F5FC8 /* unidata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = unidata.h; path = ../../../lib/luautf8/unidata.h; sourceTree = "<group>"; };
 		847C6D4A25D6F483008F5FC8 /* lutf8lib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = lutf8lib.c; path = ../../../lib/luautf8/lutf8lib.c; sourceTree = "<group>"; };
-		8488539E28DA4851004AD90F /* libjpeg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libjpeg.a; path = ../deps/libjpeg/libjpeg.a; sourceTree = "<group>"; };
 		848920F929984994001CB194 /* sdl_semaphore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sdl_semaphore.h; path = ../../../src/threading/sdl_semaphore.h; sourceTree = "<group>"; };
 		848920FA29984994001CB194 /* sdl_semaphore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_semaphore.cpp; path = ../../../src/threading/sdl_semaphore.cpp; sourceTree = "<group>"; };
 		848920FB29984994001CB194 /* sdl_thread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sdl_thread.cpp; path = ../../../src/threading/sdl_thread.cpp; sourceTree = "<group>"; };
 		848920FC29984994001CB194 /* sdl_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sdl_thread.h; path = ../../../src/threading/sdl_thread.h; sourceTree = "<group>"; };
-		848A7CE22DD8042E00CC49EB /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
-		848A7CE42DD8048400CC49EB /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		848CE6E427778E30001D3E0F /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		8495BD1528B80B00009FCF4D /* libSDL.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libSDL.a; path = ../deps/libSDL/libSDL.a; sourceTree = "<group>"; };
 		8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
@@ -576,6 +604,14 @@
 		84C9A9562B228D9A00909EFF /* chacha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chacha.c; path = ../../../lib/chacha/chacha.c; sourceTree = "<group>"; };
 		84C9A9572B228D9A00909EFF /* ecrypt-sync.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ecrypt-sync.h"; path = "../../../lib/chacha/ecrypt-sync.h"; sourceTree = "<group>"; };
 		84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnghttp2.a; path = ../deps/nghttp2/libnghttp2.a; sourceTree = "<group>"; };
+		84D5A583306BE7FD007E5260 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		84D5A585306BE7FD007E5260 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		84D5A587306BE7FD007E5260 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		84D5A589306BE7FD007E5260 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		84D5A58B306BE7FD007E5260 /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
+		84D5A58D306BE7FD007E5260 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		84D5A58F306BE7FD007E5260 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		84DEC4702ECFE7900003B5C4 /* MultiCraft.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MultiCraft.entitlements; sourceTree = "<group>"; };
 		84E592873016A448002EC373 /* MetalANGLE.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalANGLE.framework; path = ../deps/angle/MetalANGLE.framework; sourceTree = "<group>"; };
 		84E97FC52D1393F800C85934 /* hashing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hashing.cpp; path = ../../../src/util/hashing.cpp; sourceTree = "<group>"; };
 		84E97FC62D1393F800C85934 /* hashing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hashing.h; path = ../../../src/util/hashing.h; sourceTree = "<group>"; };
@@ -760,9 +796,7 @@
 		84F20EA825D528D6009562A9 /* subgames.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = subgames.cpp; path = ../../../src/content/subgames.cpp; sourceTree = "<group>"; };
 		84F20EA925D528D6009562A9 /* subgames.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = subgames.h; path = ../../../src/content/subgames.h; sourceTree = "<group>"; };
 		84F20EAA25D528D6009562A9 /* mods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mods.h; path = ../../../src/content/mods.h; sourceTree = "<group>"; };
-		84F20EAB25D528D7009562A9 /* packages.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = packages.h; path = ../../../src/content/packages.h; sourceTree = "<group>"; };
 		84F20EAC25D528D7009562A9 /* content.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = content.h; path = ../../../src/content/content.h; sourceTree = "<group>"; };
-		84F20EAD25D528D7009562A9 /* packages.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = packages.cpp; path = ../../../src/content/packages.cpp; sourceTree = "<group>"; };
 		84F20EAE25D528D7009562A9 /* mods.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mods.cpp; path = ../../../src/content/mods.cpp; sourceTree = "<group>"; };
 		84F20EAF25D528D7009562A9 /* content.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = content.cpp; path = ../../../src/content/content.cpp; sourceTree = "<group>"; };
 		84F20EB425D528EB009562A9 /* database-files.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "database-files.h"; path = "../../../src/database/database-files.h"; sourceTree = "<group>"; };
@@ -860,6 +894,14 @@
 		84FA0A152F19178E00394A7F /* scrollSwipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scrollSwipe.cpp; path = ../../../src/gui/scrollSwipe.cpp; sourceTree = "<group>"; };
 		84FA0A172F2C107600394A7F /* libharfbuzz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libharfbuzz.a; path = ../deps/harfbuzz/libharfbuzz.a; sourceTree = "<group>"; };
 		84FA0A1B2F4BB3CE00394A7F /* SheenBidi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SheenBidi.c; path = ../../lib/sheenbidi/Source/SheenBidi.c; sourceTree = "<group>"; };
+		84FA1AA0306BCDC700A04E82 /* default_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = default_shader; path = ../../../client/shaders/default_shader; sourceTree = "<group>"; };
+		84FA1AA1306BCDC700A04E82 /* minimap_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = minimap_shader; path = ../../../client/shaders/minimap_shader; sourceTree = "<group>"; };
+		84FA1AA2306BCDC700A04E82 /* nodes_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = nodes_shader; path = ../../../client/shaders/nodes_shader; sourceTree = "<group>"; };
+		84FA1AA3306BCDC700A04E82 /* object_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = object_shader; path = ../../../client/shaders/object_shader; sourceTree = "<group>"; };
+		84FA1AA4306BCDC700A04E82 /* selection_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = selection_shader; path = ../../../client/shaders/selection_shader; sourceTree = "<group>"; };
+		84FA1AA5306BCDC700A04E82 /* stars_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = stars_shader; path = ../../../client/shaders/stars_shader; sourceTree = "<group>"; };
+		84FA1AA6306BCDC700A04E82 /* Irrlicht */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Irrlicht; path = ../../deps/irrlicht/Irrlicht; sourceTree = "<group>"; };
+		84FA1AA8306BCDC700A04E82 /* MultiCraftFont.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = MultiCraftFont.ttf; path = ../../../fonts/MultiCraftFont.ttf; sourceTree = "<group>"; };
 		84FD8E2F26A0B01D00EF2BFA /* guiEditBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiEditBox.h; path = ../../../src/gui/guiEditBox.h; sourceTree = "<group>"; };
 		84FD8E3026A0B01D00EF2BFA /* guiEditBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = guiEditBox.cpp; path = ../../../src/gui/guiEditBox.cpp; sourceTree = "<group>"; };
 		84FD8E3226A0B04900EF2BFA /* guiScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = guiScene.h; path = ../../../src/gui/guiScene.h; sourceTree = "<group>"; };
@@ -871,27 +913,31 @@
 			isa = PBXFrameworksBuildPhase;
 			files = (
 				84EA1B952CA4BC8B00CDCE7C /* AudioToolbox.framework in Frameworks */,
-				84CA12AF2EF4B8BA004899E0 /* libnghttp2.a in Frameworks */,
 				8463C2992E46BC22002D5BB3 /* AppKit.framework in Frameworks */,
-				848A7CE32DD8042E00CC49EB /* AVFoundation.framework in Frameworks */,
 				8495BD2A28B81170009FCF4D /* Carbon.framework in Frameworks */,
 				841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */,
+				84D5A584306BE7FD007E5260 /* CoreFoundation.framework in Frameworks */,
+				84D5A586306BE7FD007E5260 /* CoreGraphics.framework in Frameworks */,
 				84BE974528CA129C004E8CEC /* CoreHaptics.framework in Frameworks */,
-				848A7CE52DD8048500CC49EB /* CoreMedia.framework in Frameworks */,
+				84D5A588306BE7FD007E5260 /* CoreServices.framework in Frameworks */,
+				84D5A58A306BE7FD007E5260 /* CoreVideo.framework in Frameworks */,
 				8495BD1E28B80F0B009FCF4D /* ForceFeedback.framework in Frameworks */,
 				84463B9124B258AF0099DFBD /* Foundation.framework in Frameworks */,
 				84BE974328CA1291004E8CEC /* GameController.framework in Frameworks */,
+				84D5A58C306BE7FD007E5260 /* ImageIO.framework in Frameworks */,
+				84D5A58E306BE7FD007E5260 /* IOKit.framework in Frameworks */,
 				84E592883016A448002EC373 /* MetalANGLE.framework in Frameworks */,
+				84D5A590306BE7FD007E5260 /* Security.framework in Frameworks */,
 				84A5FD912E57319F009F0F5A /* SystemConfiguration.framework in Frameworks */,
 				84D1BF562CD7EFF10077DD47 /* libzstd in Frameworks */,
 				849FD2C82DFD8FCE00C8B942 /* libcurl.a in Frameworks */,
 				844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */,
 				84FA0A182F2C10AC00394A7F /* libharfbuzz.a in Frameworks */,
-				8488539F28DA4857004AD90F /* libjpeg.a in Frameworks */,
 				8458616A24B1B7E20040BA4F /* libIrrlicht.a in Frameworks */,
 				841AD8BB28D12E980042E335 /* libintl.a in Frameworks */,
 				841AD8A528D0C1870042E335 /* libleveldb.a in Frameworks */,
 				846F883B27A59704007B6210 /* libluajit.a in Frameworks */,
+				84CA12AF2EF4B8BA004899E0 /* libnghttp2.a in Frameworks */,
 				841AD8B128D0DE430042E335 /* libogg.a in Frameworks */,
 				841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */,
 				84C2AB5328DA7776001968EE /* libpng.a in Frameworks */,
@@ -952,8 +998,6 @@
 				84F20EAC25D528D7009562A9 /* content.h */,
 				84F20EAE25D528D7009562A9 /* mods.cpp */,
 				84F20EAA25D528D6009562A9 /* mods.h */,
-				84F20EAD25D528D7009562A9 /* packages.cpp */,
-				84F20EAB25D528D7009562A9 /* packages.h */,
 				84F20EA825D528D6009562A9 /* subgames.cpp */,
 				84F20EA925D528D6009562A9 /* subgames.h */,
 			);
@@ -1059,13 +1103,14 @@
 			isa = PBXGroup;
 			children = (
 				8458617B24B1C3BB0040BA4F /* builtin */,
-				8453A49D24DB22F00087ECF9 /* client */,
-				84287CA5291ED0F000E30F96 /* fonts */,
+				84FA1AAA306BCDC700A04E82 /* fonts */,
 				84287CA4291ED0F000E30F96 /* locale */,
+				84FA1AA9306BCDC700A04E82 /* shaders */,
 				8458617C24B1C3BB0040BA4F /* textures */,
 				845856B224B1322D0040BA4F /* Assets.xcassets */,
 				845856B724B1322D0040BA4F /* Info.plist */,
 				84BDEE602C471AD500A1571D /* Localizable.xcstrings */,
+				84DEC4702ECFE7900003B5C4 /* MultiCraft.entitlements */,
 				84E33D852A7BBEA200609F77 /* Supporting Files */,
 				84585CD524B138F50040BA4F /* src */,
 				84D4D9082A93707F00CACCC7 /* lib */,
@@ -1079,22 +1124,26 @@
 				8463C2982E46BC22002D5BB3 /* AppKit.framework */,
 				84EA1B942CA4BC8B00CDCE7C /* AudioToolbox.framework */,
 				841AD8AC28D0D6920042E335 /* AudioUnit.framework */,
-				848A7CE22DD8042E00CC49EB /* AVFoundation.framework */,
 				8495BD2928B81170009FCF4D /* Carbon.framework */,
 				841AD8AE28D0D6A40042E335 /* CoreAudio.framework */,
+				84D5A583306BE7FD007E5260 /* CoreFoundation.framework */,
+				84D5A585306BE7FD007E5260 /* CoreGraphics.framework */,
 				84BE974428CA129C004E8CEC /* CoreHaptics.framework */,
-				848A7CE42DD8048400CC49EB /* CoreMedia.framework */,
+				84D5A587306BE7FD007E5260 /* CoreServices.framework */,
+				84D5A589306BE7FD007E5260 /* CoreVideo.framework */,
 				8495BD1D28B80F0B009FCF4D /* ForceFeedback.framework */,
 				84585C0024B1347B0040BA4F /* Foundation.framework */,
 				84BE974228CA1291004E8CEC /* GameController.framework */,
+				84D5A58B306BE7FD007E5260 /* ImageIO.framework */,
+				84D5A58D306BE7FD007E5260 /* IOKit.framework */,
 				84E592873016A448002EC373 /* MetalANGLE.framework */,
+				84D5A58F306BE7FD007E5260 /* Security.framework */,
 				84A5FD902E57319F009F0F5A /* SystemConfiguration.framework */,
 				849FD2C72DFD8FCE00C8B942 /* libcurl.a */,
 				844436EE28DA80C100662A9D /* libfreetype.a */,
 				84FA0A172F2C107600394A7F /* libharfbuzz.a */,
 				84EEE5E62782728E00F61929 /* libintl.a */,
 				8458616724B1B7990040BA4F /* libIrrlicht.a */,
-				8488539E28DA4851004AD90F /* libjpeg.a */,
 				841AD8A428D0C1810042E335 /* libleveldb.a */,
 				846F883A27A596F9007B6210 /* libluajit.a */,
 				84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */,
@@ -1699,6 +1748,28 @@
 			path = ../../../lib/sheenbidi;
 			sourceTree = "<group>";
 		};
+		84FA1AA9306BCDC700A04E82 /* shaders */ = {
+			isa = PBXGroup;
+			children = (
+				84FA1AA0306BCDC700A04E82 /* default_shader */,
+				84FA1AA1306BCDC700A04E82 /* minimap_shader */,
+				84FA1AA2306BCDC700A04E82 /* nodes_shader */,
+				84FA1AA3306BCDC700A04E82 /* object_shader */,
+				84FA1AA4306BCDC700A04E82 /* selection_shader */,
+				84FA1AA5306BCDC700A04E82 /* stars_shader */,
+				84FA1AA6306BCDC700A04E82 /* Irrlicht */,
+			);
+			name = shaders;
+			sourceTree = "<group>";
+		};
+		84FA1AAA306BCDC700A04E82 /* fonts */ = {
+			isa = PBXGroup;
+			children = (
+				84FA1AA8306BCDC700A04E82 /* MultiCraftFont.ttf */,
+			);
+			name = fonts;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -1710,6 +1781,8 @@
 				845856A624B1322C0040BA4F /* Frameworks */,
 				845856A724B1322C0040BA4F /* Resources */,
 				847D7EF53016A34200B653FA /* Embed Frameworks */,
+				84FA1AAB306BCDC700A04E82 /* Copy Shaders */,
+				84FA1AB5306BCDC700A04E82 /* Copy Fonts */,
 			);
 			buildRules = (
 			);
@@ -1798,8 +1871,6 @@
 			isa = PBXResourcesBuildPhase;
 			files = (
 				8458617F24B1C3BC0040BA4F /* builtin in Resources */,
-				8453A49E24DB22F00087ECF9 /* client in Resources */,
-				84287CA7291ED0F000E30F96 /* fonts in Resources */,
 				84287CA6291ED0F000E30F96 /* locale in Resources */,
 				8458618024B1C3BC0040BA4F /* textures in Resources */,
 				845856B324B1322D0040BA4F /* Assets.xcassets in Resources */,
@@ -2018,7 +2089,6 @@
 				84C9A9592B228D9A00909EFF /* chacha.c in Sources */,
 				84135C1825D526D700CA4DCF /* filecache.cpp in Sources */,
 				84F20E3425D5282A009562A9 /* l_settings.cpp in Sources */,
-				84F20EB125D528D7009562A9 /* packages.cpp in Sources */,
 				84F20F0525D52958009562A9 /* profilergraph.cpp in Sources */,
 				84135C2625D526D700CA4DCF /* guiscalingfilter.cpp in Sources */,
 				84F20E4225D5282A009562A9 /* l_auth.cpp in Sources */,
@@ -2192,7 +2262,6 @@
 					"${SRCROOT}/../deps/harfbuzz/include",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
-					"${SRCROOT}/../deps/libjpeg/include",
 					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/luajit/include",
 					"${SRCROOT}/../deps/libogg/include",
@@ -2224,7 +2293,6 @@
 					"-L${SRCROOT}/../deps/harfbuzz",
 					"-L${SRCROOT}/../deps/gettext",
 					"-L${SRCROOT}/../deps/irrlicht",
-					"-L${SRCROOT}/../deps/libjpeg",
 					"-L${SRCROOT}/../deps/leveldb",
 					"-L${SRCROOT}/../deps/luajit",
 					"-L${SRCROOT}/../deps/libogg",
@@ -2289,7 +2357,6 @@
 					"${SRCROOT}/../deps/harfbuzz/include",
 					"${SRCROOT}/../deps/gettext/include",
 					"${SRCROOT}/../deps/irrlicht/include",
-					"${SRCROOT}/../deps/libjpeg/include",
 					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/luajit/include",
 					"${SRCROOT}/../deps/libogg/include",
@@ -2321,7 +2388,6 @@
 					"-L${SRCROOT}/../deps/harfbuzz",
 					"-L${SRCROOT}/../deps/gettext",
 					"-L${SRCROOT}/../deps/irrlicht",
-					"-L${SRCROOT}/../deps/libjpeg",
 					"-L${SRCROOT}/../deps/leveldb",
 					"-L${SRCROOT}/../deps/luajit",
 					"-L${SRCROOT}/../deps/libogg",
@@ -2332,7 +2398,6 @@
 					"-L${SRCROOT}/../deps/libcurl",
 					"-L${SRCROOT}/../deps/nghttp2",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited)";
 				PRODUCT_BUNDLE_IDENTIFIER = mobi.MultiCraft;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				RUNTIME_EXCEPTION_ALLOW_JIT = YES;

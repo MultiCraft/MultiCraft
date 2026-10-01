@@ -19,7 +19,5 @@
 	<false/>
 	<key>NSHighResolutionCapable</key>
 	<true/>
-	<key>NSSupportsSuddenTermination</key>
-	<true/>
 </dict>
 </plist>

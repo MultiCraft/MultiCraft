@@ -19,10 +19,12 @@ LIBRARY_DIRS="-L$(pwd)/nghttp2"
 
 cd libcurl-src
 
+# The macOS 27 SDK declares pipe2, which only macOS 27 has, newer than the deployment target
 CPPFLAGS="$INCLUDE_DIRS" \
 LDFLAGS="$LIBRARY_DIRS" \
 CFLAGS="$CFLAGS $OSX_FLAGS $OSX_ARCH" \
 PKG_CONFIG_LIBDIR=/nonexistent \
+ac_cv_func_pipe2=no \
 ./configure --prefix=/ --disable-shared --enable-static \
 	--with-nghttp2 \
 	--disable-debug --disable-verbose --disable-versioned-symbols \
@@ -34,6 +36,7 @@ PKG_CONFIG_LIBDIR=/nonexistent \
 	--disable-imap --disable-smtp --disable-gopher --disable-sspi \
 	--disable-libcurl-option --without-libidn2 --without-libpsl
 
+make clean
 make -j
 
 mkdir -p ../libcurl/include
