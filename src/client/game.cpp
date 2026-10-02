@@ -1090,7 +1090,7 @@ void Game::run()
 	CameraOrientation cam_view_target  = { 0 };
 	CameraOrientation cam_view  = { 0 };
 	FpsControl draw_times       = { 0 };
-	f32 dtime; // in seconds
+	f32 dtime = 0; // in seconds
 
 	/* Clear the profiler */
 	Profiler::GraphValues dummyvalues;
@@ -1130,11 +1130,6 @@ void Game::run()
 
 		g_fontengine->handleReload();
 
-		// Calculate dtime =
-		//    RenderingEngine::run() from this iteration
-		//  + Sleep time until the wanted FPS are reached
-		limitFps(&draw_times, &dtime);
-
 #if defined(__ANDROID__) || defined(__IOS__)
 		if (g_pause_menu_schedule) {
 			g_pause_menu_schedule = false;
@@ -1154,6 +1149,7 @@ void Game::run()
 		{
 			if (m_does_lost_focus_pause_game && !isMenuActive())
 				showPauseMenu();
+			limitFps(&draw_times, &dtime);
 			sleep_ms(50);
 			continue;
 		}
@@ -1220,6 +1216,11 @@ void Game::run()
 		if (m_does_lost_focus_pause_game && !device->isWindowFocused() && !isMenuActive()) {
 			showPauseMenu();
 		}
+
+		// Calculate dtime =
+		//    RenderingEngine::run() from this iteration
+		//  + Sleep time until the wanted FPS are reached
+		limitFps(&draw_times, &dtime);
 	}
 }
 
