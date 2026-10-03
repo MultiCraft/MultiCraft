@@ -131,6 +131,11 @@ void *ServerThread::run()
 		} catch (DatabaseException &e) {
 			m_server->setAsyncFatalError(
 					"ServerThread::run: " + std::string(e.what()));
+#if defined(__ANDROID__) || defined(__APPLE__)
+		} catch (const std::bad_alloc &) {
+			m_server->setAsyncFatalError("Out of memory");
+			break;
+#endif
 		}
 	}
 
