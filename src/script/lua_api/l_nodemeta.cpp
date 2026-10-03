@@ -64,7 +64,7 @@ void NodeMetaRef::reportMetadataChange(const std::string *name)
 	SANITY_CHECK(!m_is_local);
 	// NOTE: This same code is in rollback_interface.cpp
 	// Inform other things that the metadata has changed
-	NodeMetadata *meta = dynamic_cast<NodeMetadata*>(m_meta);
+	NodeMetadata *meta = dynamic_cast<NodeMetadata*>(getmeta(false));
 
 	MapEditEvent event;
 	event.type = MEET_BLOCK_NODE_METADATA_CHANGED;
