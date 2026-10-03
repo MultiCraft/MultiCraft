@@ -309,7 +309,7 @@ void Minimap::setModeIndex(size_t index)
 		data->mode = m_modes[index];
 		m_current_mode_index = index;
 	} else {
-		data->mode = MinimapModeDef{MINIMAP_TYPE_OFF, gettext("Minimap hidden"), 0, 0, ""};
+		data->mode = MinimapModeDef{MINIMAP_TYPE_OFF, gettext("Minimap hidden"), 0, 0, "", 0};
 		m_current_mode_index = 0;
 	}
 
@@ -646,11 +646,11 @@ void Minimap::drawMinimap()
 
 void Minimap::drawMinimap(core::rect<s32> rect) {
 
-	video::ITexture *minimap_texture = getMinimapTexture();
-	if (!minimap_texture)
+	if (data->mode.type == MINIMAP_TYPE_OFF)
 		return;
 
-	if (data->mode.type == MINIMAP_TYPE_OFF)
+	video::ITexture *minimap_texture = getMinimapTexture();
+	if (!minimap_texture)
 		return;
 
 	updateActiveMarkers();
