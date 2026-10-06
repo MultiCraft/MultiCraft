@@ -75,12 +75,17 @@ static const touch_gui_button_id overflow_buttons_id[] {
 TouchScreenGUI *g_touchscreengui = nullptr;
 bool TouchScreenGUI::m_active = true;
 
+static s32 buttonSize()
+{
+	return RenderingEngine::getDisplayDensity() * RenderingEngine::getHudScaling() *
+			TOUCH_BUTTON_SIZE;
+}
+
 TouchScreenGUI::TouchScreenGUI(IrrlichtDevice *device):
 		m_device(device), m_guienv(device->getGUIEnvironment())
 {
 	m_screensize = m_device->getVideoDriver()->getScreenSize();
-	m_button_size = RenderingEngine::getDisplayDensity() *
-			RenderingEngine::getHudScaling() * TOUCH_BUTTON_SIZE;
+	m_button_size = buttonSize();
 
 	m_press_sound = g_settings->get("btn_press_sound");
 
@@ -323,9 +328,6 @@ void TouchScreenGUI::initJoystickButton()
 
 void TouchScreenGUI::updateButtons()
 {
-	m_button_size = RenderingEngine::getDisplayDensity() *
-			RenderingEngine::getHudScaling() * TOUCH_BUTTON_SIZE;
-
 	for (auto button : m_buttons) {
 		if (button->state == STATE_OVERFLOW)
 			continue;
@@ -464,7 +466,7 @@ void TouchScreenGUI::updateEditorButtonsState()
 
 	if (m_editor.button_redo) {
 		if (m_editor.history_current_id > -1 &&
-				m_editor.history_current_id < m_editor.history_data.size()) {
+				m_editor.history_current_id < (int)m_editor.history_data.size()) {
 			m_editor.button_redo->guibutton->setPressed(true);
 			m_editor.button_redo->inactive = false;
 		} else {
@@ -945,7 +947,7 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					if (button->id == editor_save_id) {
 						play_sound = true;
 						m_settings->updateConfigFile(m_settings_path.c_str());
-						new_state = m_previous_state;
+						new_state = STATE_DEFAULT;
 					} else if (button->id == editor_default_id) {
 						play_sound = true;
 						reset_all_values = true;
@@ -977,7 +979,8 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 							updateButtons();
 						}
 					} else if (button->id == editor_redo_id) {
-						if (m_editor.history_current_id >= 0 && m_editor.history_current_id < m_editor.history_data.size()) {
+						if (m_editor.history_current_id >= 0 &&
+								m_editor.history_current_id < (int)m_editor.history_data.size()) {
 							for (auto data : m_editor.history_data[m_editor.history_current_id]) {
 								rect<s32> rect = data.new_rect;
 								data.guibutton->setRelativePosition(rect);
@@ -1046,12 +1049,12 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 			if (m_editor.change_size) {
 				if (new_rect.UpperLeftCorner.X < 0)
 					new_rect += v2s32(-new_rect.UpperLeftCorner.X, 0);
-				else if (new_rect.LowerRightCorner.X > m_screensize.X)
+				else if (new_rect.LowerRightCorner.X > (s32)m_screensize.X)
 					new_rect -= v2s32(new_rect.LowerRightCorner.X - m_screensize.X, 0);
 
 				if (new_rect.UpperLeftCorner.Y < 0)
 					new_rect += v2s32(0, -new_rect.UpperLeftCorner.Y);
-				else if (new_rect.LowerRightCorner.Y > m_screensize.Y)
+				else if (new_rect.LowerRightCorner.Y > (s32)m_screensize.Y)
 					new_rect -= v2s32(0, new_rect.LowerRightCorner.Y - m_screensize.Y);
 			}
 
@@ -1165,12 +1168,12 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 					if (rect.UpperLeftCorner.X < 0)
 						rect += v2s32(-rect.UpperLeftCorner.X, 0);
-					else if (rect.LowerRightCorner.X > m_screensize.X)
+					else if (rect.LowerRightCorner.X > (s32)m_screensize.X)
 						rect -= v2s32(rect.LowerRightCorner.X - m_screensize.X, 0);
 
 					if (rect.UpperLeftCorner.Y < 0)
 						rect += v2s32(0, -rect.UpperLeftCorner.Y);
-					else if (rect.LowerRightCorner.Y > m_screensize.Y)
+					else if (rect.LowerRightCorner.Y > (s32)m_screensize.Y)
 						rect -= v2s32(0, rect.LowerRightCorner.Y - m_screensize.Y);
 
 					guibutton->setRelativePosition(rect);
@@ -1426,9 +1429,13 @@ void TouchScreenGUI::step(float dtime)
 		return;
 
 	v2u32 screensize = m_device->getVideoDriver()->getScreenSize();
+	// The HUD scaling follows the render core, which takes a new screen size only as it draws,
+	// after this step
+	s32 button_size = buttonSize();
 
-	if (screensize != m_screensize) {
+	if (screensize != m_screensize || button_size != m_button_size) {
 		m_screensize = screensize;
+		m_button_size = button_size;
 		initSettings();
 		updateButtons();
 	}
@@ -1601,7 +1608,9 @@ void TouchScreenGUI::reset()
 		button->reset();
 	}
 
-	m_joystick.reset(m_visible && (m_current_state == STATE_DEFAULT));
+	m_joystick.reset(m_visible && m_current_state != STATE_OVERFLOW &&
+			m_current_state != STATE_HIDDEN &&
+			(m_visible_btns.empty() || m_visible_btns.count("joystick") > 0));
 	m_camera.reset();
 	m_camera_additional.reset();
 	m_editor.reset();

@@ -1992,10 +1992,16 @@ void Game::updateStats(RunStats *stats, const FpsControl &draw_times,
 void Game::processUserInput(f32 dtime)
 {
 	// Reset input if window not active or some menu is active
-	if (!device->isWindowActive() || isMenuActive() || guienv->hasFocus(gui_chat_console)) {
+	const bool menu = isMenuActive() || guienv->hasFocus(gui_chat_console);
+	if (!device->isWindowActive() || menu) {
 		input->clear();
 #ifdef HAVE_TOUCHSCREENGUI
-		g_touchscreengui->hide();
+		// The window loses focus for a moment as the screen turns, and hidden buttons would
+		// stay hidden until a touch
+		if (menu)
+			g_touchscreengui->hide();
+		else
+			g_touchscreengui->reset();
 #endif
 	}
 
