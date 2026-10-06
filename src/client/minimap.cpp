@@ -175,6 +175,22 @@ void MinimapUpdateThread::getMap(v3s16 pos, s16 size, s16 height)
 //// Mapper
 ////
 
+// The runs of minimap pixels a mask clears; red tells them, as Irrlicht 1.9 spoils alpha
+static std::vector<MinimapClearedRun> maskCleared(video::IImage *mask)
+{
+	std::vector<MinimapClearedRun> runs;
+	for (u16 y = 0; mask && y < MINIMAP_MAX_SY; y++)
+	for (u16 x = 0; x < MINIMAP_MAX_SX; x++) {
+		if (mask->getPixel(x, y).getRed() == 255)
+			continue;
+		if (!runs.empty() && runs.back().y == y && runs.back().end == x)
+			runs.back().end++;
+		else
+			runs.push_back({y, x, (u16)(x + 1)});
+	}
+	return runs;
+}
+
 Minimap::Minimap(Client *client)
 {
 	this->client    = client;
@@ -213,6 +229,9 @@ Minimap::Minimap(Client *client)
 	// Get square minimap textures
 	data->minimap_mask_square = m_tsrc->getTextureImage("minimap_mask_square.png");
 	data->minimap_overlay_square = m_tsrc->getTexture("minimap_overlay_square.png");
+
+	m_round_cleared = maskCleared(data->minimap_mask_round);
+	m_square_cleared = maskCleared(data->minimap_mask_square);
 
 	// Create player marker texture
 	data->player_marker = m_tsrc->getTexture("player_marker.png");
@@ -568,25 +587,27 @@ video::ITexture *Minimap::getMinimapTexture()
 		image->drop();
 	}
 
-	map_image->copyToScaling(minimap_image);
+	// copyToScaling's steps with the columns taken once: per pixel it cost milliseconds an update
+	const f32 step_x = (f32)(dim.Width - 1) / (MINIMAP_MAX_SX - 1);
+	const f32 step_y = (f32)(dim.Height - 1) / (MINIMAP_MAX_SY - 1);
+	u32 columns[MINIMAP_MAX_SX];
+	f32 sx = 0.5f;
+	for (u32 x = 0; x < MINIMAP_MAX_SX; x++, sx += step_x)
+		columns[x] = (u32)sx;
+	const u32 *map_pixels = (const u32 *)map_image->getData();
+	u32 *minimap_pixels = (u32 *)minimap_image->getData();
+	f32 sy = 0.5f;
+	for (u32 y = 0; y < MINIMAP_MAX_SY; y++, sy += step_y) {
+		const u32 *row = map_pixels + (u32)sy * dim.Width;
+		for (u32 x = 0; x < MINIMAP_MAX_SX; x++)
+			minimap_pixels[y * MINIMAP_MAX_SX + x] = row[columns[x]];
+	}
 	map_image->drop();
 
-	video::IImage *minimap_mask = data->minimap_shape_round ?
-		data->minimap_mask_round : data->minimap_mask_square;
-
-	if (minimap_mask) {
-		for (s16 y = 0; y < MINIMAP_MAX_SY; y++)
-		for (s16 x = 0; x < MINIMAP_MAX_SX; x++) {
-			video::SColor mask_col = minimap_mask->getPixel(x, y);
-#if IRRLICHT_VERSION_MAJOR == 1 && IRRLICHT_VERSION_MINOR >= 9
-			// Irrlicht 1.9 has some problem with alpha
-			if (mask_col.getRed() != 255)
-#else
-			if (!mask_col.getAlpha())
-#endif
-				minimap_image->setPixel(x, y, video::SColor(0,0,0,0));
-		}
-	}
+	for (const MinimapClearedRun &run :
+			data->minimap_shape_round ? m_round_cleared : m_square_cleared)
+		memset(minimap_pixels + run.y * MINIMAP_MAX_SX + run.begin, 0,
+			(run.end - run.begin) * sizeof(u32));
 
 	updateTexture(driver, data->texture, "minimap__", minimap_image);
 	updateTexture(driver, data->heightmap_texture, "minimap_heightmap__", heightmap_image);

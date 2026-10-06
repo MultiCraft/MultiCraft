@@ -34,6 +34,12 @@ class IShaderSource;
 #define MINIMAP_MAX_SX 512
 #define MINIMAP_MAX_SY 512
 
+// A run of minimap pixels a mask clears: row y, columns [begin, end)
+struct MinimapClearedRun
+{
+	u16 y, begin, end;
+};
+
 enum MinimapShape {
 	MINIMAP_SHAPE_SQUARE,
 	MINIMAP_SHAPE_ROUND,
@@ -177,4 +183,7 @@ private:
 	std::mutex m_mutex;
 	std::list<MinimapMarker*> m_markers;
 	std::list<std::pair<v2f, video::ITexture *>> m_active_markers;
+	// The runs of minimap pixels each mask clears
+	std::vector<MinimapClearedRun> m_round_cleared;
+	std::vector<MinimapClearedRun> m_square_cleared;
 };
