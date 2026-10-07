@@ -34,6 +34,7 @@
 	java.lang.String getSecretKey(java.lang.String);
 	void hideSplashScreen();
 	boolean needsExtractAssets();
+	boolean isGooglePC();
 	void vibrationEffect(int);
 }
 -keepclasseswithmembernames,includedescriptorclasses class * {

@@ -981,6 +981,8 @@ bool extractZipFileFromAssets(io::IFileSystem *fs,
 		if (!data) {
 			if (errorMessage != nullptr)
 				*errorMessage = "failed to open zip file";
+			result = false;
+			break;
 		}
 
 		io::IReadFile *file_mem = fs->createMemoryReadFile(data, length, filename);
@@ -988,6 +990,9 @@ bool extractZipFileFromAssets(io::IFileSystem *fs,
 		if (!file_mem) {
 			if (errorMessage != nullptr)
 				*errorMessage = "failed to open zip file";
+			SDL_free(data);
+			result = false;
+			break;
 		}
 
 		irr_ptr<io::IFileArchive> opened_zip(zip_loader->createArchive(file_mem, false, false));
@@ -996,6 +1001,9 @@ bool extractZipFileFromAssets(io::IFileSystem *fs,
 
 		file_mem->drop();
 		SDL_free(data);
+
+		if (!result)
+			break;
 	}
 
 	porting::destroyAssetManager();

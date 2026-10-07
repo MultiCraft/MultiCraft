@@ -100,6 +100,12 @@ include $(PREBUILT_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 LOCAL_MODULE := MultiCraft
 
+ifdef GPROF
+	GPROF_DEF := -DGPROF
+	PROFILER_LIBS := android-ndk-profiler
+	LOCAL_CFLAGS += -pg
+endif
+
 LOCAL_CFLAGS += \
 	-DJSONCPP_NO_LOCALE_SUPPORT                    \
 	-DSB_CONFIG_UNITY                              \
@@ -123,12 +129,6 @@ LOCAL_CFLAGS += \
 
 ifdef NDEBUG
 	LOCAL_CFLAGS += -DNDEBUG=1
-endif
-
-ifdef GPROF
-	GPROF_DEF := -DGPROF
-	PROFILER_LIBS := android-ndk-profiler
-	LOCAL_CFLAGS += -pg
 endif
 
 LOCAL_C_INCLUDES := \
@@ -324,7 +324,7 @@ LOCAL_STATIC_LIBRARIES += \
 
 LOCAL_STATIC_LIBRARIES += $(PROFILER_LIBS)
 
-LOCAL_LDLIBS := -lEGL -lGLESv1_CM -lGLESv2 -landroid -lOpenSLES -lz -llog
+LOCAL_LDLIBS := -lGLESv2 -landroid -lz -llog
 
 include $(BUILD_SHARED_LIBRARY)
 

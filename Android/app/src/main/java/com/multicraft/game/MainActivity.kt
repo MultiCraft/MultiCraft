@@ -127,20 +127,10 @@ class MainActivity : AppCompatActivity() {
 	}
 
 	private fun prepareToRun() {
-		val filesList = listOf(
-			"builtin",
-			"client${sep}shaders",
-			"fonts",
-			"textures${sep}base"
-		).map { File(filesDir, it) }
-
-		lifecycleScope.launch {
-			filesList.forEach { it.deleteRecursively() }
-			try {
-				startNative(true)
-			} catch (_: Exception) {
-				runOnUiThread { showRestartDialog(restartStartForResult) }
-			}
+		try {
+			startNative(true)
+		} catch (_: Exception) {
+			showRestartDialog(restartStartForResult)
 		}
 	}
 

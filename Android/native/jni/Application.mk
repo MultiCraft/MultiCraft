@@ -12,12 +12,10 @@ endif
 
 APP_CFLAGS += -flto -std=gnu17 -ffunction-sections -fdata-sections
 
-APP_CXXFLAGS := $(APP_CFLAGS) -fvisibility-inlines-hidden -fexceptions -frtti -std=gnu++17 #-Werror=shorten-64-to-32
+APP_CXXFLAGS := -fvisibility-inlines-hidden -fexceptions -frtti -std=gnu++17
 
 # Silence Irrlicht warnings. Comment out with real debugging!
 APP_CXXFLAGS += -Wno-inconsistent-missing-override
-
-APP_CPPFLAGS := $(APP_CXXFLAGS)
 
 ifdef NDEBUG
 APP_LDFLAGS := -Wl,--gc-sections,--icf=all -Wl,-O2

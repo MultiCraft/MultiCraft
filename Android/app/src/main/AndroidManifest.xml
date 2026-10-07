@@ -69,6 +69,7 @@
 		<activity
 			android:name=".GameActivity"
 			android:configChanges="orientation|keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|uiMode"
+			android:enableOnBackInvokedCallback="false"
 			android:exported="true"
 			android:hardwareAccelerated="true"
 			android:launchMode="singleTask"

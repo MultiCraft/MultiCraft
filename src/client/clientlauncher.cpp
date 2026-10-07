@@ -393,29 +393,29 @@ bool ClientLauncher::init_assets()
 
 	IrrlichtDevice *nulldevice = createDevice(video::EDT_NULL);
 
-	if (!nulldevice) {
-		porting::hideSplashScreen();
+	if (!nulldevice)
 		return false;
-	}
 
 	io::IFileSystem *irrfs = nulldevice->getFileSystem();
 	std::string error_msg;
 
-	// Removing old assets will be done in Java activity
-	/*std::string dirs[] = {
+	// The folders the assets fill go first, so nothing of an older version stays behind
+	std::string dirs[] = {
 			"builtin", "client/shaders",
 			"fonts", "textures/base"
 	};
 
-	for (std::string dir : dirs) {
-		fs::RecursiveDelete(porting::path_share + "/" + dir);
-	}*/
+	for (const std::string &dir : dirs) {
+		const std::string path = porting::path_share + "/" + dir;
+		if (fs::PathExists(path))
+			fs::RecursiveDelete(path);
+	}
 
 	if (!fs::extractZipFileFromAssets(irrfs, porting::path_share, "",
 				&error_msg)) {
 		errorstream << "Could not extract assets: " << error_msg << std::endl;
+		porting::handleError("Could not extract assets", error_msg);
 		nulldevice->drop();
-		porting::hideSplashScreen();
 		return false;
 	}
 

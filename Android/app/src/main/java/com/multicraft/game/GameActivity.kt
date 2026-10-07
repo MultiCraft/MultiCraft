@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.multicraft.game
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.drawable.AnimationDrawable
 import android.os.*
@@ -44,8 +45,10 @@ import com.multicraft.game.helpers.ApiLevelHelper.isAndroid11
 import com.multicraft.game.helpers.ApiLevelHelper.isAndroid12
 import com.multicraft.game.helpers.ApiLevelHelper.isOreo
 import com.multicraft.game.helpers.PreferenceHelper.TAG_BUILD_VER
+import com.multicraft.game.helpers.PreferenceHelper.getIntValue
 import com.multicraft.game.helpers.PreferenceHelper.set
 import org.libsdl.app.SDLActivity
+import java.io.File
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 
@@ -73,6 +76,7 @@ class GameActivity : SDLActivity() {
 	}
 
 	private var splashView: View? = null
+	private lateinit var prefs: SharedPreferences
 	private var isExtract: Boolean = false
 	private var messageReturnValue = ""
 	private var hasKeyboard = false
@@ -89,7 +93,10 @@ class GameActivity : SDLActivity() {
 		} catch (_: Exception) {
 			exitProcess(0)
 		}
-		isExtract = intent.getBooleanExtra("update", false)
+		prefs = PreferenceHelper.init(this)
+		// Android opens this activity by itself too, as from the recent apps after an update
+		val buildVer = try { prefs.getIntValue(TAG_BUILD_VER) } catch (_: ClassCastException) { 0 }
+		isExtract = intent.getBooleanExtra("update", false) || buildVer != BuildConfig.VERSION_CODE
 		if (isExtract) {
 			val container = FrameLayout(this).apply {
 				layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
@@ -104,8 +111,6 @@ class GameActivity : SDLActivity() {
 				ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
 			)
 		}
-		val prefs = PreferenceHelper.init(this)
-		prefs[TAG_BUILD_VER] = BuildConfig.VERSION_CODE
 		hasKeyboard = hasHardKeyboard()
 	}
 
@@ -352,6 +357,8 @@ class GameActivity : SDLActivity() {
 	}
 
 	fun hideSplashScreen() {
+		if (File(filesDir, "builtin/mainmenu/init.lua").canRead())
+			prefs[TAG_BUILD_VER] = BuildConfig.VERSION_CODE
 		runOnUiThread {
 			splashView?.let { view ->
 				(view.parent as? ViewGroup)?.removeView(view)
@@ -361,6 +368,9 @@ class GameActivity : SDLActivity() {
 	}
 
 	fun needsExtractAssets() = isExtract
+
+	fun isGooglePC() =
+		packageManager.hasSystemFeature("com.google.android.play.feature.HPE_EXPERIENCE")
 
 	fun vibrationEffect(intensity: Int) {
 		val effect: Int = if (isAndroid10()) {

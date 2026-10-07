@@ -80,6 +80,9 @@ int main(int argc, char *argv[])
 
 static std::string readJavaString(JNIEnv *env, jstring j_str)
 {
+	// A Java method may return null
+	if (!j_str)
+		return "";
 	// Get string as a UTF-8 C string
 	const char *c_str = env->GetStringUTFChars(j_str, nullptr);
 	// Save it
@@ -222,7 +225,7 @@ std::string getInputDialogValue()
 {
 	input_dialog_owner = "";
 
-	jmethodID dialogvalue = jnienv->GetMethodID(activityClass,
+	static jmethodID dialogvalue = jnienv->GetMethodID(activityClass,
 			"getDialogValue", "()Ljava/lang/String;");
 
 	FATAL_ERROR_IF(dialogvalue == nullptr,
@@ -412,28 +415,8 @@ bool isGooglePC()
 	if (jnienv == nullptr || activityObj == nullptr)
 		return false;
 
-	static const bool value = [](){
-		jmethodID packageManager = jnienv->GetMethodID(activityClass,
-				"getPackageManager", "()Landroid/content/pm/PackageManager;");
-
-		if (packageManager == nullptr) {
-			errorstream << "porting::isGooglePC unable to find Java getPackageManager method" << std::endl;
-			return false;
-		}
-
-		jobject pm = jnienv->CallObjectMethod(activityObj, packageManager);
-		jclass pmCls = jnienv->GetObjectClass(pm);
-		jmethodID hasFeat = jnienv->GetMethodID(pmCls, "hasSystemFeature", "(Ljava/lang/String;)Z");
-		jstring feat = jnienv->NewStringUTF("com.google.android.play.feature.HPE_EXPERIENCE");
-		jboolean result = jnienv->CallBooleanMethod(pm, hasFeat, feat);
-
-		jnienv->DeleteLocalRef(feat);
-		jnienv->DeleteLocalRef(pmCls);
-		jnienv->DeleteLocalRef(pm);
-
-		return result == JNI_TRUE;
-	}();
-
+	static const bool value = jnienv->CallBooleanMethod(activityObj,
+			jnienv->GetMethodID(activityClass, "isGooglePC", "()Z"));
 	return value;
 }
 
@@ -507,7 +490,7 @@ void vibrationEffect(int intensity)
 	if (jnienv == nullptr || activityObj == nullptr)
 		return;
 
-	jmethodID vibrationEffectMethod = jnienv->GetMethodID(activityClass,
+	static jmethodID vibrationEffectMethod = jnienv->GetMethodID(activityClass,
 			"vibrationEffect", "(I)V");
 
 	FATAL_ERROR_IF(vibrationEffectMethod == nullptr,
