@@ -161,25 +161,61 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		bool result = m_touchscreengui->preprocessEvent(event);
 
 		if (result) {
+			// Several key types can share one keycode (e.g. sneak remapped
+			// to KEY_RBUTTON, which is also the place key). Evaluate every
+			// key type first, then update each keycode once, so a type that
+			// is not pressed cannot release a key another type is holding.
+			// Otherwise the key flips released/pressed on every event and
+			// generates a fresh "was pressed" edge each time (autoclick).
+			struct TouchKeyState {
+				KeyPress key;
+				bool pressed = false;
+				bool release_now = true;
+			};
+			std::vector<TouchKeyState> states;
+
 			for (int key_type = 0; key_type < KeyType::INTERNAL_ENUM_COUNT; key_type++) {
 				auto key = input->keycache.key[key_type];
 
 				if (!keysListenedFor[key])
 					continue;
 
+				// isButtonPressed() has side effects: call it once per type
 				bool pressed = m_touchscreengui->isButtonPressed((KeyType::T)key_type);
-				if (pressed) {
-					if (!IsKeyDown(key)) {
-						keyWasPressed.set(key);
-						keyIsDown.set(key);
-						keyWasDown.set(key);
+				bool immediate = m_touchscreengui->immediateRelease((KeyType::T)key_type);
+
+				TouchKeyState *st = nullptr;
+				for (auto &s : states) {
+					if (s.key == key) {
+						st = &s;
+						break;
 					}
 				}
-				if (!pressed || m_touchscreengui->immediateRelease((KeyType::T)key_type)) {
-					if (IsKeyDown(key))
-						keyWasReleased.set(key);
+				if (!st) {
+					states.emplace_back();
+					st = &states.back();
+					st->key = key;
+				}
 
-					keyIsDown.unset(key);
+				if (pressed) {
+					st->pressed = true;
+					// keep the key held if any pressed type wants that
+					if (!immediate)
+						st->release_now = false;
+				}
+			}
+
+			for (auto &st : states) {
+				if (st.pressed && !IsKeyDown(st.key)) {
+					keyWasPressed.set(st.key);
+					keyIsDown.set(st.key);
+					keyWasDown.set(st.key);
+				}
+				if (!st.pressed || st.release_now) {
+					if (IsKeyDown(st.key))
+						keyWasReleased.set(st.key);
+
+					keyIsDown.unset(st.key);
 				}
 			}
 		}
