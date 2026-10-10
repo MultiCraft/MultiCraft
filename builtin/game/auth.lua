@@ -128,6 +128,28 @@ core.builtin_auth_handler = {
 		end
 		return pairs(names)
 	end,
+	get_canonical_name = function(name)
+		local name_lower = name:lower()
+		if name_lower == name:upper() then
+			-- Name has no uppercase/lowercase versions, no need to do anything
+			return name
+		end
+
+		-- Fast path for existing players with the correct case provided
+		if core_auth.read(name) then
+			return name
+		end
+
+		-- Search for the player name case-insensitively
+		-- TODO: Cache this?
+		for _, n in ipairs(core_auth.list_names()) do
+			if n:lower() == name_lower then
+				return n
+			end
+		end
+
+		return name
+	end,
 }
 
 core.register_on_prejoinplayer(function(name, ip)
