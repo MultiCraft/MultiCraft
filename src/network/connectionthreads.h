@@ -124,6 +124,7 @@ private:
 			peer_id: peer id of the sender of the packet in question
 			channelnum: channel on which the packet was sent
 			reliable: true if recursing into a reliable packet
+		Returns the data for the user, empty when the packet leaves none
 	*/
 	SharedBuffer<u8> processPacket(Channel *channel,
 			const SharedBuffer<u8> &packetdata, session_t peer_id,

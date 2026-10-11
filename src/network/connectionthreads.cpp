@@ -892,16 +892,11 @@ void ConnectionReceiveThread::receive(SharedBuffer<u8> &packetdata,
 			session_t peer_id;
 			SharedBuffer<u8> resultdata;
 			while (data_left) {
-				try {
-					data_left = getFromBuffers(peer_id, resultdata);
-					if (data_left) {
-						ConnectionEvent e;
-						e.dataReceived(peer_id, resultdata);
-						m_connection->putEvent(std::move(e));
-					}
-				}
-				catch (ProcessedSilentlyException &e) {
-					/* try reading again */
+				data_left = getFromBuffers(peer_id, resultdata);
+				if (data_left && resultdata.getSize() != 0) {
+					ConnectionEvent e;
+					e.dataReceived(peer_id, resultdata);
+					m_connection->putEvent(std::move(e));
 				}
 			}
 			packet_queued = false;
@@ -996,11 +991,11 @@ void ConnectionReceiveThread::receive(SharedBuffer<u8> &packetdata,
 		memcpy(*strippeddata, &packetdata[BASE_HEADER_SIZE],
 			strippeddata.getSize());
 
-		try {
-			// Process it (the result is some data with no headers made by us)
-			SharedBuffer<u8> resultdata = processPacket
-				(channel, strippeddata, peer_id, channelnum, false);
+		// Process it (the result is some data with no headers made by us)
+		SharedBuffer<u8> resultdata = processPacket
+			(channel, strippeddata, peer_id, channelnum, false);
 
+		if (resultdata.getSize() != 0) {
 			LOG(dout_con << m_connection->getDesc()
 				<< " ProcessPacket from peer_id: " << peer_id
 				<< ", channel: " << (u32)channelnum << ", returned "
@@ -1009,11 +1004,6 @@ void ConnectionReceiveThread::receive(SharedBuffer<u8> &packetdata,
 			ConnectionEvent e;
 			e.dataReceived(peer_id, resultdata);
 			m_connection->putEvent(std::move(e));
-		}
-		catch (ProcessedSilentlyException &e) {
-		}
-		catch (ProcessedQueued &e) {
-			// we set it to true anyway (see below)
 		}
 
 		/* Every time we receive a packet it can happen that a previously
@@ -1084,7 +1074,7 @@ SharedBuffer<u8> ConnectionReceiveThread::processPacket(Channel *channel,
 
 	if (!peer) {
 		errorstream << "Peer not found (possible timeout)" << std::endl;
-		throw ProcessedSilentlyException("Peer not found (possible timeout)");
+		return {};
 	}
 
 	if (packetdata.getSize() < 1)
@@ -1173,7 +1163,8 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Control(Channel *chan
 			channel->UpdatePacketTooLateCounter();
 		}
 
-		throw ProcessedSilentlyException("Got an ACK");
+		LOG(dout_con << m_connection->getDesc() << "Got an ACK" << std::endl);
+		return {};
 	} else if (controltype == CONTROLTYPE_SET_PEER_ID) {
 		// Got a packet to set our peer id
 		if (packetdata.getSize() < 4)
@@ -1192,12 +1183,13 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Control(Channel *chan
 			m_connection->SetPeerID(peer_id_new);
 		}
 
-		throw ProcessedSilentlyException("Got a SET_PEER_ID");
+		LOG(dout_con << m_connection->getDesc() << "Got a SET_PEER_ID" << std::endl);
+		return {};
 	} else if (controltype == CONTROLTYPE_PING) {
 		// Just ignore it, the incoming data already reset
 		// the timeout counter
 		LOG(dout_con << m_connection->getDesc() << "PING" << std::endl);
-		throw ProcessedSilentlyException("Got a PING");
+		return {};
 	} else if (controltype == CONTROLTYPE_DISCO) {
 		// Just ignore it, the incoming data already reset
 		// the timeout counter
@@ -1208,7 +1200,8 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Control(Channel *chan
 			derr_con << m_connection->getDesc() << "DISCO: Peer not found" << std::endl;
 		}
 
-		throw ProcessedSilentlyException("Got a DISCO");
+		LOG(dout_con << m_connection->getDesc() << "Got a DISCO" << std::endl);
+		return {};
 	} else {
 		LOG(derr_con << m_connection->getDesc()
 			<< "INVALID TYPE_CONTROL: invalid controltype="
@@ -1255,7 +1248,7 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Split(Channel *channe
 			return data;
 		}
 		LOG(dout_con << m_connection->getDesc() << "BUFFERED TYPE_SPLIT" << std::endl);
-		throw ProcessedSilentlyException("Buffered a split packet chunk");
+		return {};
 	}
 
 	// We should never get here.
@@ -1288,9 +1281,11 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Reliable(Channel *cha
 
 		/* packet is not within receive window, don't send ack.           *
 		 * if this was a valid packet it's gonna be retransmitted         */
-		if (is_future_packet)
-			throw ProcessedSilentlyException(
-				"Received packet newer then expected, not sending ack");
+		if (is_future_packet) {
+			LOG(dout_con << m_connection->getDesc()
+				<< "Received packet newer then expected, not sending ack" << std::endl);
+			return {};
+		}
 
 		/* seems like our ack was lost, send another one for a old packet */
 		if (is_old_packet) {
@@ -1300,7 +1295,7 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Reliable(Channel *cha
 				<< ", seqnum: " << seqnum << std::endl;)
 			m_connection->sendAck(peer->id, channelnum, seqnum);
 
-			throw ProcessedSilentlyException("Retransmitting ack for old packet");
+			return {};
 		}
 	}
 
@@ -1326,7 +1321,7 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Reliable(Channel *cha
 				<< ", channel: " << (channelnum & 0xFF)
 				<< ", seqnum: " << seqnum << std::endl;)
 
-			throw ProcessedQueued("Buffered future reliable packet");
+			return {};
 		} catch (AlreadyExistsException &e) {
 		} catch (IncomingDataCorruption &e) {
 			ConnectionCommand discon;
@@ -1338,6 +1333,7 @@ SharedBuffer<u8> ConnectionReceiveThread::handlePacketType_Reliable(Channel *cha
 				<< ", channel: " << (channelnum & 0xFF)
 				<< ", seqnum: " << seqnum
 				<< "DROPPING CLIENT!" << std::endl;)
+			return {};
 		}
 	}
 

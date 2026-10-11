@@ -62,18 +62,6 @@ public:
 	NoIncomingDataException(const char *s) : BaseException(s) {}
 };
 
-class ProcessedSilentlyException : public BaseException
-{
-public:
-	ProcessedSilentlyException(const char *s) : BaseException(s) {}
-};
-
-class ProcessedQueued : public BaseException
-{
-public:
-	ProcessedQueued(const char *s) : BaseException(s) {}
-};
-
 class IncomingDataCorruption : public BaseException
 {
 public:
