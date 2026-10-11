@@ -42,8 +42,13 @@ class Profiler
 public:
 	Profiler();
 
+#ifdef PROFILER_STUB
+	void add(const std::string &, float) {}
+	void avg(const std::string &, float) {}
+#else
 	void add(const std::string &name, float value);
 	void avg(const std::string &name, float value);
+#endif
 	void clear();
 
 	float getValue(const std::string &name) const;
@@ -57,6 +62,9 @@ public:
 	void getPage(GraphValues &o, u32 page, u32 pagecount);
 
 
+#ifdef PROFILER_STUB
+	void graphAdd(const std::string &, float) {}
+#else
 	void graphAdd(const std::string &id, float value)
 	{
 		MutexAutoLock lock(m_mutex);
@@ -67,6 +75,7 @@ public:
 		else
 			i->second += value;
 	}
+#endif
 	void graphGet(GraphValues &result)
 	{
 		MutexAutoLock lock(m_mutex);
@@ -98,6 +107,9 @@ enum ScopeProfilerType{
 class ScopeProfiler
 {
 public:
+#ifdef PROFILER_STUB
+	ScopeProfiler(Profiler *, const std::string &, ScopeProfilerType = SPT_ADD) {}
+#else
 	ScopeProfiler(Profiler *profiler, const std::string &name,
 			ScopeProfilerType type = SPT_ADD);
 	~ScopeProfiler();
@@ -106,4 +118,5 @@ private:
 	std::string m_name;
 	TimeTaker *m_timer = nullptr;
 	enum ScopeProfilerType m_type;
+#endif
 };

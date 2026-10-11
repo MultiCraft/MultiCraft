@@ -340,9 +340,11 @@ void ClientMap::updateDrawBufs(video::IVideoDriver *driver)
 					driver->getMaterialRenderer(material.MaterialType);
 				bool transparent = (rnd && rnd->isTransparent());
 
+#ifndef PROFILER_STUB
 				if (buf->getVertexCount() == 0)
 					errorstream << "Block [" << analyze_block(block)
 						<< "] contains an empty meshbuf" << std::endl;
+#endif
 
 				material.setFlag(video::EMF_TRILINEAR_FILTER,
 					m_cache_trilinear_filter);
@@ -393,7 +395,9 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 	MeshBufListList &drawbufs = is_transparent_pass ?
 		m_drawbufs_transparent : m_drawbufs_solid;
 
+#ifndef PROFILER_STUB
 	u32 vertex_count = 0;
+#endif
 	u32 drawcall_count = 0;
 
 	TimeTaker draw("Drawing mesh buffers");
@@ -468,7 +472,9 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 					}
 				}
 				driver->drawMeshBuffer(buf);
+#ifndef PROFILER_STUB
 				vertex_count += buf->getVertexCount();
+#endif
 			}
 			// The list outlives the frame, so it goes back to the program with point lights
 			list.m.MaterialType = lit;
@@ -476,7 +482,9 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 	}
 	g_profiler->avg(prefix + "draw meshes [ms]", draw.stop(true));
 
+#ifndef PROFILER_STUB
 	g_profiler->avg(prefix + "vertices drawn [#]", vertex_count);
+#endif
 	g_profiler->avg(prefix + "drawcalls [#]", drawcall_count);
 	g_profiler->avg(prefix + "materials [#]", material_count);
 	g_profiler->avg(prefix + "transforms [#]", transform_count);

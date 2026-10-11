@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 static Profiler main_profiler;
 Profiler *g_profiler = &main_profiler;
+#ifndef PROFILER_STUB
 ScopeProfiler::ScopeProfiler(
 		Profiler *profiler, const std::string &name, ScopeProfilerType type) :
 		m_profiler(profiler),
@@ -54,12 +55,14 @@ ScopeProfiler::~ScopeProfiler()
 	}
 	delete m_timer;
 }
+#endif
 
 Profiler::Profiler()
 {
 	m_start_time = porting::getTimeMs();
 }
 
+#ifndef PROFILER_STUB
 void Profiler::add(const std::string &name, float value)
 {
 	MutexAutoLock lock(m_mutex);
@@ -92,6 +95,7 @@ void Profiler::avg(const std::string &name, float value)
 	count = MYMAX(count, 0) + 1;
 	m_data[name] += value;
 }
+#endif
 
 void Profiler::clear()
 {
