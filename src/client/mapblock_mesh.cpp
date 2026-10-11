@@ -1178,6 +1178,8 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 
 			scene::SMeshBuffer *buf = new scene::SMeshBuffer();
 			buf->Material = material;
+			// Without shaders animate() writes the vertices, so the driver may not take them
+			buf->setReleasable(m_enable_vbo && m_enable_shaders);
 			buf->append(&p.vertices[0], p.vertices.size(),
 				&p.indices[0], p.indices.size());
 			mesh->addMeshBuffer(buf);
