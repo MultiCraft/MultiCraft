@@ -442,13 +442,21 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 		material_count += lists.size();
 
 	for (auto &lists : drawbufs.lists) {
+		// Materials that discard go after the solid ones, whose depth then hides their fragments:
+		// a discard stops tilers removing hidden surfaces
+		auto discarding = lists.begin();
+		if (!is_transparent_pass)
+			discarding = std::partition(lists.begin(), lists.end(), [shdrsrc] (const MeshBufList &l) {
+				return !shdrsrc->discardsByAlpha(l.m.MaterialType);
+			});
 		if (m_cache_transparency_sorting) {
 			static const auto comparator = [] (MeshBufList const &a, MeshBufList const &b) {
 				// comparing pointers with < is UB unless they belong to the same array, but std::less is always allowed
 				static const std::less<video::ITexture *> texture_less;
 				return texture_less(a.m.TextureLayer[0].Texture, b.m.TextureLayer[0].Texture);
 			};
-			std::sort(lists.begin(), lists.end(), comparator);
+			std::sort(lists.begin(), discarding, comparator);
+			std::sort(discarding, lists.end(), comparator);
 		}
 		for (MeshBufList &list : lists) {
 			// Check and abort if the machine is swapping a lot
