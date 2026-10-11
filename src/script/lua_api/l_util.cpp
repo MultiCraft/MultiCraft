@@ -593,7 +593,7 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 	lua_settable(L, top);
 
 	lua_pushstring(L,"high_dpi");
-	lua_pushnumber(L,RenderingEngine::isHighDpi());
+	lua_pushboolean(L,RenderingEngine::isHighDpi());
 	lua_settable(L, top);
 
 	lua_pushstring(L,"display_width");
@@ -615,6 +615,14 @@ int ModApiUtil::l_get_screen_info(lua_State *L)
 
 	lua_pushstring(L, "max_refresh_rate");
 	lua_pushinteger(L, porting::getMaxRefreshRate());
+	lua_settable(L, top);
+
+	lua_pushstring(L, "is_tablet");
+#ifdef HAVE_TOUCHSCREENGUI
+	lua_pushboolean(L, RenderingEngine::isTablet());
+#else
+	lua_pushboolean(L, false);
+#endif
 	lua_settable(L, top);
 	return 1;
 }
