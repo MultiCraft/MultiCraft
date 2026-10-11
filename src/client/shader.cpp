@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <fstream>
 #include <iterator>
 #include <unordered_map>
+#include <unordered_set>
 #include "shader.h"
 #include "irrlichttypes_extrabloated.h"
 #include "irr_ptr.h"
@@ -452,6 +453,7 @@ public:
 
 	ShaderInfo getShaderInfo(u32 id) override;
 	video::E_MATERIAL_TYPE getMaterialWithoutPointLights(video::E_MATERIAL_TYPE material) override;
+	bool discardsByAlpha(video::E_MATERIAL_TYPE material) override;
 
 	// Processes queued shader requests from other threads.
 	// Shall be called from the main thread.
@@ -494,6 +496,8 @@ private:
 
 	// The node programs with point lights and the same programs without, main thread only
 	std::unordered_map<video::E_MATERIAL_TYPE, video::E_MATERIAL_TYPE> m_without_point_lights;
+	// The programs that discard by alpha, main thread only
+	std::unordered_set<video::E_MATERIAL_TYPE> m_alpha_test;
 
 	// Generate shader given the shader name.
 	ShaderInfo generateShader(const std::string &name,
@@ -657,6 +661,7 @@ void ShaderSource::rebuildShaders()
 
 	// Recreate shaders
 	m_without_point_lights.clear();
+	m_alpha_test.clear();
 	for (ShaderInfo &i : m_shaderinfo_cache) {
 		ShaderInfo *info = &i;
 		if (!info->name.empty()) {
@@ -1002,6 +1007,8 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 
 	// Apply the newly created material type
 	shaderinfo.material = (video::E_MATERIAL_TYPE) shadermat;
+	if (shaderinfo.base_material == video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF)
+		m_alpha_test.insert(shaderinfo.material);
 
 	// Frames with no light source near draw the nodes with the same program without point lights
 	if (lights) {
@@ -1016,6 +1023,11 @@ video::E_MATERIAL_TYPE ShaderSource::getMaterialWithoutPointLights(video::E_MATE
 {
 	const auto it = m_without_point_lights.find(material);
 	return it == m_without_point_lights.end() ? material : it->second;
+}
+
+bool ShaderSource::discardsByAlpha(video::E_MATERIAL_TYPE material)
+{
+	return material == video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF || m_alpha_test.count(material);
 }
 
 void dumpShaderProgram(std::ostream &output_stream,

@@ -140,6 +140,9 @@ public:
 	// The same program without point lights, or the material itself when it has none
 	virtual video::E_MATERIAL_TYPE getMaterialWithoutPointLights(
 			video::E_MATERIAL_TYPE material){return material;}
+	// Whether the material discards fragments by their alpha
+	virtual bool discardsByAlpha(video::E_MATERIAL_TYPE material)
+		{return material == video::EMT_TRANSPARENT_ALPHA_CHANNEL_REF;}
 };
 
 class IWritableShaderSource : public IShaderSource {
