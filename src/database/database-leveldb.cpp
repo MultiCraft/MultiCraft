@@ -134,8 +134,11 @@ void Database_LevelDB::loadBlock(const v3s16 &pos, std::string *block)
 	leveldb::Status status = m_database->Get(leveldb::ReadOptions(),
 		i64tos(getBlockAsInteger(pos)), block);
 
-	if (!status.ok())
-		block->clear();	
+	if (status.IsNotFound()) {
+		block->clear();
+	} else {
+		ENSURE_STATUS_OK(status)
+	}
 }
 
 bool Database_LevelDB::deleteBlock(const v3s16 &pos)
@@ -236,8 +239,10 @@ bool PlayerDatabaseLevelDB::loadPlayer(RemotePlayer *player, PlayerSAO *sao)
 	std::string raw;
 	leveldb::Status s = m_database->Get(leveldb::ReadOptions(),
 		player->getName(), &raw);
-	if (!s.ok())
+	if (s.IsNotFound())
 		return false;
+	ENSURE_STATUS_OK(s)
+
 	std::istringstream is(raw, std::ios_base::binary);
 
 	if (readU8(is) > 1)
@@ -275,7 +280,9 @@ void PlayerDatabaseLevelDB::listPlayers(std::vector<std::string> &res)
 	for (it->SeekToFirst(); it->Valid(); it->Next()) {
 		res.push_back(it->key().ToString());
 	}
+	leveldb::Status status = it->status();
 	delete it;
+	ENSURE_STATUS_OK(status);
 }
 
 AuthDatabaseLevelDB::AuthDatabaseLevelDB(const std::string &savedir)
@@ -296,8 +303,10 @@ bool AuthDatabaseLevelDB::getAuth(const std::string &name, AuthEntry &res)
 {
 	std::string raw;
 	leveldb::Status s = m_database->Get(leveldb::ReadOptions(), name, &raw);
-	if (!s.ok())
+	if (s.IsNotFound())
 		return false;
+	ENSURE_STATUS_OK(s)
+
 	std::istringstream is(raw, std::ios_base::binary);
 
 	/*
@@ -366,7 +375,9 @@ void AuthDatabaseLevelDB::listNames(std::vector<std::string> &res)
 	for (it->SeekToFirst(); it->Valid(); it->Next()) {
 		res.emplace_back(it->key().ToString());
 	}
+	leveldb::Status status = it->status();
 	delete it;
+	ENSURE_STATUS_OK(status);
 }
 
 void AuthDatabaseLevelDB::reload()
