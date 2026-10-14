@@ -8,6 +8,16 @@ end
 
 core.registered_globalsteps, core.register_globalstep = make_registration()
 core.registered_on_update, core.register_on_update = make_registration()
+core.registered_on_browser_closed, core.register_on_browser_closed = make_registration()
+
+-- Route internal update events to dedicated callbacks.
+core.register_on_update(function(key, value)
+    if key == "_browser_closed" then
+        for _, func in ipairs(core.registered_on_browser_closed) do
+            func(value)
+        end
+    end
+end)
 
 function core.update_handler(...)
     for _, func in ipairs(core.registered_on_update) do
