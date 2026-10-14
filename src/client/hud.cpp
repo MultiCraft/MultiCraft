@@ -392,6 +392,14 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 
 		v2s32 pos(floor(e->pos.X * (float) m_screensize.X + 0.5),
 				floor(e->pos.Y * (float) m_screensize.Y + 0.5));
+
+		constexpr float offset_start = 0.5f;
+		constexpr float offset_end = 0.75f;
+		if (e->pos.Y > offset_start) {
+			float mul = (e->pos.Y - offset_start) / (offset_end - offset_start);
+			pos.Y -= m_hud_move_upwards * std::min(1.f, mul);
+		}
+
 		switch (e->type) {
 			case HUD_ELEM_TEXT: {
 				irr::gui::IGUIFont *textfont = font;
@@ -410,11 +418,12 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 										 (e->number >> 0)  & 0xFF);
 				std::wstring text = unescape_translate(utf8_to_wide(e->text));
 				core::dimension2d<u32> textsize = textfont->getDimension(text.c_str());
+
+#if defined(__ANDROID__) || defined(__IOS__)
 				bool below_center = ((e->scale.Y * m_scale_factor + pos.Y +
 									 (e->align.Y - 1.0) * (textsize.Height / 2) +
 									  e->offset.Y * m_scale_factor) > m_displaycenter.Y);
 
-#if defined(__ANDROID__) || defined(__IOS__)
 				// The text size on Android is not proportional with the actual scaling
 				if (below_center) {
 					font_size = MYMAX(font_size * 0.9f, 1.0f);
@@ -428,8 +437,6 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 				                     text_height * e->scale.Y * m_scale_factor);
 				v2s32 offs(e->offset.X * m_scale_factor,
 				           e->offset.Y * m_scale_factor);
-				if (below_center)
-					pos.Y -= m_hud_move_upwards;
 				textfont->draw(text.c_str(), size + pos + offset + offs, color);
 				break; }
 			case HUD_ELEM_STATBAR: {
@@ -498,9 +505,6 @@ void Hud::drawLuaElements(const v3s16 &camera_offset, bool show_hud)
 				v2s32 offset((e->align.X - 1.0) * dstsize.X / 2,
 				             (e->align.Y - 1.0) * dstsize.Y / 2);
 
-				if ((dstsize.Y + pos.Y + offset.Y + e->offset.Y * m_scale_factor) > m_displaycenter.Y &&
-						e->scale.X >= 0 && e->scale.Y >= 0)
-					offset.Y -= m_hud_move_upwards;
 				core::rect<s32> rect(0, 0, dstsize.X, dstsize.Y);
 				rect += pos + offset + v2s32(e->offset.X * m_scale_factor,
 				                             e->offset.Y * m_scale_factor);
@@ -692,9 +696,6 @@ void Hud::drawStatbar(v2s32 pos, u16 corner, u16 drawdir,
 		p -= dstd.Height;
 
 	p += offset;
-
-	if ((pos.Y + offset.Y) > m_displaycenter.Y)
-		p.Y -= m_hud_move_upwards;
 
 	v2s32 steppos;
 	switch (drawdir) {
