@@ -253,15 +253,17 @@ function math.round(x)
 end
 
 
+local formspec_escapes = {
+	["\\"] = "\\\\",
+	["["] = "\\[",
+	["]"] = "\\]",
+	[";"] = "\\;",
+	[","] = "\\,",
+	["$"] = "\\$",
+}
 function core.formspec_escape(text)
-	if text ~= nil then
-		text = text:gsub("\\", "\\\\")
-		text = text:gsub("%]", "\\]")
-		text = text:gsub("%[", "\\[")
-		text = text:gsub(";", "\\;")
-		text = text:gsub(",", "\\,")
-	end
-	return text
+	-- Use explicit character set instead of dot here because it doubles the performance
+	return text and string.gsub(text, "[\\%[%];,$]", formspec_escapes)
 end
 
 
