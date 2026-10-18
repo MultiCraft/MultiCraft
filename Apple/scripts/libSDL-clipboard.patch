@@ -1,0 +1,16 @@
+diff --git a/src/video/cocoa/SDL_cocoaclipboard.m b/src/video/cocoa/SDL_cocoaclipboard.m
+index 9f785c6..795940c 100644
+--- a/src/video/cocoa/SDL_cocoaclipboard.m
++++ b/src/video/cocoa/SDL_cocoaclipboard.m
+@@ -219,7 +219,10 @@ static bool IsMimeType(const char *tag)
+ static CFStringRef GetUTIType(const char *tag)
+ {
+     CFStringRef utiType;
+-    if (IsMimeType(tag)) {
++    if (SDL_strcmp(tag, "text/plain;charset=utf-8") == 0) {
++        // macOS before 11 makes only a dynamic UTI of this, which no text on the pasteboard has
++        utiType = CFRetain((__bridge CFStringRef)NSPasteboardTypeString);
++    } else if (IsMimeType(tag)) {
+         CFStringRef mimeType = CFStringCreateWithCString(NULL, tag, kCFStringEncodingUTF8);
+         utiType = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, mimeType, NULL);
+         CFRelease(mimeType);

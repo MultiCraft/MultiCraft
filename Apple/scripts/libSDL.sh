@@ -9,6 +9,8 @@ if [ ! -d libSDL-src ]; then
 	git clone -b $SDL_VERSION --depth 1 https://github.com/libsdl-org/SDL.git libSDL-src
 	sed -i '' 's/^#pragma STDC FENV_ACCESS ON/\/\/&/' libSDL-src/src/audio/SDL_audiotypecvt.c
 	sed -i '' 's/^#define SDL_DYNAMIC_API 1$/#define SDL_DYNAMIC_API 0/' libSDL-src/src/dynapi/SDL_dynapi.h
+	# Pasted text reads by the pasteboard's string type, as macOS 10.15 has no UTI for its MIME type
+	git -C libSDL-src apply ../../scripts/libSDL-clipboard.patch
 fi
 
 rm -rf libSDL
