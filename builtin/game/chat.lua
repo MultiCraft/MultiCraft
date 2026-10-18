@@ -973,6 +973,14 @@ core.register_chatcommand("days", {
 	end
 })
 
+core.register_chatcommand("seed", {
+	description = "Show the world seed",
+	privs = {server=true},
+	func = function(name, param)
+		return true, "Seed: " .. core.get_mapgen_setting("seed")
+	end,
+})
+
 core.register_chatcommand("shutdown", {
 	params = "[<delay_in_seconds> | -1] [reconnect] [<message>]",
 	description = "Shutdown server (-1 cancels a delayed shutdown)",
