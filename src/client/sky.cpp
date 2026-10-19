@@ -774,25 +774,31 @@ void Sky::setSunTexture(const std::string &sun_texture,
 		m_materials[3].Lighting = !!m_sun_tonemap;
 	}
 
-	if (m_sun_params.texture == sun_texture && !m_first_update)
+	video::ITexture *texture = nullptr;
+	if (sun_texture == "sun.png") {
+		// Dumb compatibility fix: sun.png transparently falls back to no texture
+		texture = tsrc->isKnownSourceImage(sun_texture) ?
+			tsrc->getTexture(sun_texture) : nullptr;
+	} else if (!sun_texture.empty()) {
+		texture = tsrc->getTextureForMesh(sun_texture);
+	}
+
+	// The same name from another texture source, as the next main menu's, is a new texture
+	if (m_sun_params.texture == sun_texture && texture == m_sun_texture && !m_first_update)
 		return;
 
 	m_sun_params.texture = sun_texture;
 
+	// The new one first, as it may be the one held now
+	if (texture)
+		texture->grab();
 	if (m_sun_texture)
 		m_sun_texture->drop();
 
-	m_sun_texture = nullptr;
-	if (sun_texture == "sun.png") {
-		// Dumb compatibility fix: sun.png transparently falls back to no texture
-		m_sun_texture = tsrc->isKnownSourceImage(sun_texture) ?
-			tsrc->getTexture(sun_texture) : nullptr;
-	} else if (!sun_texture.empty()) {
-		m_sun_texture = tsrc->getTextureForMesh(sun_texture);
-	}
+	m_sun_texture = texture;
+	m_materials[3].setTexture(0, nullptr);
 
 	if (m_sun_texture) {
-		m_sun_texture->grab();
 		m_materials[3] = baseMaterial();
 		m_materials[3].setTexture(0, m_sun_texture);
 		m_materials[3].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
@@ -828,25 +834,31 @@ void Sky::setMoonTexture(const std::string &moon_texture,
 		m_materials[4].Lighting = !!m_moon_tonemap;
 	}
 
-	if (m_moon_params.texture == moon_texture && !m_first_update)
+	video::ITexture *texture = nullptr;
+	if (moon_texture == "moon.png") {
+		// Dumb compatibility fix: moon.png transparently falls back to no texture
+		texture = tsrc->isKnownSourceImage(moon_texture) ?
+			tsrc->getTexture(moon_texture) : nullptr;
+	} else if (!moon_texture.empty()) {
+		texture = tsrc->getTextureForMesh(moon_texture);
+	}
+
+	// The same name from another texture source, as the next main menu's, is a new texture
+	if (m_moon_params.texture == moon_texture && texture == m_moon_texture && !m_first_update)
 		return;
 
 	m_moon_params.texture = moon_texture;
 
+	// The new one first, as it may be the one held now
+	if (texture)
+		texture->grab();
 	if (m_moon_texture)
 		m_moon_texture->drop();
 
-	m_moon_texture = nullptr;
-	if (moon_texture == "moon.png") {
-		// Dumb compatibility fix: moon.png transparently falls back to no texture
-		m_moon_texture = tsrc->isKnownSourceImage(moon_texture) ?
-			tsrc->getTexture(moon_texture) : nullptr;
-	} else if (!moon_texture.empty()) {
-		m_moon_texture = tsrc->getTextureForMesh(moon_texture);
-	}
+	m_moon_texture = texture;
+	m_materials[4].setTexture(0, nullptr);
 
 	if (m_moon_texture) {
-		m_moon_texture->grab();
 		m_materials[4] = baseMaterial();
 		m_materials[4].setTexture(0, m_moon_texture);
 		m_materials[4].MaterialType = video::EMT_TRANSPARENT_ALPHA_CHANNEL;
