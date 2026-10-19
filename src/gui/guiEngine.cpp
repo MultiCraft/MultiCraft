@@ -263,7 +263,7 @@ void GUIEngine::run()
 					   fog_pixelfog, fog_rangefog);
 	}
 
-	u64 t_last_frame = porting::getTimeUs();
+	u64 t_last_frame = porting::getAwakeTimeUs();
 	f32 dtime = 0.0f;
 	bool drawn = false;
 
@@ -339,7 +339,7 @@ void GUIEngine::run()
 		else
 			sleep_ms(frametime_min);
 
-		u64 t_now = porting::getTimeUs();
+		u64 t_now = porting::getAwakeTimeUs();
 		dtime = static_cast<f32>(t_now - t_last_frame) * 1.0e-6f;
 		t_last_frame = t_now;
 

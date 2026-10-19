@@ -240,7 +240,7 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	set_default_settings();
 #endif
 
-	m_last_time = porting::getTimeMs();
+	m_last_time = porting::getAwakeTimeUs() / 1000;
 }
 
 RenderingEngine::~RenderingEngine()
@@ -556,7 +556,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 #endif
 
 	float fps_max = std::min(g_settings->getFloat("fps_max"), 30.0f);
-	u64 cur_time = porting::getTimeMs();
+	u64 cur_time = porting::getAwakeTimeUs() / 1000;
 	m_load_screen_dtime += dtime;
 
 	if (cur_time - m_last_time < 1000.0f / fps_max && percent == m_percent)

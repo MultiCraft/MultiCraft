@@ -1320,7 +1320,7 @@ bool Game::init(
 	if (!result)
 		return false;
 
-	load_time_ms = porting::getTimeMs();
+	load_time_ms = porting::getAwakeTimeUs() / 1000;
 	load_last_time_ms = load_time_ms;
 	showOverlayMessage(N_("Loading..."), 0, 0);
 
@@ -1383,7 +1383,7 @@ bool Game::createSingleplayerServer(const std::string &map_dir,
 		return false;
 
 	load_last_time_ms = load_time_ms;
-	load_time_ms = porting::getTimeMs();
+	load_time_ms = porting::getAwakeTimeUs() / 1000;
 	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
 	showOverlayMessage(N_("Loading..."), dtime, 5);
 
@@ -1447,7 +1447,7 @@ bool Game::createClient(const GameStartData &start_data)
 		return false;
 
 	load_last_time_ms = load_time_ms;
-	load_time_ms = porting::getTimeMs();
+	load_time_ms = porting::getAwakeTimeUs() / 1000;
 	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
 
 	if (!simple_singleplayer_mode)
@@ -1604,7 +1604,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 		return false;
 
 	load_last_time_ms = load_time_ms;
-	load_time_ms = porting::getTimeMs();
+	load_time_ms = porting::getAwakeTimeUs() / 1000;
 	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
 	showOverlayMessage(N_("Resolving address..."), dtime, 15);
 
@@ -4366,7 +4366,7 @@ void Game::updateShadows()
 
 void FpsControl::reset()
 {
-	last_time = porting::getTimeUs();
+	last_time = porting::getAwakeTimeUs();
 }
 
 /*
@@ -4388,7 +4388,7 @@ void FpsControl::limit(IrrlichtDevice *device, f32 *dtime)
 		frametime_min = 0;
 #endif
 
-	u64 time = porting::getTimeUs();
+	u64 time = porting::getAwakeTimeUs();
 
 	if (time > last_time) // Make sure time hasn't overflowed
 		busy_time = time - last_time;
@@ -4405,7 +4405,7 @@ void FpsControl::limit(IrrlichtDevice *device, f32 *dtime)
 
 	// Read the timer again to accurately determine how long we actually slept,
 	// rather than calculating it by adding sleep_time to time.
-	time = porting::getTimeUs();
+	time = porting::getAwakeTimeUs();
 
 	if (time > last_time) // Make sure last_time hasn't overflowed
 		*dtime = (time - last_time) / 1000000.0f;

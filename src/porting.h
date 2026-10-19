@@ -198,7 +198,10 @@ inline u64 getTimeNs() { return os_get_time(1000*1000*1000); }
 
 inline void os_get_clock(struct timespec *ts)
 {
-#if defined(CLOCK_MONOTONIC_RAW)
+#if defined(__ANDROID__)
+	// Counts the deep sleep; CLOCK_MONOTONIC_RAW steps back on some arm64 kernels
+	clock_gettime(CLOCK_BOOTTIME, ts);
+#elif defined(CLOCK_MONOTONIC_RAW)
 	clock_gettime(CLOCK_MONOTONIC_RAW, ts);
 #elif defined(_POSIX_MONOTONIC_CLOCK) && _POSIX_MONOTONIC_CLOCK > 0
 	clock_gettime(CLOCK_MONOTONIC, ts);
@@ -243,6 +246,18 @@ inline u64 getTimeNs()
 }
 
 #endif
+
+// Only the time the system is awake, so no frame gets a sleep as its dtime
+inline u64 getAwakeTimeUs()
+{
+#if defined(__APPLE__)
+	return clock_gettime_nsec_np(CLOCK_UPTIME_RAW) / 1000;
+#elif defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
+	return SDL_GetTicksNS() / 1000;
+#else
+	return getTimeUs();
+#endif
+}
 
 inline u64 getTime(TimePrecision prec)
 {
