@@ -3644,21 +3644,20 @@ bool Server::dynamicAddMedia(std::string filepath,
 	pkt << token;
 	// Older clients have an awful hack that just throws the data at them
 	legacy_pkt.putLongString(filedata);
+	// A joining client cannot fetch yet, so it gets the data as well
+	NetworkPacket joining_pkt = pkt;
+	joining_pkt.putLongString(filedata);
 
 	std::unordered_set<session_t> delivered, waiting;
 	m_clients.lock();
 	for (auto &pair : m_clients.getClientList()) {
-		if (pair.second->getState() == CS_DefinitionsSent && !ephemeral) {
-			/*
-				If a client is in the DefinitionsSent state it is too late to
-				transfer the file via sendMediaAnnouncement() but at the same
-				time the client cannot accept a media push yet.
-				Short of artificially delaying the joining process there is no
-				way for the server to resolve this so we (currently) opt not to.
-			*/
-			warningstream << "The media \"" << filename << "\" (dynamic) could "
-				"not be delivered to " << pair.second->getName()
-				<< " due to a race condition." << std::endl;
+		if (pair.second->getState() == CS_DefinitionsSent && !ephemeral &&
+				to_player.empty() && pair.second->net_proto_version >= 39) {
+			// Over both channels, so it comes before the objects and the HUD using it
+			NetworkPacket *joining = pair.second->net_proto_version < 40 ?
+					&legacy_pkt : &joining_pkt;
+			m_clients.send(pair.second->peer_id, 1, joining, true);
+			m_clients.send(pair.second->peer_id, 0, joining, true);
 			continue;
 		}
 		if (pair.second->getState() < CS_Active)

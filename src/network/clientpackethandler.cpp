@@ -1552,10 +1552,14 @@ void Client::handleCommand_MediaPush(NetworkPacket *pkt)
 	bool cached;
 
 	*pkt >> raw_hash >> filename >> cached;
-	if (m_proto_ver >= 40)
+	if (m_proto_ver >= 40) {
 		*pkt >> token;
-	else
+		// Pushed while this client was joining, the data comes along
+		if (pkt->getRemainingBytes() > 0)
+			filedata = pkt->readLongString();
+	} else {
 		filedata = pkt->readLongString();
+	}
 
 	if (raw_hash.size() != 20 || filename.empty() ||
 			(m_proto_ver < 40 && filedata.empty()) ||
@@ -1573,7 +1577,8 @@ void Client::handleCommand_MediaPush(NetworkPacket *pkt)
 	if (m_media_pushed_files.count(filename) != 0) {
 		// Ignore (but acknowledge). Previously this was for sync purposes,
 		// but even in new versions media cannot be replaced at runtime.
-		if (m_proto_ver >= 40)
+		// A push with the data, as on the second channel, waits for no answer
+		if (m_proto_ver >= 40 && filedata.empty())
 			sendHaveMedia({ token });
 		return;
 	}
