@@ -35,32 +35,43 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // struct MeshBufListList
 void MeshBufListList::clear()
 {
-	for (auto &list : lists)
-		list.clear();
-	for (auto &i : index)
-		i.clear();
+	for (u8 layer = 0; layer < MAX_TILE_LAYERS; layer++) {
+		lists[layer].clear();
+		for (auto it = kept[layer].begin(); it != kept[layer].end();) {
+			std::vector<std::unique_ptr<MeshBufList>> &same_texture = it->second;
+			same_texture.erase(std::remove_if(same_texture.begin(), same_texture.end(),
+				[] (const std::unique_ptr<MeshBufList> &l) { return l->bufs.empty(); }),
+				same_texture.end());
+			for (auto &l : same_texture)
+				l->bufs.clear();
+			it = same_texture.empty() ? kept[layer].erase(it) : std::next(it);
+		}
+	}
 }
 
 void MeshBufListList::add(scene::IMeshBuffer *buf, v3s16 position, u8 layer)
 {
-	// Append to the correct layer
-	std::vector<MeshBufList> &list = lists[layer];
 	const video::SMaterial &m = buf->getMaterial();
 
 	// Materials sharing the first texture are few, so the full comparison
 	// runs about once per buffer instead of once per material.
-	std::vector<u32> &candidates = index[layer][m.TextureLayer[0].Texture];
-	for (u32 i : candidates) {
-		if (list[i].m == m) {
-			list[i].bufs.emplace_back(position, buf);
-			return;
+	std::vector<std::unique_ptr<MeshBufList>> &same_texture =
+			kept[layer][m.TextureLayer[0].Texture];
+	MeshBufList *list = nullptr;
+	for (auto &l : same_texture) {
+		if (l->m == m) {
+			list = l.get();
+			break;
 		}
 	}
+	if (!list) {
+		list = same_texture.emplace_back(std::make_unique<MeshBufList>()).get();
+		list->m = m;
+	}
 
-	candidates.push_back(list.size());
-	list.emplace_back();
-	list.back().m = m;
-	list.back().bufs.emplace_back(position, buf);
+	if (list->bufs.empty())
+		lists[layer].push_back(list);
+	list->bufs.emplace_back(position, buf);
 }
 
 // ClientMap
@@ -389,8 +400,8 @@ void ClientMap::updateDrawBufs(video::IVideoDriver *driver)
 
 	// The solid pass goes near to far, so the depth test drops hidden fragments before shading
 	for (auto &list : m_drawbufs_solid.lists)
-		for (auto &entry : list)
-			std::reverse(entry.bufs.begin(), entry.bufs.end());
+		for (MeshBufList *entry : list)
+			std::reverse(entry->bufs.begin(), entry->bufs.end());
 
 	g_profiler->avg("renderMap(): animated meshes [#]", mesh_animate_count);
 }
@@ -446,34 +457,37 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 		// a discard stops tilers removing hidden surfaces
 		auto discarding = lists.begin();
 		if (!is_transparent_pass)
-			discarding = std::partition(lists.begin(), lists.end(), [shdrsrc] (const MeshBufList &l) {
-				return !shdrsrc->discardsByAlpha(l.m.MaterialType);
-			});
+			discarding = std::partition(lists.begin(), lists.end(),
+				[shdrsrc] (const MeshBufList *l) {
+					return !shdrsrc->discardsByAlpha(l->m.MaterialType);
+				});
 		if (m_cache_transparency_sorting) {
-			static const auto comparator = [] (MeshBufList const &a, MeshBufList const &b) {
+			static const auto comparator = [] (const MeshBufList *a, const MeshBufList *b) {
 				// comparing pointers with < is UB unless they belong to the same array, but std::less is always allowed
 				static const std::less<video::ITexture *> texture_less;
-				return texture_less(a.m.TextureLayer[0].Texture, b.m.TextureLayer[0].Texture);
+				return texture_less(a->m.TextureLayer[0].Texture, b->m.TextureLayer[0].Texture);
 			};
 			std::sort(lists.begin(), discarding, comparator);
 			std::sort(discarding, lists.end(), comparator);
 		}
-		for (MeshBufList &list : lists) {
+		for (const MeshBufList *list : lists) {
 			// Check and abort if the machine is swapping a lot
 			if (draw.getTimerTime() > 2000) {
 				infostream << "ClientMap::renderMap(): Rendering took >2s, " <<
 						"returning." << std::endl;
 				return;
 			}
+			// A copy, so the list's material still matches its buffers next frame
+			video::SMaterial material = list->m;
 			// Buffers out of every light's reach draw with the same program without point lights
-			const video::E_MATERIAL_TYPE lit = list.m.MaterialType;
+			const video::E_MATERIAL_TYPE lit = material.MaterialType;
 			const video::E_MATERIAL_TYPE unlit = shdrsrc->getMaterialWithoutPointLights(lit);
-			list.m.MaterialType = unlit;
+			material.MaterialType = unlit;
 
 			// pass the shadow map texture to the buffer texture
 			ShadowRenderer *shadow = m_rendering_engine->get_shadow_renderer();
 			if (shadow && shadow->is_active()) {
-				auto &layer = list.m.TextureLayer[3];
+				auto &layer = material.TextureLayer[3];
 				layer.Texture = shadow->get_texture();
 				layer.TextureWrapU = video::E_TEXTURE_CLAMP::ETC_CLAMP_TO_EDGE;
 				layer.TextureWrapV = video::E_TEXTURE_CLAMP::ETC_CLAMP_TO_EDGE;
@@ -483,13 +497,13 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 				layer.TrilinearFilter = false;
 			}
 
-			driver->setMaterial(list.m);
+			driver->setMaterial(material);
 
-			drawcall_count += list.bufs.size();
+			drawcall_count += list->bufs.size();
 
 			v3s16 last_bake(-32768, -32768, -32768);
 			v3f shift;
-			for (auto &pair : list.bufs) {
+			for (auto &pair : list->bufs) {
 				scene::IMeshBuffer *buf = pair.second;
 
 				// Vertices already carry the block position, so the transform
@@ -510,9 +524,9 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 						[&box] (const core::aabbox3df &cube) {
 							return cube.intersectsWithBox(box);
 						}) ? lit : unlit;
-					if (type != list.m.MaterialType) {
-						list.m.MaterialType = type;
-						driver->setMaterial(list.m);
+					if (type != material.MaterialType) {
+						material.MaterialType = type;
+						driver->setMaterial(material);
 					}
 				}
 				driver->drawMeshBuffer(buf);
@@ -520,8 +534,6 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 				vertex_count += buf->getVertexCount();
 #endif
 			}
-			// The list outlives the frame, so it goes back to the program with point lights
-			list.m.MaterialType = lit;
 		}
 	}
 	g_profiler->avg(prefix + "draw meshes [ms]", draw.stop(true));
@@ -794,14 +806,14 @@ void ClientMap::renderMapShadows(video::IVideoDriver *driver,
 
 	// Render all layers in order
 	for (auto &lists : drawbufs.lists) {
-		for (MeshBufList &list : lists) {
+		for (const MeshBufList *list : lists) {
 			// Check and abort if the machine is swapping a lot
 			if (draw.getTimerTime() > 1000) {
 				infostream << "ClientMap::renderMapShadows(): Rendering "
 						"took >1s, returning." << std::endl;
 				break;
 			}
-			for (auto &pair : list.bufs) {
+			for (auto &pair : list->bufs) {
 				scene::IMeshBuffer *buf = pair.second;
 
 				// override some material properties
@@ -820,7 +832,7 @@ void ClientMap::renderMapShadows(video::IVideoDriver *driver,
 				vertex_count += buf->getVertexCount();
 			}
 
-			drawcall_count += list.bufs.size();
+			drawcall_count += list->bufs.size();
 		}
 	}
 

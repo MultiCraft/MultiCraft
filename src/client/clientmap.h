@@ -24,6 +24,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "camera.h"
 #include <set>
 #include <map>
+#include <memory>
 #include <unordered_map>
 
 struct MapDrawControl
@@ -50,17 +51,15 @@ struct MeshBufListList
 	 * The array index is the material's layer.
 	 * The vector part groups vertices by material.
 	 */
-	std::vector<MeshBufList> lists[MAX_TILE_LAYERS];
+	std::vector<MeshBufList *> lists[MAX_TILE_LAYERS];
 
 	void clear();
 	void add(scene::IMeshBuffer *buf, v3s16 position, u8 layer);
 
 private:
-	/*!
-	 * Maps the first layer's texture to the lists using it, so that adding a
-	 * buffer costs one lookup instead of a walk over every material.
-	 */
-	std::unordered_map<video::ITexture *, std::vector<u32>> index[MAX_TILE_LAYERS];
+	//! The lists by the first layer's texture; one left empty for a frame goes at clear()
+	std::unordered_map<video::ITexture *, std::vector<std::unique_ptr<MeshBufList>>>
+			kept[MAX_TILE_LAYERS];
 };
 
 struct DrawListItem {
