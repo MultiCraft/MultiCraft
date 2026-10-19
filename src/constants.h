@@ -77,6 +77,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 // Player step height in nodes
 #define PLAYER_DEFAULT_STEPHEIGHT 0.6f
 
+// Maximum extra third person camera distance in nodes settable via set_eye_offset
+#define CAMERA_THIRD_PERSON_MAX_EXTRA_DISTANCE 30.0f
+
 /*
     Old stuff that shouldn't be hardcoded
 */
