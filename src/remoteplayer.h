@@ -41,7 +41,8 @@ class RemotePlayer : public Player
 	friend class PlayerDatabaseFiles;
 
 public:
-	RemotePlayer(const char *name, IItemDefManager *idef);
+	RemotePlayer(const char *name, IItemDefManager *idef,
+			const std::string &uncanonical_name = "");
 	virtual ~RemotePlayer() = default;
 
 	PlayerSAO *getPlayerSAO() { return m_sao; }
@@ -137,6 +138,8 @@ public:
 
 	void setPeerId(session_t peer_id) { m_peer_id = peer_id; }
 
+	std::string getUncanonicalName() { return m_uncanonical_name; }
+
 	void onSuccessfulSave();
 
 private:
@@ -164,4 +167,5 @@ private:
 	StarParams m_star_params;
 
 	session_t m_peer_id = PEER_ID_INEXISTENT;
+	std::string m_uncanonical_name;
 };
