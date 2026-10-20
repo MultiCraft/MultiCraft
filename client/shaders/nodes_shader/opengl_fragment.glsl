@@ -3,20 +3,21 @@ uniform sampler2D baseTexture;
 uniform vec4 skyBgColor;
 // Colour the node is drawn with, white unless a mod picked one
 uniform vec3 nodeColor;
-uniform mediump float fogDistance;
 #ifdef USE_ALPHA_REF_DISCARD
 uniform float alphaRef;
 #elif defined(USE_ALPHA_TEST_DISCARD)
 #define alphaRef 0.5
 #endif
 
-varying lowp vec4 varColor;
+varying mediump vec4 varColor;
 #ifdef GL_ES
 varying mediump vec2 varTexCoord;
 #else
 centroid varying vec2 varTexCoord;
 #endif
+#if POINT_LIGHTS
 varying vec3 eyeVec;
+#endif
 #ifdef ENABLE_DYNAMIC_SHADOWS
 	// shadow texture
 	uniform sampler2D ShadowMapSampler;
@@ -35,6 +36,7 @@ varying vec3 eyeVec;
 	varying float nightRatio;
 #endif
 #if POINT_LIGHTS
+uniform mediump float fogDistance;
 // Light sources, one per column: xyz in view space, w = level / 15
 uniform mat4 pointLights;
 #ifdef SETTINGS_UNIFORMS
@@ -74,13 +76,13 @@ float pointLight(vec4 light, vec3 pos)
 		lit = pow(lit, LIGHT_CURVE.w);
 	return lit * varColor.a * LIGHT_SCALE;
 }
-#endif
 
 #ifdef SETTINGS_UNIFORMS
 uniform float fogShadingParameter;
 #else
 const float fogStart = FOG_START;
 const float fogShadingParameter = 1.0 / ( 1.0 - fogStart);
+#endif
 #endif
 
 #ifdef ENABLE_DYNAMIC_SHADOWS
@@ -581,6 +583,7 @@ void main(void)
 	col = applyToneMapping(col);
 #endif
 
+#if POINT_LIGHTS
 	// Due to a bug in some (older ?) graphics stacks (possibly in the glsl compiler ?),
 	// the fog will only be rendered correctly if the last operation before the
 	// clamp() is an addition. Else, the clamp() seems to be ignored.
@@ -595,6 +598,9 @@ void main(void)
 			- fogShadingParameter * length(eyeVec), 0.0, 1.0);
 		col = mix(skyBgColor, col, clarity);
 	}
+#else
+	col = mix(skyBgColor, col, clamp(varColor.a, 0.0, 1.0));
+#endif
 	col = vec4(col.rgb, base.a);
 
 	gl_FragColor = col;

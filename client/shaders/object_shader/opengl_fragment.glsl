@@ -2,7 +2,6 @@ uniform sampler2D baseTexture;
 
 uniform vec4 emissiveColor;
 uniform vec4 skyBgColor;
-uniform mediump float fogDistance;
 #ifdef USE_ALPHA_REF_DISCARD
 uniform float alphaRef;
 #elif defined(USE_ALPHA_TEST_DISCARD)
@@ -16,7 +15,7 @@ varying mediump vec2 varTexCoord;
 centroid varying vec2 varTexCoord;
 #endif
 
-varying mediump vec3 eyeVec;
+varying mediump float varClarity;
 varying float vIDiff;
 
 #ifdef ENABLE_DYNAMIC_SHADOWS
@@ -34,13 +33,6 @@ varying float vIDiff;
 	varying float f_normal_length;
 	varying vec3 vNormal;
 	varying vec3 worldPosition;
-#endif
-
-#ifdef SETTINGS_UNIFORMS
-uniform float fogShadingParameter;
-#else
-const float fogStart = FOG_START;
-const float fogShadingParameter = 1.0 / (1.0 - fogStart);
 #endif
 
 #ifdef ENABLE_DYNAMIC_SHADOWS
@@ -376,20 +368,7 @@ void main(void)
 	col = applyToneMapping(col);
 #endif
 
-	// Due to a bug in some (older ?) graphics stacks (possibly in the glsl compiler ?),
-	// the fog will only be rendered correctly if the last operation before the
-	// clamp() is an addition. Else, the clamp() seems to be ignored.
-	// E.g. the following won't work:
-	//      float clarity = clamp(fogShadingParameter
-	//		* (fogDistance - length(eyeVec)) / fogDistance), 0.0, 1.0);
-	// As additions usually come for free following a multiplication, the new formula
-	// should be more efficient as well.
-	// Note: clarity = (1 - fogginess)
-	if (fogDistance > 0.0) { // -1.0 means disabled
-		float clarity = clamp(fogShadingParameter
-			- fogShadingParameter * length(eyeVec), 0.0, 1.0);
-		col = mix(skyBgColor, col, clarity);
-	}
+	col = mix(skyBgColor, col, clamp(varClarity, 0.0, 1.0));
 
 	gl_FragColor = vec4(col.rgb, base.a);
 }

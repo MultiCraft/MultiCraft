@@ -8,7 +8,7 @@ uniform mediump float fogDistance;
 uniform vec3 cameraOffset;
 uniform float animationTimer;
 
-varying lowp vec4 varColor;
+varying mediump vec4 varColor;
 // The centroid keyword ensures that after interpolation the texture coordinates
 // lie within the same bounds when MSAA is en- and disabled.
 // This fixes the stripes problem with nearest-neighbour textures and MSAA.
@@ -17,7 +17,16 @@ varying mediump vec2 varTexCoord;
 #else
 centroid varying vec2 varTexCoord;
 #endif
+#if POINT_LIGHTS
 varying vec3 eyeVec;
+#else
+#ifdef SETTINGS_UNIFORMS
+uniform float fogShadingParameter;
+#else
+const float fogStart = FOG_START;
+const float fogShadingParameter = 1.0 / (1.0 - fogStart);
+#endif
+#endif
 
 #ifdef ENABLE_DYNAMIC_SHADOWS
 	// shadow uniforms
@@ -158,7 +167,9 @@ void main(void)
 	gl_Position = mWorldViewProj * inVertexPosition;
 #endif
 
+#if POINT_LIGHTS
 	eyeVec = -(mWorldView * inVertexPosition).xyz / fogDistance;
+#endif
 #ifdef ENABLE_DYNAMIC_SHADOWS
 	worldPosition = (mWorld * inVertexPosition).xyz;
 	vNormal = inVertexNormal;
@@ -193,6 +204,11 @@ void main(void)
 	vec3 sq = inVertexNormal * inVertexNormal;
 	varColor.a = sq.x + sq.y + sq.z < 0.5 ? 1.0 : sqrt(0.45) * sq.x +
 		(inVertexNormal.y < 0.0 ? sqrt(0.2) : 1.0) * sq.y + sqrt(0.7) * sq.z;
+#else
+	// The clarity of the fog, in the alpha the fragment has no other use for; unclamped, it
+	// interpolates as the distance does. -1.0 turns the fog off
+	varColor.a = fogDistance > 0.0 ? fogShadingParameter - fogShadingParameter *
+		length((mWorldView * inVertexPosition).xyz) / fogDistance : 1.0;
 #endif
 
 #ifdef ENABLE_DYNAMIC_SHADOWS
