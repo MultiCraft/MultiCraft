@@ -7,8 +7,16 @@ varying mediump vec2 varTexCoord;
 centroid varying vec2 varTexCoord;
 #endif
 
-varying mediump vec3 eyeVec;
+// The clarity of the fog, unclamped so it interpolates as the distance does
+varying mediump float varClarity;
 varying float vIDiff;
+
+#ifdef SETTINGS_UNIFORMS
+uniform float fogShadingParameter;
+#else
+const float fogStart = FOG_START;
+const float fogShadingParameter = 1.0 / (1.0 - fogStart);
+#endif
 
 #ifdef ENABLE_DYNAMIC_SHADOWS
 	uniform mat4 mWorld;
@@ -51,7 +59,18 @@ void main(void)
 	varTexCoord = (mTexture * inTexCoord0).st;
 	gl_Position = mWorldViewProj * inVertexPosition;
 
-	eyeVec = -(mWorldView * inVertexPosition).xyz / fogDistance;
+	// Due to a bug in some (older ?) graphics stacks (possibly in the glsl compiler ?),
+	// the fog will only be rendered correctly if the last operation before the
+	// clamp() is an addition. Else, the clamp() seems to be ignored.
+	// E.g. the following won't work:
+	//      float clarity = clamp(fogShadingParameter
+	//		* (fogDistance - length(eyeVec)) / fogDistance), 0.0, 1.0);
+	// As additions usually come for free following a multiplication, the new formula
+	// should be more efficient as well.
+	// Note: clarity = (1 - fogginess)
+	// -1.0 turns the fog off
+	varClarity = fogDistance > 0.0 ? fogShadingParameter - fogShadingParameter *
+		length((mWorldView * inVertexPosition).xyz) / fogDistance : 1.0;
 #ifdef ENABLE_DYNAMIC_SHADOWS
 	worldPosition = (mWorld * inVertexPosition).xyz;
 	vNormal = inVertexNormal;
