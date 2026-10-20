@@ -82,6 +82,26 @@ struct MeshMakeData
 	- animated flowing liquids [not implemented]
 	- animating vertex positions for e.g. axles [not implemented]
 */
+// A buffer of a block mesh
+struct MapBlockMeshBuffer : public scene::SMeshBuffer
+{
+	// With shaders the mesh thread moves the vertices to 28 bytes, so the driver only copies them;
+	// normals, colours and coordinates are not read from them after that
+	void pack();
+
+	video::E_VERTEX_TYPE getVertexType() const override;
+	const void *getVertices() const override;
+	void *getVertices() override;
+	u32 getVertexCount() const override;
+	const v3f &getPosition(u32 i) const override;
+	v3f &getPosition(u32 i) override;
+	bool releaseData() override;
+
+private:
+	std::vector<video::S3DVertexPacked> m_packed;
+	bool m_is_packed = false;
+};
+
 class MapBlockMesh
 {
 public:

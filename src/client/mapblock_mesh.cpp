@@ -1007,6 +1007,57 @@ static void applyTileColor(PreMeshBuffer &pmb)
 	MapBlockMesh
 */
 
+void MapBlockMeshBuffer::pack()
+{
+	m_packed.assign(Vertices.const_pointer(), Vertices.const_pointer() + Vertices.size());
+	Vertices.clear();
+	m_is_packed = true;
+}
+
+video::E_VERTEX_TYPE MapBlockMeshBuffer::getVertexType() const
+{
+	return m_is_packed ? video::EVT_STANDARD_PACKED : video::EVT_STANDARD;
+}
+
+const void *MapBlockMeshBuffer::getVertices() const
+{
+	return m_is_packed ? (const void *)m_packed.data() : scene::SMeshBuffer::getVertices();
+}
+
+void *MapBlockMeshBuffer::getVertices()
+{
+	return m_is_packed ? (void *)m_packed.data() : scene::SMeshBuffer::getVertices();
+}
+
+u32 MapBlockMeshBuffer::getVertexCount() const
+{
+	return m_is_packed && !Released ? m_packed.size() : scene::SMeshBuffer::getVertexCount();
+}
+
+const v3f &MapBlockMeshBuffer::getPosition(u32 i) const
+{
+	return m_is_packed ? m_packed[i].Pos : scene::SMeshBuffer::getPosition(i);
+}
+
+v3f &MapBlockMeshBuffer::getPosition(u32 i)
+{
+	return m_is_packed ? m_packed[i].Pos : scene::SMeshBuffer::getPosition(i);
+}
+
+bool MapBlockMeshBuffer::releaseData()
+{
+	if (!m_is_packed)
+		return scene::SMeshBuffer::releaseData();
+	if (!Releasable || Released)
+		return Released;
+	ReleasedVertices = m_packed.size();
+	ReleasedIndices = Indices.size();
+	std::vector<video::S3DVertexPacked>().swap(m_packed);
+	Indices.clear();
+	Released = true;
+	return true;
+}
+
 MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 	m_minimap_mapblock(NULL),
 	m_tsrc(data->m_client->getTextureSource()),
@@ -1180,12 +1231,14 @@ MapBlockMesh::MapBlockMesh(MeshMakeData *data, v3s16 camera_offset):
 			for (video::S3DVertex &v : p.vertices)
 				v.Pos += bake;
 
-			scene::SMeshBuffer *buf = new scene::SMeshBuffer();
+			MapBlockMeshBuffer *buf = new MapBlockMeshBuffer();
 			buf->Material = material;
 			// Without shaders animate() writes the vertices, so the driver may not take them
 			buf->setReleasable(m_enable_vbo && m_enable_shaders);
 			buf->append(&p.vertices[0], p.vertices.size(),
 				&p.indices[0], p.indices.size());
+			if (buf->Releasable)
+				buf->pack();
 			mesh->addMeshBuffer(buf);
 			buf->drop();
 		}
