@@ -3094,7 +3094,8 @@ std::wstring Server::handleChat(const std::string &name,
 		}
 	}
 
-	if (m_max_chatmessage_length > 0
+	// SSCSM messages are bounded by the packet alone, as mods send their data in them
+	if (m_max_chatmessage_length > 0 && !sscsm_com
 			&& wmessage.length() > m_max_chatmessage_length) {
 		return L"Your message exceed the maximum chat message limit set on the server. "
 				L"It was refused. Send a shorter message";
@@ -3104,7 +3105,7 @@ std::wstring Server::handleChat(const std::string &name,
 	if (message.empty())
 		return L"";
 
-	if (message.find_first_of("\n\r") != std::wstring::npos) {
+	if (!sscsm_com && message.find_first_of("\n\r") != std::wstring::npos) {
 		return L"Newlines are not permitted in chat messages";
 	}
 

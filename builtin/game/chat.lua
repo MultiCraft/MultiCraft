@@ -88,7 +88,7 @@ core.register_on_chat_message(function(name, message)
 				end
 			end
 		else
-			if delay > msg_time_threshold then
+			if delay > msg_time_threshold and not param:find("^\001SSCSM_COM\001") then
 				-- Show how much time it took to execute the command
 				if result then
 					result = result .. core.colorize("#f3d2ff", S(" (@1 s)",
