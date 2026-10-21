@@ -75,6 +75,11 @@ android {
 		viewBinding = true
 		buildConfig = true
 	}
+
+	androidResources {
+		// zipAssetsFiles already deflated it
+		noCompress += "assets.zip"
+	}
 }
 
 val prepareAssetsFiles = tasks.register("prepareAssetsFiles") {

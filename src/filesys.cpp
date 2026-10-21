@@ -848,7 +848,6 @@ bool extractZipFileInternal(io::IFileSystem *fs, irr_ptr<io::IFileArchive> &open
 
 		if (toread.get() == nullptr) {
 			// Wrong password
-			fs->removeFileArchive(fs->getFileArchiveCount()-1);
 			if (errorMessage != nullptr)
 				*errorMessage = "invalid password";
 			return false;
@@ -933,54 +932,35 @@ void *ReadFileFromAssets(const char *filename, size_t *size) {
 	if (!file)
 		return nullptr;
 
-	const size_t chunk_size = 65536;
-	size_t buffer_size = chunk_size;
-	void *buffer = SDL_malloc(buffer_size);
+	const off64_t length = AAsset_getLength64(file);
+	void *buffer = length > 0 ? SDL_malloc(length) : nullptr;
 
 	if (!buffer) {
 		AAsset_close(file);
 		return nullptr;
 	}
 
-	size_t total_bytes = 0;
-	size_t bytes_read = 0;
+	off64_t total_bytes = 0;
 
-	do {
-		if (total_bytes + chunk_size > buffer_size) {
-			buffer_size += chunk_size;
-			void *new_buffer = SDL_realloc(buffer, buffer_size);
+	while (total_bytes < length) {
+		const int bytes_read = AAsset_read(file, (char *)buffer + total_bytes,
+				length - total_bytes);
 
-			if (!new_buffer) {
-				SDL_free(buffer);
-				AAsset_close(file);
-				return nullptr;
-			}
-
-			buffer = new_buffer;
-		}
-
-		bytes_read = AAsset_read(file, (char *)buffer + total_bytes, chunk_size);
-
+		if (bytes_read <= 0)
+			break;
 
 		total_bytes += bytes_read;
-	} while (bytes_read == chunk_size);
+	}
 
 	AAsset_close(file);
 
-	if (total_bytes == 0) {
+	if (total_bytes != length) {
 		SDL_free(buffer);
 		return nullptr;
 	}
 
 	if (size)
 		*size = total_bytes;
-
-	if (total_bytes < buffer_size) {
-		void *final_buffer = SDL_realloc(buffer, total_bytes);
-
-		if (final_buffer)
-			buffer = final_buffer;
-	}
 
 	return buffer;
 }
@@ -1015,6 +995,7 @@ bool extractZipFileFromAssets(io::IFileSystem *fs,
 
 	if (!asset_dir) {
 		warningstream << "fs::extractZipFile(): Couldn't open main directory" << std::endl;
+		porting::destroyAssetManager();
 		return false;
 	}
 
@@ -1027,21 +1008,27 @@ bool extractZipFileFromAssets(io::IFileSystem *fs,
 		if (!str_ends_with(std::string(filename), ".zip"))
 			continue;
 
-		size_t length = 0;
-		void *data = ReadFileFromAssets(filename, &length);
+		// Mapped when the APK stores it, inflated by the asset otherwise; read as the fallback
+		AAsset *asset = AAssetManager_open(porting::asset_manager, filename, AASSET_MODE_BUFFER);
+		const void *memory = asset ? AAsset_getBuffer(asset) : nullptr;
+		size_t length = memory ? AAsset_getLength64(asset) : 0;
+		void *data = nullptr;
 
-		if (!data) {
-			if (errorMessage != nullptr)
-				*errorMessage = "failed to open zip file";
-			result = false;
-			break;
+		if (!memory || length == 0) {
+			if (asset)
+				AAsset_close(asset);
+			asset = nullptr;
+			memory = data = ReadFileFromAssets(filename, &length);
 		}
 
-		io::IReadFile *file_mem = fs->createMemoryReadFile(data, length, filename);
+		io::IReadFile *file_mem = memory ?
+				fs->createMemoryReadFile(memory, length, filename) : nullptr;
 
 		if (!file_mem) {
 			if (errorMessage != nullptr)
 				*errorMessage = "failed to open zip file";
+			if (asset)
+				AAsset_close(asset);
 			SDL_free(data);
 			result = false;
 			break;
@@ -1051,13 +1038,17 @@ bool extractZipFileFromAssets(io::IFileSystem *fs,
 
 		result = extractZipFileInternal(fs, opened_zip, destination, password, errorMessage);
 
+		opened_zip.reset();
 		file_mem->drop();
+		if (asset)
+			AAsset_close(asset);
 		SDL_free(data);
 
 		if (!result)
 			break;
 	}
 
+	AAssetDir_close(asset_dir);
 	porting::destroyAssetManager();
 
 	return result;
