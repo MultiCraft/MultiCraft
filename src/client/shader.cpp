@@ -704,9 +704,6 @@ static std::string shaderVariant(const std::string &name, MaterialType material_
 	else if (base_material != video::EMT_SOLID)
 		variant += ":blend";
 
-	if (g_settings->getBool("tone_mapping"))
-		variant += ":tonemap";
-
 	if (point_lights)
 		variant += ":lights";
 
@@ -728,6 +725,9 @@ void registerPrecompiledShaders(video::IVideoDriver *driver)
 {
 	if (!driver || driver->getDriverType() != video::EDT_METAL)
 		return;
+
+	// The programs build anew when a game starts with the setting changed in the main menu
+	driver->setPrecompiledConstant(16, g_settings->getBool("tone_mapping"));
 
 	const std::string dir = porting::path_share + DIR_DELIM + "client" + DIR_DELIM +
 			"shaders" + DIR_DELIM + "Metal" + DIR_DELIM;

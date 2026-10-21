@@ -460,7 +460,12 @@ float getShadow(sampler2D shadowsampler, vec2 smTexCoord, float realDistance)
 #endif
 #endif
 
-#if ENABLE_TONE_MAPPING
+#ifdef SETTINGS_UNIFORMS
+// Fixed when the program is made: on with the filmic tone mapping
+layout(constant_id = 16) const bool toneMapping = false;
+#endif
+
+#if ENABLE_TONE_MAPPING || defined(SETTINGS_UNIFORMS)
 
 /* Hable's UC2 Tone mapping parameters
 	A = 0.12;
@@ -570,7 +575,10 @@ void main(void)
 	// col.r = adjusted_night_ratio; // debug night ratio adjustment
 #endif
 
-#if ENABLE_TONE_MAPPING
+#ifdef SETTINGS_UNIFORMS
+	if (toneMapping)
+		col = applyToneMapping(col);
+#elif ENABLE_TONE_MAPPING
 	col = applyToneMapping(col);
 #endif
 

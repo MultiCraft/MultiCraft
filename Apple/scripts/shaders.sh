@@ -119,13 +119,9 @@ for branch in ":|0|0|0|0|solid blend ref" \
 		echo "$vtag|nodes_shader|$mt|$water|$leaves|$plants|$lights" >> "$OUT/vertex.txt"
 		for mode in $modes; do
 			[ "$mode" = solid ] && dname="" || dname=":$mode"
-			for tone in 0 1; do
-				if [ "$tone" = 0 ]; then tname=""; tsuffix=""; else tname=":tonemap"; tsuffix="_tonemap"; fi
-				ftag="nodes_${mode}${tsuffix}${lsuffix}"
-				echo "$ftag|nodes_shader|$mode|$tone|$lights" >> "$OUT/fragment.txt"
-				echo "nodes_shader${name:+:$name}$dname$tname$lname|$vtag|$ftag" \
-						>> "$OUT/programs.txt"
-			done
+			ftag="nodes_${mode}${lsuffix}"
+			echo "$ftag|nodes_shader|$mode|$lights" >> "$OUT/fragment.txt"
+			echo "nodes_shader${name:+:$name}$dname$lname|$vtag|$ftag" >> "$OUT/programs.txt"
 		done
 	done
 done
@@ -137,19 +133,15 @@ for branch in ":|0|solid blend ref" ":plain|10|blend ref"; do
 	echo "$vtag|object_shader|$mt|0|0|0|0" >> "$OUT/vertex.txt"
 	for mode in $modes; do
 		[ "$mode" = solid ] && dname="" || dname=":$mode"
-		for tone in 0 1; do
-			if [ "$tone" = 0 ]; then tname=""; tsuffix=""; else tname=":tonemap"; tsuffix="_tonemap"; fi
-			ftag="object_${mode}${tsuffix}"
-			echo "$ftag|object_shader|$mode|$tone|0" >> "$OUT/fragment.txt"
-			echo "object_shader${name:+:$name}$dname$tname|$vtag|$ftag" \
-					>> "$OUT/programs.txt"
-		done
+		ftag="object_${mode}"
+		echo "$ftag|object_shader|$mode|0" >> "$OUT/fragment.txt"
+		echo "object_shader${name:+:$name}$dname|$vtag|$ftag" >> "$OUT/programs.txt"
 	done
 done
 
 for one in selection stars minimap; do
 	echo "$one|${one}_shader|0|0|0|0|0" >> "$OUT/vertex.txt"
-	echo "$one|${one}_shader|solid|0|0" >> "$OUT/fragment.txt"
+	echo "$one|${one}_shader|solid|0" >> "$OUT/fragment.txt"
 	echo "${one}_shader|$one|$one" >> "$OUT/programs.txt"
 done
 
@@ -167,7 +159,7 @@ while IFS='|' read -r tag dir mt water leaves plants lights; do
 	echo "built vs_$tag"
 done < "$OUT/vertex.txt"
 
-while IFS='|' read -r tag dir mode tone lights; do
+while IFS='|' read -r tag dir mode lights; do
 	[ -n "$tag" ] || continue
 	case "$mode" in
 		blend) discard="#define USE_ALPHA_REF_DISCARD 1" ;;
@@ -180,7 +172,7 @@ while IFS='|' read -r tag dir mode tone lights; do
 #define ENABLE_WAVING_LEAVES 0
 #define ENABLE_WAVING_PLANTS 0
 #define POINT_LIGHTS $lights
-#define ENABLE_TONE_MAPPING $tone"
+#define ENABLE_TONE_MAPPING 0"
 	echo "built fs_$tag"
 done < "$OUT/fragment.txt"
 
