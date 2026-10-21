@@ -2292,8 +2292,8 @@
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"VERSION_MAJOR=2",
-					"VERSION_MINOR=0",
-					"VERSION_PATCH=15",
+					"VERSION_MINOR=1",
+					"VERSION_PATCH=0",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=1",
 				);
@@ -2385,8 +2385,8 @@
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"VERSION_MAJOR=2",
-					"VERSION_MINOR=0",
-					"VERSION_PATCH=15",
+					"VERSION_MINOR=1",
+					"VERSION_PATCH=0",
 					"VERSION_EXTRA=\"\"",
 					"DEVELOPMENT_BUILD=0",
 				);

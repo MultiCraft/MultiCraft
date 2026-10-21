@@ -6,8 +6,8 @@ plugins {
 
 extra.apply {
 	set("versionMajor", 2)		// Version Major
-	set("versionMinor", 0)		// Version Minor
-	set("versionPatch", 15)		// Version Patch
+	set("versionMinor", 1)		// Version Minor
+	set("versionPatch", 0)		// Version Patch
 	set("versionExtra", "")		// Version Extra
 	set("versionCode", 200)		// Android Version Code
 	set("developmentBuild", 0)	// Development or release build flag
