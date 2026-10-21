@@ -394,7 +394,7 @@ bool ClientLauncher::init_assets()
 	// The folders the assets fill go first, so nothing of an older version stays behind
 	std::string dirs[] = {
 			"builtin", "client/shaders",
-			"fonts", "textures/base"
+			"fonts", "locale", "textures/base"
 	};
 
 	for (const std::string &dir : dirs) {
