@@ -1429,9 +1429,10 @@ void Game::copyServerClientCache()
 	assert(server);
 	auto map = server->getMediaList();
 	u32 n = 0;
+	const auto cached = clientMediaCacheNames();
 	for (auto &it : map) {
 		assert(it.first.size() == 20); // SHA1
-		if (clientMediaUpdateCacheCopy(it.first, it.second))
+		if (clientMediaUpdateCacheCopy(it.first, it.second, cached))
 			n++;
 	}
 	infostream << "Copied " << n << " files directly from server to client cache"

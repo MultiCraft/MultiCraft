@@ -31,6 +31,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/hashing.h"
 #include "util/string.h"
 #include <sstream>
+#ifndef _WIN32
+#include <dirent.h>
+#endif
 
 static std::string getMediaCacheDir()
 {
@@ -51,18 +54,39 @@ bool clientMediaUpdateCache(const std::string &raw_hash, const std::string &file
 	return false;
 }
 
-bool clientMediaUpdateCacheCopy(const std::string &raw_hash, const std::string &path)
+bool clientMediaUpdateCacheCopy(const std::string &raw_hash, const std::string &path,
+		const std::unordered_set<std::string> &cached)
 {
-	FileCache media_cache(getMediaCacheDir());
 	std::string name = hex_encode(raw_hash);
 
 	if (str_ends_with(path, ".e"))
 		name += ".e";
 
-	if (!media_cache.exists(name))
-		return media_cache.updateCopyFile(name, path);
+	// The listing made the directory, so the copy does not check it per file
+	return (!cached.count(name)) &&
+			fs::CopyFileContents(path, getMediaCacheDir() + DIR_DELIM + name);
+}
 
-	return false;
+std::unordered_set<std::string> clientMediaCacheNames()
+{
+	std::unordered_set<std::string> names;
+	const std::string dir = getMediaCacheDir();
+#ifdef _WIN32
+	for (const fs::DirListNode &node : fs::GetDirListing(dir))
+		names.emplace(node.name);
+	if (names.empty())
+		fs::CreateAllDirs(dir);
+#else
+	// Not fs::GetDirListing: where readdir has no d_type, as on Apple, it asks stat for each file
+	if (DIR *listing = opendir(dir.c_str())) {
+		while (dirent *entry = readdir(listing))
+			names.emplace(entry->d_name);
+		closedir(listing);
+	} else {
+		fs::CreateAllDirs(dir);
+	}
+#endif
+	return names;
 }
 
 /*
