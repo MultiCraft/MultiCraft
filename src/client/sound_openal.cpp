@@ -425,6 +425,11 @@ public:
 		assert(sound);
 		warn_if_error(alGetError(), "before createPlayingSound");
 		alGenSources(1, &sound->source_id);
+		// All sources taken, as with hundreds of sounds playing: this one is skipped
+		if (alGetError() != AL_NO_ERROR) {
+			delete sound;
+			return nullptr;
+		}
 		alSourcei(sound->source_id, AL_BUFFER, buf->buffer_id);
 		alSourcei(sound->source_id, AL_SOURCE_RELATIVE, true);
 		alSource3f(sound->source_id, AL_POSITION, 0, 0, 0);
@@ -448,6 +453,10 @@ public:
 		assert(sound);
 		warn_if_error(alGetError(), "before createPlayingSoundAt");
 		alGenSources(1, &sound->source_id);
+		if (alGetError() != AL_NO_ERROR) {
+			delete sound;
+			return nullptr;
+		}
 		alSourcei(sound->source_id, AL_BUFFER, buf->buffer_id);
 		alSourcei(sound->source_id, AL_SOURCE_RELATIVE, false);
 		alSource3f(sound->source_id, AL_POSITION, pos.X, pos.Y, pos.Z);
