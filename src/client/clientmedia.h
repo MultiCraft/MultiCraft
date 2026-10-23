@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <set>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 class Client;
 struct HTTPFetchResult;
@@ -39,9 +40,12 @@ struct HTTPFetchResult;
 bool clientMediaUpdateCache(const std::string &raw_hash,
 	const std::string &filedata);
 
-// Copy file on disk(!) into media cache (unless it exists already)
+// Names of the files in the media cache in one listing; makes the directory if there is none
+std::unordered_set<std::string> clientMediaCacheNames();
+
+// Copy file on disk(!) into media cache unless it is among the names listed
 bool clientMediaUpdateCacheCopy(const std::string &raw_hash,
-	const std::string &path);
+	const std::string &path, const std::unordered_set<std::string> &cached);
 
 // more of a base class than an interface but this name was most convenient...
 class IClientMediaDownloader
