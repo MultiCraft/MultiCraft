@@ -267,7 +267,8 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 				std::round((double)size / divisible_by) * divisible_by, divisible_by);
 	}
 
-	u16 outline = spec.outline * size_factor;
+	// A thicker outline only fills the glyph
+	u16 outline = std::min<u32>(spec.outline * size_factor, size / 2);
 	u8 outline_type = spec.outline_type;
 	s8 character_spacing = spec.character_spacing;
 

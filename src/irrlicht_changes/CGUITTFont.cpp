@@ -252,15 +252,16 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		if (FT_Get_Glyph(glyph_slot, &glyph) != FT_Err_Ok)
 			return;
 
+		const bool outlined = glyph->format == FT_GLYPH_FORMAT_OUTLINE;
 		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
 
-		if (bold) {
+		if (bold && outlined) {
 			float embolden_amount = (float)font_size * 2.0f;
 			bold_offset = embolden_amount * 2.0f;
 			FT_Outline_Embolden(&(glyph_outline->outline), embolden_amount);
 		}
 
-		if (italic) {
+		if (italic && outlined) {
 			FT_Matrix italic_matrix;
 			float slant = 0.2;
 			italic_matrix.xx = 0x10000;
@@ -439,19 +440,20 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	if (glyph)
 		FT_Done_Glyph(glyph);
 
-	if (outline > 0 && !FT_HAS_COLOR(face)) {
+	if (outline > 0 && !FT_HAS_COLOR(face) && surface) {
 		FT_Glyph glyph;
 		if (FT_Get_Glyph(glyph_slot, &glyph) != FT_Err_Ok)
 			return;
 
+		const bool outlined = glyph->format == FT_GLYPH_FORMAT_OUTLINE;
 		FT_OutlineGlyph glyph_outline = (FT_OutlineGlyph)glyph;
 
-		if (bold) {
+		if (bold && outlined) {
 			float embolden_amount = (float)font_size * 2.0f;
 			FT_Outline_Embolden(&(glyph_outline->outline), embolden_amount);
 		}
 
-		if (italic) {
+		if (italic && outlined) {
 			FT_Matrix italic_matrix;
 			float slant = 0.2;
 			italic_matrix.xx = 0x10000;
@@ -467,17 +469,17 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 		FT_Bitmap bits = bitmap_glyph->bitmap;
 		video::IImage* image = createGlyphImage(face, bits, driver, video::SColor(0,255,255,255));
-
-		core::dimension2du surface_size = surface->getDimension();
-		core::dimension2du image_size = image->getDimension();
-		s32 pos_x = std::round(((float)(surface_size.Width - image_size.Width)) / 2);
-		s32 pos_y = std::round(((float)(surface_size.Height - image_size.Height)) / 2);
-		core::position2d<s32> pos = core::position2d<s32>(pos_x, pos_y);
-		core::rect<s32> source_rect = core::rect<s32>(core::position2d<s32>(0, 0), image->getDimension());
-		video::SColor color = video::SColor(255,255,255,255);
-		image->copyToWithAlpha(surface, pos, source_rect, color, nullptr, true);
-
-		image->drop();
+		if (image) {
+			core::dimension2du surface_size = surface->getDimension();
+			core::dimension2du image_size = image->getDimension();
+			s32 pos_x = std::round(((float)(surface_size.Width - image_size.Width)) / 2);
+			s32 pos_y = std::round(((float)(surface_size.Height - image_size.Height)) / 2);
+			core::position2d<s32> pos = core::position2d<s32>(pos_x, pos_y);
+			core::rect<s32> source_rect(core::position2d<s32>(0, 0), image->getDimension());
+			video::SColor color = video::SColor(255,255,255,255);
+			image->copyToWithAlpha(surface, pos, source_rect, color, nullptr, true);
+			image->drop();
+		}
 		FT_Done_Glyph(glyph);
 	}
 
@@ -611,7 +613,6 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 	io::IFileSystem* filesystem = Environment->getFileSystem();
 	irr::ILogger* logger = (Device != 0 ? Device->getLogger() : 0);
 	this->size = size;
-	this->filenames.push_back(filename);
 
 	update_load_flags();
 
@@ -627,8 +628,6 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 		face = new SGUITTFace();
 		c_faces.set(filename, face);
 
-		bool use_memory_face = true;
-
 		if (filesystem)
 		{
 			// Read in the file data.
@@ -643,21 +642,10 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 				return false;
 			}
 
-			// A big font is mapped from disk instead of copied into the heap: its
-			// pages arrive on demand and the system can reclaim them under pressure
-			const size_t fileSize = file->getSize();
-			use_memory_face = fileSize <= (size_t)5 * 1024 * 1024;
-
-			if (!use_memory_face)
+			// Map the file, copy it to memory only if there is no real file behind the path
+			if (FT_New_Face(c_library, filename.c_str(), 0, &face->face))
 			{
-				std::string filename_utf8 = stringw_to_utf8(filename);
-				// no readable path behind the name, so fall back to a copy
-				if (FT_New_Face(c_library, filename_utf8.c_str(), 0, &face->face))
-					use_memory_face = true;
-			}
-
-			if (use_memory_face)
-			{
+				const size_t fileSize = file->getSize();
 				face->face_buffer = new FT_Byte[fileSize];
 				file->read(face->face_buffer, fileSize);
 				face->face_buffer_size = fileSize;
@@ -680,8 +668,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 
 		if (!filesystem)
 		{
-			std::string filename_utf8 = stringw_to_utf8(filename);
-			if (FT_New_Face(c_library, filename_utf8.c_str(), 0, &face->face))
+			if (FT_New_Face(c_library, filename.c_str(), 0, &face->face))
 			{
 				if (logger) logger->log(L"CGUITTFont", L"FT_New_Face failed.", irr::ELL_INFORMATION);
 
@@ -700,6 +687,7 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 	}
 
 	// Store our face.
+	filenames.push_back(filename);
 	tt_faces.push_back(face->face);
 
 	if (tt_faces.size() == 1) {
@@ -1065,7 +1053,7 @@ std::vector<TextRun> CGUITTFont::splitIntoFontRuns(
 	for (u32 i = 0; i < text.size(); i++) {
 		wchar_t ch = text[i];
 		uint32_t codepoint = (uint32_t)ch;
-		
+
 #if defined(_WIN32) || defined(_WIN64)
 		if (i + 1 < text.size() && isSurrogatePair(ch, text[i + 1])) {
 			codepoint = 0x10000 + ((uint32_t)(ch - 0xD800) << 10) + (text[i + 1] - 0xDC00);
@@ -1831,6 +1819,8 @@ video::IImage* CGUITTFont::createTextureFromChar(const uint32_t& ch)
 
 	// Acquire a read-only lock of the corresponding page texture.
 	void* ptr = tex->lock(video::ETLM_READ_ONLY);
+	if (!ptr)
+		return nullptr;
 
 	video::ECOLOR_FORMAT format = tex->getColorFormat();
 	core::dimension2du tex_size = tex->getOriginalSize();
@@ -1840,6 +1830,7 @@ video::IImage* CGUITTFont::createTextureFromChar(const uint32_t& ch)
 	core::dimension2du glyph_size(glyph->source_rect.getSize());
 	video::IImage* image = Driver->createImage(format, glyph_size);
 	pageholder->copyTo(image, core::position2di(0, 0), glyph->source_rect);
+	pageholder->drop();
 
 	tex->unlock();
 
