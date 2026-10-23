@@ -715,8 +715,8 @@ bool CGUITTFont::load(const io::path& filename, const u32 size)
 
 bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font)
 {
-	shaped_cache[0].clear();
-	shaped_cache[1].clear();
+	shaped_cache[0].invalidate();
+	shaped_cache[1].invalidate();
 
 	bool success = load(filename, size);
 
@@ -946,12 +946,12 @@ void CGUITTFont::calculateMaxFontHeight()
 std::vector<ShapedRun> CGUITTFont::shapeText(const core::stringw& text,
 		bool use_rtl) const
 {
-	auto& cache = shaped_cache[use_rtl ? 1 : 0];
+	return *shaped_cache[use_rtl ? 1 : 0].lookupCache(text);
+}
 
-	auto cached = cache.find(text);
-	if (cached != cache.end())
-		return cached->second;
-
+std::vector<ShapedRun> CGUITTFont::shapeUncached(const core::stringw& text,
+		bool use_rtl) const
+{
 	std::vector<ShapedRun> runs;
 
 	if (text.size() == 0)
@@ -987,10 +987,6 @@ std::vector<ShapedRun> CGUITTFont::shapeText(const core::stringw& text,
 		}
 	}
 
-	if (cache.size() >= 1024)
-		cache.clear();
-
-	cache[text] = runs;
 	return runs;
 }
 

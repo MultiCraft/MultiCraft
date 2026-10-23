@@ -35,6 +35,7 @@
 #include <ft2build.h>
 #include <vector>
 #include <map>
+#include "util/container.h"
 #include "util/enriched_string.h"
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
@@ -467,6 +468,7 @@ namespace gui
 
 			std::vector<ShapedRun> shapeText(const core::stringw& text,
 				bool use_rtl = true) const;
+			std::vector<ShapedRun> shapeUncached(const core::stringw& text, bool use_rtl) const;
 			std::vector<BidiRun> getBidiRuns(
 					const core::stringw& text) const;
 			std::vector<TextRun> splitIntoFontRuns(
@@ -484,7 +486,14 @@ namespace gui
 			//! HarfBuzz fonts of the faces, made when a face is first shaped
 			mutable std::vector<hb_font_t*> hb_fonts;
 
-			mutable std::map<core::stringw, std::vector<ShapedRun>> shaped_cache[2];
+			//! Recently shaped texts, without and with bidi reordering
+			mutable LRUCache<core::stringw, std::vector<ShapedRun>> shaped_cache[2] = {
+				{1024, [](void* font, const core::stringw& text, std::vector<ShapedRun>* runs) {
+					*runs = static_cast<CGUITTFont*>(font)->shapeUncached(text, false);
+				}, this},
+				{1024, [](void* font, const core::stringw& text, std::vector<ShapedRun>* runs) {
+					*runs = static_cast<CGUITTFont*>(font)->shapeUncached(text, true);
+				}, this}};
 			std::vector<int> tt_offsets;
 			FT_Size_Metrics font_metrics;
 			FT_Int32 load_flags = 0;

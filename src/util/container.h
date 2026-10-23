@@ -267,7 +267,7 @@ public:
 		m_queue.clear();
 	}
 
-	const V *lookupCache(K key)
+	const V *lookupCache(const K &key)
 	{
 		typename cache_type::iterator it = m_map.find(key);
 		V *ret;
@@ -279,9 +279,7 @@ public:
 			ret = &entry.second;
 
 			// update the usage information
-			m_queue.erase(entry.first);
-			m_queue.push_front(key);
-			entry.first = m_queue.begin();
+			m_queue.splice(m_queue.begin(), m_queue, entry.first);
 		} else {
 			// cache miss -- enter into cache
 			cache_entry_t &entry =
