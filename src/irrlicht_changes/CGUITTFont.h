@@ -481,6 +481,8 @@ namespace gui
 			video::IVideoDriver* Driver = nullptr;
 			std::vector<io::path> filenames;
 			std::vector<FT_Face> tt_faces;
+			//! HarfBuzz fonts of the faces, made when a face is first shaped
+			mutable std::vector<hb_font_t*> hb_fonts;
 
 			mutable std::map<core::stringw, std::vector<ShapedRun>> shaped_cache[2];
 			std::vector<int> tt_offsets;

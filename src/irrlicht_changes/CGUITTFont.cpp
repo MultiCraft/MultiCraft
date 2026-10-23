@@ -570,6 +570,9 @@ CGUITTFont::~CGUITTFont()
 			delete pair.second;
 	}
 
+	for (hb_font_t* hb_font : hb_fonts)
+		hb_font_destroy(hb_font);
+
 	for (auto filename : filenames) {
 		// We aren't using this face anymore.
 		core::map<io::path, SGUITTFace*>::Node* n = c_faces.find(filename);
@@ -725,6 +728,10 @@ bool CGUITTFont::loadAdditionalFont(const io::path& filename, bool is_emoji_font
 	if (!success) {
 		filenames.pop_back();
 		tt_faces.pop_back();
+		if (hb_fonts.size() > tt_faces.size()) {
+			hb_font_destroy(hb_fonts.back());
+			hb_fonts.pop_back();
+		}
 
 		core::map<io::path, SGUITTFace*>::Node *node = c_faces.find(filename);
 		if (node) {
@@ -1119,7 +1126,14 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 		FT_Select_Size(face, best_index);
 	}
 
-	hb_font_t* hb_font = hb_ft_font_create(face, nullptr);
+	// Each face keeps its HarfBuzz font and takes the size again, as fonts of other sizes share it
+	if (hb_fonts.size() <= run.face_index)
+		hb_fonts.resize(run.face_index + 1, nullptr);
+	hb_font_t*& hb_font = hb_fonts[run.face_index];
+	if (!hb_font)
+		hb_font = hb_ft_font_create(face, nullptr);
+	else
+		hb_ft_font_changed(hb_font);
 	hb_buffer_t* buf = hb_buffer_create();
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -1173,7 +1187,6 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	}
 
 	hb_buffer_destroy(buf);
-	hb_font_destroy(hb_font);
 
 	return result;
 }
