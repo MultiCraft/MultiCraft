@@ -273,6 +273,10 @@ bool MyEventReceiver::OnEvent(const SEvent &event)
 		case EMIE_MOUSE_WHEEL:
 			mouse_wheel += event.MouseInput.Wheel;
 			break;
+		case EMIE_MOUSE_MOVED:
+			mouse_movement.X += event.MouseInput.XRel;
+			mouse_movement.Y += event.MouseInput.YRel;
+			break;
 		default: break;
 		}
 	} else if (event.EventType == irr::EET_LOG_TEXT_EVENT) {
@@ -439,6 +443,7 @@ void RandomInputHandler::step(float dtime)
 		}
 	}
 	mousepos += mousespeed;
+	mousemovement += mousespeed;
 	static bool useJoystick = false;
 	{
 		static float counterUseJoystick = 0;
