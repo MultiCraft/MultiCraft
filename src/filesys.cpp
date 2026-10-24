@@ -222,6 +222,9 @@ std::string CreateTempFile()
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#ifdef __APPLE__
+#include <sys/clonefile.h>
+#endif
 
 std::vector<DirListNode> GetDirListing(const std::string &pathstring)
 {
@@ -502,6 +505,13 @@ bool CreateAllDirs(const std::string &path)
 
 bool CopyFileContents(const std::string &source, const std::string &target)
 {
+#ifdef __APPLE__
+	// On APFS the copy shares the source's blocks, nothing is read or written; where it fails,
+	// as with a target that exists or another file system, the file is copied as usual
+	if (clonefile(source.c_str(), target.c_str(), 0) == 0)
+		return true;
+#endif
+
 	FILE *sourcefile = fopen(source.c_str(), "rb");
 	if(sourcefile == NULL){
 		errorstream<<source<<": can't open for reading: "
