@@ -291,7 +291,6 @@
 		84FA0A162F19178E00394A7F /* scrollSwipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84FA0A152F19178E00394A7F /* scrollSwipe.cpp */; };
 		84FA0A182F2C10AC00394A7F /* libharfbuzz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84FA0A172F2C107600394A7F /* libharfbuzz.a */; };
 		84FA0A1C2F4BB3CE00394A7F /* SheenBidi.c in Sources */ = {isa = PBXBuildFile; fileRef = 84FA0A1B2F4BB3CE00394A7F /* SheenBidi.c */; };
-		84FA1AAD306BCDC700A04E82 /* default_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA0306BCDC700A04E82 /* default_shader */; };
 		84FA1AAE306BCDC700A04E82 /* minimap_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA1306BCDC700A04E82 /* minimap_shader */; };
 		84FA1AAF306BCDC700A04E82 /* nodes_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA2306BCDC700A04E82 /* nodes_shader */; };
 		84FA1AB0306BCDC700A04E82 /* object_shader in Copy Shaders */ = {isa = PBXBuildFile; fileRef = 84FA1AA3306BCDC700A04E82 /* object_shader */; };
@@ -319,7 +318,6 @@
 			dstPath = client/shaders;
 			dstSubfolder = Resources;
 			files = (
-				84FA1AAD306BCDC700A04E82 /* default_shader in Copy Shaders */,
 				84FA1AAE306BCDC700A04E82 /* minimap_shader in Copy Shaders */,
 				84FA1AAF306BCDC700A04E82 /* nodes_shader in Copy Shaders */,
 				84FA1AB0306BCDC700A04E82 /* object_shader in Copy Shaders */,
@@ -915,7 +913,6 @@
 		84FA0A152F19178E00394A7F /* scrollSwipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = scrollSwipe.cpp; path = ../../../src/gui/scrollSwipe.cpp; sourceTree = "<group>"; };
 		84FA0A172F2C107600394A7F /* libharfbuzz.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libharfbuzz.a; path = ../deps/harfbuzz/libharfbuzz.a; sourceTree = "<group>"; };
 		84FA0A1B2F4BB3CE00394A7F /* SheenBidi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SheenBidi.c; path = ../../lib/sheenbidi/Source/SheenBidi.c; sourceTree = "<group>"; };
-		84FA1AA0306BCDC700A04E82 /* default_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = default_shader; path = ../../../client/shaders/default_shader; sourceTree = "<group>"; };
 		84FA1AA1306BCDC700A04E82 /* minimap_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = minimap_shader; path = ../../../client/shaders/minimap_shader; sourceTree = "<group>"; };
 		84FA1AA2306BCDC700A04E82 /* nodes_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = nodes_shader; path = ../../../client/shaders/nodes_shader; sourceTree = "<group>"; };
 		84FA1AA3306BCDC700A04E82 /* object_shader */ = {isa = PBXFileReference; lastKnownFileType = folder; name = object_shader; path = ../../../client/shaders/object_shader; sourceTree = "<group>"; };
@@ -1796,7 +1793,6 @@
 		84FA1AA9306BCDC700A04E82 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
-				84FA1AA0306BCDC700A04E82 /* default_shader */,
 				84FA1AA1306BCDC700A04E82 /* minimap_shader */,
 				84FA1AA2306BCDC700A04E82 /* nodes_shader */,
 				84FA1AA3306BCDC700A04E82 /* object_shader */,

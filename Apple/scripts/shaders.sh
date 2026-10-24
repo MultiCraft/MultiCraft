@@ -147,7 +147,7 @@ for branch in ":|0|solid blend ref" ":plain|10|blend ref"; do
 	done
 done
 
-for one in selection stars minimap default; do
+for one in selection stars minimap; do
 	echo "$one|${one}_shader|0|0|0|0|0" >> "$OUT/vertex.txt"
 	echo "$one|${one}_shader|solid|0|0" >> "$OUT/fragment.txt"
 	echo "${one}_shader|$one|$one" >> "$OUT/programs.txt"
