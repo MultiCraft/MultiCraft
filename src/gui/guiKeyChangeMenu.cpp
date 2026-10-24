@@ -37,6 +37,7 @@
 #include <algorithm>
 
 #include "mainmenumanager.h"  // for g_gamecallback
+#include "client/fontengine.h"
 #include "client/renderingengine.h"
 #include "client/sound.h"
 
@@ -160,17 +161,17 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	m_pixel_scale = s;
 
 	// Make sure the GUI will fit on the screen
-	// The change keys GUI is 835x430 pixels (with a scaling of 1)
+	// The change keys GUI is 835x460 pixels (with a scaling of 1)
 	if (835 * s > screensize.X)
 		s = screensize.X / 835.f;
-	if (430 * s > screensize.Y)
-		s = screensize.Y / 430.f;
+	if (460 * s > screensize.Y)
+		s = screensize.Y / 460.f;
 
 	DesiredRect = core::rect<s32>(
 		screensize.X / 2 - 835 * s / 2,
-		screensize.Y / 2 - 430 * s / 2,
+		screensize.Y / 2 - 460 * s / 2,
 		screensize.X / 2 + 835 * s / 2,
-		screensize.Y / 2 + 430 * s / 2
+		screensize.Y / 2 + 460 * s / 2
 	);
 	recalculateAbsolutePosition(false);
 
@@ -219,7 +220,9 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 	{
 		key_setting *k = key_settings.at(i);
 		{
-			core::rect<s32> rect(0, 0, 150 * s, 20 * s);
+			// At least a line of text tall, so the letters reaching below it show
+			core::rect<s32> rect(0, 0, 150 * s,
+					std::max<s32>(20 * s, g_fontengine->getTextHeight()));
 			rect += topleft + v2s32(offset.X, offset.Y);
 			Environment->addStaticText(k->button_name, rect, false, true, this, -1);
 		}
@@ -251,7 +254,7 @@ void GUIKeyChangeMenu::regenerateGui(v2u32 screensize)
 					GUI_ID_CB_AUX1_DESCENDS, text);
 			delete[] text;
 		}
-		offset += v2s32(0, 25 * s);
+		offset += v2s32(0, 35 * s);
 	}
 
 	/*{
