@@ -254,6 +254,7 @@ core.get_screen_info()
     window_height   = <current window height>,
     max_refresh_rate = <refresh rate of the display in Hz: the fastest on Android and iOS, the current one on desktops with SDL, 0 without>,
     is_tablet       = <true on a tablet>,
+    font_size       = <base size of formspec text>,
     render_info     = <active render information>
     }
 

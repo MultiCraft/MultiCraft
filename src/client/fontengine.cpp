@@ -147,6 +147,12 @@ unsigned int FontEngine::getDefaultFontSize()
 	return m_default_size[m_currentMode];
 }
 
+/******************************************************************************/
+u32 FontEngine::getFormspecFontSize()
+{
+	return getDefaultFontSize();
+}
+
 unsigned int FontEngine::getFontSize(FontMode mode)
 {
 	if (mode == FM_Unspecified)

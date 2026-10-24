@@ -136,6 +136,9 @@ public:
 	/** get default font size */
 	unsigned int getDefaultFontSize();
 
+	/** get the font size formspecs use */
+	u32 getFormspecFontSize();
+
 	/** get font size for a specific mode */
 	unsigned int getFontSize(FontMode mode);
 
