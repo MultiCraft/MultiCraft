@@ -1603,6 +1603,9 @@ void GUIFormSpecMenu::createTextField(parserData *data, FieldSpec &spec,
 			e->OnEvent(evt);
 		}
 
+		if (is_editable && spec.fname == m_focused_element && m_focused_text == e->getText())
+			e->setCursor(m_focused_cursor);
+
 		e->setNotClipped(style.getBool(StyleSpec::NOCLIP, false));
 		e->setOverrideColor(style.getColor(StyleSpec::TEXTCOLOR, video::SColor(0xFFFFFFFF)));
 		bool border = style.getBool(StyleSpec::BORDER, true);
@@ -3156,6 +3159,13 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 						break;
 					}
 				}
+			}
+
+			// Dynamic fields show the form anew on each edit, the cursor stays where it was
+			if (focused_element->getType() == gui::EGUIET_EDIT_BOX) {
+				auto *edit_box = static_cast<GUIEditBox *>(focused_element);
+				m_focused_text = edit_box->getText();
+				m_focused_cursor = edit_box->getCursor();
 			}
 		}
 	} else {

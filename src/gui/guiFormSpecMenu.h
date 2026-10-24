@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "irrlichttypes_extrabloated.h"
 #include "inventorymanager.h"
 #include "modalMenu.h"
+#include "guiEditBox.h"
 #include "guiInventoryList.h"
 #include "guiScrollBar.h"
 #include "guiTable.h"
@@ -370,6 +371,9 @@ private:
 	std::string         m_last_formname;
 	u16                 m_formspec_version = 1;
 	std::string         m_focused_element = "";
+	// The text and cursor of the focused field, kept while the form shows the same text
+	core::stringw       m_focused_text;
+	GUIEditBox::Cursor  m_focused_cursor;
 	JoystickController *m_joystick;
 	bool m_show_debug = false;
 

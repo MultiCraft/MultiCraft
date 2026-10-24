@@ -139,6 +139,16 @@ void GUIEditBox::setText(const wchar_t *text)
 	breakText();
 }
 
+void GUIEditBox::setCursor(const Cursor &cursor)
+{
+	s32 size = Text.size();
+	m_cursor_pos = core::clamp(cursor.pos, 0, size);
+	setTextMarkers(core::clamp(cursor.mark_begin, 0, size),
+			core::clamp(cursor.mark_end, 0, size));
+	m_blink_start_time = porting::getTimeMs();
+	calculateScrollPos();
+}
+
 //! Sets the maximum amount of characters which may be entered in the box.
 //! \param max: Maximum amount of characters. If 0, the character amount is
 //! infinity.

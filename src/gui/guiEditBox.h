@@ -112,6 +112,12 @@ public:
 	//! Sets the new caption of this element.
 	virtual void setText(const wchar_t *text);
 
+	struct Cursor { s32 pos = 0, mark_begin = 0, mark_end = 0; };
+
+	//! The cursor and the selection, to show the same text anew with them
+	Cursor getCursor() const { return {m_cursor_pos, m_mark_begin, m_mark_end}; }
+	void setCursor(const Cursor &cursor);
+
 	//! Sets the maximum amount of characters which may be entered in the box.
 	//! \param max: Maximum amount of characters. If 0, the character amount is
 	//! infinity.
