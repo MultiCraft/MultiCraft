@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
+#include <array>
 #include <fstream>
 #include <iterator>
 #include <unordered_map>
@@ -352,33 +353,22 @@ public:
 class SettingsShaderConstantSetter : public IShaderConstantSetter
 {
 	CachedPixelShaderSetting<float> m_fog_shading;
-	CachedPixelShaderSetting<float, 4> m_light_curve;
-	CachedPixelShaderSetting<float, 4> m_light_boost;
 	CachedVertexShaderSetting<float, 3> m_water_wave;
 	float m_fog_shading_value;
-	float m_light_curve_value[4];
-	float m_light_boost_value[4];
 	float m_water_wave_value[3];
 
 public:
-	SettingsShaderConstantSetter(float fog_shading, const float light_curve[4],
-			const float light_boost[4], const float water_wave[3]) :
+	SettingsShaderConstantSetter(float fog_shading, const float water_wave[3]) :
 		  m_fog_shading("fogShadingParameter")
-		, m_light_curve("lightCurve")
-		, m_light_boost("lightBoost")
 		, m_water_wave("waterWave")
 		, m_fog_shading_value(fog_shading)
 	{
-		std::copy(light_curve, light_curve + 4, m_light_curve_value);
-		std::copy(light_boost, light_boost + 4, m_light_boost_value);
 		std::copy(water_wave, water_wave + 3, m_water_wave_value);
 	}
 
 	virtual void onSetConstants(video::IMaterialRendererServices *services) override
 	{
 		m_fog_shading.set(&m_fog_shading_value, services);
-		m_light_curve.set(m_light_curve_value, services);
-		m_light_boost.set(m_light_boost_value, services);
 		m_water_wave.set(m_water_wave_value, services);
 	}
 };
@@ -417,6 +407,18 @@ static float asSpelled(float value)
 	spelled << std::showpoint << value;
 	spelled >> value;
 	return value;
+}
+
+// The point light curve as the header spells it: LIGHT_CURVE, then LIGHT_BOOST and LIGHT_SCALE
+static std::array<float, 8> pointLightCurve()
+{
+	// The light source color folds into the curve, but not past a pow()
+	const LightingParams &lp = get_lighting_params();
+	const bool fold = lp.gamma == 1.0f;
+	const float f = fold ? 1.04f : 1.0f;
+	const float sigma = std::fmax(lp.sigma, 0.001f);
+	return { lp.a * f, lp.b * f, lp.c * f, 1.0f / lp.gamma,
+			lp.boost * f, lp.center, -0.5f / (sigma * sigma), fold ? 1.0f : 1.04f };
 }
 
 
@@ -728,6 +730,10 @@ void registerPrecompiledShaders(video::IVideoDriver *driver)
 
 	// The programs build anew when a game starts with the setting changed in the main menu
 	driver->setPrecompiledConstant(16, g_settings->getBool("tone_mapping"));
+	// The point light curve, as a program built on the device reads it from its header
+	const std::array<float, 8> light = pointLightCurve();
+	for (u32 i = 0; i < light.size(); i++)
+		driver->setPrecompiledConstant(17 + i, asSpelled(light[i]));
 
 	const std::string dir = porting::path_share + DIR_DELIM + "client" + DIR_DELIM +
 			"shaders" + DIR_DELIM + "Metal" + DIR_DELIM;
@@ -916,20 +922,12 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 	const float fog_start = core::clamp(g_settings->getFloat("fog_start"), 0.0f, 0.99f);
 	shaders_header << "#define FOG_START " << fog_start << "\n";
 
-	// The light source color folds into the curve, but not past a pow()
-	const LightingParams &lp = get_lighting_params();
-	const bool fold = lp.gamma == 1.0f;
-	const float f = fold ? 1.04f : 1.0f;
-	const float sigma = std::fmax(lp.sigma, 0.001f);
-	// The boost carries LIGHT_SCALE in its last component
-	const float light_curve[4] = { lp.a * f, lp.b * f, lp.c * f, 1.0f / lp.gamma };
-	const float light_boost[4] = { lp.boost * f, lp.center, -0.5f / (sigma * sigma),
-			fold ? 1.0f : 1.04f };
-	shaders_header << "#define LIGHT_CURVE vec4(" << light_curve[0] << "," << light_curve[1]
-		<< "," << light_curve[2] << "," << light_curve[3] << ")\n";
-	shaders_header << "#define LIGHT_BOOST vec3(" << light_boost[0] << "," << light_boost[1]
-		<< "," << light_boost[2] << ")\n";
-	shaders_header << "#define LIGHT_SCALE " << light_boost[3] << "\n";
+	const std::array<float, 8> light = pointLightCurve();
+	shaders_header << "#define LIGHT_CURVE vec4(" << light[0] << "," << light[1]
+		<< "," << light[2] << "," << light[3] << ")\n";
+	shaders_header << "#define LIGHT_BOOST vec3(" << light[4] << "," << light[5]
+		<< "," << light[6] << ")\n";
+	shaders_header << "#define LIGHT_SCALE " << light[7] << "\n";
 
 	if (false && g_settings->getBool("enable_dynamic_shadows")) {
 		shaders_header << "#define ENABLE_DYNAMIC_SHADOWS 1\n";
@@ -972,15 +970,11 @@ ShaderInfo ShaderSource::generateShader(const std::string &name,
 
 	// A program built ahead of time takes the values the header spells out as uniforms
 	if (driver->getDriverType() == video::EDT_METAL) {
-		float spelled_curve[4], spelled_boost[4], spelled_wave[3];
-		for (int i = 0; i < 4; i++) {
-			spelled_curve[i] = asSpelled(light_curve[i]);
-			spelled_boost[i] = asSpelled(light_boost[i]);
-		}
+		float spelled_wave[3];
 		for (int i = 0; i < 3; i++)
 			spelled_wave[i] = asSpelled(water_wave[i]);
 		cb->addSetter(new SettingsShaderConstantSetter(
-				1.0f / (1.0f - asSpelled(fog_start)), spelled_curve, spelled_boost, spelled_wave));
+				1.0f / (1.0f - asSpelled(fog_start)), spelled_wave));
 		// A blending base alpha tests inside the program, against the reference of the material
 		if (shaderinfo.base_material == video::EMT_TRANSPARENT_ALPHA_CHANNEL)
 			cb->addSetter(new AlphaRefShaderConstantSetter());

@@ -38,15 +38,18 @@ varying vec3 eyeVec;
 // Light sources, one per column: xyz in view space, w = level / 15
 uniform mat4 pointLights;
 #ifdef SETTINGS_UNIFORMS
-// Lighting curve as the header spells it, LIGHT_SCALE in the w of the boost
-uniform vec4 lightCurve;
-uniform vec4 lightBoost;
-// Copies main fills, since a Metal function cannot take a constant buffer by reference
-vec4 curve;
-vec4 boost;
-#define LIGHT_CURVE curve
-#define LIGHT_BOOST boost.xyz
-#define LIGHT_SCALE boost.w
+// Lighting curve as the header spells it, fixed when the program is made
+layout(constant_id = 17) const float lightCurveA = 0.0;
+layout(constant_id = 18) const float lightCurveB = 0.0;
+layout(constant_id = 19) const float lightCurveC = 0.0;
+layout(constant_id = 20) const float lightCurveGamma = 1.0;
+layout(constant_id = 21) const float lightBoostX = 0.0;
+layout(constant_id = 22) const float lightBoostY = 0.0;
+layout(constant_id = 23) const float lightBoostZ = 0.0;
+layout(constant_id = 24) const float lightScale = 1.0;
+#define LIGHT_CURVE vec4(lightCurveA, lightCurveB, lightCurveC, lightCurveGamma)
+#define LIGHT_BOOST vec3(lightBoostX, lightBoostY, lightBoostZ)
+#define LIGHT_SCALE lightScale
 #endif
 // Maximum with a rounded corner, a plain max() shows the rim as a crease
 vec3 softMax(vec3 a, vec3 b)
@@ -549,10 +552,6 @@ void main(void)
 					lightColor * (1.0 - shadow_int * (1.0 - shadow_color)); // filtered
 #endif
 #if POINT_LIGHTS
-#ifdef SETTINGS_UNIFORMS
-	curve = lightCurve;
-	boost = lightBoost;
-#endif
 	// The fragment in view space, as eyeVec carries it for the fog
 	vec3 pos = -eyeVec * fogDistance;
 	for (int i = 0; i < POINT_LIGHTS; i++) {
