@@ -455,6 +455,15 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 	for (auto &lists : drawbufs.lists)
 		material_count += lists.size();
 
+	// Buffers between changes of the transform or the material go to the driver in one call, so
+	// it can bind the material once
+	std::vector<const scene::IMeshBuffer *> run;
+	const auto draw_run = [&] {
+		if (!run.empty())
+			driver->drawMeshBuffers(run.data(), run.size());
+		run.clear();
+	};
+
 	for (auto &lists : drawbufs.lists) {
 		// Materials that discard go after the solid ones, whose depth then hides their fragments:
 		// a discard stops tilers removing hidden surfaces
@@ -506,6 +515,7 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 				// Vertices already carry the block position, so the transform
 				// only differs between meshes built at different camera offsets.
 				if (pair.first != last_bake) {
+					draw_run();
 					shift = intToFloat(pair.first - m_camera_offset, BS);
 					m.setTranslation(shift);
 					driver->setTransform(video::ETS_WORLD, m);
@@ -522,15 +532,17 @@ void ClientMap::renderMap(video::IVideoDriver* driver, s32 pass)
 							return cube.intersectsWithBox(box);
 						}) ? lit : unlit;
 					if (type != material.MaterialType) {
+						draw_run();
 						material.MaterialType = type;
 						driver->setMaterial(material);
 					}
 				}
-				driver->drawMeshBuffer(buf);
+				run.push_back(buf);
 #ifndef PROFILER_STUB
 				vertex_count += buf->getVertexCount();
 #endif
 			}
+			draw_run();
 		}
 	}
 	g_profiler->avg(prefix + "draw meshes [ms]", draw.stop(true));
