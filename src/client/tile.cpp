@@ -43,6 +43,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 MutexedMap<std::string, std::string> g_texturename_to_path_cache;
 bool g_disable_texture_packs = false;
 
+// Texture strings come from servers: limits of one image, of a whole string and of nesting
+static const u32 MAX_IMAGE_SIDE = 16384;
+static const u32 MAX_IMAGE_AREA = 4096 * 4096;
+static const u64 MAX_IMAGE_BUDGET = 2 * (u64)MAX_IMAGE_AREA;
+static const u32 MAX_IMAGE_DEPTH = 256;
+
 /*
 	Replaces the filename extension.
 	eg:
@@ -556,6 +562,11 @@ private:
 	// Generate image based on a string like "stone.png" or "[crack:1:0".
 	// if baseimg is NULL, it is created. Otherwise stuff is made on it.
 	bool generateImagePart(std::string part_of_name, video::IImage *& baseimg);
+
+	// Takes an image of this size from the budget of the string being generated
+	bool takeImageBudget(u32 width, u32 height);
+	u64 m_image_budget = 0;
+	u32 m_image_depth = 0;
 
 	/*! Generates an image from a full string like
 	 * "stone.png^mineral_coal.png^[crack:1:0".
@@ -1187,8 +1198,38 @@ static video::IImage *createInventoryCubeImage(
 	return result;
 }
 
+bool TextureSource::takeImageBudget(u32 width, u32 height)
+{
+	const u64 pixels = (u64)width * height;
+	if (width > MAX_IMAGE_SIDE || height > MAX_IMAGE_SIDE || pixels > MAX_IMAGE_AREA ||
+			pixels > m_image_budget) {
+		if (m_image_budget > 0)
+			errorstream << "generateImage(): texture string asks for too large an image "
+					<< width << "x" << height << std::endl;
+		m_image_budget = 0;
+		return false;
+	}
+	m_image_budget -= pixels;
+	return true;
+}
+
 video::IImage* TextureSource::generateImage(const std::string &name)
 {
+	if (m_image_depth == 0)
+		m_image_budget = MAX_IMAGE_BUDGET;
+	else if (m_image_budget == 0)
+		return NULL;
+	if (m_image_depth == MAX_IMAGE_DEPTH) {
+		errorstream << "generateImage(): a texture nests deeper than "
+				<< MAX_IMAGE_DEPTH << " parts" << std::endl;
+		m_image_budget = 0;
+		return NULL;
+	}
+	struct Depth {
+		u32 &value;
+		~Depth() { --value; }
+	} depth{++m_image_depth};
+
 	// Get the base image
 
 	const char separator = '^';
@@ -1241,6 +1282,8 @@ video::IImage* TextureSource::generateImage(const std::string &name)
 	*/
 	if (last_separator_pos != -1) {
 		baseimg = generateImage(name.substr(0, last_separator_pos));
+		if (!baseimg && m_image_budget == 0)
+			return NULL;
 	}
 
 	/*
@@ -1259,6 +1302,11 @@ video::IImage* TextureSource::generateImage(const std::string &name)
 		std::string name2 = last_part_of_name.substr(1,
 				last_part_of_name.size() - 2);
 		video::IImage *tmp = generateImage(name2);
+		if (!tmp && m_image_budget == 0) {
+			if (baseimg)
+				baseimg->drop();
+			return NULL;
+		}
 		if (!tmp) {
 			errorstream << "generateImage(): "
 				"Failed to generate \"" << name2 << "\""
@@ -1356,6 +1404,11 @@ void blitBaseImage(video::IImage* &src, video::IImage* &dst)
 bool TextureSource::generateImagePart(std::string part_of_name,
 		video::IImage *& baseimg)
 {
+	// Each modifier walks over its base
+	if (baseimg && !takeImageBudget(baseimg->getDimension().Width,
+			baseimg->getDimension().Height))
+		return false;
+
 	const char escape = '\\'; // same as in generateImage()
 	video::IVideoDriver *driver = RenderingEngine::get_video_driver();
 	sanity_check(driver);
@@ -1464,6 +1517,7 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 				frame_count = progression;
 				progression = stoi(s);
 			}
+			tiles = core::clamp(tiles, 1, 255);
 
 			if (progression >= 0) {
 				/*
@@ -1500,6 +1554,8 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 			u32 h0 = stoi(sf.next(":"));
 			core::dimension2d<u32> dim(w0,h0);
 			if (baseimg == NULL) {
+				if (!takeImageBudget(w0, h0))
+					return false;
 				baseimg = driver->createImage(video::ECF_A8R8G8B8, dim);
 				baseimg->fill(video::SColor(0,0,0,0));
 			}
@@ -1902,7 +1958,7 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 				u32 scale = (xscale > yscale) ? xscale : yscale;
 
 				// Never downscale; only scale up by 2x or more.
-				if (scale > 1) {
+				if (scale > 1 && takeImageBudget(scale * dim.Width, scale * dim.Height)) {
 					u32 w = scale * dim.Width;
 					u32 h = scale * dim.Height;
 					const core::dimension2d<u32> newdim = core::dimension2d<u32>(w, h);
@@ -1932,6 +1988,8 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 			u32 width = stoi(sf.next("x"));
 			u32 height = stoi(sf.next(""));
 			core::dimension2d<u32> dim(width, height);
+			if (!takeImageBudget(width, height))
+				return false;
 
 			video::IImage *image = RenderingEngine::get_video_driver()->
 				createImage(video::ECF_A8R8G8B8, dim);
@@ -2078,6 +2136,14 @@ bool TextureSource::generateImagePart(std::string part_of_name,
 			auto *memfile = fs->createMemoryReadFile(png.data(), png.size(), "__temp_png");
 			video::IImage* pngimg = vd->createImageFromFile(memfile);
 			memfile->drop();
+			if (!pngimg) {
+				errorstream << "generateImagePart(): broken '[png'" << std::endl;
+				return false;
+			}
+			if (!takeImageBudget(pngimg->getDimension().Width, pngimg->getDimension().Height)) {
+				pngimg->drop();
+				return false;
+			}
 
 			if (baseimg) {
 				blitBaseImage(pngimg, baseimg);
