@@ -1608,8 +1608,12 @@ void Client::handleCommand_MediaPush(NetworkPacket *pkt)
 	auto downloader(std::make_shared<SingleMediaDownloader>(cached));
 	m_pending_media_downloads.emplace_back(token, downloader);
 	downloader->addFile(filename, raw_hash);
-	for (const auto &baseurl : m_remote_media_servers)
-		downloader->addRemoteServer(baseurl);
+	// Ephemeral media (client_cache = false) is generated at runtime and
+	// never exists on remote media servers
+	if (cached) {
+		for (const auto &baseurl : m_remote_media_servers)
+			downloader->addRemoteServer(baseurl);
+	}
 
 	downloader->step(this);
 }
