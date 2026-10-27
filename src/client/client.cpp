@@ -2006,6 +2006,14 @@ float Client::getCurRate()
 void Client::makeScreenshot()
 {
 	irr::video::IVideoDriver *driver = m_rendering_engine->get_video_driver();
+	const std::string filename_ext = "." + g_settings->get("screenshot_format");
+
+	bool writable = false;
+	for (u32 i = 0; i < driver->getImageWriterCount() && !writable; ++i)
+		writable = driver->getImageWriter(i)->isAWriteableFileExtension(filename_ext.c_str());
+	if (!writable)
+		return;
+
 	irr::video::IImage* const raw_image = driver->createScreenShot();
 
 	if (!raw_image)
@@ -2028,7 +2036,6 @@ void Client::makeScreenshot()
 			+ DIR_DELIM
 			+ std::string("screenshot_")
 			+ std::string(timetstamp_c);
-	std::string filename_ext = "." + g_settings->get("screenshot_format");
 	std::string filename;
 
 	// Create the directory if it doesn't already exist.
