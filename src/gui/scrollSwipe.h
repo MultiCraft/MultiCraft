@@ -43,6 +43,8 @@ public:
 
 	void setScrollBar(GUIScrollBar *scrollbar) { m_scrollbar = scrollbar; }
 	void setScrollFactor(f32 scrollfactor) { m_scrollfactor = scrollfactor; }
+	//! The scroll bar moved by delta for another reason, the finger and the glide keep their place
+	void shiftPos(f32 delta);
 
 private:
 	gui::IGUIEnvironment *m_env = nullptr;
@@ -52,6 +54,7 @@ private:
 	OrientationEnum m_orientation = UNDEFINED;
 	bool m_swipe_started = false;
 	bool m_is_coasting = false;
+	bool m_coasting_stopped = false;
 	int m_swipe_start_px = -1;
 	u64 m_last_time = 0;
 	float m_swipe_pos = 0;

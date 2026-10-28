@@ -83,6 +83,9 @@ void GUIEditBoxWithScrollBar::draw()
 	if (!IsVisible)
 		return;
 
+	if (m_scroll_swipe)
+		m_scroll_swipe->updateScrollCoasting();
+
 	const bool focus = Environment->hasFocus(this);
 	const bool scollbar_focus = Environment->hasFocus(m_vscrollbar);
 
@@ -252,6 +255,17 @@ void GUIEditBoxWithScrollBar::draw()
 	IGUIElement::draw();
 }
 
+
+bool GUIEditBoxWithScrollBar::OnEvent(const SEvent &event)
+{
+	// A finger going up or down scrolls the text instead of marking it
+	if (m_scroll_swipe && m_scroll_swipe->onEvent(event)) {
+		m_mouse_marking = false;
+		setTextMarkers(0, 0);
+		return true;
+	}
+	return GUIEditBox::OnEvent(event);
+}
 
 s32 GUIEditBoxWithScrollBar::getCursorPos(s32 x, s32 y)
 {
@@ -636,6 +650,14 @@ void GUIEditBoxWithScrollBar::createVScrollBar()
 	m_vscrollbar->setVisible(false);
 	m_vscrollbar->setSmallStep(3 * fontHeight);
 	m_vscrollbar->setLargeStep(10 * fontHeight);
+
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	m_scroll_swipe = std::make_unique<ScrollSwipe>(Environment, this, ScrollSwipe::VERTICAL);
+	m_scroll_swipe->setScrollBar(m_vscrollbar);
+	m_scroll_swipe->setScrollFactor(-1.0f);
+#endif
+#endif
 }
 
 

@@ -6,6 +6,8 @@
 #define GUIEDITBOXWITHSCROLLBAR_HEADER
 
 #include "guiEditBox.h"
+#include "scrollSwipe.h"
+#include <memory>
 
 class ISoundManager;
 
@@ -26,6 +28,8 @@ public:
 
 	//! draws the element and its children
 	virtual void draw();
+
+	virtual bool OnEvent(const SEvent &event);
 
 	//! Updates the absolute position, splits text if required
 	virtual void updateAbsolutePosition();
@@ -59,6 +63,8 @@ protected:
 	bool m_bg_color_used;
 	video::SColor m_bg_color;
 	ISoundManager *m_sound_manager;
+	//! A read-only textarea scrolls by the finger as the lists of a form
+	std::unique_ptr<ScrollSwipe> m_scroll_swipe;
 };
 
 

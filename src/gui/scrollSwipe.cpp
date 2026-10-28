@@ -33,6 +33,9 @@ void ScrollSwipe::calculateCoastingVelocity()
 #ifdef HAVE_TOUCHSCREENGUI
 	if (m_sample_count < 1)
 		return;
+	// A finger that stopped before letting go does not throw
+	if (porting::getTimeMs() - m_last_time > 100)
+		return;
 
 	u32 last_sample_index = (m_sample_index - 1 + MAX_VELOCITY_SAMPLES) %
 				MAX_VELOCITY_SAMPLES;
@@ -124,6 +127,19 @@ void ScrollSwipe::updateScrollCoasting()
 #endif
 }
 
+void ScrollSwipe::shiftPos(f32 delta)
+{
+#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
+#ifdef HAVE_TOUCHSCREENGUI
+	if (m_swipe_start_px != -1)
+		m_swipe_start_px -= delta * m_scrollfactor;
+	m_swipe_pos += delta;
+	for (u32 i = 0; i < m_sample_count; i++)
+		m_velocity_samples[i].position += delta;
+#endif
+#endif
+}
+
 bool ScrollSwipe::onEvent(const SEvent &event)
 {
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
@@ -138,17 +154,24 @@ bool ScrollSwipe::onEvent(const SEvent &event)
 				    event.MouseInput.X, event.MouseInput.Y))) {
 			m_swipe_start_px = mouse_pos -
 					   m_scrollbar->getPos() * m_scrollfactor;
+			// A press that stops the glide does nothing else, nor its release
+			m_coasting_stopped = m_is_coasting && m_velocity != 0;
 			m_velocity = 0;
 			m_is_coasting = false;
 			m_last_pos = m_scrollbar->getPos();
+			if (m_coasting_stopped)
+				return true;
 		}
 	} else if (event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP) {
 		m_swipe_start_px = -1;
+		const bool coasting_stopped = std::exchange(m_coasting_stopped, false);
 		if (m_swipe_started) {
 			m_swipe_started = false;
 			calculateCoastingVelocity();
 			return true;
 		}
+		if (coasting_stopped)
+			return true;
 	} else if (event.MouseInput.Event == EMIE_MOUSE_MOVED) {
 		double screen_dpi = RenderingEngine::getDisplayDensity() * 96;
 
