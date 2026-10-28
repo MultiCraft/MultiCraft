@@ -62,15 +62,7 @@ Hud::Hud(Client *client, LocalPlayer *player,
 	m_hotbar_imagesize *= m_hud_scaling;
 	m_padding = m_hotbar_imagesize / 12;
 #ifdef __IOS__
-	if (RenderingEngine::getWindowSafeArea() > 0) {
-		const char *model = MultiCraft::getDeviceModel();
-		if (isDevice8and3Inch(model))
-			m_hud_move_upwards = 15;
-		else if (isDevice12and9Inch(model) || isDeviceiPhone12Series(model))
-			m_hud_move_upwards = 20;
-		else
-			m_hud_move_upwards = 25;
-	}
+	m_hud_move_upwards = deviceHudMoveUpwards();
 #endif
 
 	for (auto &hbar_color : hbar_colors)

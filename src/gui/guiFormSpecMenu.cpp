@@ -3422,8 +3422,7 @@ void GUIFormSpecMenu::regenerateGui(v2u32 screensize)
 
 #ifdef __IOS__
 				// Prefer Desktop size on large tablets.
-				const char *model = MultiCraft::getDeviceModel();
-				if (isDevice11Inch(model) || isDevice12and9Inch(model))
+				if (isDevice11Inch() || isDevice12and9Inch())
 					prefer_imgsize = padded_screensize.Y / 15 * gui_scaling;
 #endif
 			}

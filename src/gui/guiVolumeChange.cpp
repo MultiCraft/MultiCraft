@@ -94,8 +94,7 @@ void GUIVolumeChange::regenerateGui(v2u32 screensize)
 	float s = MYMIN(screensize.X / 380.f, screensize.Y / 180.f);
 #if HAVE_TOUCHSCREENGUI
 #ifdef __IOS__
-	const char *model = MultiCraft::getDeviceModel();
-	if (!isDevice11Inch(model) && !isDevice12and9Inch(model))
+	if (!isDevice11Inch() && !isDevice12and9Inch())
 		s *= 0.5f;
 	else
 		s *= 0.4f;

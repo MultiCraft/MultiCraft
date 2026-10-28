@@ -123,7 +123,6 @@ struct joystick_info
 	s16 move_sideward = 0;
 	s16 move_forward = 0;
 	bool pressed = false;
-	bool released = false;
 	u64 event_id = 0;
 
 	void reset(bool visible)
@@ -339,7 +338,6 @@ private:
 	touch_gui_state m_previous_state = STATE_DEFAULT;
 	bool m_overflow_close_schedule = false;
 	IGUIStaticText *m_overflow_bg = nullptr;
-	std::vector<IGUIStaticText *> m_overflow_button_titles;
 	std::set<std::string> m_visible_btns;
 
 	Settings *m_settings = nullptr;
@@ -352,7 +350,6 @@ private:
 	rect<s32> getButtonRect(touch_gui_button_id id);
 	rect<s32> getDefaultButtonRect(touch_gui_button_id id);
 	void resetAllValues();
-	void restoreAllValues();
 	// bool checkInvalidSettings();
 
 	void loadButtonTexture(button_info *button, IGUIButton *guibutton,

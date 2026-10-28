@@ -190,7 +190,7 @@ void TouchScreenGUI::init(ISimpleTextureSource *tsrc, ISoundManager *sound_manag
 	m_editor.button_default = initButton(editor_default_id,
 			getButtonRect(editor_default_id), STATE_EDITOR);
 	m_editor.button_default->guibutton->setIsPushButton();
-	m_editor.button_move = m_editor.button_move = initButton(editor_move_id,
+	m_editor.button_move = initButton(editor_move_id,
 			getButtonRect(editor_move_id), STATE_EDITOR);
 	m_editor.button_move->guibutton->setIsPushButton();
 	m_editor.button_scale = initButton(editor_scale_id,
@@ -239,16 +239,9 @@ void TouchScreenGUI::loadButtonTexture(button_info *button, IGUIButton *guibutto
 		}
 
 		guibutton->setUseAlphaChannel(true);
-		if (g_settings->getBool("gui_scaling_filter")) {
-			rect<s32> txr_rect = rect<s32>(v2s32(0, 0), button_rect.getSize());
-			guibutton->setImage(texture, txr_rect);
-			guibutton->setPressedImage(texture_pressed, txr_rect);
-			guibutton->setScaleImage(false);
-		} else {
-			guibutton->setImage(texture);
-			guibutton->setPressedImage(texture_pressed);
-			guibutton->setScaleImage(true);
-		}
+		guibutton->setImage(texture);
+		guibutton->setPressedImage(texture_pressed);
+		guibutton->setScaleImage(true);
 		guibutton->setDrawBorder(false);
 		guibutton->setText(L"");
 	}
@@ -522,6 +515,13 @@ void TouchScreenGUI::initSettings(bool init)
 	if (m_settings == nullptr)
 		m_settings = Settings::createLayer(SL_TOUCHSCREENGUI);
 
+	bool is_round_screen = false;
+	s32 hud_move_upwards = 0;
+#ifdef __IOS__
+	is_round_screen = isDevice6and9Inch();
+	hud_move_upwards = deviceHudMoveUpwards();
+#endif
+
 	m_settings_path = porting::path_user + DIR_DELIM + "touchscreengui.conf";
 
 	m_settings->readConfigFile(m_settings_path.c_str());
@@ -588,39 +588,43 @@ void TouchScreenGUI::initSettings(bool init)
 			m_screensize.X - m_button_size * 1.25, m_button_size,
 			m_button_size * 1.25, m_button_size);
 
+	float joystick_shift = (is_round_screen ? m_button_size * 0.2f : 0.0f);
+
 	setDefaultValues(joystick_off_id,
-			m_button_size / 2, m_screensize.Y - m_button_size * 4.5,
-			m_button_size * 4.0, m_button_size * 4.0);
+			m_button_size / 2 + joystick_shift, m_screensize.Y - m_button_size * 4.5,
+			m_button_size * 4.0 + joystick_shift / 2.0, m_button_size * 4.0);
 
 	setDefaultValues(joystick_bg_id,
-			m_button_size / 2, m_screensize.Y - m_button_size * 4.5,
-			m_button_size * 4.0, m_button_size * 4.0);
+			m_button_size / 2 + joystick_shift, m_screensize.Y - m_button_size * 4.5,
+			m_button_size * 4.0 + joystick_shift / 2.0, m_button_size * 4.0);
 
 	setDefaultValues(joystick_center_id,
 			0, 0, m_button_size * 1.5, m_button_size * 1.5);
 
+	const float editor_y = m_screensize.Y - m_button_size * 0.75 - hud_move_upwards;
+
 	setDefaultValues(editor_save_id,
-			m_screensize.X / 2 - m_button_size * 5.0, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 - m_button_size * 5.0, editor_y,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_default_id,
-			m_screensize.X / 2 - m_button_size * 3.5, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 - m_button_size * 3.5, editor_y,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_move_id,
-			m_screensize.X / 2 - m_button_size * 1.5, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 - m_button_size * 1.5, editor_y,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_scale_id,
-			m_screensize.X / 2, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2, editor_y,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_undo_id,
-			m_screensize.X / 2 + m_button_size * 2.0, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 + m_button_size * 2.0, editor_y,
 			m_button_size * 1.5, m_button_size * 0.75);
 
 	setDefaultValues(editor_redo_id,
-			m_screensize.X / 2 + m_button_size * 3.5, m_screensize.Y - m_button_size * 0.75,
+			m_screensize.X / 2 + m_button_size * 3.5, editor_y,
 			m_button_size * 1.5, m_button_size * 0.75);
 }
 
@@ -713,20 +717,6 @@ void TouchScreenGUI::resetAllValues()
 
 		updateButtons();
 	}
-
-	restoreAllValues();
-}
-
-void TouchScreenGUI::restoreAllValues()
-{
-	for (auto name : m_settings->getNames()) {
-		m_settings->remove(name);
-	}
-
-	m_settings->setS32("button_size", m_button_size);
-	m_settings->updateConfigFile(m_settings_path.c_str());
-
-	initSettings();
 }
 
 /*bool TouchScreenGUI::checkInvalidSettings()
@@ -804,8 +794,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 					else
 						new_state = STATE_OVERFLOW;
 				} else if (button->id == toggle_interface_id) {
-					if (m_current_state == STATE_HIDDEN)
-						new_state = STATE_DEFAULT;
 					if (m_current_state == STATE_OVERFLOW &&
 							m_previous_state == STATE_HIDDEN) {
 						new_state = STATE_DEFAULT;
@@ -933,7 +921,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 		touch_gui_state new_state = m_current_state;
 		bool reset_all_values = false;
-		bool restore_all_values = false;
 
 		for (auto button : m_buttons) {
 			if (m_current_state != button->state &&
@@ -1062,14 +1049,14 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 				new_rect = m_editor.old_rect;
 			}
 
-			setValues(m_editor.button_id,
-					new_rect.UpperLeftCorner.X, new_rect.UpperLeftCorner.Y,
-					new_rect.getWidth(), new_rect.getHeight());
-
-			if (m_editor.history_current_id > -1)
-				m_editor.history_data.resize(m_editor.history_current_id);
-
 			if (new_rect != m_editor.old_rect) {
+				setValues(m_editor.button_id,
+						new_rect.UpperLeftCorner.X, new_rect.UpperLeftCorner.Y,
+						new_rect.getWidth(), new_rect.getHeight());
+
+				if (m_editor.history_current_id > -1)
+					m_editor.history_data.resize(m_editor.history_current_id);
+
 				editor_history_data data = {guibutton, m_editor.button_id, m_editor.old_rect, new_rect};
 				std::vector<editor_history_data> history_data;
 				history_data.push_back(data);
@@ -1083,9 +1070,6 @@ bool TouchScreenGUI::preprocessEvent(const SEvent &event)
 
 		if (reset_all_values)
 			resetAllValues();
-
-		if (restore_all_values)
-			restoreAllValues();
 
 		if (!m_pressing_csm_button.empty()) {
 			for (auto &csm_button : m_csm_buttons) {
@@ -1267,9 +1251,6 @@ bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 	double distance = sqrt(dx * dx + dy * dy);
 	float max_distance = (float)joystick_size / 2.66f;
 
-	if (distance == 0)
-		return false;
-
 	if (distance > max_distance) {
 		s32 ndx = max_distance * dx / distance - joystick_center_size / 2.0f;
 		s32 ndy = max_distance * dy / distance - joystick_center_size / 2.0f;
@@ -1282,15 +1263,15 @@ bool TouchScreenGUI::moveJoystick(s32 x, s32 y)
 				y - joystick_center_size / 2.0f));
 	}
 
-	// angle in degrees
-	double angle = acos(dx / distance) * 180 / M_PI;
+	// angle in degrees, unused in the centre where the threshold stops the move
+	double angle = distance > 0 ? acos(dx / distance) * 180 / M_PI : 0;
 	if (dy < 0)
 		angle *= -1;
 	// rotate to make comparing easier
 	angle = fmod(angle + 180 + 22.5, 360);
 
-	bool old_move_sideward = m_joystick.move_sideward;
-	bool old_move_forward = m_joystick.move_forward;
+	s16 old_move_sideward = m_joystick.move_sideward;
+	s16 old_move_forward = m_joystick.move_forward;
 	m_joystick.move_sideward = 0;
 	m_joystick.move_forward = 0;
 
@@ -1443,7 +1424,7 @@ void TouchScreenGUI::step(float dtime)
 	if (m_current_state == STATE_OVERFLOW && m_overflow_close_schedule)
 		changeCurrentState(m_previous_state);
 
-	if (m_camera.event_id != 0 && (!m_camera.has_really_moved) &&
+	if (m_camera.event_id != 0 && !m_camera.has_really_moved && !m_camera.dig &&
 			m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
@@ -1452,8 +1433,8 @@ void TouchScreenGUI::step(float dtime)
 		}
 	}
 
-	if (m_camera_additional.event_id != 0 && (!m_camera_additional.has_really_moved) &&
-			m_current_state == STATE_DEFAULT) {
+	if (m_camera_additional.event_id != 0 && !m_camera_additional.has_really_moved &&
+			!m_camera_additional.dig && m_current_state == STATE_DEFAULT) {
 		u64 delta = porting::getDeltaMs(m_camera_additional.downtime, porting::getTimeMs());
 		if (delta > MIN_DIG_TIME_MS) {
 			m_camera_additional.dig = true;
@@ -1564,8 +1545,15 @@ void TouchScreenGUI::changeCurrentState(touch_gui_state state)
 
 	reset();
 
-	if (m_current_state == STATE_EDITOR)
+	if (m_current_state == STATE_EDITOR) {
+		// Leaving without Save drops the changes, after Save the file already has them
+		for (const auto &name : m_settings->getNames())
+			m_settings->remove(name);
+		m_settings->readConfigFile(m_settings_path.c_str());
+		m_editor.history_data.clear();
+		m_editor.history_current_id = -1;
 		updateButtons();
+	}
 
 	m_current_state = state;
 	m_overflow_close_schedule = false;

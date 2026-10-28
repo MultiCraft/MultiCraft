@@ -958,7 +958,14 @@ float RenderingEngine::getHudScaling()
 		if (size.X > 0 && size.Y > 0) {
 			if (size != fitted_size) {
 				fitted_size = size;
-				fitted_scaling = getAutoHudScaling(size, getDisplayDensity());
+#ifdef __IOS__
+				// as the touch screen GUI shifts it
+				const bool shifted_joystick = isDevice6and9Inch();
+#else
+				const bool shifted_joystick = false;
+#endif
+				fitted_scaling = getAutoHudScaling(size, getDisplayDensity(),
+						shifted_joystick);
 			}
 			return fitted_scaling;
 		}
