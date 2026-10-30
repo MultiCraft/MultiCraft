@@ -1452,8 +1452,9 @@ float Connection::getPeerStat(session_t peer_id, rtt_stat_type type)
 float Connection::getLocalStat(rate_stat_type type)
 {
 	PeerHelper peer = getPeerNoEx(PEER_ID_SERVER);
-
-	FATAL_ERROR_IF(!peer, "Connection::getLocalStat we couldn't get our own peer? are you serious???");
+	// The connection thread may drop the peer before the client hears of it
+	if (!peer)
+		return 0.0f;
 
 	float retval = 0.0;
 
