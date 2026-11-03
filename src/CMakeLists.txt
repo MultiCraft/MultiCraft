@@ -137,7 +137,7 @@ if(BUILD_CLIENT)
 	endif()
 endif()
 
-option(USE_CAIRO "Enable Cairo for COLRv1 emoji" TRUE)
+option(USE_HARFBUZZ_RASTER "Enable the HarfBuzz rasterizer for vector color emoji" TRUE)
 
 if(BUILD_CLIENT)
 	find_package(Freetype REQUIRED)
@@ -149,15 +149,15 @@ if(BUILD_CLIENT)
 		include_directories(${HARFBUZZ_INCLUDE_DIR})
 	endif()
 	
-	if (USE_CAIRO)
-		find_library(CAIRO_LIBRARY NAMES cairo libcairo)
-		find_path(CAIRO_INCLUDE_DIR NAMES cairo/cairo.h cairo.h PATHS)
-		if (CAIRO_LIBRARY AND CAIRO_INCLUDE_DIR)
-			message(STATUS "Cairo found.")
-			include_directories(${CAIRO_INCLUDE_DIR})
-			add_definitions(-DUSE_CAIRO=1)
+	if (USE_HARFBUZZ_RASTER)
+		find_library(HARFBUZZ_RASTER_LIBRARY NAMES harfbuzz-raster libharfbuzz-raster)
+		find_path(HARFBUZZ_RASTER_INCLUDE_DIR NAMES harfbuzz/hb-raster.h PATHS)
+		if (HARFBUZZ_RASTER_LIBRARY AND HARFBUZZ_RASTER_INCLUDE_DIR)
+			message(STATUS "HarfBuzz raster found.")
+			add_definitions(-DUSE_HARFBUZZ_RASTER=1)
+			set(HARFBUZZ_RASTER_LIBS ${HARFBUZZ_RASTER_LIBRARY})
 		else()
-			message(STATUS "Cairo not found.")
+			message(STATUS "HarfBuzz raster not found.")
 		endif()
 	endif()
 endif()
@@ -718,8 +718,8 @@ if(BUILD_CLIENT)
 	endif()
 	target_link_libraries(
 		${PROJECT_NAME}
+		${HARFBUZZ_RASTER_LIBS}
 		${HARFBUZZ_LIBRARY}
-		${CAIRO_LIBRARY}
 	)
 	if(FREETYPE_PKGCONFIG_FOUND)
 		set_target_properties(${PROJECT_NAME}

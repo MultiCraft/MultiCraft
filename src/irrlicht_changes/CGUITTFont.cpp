@@ -32,6 +32,7 @@
 #include <irrlicht.h>
 #include <cstring>
 #include "CGUITTFont.h"
+#include <harfbuzz/hb-ot.h>
 #include "debug.h"
 #include "util/string.h"
 
@@ -100,6 +101,31 @@ u32 getBestFixedSizeIndex(FT_Face face, u32 font_size)
 
 	return index;
 }
+
+#ifdef USE_HARFBUZZ_RASTER
+// Paints a vector color glyph into a square of 1.5 sizes with the baseline at size from the top
+static hb_raster_image_t *paintColorGlyph(FT_Face face, u32 char_index, u32 size)
+{
+	hb_raster_paint_t *paint = hb_raster_paint_create_or_fail();
+	if (!paint)
+		return nullptr;
+
+	const u32 side = size * 1.5f;
+	const hb_raster_extents_t extents = {0, (int)size - (int)side, side, side, 0};
+	hb_raster_paint_set_extents(paint, &extents);
+	// The font counts in 1/64 of a pixel
+	hb_raster_paint_set_scale_factor(paint, 64, 64);
+
+	hb_font_t *font = hb_ft_font_create_referenced(face);
+	// A glyph without color paint comes out as its outline, a space as an empty image
+	hb_raster_paint_glyph(paint, font, char_index);
+	hb_raster_image_t *image = hb_raster_paint_render(paint);
+
+	hb_font_destroy(font);
+	hb_raster_paint_destroy(paint);
+	return image;
+}
+#endif
 
 video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitmap& bits, video::IVideoDriver* driver, video::SColor color) const
 {
@@ -240,10 +266,8 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 	FT_Glyph glyph = nullptr;
 	FT_Bitmap bits;
-#ifdef USE_CAIRO
-	cairo_surface_t *cairo_surface = nullptr;
-	cairo_t *cairo = nullptr;
-	cairo_font_face_t *cairo_font_face = nullptr;
+#ifdef USE_HARFBUZZ_RASTER
+	hb_raster_image_t *color_image = nullptr;
 #endif
 
 	FT_GlyphSlot glyph_slot = face->glyph;
@@ -322,39 +346,21 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		offset = core::vector2di(glyph_slot->bitmap_left * scale, bitmap_top);
 
 	} else {
-#ifdef USE_CAIRO
-		cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
-				font_size * 1.5f, font_size * 1.5f);
+#ifdef USE_HARFBUZZ_RASTER
+		color_image = paintColorGlyph(face, char_index, font_size);
+		if (!color_image)
+			return;
 
-		cairo = cairo_create(cairo_surface);
+		hb_raster_extents_t extents;
+		hb_raster_image_get_extents(color_image, &extents);
 
-		cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
-		cairo_paint(cairo);
-		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
-
-		cairo_font_face = cairo_ft_font_face_create_for_ft_face(face, 0);
-
-		cairo_set_font_face(cairo, cairo_font_face);
-		cairo_set_font_size(cairo, font_size);
-
-		cairo_glyph_t cairo_glyph;
-		cairo_glyph.index = char_index;
-		cairo_glyph.x = 0;
-		cairo_glyph.y = font_size;
-
-		cairo_show_glyphs(cairo, &cairo_glyph, 1);
-		cairo_surface_flush(cairo_surface);
-
-		unsigned char* data = cairo_image_surface_get_data(cairo_surface);
-		int stride = cairo_image_surface_get_stride(cairo_surface);
-		int w = cairo_image_surface_get_width(cairo_surface);
-		int h = cairo_image_surface_get_height(cairo_surface);
-
-		bits.width = w;
-		bits.rows = h;
-		bits.pitch = stride;
+		// The image keeps its rows bottom up
+		bits.width = extents.width;
+		bits.rows = extents.height;
+		bits.pitch = -(int)extents.stride;
 		bits.pixel_mode = FT_PIXEL_MODE_BGRA;
-		bits.buffer = data;
+		bits.buffer = (unsigned char *)hb_raster_image_get_buffer(color_image) +
+				(extents.height - 1) * extents.stride;
 
 		offset = core::vector2di(0, (int)(font_size));
 #else
@@ -394,12 +400,8 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		if (!page) {
 			// Retrying it would take another page on every draw
 			tooLarge = true;
-#ifdef USE_CAIRO
-			if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
-				cairo_font_face_destroy(cairo_font_face);
-				cairo_destroy(cairo);
-				cairo_surface_destroy(cairo_surface);
-			}
+#ifdef USE_HARFBUZZ_RASTER
+			hb_raster_image_destroy(color_image);
 #endif
 			if (glyph)
 				FT_Done_Glyph(glyph);
@@ -426,12 +428,8 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	// We grab the glyph bitmap here so the data won't be removed when the next glyph is loaded.
 	surface = createGlyphImage(face, bits, driver, color);
 
-#ifdef USE_CAIRO
-	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
-		cairo_font_face_destroy(cairo_font_face);
-		cairo_destroy(cairo);
-		cairo_surface_destroy(cairo_surface);
-	}
+#ifdef USE_HARFBUZZ_RASTER
+	hb_raster_image_destroy(color_image);
 #endif
 
 	if (glyph)
@@ -770,6 +768,18 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (char_index == 0)
 		return false;
 
+	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
+		// The color tables tell whether the emoji comes in color, without drawing it
+		hb_face_t *hb_face = hb_ft_face_create_referenced(face);
+		// FreeType draws in color only the layers of COLR version 0
+		bool color = hb_ot_color_glyph_get_layers(hb_face, char_index, 0, nullptr, nullptr) > 0;
+#ifdef USE_HARFBUZZ_RASTER
+		color = color || hb_ot_color_glyph_has_paint(hb_face, char_index);
+#endif
+		hb_face_destroy(hb_face);
+		return color;
+	}
+
 	FT_Int32 flags = load_flags;
 	if (FT_HAS_COLOR(face))
 		flags |= FT_LOAD_COLOR;
@@ -787,70 +797,18 @@ bool CGUITTFont::testEmojiFont(const io::path& filename)
 	if (FT_Load_Glyph(face, char_index, flags) != FT_Err_Ok)
 		return false;
 
-#ifdef USE_CAIRO
-	if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0) {
-		cairo_surface_t* cairo_surface = cairo_image_surface_create(
-				CAIRO_FORMAT_ARGB32, size * 1.5f, size * 1.5f);
-		cairo_t* cairo = cairo_create(cairo_surface);
-		cairo_font_face_t* cairo_face =
-				cairo_ft_font_face_create_for_ft_face(face, 0);
+	FT_GlyphSlot glyph = face->glyph;
+	FT_Bitmap bits = glyph->bitmap;
 
-		cairo_set_operator(cairo, CAIRO_OPERATOR_CLEAR);
-		cairo_paint(cairo);
-		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+	if (bits.rows < 1 || bits.width < 1)
+		return false;
 
-		cairo_set_font_face(cairo, cairo_face);
-		cairo_set_font_size(cairo, size);
+	if (FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_BGRA)
+		return false;
 
-		cairo_glyph_t cairo_glyph;
-		cairo_glyph.index = char_index;
-		cairo_glyph.x = 0;
-		cairo_glyph.y = size;
-
-		cairo_show_glyphs(cairo, &cairo_glyph, 1);
-		cairo_surface_flush(cairo_surface);
-
-		unsigned char *data = cairo_image_surface_get_data(cairo_surface);
-		int stride = cairo_image_surface_get_stride(cairo_surface);
-		bool has_pixels = false;
-
-		u32* pixels = (u32*)data;
-		int buffer_size = stride/4 * size;
-		for (int i = 0; i < buffer_size; i++) {
-			if ((pixels[i] >> 24) > 0) {
-				has_pixels = true;
-				break;
-			}
-		}
-
-		cairo_font_face_destroy(cairo_face);
-		cairo_destroy(cairo);
-		cairo_surface_destroy(cairo_surface);
-
-		if (!has_pixels)
-			return false;
-
-	} else {
-#endif
-		FT_GlyphSlot glyph = face->glyph;
-
-		if (FT_HAS_COLOR(face) && face->num_fixed_sizes == 0)
-			FT_Render_Glyph(glyph, FT_RENDER_MODE_NORMAL);
-
-		FT_Bitmap bits = glyph->bitmap;
-
-		if (bits.rows < 1 || bits.width < 1)
-			return false;
-
-		if (FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_BGRA)
-			return false;
-
-		if (!FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_MONO &&
-				bits.pixel_mode != FT_PIXEL_MODE_GRAY)
-			return false;
-#ifdef USE_CAIRO
-	}
-#endif
+	if (!FT_HAS_COLOR(face) && bits.pixel_mode != FT_PIXEL_MODE_MONO &&
+			bits.pixel_mode != FT_PIXEL_MODE_GRAY)
+		return false;
 
 	return true;
 }

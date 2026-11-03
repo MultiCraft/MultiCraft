@@ -23,13 +23,8 @@ LOCAL_SRC_FILES := deps/harfbuzz/lib/$(APP_ABI)/libharfbuzz.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := Cairo
-LOCAL_SRC_FILES := deps/cairo/lib/$(APP_ABI)/libcairo.a
-include $(PREBUILT_STATIC_LIBRARY)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := Pixman
-LOCAL_SRC_FILES := deps/pixman/lib/$(APP_ABI)/libpixman.a
+LOCAL_MODULE := HarfBuzzRaster
+LOCAL_SRC_FILES := deps/harfbuzz/lib/$(APP_ABI)/libharfbuzz-raster.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -114,7 +109,7 @@ LOCAL_CFLAGS += \
 	-DUSE_CURL=1                                   \
 	-DUSE_SOUND=1                                  \
 	-DUSE_NOGG=1                                   \
-	-DUSE_CAIRO=1                                  \
+	-DUSE_HARFBUZZ_RASTER=1                        \
 	-DUSE_LEVELDB=1                                \
 	-DUSE_SQLITE=0                                 \
 	-DUSE_LUAJIT=1                                 \
@@ -140,7 +135,6 @@ LOCAL_C_INCLUDES := \
 	../../lib/sheenbidi/Headers                    \
 	deps/freetype/include                          \
 	deps/harfbuzz/include                          \
-	deps/cairo/include                             \
 	deps/gettext/include                           \
 	deps/irrlicht/include                          \
 	deps/libpng/include                            \
@@ -317,7 +311,7 @@ LOCAL_SRC_FILES += ../../lib/sheenbidi/Source/SheenBidi.c
 
 LOCAL_STATIC_LIBRARIES += \
 	Curl libssl libcrypto libnghttp2 \
-	Freetype HarfBuzz Cairo Pixman \
+	Freetype HarfBuzzRaster HarfBuzz \
 	oboe OpenAL \
 	Gettext \
 	Irrlicht libpng libjpeg SDL \
