@@ -24,7 +24,11 @@ with this program; ifnot, write to the Free Software Foundation, Inc.,
 #include "sound_openal.h"
 
 #include <cmath>
+#ifdef USE_NOGG
+#include <nogg.h>
+#else
 #include <vorbis/vorbisfile.h>
+#endif
 #include <cassert>
 #include "log.h"
 #include "util/numeric.h" // myrand()
@@ -94,6 +98,73 @@ struct SoundBuffer
 	ALuint buffer_id;
 };
 
+#ifdef USE_NOGG
+SoundBuffer *load_opened_ogg_file(vorbis_t *oggFile,
+		const std::string &filename_for_logging)
+{
+	const int channels = vorbis_channels(oggFile);
+	int16_t array[BUFFER_SIZE / 2];
+	std::vector<char> buffer;
+	vorbis_error_t error;
+	int32_t frames;
+
+	do {
+		frames = vorbis_read_int16(oggFile, array, BUFFER_SIZE / 2 / channels, &error);
+		const char *bytes = (const char *)array;
+		buffer.insert(buffer.end(), bytes, bytes + frames * channels * sizeof(int16_t));
+	} while ((error == VORBIS_NO_ERROR && frames > 0) ||
+			error == VORBIS_ERROR_DECODE_RECOVERED);
+
+	// What was decoded before an error stays, as with a cut-off file
+	if (buffer.empty() && error != VORBIS_ERROR_STREAM_END) {
+		vorbis_close(oggFile);
+		infostream << "Audio: Error decoding "
+			<< filename_for_logging << std::endl;
+		return nullptr;
+	}
+
+	SoundBuffer *snd = new SoundBuffer;
+	snd->format = channels == 1 ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16;
+	snd->freq = vorbis_rate(oggFile);
+	vorbis_close(oggFile);
+
+	alGenBuffers(1, &snd->buffer_id);
+	alBufferData(snd->buffer_id, snd->format, buffer.data(), buffer.size(), snd->freq);
+
+	ALenum al_error = alGetError();
+	if (al_error != AL_NO_ERROR) {
+		infostream << "Audio: OpenAL error: " << alErrorString(al_error)
+				<< "preparing sound buffer" << std::endl;
+	}
+
+	return snd;
+}
+
+SoundBuffer *load_ogg_from_file(const std::string &path)
+{
+	vorbis_t *oggFile = vorbis_open_file(path.c_str(), VORBIS_OPTION_SCAN_FOR_NEXT_PAGE, nullptr);
+	if (!oggFile) {
+		infostream << "Audio: Error opening " << path
+			<< " for decoding" << std::endl;
+		return nullptr;
+	}
+
+	return load_opened_ogg_file(oggFile, path);
+}
+
+SoundBuffer *load_ogg_from_buffer(const std::string &buf, const std::string &id_for_log)
+{
+	vorbis_t *oggFile = vorbis_open_buffer(buf.data(), buf.size(),
+			VORBIS_OPTION_SCAN_FOR_NEXT_PAGE, nullptr);
+	if (!oggFile) {
+		infostream << "Audio: Error opening " << id_for_log
+			<< " for decoding" << std::endl;
+		return nullptr;
+	}
+
+	return load_opened_ogg_file(oggFile, id_for_log);
+}
+#else
 SoundBuffer *load_opened_ogg_file(OggVorbis_File *oggFile,
 		const std::string &filename_for_logging)
 {
@@ -243,6 +314,7 @@ SoundBuffer *load_ogg_from_buffer(const std::string &buf, const std::string &id_
 
 	return load_opened_ogg_file(&oggFile, id_for_log);
 }
+#endif
 
 struct PlayingSound
 {

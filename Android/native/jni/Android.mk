@@ -88,8 +88,8 @@ LOCAL_SRC_FILES := deps/oboe/lib/$(APP_ABI)/liboboe.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := Vorbis
-LOCAL_SRC_FILES := deps/vorbis/lib/$(APP_ABI)/libvorbis.a
+LOCAL_MODULE := Nogg
+LOCAL_SRC_FILES := deps/libnogg/lib/$(APP_ABI)/libnogg.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -113,6 +113,7 @@ LOCAL_CFLAGS += \
 	-DENABLE_GLES=1                                \
 	-DUSE_CURL=1                                   \
 	-DUSE_SOUND=1                                  \
+	-DUSE_NOGG=1                                   \
 	-DUSE_CAIRO=1                                  \
 	-DUSE_LEVELDB=1                                \
 	-DUSE_SQLITE=0                                 \
@@ -150,7 +151,7 @@ LOCAL_C_INCLUDES := \
 	deps/luajit/include                            \
 	deps/openal/include                            \
 	deps/boringssl/include                         \
-	deps/vorbis/include                            \
+	deps/libnogg/include                           \
 	deps/zstd/include
 
 LOCAL_SRC_FILES := \
@@ -321,7 +322,7 @@ LOCAL_STATIC_LIBRARIES += \
 	Gettext \
 	Irrlicht libpng libjpeg SDL \
 	LevelDB \
-	Vorbis \
+	Nogg \
 	LuaJIT \
 	zstd
 

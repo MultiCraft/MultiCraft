@@ -17,8 +17,7 @@ echo "Build libraries:"
 ./scripts/leveldb.sh
 ./scripts/nghttp2.sh
 ./scripts/libcurl.sh
-./scripts/libogg.sh
-./scripts/libvorbis.sh
+./scripts/libnogg.sh
 ./scripts/luajit.sh
 ./scripts/openal.sh
 

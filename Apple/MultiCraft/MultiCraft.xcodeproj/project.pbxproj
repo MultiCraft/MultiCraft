@@ -104,9 +104,7 @@
 		841AD8A528D0C1870042E335 /* libleveldb.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8A428D0C1810042E335 /* libleveldb.a */; };
 		841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8A928D0CE7F0042E335 /* libopenal.a */; };
 		841AD8AF28D0D6A40042E335 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8AE28D0D6A40042E335 /* CoreAudio.framework */; };
-		841AD8B128D0DE430042E335 /* libogg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B028D0DE3D0042E335 /* libogg.a */; };
-		841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B428D0E2340042E335 /* libvorbis.a */; };
-		841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B828D0E2E40042E335 /* libvorbisfile.a */; };
+		841AD8B128D0DE430042E335 /* libnogg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 841AD8B028D0DE3D0042E335 /* libnogg.a */; };
 		841AD8BB28D12E980042E335 /* libintl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EEE5E62782728E00F61929 /* libintl.a */; };
 		84287CA6291ED0F000E30F96 /* locale in Resources */ = {isa = PBXBuildFile; fileRef = 84287CA4291ED0F000E30F96 /* locale */; };
 		844436EF28DA80C700662A9D /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 844436EE28DA80C100662A9D /* libfreetype.a */; };
@@ -560,9 +558,7 @@
 		841AD8A928D0CE7F0042E335 /* libopenal.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libopenal.a; path = ../deps/openal/libopenal.a; sourceTree = "<group>"; };
 		841AD8AC28D0D6920042E335 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
 		841AD8AE28D0D6A40042E335 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
-		841AD8B028D0DE3D0042E335 /* libogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libogg.a; path = ../deps/libogg/libogg.a; sourceTree = "<group>"; };
-		841AD8B428D0E2340042E335 /* libvorbis.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbis.a; path = ../deps/libvorbis/libvorbis.a; sourceTree = "<group>"; };
-		841AD8B828D0E2E40042E335 /* libvorbisfile.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbisfile.a; path = ../deps/libvorbis/libvorbisfile.a; sourceTree = "<group>"; };
+		841AD8B028D0DE3D0042E335 /* libnogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libnogg.a; path = ../deps/libnogg/libnogg.a; sourceTree = "<group>"; };
 		84287CA4291ED0F000E30F96 /* locale */ = {isa = PBXFileReference; lastKnownFileType = folder; name = locale; path = ../../assets/locale; sourceTree = "<group>"; };
 		844436EE28DA80C100662A9D /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../deps/freetype/libfreetype.a; sourceTree = "<group>"; };
 		845856A924B1322C0040BA4F /* MultiCraft.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MultiCraft.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -960,12 +956,10 @@
 				841AD8A528D0C1870042E335 /* libleveldb.a in Frameworks */,
 				846F883B27A59704007B6210 /* libluajit.a in Frameworks */,
 				84CA12AF2EF4B8BA004899E0 /* libnghttp2.a in Frameworks */,
-				841AD8B128D0DE430042E335 /* libogg.a in Frameworks */,
+				841AD8B128D0DE430042E335 /* libnogg.a in Frameworks */,
 				841AD8AB28D0CF890042E335 /* libopenal.a in Frameworks */,
 				84C2AB5328DA7776001968EE /* libpng.a in Frameworks */,
 				8495BD1628B80B14009FCF4D /* libSDL.a in Frameworks */,
-				841AD8B528D0E23A0042E335 /* libvorbis.a in Frameworks */,
-				841AD8B928D0E2EA0042E335 /* libvorbisfile.a in Frameworks */,
 				848CE6E527778E38001D3E0F /* libz.tbd in Frameworks */,
 			);
 		};
@@ -1186,12 +1180,10 @@
 				841AD8A428D0C1810042E335 /* libleveldb.a */,
 				846F883A27A596F9007B6210 /* libluajit.a */,
 				84CA12AE2EF4B8A3004899E0 /* libnghttp2.a */,
-				841AD8B028D0DE3D0042E335 /* libogg.a */,
+				841AD8B028D0DE3D0042E335 /* libnogg.a */,
 				841AD8A928D0CE7F0042E335 /* libopenal.a */,
 				84C2AB5228DA7770001968EE /* libpng.a */,
 				8495BD1528B80B00009FCF4D /* libSDL.a */,
-				841AD8B428D0E2340042E335 /* libvorbis.a */,
-				841AD8B828D0E2E40042E335 /* libvorbisfile.a */,
 				848CE6E427778E30001D3E0F /* libz.tbd */,
 			);
 			name = Frameworks;
@@ -2289,6 +2281,7 @@
 					"USE_GETTEXT=1",
 					"USE_CURL=1",
 					"USE_SOUND=1",
+					"USE_NOGG=1",
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"VERSION_MAJOR=2",
@@ -2311,11 +2304,10 @@
 					"${SRCROOT}/../deps/irrlicht/include",
 					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/luajit/include",
-					"${SRCROOT}/../deps/libogg/include",
+					"${SRCROOT}/../deps/libnogg/include",
 					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
 					"${SRCROOT}/../deps/libSDL/include",
-					"${SRCROOT}/../deps/libvorbis/include",
 					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
@@ -2341,11 +2333,10 @@
 					"-L${SRCROOT}/../deps/irrlicht",
 					"-L${SRCROOT}/../deps/leveldb",
 					"-L${SRCROOT}/../deps/luajit",
-					"-L${SRCROOT}/../deps/libogg",
+					"-L${SRCROOT}/../deps/libnogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/libSDL",
-					"-L${SRCROOT}/../deps/libvorbis",
 					"-L${SRCROOT}/../deps/libcurl",
 					"-L${SRCROOT}/../deps/nghttp2",
 				);
@@ -2382,6 +2373,7 @@
 					"USE_GETTEXT=1",
 					"USE_CURL=1",
 					"USE_SOUND=1",
+					"USE_NOGG=1",
 					"USE_LEVELDB=1",
 					"USE_LUAJIT=1",
 					"VERSION_MAJOR=2",
@@ -2404,11 +2396,10 @@
 					"${SRCROOT}/../deps/irrlicht/include",
 					"${SRCROOT}/../deps/leveldb/include",
 					"${SRCROOT}/../deps/luajit/include",
-					"${SRCROOT}/../deps/libogg/include",
+					"${SRCROOT}/../deps/libnogg/include",
 					"${SRCROOT}/../deps/openal/include",
 					"${SRCROOT}/../deps/libpng/include",
 					"${SRCROOT}/../deps/libSDL/include",
-					"${SRCROOT}/../deps/libvorbis/include",
 					"${SRCROOT}/../deps/libcurl/include",
 					"$(BUILD_DIR)/SourcePackages/checkouts/zstd/lib",
 				);
@@ -2434,11 +2425,10 @@
 					"-L${SRCROOT}/../deps/irrlicht",
 					"-L${SRCROOT}/../deps/leveldb",
 					"-L${SRCROOT}/../deps/luajit",
-					"-L${SRCROOT}/../deps/libogg",
+					"-L${SRCROOT}/../deps/libnogg",
 					"-L${SRCROOT}/../deps/openal",
 					"-L${SRCROOT}/../deps/libpng",
 					"-L${SRCROOT}/../deps/libSDL",
-					"-L${SRCROOT}/../deps/libvorbis",
 					"-L${SRCROOT}/../deps/libcurl",
 					"-L${SRCROOT}/../deps/nghttp2",
 				);
