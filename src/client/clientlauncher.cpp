@@ -71,10 +71,8 @@ static void dump_start_data(const GameStartData &data)
 
 ClientLauncher::~ClientLauncher()
 {
-	RenderingEngine *rendering_engine = RenderingEngine::get_instance();
-
-	if (rendering_engine && rendering_engine->get_raw_device())
-		rendering_engine->get_raw_device()->setEventReceiver(nullptr);
+	if (m_rendering_engine && m_rendering_engine->get_raw_device())
+		m_rendering_engine->get_raw_device()->setEventReceiver(nullptr);
 
 	delete input;
 
@@ -83,7 +81,7 @@ ClientLauncher::~ClientLauncher()
 	delete g_fontengine;
 	delete g_gamecallback;
 
-	delete rendering_engine;
+	delete m_rendering_engine;
 
 #if USE_SOUND
 	deleteSoundManagerSingleton(g_sound_manager_singleton);
@@ -136,7 +134,7 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 
 	m_rendering_engine->setupTopLevelWindow(PROJECT_NAME_C);
 
-	RenderingEngine::get_raw_device()->getLogger()->setLogLevel(irr::ELL_INFORMATION);
+	m_rendering_engine->get_raw_device()->getLogger()->setLogLevel(irr::ELL_INFORMATION);
 
 	/*
 		This changes the minimum allowed number of vertices in a VBO.
@@ -171,7 +169,8 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 	// TODO other icons
 	std::string sprite_path = porting::path_share + DIR_DELIM + "textures"
 				+ DIR_DELIM + "base" + DIR_DELIM + "pack" + DIR_DELIM + "checkbox.png";
-	if (auto *sprite_texture = RenderingEngine::get_video_driver()->getTexture(sprite_path.c_str())) {
+	if (auto *sprite_texture =
+			m_rendering_engine->get_video_driver()->getTexture(sprite_path.c_str())) {
 		auto *sprites = skin->getSpriteBank();
 		s32 sprite_id = sprites->addTextureAsSprite(sprite_texture);
 		if (sprite_id != -1)
@@ -288,13 +287,13 @@ bool ClientLauncher::run(GameStartData &start_data, const Settings &cmd_args)
 				break;
 			}
 
-			RenderingEngine::clear_irrlicht_texture_cache();
+			m_rendering_engine->clear_irrlicht_texture_cache();
 
-			RenderingEngine::get_video_driver()->setTextureCreationFlag(
+			m_rendering_engine->get_video_driver()->setTextureCreationFlag(
 					video::ETCF_CREATE_MIP_MAPS, g_settings->getBool("mip_map"));
 
 #ifdef HAVE_TOUCHSCREENGUI
-			receiver->m_touchscreengui = new TouchScreenGUI(RenderingEngine::get_raw_device());
+			receiver->m_touchscreengui = new TouchScreenGUI(m_rendering_engine->get_raw_device());
 			g_touchscreengui = receiver->m_touchscreengui;
 #endif
 

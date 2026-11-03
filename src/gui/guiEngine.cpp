@@ -185,7 +185,7 @@ GUIEngine::GUIEngine(JoystickController *joystick,
 	// Update the load screen background texture
 	const texture_layer layer = m_clouds_enabled ? TEX_LAYER_OVERLAY : TEX_LAYER_BACKGROUND;
 	const video::ITexture* texture = m_textures[layer].texture;
-	RenderingEngine::setLoadScreenBackground(m_clouds_enabled,
+	m_rendering_engine->setLoadScreenBackground(m_clouds_enabled,
 			(texture && !m_textures[layer].tile) ? texture->getName().getPath().c_str() : "",
 			g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245));
 
@@ -267,12 +267,12 @@ void GUIEngine::run()
 	f32 dtime = 0.0f;
 	bool drawn = false;
 
-	while (RenderingEngine::run() && (!m_startgame) && (!m_kill)) {
+	while (m_rendering_engine->run() && (!m_startgame) && (!m_kill)) {
 		const video::SColor sky_color = g_menusky ? g_menusky->getSkyColor() : video::SColor(255, 5, 155, 245);
 		driver->setFog(sky_color, fog_type, fog_start, fog_end, fog_density,
 				fog_pixelfog, fog_rangefog);
 
-		IrrlichtDevice *device = RenderingEngine::get_raw_device();
+		IrrlichtDevice *device = m_rendering_engine->get_raw_device();
 #ifdef __IOS__
 		if (device->isWindowMinimized() && drawn)
 #else

@@ -360,6 +360,9 @@ public:
 
 	bool drawLoadScreen(const std::wstring &text, float dtime, int percent);
 	bool afterContentReceived();
+	void showUpdateProgressTexture(void *args, u32 progress, u32 max_progress);
+	// Polls the window; false once it closed or the player cancelled the loading
+	bool keepLoading();
 
 	float getRTT();
 	float getCurRate();

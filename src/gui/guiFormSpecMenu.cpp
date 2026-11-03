@@ -2834,7 +2834,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 	if (!data->explicit_size)
 		warningstream << "invalid use of model without a size[] element" << std::endl;
 
-	scene::ISceneManager *smgr = RenderingEngine::get_scene_manager();
+	scene::ISceneManager *smgr = RenderingEngine::get_raw_device()->getSceneManager();
 
 	scene::IAnimatedMesh *mesh;
 	if (m_client != nullptr) {
@@ -2845,7 +2845,7 @@ void GUIFormSpecMenu::parseModel(parserData *data, const std::string &element)
 		if (fs::ReadFile(meshstr, data) &&
 				Encryption::decryptSimple(data, decrypted_data, &filename)) {
 			Buffer<char> data_rw(decrypted_data.c_str(), decrypted_data.size());
-			io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
+			io::IFileSystem *irrfs = RenderingEngine::get_raw_device()->getFileSystem();
 			io::IReadFile *rfile = irrfs->createMemoryReadFile(
 				*data_rw, data_rw.getSize(), filename.c_str());
 			FATAL_ERROR_IF(!rfile, "Could not create irrlicht memory file.");

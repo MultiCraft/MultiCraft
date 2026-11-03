@@ -128,7 +128,7 @@ ParticleFrameView::ParticleFrameView(ClientEnvironment *env)
 	// the previous frame
 	has_cone = false;
 	const scene::ICameraSceneNode *camera =
-		RenderingEngine::get_scene_manager()->getActiveCamera();
+		env->getGameDef()->getSceneManager()->getActiveCamera();
 	if (camera) {
 		view_pos = camera->getAbsolutePosition();
 		view_dir = camera->getTarget() - view_pos;
@@ -467,8 +467,8 @@ static constexpr u16 quad_indices[] = { 0, 1, 2, 2, 3, 0 };
 ParticleBuffer::ParticleBuffer(ClientEnvironment *env,
 	const video::SMaterial &material
 ):
-	scene::ISceneNode(RenderingEngine::get_scene_manager()->getRootSceneNode(),
-		RenderingEngine::get_scene_manager()),
+	scene::ISceneNode(env->getGameDef()->getSceneManager()->getRootSceneNode(),
+		env->getGameDef()->getSceneManager()),
 	m_mesh_buffer(make_irr<scene::SMeshBuffer>())
 {
 	m_mesh_buffer->getMaterial() = material;

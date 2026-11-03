@@ -939,7 +939,7 @@ int ModApiMainMenu::l_extract_zip(lua_State *L)
 
 	if (ModApiMainMenu::mayModifyPath(absolute_destination)) {
 		std::string errorMessage;
-		auto fs = RenderingEngine::get_filesystem();
+		auto fs = RenderingEngine::get_raw_device()->getFileSystem();
 		bool ok = fs::extractZipFile(fs, zipfile, destination, password, &errorMessage);
 		lua_pushboolean(L, ok);
 		if (!errorMessage.empty()) {

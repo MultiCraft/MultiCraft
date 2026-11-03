@@ -358,7 +358,7 @@ public:
 			Buffer<char> data_rw(decrypted_data.c_str(), decrypted_data.size());
 
 			// Create an irrlicht memory file
-			io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
+			io::IFileSystem *irrfs = RenderingEngine::get_raw_device()->getFileSystem();
 			io::IReadFile *rfile = irrfs->createMemoryReadFile(
 					*data_rw, data_rw.getSize(), "_tempreadfile");
 
@@ -394,7 +394,7 @@ private:
 		TRACESTREAM(<< "Client: Attempting to process image "
 			<< "file \"" << filename << "\" from RAM" << std::endl);
 
-		io::IFileSystem *irrfs = RenderingEngine::get_filesystem();
+		io::IFileSystem *irrfs = RenderingEngine::get_raw_device()->getFileSystem();
 		video::IVideoDriver *vdrv = RenderingEngine::get_video_driver();
 
 		// Silly irrlicht's const-incorrectness

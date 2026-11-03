@@ -74,7 +74,7 @@ void GameUI::init(Client *client)
 	// At the middle of the screen
 	// Object infos are shown in this
 	//u32 chat_font_height = m_guitext_chat->getActiveFont()->getDimension(L"Ay").Height;
-	v2u32 screensize = RenderingEngine::get_instance()->getWindowSize();
+	v2u32 screensize = RenderingEngine::getWindowSize();
 	s32 text_height = g_fontengine->getTextHeight() * 6;
 	s32 top_y = (screensize.Y - text_height) / 2;
 	s32 horiz_offset = 100 + client->getRoundScreen();

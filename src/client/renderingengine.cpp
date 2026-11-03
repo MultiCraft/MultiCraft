@@ -543,7 +543,7 @@ bool RenderingEngine::setXorgWindowIconFromPath(const std::string &icon_file)
 	Text will be removed when the screen is drawn the next time.
 	Additionally, a progressbar can be drawn when percent is set between 0 and 100.
 */
-void RenderingEngine::_draw_load_screen(const std::wstring &text,
+void RenderingEngine::draw_load_screen(const std::wstring &text,
 		gui::IGUIEnvironment *guienv, ITextureSource *tsrc, float dtime,
 		int percent)
 {
@@ -684,7 +684,7 @@ void RenderingEngine::_draw_load_screen(const std::wstring &text,
 /*
 	Draws the menu scene including (optional) cloud background.
 */
-void RenderingEngine::_draw_menu_scene(gui::IGUIEnvironment *guienv,
+void RenderingEngine::draw_menu_scene(gui::IGUIEnvironment *guienv,
 		ITextureSource *tsrc, float dtime)
 {
 	_draw_load_bg(guienv, tsrc, dtime);
@@ -787,10 +787,10 @@ bool RenderingEngine::handle_load_screen_touch(const SEvent &event)
 		return false;
 	}
 
-	return get_gui_env()->postEventFromUser(mouse);
+	return s_singleton->get_gui_env()->postEventFromUser(mouse);
 }
 
-void RenderingEngine::_draw_load_cleanup()
+void RenderingEngine::draw_load_cleanup()
 {
 	if (m_load_text) {
 		m_load_text->remove();
@@ -834,7 +834,7 @@ std::vector<irr::video::E_DRIVER_TYPE> RenderingEngine::getSupportedVideoDrivers
 	return drivers;
 }
 
-void RenderingEngine::_initialize(Client *client, Hud *hud)
+void RenderingEngine::initialize(Client *client, Hud *hud)
 {
 #if 0
 	const std::string &draw_mode = g_settings->get("3d_mode");
@@ -844,12 +844,12 @@ void RenderingEngine::_initialize(Client *client, Hud *hud)
 	core->initialize();
 }
 
-void RenderingEngine::_finalize()
+void RenderingEngine::finalize()
 {
 	core.reset();
 }
 
-void RenderingEngine::_clear_irrlicht_texture_cache()
+void RenderingEngine::clear_irrlicht_texture_cache()
 {
 	for (u32 i = 0; i < driver->getTextureCount(); i++) {
 		irr::video::ITexture *texture = driver->getTextureByIndex(i);
@@ -865,7 +865,7 @@ void RenderingEngine::_clear_irrlicht_texture_cache()
 	}
 }
 
-void RenderingEngine::_draw_scene(video::SColor skycolor, bool show_hud,
+void RenderingEngine::draw_scene(video::SColor skycolor, bool show_hud,
 		bool show_minimap, bool draw_wield_tool, bool draw_crosshair, bool draw_nametags)
 {
 	core->draw(skycolor, show_hud, show_minimap, draw_wield_tool, draw_crosshair, draw_nametags);
@@ -930,7 +930,7 @@ float RenderingEngine::getHudScaling()
 #ifdef HAVE_TOUCHSCREENGUI
 		const v2u32 size = getDisplaySize();
 #else
-		const RenderingEngine *engine = get_instance();
+		const RenderingEngine *engine = s_singleton;
 		const v2u32 size = engine ? engine->getWindowSize() : v2u32(0, 0);
 #endif
 		if (size.X > 0 && size.Y > 0) {
@@ -1043,7 +1043,7 @@ v2u32 RenderingEngine::getDisplaySize()
 
 v2u32 RenderingEngine::getDisplaySize()
 {
-	const RenderingEngine *engine = RenderingEngine::get_instance();
+	const RenderingEngine *engine = s_singleton;
 	if (engine == nullptr)
 		return v2u32(0, 0);
 	return engine->getWindowSize();
@@ -1055,7 +1055,7 @@ int RenderingEngine::getWindowSafeArea()
 	// don't make it static
 	return MultiCraft::getScreenRound();
 #elif defined(_IRR_COMPILE_WITH_SDL_DEVICE_)
-	RenderingEngine *engine = RenderingEngine::get_instance();
+	RenderingEngine *engine = s_singleton;
 
 	if (engine) {
 		video::IVideoDriver* driver = engine->getVideoDriver();
@@ -1105,7 +1105,7 @@ bool RenderingEngine::isHighDpi()
 void RenderingEngine::startTextInput()
 {
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	RenderingEngine *engine = RenderingEngine::get_instance();
+	RenderingEngine *engine = s_singleton;
 
 	SDL_SetHint(SDL_HINT_ENABLE_SCREEN_KEYBOARD, porting::hasRealKeyboard() ? "0" : "1");
 #ifdef __ANDROID__
@@ -1130,7 +1130,7 @@ void RenderingEngine::startTextInput()
 void RenderingEngine::stopTextInput()
 {
 #ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	RenderingEngine *engine = RenderingEngine::get_instance();
+	RenderingEngine *engine = s_singleton;
 
 	if (engine && porting::hasRealKeyboard()) {
 		video::IVideoDriver* driver = engine->getVideoDriver();

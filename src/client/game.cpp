@@ -1053,7 +1053,7 @@ bool Game::startup(bool *kill,
 
 	// "cache"
 	m_rendering_engine        = rendering_engine;
-	this->device              = RenderingEngine::get_raw_device();
+	device                    = m_rendering_engine->get_raw_device();
 	video::IVideoDriver *run_driver = device->getVideoDriver();
 	actionstream << "Video driver "
 			<< RenderingEngine::getVideoDriverInfo(run_driver->getDriverType()).name
@@ -1126,7 +1126,7 @@ void Game::run()
 	}
 #endif
 
-	while (RenderingEngine::run()
+	while (m_rendering_engine->run()
 			&& !(*kill || g_gamecallback->shutdown_requested
 			|| (server && server->isShutdownRequested()))) {
 
@@ -1233,7 +1233,7 @@ void Game::run()
 		}
 
 		// Calculate dtime =
-		//    RenderingEngine::run() from this iteration
+		//    m_rendering_engine->run() from this iteration
 		//  + Sleep time until the wanted FPS are reached
 		limitFps(&draw_times, &dtime);
 	}
@@ -1269,7 +1269,7 @@ void Game::shutdown()
 
 	showOverlayMessage(N_("Shutting down..."), 0, 100);
 
-	RenderingEngine::draw_load_cleanup();
+	m_rendering_engine->draw_load_cleanup();
 
 	if (clouds)
 		clouds->drop();
@@ -1316,7 +1316,7 @@ bool Game::init(
 {
 	texture_src = createTextureSource(false);
 
-	bool result = RenderingEngine::run();
+	bool result = m_rendering_engine->run();
 	if (!result)
 		return false;
 
@@ -1378,7 +1378,7 @@ bool Game::initSound()
 bool Game::createSingleplayerServer(const std::string &map_dir,
 		const SubgameSpec &gamespec, u16 port)
 {
-	bool result = RenderingEngine::run();
+	bool result = m_rendering_engine->run();
 	if (!result)
 		return false;
 
@@ -1443,7 +1443,7 @@ bool Game::createClient(const GameStartData &start_data)
 {
 	bool could_connect = false;
 
-	bool result = RenderingEngine::run();
+	bool result = m_rendering_engine->run();
 	if (!result)
 		return false;
 
@@ -1452,7 +1452,7 @@ bool Game::createClient(const GameStartData &start_data)
 	float dtime = (float)(load_time_ms - load_last_time_ms) / 1000.0f;
 
 	if (!simple_singleplayer_mode)
-		RenderingEngine::set_load_screen_cancel(&m_connect_aborted);
+		m_rendering_engine->set_load_screen_cancel(&m_connect_aborted);
 
 	showOverlayMessage(N_("Creating client..."), dtime, 10);
 
@@ -1495,7 +1495,7 @@ bool Game::createClient(const GameStartData &start_data)
 		return false;
 	}
 
-	RenderingEngine::draw_load_cleanup();
+	m_rendering_engine->draw_load_cleanup();
 
 	/* Camera
 	 */
@@ -1600,7 +1600,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 {
 	bool local_server_mode = false;
 
-	bool result = RenderingEngine::run();
+	bool result = m_rendering_engine->run();
 	if (!result)
 		return false;
 
@@ -1673,7 +1673,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 
 		fps_control.reset();
 
-		while ((result = RenderingEngine::run())) {
+		while ((result = m_rendering_engine->run())) {
 
 			fps_control.limit(device, &dtime);
 
@@ -1710,7 +1710,7 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 				if (registration_confirmation_shown) {
 					// Keep drawing the GUI
 					ITextureSource *tsrc = client->getTextureSource();
-					RenderingEngine::draw_menu_scene(guienv, tsrc, dtime);
+					m_rendering_engine->draw_menu_scene(guienv, tsrc, dtime);
 				} else {
 					registration_confirmation_shown = true;
 					(new GUIConfirmRegistration(guienv, guienv->getRootGUIElement(), -1,
@@ -1749,7 +1749,7 @@ bool Game::getServerContent()
 	fps_control.reset();
 
 	bool result = true;
-	while ((result = RenderingEngine::run())) {
+	while ((result = m_rendering_engine->run())) {
 
 		fps_control.limit(device, &dtime);
 
@@ -4289,7 +4289,7 @@ void Game::updateFrame(ProfilerGraph *graph, RunStats *stats, f32 dtime,
 		show_hud = (g_touchscreengui->getCurrentState() != STATE_HIDDEN);
 #endif
 
-	RenderingEngine::draw_scene(skycolor, show_hud,
+	m_rendering_engine->draw_scene(skycolor, show_hud,
 			m_game_ui->m_flags.show_minimap, draw_wield_tool, draw_crosshair,
 			m_game_ui->m_flags.show_nametags);
 
@@ -4445,7 +4445,7 @@ inline void Game::limitFps(FpsControl *fps_timings, f32 *dtime)
 void Game::showOverlayMessage(const char *msg, float dtime, int percent)
 {
 	const wchar_t *wmsg = wgettext(msg);
-	RenderingEngine::draw_load_screen(wmsg, guienv, texture_src, dtime, percent);
+	m_rendering_engine->draw_load_screen(wmsg, guienv, texture_src, dtime, percent);
 	delete[] wmsg;
 }
 

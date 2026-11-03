@@ -1849,12 +1849,10 @@ float Client::mediaReceiveProgress()
 }
 
 bool Client::drawLoadScreen(const std::wstring &text, float dtime, int percent) {
-	bool result = RenderingEngine::run();
-
-	if (!result || *m_connect_aborted)
+	if (!keepLoading())
 		return false;
 
-	RenderingEngine::draw_load_screen(text, guienv, m_tsrc, dtime, percent);
+	m_rendering_engine->draw_load_screen(text, guienv, m_tsrc, dtime, percent);
 	return true;
 }
 
@@ -1866,7 +1864,7 @@ struct TextureUpdateArgs {
 	ITextureSource *tsrc;
 };
 
-void texture_update_progress(void *args, u32 progress, u32 max_progress)
+void Client::showUpdateProgressTexture(void *args, u32 progress, u32 max_progress)
 {
 		TextureUpdateArgs* targs = (TextureUpdateArgs*) args;
 		u16 cur_percent = ceil(progress / (double) max_progress * 100.);
@@ -1886,9 +1884,14 @@ void texture_update_progress(void *args, u32 progress, u32 max_progress)
 			targs->last_time_ms = time_ms;
 			std::wostringstream strm;
 			strm << targs->text_base << L" " << targs->last_percent << L"%...";
-			RenderingEngine::draw_load_screen(strm.str(), targs->guienv, targs->tsrc, dtime,
+			m_rendering_engine->draw_load_screen(strm.str(), targs->guienv, targs->tsrc, dtime,
 				72 + (u16) ((18. / 100.) * (double) targs->last_percent));
 		}
+}
+
+bool Client::keepLoading()
+{
+	return m_rendering_engine->run() && !*m_connect_aborted;
 }
 
 bool Client::afterContentReceived()
@@ -1918,9 +1921,7 @@ bool Client::afterContentReceived()
 	m_tsrc->rebuildImagesAndTextures();
 	delete[] text;
 
-	bool result = RenderingEngine::run();
-
-	if (!result || *m_connect_aborted)
+	if (!keepLoading())
 		return false;
 
 	// Rebuild shaders
@@ -1933,9 +1934,7 @@ bool Client::afterContentReceived()
 	m_shsrc->rebuildShaders();
 	delete[] text;
 
-	result = RenderingEngine::run();
-
-	if (!result || *m_connect_aborted)
+	if (!keepLoading())
 		return false;
 
 	// Update node aliases
@@ -1955,9 +1954,7 @@ bool Client::afterContentReceived()
 	m_nodedef->runNodeResolveCallbacks();
 	delete[] text;
 
-	result = RenderingEngine::run();
-
-	if (!result || *m_connect_aborted)
+	if (!keepLoading())
 		return false;
 
 	// Update node textures and assign shaders to each tile
@@ -1968,7 +1965,7 @@ bool Client::afterContentReceived()
 	tu_args.last_percent = 0;
 	tu_args.text_base = wgettext("Initializing nodes");
 	tu_args.tsrc = m_tsrc;
-	result = m_nodedef->updateTextures(this, texture_update_progress, &tu_args);
+	bool result = m_nodedef->updateTextures(this, &tu_args);
 	delete[] tu_args.text_base;
 
 	if (!result || *m_connect_aborted)
