@@ -120,7 +120,7 @@ namespace gui
 		//! before the batch draw call.
 		void preload(u32 char_index, FT_Face face, video::IVideoDriver* driver,
 				u32 font_size, const FT_Int32 loadFlags, bool bold,
-				bool italic, u16 outline, u8 outline_type, s8 character_spacing);
+				bool italic, u16 outline, u8 outline_type);
 
 		//! Unloads the glyph.
 		void unload();

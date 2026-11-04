@@ -210,7 +210,7 @@ video::IImage* SGUITTGlyph::createGlyphImage(const FT_Face& face, const FT_Bitma
 
 void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 		video::IVideoDriver* driver, u32 font_size, const FT_Int32 loadFlags,
-		bool bold, bool italic, u16 outline, u8 outline_type, s8 character_spacing)
+		bool bold, bool italic, u16 outline, u8 outline_type)
 {
 	if (isLoaded) return;
 
@@ -221,7 +221,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 	}
 
 	float scale = 1.0f;
-	float bold_offset = 0;
 
 	// Set the size of the glyph.
 	FT_Set_Pixel_Sizes(face, 0, font_size);
@@ -257,7 +256,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 
 		if (bold && outlined) {
 			float embolden_amount = (float)font_size * 2.0f;
-			bold_offset = embolden_amount * 2.0f;
 			FT_Outline_Embolden(&(glyph_outline->outline), embolden_amount);
 		}
 
@@ -272,7 +270,6 @@ void SGUITTGlyph::preload(u32 char_index, FT_Face face,
 			FT_Outline_Transform(&(glyph_outline->outline), &italic_matrix);
 		}
 
-		bold_offset += (float)character_spacing * 64.0f;
 		if (outline > 0) {
 			FT_Pos outline_strength = outline * 64;
 
@@ -1129,6 +1126,8 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 	hb_buffer_guess_segment_properties(buf);
 
 	hb_buffer_set_direction(buf, is_rtl ? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
+	// Joiners and variation selectors keep their cluster, but no glyph is drawn for them
+	hb_buffer_set_invisible_glyph(buf, (hb_codepoint_t)-1);
 
 	float bold_offset = 0;
 	if (bold) {
@@ -1159,11 +1158,15 @@ ShapedRun CGUITTFont::shapeRun(const TextRun& run,
 		}
 
 		ShapedGlyph glyph;
-		glyph.glyph_index = glyph_info[i].codepoint;
+		const hb_codepoint_t codepoint = glyph_info[i].codepoint;
+		glyph.glyph_index = codepoint == (hb_codepoint_t)-1 ? 0 : codepoint;
 		glyph.cluster = glyph_info[i].cluster;
 		glyph.x_offset = glyph_pos[i].x_offset >> 6;
 		glyph.y_offset = glyph_pos[i].y_offset >> 6;
-		glyph.x_advance = x_advance + spacing_offset;
+		// The spacing goes after the whole cluster, so marks stay over their letter
+		const bool cluster_end = i + 1 == glyph_count ||
+				glyph_info[i + 1].cluster != glyph_info[i].cluster;
+		glyph.x_advance = cluster_end ? x_advance + spacing_offset : x_advance;
 		glyph.y_advance = y_advance;
 		glyph.face_index = run.face_index;
 
@@ -1207,7 +1210,7 @@ void CGUITTFont::loadGlyphsForShapedText(const std::vector<ShapedRun>& runs)
 					flags |= FT_LOAD_COLOR;
 
 				glyph->preload(glyph_idx, face, Driver, size, flags,
-						bold, italic, outline, outline_type, character_spacing);
+						bold, italic, outline, outline_type);
 
 				if (glyph->isLoaded && glyph->glyph_page < Glyph_Pages.size())
 					Glyph_Pages[glyph->glyph_page]->pushGlyphToBePaged(glyph);
