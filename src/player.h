@@ -161,6 +161,9 @@ public:
 
 	v3f eye_offset_first;
 	v3f eye_offset_third;
+	v3f eye_offset_third_front;
+
+	f32 camera_distance_third = 0.0f;
 
 	Inventory inventory;
 
