@@ -49,7 +49,9 @@ core.open_dir(path)
 core.get_version() (possible in async calls)
 ^ returns current core version
 core.get_system_ram()
-^ returns system memory in MB
+^ returns system memory in MiB
+core.get_free_ram()
+^ returns free (available) memory in MiB
 core.copy_to_clipboard(text)
 ^ Copies text to the clipboard
 
