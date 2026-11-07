@@ -1766,10 +1766,7 @@ void Server::SendHUDChange(session_t peer_id, u32 id, HudElementStat stat, void 
 				pkt << (u32) b;
 			}
 			break;
-		case HUD_STAT_NUMBER:
-		case HUD_STAT_ITEM:
-		case HUD_STAT_DIR:
-		default:
+		default: // all other types
 			pkt << *(u32 *) value;
 			break;
 	}
@@ -2570,7 +2567,6 @@ bool Server::addMediaFile(const std::string &filename,
 	std::string sha1 = hashing::sha1(filedata);
 	std::string sha1_base64 = base64_encode(
 			reinterpret_cast<const unsigned char*>(sha1.data()), sha1.size());
-	std::string sha1_hex = hex_encode(sha1);
 	if (digest_to)
 		*digest_to = sha1;
 

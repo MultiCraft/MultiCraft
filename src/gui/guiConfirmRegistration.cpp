@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "guiConfirmRegistration.h"
 #include "client/client.h"
 #include "client/sound.h"
-#include "filesys.h"
 #include "guiBackgroundImage.h"
 #include "guiButton.h"
 #include "guiEditBoxWithScrollbar.h"
@@ -34,10 +33,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #ifdef HAVE_TOUCHSCREENGUI
 	#include "client/renderingengine.h"
-#endif
-
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-	#include <SDL3/SDL.h>
 #endif
 
 #include "gettext.h"

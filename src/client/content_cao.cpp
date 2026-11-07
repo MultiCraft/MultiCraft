@@ -1729,7 +1729,8 @@ void GenericCAO::processMessage(const std::string &data)
 			expireVisuals();
 		} else {
 			infostream << "GenericCAO: properties updated but expiring visuals"
-				<< " not necessary " << m_prop.textures[0] << std::endl;
+				<< " not necessary " << (m_prop.textures.empty() ? "" : m_prop.textures[0].c_str())
+				<< std::endl;
 			if (textures_changed) {
 				// don't update while punch texture modifier is active
 				if (m_reset_textures_timer < 0)

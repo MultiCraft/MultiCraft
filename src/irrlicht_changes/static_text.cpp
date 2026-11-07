@@ -11,7 +11,6 @@
 #include <IVideoDriver.h>
 #include <rect.h>
 #include <SColor.h>
-#include <iostream>
 
 #include "CGUITTFont.h"
 #include "util/string.h"

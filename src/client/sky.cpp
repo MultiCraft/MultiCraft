@@ -32,13 +32,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/renderingengine.h"
 #include "settings.h"
 #include "camera.h" // CameraModes
-#include "filesys.h"
-#include "porting.h"
 
 using namespace irr::core;
 
 // Menu sky are created later
-class Sky;
 Sky *g_menusky = NULL;
 
 static video::SMaterial baseMaterial()

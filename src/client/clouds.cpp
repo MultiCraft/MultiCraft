@@ -312,8 +312,8 @@ void Clouds::update(const v3f &camera_p, const video::SColorf &color_diffuse)
 		if (camera_height >= m_box.MinEdge.Y &&
 				camera_height <= m_box.MaxEdge.Y) {
 			v2f camera_in_noise;
-			camera_in_noise.X = floor((camera_p.X - m_origin.X) / cloud_size + 0.5);
-			camera_in_noise.Y = floor((camera_p.Z - m_origin.Y) / cloud_size + 0.5);
+			camera_in_noise.X = floor((camera_p.X - m_origin.X) / cloud_size);
+			camera_in_noise.Y = floor((camera_p.Z - m_origin.Y) / cloud_size);
 			bool filled = gridFilled(camera_in_noise.X, camera_in_noise.Y);
 			m_camera_inside_cloud = filled;
 		}

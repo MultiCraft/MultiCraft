@@ -71,5 +71,4 @@ private:
 	std::wstring m_pass_confirm = L"";
 	ISimpleTextureSource *m_tsrc;
 	ISoundManager *m_sound_manager;
-	video::SColor m_fullscreen_bgcolor;
 };

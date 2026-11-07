@@ -73,10 +73,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "touchscreengui_mc.h"
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL3/SDL.h>
-#endif
-
 #define MY_CHECKPOS(a,b)													\
 	if (v_pos.size() != 2) {												\
 		errorstream<< "Invalid pos for element " << a << " specified: \""	\

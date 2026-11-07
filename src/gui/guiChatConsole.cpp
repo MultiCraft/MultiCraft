@@ -37,10 +37,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "touchscreengui_mc.h"
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL3/SDL.h>
-#endif
-
 inline u32 clamp_u8(s32 value)
 {
 	return (u32) MYMIN(MYMAX(value, 0), 255);

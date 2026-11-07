@@ -43,13 +43,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "util/hashing.h"
 #include "util/string.h"
 #include "util/png.h"
-#include <algorithm>
 #include "translation.h"
 #if defined(__ANDROID__) || defined(__APPLE__)
 #include "util/encryption.h"
 #endif
-#include "content/mods.h"
-#include "cpp_api/s_base.h"
 
 #ifndef SERVER
 #include "client/renderingengine.h"
@@ -136,7 +133,6 @@ int ModApiUtil::l_parse_json(lua_State *L)
 
 		Json::CharReaderBuilder builder;
 		builder.settings_["collectComments"] = false;
-		const std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
 		std::string errmsg;
 		if (!Json::parseFromStream(builder, stream, &root, &errmsg))
 			return handle_error(errmsg.c_str());

@@ -166,7 +166,6 @@ Kicked @1.=@1 hinausgeworfen.
 Clear all objects in world=Alle Objekte in der Welt löschen
 Invalid usage, see /help clearobjects.=Ungültige Verwendung, siehe /help clearobjects.
 Clearing all objects. This may take a long time. You may experience a timeout.=Lösche alle Objekte. Dies kann eine lange Zeit dauern. Eine Netzwerkzeitüberschreitung könnte für Sie auftreten.
-Objects cleared.=Objekte gelöscht.
 Cleared all objects.=Alle Objekte gelöscht.
 <name> <message>=<Name> <Nachricht>
 Send a direct message to a player=Eine Direktnachricht an einen Spieler senden

@@ -26,10 +26,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "settings.h"
 #include "debug.h"
 #include "log.h"
-#include "filesys.h"
-#include "porting.h"
-#include "content/mods.h"
-#include "cpp_api/s_base.h"
 
 #include <iomanip>
 

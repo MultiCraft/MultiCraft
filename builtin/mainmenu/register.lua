@@ -52,7 +52,3 @@ function core.run_callbacks(callbacks, mode, ...)
 	end
 	return ret
 end
-
--- These are for after.lua since they make no sense for the main menu code
-function core.get_last_run_mod() end
-function core.set_last_run_mod() end

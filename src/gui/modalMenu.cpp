@@ -33,10 +33,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "touchscreengui_mc.h"
 #endif
 
-#ifdef _IRR_COMPILE_WITH_SDL_DEVICE_
-#include <SDL3/SDL.h>
-#endif
-
 // clang-format off
 GUIModalMenu::GUIModalMenu(gui::IGUIEnvironment* env, gui::IGUIElement* parent,
 	s32 id, IMenuManager *menumgr, bool remap_dbl_click) :
