@@ -893,12 +893,6 @@ mono_font_path_bold (Bold monospace font path) filepath ""
 mono_font_path_italic (Italic monospace font path) filepath ""
 mono_font_path_bold_italic (Bold and italic monospace font path) filepath ""
 
-#    Shadow offset (in pixels) of the fallback font. If 0, then shadow will not be drawn.
-fallback_font_shadow (Fallback font shadow) int 1
-
-#    Opaqueness (alpha) of the shadow behind the fallback font, between 0 and 255.
-fallback_font_shadow_alpha (Fallback font shadow alpha) int 128 0 255
-
 #    Path of the fallback font. Must be a TrueType font.
 #    This font will be used for certain languages or if the default font is unavailable.
 fallback_font_path (Fallback font path) filepath fonts/DroidSansFallback.ttf

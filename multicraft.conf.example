@@ -1056,14 +1056,6 @@
 #    type: filepath
 # mono_font_path_bold_italic =
 
-#    Shadow offset (in pixels) of the fallback font. If 0, then shadow will not be drawn.
-#    type: int
-# fallback_font_shadow = 1
-
-#    Opaqueness (alpha) of the shadow behind the fallback font, between 0 and 255.
-#    type: int min: 0 max: 255
-# fallback_font_shadow_alpha = 128
-
 #    Path of the fallback font. Must be a TrueType font.
 #    This font will be used for certain languages or if the default font is unavailable.
 #    type: filepath

@@ -158,22 +158,9 @@ unsigned int FontEngine::getFontSize(FontMode mode)
 /******************************************************************************/
 void FontEngine::readSettings()
 {
-	m_default_size[FM_Standard] = g_settings->getU16("font_size");
-	m_default_size[FM_Fallback] = g_settings->getU16("font_size"); // fallback_font_size
-	m_default_size[FM_Mono]     = g_settings->getU16("mono_font_size");
-
-	/*~ DO NOT TRANSLATE THIS LITERALLY!
-	This is a special string. Put either "no" or "yes"
-	into the translation field (literally).
-	Choose "yes" if the language requires use of the fallback
-	font, "no" otherwise.
-	The fallback font is (normally) required for languages with
-	non-Latin script, like Chinese.
-	When in doubt, test your translation. */
-	//m_currentMode = is_yes(gettext("needs_fallback_font")) ?
-	//		FM_Fallback : FM_Standard;
-
-	// Never use FM_Fallback mode because the fallback font is loaded anyway
+	m_default_size[FM_Standard]  = g_settings->getU16("font_size");
+	m_default_size[_FM_Fallback] = g_settings->getU16("font_size");
+	m_default_size[FM_Mono]      = g_settings->getU16("mono_font_size");
 
 	m_default_bold = g_settings->getBool("font_bold");
 	m_default_italic = g_settings->getBool("font_italic");
@@ -217,17 +204,8 @@ gui::IGUIFont *FontEngine::initFont(const FontSpec &spec)
 	assert(spec.size != FONT_SIZE_UNSPECIFIED);
 
 	std::string setting_prefix = "";
-
-	switch (spec.mode) {
-		case FM_Fallback:
-			setting_prefix = "fallback_";
-			break;
-		case FM_Mono:
-			setting_prefix = "mono_";
-			break;
-		default:
-			break;
-	}
+	if (spec.mode == FM_Mono)
+		setting_prefix = "mono_";
 
 	std::string setting_suffix = "";
 	bool bold = false;

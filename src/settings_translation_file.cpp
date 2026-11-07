@@ -434,10 +434,6 @@ fake_function() {
 	gettext("Bold monospace font path");
 	gettext("Italic monospace font path");
 	gettext("Bold and italic monospace font path");
-	gettext("Fallback font shadow");
-	gettext("Shadow offset (in pixels) of the fallback font. If 0, then shadow will not be drawn.");
-	gettext("Fallback font shadow alpha");
-	gettext("Opaqueness (alpha) of the shadow behind the fallback font, between 0 and 255.");
 	gettext("Fallback font path");
 	gettext("Path of the fallback font. Must be a TrueType font.\nThis font will be used for certain languages or if the default font is unavailable.");
 	gettext("Chat font size");
