@@ -1136,19 +1136,29 @@ bool Map::isOccluded(const v3s16 &pos_camera, const v3s16 &pos_target,
 	v3f pos_origin_f = intToFloat(pos_camera, BS);
 	u32 count = 0;
 	bool is_valid_position;
+	// Steps of 1-2 nodes mostly stay in one block: look it up only when a step leaves it
+	v3s16 block_pos(S16_MIN, S16_MIN, S16_MIN);
+	MapBlock *block = nullptr;
 
 	for (; offset < distance + end_offset; offset += step) {
 		v3f pos_node_f = pos_origin_f + direction * offset;
 		v3s16 pos_node = floatToInt(pos_node_f, BS);
 
-		MapNode node = getNode(pos_node, &is_valid_position);
-
-		if (is_valid_position &&
-				!m_nodedef->get(node).light_propagates) {
-			// Cannot see through light-blocking nodes --> occluded
-			count++;
-			if (count >= needed_count)
-				return true;
+		const v3s16 pos_block = getNodeBlockPos(pos_node);
+		if (pos_block != block_pos) {
+			block_pos = pos_block;
+			block = getBlockNoCreateNoEx(pos_block);
+		}
+		if (block) {
+			MapNode node = block->getNodeNoCheck(pos_node - pos_block * MAP_BLOCKSIZE,
+				&is_valid_position);
+			if (is_valid_position &&
+					!m_nodedef->get(node).light_propagates) {
+				// Cannot see through light-blocking nodes --> occluded
+				count++;
+				if (count >= needed_count)
+					return true;
+			}
 		}
 		step *= stepfac;
 	}
