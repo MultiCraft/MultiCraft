@@ -1080,6 +1080,7 @@ static bool migrate_map_database(const GameParams &game_params, const Settings &
 	}
 	std::cerr << std::endl;
 	new_db->endSave();
+	new_db->compact();
 
 	actionstream << "Successfully migrated " << count << " blocks" << std::endl;
 	world_mt.set("backend", migrate_to);

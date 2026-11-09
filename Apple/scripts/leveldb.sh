@@ -9,6 +9,9 @@ if [ ! -d leveldb-src ]; then
 	git clone -b $LEVELDB_VERSION --depth 1 https://github.com/google/leveldb leveldb-src
 	mkdir leveldb-src/build
 fi
+# Reads never start a compaction: a walk over a built map does not rewrite it
+sed -i '' 's|f->allowed_seeks = static_cast<int>.*;|f->allowed_seeks = 1 << 30;|' \
+	leveldb-src/db/version_set.cc
 
 rm -rf leveldb
 

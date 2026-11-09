@@ -732,6 +732,13 @@ void *EmergeThread::run()
 			<< "You can ignore this using [ignore_world_load_errors = true]."
 			<< std::endl;
 		m_server->setAsyncFatalError(err.str());
+	} catch (DatabaseException &e) {
+		std::ostringstream err;
+		err << "Could not read MapBlock " << PP(pos) << std::endl
+			<< "----" << std::endl
+			<< "\"" << e.what() << "\"" << std::endl
+			<< "See debug.txt." << std::endl;
+		m_server->setAsyncFatalError(err.str());
 	}
 
 	cancelPendingItems();

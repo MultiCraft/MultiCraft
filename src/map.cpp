@@ -1828,6 +1828,10 @@ void ServerMap::loadBlock(std::string *blob, v3s16 p3d, MapSector *sector, bool 
 
 		// We just loaded it from, so it's up-to-date.
 		block->resetModified();
+
+		// An older format is saved once in the newest one: smaller and faster to read
+		if (version < SER_FMT_VER_HIGHEST_WRITE)
+			block->raiseModified(MOD_STATE_WRITE_NEEDED);
 	}
 	catch(SerializationError &e)
 	{

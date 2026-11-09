@@ -36,9 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "leveldb/db.h"
 #include "leveldb/cache.h"
 #include "leveldb/write_batch.h"
-#ifdef SERVER
 #include "leveldb/filter_policy.h"
-#endif
 
 static const size_t BATCH_FLUSH_BYTES = 8 * 1024 * 1024;
 static const size_t BATCH_KEEP_BYTES = 1024 * 1024;
@@ -54,12 +52,16 @@ Database_LevelDB::Database_LevelDB(const std::string &savedir)
 {
 	leveldb::Options options;
 	options.create_if_missing = true;
+	// LevelDB does not delete it and a world can be opened many times
+	static const leveldb::FilterPolicy *const filter_policy = leveldb::NewBloomFilterPolicy(10);
+	options.filter_policy = filter_policy;
 #ifdef SERVER
-	options.block_cache = leveldb::NewLRUCache(64 * 1024 * 1024); // x8 from default
+	options.block_cache = leveldb::NewLRUCache(32 * 1024 * 1024); // x4 from default
 	options.block_size = 32 * 1024; // x8 from default
-	options.write_buffer_size = 32 * 1024 * 1024; // x8 from default
+	options.write_buffer_size = 64 * 1024 * 1024; // x16 from default
 	options.max_file_size = 8 * 1024 * 1024; // x4 from default
-	options.filter_policy = leveldb::NewBloomFilterPolicy(10);
+#else
+	options.write_buffer_size = 8 * 1024 * 1024; // x2 from default
 #endif
 	leveldb::Status status = leveldb::DB::Open(options,
 		savedir + DIR_DELIM + "map.db", &m_database);
@@ -68,9 +70,7 @@ Database_LevelDB::Database_LevelDB(const std::string &savedir)
 
 void Database_LevelDB::beginSave()
 {
-#ifdef SERVER
 	m_batching = true;
-#endif
 }
 
 void Database_LevelDB::endSave()
