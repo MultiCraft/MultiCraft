@@ -99,6 +99,10 @@ struct SoundBuffer
 };
 
 #ifdef USE_NOGG
+// 32 MB is 6 minutes of mono at 44100 Hz
+static const size_t MAX_SOUND_SIZE = 32 * 1024 * 1024;
+static const int64_t MAX_DECODER_MEMORY = 16 * 1024 * 1024;
+
 SoundBuffer *load_opened_ogg_file(vorbis_t *oggFile,
 		const std::string &filename_for_logging)
 {
@@ -112,6 +116,11 @@ SoundBuffer *load_opened_ogg_file(vorbis_t *oggFile,
 		frames = vorbis_read_int16(oggFile, array, BUFFER_SIZE / 2 / channels, &error);
 		const char *bytes = (const char *)array;
 		buffer.insert(buffer.end(), bytes, bytes + frames * channels * sizeof(int16_t));
+		if (buffer.size() > MAX_SOUND_SIZE) {
+			vorbis_close(oggFile);
+			infostream << "Audio: Too large sound " << filename_for_logging << std::endl;
+			return nullptr;
+		}
 	} while ((error == VORBIS_NO_ERROR && frames > 0) ||
 			error == VORBIS_ERROR_DECODE_RECOVERED);
 
@@ -152,9 +161,60 @@ SoundBuffer *load_ogg_from_file(const std::string &path)
 	return load_opened_ogg_file(oggFile, path);
 }
 
+struct OggBuffer
+{
+	const char *data;
+	int64_t length, position, decoder_memory;
+};
+
+static int64_t ogg_length(void *opaque)
+{
+	return static_cast<OggBuffer *>(opaque)->length;
+}
+
+static int64_t ogg_tell(void *opaque)
+{
+	return static_cast<OggBuffer *>(opaque)->position;
+}
+
+static void ogg_seek(void *opaque, int64_t offset)
+{
+	static_cast<OggBuffer *>(opaque)->position = offset;
+}
+
+static int32_t ogg_read(void *opaque, void *buffer, int32_t length)
+{
+	OggBuffer *b = static_cast<OggBuffer *>(opaque);
+	length = (int32_t)MYMIN((int64_t)length, b->length - b->position);
+	memcpy(buffer, b->data + b->position, length);
+	b->position += length;
+	return length;
+}
+
+static void *ogg_malloc(void *opaque, int32_t size, int32_t align)
+{
+	OggBuffer *b = static_cast<OggBuffer *>(opaque);
+	// Freed blocks stay counted: until it closes the decoder frees only small ones
+	b->decoder_memory += size;
+	void *ptr;
+	if (b->decoder_memory > MAX_DECODER_MEMORY || posix_memalign(&ptr,
+			MYMAX((size_t)align, alignof(std::max_align_t)), size) != 0)
+		return nullptr;
+	return ptr;
+}
+
+static void ogg_free(void *, void *ptr)
+{
+	free(ptr);
+}
+
 SoundBuffer *load_ogg_from_buffer(const std::string &buf, const std::string &id_for_log)
 {
-	vorbis_t *oggFile = vorbis_open_buffer(buf.data(), buf.size(),
+	static const vorbis_callbacks_t callbacks = {
+		&ogg_length, &ogg_tell, &ogg_seek, &ogg_read, nullptr, &ogg_malloc, &ogg_free
+	};
+	OggBuffer source = {buf.data(), (int64_t)buf.size(), 0, 0};
+	vorbis_t *oggFile = vorbis_open_callbacks(callbacks, &source,
 			VORBIS_OPTION_SCAN_FOR_NEXT_PAGE, nullptr);
 	if (!oggFile) {
 		infostream << "Audio: Error opening " << id_for_log
