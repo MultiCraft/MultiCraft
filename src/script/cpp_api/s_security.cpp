@@ -26,6 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "client/client.h"
 #endif
 #include "settings.h"
+#include "threading/mutex_auto_lock.h"
 #include "util/encryption.h"
 
 #include <cerrno>
@@ -547,6 +548,18 @@ bool ScriptApiSecurity::safeLoadFile(lua_State *L, const char *path, const char 
 }
 
 
+// Every read checks all mod paths; resolving one takes a system call per folder
+static std::string cachedAbsolutePath(const std::string &path)
+{
+	static std::mutex mutex;
+	static std::unordered_map<std::string, std::string> resolved;
+	MutexAutoLock lock(mutex);
+	std::string &abs_path = resolved[path];
+	if (abs_path.empty())
+		abs_path = fs::AbsolutePath(path);
+	return abs_path;
+}
+
 bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 		bool write_required, bool *write_allowed)
 {
@@ -559,7 +572,7 @@ bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 
 	if (!abs_path.empty()) {
 		// Don't allow accessing the settings file
-		str = fs::AbsolutePath(g_settings_path);
+		str = cachedAbsolutePath(g_settings_path);
 		if (str == abs_path) return false;
 	}
 
@@ -611,7 +624,7 @@ bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 		// Don't bother if write access isn't important, since it will be handled later
 		const ModSpec *mod = gamedef->getModSpec(mod_name);
 		if (mod && (write_required || write_allowed != nullptr || mod->isTrusted())) {
-			str = fs::AbsolutePath(mod->path);
+			str = cachedAbsolutePath(mod->path);
 			if (!str.empty() && fs::PathStartsWith(abs_path, str)) {
 				if (write_allowed && !mod->isTrusted())
 					*write_allowed = true;
@@ -628,14 +641,14 @@ bool ScriptApiSecurity::checkPath(lua_State *L, const char *path,
 			if (mod.name != "dummy" && mod.isTrusted())
 				continue;
 
-			str = fs::AbsolutePath(mod.path);
+			str = cachedAbsolutePath(mod.path);
 			if (!str.empty() && fs::PathStartsWith(abs_path, str)) {
 				return true;
 			}
 		}
 	}
 
-	str = fs::AbsolutePath(gamedef->getWorldPath());
+	str = cachedAbsolutePath(gamedef->getWorldPath());
 	if (!str.empty()) {
 		// Don't allow access to other paths in the world mod/game path.
 		// These have to be blocked so you can't override a trusted mod
