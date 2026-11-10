@@ -65,6 +65,7 @@ class Camera;
 class NetworkPacket;
 namespace con {
 class Connection;
+struct LocalLink;
 }
 
 enum LocalClientState {
@@ -127,7 +128,8 @@ public:
 			MtEventManager *event,
 			RenderingEngine *rendering_engine,
 			bool ipv6,
-			GameUI *game_ui
+			GameUI *game_ui,
+			std::shared_ptr<con::LocalLink> local_link
 	);
 
 	~Client();

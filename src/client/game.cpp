@@ -1642,7 +1642,8 @@ bool Game::connectToServer(const GameStartData &start_data, bool *connect_ok)
 				start_data.password, start_data.address,
 				*draw_control, texture_src, shader_src,
 				itemdef_manager, nodedef_manager, sound, eventmgr,
-				m_rendering_engine, connect_address.isIPv6(), m_game_ui.get());
+				m_rendering_engine, connect_address.isIPv6(), m_game_ui.get(),
+				server ? server->getLocalLink() : nullptr);
 		client->migrateModStorage();
 	} catch (const BaseException &e) {
 		*error_message = fmtgettext("Error creating client: %s", e.what());

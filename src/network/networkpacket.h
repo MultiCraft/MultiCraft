@@ -35,6 +35,8 @@ public:
 	~NetworkPacket();
 
 	void putRawPacket(const u8 *data, u32 datasize, session_t peer_id);
+	void adoptPayload(std::vector<u8> &&payload, u16 command, session_t peer_id);
+	const std::vector<u8> &getPayload() const { return m_data; }
 	void clear();
 
 	// Getters

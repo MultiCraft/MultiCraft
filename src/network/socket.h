@@ -48,7 +48,7 @@ public:
 	bool WaitData(int timeout_ms);
 
 private:
-	int m_handle;
+	int m_handle = -1;
 	int m_timeout_ms;
 	int m_addr_family;
 };

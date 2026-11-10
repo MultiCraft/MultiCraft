@@ -74,6 +74,9 @@ struct StarParams;
 class ServerThread;
 class ServerModManager;
 class ServerInventoryManager;
+namespace con {
+struct LocalLink;
+}
 
 enum ClientDeletionReason {
 	CDR_LEAVE,
@@ -305,6 +308,8 @@ public:
 
 	inline bool isSingleplayer()
 			{ return m_simple_singleplayer_mode; }
+
+	std::shared_ptr<con::LocalLink> getLocalLink() const { return m_local_link; }
 
 	inline void setAsyncFatalError(const std::string &error)
 			{ m_async_fatal_error.set(error); }
@@ -584,6 +589,7 @@ private:
 	ServerMap *m_startup_server_map = nullptr;
 
 	// server connection
+	std::shared_ptr<con::LocalLink> m_local_link;
 	std::shared_ptr<con::Connection> m_con;
 
 #if BAN_MANAGER

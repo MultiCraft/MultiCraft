@@ -674,7 +674,10 @@ struct ConnectionEvent
 {
 	const ConnectionEventType type;
 	session_t peer_id = 0;
-	Buffer<u8> data;
+	// -1 if the packet is too short to have a command
+	s32 command = -1;
+	// Without the command
+	std::vector<u8> data;
 	bool timeout = false;
 	Address address;
 
@@ -682,7 +685,7 @@ struct ConnectionEvent
 	DISABLE_CLASS_COPY(ConnectionEvent);
 
 	static ConnectionEventPtr create(ConnectionEventType type);
-	static ConnectionEventPtr dataReceived(session_t peer_id, const Buffer<u8> &data);
+	static ConnectionEventPtr dataReceived(session_t peer_id, const SharedBuffer<u8> &data);
 	static ConnectionEventPtr peerAdded(session_t peer_id, Address address);
 	static ConnectionEventPtr peerRemoved(session_t peer_id, bool is_timeout, Address address);
 	static ConnectionEventPtr bindFailed();
@@ -696,6 +699,17 @@ private:
 
 class PeerHandler;
 
+// Joins the server and the client of a single player game: one process, no socket
+struct LocalLink
+{
+	// Covers these fields and every call through the two pointers
+	std::mutex mutex;
+	Connection *server = nullptr;
+	Connection *client = nullptr;
+	// The peer id the server gave the client
+	session_t client_id = PEER_ID_INEXISTENT;
+};
+
 class Connection
 {
 public:
@@ -703,7 +717,7 @@ public:
 	friend class ConnectionReceiveThread;
 
 	Connection(u32 protocol_id, u32 max_packet_size, float timeout, bool ipv6,
-			PeerHandler *peerhandler);
+			PeerHandler *peerhandler, std::shared_ptr<LocalLink> local_link = nullptr);
 	~Connection();
 
 	/* Interface */
@@ -760,6 +774,12 @@ protected:
 		return getPeerNoEx(PEER_ID_SERVER) != nullptr;
 	}
 private:
+	// With the link's mutex held: the other end and the peer id it has for this one
+	Connection *otherLocalEnd(session_t *our_id_there);
+
+	// Set in a single player game, the threads then do not run
+	std::shared_ptr<LocalLink> m_local_link;
+
 	// Event queue: ReceiveThread -> user
 	MutexedQueue<ConnectionEventPtr> m_event_queue;
 

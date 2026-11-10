@@ -67,6 +67,16 @@ void NetworkPacket::putRawPacket(const u8 *data, u32 datasize, session_t peer_id
 	memcpy(m_data.data(), &data[2], m_datasize);
 }
 
+void NetworkPacket::adoptPayload(std::vector<u8> &&payload, u16 command, session_t peer_id)
+{
+	assert(m_command == 0);
+
+	m_data = std::move(payload);
+	m_datasize = static_cast<u32>(m_data.size());
+	m_command = command;
+	m_peer_id = peer_id;
+}
+
 void NetworkPacket::clear()
 {
 	m_data.clear();

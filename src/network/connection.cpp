@@ -1249,11 +1249,14 @@ ConnectionEventPtr ConnectionEvent::create(ConnectionEventType type)
 	return std::shared_ptr<ConnectionEvent>(new ConnectionEvent(type));
 }
 
-ConnectionEventPtr ConnectionEvent::dataReceived(session_t peer_id, const Buffer<u8> &data)
+ConnectionEventPtr ConnectionEvent::dataReceived(session_t peer_id, const SharedBuffer<u8> &data)
 {
 	auto e = create(CONNEVENT_DATA_RECEIVED);
 	e->peer_id = peer_id;
-	data.copyTo(e->data);
+	if (data.getSize() >= 2) {
+		e->command = readU16(*data);
+		e->data.assign(*data + 2, *data + data.getSize());
+	}
 	return e;
 }
 
@@ -1284,14 +1287,17 @@ ConnectionEventPtr ConnectionEvent::bindFailed()
 */
 
 Connection::Connection(u32 protocol_id, u32 max_packet_size, float timeout,
-		bool ipv6, PeerHandler *peerhandler) :
-	m_udpSocket(ipv6),
+		bool ipv6, PeerHandler *peerhandler, std::shared_ptr<LocalLink> local_link) :
+	m_local_link(std::move(local_link)),
 	m_protocol_id(protocol_id),
 	m_sendThread(new ConnectionSendThread(max_packet_size, timeout)),
 	m_receiveThread(new ConnectionReceiveThread(max_packet_size)),
 	m_bc_peerhandler(peerhandler)
 
 {
+	if (!m_local_link)
+		m_udpSocket.init(ipv6);
+
 	/* Amount of time Receive() will wait for data, this is entirely different
 	 * from the connection timeout */
 	m_udpSocket.setTimeoutMs(500);
@@ -1299,13 +1305,18 @@ Connection::Connection(u32 protocol_id, u32 max_packet_size, float timeout,
 	m_sendThread->setParent(this);
 	m_receiveThread->setParent(this);
 
-	m_sendThread->start();
-	m_receiveThread->start();
+	if (!m_local_link) {
+		m_sendThread->start();
+		m_receiveThread->start();
+	}
 }
 
 
 Connection::~Connection()
 {
+	if (m_local_link)
+		Disconnect();
+
 	m_shutting_down = true;
 	// request threads to stop
 	m_sendThread->stop();
@@ -1423,11 +1434,29 @@ void Connection::putCommand(ConnectionCommandPtr c)
 
 void Connection::Serve(Address bind_addr)
 {
+	if (m_local_link) {
+		MutexAutoLock lock(m_local_link->mutex);
+		m_local_link->server = this;
+		return;
+	}
+
 	putCommand(ConnectionCommand::serve(bind_addr));
 }
 
 void Connection::Connect(Address address)
 {
+	if (m_local_link) {
+		LocalLink &link = *m_local_link;
+		MutexAutoLock lock(link.mutex);
+		FATAL_ERROR_IF(!link.server, "The local server is not serving");
+		UDPPeer *peer = createServerPeer(address);
+		putEvent(ConnectionEvent::peerAdded(peer->id, peer->address));
+		link.client = this;
+		link.client_id = link.server->createPeer(address, MTP_MINETEST_RELIABLE_UDP, 0);
+		SetPeerID(link.client_id);
+		return;
+	}
+
 	putCommand(ConnectionCommand::connect(address));
 }
 
@@ -1450,6 +1479,16 @@ bool Connection::Connected()
 
 void Connection::Disconnect()
 {
+	if (m_local_link) {
+		MutexAutoLock lock(m_local_link->mutex);
+		session_t our_id_there;
+		if (Connection *other = otherLocalEnd(&our_id_there))
+			other->deletePeer(our_id_there, false);
+		m_local_link->server = nullptr;
+		m_local_link->client = nullptr;
+		return;
+	}
+
 	putCommand(ConnectionCommand::disconnect());
 }
 
@@ -1462,7 +1501,7 @@ bool Connection::Receive(NetworkPacket *pkt, u32 timeout)
 	*/
 	for(;;) {
 		ConnectionEventPtr e_ptr = waitEvent(timeout);
-		const ConnectionEvent &e = *e_ptr;
+		ConnectionEvent &e = *e_ptr;
 
 		if (e.type != CONNEVENT_NONE) {
 			LOG(dout_con << getDesc() << ": Receive: got event: "
@@ -1474,11 +1513,11 @@ bool Connection::Receive(NetworkPacket *pkt, u32 timeout)
 			return false;
 		case CONNEVENT_DATA_RECEIVED:
 			// Data size is lesser than command size, ignoring packet
-			if (e.data.getSize() < 2) {
+			if (e.command < 0) {
 				continue;
 			}
 
-			pkt->putRawPacket(*e.data, e.data.getSize(), e.peer_id);
+			pkt->adoptPayload(std::move(e.data), static_cast<u16>(e.command), e.peer_id);
 			return true;
 		case CONNEVENT_PEER_ADDED: {
 			UDPPeer tmp(e.peer_id, e.address, this);
@@ -1517,6 +1556,16 @@ void Connection::Send(session_t peer_id, u8 channelnum,
 {
 	assert(channelnum < CHANNEL_COUNT); // Pre-condition
 
+	if (m_local_link) {
+		const ConnectionEventPtr e = ConnectionEvent::create(CONNEVENT_DATA_RECEIVED);
+		e->command = pkt->getCommand();
+		e->data = pkt->getPayload();
+		MutexAutoLock lock(m_local_link->mutex);
+		if (Connection *other = otherLocalEnd(&e->peer_id))
+			other->putEvent(e);
+		return;
+	}
+
 	putCommand(ConnectionCommand::send(peer_id, channelnum, pkt, reliable));
 }
 
@@ -1533,6 +1582,9 @@ Address Connection::GetPeerAddress(session_t peer_id)
 
 float Connection::getPeerStat(session_t peer_id, rtt_stat_type type)
 {
+	if (m_local_link)
+		return 0.0f;
+
 	PeerHelper peer = getPeerNoEx(peer_id);
 	if (!peer) return -1;
 	return peer->getStat(type);
@@ -1641,7 +1693,28 @@ const std::string Connection::getDesc()
 
 void Connection::DisconnectPeer(session_t peer_id)
 {
+	if (m_local_link) {
+		Disconnect();
+		deletePeer(peer_id, false);
+		return;
+	}
+
 	putCommand(ConnectionCommand::disconnect_peer(peer_id));
+}
+
+Connection *Connection::otherLocalEnd(session_t *our_id_there)
+{
+	LocalLink &link = *m_local_link;
+	if (!link.server || !link.client)
+		return nullptr;
+
+	if (this == link.server) {
+		*our_id_there = PEER_ID_SERVER;
+		return link.client;
+	}
+
+	*our_id_there = link.client_id;
+	return link.server;
 }
 
 void Connection::sendAck(session_t peer_id, u8 channelnum, u16 seqnum)

@@ -137,7 +137,8 @@ Client::Client(
 		MtEventManager *event,
 		RenderingEngine *rendering_engine,
 		bool ipv6,
-		GameUI *game_ui
+		GameUI *game_ui,
+		std::shared_ptr<con::LocalLink> local_link
 ):
 	m_tsrc(tsrc),
 	m_shsrc(shsrc),
@@ -152,7 +153,8 @@ Client::Client(
 		tsrc, this
 	),
 	m_particle_manager(&m_env),
-	m_con(new con::Connection(PROTOCOL_ID, 512, CONNECTION_TIMEOUT, ipv6, this)),
+	m_con(new con::Connection(PROTOCOL_ID, 512, CONNECTION_TIMEOUT, ipv6, this,
+			std::move(local_link))),
 	m_address_name(address_name),
 	m_server_ser_ver(SER_FMT_VER_INVALID),
 	m_last_chat_message_sent(time(NULL)),
