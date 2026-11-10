@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #pragma once
 
+#include <cstdint>
 #include <set>
 #include <string>
 #include <vector>
@@ -59,6 +60,9 @@ bool PathExists(const std::string &path);
 bool IsPathAbsolute(const std::string &path);
 
 bool IsDir(const std::string &path);
+
+// Size of a regular file, found without opening it
+bool GetFileSize(const std::string &path, std::uint64_t &size);
 
 bool IsDirDelimiter(char c);
 

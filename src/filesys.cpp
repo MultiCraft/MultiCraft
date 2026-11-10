@@ -256,10 +256,10 @@ std::vector<DirListNode> GetDirListing(const std::string &pathstring)
 
 			Also we don't know whether symlinks are directories or not.
 		*/
-#ifdef _DIRENT_HAVE_D_TYPE
+#if defined(_DIRENT_HAVE_D_TYPE) || defined(__APPLE__)
 		if(dirp->d_type != DT_UNKNOWN && dirp->d_type != DT_LNK)
 			isdir = (dirp->d_type == DT_DIR);
-#endif /* _DIRENT_HAVE_D_TYPE */
+#endif
 
 		/*
 			Was d_type DT_UNKNOWN, DT_LNK or nonexistent?
@@ -434,6 +434,23 @@ std::string CreateTempFile()
 /****************************
  * portable implementations *
  ****************************/
+
+bool GetFileSize(const std::string &path, std::uint64_t &size)
+{
+#ifdef _WIN32
+	WIN32_FILE_ATTRIBUTE_DATA data;
+	if (!GetFileAttributesEx(path.c_str(), GetFileExInfoStandard, &data) ||
+			(data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
+		return false;
+	size = (std::uint64_t)data.nFileSizeHigh << 32 | data.nFileSizeLow;
+#else
+	struct stat st{};
+	if (stat(path.c_str(), &st) || !S_ISREG(st.st_mode))
+		return false;
+	size = st.st_size;
+#endif
+	return true;
+}
 
 void GetRecursiveDirs(std::vector<std::string> &dirs, const std::string &dir)
 {

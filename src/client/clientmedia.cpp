@@ -77,7 +77,7 @@ std::unordered_set<std::string> clientMediaCacheNames()
 	if (names.empty())
 		fs::CreateAllDirs(dir);
 #else
-	// Not fs::GetDirListing: where readdir has no d_type, as on Apple, it asks stat for each file
+	// Not fs::GetDirListing: only the names are needed, not whether each one is a directory
 	if (DIR *listing = opendir(dir.c_str())) {
 		while (dirent *entry = readdir(listing))
 			names.emplace(entry->d_name);
