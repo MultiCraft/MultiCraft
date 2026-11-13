@@ -1408,11 +1408,9 @@ bool Connection::deletePeer(session_t peer_id, bool timeout)
 
 ConnectionEventPtr Connection::waitEvent(u32 timeout_ms)
 {
-	try {
-		return m_event_queue.pop_front(timeout_ms);
-	} catch(ItemNotFoundException &ex) {
-		return ConnectionEvent::create(CONNEVENT_NONE);
-	}
+	// The queue is empty in most frames, and pop_front() would throw then
+	ConnectionEventPtr e = m_event_queue.pop_frontNoEx(timeout_ms);
+	return e ? e : ConnectionEvent::create(CONNEVENT_NONE);
 }
 
 void Connection::putCommand(ConnectionCommandPtr c)
