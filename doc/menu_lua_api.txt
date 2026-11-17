@@ -248,8 +248,6 @@ core.get_screen_info()
 ^ returns {
     density         = <screen density 0.75,1.0,2.0,3.0 ... (dpi)>,
 	high_dpi		= <true on a high dpi screen>,
-    display_width   = <width of display>,
-    display_height  = <height of display>,
     window_width    = <current window width>,
     window_height   = <current window height>,
     max_refresh_rate = <refresh rate of the display in Hz: the fastest on Android and iOS, the current one on desktops with SDL, 0 without>,

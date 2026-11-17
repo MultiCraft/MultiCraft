@@ -624,7 +624,7 @@ void set_default_settings()
 	if (porting::isGooglePC())
 		settings->setDefault("mouse_sensitivity", "0.8");
 
-	v2u32 window_size = RenderingEngine::getDisplaySize();
+	v2u32 window_size = RenderingEngine::getWindowSize();
 	if (window_size.X > 0) {
 		float x_inches = window_size.X / (160.f * RenderingEngine::getDisplayDensity());
 		if (x_inches <= 3.7) {

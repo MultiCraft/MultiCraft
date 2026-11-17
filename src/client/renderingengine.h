@@ -58,7 +58,6 @@ public:
 	static float getDisplayDensity();
 	static float getScreenScale();
 	static float getHudScaling();
-	static v2u32 getDisplaySize();
 	static int getWindowSafeArea();
 #ifdef HAVE_TOUCHSCREENGUI
 	static bool isTablet();
@@ -76,10 +75,10 @@ public:
 
 	void removeMesh(const scene::IMesh* mesh);
 
+	// Zero before the engine starts, as the first pass of the default settings runs
 	static v2u32 getWindowSize()
 	{
-		sanity_check(s_singleton);
-		return s_singleton->_getWindowSize();
+		return s_singleton ? s_singleton->_getWindowSize() : v2u32(0, 0);
 	}
 
 	// The last error Irrlicht logged, for the message of a device that did not start

@@ -949,12 +949,7 @@ float RenderingEngine::getHudScaling()
 		static v2u32 fitted_size;
 		static float fitted_scaling = 1.0f;
 
-#ifdef HAVE_TOUCHSCREENGUI
-		const v2u32 size = getDisplaySize();
-#else
-		const RenderingEngine *engine = s_singleton;
-		const v2u32 size = engine ? engine->getWindowSize() : v2u32(0, 0);
-#endif
+		const v2u32 size = getWindowSize();
 		if (size.X > 0 && size.Y > 0) {
 			if (size != fitted_size) {
 				fitted_size = size;
@@ -1057,26 +1052,7 @@ float RenderingEngine::getDisplayDensity()
 
 #endif
 
-v2u32 RenderingEngine::getDisplaySize()
-{
-	IrrlichtDevice *nulldevice = createDevice(video::EDT_NULL);
-
-	core::dimension2d<u32> deskres =
-			nulldevice->getVideoModeList()->getDesktopResolution();
-	nulldevice->drop();
-
-	return deskres;
-}
-
 #else // __ANDROID__/__IOS__
-
-v2u32 RenderingEngine::getDisplaySize()
-{
-	const RenderingEngine *engine = s_singleton;
-	if (engine == nullptr)
-		return v2u32(0, 0);
-	return engine->getWindowSize();
-}
 
 int RenderingEngine::getWindowSafeArea()
 {
