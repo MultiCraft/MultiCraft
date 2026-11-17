@@ -194,7 +194,6 @@ RenderingEngine::RenderingEngine(IEventReceiver *receiver)
 	params.Stereobuffer = stereo_buffer;
 	params.Vsync = vsync;
 	params.EventReceiver = receiver;
-	params.HighPrecisionFPU = true;
 	params.ZBufferBits = 24;
 #if ENABLE_GLES
 	// there is no standardized path for these on desktop
@@ -897,7 +896,6 @@ const VideoDriverInfo &RenderingEngine::getVideoDriverInfo(irr::video::E_DRIVER_
 	static const std::unordered_map<int, VideoDriverInfo> driver_info_map = {
 		{(int)video::EDT_NULL,   {"null",   "NULL Driver"}},
 		{(int)video::EDT_OPENGL, {"opengl", "OpenGL"}},
-		{(int)video::EDT_OGLES1, {"ogles1", "OpenGL ES1"}},
 		{(int)video::EDT_OGLES2, {"ogles2", "OpenGL ES2"}},
 		{(int)video::EDT_ANGLE,  {"angle",  "ANGLE"}},
 		{(int)video::EDT_METAL,  {"metal",  "Metal"}},
