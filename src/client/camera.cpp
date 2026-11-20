@@ -41,6 +41,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "gettext.h"
 
 #define CAMERA_OFFSET_STEP 200
+#define CAMERA_THIRD_PERSON_DISTANCE_SPEED 10.0f
 #define WIELDMESH_OFFSET_X 55.0f
 #define WIELDMESH_OFFSET_Y -35.0f
 #define WIELDMESH_AMPLITUDE_X 7.0f
@@ -447,6 +448,14 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 	v3f abs_cam_up;
 	m_headnode->getAbsoluteTransformation().rotateVect(abs_cam_up, rel_cam_up);
 
+	// Network input: clamp again here, then move linearly toward the target.
+	f32 target_distance_third = rangelim(player->camera_distance_third, 0.0f,
+		CAMERA_THIRD_PERSON_MAX_EXTRA_DISTANCE);
+	f32 max_distance_step = CAMERA_THIRD_PERSON_DISTANCE_SPEED * frametime;
+	m_camera_distance_third_current += rangelim(
+		target_distance_third - m_camera_distance_third_current,
+		-max_distance_step, max_distance_step);
+
 	// Seperate camera position for calculation
 	v3f my_cp = m_camera_position;
 
@@ -460,7 +469,7 @@ void Camera::update(LocalPlayer* player, f32 frametime, f32 tool_reload_ratio)
 
 		// Calculate new position
 		bool abort = false;
-		for (int i = BS; i <= BS * 2.75; i++) {
+		for (int i = BS; i <= BS * (2.75f + m_camera_distance_third_current); i++) {
 			my_cp.X = m_camera_position.X + m_camera_direction.X * -i;
 			my_cp.Z = m_camera_position.Z + m_camera_direction.Z * -i;
 			if (i > 12)
